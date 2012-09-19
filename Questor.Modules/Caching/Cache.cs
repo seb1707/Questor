@@ -407,7 +407,7 @@ namespace Questor.Modules.Caching
 
         public string ConsoleLogRedacted { get; set; }
 
-        public bool IsAgentLoop { get; set; }
+        public bool AllAgentsStillInDeclineCoolDown { get; set; }
 
         private string _agentName = "";
 
@@ -978,10 +978,10 @@ namespace Questor.Modules.Caching
                         Logging.Log("Cache","SwitchAgent","Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it.");
                         Cache.Instance.Paused = true;
                     }
-                    IsAgentLoop = true; //this literally means we have no agents available at the moment (decline timer likely)
+                    AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
                 }
                 else
-                    IsAgentLoop = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+                    AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
 
                 return agent.Name;
             }

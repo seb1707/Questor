@@ -473,7 +473,11 @@ namespace Questor.Modules.Actions
                     //
                     if (Cache.Instance.DamagedDrones != null && Cache.Instance.DamagedDrones.Any())
                     {
-                        if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
+                        if (Settings.Instance.UseStationRepair)
+                        {
+                            if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station    
+                        }
+
                         foreach (var damagedDrone in Cache.Instance.DamagedDrones.ToList())
                         {
                             Cache.Instance.DamagedDrones.ToList().Remove(damagedDrone);

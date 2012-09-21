@@ -637,9 +637,8 @@ namespace Questor.Modules.Actions
                                 if (mission == null)
                                     return;
 
-                                string missionName = Cache.Instance.FilterPath(mission.Name);
-                                Cache.Instance.missionXmlPath = Path.Combine(Settings.Instance.MissionsPath,
-                                                                             missionName + ".xml");
+                                Cache.Instance.SetmissionXmlPath(Cache.Instance.FilterPath(mission.Name));
+
                                 XDocument missionXml = XDocument.Load(Cache.Instance.missionXmlPath);
                                 Cache.Instance.MissionAmmo = new List<Ammo>();
                                 if (missionXml.Root != null)

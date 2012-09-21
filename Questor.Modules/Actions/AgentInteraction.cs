@@ -745,7 +745,7 @@ namespace Questor.Modules.Actions
                     int secondsToWait = ((hours * 3600) + (minutes * 60) + 60);
                     AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
-                    if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings && Cache.Instance.IsAgentLoop)
+                    if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings && Cache.Instance.AllAgentsStillInDeclineCoolDown)
                     {
                         _nextAgentAction = DateTime.Now.AddSeconds(secondsToWait);
                         Logging.Log("AgentInteraction", "Current standings [" + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.", Logging.yellow);
@@ -756,7 +756,7 @@ namespace Questor.Modules.Actions
                     }
 
                     //add timer to current agent
-                    if (!Cache.Instance.IsAgentLoop && Settings.Instance.MultiAgentSupport)
+                    if (!Cache.Instance.AllAgentsStillInDeclineCoolDown && Settings.Instance.MultiAgentSupport)
                     {
                         if (currentAgent != null) currentAgent.DeclineTimer = DateTime.Now.AddSeconds(secondsToWait);
                         CloseConversation();

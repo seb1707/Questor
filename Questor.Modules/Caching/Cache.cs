@@ -866,6 +866,18 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextRepairDronesAction;
+
+        public DateTime NextRepairDronesAction
+        {
+            get { return _nextRepairDronesAction; }
+            set
+            {
+                _nextRepairDronesAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         public DateTime LastLocalWatchAction = DateTime.Now;
         public DateTime LastWalletCheck = DateTime.Now;
         public DateTime LastScheduleCheck = DateTime.Now;
@@ -950,7 +962,6 @@ namespace Questor.Modules.Caching
                             Logging.Log("Cache", "AgentId", "Unable to get agent details: trying again in a moment [" + ex.Message + "]");
                             return "";
                         }
-
                     }
 
                     return _agentName;
@@ -3703,8 +3714,13 @@ namespace Questor.Modules.Caching
 
         public bool RepairItems(string module)
         {
-            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace || DateTime.Now < _nextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.Now < _nextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                Logging.Log(module, "Waiting...", Logging.orange);
                 return false;
+            }
+
+            _nextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
 
             if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
             {
@@ -3714,6 +3730,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
+                //Cache.Instance.DirectEve.OpenRepairShop();
                 DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
 
                 if (repairWindow == null)
@@ -3730,13 +3747,17 @@ namespace Questor.Modules.Caching
                     if (!Cache.Instance.OpenItemsHangar(module)) return false;
 
                     List<DirectItem> items = Cache.Instance.ShipHangar.Items;
-                    items.AddRange(Cache.Instance.ItemHangar.Items);
+                    //items.AddRange(Cache.Instance.ItemHangar.Items);
 
                     if (items.Any())
                     {
                         if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
                         {
-                            Logging.Log(module, "add Items to repair list", Logging.white);
+                            Logging.Log(module, "Add items to repair list", Logging.white);
+//                          foreach (DirectItem item in items)
+//                          {
+//                              Logging.Log(module, "Items: " + item.TypeName, Logging.white);
+//                          }
                             repairWindow.RepairItems(items);
 
                             _nextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
@@ -3754,9 +3775,87 @@ namespace Questor.Modules.Caching
                     return true;
                 }
             }
+            Logging.Log(module, "Not in station.", Logging.orange);
             return false;
         }
 
+        public bool RepairDrones(string module)
+        {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.Now < _nextRepairDronesAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                Logging.Log(module, "Waiting...", Logging.orange);
+                return false;
+            }
 
+            _nextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+
+            if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
+            {
+                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existant repair facility.", Logging.orange);
+                return true;
+            }
+
+            if (Cache.Instance.InStation)
+            {
+                //Cache.Instance.DirectEve.OpenRepairShop();
+                DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
+
+                if (repairWindow == null)
+                {
+                    Logging.Log(module, "Opening repairshop window", Logging.white);
+                    Cache.Instance.DirectEve.OpenRepairShop();
+
+                    _nextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                    return false;
+                }
+                else
+                {
+                    if (!Cache.Instance.OpenShipsHangar(module)) return false;
+                    if (!Cache.Instance.OpenItemsHangar(module)) return false;
+
+                    List<DirectItem> items = Cache.Instance.ShipHangar.Items;
+                    List<DirectItem> dronestorepair = null;
+                    //items.AddRange(Cache.Instance.ItemHangar.Items);
+
+                    if (items.Any())
+                    {
+                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
+                        {
+                            Logging.Log(module, "Add items to repair list", Logging.white);
+                            foreach (DirectItem item in items)
+                            {
+                                if (item.GroupId == (int)Group.ProximityDrone ||
+                                    item.GroupId == (int)Group.CombatDrone ||
+                                    item.GroupId == (int)Group.MiningDrone ||
+                                    item.GroupId == (int)Group.FighterDrone ||
+                                    item.GroupId == (int)Group.ElectronicWarfareDrone ||
+                                    item.GroupId == (int)Group.LogisticsDrone ||
+                                    item.GroupId == (int)Group.WebbingDrone
+                                    )
+                                {
+                                    Logging.Log(module, "Items: " + item.TypeName, Logging.white);
+                                    dronestorepair.Add(item);
+                                }
+                            }
+
+                            if (dronestorepair != null)
+                            {
+                                Logging.Log(module, "Repairing [" + dronestorepair.Count() +  "] Drones", Logging.white);
+                                repairWindow.RepairItems(dronestorepair);
+                            }
+                            
+                            _nextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                            return false;
+                        }
+                    }
+                    else
+                        Logging.Log(module, "No items are damaged, nothing to repair.", Logging.orange);
+
+                    return true;
+                }
+            }
+            Logging.Log(module, "Not in station.", Logging.orange);
+            return false;
+        }
     }
 }

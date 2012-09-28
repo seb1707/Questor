@@ -1815,21 +1815,18 @@ namespace Questor.Modules.Caching
         {
             if (!string.IsNullOrEmpty(Cache.Instance.FactionName))
             {
-                Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath,
-                                                             missionName + "-" + Cache.Instance.FactionName + ".xml");
+                Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + "-" + Cache.Instance.FactionName + ".xml");
                 if (!File.Exists(Cache.Instance.missionXmlPath))
                 {
                     Logging.Log("Cache.SetmissionXmlPath",
                                 "Unable to find faction specific [" + Cache.Instance.missionXmlPath +
                                 "] trying generic version", Logging.white);
-                    Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath,
-                                                                 missionName + ".xml");
+                    Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + ".xml");
                 }
             }
             else
             {
-                Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath,
-                                                                missionName + ".xml");
+                Cache.Instance.missionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + ".xml");
             }
 
         }

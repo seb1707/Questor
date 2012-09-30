@@ -3793,18 +3793,20 @@ namespace Questor.Modules.Caching
                     if (!Cache.Instance.OpenShipsHangar(module)) return false;
                     if (!Cache.Instance.OpenItemsHangar(module)) return false;
 
+                    //repair ships in ships hangar
                     List<DirectItem> items = Cache.Instance.ShipHangar.Items;
-                    //items.AddRange(Cache.Instance.ItemHangar.Items);
+                    //repair items in items hangar also
+                    items.AddRange(Cache.Instance.ItemHangar.Items);
 
                     if (items.Any())
                     {
                         if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
                         {
                             Logging.Log(module, "Add items to repair list", Logging.white);
-//                          foreach (DirectItem item in items)
-//                          {
-//                              Logging.Log(module, "Items: " + item.TypeName, Logging.white);
-//                          }
+                            //                          foreach (DirectItem item in items)
+                            //                          {
+                            //                              Logging.Log(module, "Items: " + item.TypeName, Logging.white);
+                            //                          }
                             repairWindow.RepairItems(items);
 
                             _nextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
@@ -3887,12 +3889,14 @@ namespace Questor.Modules.Caching
 
                             if (dronestorepair != null)
                             {
-                                Logging.Log(module, "Repairing [" + dronestorepair.Count() +  "] Drones", Logging.white);
+                                Logging.Log(module, "Repairing [" + dronestorepair.Count() + "] Drones", Logging.white);
                                 repairWindow.RepairItems(dronestorepair);
+                                _nextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(20, 40));
+                                return true;
                             }
-                            
+
                             _nextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
-                            return false;
+                            return true;
                         }
                     }
                     else

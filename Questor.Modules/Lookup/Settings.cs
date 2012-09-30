@@ -1216,16 +1216,26 @@ namespace Questor.Modules.Lookup
                     MissionBlacklist.Clear();
                     XElement blacklist = xml.Element("blacklist");
                     if (blacklist != null)
+                    {
+                        Logging.Log("Settings","Loading Mission Blacklist",Logging.white);
                         foreach (XElement blacklistedmission in blacklist.Elements("mission"))
                             MissionBlacklist.Add((string)blacklistedmission);
+                        Logging.Log("Settings", "Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.white);
+                    }
+                        
                     //
                     // Mission Greylist
                     //
                     MissionGreylist.Clear();
                     XElement greylist = xml.Element("greylist");
                     if (greylist != null)
+                    {
+                        Logging.Log("Settings", "Loading Mission Greylist", Logging.white);
                         foreach (XElement greylistedmission in greylist.Elements("mission"))
                             MissionGreylist.Add((string)greylistedmission);
+                        Logging.Log("Settings", "Mission Greylist now has [" + MissionBlacklist.Count + "] entries", Logging.white);
+                    }
+                        
 
                     //
                     // Faction Blacklist
@@ -1233,8 +1243,17 @@ namespace Questor.Modules.Lookup
                     FactionBlacklist.Clear();
                     XElement factionblacklist = xml.Element("factionblacklist");
                     if (factionblacklist != null)
+                    {
+                        Logging.Log("Settings", "Loading Faction Blacklist", Logging.white);
                         foreach (XElement faction in factionblacklist.Elements("faction"))
+                        {
+                            Logging.Log("Settings", "Missions from the faction [" + faction.Name + "] will be declined", Logging.white);
                             FactionBlacklist.Add((string)faction);
+                        }
+                            
+                        Logging.Log("Settings", "Faction Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.white);
+                    }
+                        
                 }
             }
             //

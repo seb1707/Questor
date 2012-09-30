@@ -229,6 +229,8 @@
   <!--                                                                                                                                                   -->
   <!--      Logging Options: All logs are in ./.Net Programs/Logs/<CharacterName>/<optionalsubdirectory> -->
   <!--                                                                                                                                                   -->
+  <!-- console logs older than this many days will be removed, it is recommended that you leave this setting as is -->
+  <consoleLogDaysOfLogsToKeep>14</consoleLogDaysOfLogsToKeep>
   <!-- Enable or Disable the SessionsLog that tracks Logins / Logoffs and overall session stats for questor -->
   <SessionsLog>true</SessionsLog><!-- default is: true -->
   <!-- Enable or Disable the DroneStatsLog that tracks drone losses -->

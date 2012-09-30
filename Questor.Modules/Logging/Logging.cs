@@ -173,5 +173,38 @@ namespace Questor.Modules.Logging
                 line = line.Replace("  ", " ");
             return line.Trim();
         }
+
+        public static void MaintainConsoleLogs()
+        {
+            const string searchpattern = ".log";
+
+            //calculate the current date - the number of keep days (make sure you use the negative value if Settings.Instance.ConsoleLogDaysOfLogsToKeep as we want to keep that many days in the past, not that many days in the future)
+            DateTime keepdate = DateTime.Now.AddDays(-Settings.Instance.ConsoleLogDaysOfLogsToKeep);
+ 
+            //this is where it gets the directory and looks at
+            //the files in the directory to compare the last write time
+            //against the keepdate variable.
+
+            DirectoryInfo fileListing = new DirectoryInfo(Settings.Instance.ConsoleLogPath);
+
+            if (fileListing.Exists)
+            {
+                foreach (FileInfo log in fileListing.GetFiles(searchpattern))
+                {
+                    if (log.LastWriteTime <= keepdate)
+                    {
+                        try
+                        {
+                            Logging.Log("Logging", "Removing old console log named [" + log.Name + "] Dated [" + log.LastWriteTime + "]", Logging.white);
+                            log.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logging.Log("Logging", "Unable to delete log [" + ex.Message + "]", Logging.white);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

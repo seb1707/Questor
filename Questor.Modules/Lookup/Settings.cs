@@ -786,6 +786,10 @@ namespace Questor.Modules.Lookup
                 BelowThisHealthLevelRemoveFromDroneBay = 150;
 
                 //
+                // number of days of console logs to keep (anything older will be deleted on startup)
+                //
+                ConsoleLogDaysOfLogsToKeep = 14;
+                //
                 // Storage Location for Loot, Ammo, Bookmarks, default is local hangar
                 //
                 LootHangar = string.Empty;
@@ -1111,6 +1115,11 @@ namespace Questor.Modules.Lookup
                     LongRangeDroneRecallCapacitorPct = (int?)xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
                     DronesKillHighValueTargets = (bool?)xml.Element("dronesKillHighValueTargets") ?? false;
                     BelowThisHealthLevelRemoveFromDroneBay = (int?)xml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? 150;
+
+                    //
+                    // number of days of console logs to keep (anything older will be deleted on startup)
+                    //
+                    ConsoleLogDaysOfLogsToKeep = (int?)xml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
 
                     //
                     // Ammo settings

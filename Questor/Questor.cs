@@ -170,6 +170,7 @@ namespace Questor
                             LavishScript.ExecuteCommand("runscript " + Settings.Instance.LoginQuestorLavishScriptContents.ToString(CultureInfo.InvariantCulture));
                             Logging.Log("Questor", "Done: executing LoginQuestorLavishScriptCmd", Logging.white);
                         }
+                        Logging.MaintainConsoleLogs();
                     }
                 }
                 else
@@ -460,6 +461,8 @@ namespace Questor
         {
             if (!OnframeProcessEveryPulse()) return;
             if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.Now + "] by default the next pulse will be in [" + (int)Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.teal);
+
+            RunOnce30SecAfterStartup();
 
             if (!Cache.Instance.Paused)
             {

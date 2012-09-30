@@ -480,6 +480,12 @@ namespace Questor.Modules.Lookup
         public int MaterialsForWarOreID { get; set; }
 
         public int MaterialsForWarOreQty { get; set; }
+        
+        //
+        // number of days of console logs to keep (anything older will be deleted on startup)
+        //
+        public int ConsoleLogDaysOfLogsToKeep { get; set; }
+        
 
         //
         // Mission Blacklist / Greylist Settings

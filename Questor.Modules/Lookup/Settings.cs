@@ -296,6 +296,8 @@ namespace Questor.Modules.Lookup
         public int TrackingLinkScript { get; private set; }
         public int SensorBoosterScript { get; private set; }
         public int SensorDampenerScript { get; private set; }
+        public int AncillaryShieldBoosterScript { get; private set; } //they arent scripts, but they work the same, but are consumable for ourpurposes that doesnt matter
+        public int CapacitorInjectorScript { get; private set; }      //they arent scripts, but they work the same, but are consumable for ourpurposes that doesnt matter
 
         //
         // Speed and Movement Settings
@@ -632,11 +634,27 @@ namespace Questor.Modules.Lookup
                 // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
                 // 28999 Optimal Range Script             // tracking enhancer and tracking computer
                 
+                // 3554  Cap Booster 100
+                // 11283 Cap Booster 150
+                // 11285 Cap Booster 200
+                // 263   Cap Booster 25
+                // 11287 Cap Booster 400
+                // 264   Cap Booster 50
+                // 3552  Cap Booster 75
+                // 11289 Cap Booster 800
+                // 31982 Navy Cap Booster 100
+                // 31990 Navy Cap Booster 150
+                // 31998 Navy Cap Booster 200
+                // 32006 Navy Cap Booster 400
+                // 32014 Navy Cap Booster 800
+                
                 TrackingDisruptorScript = 29007;
                 TrackingComputerScript = 29001;
                 TrackingLinkScript = 29001;
                 SensorBoosterScript = 29009;
                 SensorDampenerScript = 29015;
+                AncillaryShieldBoosterScript = 11289;
+                CapacitorInjectorScript = 11289;
 
 
                 //
@@ -986,11 +1004,27 @@ namespace Questor.Modules.Lookup
                     // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
                     // 28999 Optimal Range Script             // tracking enhancer and tracking computer
 
+                    // 3554  Cap Booster 100
+                    // 11283 Cap Booster 150
+                    // 11285 Cap Booster 200
+                    // 263   Cap Booster 25
+                    // 11287 Cap Booster 400
+                    // 264   Cap Booster 50
+                    // 3552  Cap Booster 75
+                    // 11289 Cap Booster 800
+                    // 31982 Navy Cap Booster 100
+                    // 31990 Navy Cap Booster 150
+                    // 31998 Navy Cap Booster 200
+                    // 32006 Navy Cap Booster 400
+                    // 32014 Navy Cap Booster 800
+
                     TrackingDisruptorScript = (int?)xml.Element("trackingDisruptorScript") ?? 29007;
                     TrackingComputerScript = (int?)xml.Element("trackingComputerScript") ?? 29001;
                     TrackingLinkScript = (int?)xml.Element("trackingLinkScript") ?? 29001;
                     SensorBoosterScript = (int?)xml.Element("sensorBoosterScript") ?? 29009;
                     SensorDampenerScript = (int?)xml.Element("sensorDampenerScript") ?? 29015;
+                    AncillaryShieldBoosterScript = (int?)xml.Element("ancillaryShieldBoosterScript") ?? 11289;
+                    CapacitorInjectorScript = (int?)xml.Element("capacitorInjectorScript") ?? 11289;
 
                     //
                     // Speed and Movement Settings

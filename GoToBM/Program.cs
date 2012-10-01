@@ -26,11 +26,11 @@ namespace GoToBM
         [STAThread]
         private static void Main(string[] args)
         {
-            Logging.Log("GoToBM", "Started", Logging.white);
+            Logging.Log("GoToBM", "Started", Logging.White);
             if (args.Length == 0 || args[0].Length < 1)
             {
-                Logging.Log("GoToBM", " You need to supply a bookmark name", Logging.white);
-                Logging.Log("GoToBM", " Ended", Logging.white);
+                Logging.Log("GoToBM", " You need to supply a bookmark name", Logging.White);
+                Logging.Log("GoToBM", " Ended", Logging.White);
                 return;
             }
             _BM = args[0];
@@ -49,7 +49,7 @@ namespace GoToBM
             }
 
             _directEve.Dispose();
-            Logging.Log("GoToBM", " Exiting", Logging.white);
+            Logging.Log("GoToBM", " Exiting", Logging.White);
             return;
         }
 
@@ -108,10 +108,10 @@ namespace GoToBM
                 _started = true;
                 if (!Cache.Instance.DirectEve.Session.IsReady)
                 {
-                    Logging.Log("GoToBM", " Not in game, exiting", Logging.white);
+                    Logging.Log("GoToBM", " Not in game, exiting", Logging.White);
                     return;
                 }
-                Logging.Log("GoToBM", ": Attempting to find bookmark [" + _BM + "]", Logging.white);
+                Logging.Log("GoToBM", ": Attempting to find bookmark [" + _bm + "]", Logging.White);
                 foreach (var bookmark in Cache.Instance.DirectEve.Bookmarks)
                 {
                     if (bookmark.Title.ToLower().Equals(_BM))
@@ -126,7 +126,7 @@ namespace GoToBM
                 }
                 if (_bookmark == null)
                 {
-                    Logging.Log("GoToBM", ": Bookmark not found", Logging.white);
+                    Logging.Log("GoToBM", ": Bookmark not found", Logging.White);
                     _done = true;
                     return;
                 }
@@ -136,11 +136,11 @@ namespace GoToBM
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
                 _done = true;
-                Logging.Log("GoToBM", " At destination", Logging.white);
+                Logging.Log("GoToBM", " At destination", Logging.White);
             }
             else if (_States.CurrentTravelerState == TravelerState.Error)
             {
-                Logging.Log("GoToBM", " Traveler error", Logging.white);
+                Logging.Log("GoToBM", " Traveler error", Logging.White);
                 _done = true;
             }
         }

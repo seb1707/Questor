@@ -19,9 +19,9 @@ namespace GoToBM
         private static Defense _defense;
         private static DirectBookmark _bookmark;
         private static DateTime _lastPulse;
-        private static bool _done = false;
-        private static string _BM;
-        private static bool _started = false;
+        private static bool _done;
+        private static string _bm;
+        private static bool _started;
 
         [STAThread]
         private static void Main(string[] args)
@@ -33,8 +33,8 @@ namespace GoToBM
                 Logging.Log("GoToBM", " Ended", Logging.White);
                 return;
             }
-            _BM = args[0];
-            _BM = _BM.ToLower();
+            _bm = args[0];
+            _bm = _bm.ToLower();
 
             _directEve = new DirectEve();
             Cache.Instance.DirectEve = _directEve;
@@ -114,12 +114,12 @@ namespace GoToBM
                 Logging.Log("GoToBM", ": Attempting to find bookmark [" + _bm + "]", Logging.White);
                 foreach (var bookmark in Cache.Instance.DirectEve.Bookmarks)
                 {
-                    if (bookmark.Title.ToLower().Equals(_BM))
+                    if (bookmark.Title.ToLower().Equals(_bm))
                     {
                         _bookmark = bookmark;
                         break;
                     }
-                    if (_bookmark == null && bookmark.Title.ToLower().Contains(_BM))
+                    if (_bookmark == null && bookmark.Title.ToLower().Contains(_bm))
                     {
                         _bookmark = bookmark;
                     }

@@ -408,7 +408,7 @@ namespace Questor.Modules.Activities
                             target.LockTarget();
                         }
 
-                        if (!Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
+                        if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We have attempted to target an NPC that is on the ignore list (why?) Name [" + target.Name + "][" + target.Id + "][" + target.Distance + "]", Logging.Teal);
                         }

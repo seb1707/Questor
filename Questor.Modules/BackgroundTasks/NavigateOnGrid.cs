@@ -148,6 +148,7 @@ namespace Questor.Modules.BackgroundTasks
             {   
                 if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
                 OrbitGateorTarget(target, module);
+                return;
             }
             else //if we aren't speed tanking then check optimalrange setting, if that isn't set use the less of targeting range and weapons range to dictate engagement range
             {
@@ -168,13 +169,25 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             target.Approach(Settings.Instance.OptimalRange);
                             Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            return;
                         }
-                        //I think when approach distance will be reached ship will be stopped so this is not needed
+
                         if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching != null)
                         {
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                             Cache.Instance.Approaching = null;
                             Logging.Log(module, "Using Optimal Range: Stop ship, target at [" + Math.Round(target.Distance / 1000, 0) + "k away] is inside optimal", Logging.Teal);
+                            return;
+                        }
+
+                        if (target.Distance <= Settings.Instance.OptimalRange && Cache.Instance.Approaching == null)
+                        {
+                            if (target.IsNPCFrigate)
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + target.Distance + "]", Logging.White);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
                         }
                     }
                     //if optimalrange is not set use MaxRange (shorter of weapons range and targeting range)
@@ -192,6 +205,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
                             Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.WeaponRange * 0.8d/1000,0) + " k]: Approaching target [" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            return;
                         }
                         //I think when approach distance will be reached ship will be stopped so this is not needed
                         if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching != null)
@@ -205,6 +219,17 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                             Cache.Instance.Approaching = null;
                             Logging.Log(module, "Using Weapons Range: Stop ship, target is in orbit range", Logging.Teal);
+                            return;
+                        }
+
+                        if (target.Distance <= Cache.Instance.MaxRange && Cache.Instance.Approaching == null)
+                        {
+                            if (target.IsNPCFrigate)
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + target.Distance + "]", Logging.White);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
                         }
                     }
                     return;

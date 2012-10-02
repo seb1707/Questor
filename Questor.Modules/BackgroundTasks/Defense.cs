@@ -88,6 +88,7 @@ namespace Questor.Modules.BackgroundTasks
             //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
             if (DateTime.Now < Cache.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
+
             ModuleNumber = 0;
             foreach (ModuleCache module in Cache.Instance.Modules)
             {

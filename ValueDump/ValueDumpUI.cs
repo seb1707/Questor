@@ -310,30 +310,39 @@ namespace ValueDump
                         bool updItem = false;
                         foreach (ItemCacheMarket material in item.RefineOutput)
                         {
-                            if (!InvTypesById.TryGetValue(material.TypeId, out invType))
+                            try
                             {
-                                Logging.Log("Valuedump", "Unknown TypeId " + material.TypeId + " for " + material.Name, Logging.White);
+                                if (!InvTypesById.TryGetValue(material.TypeId, out invType))
+                                {
+                                    Logging.Log("Valuedump", "Unknown TypeId [" + material.TypeId + "] for [" + material.Name + "]", Logging.White);
+                                    continue;
+                                }
+                                material.InvType = invType;
+
+                                double matsPerItem = (double)material.Quantity / item.PortionSize;
+                                bool exists = InvTypesById[item.TypeId].Reprocess[material.Name].HasValue;
+                                if ((!exists && matsPerItem > 0) || (exists && InvTypesById[item.TypeId].Reprocess[material.Name] != matsPerItem))
+                                {
+                                    if (exists)
+                                        Logging.Log("ValueDump",
+                                            Logging.Orange + " [" + Logging.White +
+                                            item.Name +
+                                            Logging.Orange + "][" + Logging.White +
+                                            material.Name +
+                                            Logging.Orange + "] old value: [" + Logging.White +
+                                            InvTypesById[item.TypeId].Reprocess[material.Name] + ", new value: " +
+                                            Logging.Orange + "[" + Logging.White + matsPerItem +
+                                            Logging.Orange + "]", Logging.White);
+                                    InvTypesById[item.TypeId].Reprocess[material.Name] = matsPerItem;
+                                    updItem = true;
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                Logging.Log("ValueDump","Unknown TypeId [" + material.TypeId + "] for [" + material.Name + "] Exception was: " + ex,Logging.Orange);
                                 continue;
                             }
-                            material.InvType = invType;
-
-                            double matsPerItem = (double)material.Quantity / item.PortionSize;
-                            bool exists = InvTypesById[item.TypeId].Reprocess[material.Name].HasValue;
-                            if ((!exists && matsPerItem > 0) || (exists && InvTypesById[item.TypeId].Reprocess[material.Name] != matsPerItem))
-                            {
-                                if (exists)
-                                    Logging.Log("ValueDumpUI",
-                                        Logging.Orange + " [" + Logging.White +
-                                        item.Name +
-                                        Logging.Orange + "][" + Logging.White +
-                                        material.Name +
-                                        Logging.Orange + "] old value: [" + Logging.White +
-                                        InvTypesById[item.TypeId].Reprocess[material.Name] + ", new value: " +
-                                        Logging.Orange + "[" + Logging.White + matsPerItem +
-                                        Logging.Orange + "]", Logging.White);
-                                InvTypesById[item.TypeId].Reprocess[material.Name] = matsPerItem;
-                                updItem = true;
-                            }
+                            
                         }
 
                         if (updItem)

@@ -928,8 +928,8 @@ namespace Questor.Modules.Caching
 
         public float AgentEffectiveStandingtoMe;
         public string AgentEffectiveStandingtoMeText;
-        public bool Missionbookmarktimerset = false;
-        public DateTime Missionbookmarktimeout = DateTime.MaxValue;
+        public bool MissionBookmarkTimerSet = false;
+        public DateTime MissionBookmarkTimeout = DateTime.MaxValue;
 
         public long AgentStationID { get; set; }
 

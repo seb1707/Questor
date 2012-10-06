@@ -400,12 +400,12 @@ namespace Questor.Modules.Actions
         {
             if (bookmark == null)
             {
-                if (!Cache.Instance.Missionbookmarktimerset)
+                if (!Cache.Instance.MissionBookmarkTimerSet)
                 {
-                    Cache.Instance.Missionbookmarktimeout = DateTime.Now.AddSeconds(10);
+                    Cache.Instance.MissionBookmarkTimeout = DateTime.Now.AddSeconds(10);
                 }
 
-                if (Cache.Instance.Missionbookmarktimeout > DateTime.Now)
+                if (Cache.Instance.MissionBookmarkTimeout > DateTime.Now)
                 {
                     AgentId = -1;
                     Title = null;
@@ -422,7 +422,7 @@ namespace Questor.Modules.Actions
                 }
                 else
                 {
-                    Logging.Log("TravelDestination.MissionBookmarkDestination", "Invalid Mission Bookmark! retrying for another [ " + Math.Round(Cache.Instance.Missionbookmarktimeout.Subtract(DateTime.Now).TotalSeconds, 0) + " ]sec", Logging.Green);
+                    Logging.Log("TravelDestination.MissionBookmarkDestination", "Invalid Mission Bookmark! retrying for another [ " + Math.Round(Cache.Instance.MissionBookmarkTimeout.Subtract(DateTime.Now).TotalSeconds, 0) + " ]sec", Logging.Green);
                 }
             }
 

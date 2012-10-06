@@ -528,10 +528,6 @@ namespace Questor
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Idle)
-                    {
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                    }
                     _combatMissionsBehavior.ProcessState();
                     break;
 
@@ -539,10 +535,6 @@ namespace Questor
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Idle)
-                    {
-                        _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
-                    }
                     _combatHelperBehavior.ProcessState();
                     break;
 
@@ -550,10 +542,6 @@ namespace Questor
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Idle)
-                    {
-                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
-                    }
                     _dedicatedBookmarkSalvagerBehavior.ProcessState();
                     break;
 
@@ -561,10 +549,6 @@ namespace Questor
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Idle)
-                    {
-                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
-                    }
                     _directionalScannerBehavior.ProcessState();
                     break;
 

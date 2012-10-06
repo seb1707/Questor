@@ -37,6 +37,7 @@ namespace Questor
         private readonly CombatHelperBehavior _combatHelperBehavior;
         private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
+        private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
@@ -56,6 +57,7 @@ namespace Questor
             _combatHelperBehavior = new CombatHelperBehavior();
             _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
             _directionalScannerBehavior = new DirectionalScannerBehavior();
+            _debugHangarsBehavior = new DebugHangarsBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
 
@@ -152,8 +154,8 @@ namespace Questor
                     if (Settings.Instance.UseInnerspace)
                     {
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
-                        Logging.Log("Questor", "Running Innerspace command: windowtaskbar on" + Settings.Instance.CharacterName, Logging.White);
-                        LavishScript.ExecuteCommand("windowtaskbar on" + Settings.Instance.CharacterName);
+                        Logging.Log("Questor", "Running Innerspace command: windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
+                        LavishScript.ExecuteCommand("windowtaskbar on " + Settings.Instance.CharacterName);
                         if (Settings.Instance.LoginQuestorArbitraryOSCmd)
                         {
                             Logging.Log("Questor", "After Questor Login: executing LoginQuestorArbitraryOSCmd", Logging.White);
@@ -550,6 +552,13 @@ namespace Questor
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
                     _directionalScannerBehavior.ProcessState();
+                    break;
+
+                case QuestorState.DebugHangarsBehavior:
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    _debugHangarsBehavior.ProcessState();
                     break;
 
                 case QuestorState.DebugReloadAll:

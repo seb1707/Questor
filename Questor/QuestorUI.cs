@@ -170,7 +170,7 @@ namespace Questor
                         NextSalvageActionData.Text = Cache.Instance.NextSalvageAction.ToLongTimeString();
                         NextLootActionData.Text = Cache.Instance.NextLootAction.ToLongTimeString();
                         LastJettisonData.Text = Cache.Instance.LastJettison.ToLongTimeString();
-                        NextDefenceModuleActionData.Text = Cache.Instance.NextDefenceModuleAction.ToLongTimeString();
+                        NextDefenceModuleActionData.Text = Cache.Instance.NextDefenseModuleAction.ToLongTimeString();
                         NextAfterburnerActionlbl.Text = Cache.Instance.NextAfterburnerAction.ToLongTimeString();
                         NextRepModuleActionData.Text = Cache.Instance.NextRepModuleAction.ToLongTimeString();
                         NextActivateSupportModulesData.Text = Cache.Instance.NextActivateSupportModules.ToLongTimeString();
@@ -321,6 +321,12 @@ namespace Questor
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(DirectionalScannerBehaviorState)))
+                        BehaviorComboBox.Items.Add(text);
+                }
+                if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
+                {
+                    BehaviorComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(DebugHangarsBehaviorState)))
                         BehaviorComboBox.Items.Add(text);
                 }
             }
@@ -1013,23 +1019,40 @@ namespace Questor
                     (CombatMissionsBehaviorState)
                     Enum.Parse(typeof(CombatMissionsBehaviorState), BehaviorComboBox.Text);
             }
+
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
             {
                 _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
                     (DedicatedBookmarkSalvagerBehaviorState)
                     Enum.Parse(typeof(DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
             }
+
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
             {
                 _States.CurrentCombatHelperBehaviorState =
                     (CombatHelperBehaviorState)
                     Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);
             }
+
             if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
             {
                 _States.CurrentDirectionalScannerBehaviorState =
                     (DirectionalScannerBehaviorState)
                     Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
+            }
+
+            //if (_States.CurrentQuestorState == QuestorState.DebugInventoryTree)
+            //{
+            //    _States.CurrentDe =
+            //        (DebugHangarsState)
+            //        Enum.Parse(typeof(DebugHangarsState), BehaviorComboBox.Text);
+            //} 
+
+            if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
+            {
+                _States.CurrentDebugHangarBehaviorState =
+                    (DebugHangarsBehaviorState)
+                    Enum.Parse(typeof(DebugHangarsBehaviorState), BehaviorComboBox.Text);
             }
 
             try
@@ -1200,17 +1223,216 @@ namespace Questor
             Cache.Instance.StopSessionAfterMissionNumber = (int)numericUpDown1.Value;
         }
 
-        private void ReloadAll_Click(object sender, EventArgs e)
+        private void ReloadAllClick(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI","ReloadAll botton was pressed: changing QuestorState to ReloadAll- when done reloading it shoud return to the configured behavior",Logging.Teal);
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI","ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it shoud return to the configured behavior",Logging.Teal);
             _States.CurrentQuestorState = QuestorState.DebugReloadAll;
         }
 
-        private void OutOfAmmo_Click(object sender, EventArgs e)
+        private void OutOfAmmoClick(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI", "OutOfAmmo botton was pressed: changing CombatState to OutOfAmmo", Logging.Teal);
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "OutOfAmmo button was pressed: changing CombatState to OutOfAmmo", Logging.Teal);
             _States.CurrentCombatState = CombatState.OutOfAmmo;
         }
+
+        private void BtnOpenItemsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open ItemsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenItemsHangar;
+        }
+
+        private void BtnStackItemsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack ItemsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackItemsHangar;
+        }
+
+        private void BtnOpenShipsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open ShipsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenShipsHangar;
+        }
+
+        private void BtnStackShipsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack ShipsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackShipsHangar;
+        }
+
+        private void BtnOpenFreightContainerClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open Loot Container button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenLootContainer;
+        }
+
+        private void BtnStackFreightContainerClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack Loot Container button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackLootContainer;
+        }
+
+        private void BtnOpenCorpAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open Corp AmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenCorpAmmoHangar;
+        }
+
+        private void BtnOpenCorpLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open Corp LootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenCorpLootHangar;
+        }
+
+        private void BtnStackCorpAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack Corp AmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackCorpAmmoHangar;
+        }
+
+        private void BtnStackCorpLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack Corp LootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackCorpLootHangar;
+        }
+
+        private void BtnOpenAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open AmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenAmmoHangar;
+        }
+
+        private void BtnOpenLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Open LootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenLootHangar;
+        }
+
+        private void BtnStackAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack AmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackAmmoHangar;
+        }
+
+        private void BtnStackLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Stack LootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackLootHangar;
+        }
+
+        private void BttnCloseLootContainerClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close LootContainer button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseLootContainer;
+        }
+
+        private void BttnCloseShipsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close ShipsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseShipsHangar;
+        }
+
+        private void BttnCloseItemsHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close ItemsHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseItemsHangar;
+        }
+
+        private void BttnCloseCorpAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close CorpAmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseCorpAmmoHangar;
+        }
+
+        private void BttnCloseCorpLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close CorpLootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseCorpLootHangar;
+        }
+
+        private void BttnCloseAmmoHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close AmmoHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseAmmoHangar;
+        }
+
+        private void BttnCloseLootHangarClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close LootHangar button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseLootHangar;
+        }
+
+        private void BttnCloseAllInventoryWindowsClick(object sender, EventArgs e)
+        {
+            Cache.Instance.Paused = false;
+            Logging.Log("QuestorUI", "Close ALL Inventory Windows button was pressed", Logging.Teal);
+            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseAllInventoryWindows;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
         //private void comboBoxQuestorMode_SelectedIndexChanged(object sender, EventArgs e)
         //{

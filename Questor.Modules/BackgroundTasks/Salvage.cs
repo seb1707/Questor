@@ -368,6 +368,10 @@ namespace Questor.Modules.BackgroundTasks
             if (lootWindows != null)
             {
                 containerIDs = lootWindows.GetIdsFromTree();
+                if (!containerIDs.Any())
+                {
+                    return;
+                }
                 if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.Lootwrecks", "containerIDs contains [" + containerIDs.Count() +  "] individual containerIDs", Logging.Teal);
             }
             else

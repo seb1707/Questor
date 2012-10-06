@@ -114,12 +114,12 @@ namespace ValueDump
                 Settings.Instance.LoadSettings();
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastupdateofSessionRunningTime).TotalSeconds <
+            if (DateTime.Now.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds <
                 Time.Instance.SessionRunningTimeUpdate_seconds)
             {
                 Cache.Instance.SessionRunningTime =
                     (int)DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                Cache.Instance.LastupdateofSessionRunningTime = DateTime.Now;
+                Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.Now;
             }
 
             if ( _States.CurrentValueDumpState == ValueDumpState.Idle)
@@ -128,7 +128,7 @@ namespace ValueDump
             XDocument invIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
             DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
             DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
-            DirectReprocessingWindow reprorcessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
+            DirectReprocessingWindow reprocessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
             bool doNotSellTheseItems = false;
 
             switch (_States.CurrentValueDumpState)
@@ -621,7 +621,7 @@ namespace ValueDump
                     const bool refine = true;
                     if (refine)
                     {
-                        if (reprorcessingWindow == null)
+                        if (reprocessingWindow == null)
                         {
                             if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
                             {
@@ -633,11 +633,11 @@ namespace ValueDump
                             return;
                         }
 
-                        if (reprorcessingWindow.NeedsQuote)
+                        if (reprocessingWindow.NeedsQuote)
                         {
                             if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
                             {
-                                reprorcessingWindow.GetQuotes();
+                                reprocessingWindow.GetQuotes();
                                 _lastExecute = DateTime.Now;
                             }
 
@@ -645,7 +645,7 @@ namespace ValueDump
                         }
 
                         // Wait till we have a quote
-                        if (reprorcessingWindow.Quotes.Count == 0)
+                        if (reprocessingWindow.Quotes.Count == 0)
                         {
                             _lastExecute = DateTime.Now;
                             return;
@@ -655,7 +655,7 @@ namespace ValueDump
                         if (DateTime.Now.Subtract(_lastExecute).TotalSeconds > Time.Instance.Marketlookupdelay_seconds)
                         {
                             // TODO: We should wait for the items to appear in our hangar and then sell them...
-                            reprorcessingWindow.Reprocess();
+                            reprocessingWindow.Reprocess();
                             _States.CurrentValueDumpState = ValueDumpState.Idle;
                         }
                     }

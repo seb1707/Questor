@@ -194,12 +194,12 @@ namespace QuestorManager
                 Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
                 Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastupdateofSessionRunningTime).TotalSeconds <
+            if (DateTime.Now.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds <
                 Time.Instance.SessionRunningTimeUpdate_seconds)
             {
                 Cache.Instance.SessionRunningTime =
                     (int)DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                Cache.Instance.LastupdateofSessionRunningTime = DateTime.Now;
+                Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.Now;
             }
 
             // We always check our defense state if we're in space, regardless of questor state

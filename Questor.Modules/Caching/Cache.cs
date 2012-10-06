@@ -880,7 +880,7 @@ namespace Questor.Modules.Caching
         public DateTime LastWalletCheck = DateTime.Now;
         public DateTime LastScheduleCheck = DateTime.Now;
 
-        public DateTime LastupdateofSessionRunningTime;
+        public DateTime LastUpdateOfSessionRunningTime;
         public DateTime NextInSpaceorInStation;
         public DateTime NextTimeCheckAction = DateTime.Now;
 

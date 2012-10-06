@@ -165,8 +165,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.InSpace)
                     {
-                        Cache.Instance.AddPriorityTargets(
-                            Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), Priority.WarpScrambler);
+                        Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), Priority.WarpScrambler);
                         if (Settings.Instance.SpeedTank)
                         {
                             Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), Priority.Webbing);
@@ -176,9 +175,7 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), Priority.Jamming);
                         Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), Priority.Dampening);
                         if (Cache.Instance.Modules.Any(m => m.IsTurret))
-                            Cache.Instance.AddPriorityTargets(
-                                Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe),
-                                Priority.TrackingDisrupting);
+                            Cache.Instance.AddPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe),Priority.TrackingDisrupting);
 
                         if (Math.Round(DateTime.Now.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
                         {

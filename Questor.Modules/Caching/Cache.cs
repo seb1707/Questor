@@ -263,7 +263,7 @@ namespace Questor.Modules.Caching
         public int PocketNumber { get; set; }
 
         public bool OpenWrecks = false;
-        public bool NormalApproch = true;
+        public bool NormalApproach = true;
         public bool CourierMission = false;
         public string MissionName = "";
         public int MissionsThisSession = 0;

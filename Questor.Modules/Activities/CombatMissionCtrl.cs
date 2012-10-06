@@ -254,8 +254,8 @@ namespace Questor.Modules.Activities
 
         private void ClearAggroAction(Actions.Action action)
         {
-            if (!Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = true;
+            if (!Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = true;
 
             // Get lowest range
             double range = Cache.Instance.MaxRange;
@@ -345,8 +345,8 @@ namespace Questor.Modules.Activities
 
         private void ClearPocketAction(Actions.Action action)
         {
-            if (!Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = true;
+            if (!Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = true;
 
             // Get lowest range
             double range = Cache.Instance.MaxRange;
@@ -564,8 +564,8 @@ namespace Questor.Modules.Activities
 
         private void MoveToBackgroundAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             int distancetoapp;
             if (!int.TryParse(action.GetParameterValue("distance"), out distancetoapp))
@@ -594,8 +594,8 @@ namespace Questor.Modules.Activities
 
         private void MoveToAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             string target = action.GetParameterValue("target");
 
@@ -755,8 +755,8 @@ namespace Questor.Modules.Activities
 
         private void AggroOnlyAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             bool ignoreAttackers;
             if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
@@ -833,8 +833,8 @@ namespace Questor.Modules.Activities
 
         private void KillAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             bool ignoreAttackers;
             if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
@@ -946,8 +946,8 @@ namespace Questor.Modules.Activities
 
         private void KillOnceAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             bool nottheclosest;
             if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
@@ -1044,8 +1044,8 @@ namespace Questor.Modules.Activities
             if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
                 nottheclosest = false;
 
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             List<string> targetNames = action.GetParameterValues("target");
             // No parameter? Ignore kill action
@@ -1099,8 +1099,8 @@ namespace Questor.Modules.Activities
 
         private void KillClosestAction(Actions.Action action)
         {
-            if (Cache.Instance.NormalApproch)
-                Cache.Instance.NormalApproch = false;
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
 
             bool nottheclosest;
             if (!bool.TryParse(action.GetParameterValue("notclosest"), out nottheclosest))
@@ -1556,8 +1556,8 @@ namespace Questor.Modules.Activities
                 case CombatMissionCtrlState.Done:
                     Statistics.WritePocketStatistics();
 
-                    if (!Cache.Instance.NormalApproch)
-                        Cache.Instance.NormalApproch = true;
+                    if (!Cache.Instance.NormalApproach)
+                        Cache.Instance.NormalApproach = true;
 
                     Cache.Instance.IgnoreTargets.Clear();
                     break;

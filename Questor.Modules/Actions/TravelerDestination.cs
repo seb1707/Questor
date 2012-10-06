@@ -66,6 +66,7 @@ namespace Questor.Modules.Actions
     public class StationDestination : TravelerDestination
     {
         private DateTime _nextStationAction;
+        private static int _undockAttempts = 0;
 
         public StationDestination(long stationId)
         {
@@ -118,6 +119,12 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (DateTime.Now > Cache.Instance.NextUndockAction)
                 {
+                    if (_undockAttempts > 10)
+                    {
+                        Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, we have tried to undock [" + _undockAttempts + "] times - and it is evidentally not working (lag?) - restarting Questor (and EVE)", Logging.Green);
+                        Cache.Instance.SessionState = "Quitting"; //this will perform a graceful restart
+                    }
+
                     Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, undocking from [" + Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0) + "]", Logging.Green);
 
                     //if (!string.IsNullOrEmpty(Settings.Instance.UndockPrefix))
@@ -140,6 +147,7 @@ namespace Questor.Modules.Actions
                     //}
                     //else Logging.Log("TravelerDestination.StationDestination: UndockPrefix is not configured");
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                    _undockAttempts++;
                     Cache.Instance.NextUndockAction = DateTime.Now.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
                     return false;
                 }
@@ -156,6 +164,8 @@ namespace Questor.Modules.Actions
 
             if (nextAction > DateTime.Now)
                 return false;
+
+            _undockAttempts = 0;
 
             if (localundockBookmark != null)
             {

@@ -529,9 +529,6 @@
             this.btnOpenShipsHangar = new System.Windows.Forms.Button();
             this.btnOpenItemsHangar = new System.Windows.Forms.Button();
             this.btnOpenCorpLootHangar = new System.Windows.Forms.Button();
-            this.MiscInfo.SuspendLayout();
-            this.TimeStamps.SuspendLayout();
-            this.MissionsTab.SuspendLayout();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();

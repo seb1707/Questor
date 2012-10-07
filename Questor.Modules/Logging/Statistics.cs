@@ -485,6 +485,8 @@ namespace Questor.Modules.Logging
                 Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints));
                 Logging.Log("Statistics", "Printing All Statistics Related Variables to the console log:", Logging.White);
                 Logging.Log("Statistics", "Mission Name: [" + Cache.Instance.MissionName + "]", Logging.White);
+                Logging.Log("Statistics", "Faction: [" + Cache.Instance.FactionName + "]", Logging.White);
+                Logging.Log("Statistics", "System: [" + Cache.Instance.MissionSolarSystem.ToString() + "]", Logging.White);
                 Logging.Log("Statistics", "Total Missions completed this session: [" + Statistics.Instance.MissionsThisSession + "]", Logging.White);
                 Logging.Log("Statistics", "StartedMission: [ " + Statistics.Instance.StartedMission + "]", Logging.White);
                 Logging.Log("Statistics", "FinishedMission: [ " + Statistics.Instance.FinishedMission + "]", Logging.White);
@@ -575,7 +577,7 @@ namespace Questor.Modules.Logging
 
                     // Write the header
                     if (!File.Exists(Settings.Instance.MissionStats3LogFile))
-                        File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;\r\n");
+                        File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;Faction;SolarSystem;\r\n");
 
                     // Build the line
                     string line3 = DateTime.Now + ";";                                                                                           // Date
@@ -596,6 +598,8 @@ namespace Questor.Modules.Logging
                     line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // After Mission Salvaging Time
                     line3 += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";"; // Total Time, Mission + After Mission Salvaging (if any)
                     line3 += Cache.Instance.MissionXMLIsAvailable.ToString(CultureInfo.InvariantCulture) + ";";
+                    line3 += Cache.Instance.FactionName + ";";                                                                                   // FactionName that the mission is against
+                    line3 += Cache.Instance.MissionSolarSystem + ";";                                                                            // SolarSystem the mission was located in
                     line3 += "\r\n";
 
                     // The mission is finished
@@ -631,6 +635,7 @@ namespace Questor.Modules.Logging
                 Cache.Instance.TimeSpentInMission_seconds = 0;             // from landing on grid (loading mission actions) to going to base (changing to gotobase state)
                 Cache.Instance.TimeSpentInMissionInRange = 0;              // time spent totally out of range, no targets
                 Cache.Instance.TimeSpentInMissionOutOfRange = 0;           // time spent in range - with targets to kill (or no targets?!)
+                Cache.Instance.MissionSolarSystem = null;
             }
         }
 

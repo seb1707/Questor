@@ -2577,19 +2577,19 @@ namespace Questor.Modules.Caching
 
                 if (!Cache.Instance.CargoHold.Window.IsReady)
                 {
-                    Logging.Log(module, "cargo window is not ready", Logging.White);
+                    //Logging.Log(module, "cargo window is not ready", Logging.White);
                     return false;
                 }
 
                 if (!Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    Logging.Log(module, "cargo window is ready and is a secondary inventory window", Logging.White);
+                    //Logging.Log(module, "cargo window is ready and is a secondary inventory window", Logging.White);
                     return true;
                 }
 
                 if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    Logging.Log(module, "Opening cargo window as secondary", Logging.White);
+                    //Logging.Log(module, "Opening cargo window as secondary", Logging.White);
                     Cache.Instance.CargoHold.Window.OpenAsSecondary();
                     //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));

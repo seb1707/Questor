@@ -113,6 +113,8 @@ namespace Questor.Modules.Caching
 
         public String _priorityTargets_text;
 
+        public DirectLocation MissionSolarSystem;
+
         /// <summary>
         ///   Star cache
         /// </summary>

@@ -601,7 +601,6 @@ namespace Questor.Modules.BackgroundTasks
                                 //trial account
                                 close |= window.Html.Contains("At any time you can log in to the account management page and change your trial account to a paying account");
 
-                                restartharsh |= window.Html.Contains("The connection to the server was closed");
                                 restartharsh |= window.Html.Contains("The user's connection has been usurped on the proxy");
                                 restartharsh |= window.Html.Contains("The connection to the server was closed"); 										//CONNECTION LOST
                                 restartharsh |= window.Html.Contains("server was closed");  															//CONNECTION LOST

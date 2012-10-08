@@ -79,7 +79,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 return true;
             }
-            Logging.Log("LoadthisScript", "script to load was NUL!", Logging.Teal);
+            Logging.Log("LoadthisScript", "script to load was NULL!", Logging.Teal);
             return false;
         }
 
@@ -242,11 +242,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int) Group.SensorDampener && _sensorDampenerScriptAttempts < 5)
                         {
                             _sensorDampenerScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "SensorDampner Found", Logging.White);
+                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "SensorDampener Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorDampenerScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorDampner", Logging.White);
+                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorDampener", Logging.White);
                                 if (module.IsActive)
                                 {
                                     module.Click();
@@ -387,8 +387,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "] waiting [" + Math.Round(Cache.Instance.NextActivateSupportModules.Subtract(DateTime.Now).TotalSeconds, 0) + " sec]", Logging.White);
-
+                Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
                 continue;
             }
             ModuleNumber = 0;

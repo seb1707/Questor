@@ -514,7 +514,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
                     {
-                        Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
+                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
                         _lastCleanupAction = DateTime.Now;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
@@ -522,7 +522,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.Windows == null)
                     {
-                        Logging.Log("Cleanup","CheckModalWindows: Cache.intance.windows returned null",Logging.White);
+                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.intance.windows returned null", Logging.White);
                         _lastCleanupAction = DateTime.Now;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
@@ -576,7 +576,8 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("cargo units would be required to complete this operation.");
                                 close |= window.Html.Contains("You are too far away from the acceleration gate to activate it!");
                                 close |= window.Html.Contains("maximum distance is 2500 meters");
-                                close |= window.Html.Contains("you can decline a mission every"); //4 hours without penalty
+                                // agent mission decline warning (ok button)
+                                close |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty
                                 // Stupid warning, lets see if we can find it
                                 close |= window.Html.Contains("Do you wish to proceed with this dangerous action?");
                                 // Yes we know the mission is not complete, Questor will just redo the mission
@@ -622,7 +623,7 @@ namespace Questor.Modules.BackgroundTasks
                                 sayyes |= window.Html.Contains("Are you sure you want to remove location");
                                 sayyes |= window.Html.Contains("Repairing these items will cost");
                                 sayyes |= window.Html.Contains("Are you sure you would like to decline this mission");
-                                sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
+                                //sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
                                 
                                 //
                                 // LP Store "Accept offer" dialog

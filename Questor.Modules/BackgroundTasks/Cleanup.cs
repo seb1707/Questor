@@ -512,11 +512,21 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // go through *every* window
                     //
-                    if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
+                    if (!Cache.Instance.InSpace && !Cache.Instance.InStation && Settings.Instance.CharacterName != "AtLoginScreenNoCharactersLoggedInYet")
                     {
                         if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
                         _lastCleanupAction = DateTime.Now;
                         _States.CurrentCleanupState = CleanupState.Idle;
+                        return;
+                    }
+
+                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Cache.Instance.LastInStation.AddHours(1) > DateTime.Now)
+                    {
+                        Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
+                        Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White); 
+                        Settings.Instance.SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 0;
+                        Cache.Instance.SessionState = "Quitting";
+                        Cleanup.CloseQuestor();
                         return;
                     }
 

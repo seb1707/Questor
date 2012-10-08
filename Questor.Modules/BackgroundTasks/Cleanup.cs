@@ -566,6 +566,9 @@ namespace Questor.Modules.BackgroundTasks
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
                                 pause |= window.Html.Contains("Not all the items could be fitted");
 
+                                // quitting eve?
+                                close |= window.Html.Contains("Do you really want to quit now?");
+
                                 // Server going down
                                 close |= window.Html.Contains("Please make sure your characters are out of harm");
                                 close |= window.Html.Contains("the servers are down for 30 minutes each day for maintenance and updates");

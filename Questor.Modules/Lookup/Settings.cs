@@ -261,6 +261,13 @@ namespace Questor.Modules.Lookup
         public bool MissionStats3Log { get; set; }
         public string MissionStats3LogPath { get; set; }
         public string MissionStats3LogFile { get; set; }
+
+        public bool MissionDungeonIdLog { get; set; }
+
+        public string MissionDungeonIdLogPath { get; set; }
+
+        public string MissionDungeonIdLogFile { get; set; }
+
         public bool PocketStatistics { get; set; }
         public string PocketStatisticsPath { get; set; }
         public string PocketStatisticsFile { get; set; }
@@ -977,6 +984,7 @@ namespace Questor.Modules.Lookup
                     MissionStats1Log = (bool?)xml.Element("MissionStats1Log") ?? true;
                     MissionStats2Log = (bool?)xml.Element("MissionStats2Log") ?? true;
                     MissionStats3Log = (bool?)xml.Element("MissionStats3Log") ?? true;
+                    MissionDungeonIdLog = (bool?)xml.Element("MissionDungeonIdLog") ?? true;
                     PocketStatistics = (bool?)xml.Element("PocketStatistics") ?? true;
                     PocketStatsUseIndividualFilesPerPocket = (bool?)xml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
                     PocketObjectStatisticsLog = (bool?)xml.Element("PocketObjectStatisticsLog") ?? true;
@@ -1291,6 +1299,8 @@ namespace Questor.Modules.Lookup
             MissionStats2LogFile = System.IO.Path.Combine(MissionStats2LogPath, characterNameForLogs + ".DatedStatistics.log");
             MissionStats3LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
             MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath, characterNameForLogs + ".CustomDatedStatistics.csv");
+            MissionDungeonIdLogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
+            MissionDungeonIdLogFile = System.IO.Path.Combine(MissionDungeonIdLogPath, characterNameForLogs + "Mission-DungeonId-list.csv");
             PocketStatisticsPath = System.IO.Path.Combine(Logpath, "pocketstats\\");
             PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath, characterNameForLogs + "pocketstats-combined.csv");
             PocketObjectStatisticsPath = System.IO.Path.Combine(Logpath, "pocketobjectstats\\");
@@ -1305,6 +1315,7 @@ namespace Questor.Modules.Lookup
             Directory.CreateDirectory(MissionStats1LogPath);
             Directory.CreateDirectory(MissionStats2LogPath);
             Directory.CreateDirectory(MissionStats3LogPath);
+            Directory.CreateDirectory(MissionDungeonIdLogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
             Directory.CreateDirectory(PocketObjectStatisticsPath);
             if (!Defaultsettingsloaded)

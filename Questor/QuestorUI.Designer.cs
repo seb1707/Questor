@@ -242,125 +242,81 @@
             this.txtComand = new System.Windows.Forms.TextBox();
             this.txtExtConsole = new System.Windows.Forms.RichTextBox();
             this.Tabs = new System.Windows.Forms.TabControl();
+            this.Inventory = new System.Windows.Forms.TabPage();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.bttnQueryLootHangarID = new System.Windows.Forms.Button();
+            this.bttnQueryAmmoHangarID = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.DataAmmoHangarName = new System.Windows.Forms.Label();
+            this.DataLootHangarName = new System.Windows.Forms.Label();
+            this.lblLootHangar = new System.Windows.Forms.Label();
+            this.lblAmmoHangar = new System.Windows.Forms.Label();
+            this.DataLootHangarID = new System.Windows.Forms.Label();
+            this.DataAmmoHangarID = new System.Windows.Forms.Label();
+            this.lblLootHangarID = new System.Windows.Forms.Label();
+            this.lblAmmoHangarID = new System.Windows.Forms.Label();
+            this.groupQuestorsLoothangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseLootHangar = new System.Windows.Forms.Button();
+            this.btnStackLootHangar = new System.Windows.Forms.Button();
+            this.btnOpenLootHangar = new System.Windows.Forms.Button();
+            this.groupQuestorsAmmoHangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseAmmoHangar = new System.Windows.Forms.Button();
+            this.btnStackAmmoHangar = new System.Windows.Forms.Button();
+            this.btnOpenAmmoHangar = new System.Windows.Forms.Button();
+            this.groupCorpLootHangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseCorpLootHangar = new System.Windows.Forms.Button();
+            this.btnStackCorpLootHangar = new System.Windows.Forms.Button();
+            this.btnOpenCorpLootHangar = new System.Windows.Forms.Button();
+            this.groupCorpAmmoHangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseCorpAmmoHangar = new System.Windows.Forms.Button();
+            this.btnStackCorpAmmoHangar = new System.Windows.Forms.Button();
+            this.btnOpenCorpAmmoHangar = new System.Windows.Forms.Button();
+            this.groupLootContainerTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseLootContainer = new System.Windows.Forms.Button();
+            this.btnStackFreightContainer = new System.Windows.Forms.Button();
+            this.btnOpenFreightContainer = new System.Windows.Forms.Button();
+            this.groupShipHangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseShipsHangar = new System.Windows.Forms.Button();
+            this.btnStackShipsHangar = new System.Windows.Forms.Button();
+            this.btnOpenShipsHangar = new System.Windows.Forms.Button();
+            this.groupItemHangarTests = new System.Windows.Forms.GroupBox();
+            this.bttnCloseItemsHangar = new System.Windows.Forms.Button();
+            this.btnStackItemsHangar = new System.Windows.Forms.Button();
+            this.btnOpenItemsHangar = new System.Windows.Forms.Button();
+            this.bttnCloseAllInventoryWindows = new System.Windows.Forms.Button();
             this.tabModules = new System.Windows.Forms.TabPage();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabHighSlots1to4 = new System.Windows.Forms.TabPage();
-            this.tabHighSlots5to8 = new System.Windows.Forms.TabPage();
-            this.tabLowSlots = new System.Windows.Forms.TabPage();
             this.tabShipInfo = new System.Windows.Forms.TabPage();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
-            this.label21 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label24 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.label30 = new System.Windows.Forms.Label();
-            this.label32 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
-            this.label34 = new System.Windows.Forms.Label();
-            this.label35 = new System.Windows.Forms.Label();
-            this.label36 = new System.Windows.Forms.Label();
-            this.label37 = new System.Windows.Forms.Label();
-            this.label38 = new System.Windows.Forms.Label();
-            this.label39 = new System.Windows.Forms.Label();
-            this.label40 = new System.Windows.Forms.Label();
-            this.label41 = new System.Windows.Forms.Label();
-            this.label42 = new System.Windows.Forms.Label();
-            this.label43 = new System.Windows.Forms.Label();
-            this.label44 = new System.Windows.Forms.Label();
-            this.label45 = new System.Windows.Forms.Label();
-            this.label46 = new System.Windows.Forms.Label();
-            this.label47 = new System.Windows.Forms.Label();
-            this.label48 = new System.Windows.Forms.Label();
-            this.label49 = new System.Windows.Forms.Label();
             this.label50 = new System.Windows.Forms.Label();
-            this.label51 = new System.Windows.Forms.Label();
-            this.label56 = new System.Windows.Forms.Label();
-            this.label57 = new System.Windows.Forms.Label();
-            this.label59 = new System.Windows.Forms.Label();
-            this.label60 = new System.Windows.Forms.Label();
-            this.label61 = new System.Windows.Forms.Label();
-            this.label62 = new System.Windows.Forms.Label();
-            this.label63 = new System.Windows.Forms.Label();
-            this.label64 = new System.Windows.Forms.Label();
-            this.label65 = new System.Windows.Forms.Label();
-            this.label66 = new System.Windows.Forms.Label();
-            this.label54 = new System.Windows.Forms.Label();
-            this.label55 = new System.Windows.Forms.Label();
-            this.label58 = new System.Windows.Forms.Label();
-            this.label67 = new System.Windows.Forms.Label();
-            this.label52 = new System.Windows.Forms.Label();
-            this.label53 = new System.Windows.Forms.Label();
-            this.label68 = new System.Windows.Forms.Label();
-            this.label69 = new System.Windows.Forms.Label();
-            this.label70 = new System.Windows.Forms.Label();
-            this.label71 = new System.Windows.Forms.Label();
-            this.label72 = new System.Windows.Forms.Label();
-            this.label73 = new System.Windows.Forms.Label();
-            this.label74 = new System.Windows.Forms.Label();
-            this.label75 = new System.Windows.Forms.Label();
-            this.label76 = new System.Windows.Forms.Label();
-            this.label77 = new System.Windows.Forms.Label();
-            this.label78 = new System.Windows.Forms.Label();
-            this.label79 = new System.Windows.Forms.Label();
-            this.label80 = new System.Windows.Forms.Label();
-            this.label81 = new System.Windows.Forms.Label();
-            this.label82 = new System.Windows.Forms.Label();
-            this.label83 = new System.Windows.Forms.Label();
-            this.label84 = new System.Windows.Forms.Label();
-            this.label85 = new System.Windows.Forms.Label();
-            this.label86 = new System.Windows.Forms.Label();
-            this.label87 = new System.Windows.Forms.Label();
-            this.label88 = new System.Windows.Forms.Label();
-            this.label89 = new System.Windows.Forms.Label();
-            this.label90 = new System.Windows.Forms.Label();
-            this.label91 = new System.Windows.Forms.Label();
-            this.label92 = new System.Windows.Forms.Label();
-            this.label93 = new System.Windows.Forms.Label();
-            this.label94 = new System.Windows.Forms.Label();
-            this.label95 = new System.Windows.Forms.Label();
-            this.label96 = new System.Windows.Forms.Label();
-            this.label97 = new System.Windows.Forms.Label();
-            this.label98 = new System.Windows.Forms.Label();
-            this.label99 = new System.Windows.Forms.Label();
-            this.label100 = new System.Windows.Forms.Label();
-            this.label101 = new System.Windows.Forms.Label();
-            this.label102 = new System.Windows.Forms.Label();
-            this.label103 = new System.Windows.Forms.Label();
-            this.label104 = new System.Windows.Forms.Label();
-            this.label105 = new System.Windows.Forms.Label();
-            this.label106 = new System.Windows.Forms.Label();
-            this.label107 = new System.Windows.Forms.Label();
-            this.label108 = new System.Windows.Forms.Label();
-            this.label109 = new System.Windows.Forms.Label();
-            this.label110 = new System.Windows.Forms.Label();
-            this.label111 = new System.Windows.Forms.Label();
-            this.label112 = new System.Windows.Forms.Label();
-            this.label113 = new System.Windows.Forms.Label();
-            this.label114 = new System.Windows.Forms.Label();
-            this.label115 = new System.Windows.Forms.Label();
-            this.label116 = new System.Windows.Forms.Label();
-            this.label117 = new System.Windows.Forms.Label();
-            this.label118 = new System.Windows.Forms.Label();
-            this.label119 = new System.Windows.Forms.Label();
-            this.label120 = new System.Windows.Forms.Label();
-            this.label121 = new System.Windows.Forms.Label();
-            this.label122 = new System.Windows.Forms.Label();
-            this.label123 = new System.Windows.Forms.Label();
-            this.label124 = new System.Windows.Forms.Label();
-            this.label125 = new System.Windows.Forms.Label();
-            this.label126 = new System.Windows.Forms.Label();
-            this.label127 = new System.Windows.Forms.Label();
-            this.label128 = new System.Windows.Forms.Label();
-            this.label129 = new System.Windows.Forms.Label();
-            this.label130 = new System.Windows.Forms.Label();
-            this.label131 = new System.Windows.Forms.Label();
-            this.label132 = new System.Windows.Forms.Label();
-            this.label133 = new System.Windows.Forms.Label();
-            this.label134 = new System.Windows.Forms.Label();
+            this.label49 = new System.Windows.Forms.Label();
+            this.label48 = new System.Windows.Forms.Label();
+            this.label47 = new System.Windows.Forms.Label();
+            this.label46 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label42 = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.label39 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label32 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tabHighSlots1to4 = new System.Windows.Forms.TabPage();
             this.label135 = new System.Windows.Forms.Label();
             this.label136 = new System.Windows.Forms.Label();
             this.label137 = new System.Windows.Forms.Label();
@@ -389,6 +345,91 @@
             this.label160 = new System.Windows.Forms.Label();
             this.label161 = new System.Windows.Forms.Label();
             this.label162 = new System.Windows.Forms.Label();
+            this.label107 = new System.Windows.Forms.Label();
+            this.label108 = new System.Windows.Forms.Label();
+            this.label109 = new System.Windows.Forms.Label();
+            this.label110 = new System.Windows.Forms.Label();
+            this.label111 = new System.Windows.Forms.Label();
+            this.label112 = new System.Windows.Forms.Label();
+            this.label113 = new System.Windows.Forms.Label();
+            this.label114 = new System.Windows.Forms.Label();
+            this.label115 = new System.Windows.Forms.Label();
+            this.label116 = new System.Windows.Forms.Label();
+            this.label117 = new System.Windows.Forms.Label();
+            this.label118 = new System.Windows.Forms.Label();
+            this.label119 = new System.Windows.Forms.Label();
+            this.label120 = new System.Windows.Forms.Label();
+            this.label121 = new System.Windows.Forms.Label();
+            this.label122 = new System.Windows.Forms.Label();
+            this.label123 = new System.Windows.Forms.Label();
+            this.label124 = new System.Windows.Forms.Label();
+            this.label125 = new System.Windows.Forms.Label();
+            this.label126 = new System.Windows.Forms.Label();
+            this.label127 = new System.Windows.Forms.Label();
+            this.label128 = new System.Windows.Forms.Label();
+            this.label129 = new System.Windows.Forms.Label();
+            this.label130 = new System.Windows.Forms.Label();
+            this.label131 = new System.Windows.Forms.Label();
+            this.label132 = new System.Windows.Forms.Label();
+            this.label133 = new System.Windows.Forms.Label();
+            this.label134 = new System.Windows.Forms.Label();
+            this.label79 = new System.Windows.Forms.Label();
+            this.label80 = new System.Windows.Forms.Label();
+            this.label81 = new System.Windows.Forms.Label();
+            this.label82 = new System.Windows.Forms.Label();
+            this.label83 = new System.Windows.Forms.Label();
+            this.label84 = new System.Windows.Forms.Label();
+            this.label85 = new System.Windows.Forms.Label();
+            this.label86 = new System.Windows.Forms.Label();
+            this.label87 = new System.Windows.Forms.Label();
+            this.label88 = new System.Windows.Forms.Label();
+            this.label89 = new System.Windows.Forms.Label();
+            this.label90 = new System.Windows.Forms.Label();
+            this.label91 = new System.Windows.Forms.Label();
+            this.label92 = new System.Windows.Forms.Label();
+            this.label93 = new System.Windows.Forms.Label();
+            this.label94 = new System.Windows.Forms.Label();
+            this.label95 = new System.Windows.Forms.Label();
+            this.label96 = new System.Windows.Forms.Label();
+            this.label97 = new System.Windows.Forms.Label();
+            this.label98 = new System.Windows.Forms.Label();
+            this.label99 = new System.Windows.Forms.Label();
+            this.label100 = new System.Windows.Forms.Label();
+            this.label101 = new System.Windows.Forms.Label();
+            this.label102 = new System.Windows.Forms.Label();
+            this.label103 = new System.Windows.Forms.Label();
+            this.label104 = new System.Windows.Forms.Label();
+            this.label105 = new System.Windows.Forms.Label();
+            this.label106 = new System.Windows.Forms.Label();
+            this.label78 = new System.Windows.Forms.Label();
+            this.label77 = new System.Windows.Forms.Label();
+            this.label76 = new System.Windows.Forms.Label();
+            this.label75 = new System.Windows.Forms.Label();
+            this.label74 = new System.Windows.Forms.Label();
+            this.label73 = new System.Windows.Forms.Label();
+            this.label72 = new System.Windows.Forms.Label();
+            this.label71 = new System.Windows.Forms.Label();
+            this.label70 = new System.Windows.Forms.Label();
+            this.label69 = new System.Windows.Forms.Label();
+            this.label68 = new System.Windows.Forms.Label();
+            this.label53 = new System.Windows.Forms.Label();
+            this.label52 = new System.Windows.Forms.Label();
+            this.label67 = new System.Windows.Forms.Label();
+            this.label58 = new System.Windows.Forms.Label();
+            this.label55 = new System.Windows.Forms.Label();
+            this.label54 = new System.Windows.Forms.Label();
+            this.label66 = new System.Windows.Forms.Label();
+            this.label65 = new System.Windows.Forms.Label();
+            this.label64 = new System.Windows.Forms.Label();
+            this.label63 = new System.Windows.Forms.Label();
+            this.label62 = new System.Windows.Forms.Label();
+            this.label61 = new System.Windows.Forms.Label();
+            this.label60 = new System.Windows.Forms.Label();
+            this.label59 = new System.Windows.Forms.Label();
+            this.label57 = new System.Windows.Forms.Label();
+            this.label56 = new System.Windows.Forms.Label();
+            this.label51 = new System.Windows.Forms.Label();
+            this.tabHighSlots5to8 = new System.Windows.Forms.TabPage();
             this.label163 = new System.Windows.Forms.Label();
             this.label164 = new System.Windows.Forms.Label();
             this.label165 = new System.Windows.Forms.Label();
@@ -501,34 +542,11 @@
             this.label272 = new System.Windows.Forms.Label();
             this.label273 = new System.Windows.Forms.Label();
             this.label274 = new System.Windows.Forms.Label();
-
-            this.Inventory = new System.Windows.Forms.TabPage();
-            this.bttnCloseAllInventoryWindows = new System.Windows.Forms.Button();
-            this.bttnCloseLootHangar = new System.Windows.Forms.Button();
-            this.bttnCloseAmmoHangar = new System.Windows.Forms.Button();
-            this.bttnCloseCorpLootHangar = new System.Windows.Forms.Button();
-            this.bttnCloseCorpAmmoHangar = new System.Windows.Forms.Button();
-            this.bttnCloseItemsHangar = new System.Windows.Forms.Button();
-            this.bttnCloseShipsHangar = new System.Windows.Forms.Button();
-            this.bttnCloseLootContainer = new System.Windows.Forms.Button();
-            this.btnStackFreightContainer = new System.Windows.Forms.Button();
-            this.lblQuestorConfiguredHangarTests = new System.Windows.Forms.Label();
-            this.btnStackLootHangar = new System.Windows.Forms.Button();
-            this.btnStackAmmoHangar = new System.Windows.Forms.Button();
-            this.btnOpenAmmoHangar = new System.Windows.Forms.Button();
-            this.btnOpenLootHangar = new System.Windows.Forms.Button();
-            this.lblSpecificHangarTests = new System.Windows.Forms.Label();
-            this.lblCorpHangarTests = new System.Windows.Forms.Label();
-            this.lbllocalHangarTests = new System.Windows.Forms.Label();
-            this.btnStackCorpLootHangar = new System.Windows.Forms.Button();
-            this.btnStackCorpAmmoHangar = new System.Windows.Forms.Button();
-            this.btnOpenCorpAmmoHangar = new System.Windows.Forms.Button();
-            this.btnStackShipsHangar = new System.Windows.Forms.Button();
-            this.btnStackItemsHangar = new System.Windows.Forms.Button();
-            this.btnOpenFreightContainer = new System.Windows.Forms.Button();
-            this.btnOpenShipsHangar = new System.Windows.Forms.Button();
-            this.btnOpenItemsHangar = new System.Windows.Forms.Button();
-            this.btnOpenCorpLootHangar = new System.Windows.Forms.Button();
+            this.tabLowSlots = new System.Windows.Forms.TabPage();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.bttnCloseCargoHold = new System.Windows.Forms.Button();
+            this.bttnStackCargoHold = new System.Windows.Forms.Button();
+            this.bttnOpenCargoHold = new System.Windows.Forms.Button();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -541,11 +559,21 @@
             this.tabConsole.SuspendLayout();
             this.Tabs.SuspendLayout();
             this.Inventory.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupQuestorsLoothangarTests.SuspendLayout();
+            this.groupQuestorsAmmoHangarTests.SuspendLayout();
+            this.groupCorpLootHangarTests.SuspendLayout();
+            this.groupCorpAmmoHangarTests.SuspendLayout();
+            this.groupLootContainerTests.SuspendLayout();
+            this.groupShipHangarTests.SuspendLayout();
+            this.groupItemHangarTests.SuspendLayout();
             this.tabModules.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.tabShipInfo.SuspendLayout();
             this.tabHighSlots1to4.SuspendLayout();
             this.tabHighSlots5to8.SuspendLayout();
-            this.tabShipInfo.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // AutoStartCheckBox
@@ -2670,32 +2698,16 @@
             // 
             // Inventory
             // 
-            this.Inventory.Controls.Add(this.bttnCloseAllInventoryWindows);
-            this.Inventory.Controls.Add(this.bttnCloseLootHangar);
-            this.Inventory.Controls.Add(this.bttnCloseAmmoHangar);
-            this.Inventory.Controls.Add(this.bttnCloseCorpLootHangar);
-            this.Inventory.Controls.Add(this.bttnCloseCorpAmmoHangar);
-            this.Inventory.Controls.Add(this.bttnCloseItemsHangar);
-            this.Inventory.Controls.Add(this.bttnCloseShipsHangar);
-            this.Inventory.Controls.Add(this.bttnCloseLootContainer);
-            this.Inventory.Controls.Add(this.btnStackFreightContainer);
-            this.Inventory.Controls.Add(this.lblQuestorConfiguredHangarTests);
-            this.Inventory.Controls.Add(this.btnStackLootHangar);
-            this.Inventory.Controls.Add(this.btnStackAmmoHangar);
-            this.Inventory.Controls.Add(this.btnOpenAmmoHangar);
-            this.Inventory.Controls.Add(this.btnOpenLootHangar);
-            this.Inventory.Controls.Add(this.lblSpecificHangarTests);
-            this.Inventory.Controls.Add(this.lblCorpHangarTests);
-            this.Inventory.Controls.Add(this.lbllocalHangarTests);
-            this.Inventory.Controls.Add(this.btnStackCorpLootHangar);
-            this.Inventory.Controls.Add(this.btnStackCorpAmmoHangar);
-            this.Inventory.Controls.Add(this.btnOpenCorpAmmoHangar);
-            this.Inventory.Controls.Add(this.btnStackShipsHangar);
-            this.Inventory.Controls.Add(this.btnStackItemsHangar);
-            this.Inventory.Controls.Add(this.btnOpenFreightContainer);
-            this.Inventory.Controls.Add(this.btnOpenShipsHangar);
-            this.Inventory.Controls.Add(this.btnOpenItemsHangar);
-            this.Inventory.Controls.Add(this.btnOpenCorpLootHangar);
+            this.Inventory.Controls.Add(this.groupBox3);
+            this.Inventory.Controls.Add(this.groupBox2);
+            this.Inventory.Controls.Add(this.groupBox1);
+            this.Inventory.Controls.Add(this.groupQuestorsLoothangarTests);
+            this.Inventory.Controls.Add(this.groupQuestorsAmmoHangarTests);
+            this.Inventory.Controls.Add(this.groupCorpLootHangarTests);
+            this.Inventory.Controls.Add(this.groupCorpAmmoHangarTests);
+            this.Inventory.Controls.Add(this.groupLootContainerTests);
+            this.Inventory.Controls.Add(this.groupShipHangarTests);
+            this.Inventory.Controls.Add(this.groupItemHangarTests);
             this.Inventory.Location = new System.Drawing.Point(4, 22);
             this.Inventory.Name = "Inventory";
             this.Inventory.Padding = new System.Windows.Forms.Padding(3);
@@ -2704,263 +2716,431 @@
             this.Inventory.Text = "Inventory";
             this.Inventory.UseVisualStyleBackColor = true;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.bttnQueryLootHangarID);
+            this.groupBox2.Controls.Add(this.bttnQueryAmmoHangarID);
+            this.groupBox2.Location = new System.Drawing.Point(552, 11);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(129, 219);
+            this.groupBox2.TabIndex = 157;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Tests";
+            // 
+            // bttnQueryLootHangarID
+            // 
+            this.bttnQueryLootHangarID.Location = new System.Drawing.Point(9, 59);
+            this.bttnQueryLootHangarID.Name = "bttnQueryLootHangarID";
+            this.bttnQueryLootHangarID.Size = new System.Drawing.Size(114, 34);
+            this.bttnQueryLootHangarID.TabIndex = 150;
+            this.bttnQueryLootHangarID.Text = "Get LootHangarID";
+            this.bttnQueryLootHangarID.UseVisualStyleBackColor = true;
+            this.bttnQueryLootHangarID.Click += new System.EventHandler(this.bttnQueryLootHangarID_Click);
+            // 
+            // bttnQueryAmmoHangarID
+            // 
+            this.bttnQueryAmmoHangarID.Location = new System.Drawing.Point(9, 19);
+            this.bttnQueryAmmoHangarID.Name = "bttnQueryAmmoHangarID";
+            this.bttnQueryAmmoHangarID.Size = new System.Drawing.Size(114, 34);
+            this.bttnQueryAmmoHangarID.TabIndex = 149;
+            this.bttnQueryAmmoHangarID.Text = "Get AmmoHangarID";
+            this.bttnQueryAmmoHangarID.UseVisualStyleBackColor = true;
+            this.bttnQueryAmmoHangarID.Click += new System.EventHandler(this.bttnQueryAmmoHangarID_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.DataAmmoHangarName);
+            this.groupBox1.Controls.Add(this.DataLootHangarName);
+            this.groupBox1.Controls.Add(this.lblLootHangar);
+            this.groupBox1.Controls.Add(this.lblAmmoHangar);
+            this.groupBox1.Controls.Add(this.DataLootHangarID);
+            this.groupBox1.Controls.Add(this.DataAmmoHangarID);
+            this.groupBox1.Controls.Add(this.lblLootHangarID);
+            this.groupBox1.Controls.Add(this.lblAmmoHangarID);
+            this.groupBox1.Controls.Add(this.bttnCloseAllInventoryWindows);
+            this.groupBox1.Location = new System.Drawing.Point(379, 11);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(167, 219);
+            this.groupBox1.TabIndex = 157;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Corp Hangar Info";
+            // 
+            // DataAmmoHangarName
+            // 
+            this.DataAmmoHangarName.AutoSize = true;
+            this.DataAmmoHangarName.Location = new System.Drawing.Point(92, 70);
+            this.DataAmmoHangarName.Name = "DataAmmoHangarName";
+            this.DataAmmoHangarName.Size = new System.Drawing.Size(24, 13);
+            this.DataAmmoHangarName.TabIndex = 171;
+            this.DataAmmoHangarName.Text = "n/a";
+            // 
+            // DataLootHangarName
+            // 
+            this.DataLootHangarName.AutoSize = true;
+            this.DataLootHangarName.Location = new System.Drawing.Point(92, 24);
+            this.DataLootHangarName.Name = "DataLootHangarName";
+            this.DataLootHangarName.Size = new System.Drawing.Size(24, 13);
+            this.DataLootHangarName.TabIndex = 170;
+            this.DataLootHangarName.Text = "n/a";
+            // 
+            // lblLootHangar
+            // 
+            this.lblLootHangar.AutoSize = true;
+            this.lblLootHangar.Location = new System.Drawing.Point(23, 24);
+            this.lblLootHangar.Name = "lblLootHangar";
+            this.lblLootHangar.Size = new System.Drawing.Size(69, 13);
+            this.lblLootHangar.TabIndex = 169;
+            this.lblLootHangar.Text = "LootHangar: ";
+            // 
+            // lblAmmoHangar
+            // 
+            this.lblAmmoHangar.AutoSize = true;
+            this.lblAmmoHangar.Location = new System.Drawing.Point(15, 70);
+            this.lblAmmoHangar.Name = "lblAmmoHangar";
+            this.lblAmmoHangar.Size = new System.Drawing.Size(77, 13);
+            this.lblAmmoHangar.TabIndex = 168;
+            this.lblAmmoHangar.Text = "AmmoHangar: ";
+            // 
+            // DataLootHangarID
+            // 
+            this.DataLootHangarID.AutoSize = true;
+            this.DataLootHangarID.Location = new System.Drawing.Point(92, 40);
+            this.DataLootHangarID.Name = "DataLootHangarID";
+            this.DataLootHangarID.Size = new System.Drawing.Size(24, 13);
+            this.DataLootHangarID.TabIndex = 167;
+            this.DataLootHangarID.Text = "n/a";
+            // 
+            // DataAmmoHangarID
+            // 
+            this.DataAmmoHangarID.AutoSize = true;
+            this.DataAmmoHangarID.Location = new System.Drawing.Point(92, 84);
+            this.DataAmmoHangarID.Name = "DataAmmoHangarID";
+            this.DataAmmoHangarID.Size = new System.Drawing.Size(24, 13);
+            this.DataAmmoHangarID.TabIndex = 166;
+            this.DataAmmoHangarID.Text = "n/a";
+            // 
+            // lblLootHangarID
+            // 
+            this.lblLootHangarID.AutoSize = true;
+            this.lblLootHangarID.Location = new System.Drawing.Point(15, 40);
+            this.lblLootHangarID.Name = "lblLootHangarID";
+            this.lblLootHangarID.Size = new System.Drawing.Size(77, 13);
+            this.lblLootHangarID.TabIndex = 163;
+            this.lblLootHangarID.Text = "LootHangarID:";
+            // 
+            // lblAmmoHangarID
+            // 
+            this.lblAmmoHangarID.AutoSize = true;
+            this.lblAmmoHangarID.Location = new System.Drawing.Point(7, 84);
+            this.lblAmmoHangarID.Name = "lblAmmoHangarID";
+            this.lblAmmoHangarID.Size = new System.Drawing.Size(85, 13);
+            this.lblAmmoHangarID.TabIndex = 162;
+            this.lblAmmoHangarID.Text = "AmmoHangarID:";
+            // 
+            // groupQuestorsLoothangarTests
+            // 
+            this.groupQuestorsLoothangarTests.Controls.Add(this.bttnCloseLootHangar);
+            this.groupQuestorsLoothangarTests.Controls.Add(this.btnStackLootHangar);
+            this.groupQuestorsLoothangarTests.Controls.Add(this.btnOpenLootHangar);
+            this.groupQuestorsLoothangarTests.Location = new System.Drawing.Point(200, 181);
+            this.groupQuestorsLoothangarTests.Name = "groupQuestorsLoothangarTests";
+            this.groupQuestorsLoothangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupQuestorsLoothangarTests.TabIndex = 159;
+            this.groupQuestorsLoothangarTests.TabStop = false;
+            this.groupQuestorsLoothangarTests.Text = "Questors Loot Hangar Tests";
+            // 
+            // bttnCloseLootHangar
+            // 
+            this.bttnCloseLootHangar.Location = new System.Drawing.Point(117, 19);
+            this.bttnCloseLootHangar.Name = "bttnCloseLootHangar";
+            this.bttnCloseLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.bttnCloseLootHangar.TabIndex = 154;
+            this.bttnCloseLootHangar.Text = "Close LootHangar";
+            this.bttnCloseLootHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseLootHangar.Click += new System.EventHandler(this.bttnCloseLootHangar_Click_1);
+            // 
+            // btnStackLootHangar
+            // 
+            this.btnStackLootHangar.Location = new System.Drawing.Point(61, 19);
+            this.btnStackLootHangar.Name = "btnStackLootHangar";
+            this.btnStackLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnStackLootHangar.TabIndex = 153;
+            this.btnStackLootHangar.Text = "Stack LootHangar";
+            this.btnStackLootHangar.UseVisualStyleBackColor = true;
+            this.btnStackLootHangar.Click += new System.EventHandler(this.btnStackLootHangar_Click);
+            // 
+            // btnOpenLootHangar
+            // 
+            this.btnOpenLootHangar.Location = new System.Drawing.Point(6, 19);
+            this.btnOpenLootHangar.Name = "btnOpenLootHangar";
+            this.btnOpenLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnOpenLootHangar.TabIndex = 152;
+            this.btnOpenLootHangar.Text = "Open LootHangar";
+            this.btnOpenLootHangar.UseVisualStyleBackColor = true;
+            this.btnOpenLootHangar.Click += new System.EventHandler(this.btnOpenLootHangar_Click);
+            // 
+            // groupQuestorsAmmoHangarTests
+            // 
+            this.groupQuestorsAmmoHangarTests.Controls.Add(this.bttnCloseAmmoHangar);
+            this.groupQuestorsAmmoHangarTests.Controls.Add(this.btnStackAmmoHangar);
+            this.groupQuestorsAmmoHangarTests.Controls.Add(this.btnOpenAmmoHangar);
+            this.groupQuestorsAmmoHangarTests.Location = new System.Drawing.Point(200, 124);
+            this.groupQuestorsAmmoHangarTests.Name = "groupQuestorsAmmoHangarTests";
+            this.groupQuestorsAmmoHangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupQuestorsAmmoHangarTests.TabIndex = 158;
+            this.groupQuestorsAmmoHangarTests.TabStop = false;
+            this.groupQuestorsAmmoHangarTests.Text = "Questors Ammo Hangar Tests";
+            // 
+            // bttnCloseAmmoHangar
+            // 
+            this.bttnCloseAmmoHangar.Location = new System.Drawing.Point(117, 18);
+            this.bttnCloseAmmoHangar.Name = "bttnCloseAmmoHangar";
+            this.bttnCloseAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.bttnCloseAmmoHangar.TabIndex = 153;
+            this.bttnCloseAmmoHangar.Text = "Close AmmoHangar";
+            this.bttnCloseAmmoHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseAmmoHangar.Click += new System.EventHandler(this.bttnCloseAmmoHangar_Click_1);
+            // 
+            // btnStackAmmoHangar
+            // 
+            this.btnStackAmmoHangar.Location = new System.Drawing.Point(61, 18);
+            this.btnStackAmmoHangar.Name = "btnStackAmmoHangar";
+            this.btnStackAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnStackAmmoHangar.TabIndex = 152;
+            this.btnStackAmmoHangar.Text = "Stack AmmoHangar";
+            this.btnStackAmmoHangar.UseVisualStyleBackColor = true;
+            this.btnStackAmmoHangar.Click += new System.EventHandler(this.btnStackAmmoHangar_Click);
+            // 
+            // btnOpenAmmoHangar
+            // 
+            this.btnOpenAmmoHangar.Location = new System.Drawing.Point(6, 18);
+            this.btnOpenAmmoHangar.Name = "btnOpenAmmoHangar";
+            this.btnOpenAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnOpenAmmoHangar.TabIndex = 151;
+            this.btnOpenAmmoHangar.Text = "Open AmmoHangar";
+            this.btnOpenAmmoHangar.UseVisualStyleBackColor = true;
+            this.btnOpenAmmoHangar.Click += new System.EventHandler(this.btnOpenAmmoHangar_Click);
+            // 
+            // groupCorpLootHangarTests
+            // 
+            this.groupCorpLootHangarTests.Controls.Add(this.bttnCloseCorpLootHangar);
+            this.groupCorpLootHangarTests.Controls.Add(this.btnStackCorpLootHangar);
+            this.groupCorpLootHangarTests.Controls.Add(this.btnOpenCorpLootHangar);
+            this.groupCorpLootHangarTests.Location = new System.Drawing.Point(200, 66);
+            this.groupCorpLootHangarTests.Name = "groupCorpLootHangarTests";
+            this.groupCorpLootHangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupCorpLootHangarTests.TabIndex = 157;
+            this.groupCorpLootHangarTests.TabStop = false;
+            this.groupCorpLootHangarTests.Text = "Corp Loot Hangar Tests";
+            // 
+            // bttnCloseCorpLootHangar
+            // 
+            this.bttnCloseCorpLootHangar.Location = new System.Drawing.Point(117, 19);
+            this.bttnCloseCorpLootHangar.Name = "bttnCloseCorpLootHangar";
+            this.bttnCloseCorpLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.bttnCloseCorpLootHangar.TabIndex = 152;
+            this.bttnCloseCorpLootHangar.Text = "Close Corp LootHangar";
+            this.bttnCloseCorpLootHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseCorpLootHangar.Click += new System.EventHandler(this.bttnCloseCorpLootHangar_Click);
+            // 
+            // btnStackCorpLootHangar
+            // 
+            this.btnStackCorpLootHangar.Location = new System.Drawing.Point(61, 19);
+            this.btnStackCorpLootHangar.Name = "btnStackCorpLootHangar";
+            this.btnStackCorpLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnStackCorpLootHangar.TabIndex = 151;
+            this.btnStackCorpLootHangar.Text = "Stack Corp LootHangar";
+            this.btnStackCorpLootHangar.UseVisualStyleBackColor = true;
+            this.btnStackCorpLootHangar.Click += new System.EventHandler(this.btnStackCorpLootHangar_Click);
+            // 
+            // btnOpenCorpLootHangar
+            // 
+            this.btnOpenCorpLootHangar.Location = new System.Drawing.Point(6, 19);
+            this.btnOpenCorpLootHangar.Name = "btnOpenCorpLootHangar";
+            this.btnOpenCorpLootHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnOpenCorpLootHangar.TabIndex = 150;
+            this.btnOpenCorpLootHangar.Text = "Open Corp LootHangar";
+            this.btnOpenCorpLootHangar.UseVisualStyleBackColor = true;
+            this.btnOpenCorpLootHangar.Click += new System.EventHandler(this.btnOpenCorpLootHangar_Click);
+            // 
+            // groupCorpAmmoHangarTests
+            // 
+            this.groupCorpAmmoHangarTests.Controls.Add(this.bttnCloseCorpAmmoHangar);
+            this.groupCorpAmmoHangarTests.Controls.Add(this.btnStackCorpAmmoHangar);
+            this.groupCorpAmmoHangarTests.Controls.Add(this.btnOpenCorpAmmoHangar);
+            this.groupCorpAmmoHangarTests.Location = new System.Drawing.Point(200, 11);
+            this.groupCorpAmmoHangarTests.Name = "groupCorpAmmoHangarTests";
+            this.groupCorpAmmoHangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupCorpAmmoHangarTests.TabIndex = 156;
+            this.groupCorpAmmoHangarTests.TabStop = false;
+            this.groupCorpAmmoHangarTests.Text = "Corp Ammo Hangar Tests";
+            // 
+            // bttnCloseCorpAmmoHangar
+            // 
+            this.bttnCloseCorpAmmoHangar.Location = new System.Drawing.Point(117, 19);
+            this.bttnCloseCorpAmmoHangar.Name = "bttnCloseCorpAmmoHangar";
+            this.bttnCloseCorpAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.bttnCloseCorpAmmoHangar.TabIndex = 151;
+            this.bttnCloseCorpAmmoHangar.Text = "Close Corp AmmoHangar";
+            this.bttnCloseCorpAmmoHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseCorpAmmoHangar.Click += new System.EventHandler(this.bttnCloseCorpAmmoHangar_Click_1);
+            // 
+            // btnStackCorpAmmoHangar
+            // 
+            this.btnStackCorpAmmoHangar.Location = new System.Drawing.Point(61, 19);
+            this.btnStackCorpAmmoHangar.Name = "btnStackCorpAmmoHangar";
+            this.btnStackCorpAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnStackCorpAmmoHangar.TabIndex = 150;
+            this.btnStackCorpAmmoHangar.Text = "Stack Corp AmmoHangar";
+            this.btnStackCorpAmmoHangar.UseVisualStyleBackColor = true;
+            this.btnStackCorpAmmoHangar.Click += new System.EventHandler(this.btnStackCorpAmmoHangar_Click);
+            // 
+            // btnOpenCorpAmmoHangar
+            // 
+            this.btnOpenCorpAmmoHangar.Location = new System.Drawing.Point(6, 19);
+            this.btnOpenCorpAmmoHangar.Name = "btnOpenCorpAmmoHangar";
+            this.btnOpenCorpAmmoHangar.Size = new System.Drawing.Size(49, 23);
+            this.btnOpenCorpAmmoHangar.TabIndex = 149;
+            this.btnOpenCorpAmmoHangar.Text = "Open Corp AmmoHangar";
+            this.btnOpenCorpAmmoHangar.UseVisualStyleBackColor = true;
+            this.btnOpenCorpAmmoHangar.Click += new System.EventHandler(this.btnOpenCorpAmmoHangar_Click);
+            // 
+            // groupLootContainerTests
+            // 
+            this.groupLootContainerTests.Controls.Add(this.bttnCloseLootContainer);
+            this.groupLootContainerTests.Controls.Add(this.btnStackFreightContainer);
+            this.groupLootContainerTests.Controls.Add(this.btnOpenFreightContainer);
+            this.groupLootContainerTests.Location = new System.Drawing.Point(21, 179);
+            this.groupLootContainerTests.Name = "groupLootContainerTests";
+            this.groupLootContainerTests.Size = new System.Drawing.Size(173, 49);
+            this.groupLootContainerTests.TabIndex = 157;
+            this.groupLootContainerTests.TabStop = false;
+            this.groupLootContainerTests.Text = "Loot ContainerTests";
+            // 
+            // bttnCloseLootContainer
+            // 
+            this.bttnCloseLootContainer.Location = new System.Drawing.Point(115, 18);
+            this.bttnCloseLootContainer.Name = "bttnCloseLootContainer";
+            this.bttnCloseLootContainer.Size = new System.Drawing.Size(46, 23);
+            this.bttnCloseLootContainer.TabIndex = 148;
+            this.bttnCloseLootContainer.Text = "Close";
+            this.bttnCloseLootContainer.UseVisualStyleBackColor = true;
+            this.bttnCloseLootContainer.Click += new System.EventHandler(this.bttnCloseLootContainer_Click);
+            // 
+            // btnStackFreightContainer
+            // 
+            this.btnStackFreightContainer.Location = new System.Drawing.Point(63, 18);
+            this.btnStackFreightContainer.Name = "btnStackFreightContainer";
+            this.btnStackFreightContainer.Size = new System.Drawing.Size(46, 23);
+            this.btnStackFreightContainer.TabIndex = 147;
+            this.btnStackFreightContainer.Text = "Stack";
+            this.btnStackFreightContainer.UseVisualStyleBackColor = true;
+            this.btnStackFreightContainer.Click += new System.EventHandler(this.btnStackFreightContainer_Click);
+            // 
+            // btnOpenFreightContainer
+            // 
+            this.btnOpenFreightContainer.Location = new System.Drawing.Point(11, 18);
+            this.btnOpenFreightContainer.Name = "btnOpenFreightContainer";
+            this.btnOpenFreightContainer.Size = new System.Drawing.Size(47, 23);
+            this.btnOpenFreightContainer.TabIndex = 146;
+            this.btnOpenFreightContainer.Text = "Open";
+            this.btnOpenFreightContainer.UseVisualStyleBackColor = true;
+            this.btnOpenFreightContainer.Click += new System.EventHandler(this.btnOpenFreightContainer_Click);
+            // 
+            // groupShipHangarTests
+            // 
+            this.groupShipHangarTests.Controls.Add(this.bttnCloseShipsHangar);
+            this.groupShipHangarTests.Controls.Add(this.btnStackShipsHangar);
+            this.groupShipHangarTests.Controls.Add(this.btnOpenShipsHangar);
+            this.groupShipHangarTests.Location = new System.Drawing.Point(21, 121);
+            this.groupShipHangarTests.Name = "groupShipHangarTests";
+            this.groupShipHangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupShipHangarTests.TabIndex = 156;
+            this.groupShipHangarTests.TabStop = false;
+            this.groupShipHangarTests.Text = "Ship Hangar Tests";
+            // 
+            // bttnCloseShipsHangar
+            // 
+            this.bttnCloseShipsHangar.Location = new System.Drawing.Point(115, 19);
+            this.bttnCloseShipsHangar.Name = "bttnCloseShipsHangar";
+            this.bttnCloseShipsHangar.Size = new System.Drawing.Size(46, 23);
+            this.bttnCloseShipsHangar.TabIndex = 149;
+            this.bttnCloseShipsHangar.Text = "Close";
+            this.bttnCloseShipsHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseShipsHangar.Click += new System.EventHandler(this.bttnCloseShipsHangar_Click);
+            // 
+            // btnStackShipsHangar
+            // 
+            this.btnStackShipsHangar.Location = new System.Drawing.Point(63, 19);
+            this.btnStackShipsHangar.Name = "btnStackShipsHangar";
+            this.btnStackShipsHangar.Size = new System.Drawing.Size(46, 23);
+            this.btnStackShipsHangar.TabIndex = 148;
+            this.btnStackShipsHangar.Text = "Stack";
+            this.btnStackShipsHangar.UseVisualStyleBackColor = true;
+            this.btnStackShipsHangar.Click += new System.EventHandler(this.btnStackShipsHangar_Click);
+            // 
+            // btnOpenShipsHangar
+            // 
+            this.btnOpenShipsHangar.Location = new System.Drawing.Point(11, 19);
+            this.btnOpenShipsHangar.Name = "btnOpenShipsHangar";
+            this.btnOpenShipsHangar.Size = new System.Drawing.Size(46, 23);
+            this.btnOpenShipsHangar.TabIndex = 147;
+            this.btnOpenShipsHangar.Text = "Open";
+            this.btnOpenShipsHangar.UseVisualStyleBackColor = true;
+            this.btnOpenShipsHangar.Click += new System.EventHandler(this.btnOpenShipsHangar_Click);
+            // 
+            // groupItemHangarTests
+            // 
+            this.groupItemHangarTests.Controls.Add(this.bttnCloseItemsHangar);
+            this.groupItemHangarTests.Controls.Add(this.btnStackItemsHangar);
+            this.groupItemHangarTests.Controls.Add(this.btnOpenItemsHangar);
+            this.groupItemHangarTests.Location = new System.Drawing.Point(21, 66);
+            this.groupItemHangarTests.Name = "groupItemHangarTests";
+            this.groupItemHangarTests.Size = new System.Drawing.Size(173, 49);
+            this.groupItemHangarTests.TabIndex = 155;
+            this.groupItemHangarTests.TabStop = false;
+            this.groupItemHangarTests.Text = "Item Hangar Tests";
+            // 
+            // bttnCloseItemsHangar
+            // 
+            this.bttnCloseItemsHangar.Location = new System.Drawing.Point(115, 19);
+            this.bttnCloseItemsHangar.Name = "bttnCloseItemsHangar";
+            this.bttnCloseItemsHangar.Size = new System.Drawing.Size(46, 23);
+            this.bttnCloseItemsHangar.TabIndex = 151;
+            this.bttnCloseItemsHangar.Text = "Close";
+            this.bttnCloseItemsHangar.UseVisualStyleBackColor = true;
+            this.bttnCloseItemsHangar.Click += new System.EventHandler(this.bttnCloseItemsHangar_Click);
+            // 
+            // btnStackItemsHangar
+            // 
+            this.btnStackItemsHangar.Location = new System.Drawing.Point(63, 19);
+            this.btnStackItemsHangar.Name = "btnStackItemsHangar";
+            this.btnStackItemsHangar.Size = new System.Drawing.Size(46, 23);
+            this.btnStackItemsHangar.TabIndex = 149;
+            this.btnStackItemsHangar.Text = "Stack";
+            this.btnStackItemsHangar.UseVisualStyleBackColor = true;
+            this.btnStackItemsHangar.Click += new System.EventHandler(this.btnStackItemsHangar_Click);
+            // 
+            // btnOpenItemsHangar
+            // 
+            this.btnOpenItemsHangar.Location = new System.Drawing.Point(11, 19);
+            this.btnOpenItemsHangar.Name = "btnOpenItemsHangar";
+            this.btnOpenItemsHangar.Size = new System.Drawing.Size(46, 23);
+            this.btnOpenItemsHangar.TabIndex = 148;
+            this.btnOpenItemsHangar.Text = "Open";
+            this.btnOpenItemsHangar.UseVisualStyleBackColor = true;
+            this.btnOpenItemsHangar.Click += new System.EventHandler(this.btnOpenItemsHangar_Click);
+            // 
             // bttnCloseAllInventoryWindows
             // 
-            this.bttnCloseAllInventoryWindows.Location = new System.Drawing.Point(475, 11);
+            this.bttnCloseAllInventoryWindows.Location = new System.Drawing.Point(6, 177);
             this.bttnCloseAllInventoryWindows.Name = "bttnCloseAllInventoryWindows";
-            this.bttnCloseAllInventoryWindows.Size = new System.Drawing.Size(198, 35);
+            this.bttnCloseAllInventoryWindows.Size = new System.Drawing.Size(150, 35);
             this.bttnCloseAllInventoryWindows.TabIndex = 152;
             this.bttnCloseAllInventoryWindows.Text = "Close ALL Inventory Windows";
             this.bttnCloseAllInventoryWindows.UseVisualStyleBackColor = true;
             this.bttnCloseAllInventoryWindows.Click += new System.EventHandler(this.BttnCloseAllInventoryWindowsClick);
             // 
-            // bttnCloseLootHangar
-            // 
-            this.bttnCloseLootHangar.Location = new System.Drawing.Point(519, 236);
-            this.bttnCloseLootHangar.Name = "bttnCloseLootHangar";
-            this.bttnCloseLootHangar.Size = new System.Drawing.Size(119, 23);
-            this.bttnCloseLootHangar.TabIndex = 151;
-            this.bttnCloseLootHangar.Text = "Close LootHangar";
-            this.bttnCloseLootHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseLootHangar.Click += new System.EventHandler(this.BttnCloseLootHangarClick);
-            // 
-            // bttnCloseAmmoHangar
-            // 
-            this.bttnCloseAmmoHangar.Location = new System.Drawing.Point(519, 147);
-            this.bttnCloseAmmoHangar.Name = "bttnCloseAmmoHangar";
-            this.bttnCloseAmmoHangar.Size = new System.Drawing.Size(119, 23);
-            this.bttnCloseAmmoHangar.TabIndex = 150;
-            this.bttnCloseAmmoHangar.Text = "Close AmmoHangar";
-            this.bttnCloseAmmoHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseAmmoHangar.Click += new System.EventHandler(this.BttnCloseAmmoHangarClick);
-            // 
-            // bttnCloseCorpLootHangar
-            // 
-            this.bttnCloseCorpLootHangar.Location = new System.Drawing.Point(296, 207);
-            this.bttnCloseCorpLootHangar.Name = "bttnCloseCorpLootHangar";
-            this.bttnCloseCorpLootHangar.Size = new System.Drawing.Size(143, 23);
-            this.bttnCloseCorpLootHangar.TabIndex = 149;
-            this.bttnCloseCorpLootHangar.Text = "Close Corp LootHangar";
-            this.bttnCloseCorpLootHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseCorpLootHangar.Click += new System.EventHandler(this.BttnCloseCorpLootHangarClick);
-            // 
-            // bttnCloseCorpAmmoHangar
-            // 
-            this.bttnCloseCorpAmmoHangar.Location = new System.Drawing.Point(296, 118);
-            this.bttnCloseCorpAmmoHangar.Name = "bttnCloseCorpAmmoHangar";
-            this.bttnCloseCorpAmmoHangar.Size = new System.Drawing.Size(143, 23);
-            this.bttnCloseCorpAmmoHangar.TabIndex = 148;
-            this.bttnCloseCorpAmmoHangar.Text = "Close Corp AmmoHangar";
-            this.bttnCloseCorpAmmoHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseCorpAmmoHangar.Click += new System.EventHandler(this.BttnCloseCorpAmmoHangarClick);
-            // 
-            // bttnCloseItemsHangar
-            // 
-            this.bttnCloseItemsHangar.Location = new System.Drawing.Point(20, 120);
-            this.bttnCloseItemsHangar.Name = "bttnCloseItemsHangar";
-            this.bttnCloseItemsHangar.Size = new System.Drawing.Size(129, 23);
-            this.bttnCloseItemsHangar.TabIndex = 147;
-            this.bttnCloseItemsHangar.Text = "Close ItemsHangar";
-            this.bttnCloseItemsHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseItemsHangar.Click += new System.EventHandler(this.BttnCloseItemsHangarClick);
-            // 
-            // bttnCloseShipsHangar
-            // 
-            this.bttnCloseShipsHangar.Location = new System.Drawing.Point(20, 207);
-            this.bttnCloseShipsHangar.Name = "bttnCloseShipsHangar";
-            this.bttnCloseShipsHangar.Size = new System.Drawing.Size(129, 23);
-            this.bttnCloseShipsHangar.TabIndex = 146;
-            this.bttnCloseShipsHangar.Text = "Close ShipsHangar";
-            this.bttnCloseShipsHangar.UseVisualStyleBackColor = true;
-            this.bttnCloseShipsHangar.Click += new System.EventHandler(this.BttnCloseShipsHangarClick);
-            // 
-            // bttnCloseLootContainer
-            // 
-            this.bttnCloseLootContainer.Location = new System.Drawing.Point(163, 118);
-            this.bttnCloseLootContainer.Name = "bttnCloseLootContainer";
-            this.bttnCloseLootContainer.Size = new System.Drawing.Size(116, 23);
-            this.bttnCloseLootContainer.TabIndex = 145;
-            this.bttnCloseLootContainer.Text = "Close LootContainer";
-            this.bttnCloseLootContainer.UseVisualStyleBackColor = true;
-            this.bttnCloseLootContainer.Click += new System.EventHandler(this.BttnCloseLootContainerClick);
-            // 
-            // btnStackFreightContainer
-            // 
-            this.btnStackFreightContainer.Location = new System.Drawing.Point(165, 89);
-            this.btnStackFreightContainer.Name = "btnStackFreightContainer";
-            this.btnStackFreightContainer.Size = new System.Drawing.Size(114, 23);
-            this.btnStackFreightContainer.TabIndex = 144;
-            this.btnStackFreightContainer.Text = "Stack LootContainer";
-            this.btnStackFreightContainer.UseVisualStyleBackColor = true;
-            this.btnStackFreightContainer.Click += new System.EventHandler(this.BtnStackFreightContainerClick);
-            // 
-            // lblQuestorConfiguredHangarTests
-            // 
-            this.lblQuestorConfiguredHangarTests.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblQuestorConfiguredHangarTests.Location = new System.Drawing.Point(501, 63);
-            this.lblQuestorConfiguredHangarTests.Name = "lblQuestorConfiguredHangarTests";
-            this.lblQuestorConfiguredHangarTests.Size = new System.Drawing.Size(172, 23);
-            this.lblQuestorConfiguredHangarTests.TabIndex = 143;
-            this.lblQuestorConfiguredHangarTests.Text = "Questors Hangars";
-            // 
-            // btnStackLootHangar
-            // 
-            this.btnStackLootHangar.Location = new System.Drawing.Point(519, 207);
-            this.btnStackLootHangar.Name = "btnStackLootHangar";
-            this.btnStackLootHangar.Size = new System.Drawing.Size(119, 23);
-            this.btnStackLootHangar.TabIndex = 141;
-            this.btnStackLootHangar.Text = "Stack LootHangar";
-            this.btnStackLootHangar.UseVisualStyleBackColor = true;
-            this.btnStackLootHangar.Click += new System.EventHandler(this.BtnStackLootHangarClick);
-            // 
-            // btnStackAmmoHangar
-            // 
-            this.btnStackAmmoHangar.Location = new System.Drawing.Point(519, 118);
-            this.btnStackAmmoHangar.Name = "btnStackAmmoHangar";
-            this.btnStackAmmoHangar.Size = new System.Drawing.Size(119, 23);
-            this.btnStackAmmoHangar.TabIndex = 140;
-            this.btnStackAmmoHangar.Text = "Stack AmmoHangar";
-            this.btnStackAmmoHangar.UseVisualStyleBackColor = true;
-            this.btnStackAmmoHangar.Click += new System.EventHandler(this.BtnStackAmmoHangarClick);
-            // 
-            // btnOpenAmmoHangar
-            // 
-            this.btnOpenAmmoHangar.Location = new System.Drawing.Point(519, 89);
-            this.btnOpenAmmoHangar.Name = "btnOpenAmmoHangar";
-            this.btnOpenAmmoHangar.Size = new System.Drawing.Size(119, 23);
-            this.btnOpenAmmoHangar.TabIndex = 139;
-            this.btnOpenAmmoHangar.Text = "Open AmmoHangar";
-            this.btnOpenAmmoHangar.UseVisualStyleBackColor = true;
-            this.btnOpenAmmoHangar.Click += new System.EventHandler(this.BtnOpenAmmoHangarClick);
-            // 
-            // btnOpenLootHangar
-            // 
-            this.btnOpenLootHangar.Location = new System.Drawing.Point(519, 176);
-            this.btnOpenLootHangar.Name = "btnOpenLootHangar";
-            this.btnOpenLootHangar.Size = new System.Drawing.Size(119, 23);
-            this.btnOpenLootHangar.TabIndex = 138;
-            this.btnOpenLootHangar.Text = "Open LootHangar";
-            this.btnOpenLootHangar.UseVisualStyleBackColor = true;
-            this.btnOpenLootHangar.Click += new System.EventHandler(this.BtnOpenLootHangarClick);
-            // 
-            // lblSpecificHangarTests
-            // 
-            this.lblSpecificHangarTests.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSpecificHangarTests.Location = new System.Drawing.Point(126, 11);
-            this.lblSpecificHangarTests.Name = "lblSpecificHangarTests";
-            this.lblSpecificHangarTests.Size = new System.Drawing.Size(219, 23);
-            this.lblSpecificHangarTests.TabIndex = 137;
-            this.lblSpecificHangarTests.Text = "Specific Hangar Tests";
-            // 
-            // lblCorpHangarTests
-            // 
-            this.lblCorpHangarTests.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCorpHangarTests.Location = new System.Drawing.Point(292, 34);
-            this.lblCorpHangarTests.Name = "lblCorpHangarTests";
-            this.lblCorpHangarTests.Size = new System.Drawing.Size(164, 23);
-            this.lblCorpHangarTests.TabIndex = 136;
-            this.lblCorpHangarTests.Text = "Corporate Hangars";
-            // 
-            // lbllocalHangarTests
-            // 
-            this.lbllocalHangarTests.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbllocalHangarTests.Location = new System.Drawing.Point(17, 34);
-            this.lbllocalHangarTests.Name = "lbllocalHangarTests";
-            this.lbllocalHangarTests.Size = new System.Drawing.Size(132, 23);
-            this.lbllocalHangarTests.TabIndex = 135;
-            this.lbllocalHangarTests.Text = "Local Hangars";
-            // 
-            // btnStackCorpLootHangar
-            // 
-            this.btnStackCorpLootHangar.Location = new System.Drawing.Point(296, 178);
-            this.btnStackCorpLootHangar.Name = "btnStackCorpLootHangar";
-            this.btnStackCorpLootHangar.Size = new System.Drawing.Size(143, 23);
-            this.btnStackCorpLootHangar.TabIndex = 133;
-            this.btnStackCorpLootHangar.Text = "Stack Corp LootHangar";
-            this.btnStackCorpLootHangar.UseVisualStyleBackColor = true;
-            this.btnStackCorpLootHangar.Click += new System.EventHandler(this.BtnStackCorpLootHangarClick);
-            // 
-            // btnStackCorpAmmoHangar
-            // 
-            this.btnStackCorpAmmoHangar.Location = new System.Drawing.Point(296, 89);
-            this.btnStackCorpAmmoHangar.Name = "btnStackCorpAmmoHangar";
-            this.btnStackCorpAmmoHangar.Size = new System.Drawing.Size(143, 23);
-            this.btnStackCorpAmmoHangar.TabIndex = 132;
-            this.btnStackCorpAmmoHangar.Text = "Stack Corp AmmoHangar";
-            this.btnStackCorpAmmoHangar.UseVisualStyleBackColor = true;
-            this.btnStackCorpAmmoHangar.Click += new System.EventHandler(this.BtnStackCorpAmmoHangarClick);
-            // 
-            // btnOpenCorpAmmoHangar
-            // 
-            this.btnOpenCorpAmmoHangar.Location = new System.Drawing.Point(296, 60);
-            this.btnOpenCorpAmmoHangar.Name = "btnOpenCorpAmmoHangar";
-            this.btnOpenCorpAmmoHangar.Size = new System.Drawing.Size(143, 23);
-            this.btnOpenCorpAmmoHangar.TabIndex = 131;
-            this.btnOpenCorpAmmoHangar.Text = "Open Corp AmmoHangar";
-            this.btnOpenCorpAmmoHangar.UseVisualStyleBackColor = true;
-            this.btnOpenCorpAmmoHangar.Click += new System.EventHandler(this.BtnOpenCorpAmmoHangarClick);
-            // 
-            // btnStackShipsHangar
-            // 
-            this.btnStackShipsHangar.Location = new System.Drawing.Point(20, 178);
-            this.btnStackShipsHangar.Name = "btnStackShipsHangar";
-            this.btnStackShipsHangar.Size = new System.Drawing.Size(129, 23);
-            this.btnStackShipsHangar.TabIndex = 130;
-            this.btnStackShipsHangar.Text = "Stack ShipsHangar";
-            this.btnStackShipsHangar.UseVisualStyleBackColor = true;
-            this.btnStackShipsHangar.Click += new System.EventHandler(this.BtnStackShipsHangarClick);
-            // 
-            // btnStackItemsHangar
-            // 
-            this.btnStackItemsHangar.Location = new System.Drawing.Point(20, 89);
-            this.btnStackItemsHangar.Name = "btnStackItemsHangar";
-            this.btnStackItemsHangar.Size = new System.Drawing.Size(129, 23);
-            this.btnStackItemsHangar.TabIndex = 129;
-            this.btnStackItemsHangar.Text = "Stack ItemsHangar";
-            this.btnStackItemsHangar.UseVisualStyleBackColor = true;
-            this.btnStackItemsHangar.Click += new System.EventHandler(this.BtnStackItemsHangarClick);
-            // 
-            // btnOpenFreightContainer
-            // 
-            this.btnOpenFreightContainer.Location = new System.Drawing.Point(163, 60);
-            this.btnOpenFreightContainer.Name = "btnOpenFreightContainer";
-            this.btnOpenFreightContainer.Size = new System.Drawing.Size(116, 23);
-            this.btnOpenFreightContainer.TabIndex = 128;
-            this.btnOpenFreightContainer.Text = "Open LootContainer";
-            this.btnOpenFreightContainer.UseVisualStyleBackColor = true;
-            this.btnOpenFreightContainer.Click += new System.EventHandler(this.BtnOpenFreightContainerClick);
-            // 
-            // btnOpenShipsHangar
-            // 
-            this.btnOpenShipsHangar.Location = new System.Drawing.Point(20, 149);
-            this.btnOpenShipsHangar.Name = "btnOpenShipsHangar";
-            this.btnOpenShipsHangar.Size = new System.Drawing.Size(129, 23);
-            this.btnOpenShipsHangar.TabIndex = 127;
-            this.btnOpenShipsHangar.Text = "Open ShipsHangar";
-            this.btnOpenShipsHangar.UseVisualStyleBackColor = true;
-            this.btnOpenShipsHangar.Click += new System.EventHandler(this.BtnOpenShipsHangarClick);
-            // 
-            // btnOpenItemsHangar
-            // 
-            this.btnOpenItemsHangar.Location = new System.Drawing.Point(20, 60);
-            this.btnOpenItemsHangar.Name = "btnOpenItemsHangar";
-            this.btnOpenItemsHangar.Size = new System.Drawing.Size(129, 23);
-            this.btnOpenItemsHangar.TabIndex = 126;
-            this.btnOpenItemsHangar.Text = "Open ItemsHangar";
-            this.btnOpenItemsHangar.UseVisualStyleBackColor = true;
-            this.btnOpenItemsHangar.Click += new System.EventHandler(this.BtnOpenItemsHangarClick);
-            // 
-            // btnOpenCorpLootHangar
-            // 
-            this.btnOpenCorpLootHangar.Location = new System.Drawing.Point(296, 147);
-            this.btnOpenCorpLootHangar.Name = "btnOpenCorpLootHangar";
-            this.btnOpenCorpLootHangar.Size = new System.Drawing.Size(143, 23);
-            this.btnOpenCorpLootHangar.TabIndex = 125;
-            this.btnOpenCorpLootHangar.Text = "Open Corp LootHangar";
-            this.btnOpenCorpLootHangar.UseVisualStyleBackColor = true;
-            this.btnOpenCorpLootHangar.Click += new System.EventHandler(this.BtnOpenCorpLootHangarClick);
-            
-            //
             // tabModules
             // 
             this.tabModules.Controls.Add(this.tabControl1);
@@ -2983,6 +3163,306 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(681, 259);
             this.tabControl1.TabIndex = 0;
+            // 
+            // tabShipInfo
+            // 
+            this.tabShipInfo.Controls.Add(this.label50);
+            this.tabShipInfo.Controls.Add(this.label49);
+            this.tabShipInfo.Controls.Add(this.label48);
+            this.tabShipInfo.Controls.Add(this.label47);
+            this.tabShipInfo.Controls.Add(this.label46);
+            this.tabShipInfo.Controls.Add(this.label45);
+            this.tabShipInfo.Controls.Add(this.label44);
+            this.tabShipInfo.Controls.Add(this.label43);
+            this.tabShipInfo.Controls.Add(this.label42);
+            this.tabShipInfo.Controls.Add(this.label41);
+            this.tabShipInfo.Controls.Add(this.label40);
+            this.tabShipInfo.Controls.Add(this.label39);
+            this.tabShipInfo.Controls.Add(this.label38);
+            this.tabShipInfo.Controls.Add(this.label37);
+            this.tabShipInfo.Controls.Add(this.label36);
+            this.tabShipInfo.Controls.Add(this.label35);
+            this.tabShipInfo.Controls.Add(this.label34);
+            this.tabShipInfo.Controls.Add(this.label33);
+            this.tabShipInfo.Controls.Add(this.label32);
+            this.tabShipInfo.Controls.Add(this.label30);
+            this.tabShipInfo.Controls.Add(this.label29);
+            this.tabShipInfo.Controls.Add(this.label24);
+            this.tabShipInfo.Controls.Add(this.label23);
+            this.tabShipInfo.Controls.Add(this.label22);
+            this.tabShipInfo.Controls.Add(this.label21);
+            this.tabShipInfo.Controls.Add(this.label20);
+            this.tabShipInfo.Controls.Add(this.label14);
+            this.tabShipInfo.Controls.Add(this.label4);
+            this.tabShipInfo.Controls.Add(this.label1);
+            this.tabShipInfo.Location = new System.Drawing.Point(4, 22);
+            this.tabShipInfo.Name = "tabShipInfo";
+            this.tabShipInfo.Padding = new System.Windows.Forms.Padding(3);
+            this.tabShipInfo.Size = new System.Drawing.Size(673, 233);
+            this.tabShipInfo.TabIndex = 3;
+            this.tabShipInfo.Text = "Ship Information";
+            this.tabShipInfo.UseVisualStyleBackColor = true;
+            // 
+            // label50
+            // 
+            this.label50.AutoSize = true;
+            this.label50.Location = new System.Drawing.Point(260, 200);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(24, 13);
+            this.label50.TabIndex = 28;
+            this.label50.Text = "n/a";
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(260, 178);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(24, 13);
+            this.label49.TabIndex = 27;
+            this.label49.Text = "n/a";
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(260, 160);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(24, 13);
+            this.label48.TabIndex = 26;
+            this.label48.Text = "n/a";
+            // 
+            // label47
+            // 
+            this.label47.AutoSize = true;
+            this.label47.Location = new System.Drawing.Point(229, 200);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(24, 13);
+            this.label47.TabIndex = 25;
+            this.label47.Text = "n/a";
+            // 
+            // label46
+            // 
+            this.label46.AutoSize = true;
+            this.label46.Location = new System.Drawing.Point(229, 178);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(24, 13);
+            this.label46.TabIndex = 24;
+            this.label46.Text = "n/a";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(229, 160);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(24, 13);
+            this.label45.TabIndex = 23;
+            this.label45.Text = "n/a";
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(190, 200);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(24, 13);
+            this.label44.TabIndex = 22;
+            this.label44.Text = "n/a";
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(190, 178);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(24, 13);
+            this.label43.TabIndex = 21;
+            this.label43.Text = "n/a";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(190, 160);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(24, 13);
+            this.label42.TabIndex = 20;
+            this.label42.Text = "n/a";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(160, 200);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(24, 13);
+            this.label41.TabIndex = 19;
+            this.label41.Text = "n/a";
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(160, 178);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(24, 13);
+            this.label40.TabIndex = 18;
+            this.label40.Text = "n/a";
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(160, 160);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(24, 13);
+            this.label39.TabIndex = 17;
+            this.label39.Text = "n/a";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(83, 200);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(24, 13);
+            this.label38.TabIndex = 16;
+            this.label38.Text = "n/a";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(83, 178);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(24, 13);
+            this.label37.TabIndex = 15;
+            this.label37.Text = "n/a";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(83, 156);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(24, 13);
+            this.label36.TabIndex = 14;
+            this.label36.Text = "n/a";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(259, 143);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(25, 13);
+            this.label35.TabIndex = 13;
+            this.label35.Text = "Exp";
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(160, 143);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(23, 13);
+            this.label34.TabIndex = 12;
+            this.label34.Text = "EM";
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(188, 143);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(37, 13);
+            this.label33.TabIndex = 11;
+            this.label33.Text = "Therm";
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(231, 143);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(22, 13);
+            this.label32.TabIndex = 10;
+            this.label32.Text = "Kin";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(188, 125);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(65, 13);
+            this.label30.TabIndex = 9;
+            this.label30.Text = "Resistances";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(23, 199);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(51, 13);
+            this.label29.TabIndex = 8;
+            this.label29.Text = "Max Hull:";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(15, 177);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(60, 13);
+            this.label24.TabIndex = 7;
+            this.label24.Text = "Max Armor:";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(8, 156);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(67, 13);
+            this.label23.TabIndex = 6;
+            this.label23.Text = "Max Shields:";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(83, 55);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(24, 13);
+            this.label22.TabIndex = 5;
+            this.label22.Text = "n/a";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(4, 55);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(62, 13);
+            this.label21.TabIndex = 4;
+            this.label21.Text = "Ship Name:";
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(83, 38);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(24, 13);
+            this.label20.TabIndex = 3;
+            this.label20.Text = "n/a";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(7, 38);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(58, 13);
+            this.label14.TabIndex = 2;
+            this.label14.Text = "Ship Type:";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(83, 21);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(24, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "n/a";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 21);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Ship Class:";
             // 
             // tabHighSlots1to4
             // 
@@ -3106,941 +3586,257 @@
             this.tabHighSlots1to4.Text = "HighSlots 1-4";
             this.tabHighSlots1to4.UseVisualStyleBackColor = true;
             // 
-            // tabHighSlots5to8
-            // 
-            this.tabHighSlots5to8.Controls.Add(this.label163);
-            this.tabHighSlots5to8.Controls.Add(this.label164);
-            this.tabHighSlots5to8.Controls.Add(this.label165);
-            this.tabHighSlots5to8.Controls.Add(this.label166);
-            this.tabHighSlots5to8.Controls.Add(this.label167);
-            this.tabHighSlots5to8.Controls.Add(this.label168);
-            this.tabHighSlots5to8.Controls.Add(this.label169);
-            this.tabHighSlots5to8.Controls.Add(this.label170);
-            this.tabHighSlots5to8.Controls.Add(this.label171);
-            this.tabHighSlots5to8.Controls.Add(this.label172);
-            this.tabHighSlots5to8.Controls.Add(this.label173);
-            this.tabHighSlots5to8.Controls.Add(this.label174);
-            this.tabHighSlots5to8.Controls.Add(this.label175);
-            this.tabHighSlots5to8.Controls.Add(this.label176);
-            this.tabHighSlots5to8.Controls.Add(this.label177);
-            this.tabHighSlots5to8.Controls.Add(this.label178);
-            this.tabHighSlots5to8.Controls.Add(this.label179);
-            this.tabHighSlots5to8.Controls.Add(this.label180);
-            this.tabHighSlots5to8.Controls.Add(this.label181);
-            this.tabHighSlots5to8.Controls.Add(this.label182);
-            this.tabHighSlots5to8.Controls.Add(this.label183);
-            this.tabHighSlots5to8.Controls.Add(this.label184);
-            this.tabHighSlots5to8.Controls.Add(this.label185);
-            this.tabHighSlots5to8.Controls.Add(this.label186);
-            this.tabHighSlots5to8.Controls.Add(this.label187);
-            this.tabHighSlots5to8.Controls.Add(this.label188);
-            this.tabHighSlots5to8.Controls.Add(this.label189);
-            this.tabHighSlots5to8.Controls.Add(this.label190);
-            this.tabHighSlots5to8.Controls.Add(this.label191);
-            this.tabHighSlots5to8.Controls.Add(this.label192);
-            this.tabHighSlots5to8.Controls.Add(this.label193);
-            this.tabHighSlots5to8.Controls.Add(this.label194);
-            this.tabHighSlots5to8.Controls.Add(this.label195);
-            this.tabHighSlots5to8.Controls.Add(this.label196);
-            this.tabHighSlots5to8.Controls.Add(this.label197);
-            this.tabHighSlots5to8.Controls.Add(this.label198);
-            this.tabHighSlots5to8.Controls.Add(this.label199);
-            this.tabHighSlots5to8.Controls.Add(this.label200);
-            this.tabHighSlots5to8.Controls.Add(this.label201);
-            this.tabHighSlots5to8.Controls.Add(this.label202);
-            this.tabHighSlots5to8.Controls.Add(this.label203);
-            this.tabHighSlots5to8.Controls.Add(this.label204);
-            this.tabHighSlots5to8.Controls.Add(this.label205);
-            this.tabHighSlots5to8.Controls.Add(this.label206);
-            this.tabHighSlots5to8.Controls.Add(this.label207);
-            this.tabHighSlots5to8.Controls.Add(this.label208);
-            this.tabHighSlots5to8.Controls.Add(this.label209);
-            this.tabHighSlots5to8.Controls.Add(this.label210);
-            this.tabHighSlots5to8.Controls.Add(this.label211);
-            this.tabHighSlots5to8.Controls.Add(this.label212);
-            this.tabHighSlots5to8.Controls.Add(this.label213);
-            this.tabHighSlots5to8.Controls.Add(this.label214);
-            this.tabHighSlots5to8.Controls.Add(this.label215);
-            this.tabHighSlots5to8.Controls.Add(this.label216);
-            this.tabHighSlots5to8.Controls.Add(this.label217);
-            this.tabHighSlots5to8.Controls.Add(this.label218);
-            this.tabHighSlots5to8.Controls.Add(this.label219);
-            this.tabHighSlots5to8.Controls.Add(this.label220);
-            this.tabHighSlots5to8.Controls.Add(this.label221);
-            this.tabHighSlots5to8.Controls.Add(this.label222);
-            this.tabHighSlots5to8.Controls.Add(this.label223);
-            this.tabHighSlots5to8.Controls.Add(this.label224);
-            this.tabHighSlots5to8.Controls.Add(this.label225);
-            this.tabHighSlots5to8.Controls.Add(this.label226);
-            this.tabHighSlots5to8.Controls.Add(this.label227);
-            this.tabHighSlots5to8.Controls.Add(this.label228);
-            this.tabHighSlots5to8.Controls.Add(this.label229);
-            this.tabHighSlots5to8.Controls.Add(this.label230);
-            this.tabHighSlots5to8.Controls.Add(this.label231);
-            this.tabHighSlots5to8.Controls.Add(this.label232);
-            this.tabHighSlots5to8.Controls.Add(this.label233);
-            this.tabHighSlots5to8.Controls.Add(this.label234);
-            this.tabHighSlots5to8.Controls.Add(this.label235);
-            this.tabHighSlots5to8.Controls.Add(this.label236);
-            this.tabHighSlots5to8.Controls.Add(this.label237);
-            this.tabHighSlots5to8.Controls.Add(this.label238);
-            this.tabHighSlots5to8.Controls.Add(this.label239);
-            this.tabHighSlots5to8.Controls.Add(this.label240);
-            this.tabHighSlots5to8.Controls.Add(this.label241);
-            this.tabHighSlots5to8.Controls.Add(this.label242);
-            this.tabHighSlots5to8.Controls.Add(this.label243);
-            this.tabHighSlots5to8.Controls.Add(this.label244);
-            this.tabHighSlots5to8.Controls.Add(this.label245);
-            this.tabHighSlots5to8.Controls.Add(this.label246);
-            this.tabHighSlots5to8.Controls.Add(this.label247);
-            this.tabHighSlots5to8.Controls.Add(this.label248);
-            this.tabHighSlots5to8.Controls.Add(this.label249);
-            this.tabHighSlots5to8.Controls.Add(this.label250);
-            this.tabHighSlots5to8.Controls.Add(this.label251);
-            this.tabHighSlots5to8.Controls.Add(this.label252);
-            this.tabHighSlots5to8.Controls.Add(this.label253);
-            this.tabHighSlots5to8.Controls.Add(this.label254);
-            this.tabHighSlots5to8.Controls.Add(this.label255);
-            this.tabHighSlots5to8.Controls.Add(this.label256);
-            this.tabHighSlots5to8.Controls.Add(this.label257);
-            this.tabHighSlots5to8.Controls.Add(this.label258);
-            this.tabHighSlots5to8.Controls.Add(this.label259);
-            this.tabHighSlots5to8.Controls.Add(this.label260);
-            this.tabHighSlots5to8.Controls.Add(this.label261);
-            this.tabHighSlots5to8.Controls.Add(this.label262);
-            this.tabHighSlots5to8.Controls.Add(this.label263);
-            this.tabHighSlots5to8.Controls.Add(this.label264);
-            this.tabHighSlots5to8.Controls.Add(this.label265);
-            this.tabHighSlots5to8.Controls.Add(this.label266);
-            this.tabHighSlots5to8.Controls.Add(this.label267);
-            this.tabHighSlots5to8.Controls.Add(this.label268);
-            this.tabHighSlots5to8.Controls.Add(this.label269);
-            this.tabHighSlots5to8.Controls.Add(this.label270);
-            this.tabHighSlots5to8.Controls.Add(this.label271);
-            this.tabHighSlots5to8.Controls.Add(this.label272);
-            this.tabHighSlots5to8.Controls.Add(this.label273);
-            this.tabHighSlots5to8.Controls.Add(this.label274);
-            this.tabHighSlots5to8.Location = new System.Drawing.Point(4, 22);
-            this.tabHighSlots5to8.Name = "tabHighSlots5to8";
-            this.tabHighSlots5to8.Padding = new System.Windows.Forms.Padding(3);
-            this.tabHighSlots5to8.Size = new System.Drawing.Size(673, 233);
-            this.tabHighSlots5to8.TabIndex = 1;
-            this.tabHighSlots5to8.Text = "HighSlots 5-8";
-            this.tabHighSlots5to8.UseVisualStyleBackColor = true;
-            // 
-            // tabLowSlots
-            // 
-            this.tabLowSlots.Location = new System.Drawing.Point(4, 22);
-            this.tabLowSlots.Name = "tabLowSlots";
-            this.tabLowSlots.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLowSlots.Size = new System.Drawing.Size(673, 233);
-            this.tabLowSlots.TabIndex = 2;
-            this.tabLowSlots.Text = "LowSlots";
-            this.tabLowSlots.UseVisualStyleBackColor = true;
-            // 
-            // tabShipInfo
-            // 
-            this.tabShipInfo.Controls.Add(this.label50);
-            this.tabShipInfo.Controls.Add(this.label49);
-            this.tabShipInfo.Controls.Add(this.label48);
-            this.tabShipInfo.Controls.Add(this.label47);
-            this.tabShipInfo.Controls.Add(this.label46);
-            this.tabShipInfo.Controls.Add(this.label45);
-            this.tabShipInfo.Controls.Add(this.label44);
-            this.tabShipInfo.Controls.Add(this.label43);
-            this.tabShipInfo.Controls.Add(this.label42);
-            this.tabShipInfo.Controls.Add(this.label41);
-            this.tabShipInfo.Controls.Add(this.label40);
-            this.tabShipInfo.Controls.Add(this.label39);
-            this.tabShipInfo.Controls.Add(this.label38);
-            this.tabShipInfo.Controls.Add(this.label37);
-            this.tabShipInfo.Controls.Add(this.label36);
-            this.tabShipInfo.Controls.Add(this.label35);
-            this.tabShipInfo.Controls.Add(this.label34);
-            this.tabShipInfo.Controls.Add(this.label33);
-            this.tabShipInfo.Controls.Add(this.label32);
-            this.tabShipInfo.Controls.Add(this.label30);
-            this.tabShipInfo.Controls.Add(this.label29);
-            this.tabShipInfo.Controls.Add(this.label24);
-            this.tabShipInfo.Controls.Add(this.label23);
-            this.tabShipInfo.Controls.Add(this.label22);
-            this.tabShipInfo.Controls.Add(this.label21);
-            this.tabShipInfo.Controls.Add(this.label20);
-            this.tabShipInfo.Controls.Add(this.label14);
-            this.tabShipInfo.Controls.Add(this.label4);
-            this.tabShipInfo.Controls.Add(this.label1);
-            this.tabShipInfo.Location = new System.Drawing.Point(4, 22);
-            this.tabShipInfo.Name = "tabShipInfo";
-            this.tabShipInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabShipInfo.Size = new System.Drawing.Size(673, 233);
-            this.tabShipInfo.TabIndex = 3;
-            this.tabShipInfo.Text = "Ship Information";
-            this.tabShipInfo.UseVisualStyleBackColor = true;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Ship Class:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(83, 21);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(24, 13);
-            this.label4.TabIndex = 1;
-            this.label4.Text = "n/a";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(7, 38);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(58, 13);
-            this.label14.TabIndex = 2;
-            this.label14.Text = "Ship Type:";
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(83, 38);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(24, 13);
-            this.label20.TabIndex = 3;
-            this.label20.Text = "n/a";
-            // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(4, 55);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(62, 13);
-            this.label21.TabIndex = 4;
-            this.label21.Text = "Ship Name:";
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(83, 55);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(24, 13);
-            this.label22.TabIndex = 5;
-            this.label22.Text = "n/a";
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(8, 156);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(67, 13);
-            this.label23.TabIndex = 6;
-            this.label23.Text = "Max Shields:";
-            // 
-            // label24
-            // 
-            this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(15, 177);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(60, 13);
-            this.label24.TabIndex = 7;
-            this.label24.Text = "Max Armor:";
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(23, 199);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(51, 13);
-            this.label29.TabIndex = 8;
-            this.label29.Text = "Max Hull:";
-            // 
-            // label30
-            // 
-            this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(188, 125);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(65, 13);
-            this.label30.TabIndex = 9;
-            this.label30.Text = "Resistances";
-            // 
-            // label32
-            // 
-            this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(231, 143);
-            this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(22, 13);
-            this.label32.TabIndex = 10;
-            this.label32.Text = "Kin";
-            // 
-            // label33
-            // 
-            this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(188, 143);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(37, 13);
-            this.label33.TabIndex = 11;
-            this.label33.Text = "Therm";
-            // 
-            // label34
-            // 
-            this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(160, 143);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(23, 13);
-            this.label34.TabIndex = 12;
-            this.label34.Text = "EM";
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(259, 143);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(25, 13);
-            this.label35.TabIndex = 13;
-            this.label35.Text = "Exp";
-            // 
-            // label36
-            // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(83, 156);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(24, 13);
-            this.label36.TabIndex = 14;
-            this.label36.Text = "n/a";
-            // 
-            // label37
-            // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(83, 178);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(24, 13);
-            this.label37.TabIndex = 15;
-            this.label37.Text = "n/a";
-            // 
-            // label38
-            // 
-            this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(83, 200);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(24, 13);
-            this.label38.TabIndex = 16;
-            this.label38.Text = "n/a";
-            // 
-            // label39
-            // 
-            this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(160, 160);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(24, 13);
-            this.label39.TabIndex = 17;
-            this.label39.Text = "n/a";
-            // 
-            // label40
-            // 
-            this.label40.AutoSize = true;
-            this.label40.Location = new System.Drawing.Point(160, 178);
-            this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(24, 13);
-            this.label40.TabIndex = 18;
-            this.label40.Text = "n/a";
-            // 
-            // label41
-            // 
-            this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(160, 200);
-            this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(24, 13);
-            this.label41.TabIndex = 19;
-            this.label41.Text = "n/a";
-            // 
-            // label42
-            // 
-            this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(190, 160);
-            this.label42.Name = "label42";
-            this.label42.Size = new System.Drawing.Size(24, 13);
-            this.label42.TabIndex = 20;
-            this.label42.Text = "n/a";
-            // 
-            // label43
-            // 
-            this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(190, 178);
-            this.label43.Name = "label43";
-            this.label43.Size = new System.Drawing.Size(24, 13);
-            this.label43.TabIndex = 21;
-            this.label43.Text = "n/a";
-            // 
-            // label44
-            // 
-            this.label44.AutoSize = true;
-            this.label44.Location = new System.Drawing.Point(190, 200);
-            this.label44.Name = "label44";
-            this.label44.Size = new System.Drawing.Size(24, 13);
-            this.label44.TabIndex = 22;
-            this.label44.Text = "n/a";
-            // 
-            // label45
-            // 
-            this.label45.AutoSize = true;
-            this.label45.Location = new System.Drawing.Point(229, 160);
-            this.label45.Name = "label45";
-            this.label45.Size = new System.Drawing.Size(24, 13);
-            this.label45.TabIndex = 23;
-            this.label45.Text = "n/a";
-            // 
-            // label46
-            // 
-            this.label46.AutoSize = true;
-            this.label46.Location = new System.Drawing.Point(229, 178);
-            this.label46.Name = "label46";
-            this.label46.Size = new System.Drawing.Size(24, 13);
-            this.label46.TabIndex = 24;
-            this.label46.Text = "n/a";
-            // 
-            // label47
-            // 
-            this.label47.AutoSize = true;
-            this.label47.Location = new System.Drawing.Point(229, 200);
-            this.label47.Name = "label47";
-            this.label47.Size = new System.Drawing.Size(24, 13);
-            this.label47.TabIndex = 25;
-            this.label47.Text = "n/a";
-            // 
-            // label48
-            // 
-            this.label48.AutoSize = true;
-            this.label48.Location = new System.Drawing.Point(260, 160);
-            this.label48.Name = "label48";
-            this.label48.Size = new System.Drawing.Size(24, 13);
-            this.label48.TabIndex = 26;
-            this.label48.Text = "n/a";
-            // 
-            // label49
-            // 
-            this.label49.AutoSize = true;
-            this.label49.Location = new System.Drawing.Point(260, 178);
-            this.label49.Name = "label49";
-            this.label49.Size = new System.Drawing.Size(24, 13);
-            this.label49.TabIndex = 27;
-            this.label49.Text = "n/a";
-            // 
-            // label50
-            // 
-            this.label50.AutoSize = true;
-            this.label50.Location = new System.Drawing.Point(260, 200);
-            this.label50.Name = "label50";
-            this.label50.Size = new System.Drawing.Size(24, 13);
-            this.label50.TabIndex = 28;
-            this.label50.Text = "n/a";
-            // 
-            // label51
-            // 
-            this.label51.AutoSize = true;
-            this.label51.Location = new System.Drawing.Point(20, 15);
-            this.label51.Name = "label51";
-            this.label51.Size = new System.Drawing.Size(31, 13);
-            this.label51.TabIndex = 0;
-            this.label51.Text = "Slot1";
-            // 
-            // label56
-            // 
-            this.label56.AutoSize = true;
-            this.label56.Location = new System.Drawing.Point(42, 49);
-            this.label56.Name = "label56";
-            this.label56.Size = new System.Drawing.Size(67, 13);
-            this.label56.TabIndex = 5;
-            this.label56.Text = "isActivatable";
-            // 
-            // label57
-            // 
-            this.label57.AutoSize = true;
-            this.label57.Location = new System.Drawing.Point(110, 49);
-            this.label57.Name = "label57";
-            this.label57.Size = new System.Drawing.Size(41, 13);
-            this.label57.TabIndex = 6;
-            this.label57.Text = "label57";
-            // 
-            // label59
-            // 
-            this.label59.AutoSize = true;
-            this.label59.Location = new System.Drawing.Point(61, 61);
-            this.label59.Name = "label59";
-            this.label59.Size = new System.Drawing.Size(48, 13);
-            this.label59.TabIndex = 8;
-            this.label59.Text = "IsActive:";
-            // 
-            // label60
-            // 
-            this.label60.AutoSize = true;
-            this.label60.Location = new System.Drawing.Point(61, 74);
-            this.label60.Name = "label60";
-            this.label60.Size = new System.Drawing.Size(48, 13);
-            this.label60.TabIndex = 9;
-            this.label60.Text = "IsOnline:";
-            // 
-            // label61
-            // 
-            this.label61.AutoSize = true;
-            this.label61.Location = new System.Drawing.Point(33, 87);
-            this.label61.Name = "label61";
-            this.label61.Size = new System.Drawing.Size(76, 13);
-            this.label61.TabIndex = 10;
-            this.label61.Text = "IsGoingOnline:";
-            // 
-            // label62
-            // 
-            this.label62.AutoSize = true;
-            this.label62.Location = new System.Drawing.Point(14, 100);
-            this.label62.Name = "label62";
-            this.label62.Size = new System.Drawing.Size(95, 13);
-            this.label62.TabIndex = 11;
-            this.label62.Text = "IsReloadingAmmo:";
-            // 
-            // label63
-            // 
-            this.label63.AutoSize = true;
-            this.label63.Location = new System.Drawing.Point(31, 113);
-            this.label63.Name = "label63";
-            this.label63.Size = new System.Drawing.Size(78, 13);
-            this.label63.TabIndex = 12;
-            this.label63.Text = "IsDeactivating:";
-            // 
-            // label64
-            // 
-            this.label64.AutoSize = true;
-            this.label64.Location = new System.Drawing.Point(18, 126);
-            this.label64.Name = "label64";
-            this.label64.Size = new System.Drawing.Size(92, 13);
-            this.label64.TabIndex = 13;
-            this.label64.Text = "IsChangingAmmo:";
-            // 
-            // label65
-            // 
-            this.label65.AutoSize = true;
-            this.label65.Location = new System.Drawing.Point(59, 139);
-            this.label65.Name = "label65";
-            this.label65.Size = new System.Drawing.Size(50, 13);
-            this.label65.TabIndex = 14;
-            this.label65.Text = "TargetId:";
-            // 
-            // label66
-            // 
-            this.label66.AutoSize = true;
-            this.label66.Location = new System.Drawing.Point(26, 152);
-            this.label66.Name = "label66";
-            this.label66.Size = new System.Drawing.Size(83, 13);
-            this.label66.TabIndex = 15;
-            this.label66.Text = "MatchingAmmo:";
-            // 
-            // label54
-            // 
-            this.label54.AutoSize = true;
-            this.label54.Location = new System.Drawing.Point(65, 165);
-            this.label54.Name = "label54";
-            this.label54.Size = new System.Drawing.Size(44, 13);
-            this.label54.TabIndex = 16;
-            this.label54.Text = "Charge:";
-            // 
-            // label55
-            // 
-            this.label55.AutoSize = true;
-            this.label55.Location = new System.Drawing.Point(26, 178);
-            this.label55.Name = "label55";
-            this.label55.Size = new System.Drawing.Size(83, 13);
-            this.label55.TabIndex = 17;
-            this.label55.Text = "CurrentCharges:";
-            // 
-            // label58
-            // 
-            this.label58.AutoSize = true;
-            this.label58.Location = new System.Drawing.Point(40, 191);
-            this.label58.Name = "label58";
-            this.label58.Size = new System.Drawing.Size(69, 13);
-            this.label58.TabIndex = 18;
-            this.label58.Text = "MaxCharges:";
-            // 
-            // label67
-            // 
-            this.label67.AutoSize = true;
-            this.label67.Location = new System.Drawing.Point(31, 204);
-            this.label67.Name = "label67";
-            this.label67.Size = new System.Drawing.Size(77, 13);
-            this.label67.TabIndex = 19;
-            this.label67.Text = "OptimalRange:";
-            // 
-            // label52
-            // 
-            this.label52.AutoSize = true;
-            this.label52.Location = new System.Drawing.Point(62, 15);
-            this.label52.Name = "label52";
-            this.label52.Size = new System.Drawing.Size(81, 13);
-            this.label52.TabIndex = 20;
-            this.label52.Text = "NameOfModule";
-            // 
-            // label53
-            // 
-            this.label53.AutoSize = true;
-            this.label53.Location = new System.Drawing.Point(110, 62);
-            this.label53.Name = "label53";
-            this.label53.Size = new System.Drawing.Size(41, 13);
-            this.label53.TabIndex = 21;
-            this.label53.Text = "label53";
-            // 
-            // label68
-            // 
-            this.label68.AutoSize = true;
-            this.label68.Location = new System.Drawing.Point(110, 75);
-            this.label68.Name = "label68";
-            this.label68.Size = new System.Drawing.Size(41, 13);
-            this.label68.TabIndex = 22;
-            this.label68.Text = "label68";
-            // 
-            // label69
-            // 
-            this.label69.AutoSize = true;
-            this.label69.Location = new System.Drawing.Point(110, 88);
-            this.label69.Name = "label69";
-            this.label69.Size = new System.Drawing.Size(41, 13);
-            this.label69.TabIndex = 23;
-            this.label69.Text = "label69";
-            // 
-            // label70
-            // 
-            this.label70.AutoSize = true;
-            this.label70.Location = new System.Drawing.Point(110, 101);
-            this.label70.Name = "label70";
-            this.label70.Size = new System.Drawing.Size(41, 13);
-            this.label70.TabIndex = 24;
-            this.label70.Text = "label70";
-            // 
-            // label71
-            // 
-            this.label71.AutoSize = true;
-            this.label71.Location = new System.Drawing.Point(110, 114);
-            this.label71.Name = "label71";
-            this.label71.Size = new System.Drawing.Size(41, 13);
-            this.label71.TabIndex = 25;
-            this.label71.Text = "label71";
-            // 
-            // label72
-            // 
-            this.label72.AutoSize = true;
-            this.label72.Location = new System.Drawing.Point(110, 127);
-            this.label72.Name = "label72";
-            this.label72.Size = new System.Drawing.Size(41, 13);
-            this.label72.TabIndex = 26;
-            this.label72.Text = "label72";
-            // 
-            // label73
-            // 
-            this.label73.AutoSize = true;
-            this.label73.Location = new System.Drawing.Point(110, 140);
-            this.label73.Name = "label73";
-            this.label73.Size = new System.Drawing.Size(41, 13);
-            this.label73.TabIndex = 27;
-            this.label73.Text = "label73";
-            // 
-            // label74
-            // 
-            this.label74.AutoSize = true;
-            this.label74.Location = new System.Drawing.Point(110, 153);
-            this.label74.Name = "label74";
-            this.label74.Size = new System.Drawing.Size(41, 13);
-            this.label74.TabIndex = 28;
-            this.label74.Text = "label74";
-            // 
-            // label75
-            // 
-            this.label75.AutoSize = true;
-            this.label75.Location = new System.Drawing.Point(110, 166);
-            this.label75.Name = "label75";
-            this.label75.Size = new System.Drawing.Size(41, 13);
-            this.label75.TabIndex = 29;
-            this.label75.Text = "label75";
-            // 
-            // label76
-            // 
-            this.label76.AutoSize = true;
-            this.label76.Location = new System.Drawing.Point(110, 179);
-            this.label76.Name = "label76";
-            this.label76.Size = new System.Drawing.Size(41, 13);
-            this.label76.TabIndex = 30;
-            this.label76.Text = "label76";
-            // 
-            // label77
-            // 
-            this.label77.AutoSize = true;
-            this.label77.Location = new System.Drawing.Point(110, 192);
-            this.label77.Name = "label77";
-            this.label77.Size = new System.Drawing.Size(41, 13);
-            this.label77.TabIndex = 31;
-            this.label77.Text = "label77";
-            // 
-            // label78
-            // 
-            this.label78.AutoSize = true;
-            this.label78.Location = new System.Drawing.Point(110, 205);
-            this.label78.Name = "label78";
-            this.label78.Size = new System.Drawing.Size(41, 13);
-            this.label78.TabIndex = 32;
-            this.label78.Text = "label78";
-            // 
-            // label79
-            // 
-            this.label79.AutoSize = true;
-            this.label79.Location = new System.Drawing.Point(256, 206);
-            this.label79.Name = "label79";
-            this.label79.Size = new System.Drawing.Size(41, 13);
-            this.label79.TabIndex = 60;
-            this.label79.Text = "label79";
-            // 
-            // label80
-            // 
-            this.label80.AutoSize = true;
-            this.label80.Location = new System.Drawing.Point(256, 193);
-            this.label80.Name = "label80";
-            this.label80.Size = new System.Drawing.Size(41, 13);
-            this.label80.TabIndex = 59;
-            this.label80.Text = "label80";
-            // 
-            // label81
-            // 
-            this.label81.AutoSize = true;
-            this.label81.Location = new System.Drawing.Point(256, 180);
-            this.label81.Name = "label81";
-            this.label81.Size = new System.Drawing.Size(41, 13);
-            this.label81.TabIndex = 58;
-            this.label81.Text = "label81";
-            // 
-            // label82
-            // 
-            this.label82.AutoSize = true;
-            this.label82.Location = new System.Drawing.Point(256, 167);
-            this.label82.Name = "label82";
-            this.label82.Size = new System.Drawing.Size(41, 13);
-            this.label82.TabIndex = 57;
-            this.label82.Text = "label82";
-            // 
-            // label83
-            // 
-            this.label83.AutoSize = true;
-            this.label83.Location = new System.Drawing.Point(256, 154);
-            this.label83.Name = "label83";
-            this.label83.Size = new System.Drawing.Size(41, 13);
-            this.label83.TabIndex = 56;
-            this.label83.Text = "label83";
-            // 
-            // label84
-            // 
-            this.label84.AutoSize = true;
-            this.label84.Location = new System.Drawing.Point(256, 141);
-            this.label84.Name = "label84";
-            this.label84.Size = new System.Drawing.Size(41, 13);
-            this.label84.TabIndex = 55;
-            this.label84.Text = "label84";
-            // 
-            // label85
-            // 
-            this.label85.AutoSize = true;
-            this.label85.Location = new System.Drawing.Point(256, 128);
-            this.label85.Name = "label85";
-            this.label85.Size = new System.Drawing.Size(41, 13);
-            this.label85.TabIndex = 54;
-            this.label85.Text = "label85";
-            // 
-            // label86
-            // 
-            this.label86.AutoSize = true;
-            this.label86.Location = new System.Drawing.Point(256, 115);
-            this.label86.Name = "label86";
-            this.label86.Size = new System.Drawing.Size(41, 13);
-            this.label86.TabIndex = 53;
-            this.label86.Text = "label86";
-            // 
-            // label87
-            // 
-            this.label87.AutoSize = true;
-            this.label87.Location = new System.Drawing.Point(256, 102);
-            this.label87.Name = "label87";
-            this.label87.Size = new System.Drawing.Size(41, 13);
-            this.label87.TabIndex = 52;
-            this.label87.Text = "label87";
-            // 
-            // label88
-            // 
-            this.label88.AutoSize = true;
-            this.label88.Location = new System.Drawing.Point(256, 89);
-            this.label88.Name = "label88";
-            this.label88.Size = new System.Drawing.Size(41, 13);
-            this.label88.TabIndex = 51;
-            this.label88.Text = "label88";
-            // 
-            // label89
-            // 
-            this.label89.AutoSize = true;
-            this.label89.Location = new System.Drawing.Point(256, 76);
-            this.label89.Name = "label89";
-            this.label89.Size = new System.Drawing.Size(41, 13);
-            this.label89.TabIndex = 50;
-            this.label89.Text = "label89";
-            // 
-            // label90
-            // 
-            this.label90.AutoSize = true;
-            this.label90.Location = new System.Drawing.Point(256, 63);
-            this.label90.Name = "label90";
-            this.label90.Size = new System.Drawing.Size(41, 13);
-            this.label90.TabIndex = 49;
-            this.label90.Text = "label90";
-            // 
-            // label91
-            // 
-            this.label91.AutoSize = true;
-            this.label91.Location = new System.Drawing.Point(208, 16);
-            this.label91.Name = "label91";
-            this.label91.Size = new System.Drawing.Size(81, 13);
-            this.label91.TabIndex = 48;
-            this.label91.Text = "NameOfModule";
-            // 
-            // label92
-            // 
-            this.label92.AutoSize = true;
-            this.label92.Location = new System.Drawing.Point(177, 205);
-            this.label92.Name = "label92";
-            this.label92.Size = new System.Drawing.Size(77, 13);
-            this.label92.TabIndex = 47;
-            this.label92.Text = "OptimalRange:";
-            // 
-            // label93
-            // 
-            this.label93.AutoSize = true;
-            this.label93.Location = new System.Drawing.Point(186, 192);
-            this.label93.Name = "label93";
-            this.label93.Size = new System.Drawing.Size(69, 13);
-            this.label93.TabIndex = 46;
-            this.label93.Text = "MaxCharges:";
-            // 
-            // label94
-            // 
-            this.label94.AutoSize = true;
-            this.label94.Location = new System.Drawing.Point(172, 179);
-            this.label94.Name = "label94";
-            this.label94.Size = new System.Drawing.Size(83, 13);
-            this.label94.TabIndex = 45;
-            this.label94.Text = "CurrentCharges:";
-            // 
-            // label95
-            // 
-            this.label95.AutoSize = true;
-            this.label95.Location = new System.Drawing.Point(211, 166);
-            this.label95.Name = "label95";
-            this.label95.Size = new System.Drawing.Size(44, 13);
-            this.label95.TabIndex = 44;
-            this.label95.Text = "Charge:";
-            // 
-            // label96
-            // 
-            this.label96.AutoSize = true;
-            this.label96.Location = new System.Drawing.Point(172, 153);
-            this.label96.Name = "label96";
-            this.label96.Size = new System.Drawing.Size(83, 13);
-            this.label96.TabIndex = 43;
-            this.label96.Text = "MatchingAmmo:";
-            // 
-            // label97
-            // 
-            this.label97.AutoSize = true;
-            this.label97.Location = new System.Drawing.Point(205, 140);
-            this.label97.Name = "label97";
-            this.label97.Size = new System.Drawing.Size(50, 13);
-            this.label97.TabIndex = 42;
-            this.label97.Text = "TargetId:";
-            // 
-            // label98
-            // 
-            this.label98.AutoSize = true;
-            this.label98.Location = new System.Drawing.Point(164, 127);
-            this.label98.Name = "label98";
-            this.label98.Size = new System.Drawing.Size(92, 13);
-            this.label98.TabIndex = 41;
-            this.label98.Text = "IsChangingAmmo:";
-            // 
-            // label99
-            // 
-            this.label99.AutoSize = true;
-            this.label99.Location = new System.Drawing.Point(177, 114);
-            this.label99.Name = "label99";
-            this.label99.Size = new System.Drawing.Size(78, 13);
-            this.label99.TabIndex = 40;
-            this.label99.Text = "IsDeactivating:";
-            // 
-            // label100
-            // 
-            this.label100.AutoSize = true;
-            this.label100.Location = new System.Drawing.Point(160, 101);
-            this.label100.Name = "label100";
-            this.label100.Size = new System.Drawing.Size(95, 13);
-            this.label100.TabIndex = 39;
-            this.label100.Text = "IsReloadingAmmo:";
-            // 
-            // label101
-            // 
-            this.label101.AutoSize = true;
-            this.label101.Location = new System.Drawing.Point(179, 88);
-            this.label101.Name = "label101";
-            this.label101.Size = new System.Drawing.Size(76, 13);
-            this.label101.TabIndex = 38;
-            this.label101.Text = "IsGoingOnline:";
-            // 
-            // label102
-            // 
-            this.label102.AutoSize = true;
-            this.label102.Location = new System.Drawing.Point(207, 75);
-            this.label102.Name = "label102";
-            this.label102.Size = new System.Drawing.Size(48, 13);
-            this.label102.TabIndex = 37;
-            this.label102.Text = "IsOnline:";
-            // 
-            // label103
-            // 
-            this.label103.AutoSize = true;
-            this.label103.Location = new System.Drawing.Point(207, 62);
-            this.label103.Name = "label103";
-            this.label103.Size = new System.Drawing.Size(48, 13);
-            this.label103.TabIndex = 36;
-            this.label103.Text = "IsActive:";
-            // 
-            // label104
-            // 
-            this.label104.AutoSize = true;
-            this.label104.Location = new System.Drawing.Point(256, 50);
-            this.label104.Name = "label104";
-            this.label104.Size = new System.Drawing.Size(47, 13);
-            this.label104.TabIndex = 35;
-            this.label104.Text = "label104";
-            // 
-            // label105
-            // 
-            this.label105.AutoSize = true;
-            this.label105.Location = new System.Drawing.Point(188, 50);
-            this.label105.Name = "label105";
-            this.label105.Size = new System.Drawing.Size(67, 13);
-            this.label105.TabIndex = 34;
-            this.label105.Text = "isActivatable";
-            // 
-            // label106
-            // 
-            this.label106.AutoSize = true;
-            this.label106.Location = new System.Drawing.Point(166, 16);
-            this.label106.Name = "label106";
-            this.label106.Size = new System.Drawing.Size(31, 13);
-            this.label106.TabIndex = 33;
-            this.label106.Text = "Slot1";
+            // label135
+            // 
+            this.label135.AutoSize = true;
+            this.label135.Location = new System.Drawing.Point(578, 206);
+            this.label135.Name = "label135";
+            this.label135.Size = new System.Drawing.Size(47, 13);
+            this.label135.TabIndex = 116;
+            this.label135.Text = "label135";
+            // 
+            // label136
+            // 
+            this.label136.AutoSize = true;
+            this.label136.Location = new System.Drawing.Point(578, 193);
+            this.label136.Name = "label136";
+            this.label136.Size = new System.Drawing.Size(47, 13);
+            this.label136.TabIndex = 115;
+            this.label136.Text = "label136";
+            // 
+            // label137
+            // 
+            this.label137.AutoSize = true;
+            this.label137.Location = new System.Drawing.Point(578, 180);
+            this.label137.Name = "label137";
+            this.label137.Size = new System.Drawing.Size(47, 13);
+            this.label137.TabIndex = 114;
+            this.label137.Text = "label137";
+            // 
+            // label138
+            // 
+            this.label138.AutoSize = true;
+            this.label138.Location = new System.Drawing.Point(578, 167);
+            this.label138.Name = "label138";
+            this.label138.Size = new System.Drawing.Size(47, 13);
+            this.label138.TabIndex = 113;
+            this.label138.Text = "label138";
+            // 
+            // label139
+            // 
+            this.label139.AutoSize = true;
+            this.label139.Location = new System.Drawing.Point(578, 154);
+            this.label139.Name = "label139";
+            this.label139.Size = new System.Drawing.Size(47, 13);
+            this.label139.TabIndex = 112;
+            this.label139.Text = "label139";
+            // 
+            // label140
+            // 
+            this.label140.AutoSize = true;
+            this.label140.Location = new System.Drawing.Point(578, 141);
+            this.label140.Name = "label140";
+            this.label140.Size = new System.Drawing.Size(47, 13);
+            this.label140.TabIndex = 111;
+            this.label140.Text = "label140";
+            // 
+            // label141
+            // 
+            this.label141.AutoSize = true;
+            this.label141.Location = new System.Drawing.Point(578, 128);
+            this.label141.Name = "label141";
+            this.label141.Size = new System.Drawing.Size(47, 13);
+            this.label141.TabIndex = 110;
+            this.label141.Text = "label141";
+            // 
+            // label142
+            // 
+            this.label142.AutoSize = true;
+            this.label142.Location = new System.Drawing.Point(578, 115);
+            this.label142.Name = "label142";
+            this.label142.Size = new System.Drawing.Size(47, 13);
+            this.label142.TabIndex = 109;
+            this.label142.Text = "label142";
+            // 
+            // label143
+            // 
+            this.label143.AutoSize = true;
+            this.label143.Location = new System.Drawing.Point(578, 102);
+            this.label143.Name = "label143";
+            this.label143.Size = new System.Drawing.Size(47, 13);
+            this.label143.TabIndex = 108;
+            this.label143.Text = "label143";
+            // 
+            // label144
+            // 
+            this.label144.AutoSize = true;
+            this.label144.Location = new System.Drawing.Point(578, 89);
+            this.label144.Name = "label144";
+            this.label144.Size = new System.Drawing.Size(47, 13);
+            this.label144.TabIndex = 107;
+            this.label144.Text = "label144";
+            // 
+            // label145
+            // 
+            this.label145.AutoSize = true;
+            this.label145.Location = new System.Drawing.Point(578, 76);
+            this.label145.Name = "label145";
+            this.label145.Size = new System.Drawing.Size(47, 13);
+            this.label145.TabIndex = 106;
+            this.label145.Text = "label145";
+            // 
+            // label146
+            // 
+            this.label146.AutoSize = true;
+            this.label146.Location = new System.Drawing.Point(578, 63);
+            this.label146.Name = "label146";
+            this.label146.Size = new System.Drawing.Size(47, 13);
+            this.label146.TabIndex = 105;
+            this.label146.Text = "label146";
+            // 
+            // label147
+            // 
+            this.label147.AutoSize = true;
+            this.label147.Location = new System.Drawing.Point(530, 16);
+            this.label147.Name = "label147";
+            this.label147.Size = new System.Drawing.Size(81, 13);
+            this.label147.TabIndex = 104;
+            this.label147.Text = "NameOfModule";
+            // 
+            // label148
+            // 
+            this.label148.AutoSize = true;
+            this.label148.Location = new System.Drawing.Point(499, 205);
+            this.label148.Name = "label148";
+            this.label148.Size = new System.Drawing.Size(77, 13);
+            this.label148.TabIndex = 103;
+            this.label148.Text = "OptimalRange:";
+            // 
+            // label149
+            // 
+            this.label149.AutoSize = true;
+            this.label149.Location = new System.Drawing.Point(508, 192);
+            this.label149.Name = "label149";
+            this.label149.Size = new System.Drawing.Size(69, 13);
+            this.label149.TabIndex = 102;
+            this.label149.Text = "MaxCharges:";
+            // 
+            // label150
+            // 
+            this.label150.AutoSize = true;
+            this.label150.Location = new System.Drawing.Point(494, 179);
+            this.label150.Name = "label150";
+            this.label150.Size = new System.Drawing.Size(83, 13);
+            this.label150.TabIndex = 101;
+            this.label150.Text = "CurrentCharges:";
+            // 
+            // label151
+            // 
+            this.label151.AutoSize = true;
+            this.label151.Location = new System.Drawing.Point(533, 166);
+            this.label151.Name = "label151";
+            this.label151.Size = new System.Drawing.Size(44, 13);
+            this.label151.TabIndex = 100;
+            this.label151.Text = "Charge:";
+            // 
+            // label152
+            // 
+            this.label152.AutoSize = true;
+            this.label152.Location = new System.Drawing.Point(494, 153);
+            this.label152.Name = "label152";
+            this.label152.Size = new System.Drawing.Size(83, 13);
+            this.label152.TabIndex = 99;
+            this.label152.Text = "MatchingAmmo:";
+            // 
+            // label153
+            // 
+            this.label153.AutoSize = true;
+            this.label153.Location = new System.Drawing.Point(527, 140);
+            this.label153.Name = "label153";
+            this.label153.Size = new System.Drawing.Size(50, 13);
+            this.label153.TabIndex = 98;
+            this.label153.Text = "TargetId:";
+            // 
+            // label154
+            // 
+            this.label154.AutoSize = true;
+            this.label154.Location = new System.Drawing.Point(486, 127);
+            this.label154.Name = "label154";
+            this.label154.Size = new System.Drawing.Size(92, 13);
+            this.label154.TabIndex = 97;
+            this.label154.Text = "IsChangingAmmo:";
+            // 
+            // label155
+            // 
+            this.label155.AutoSize = true;
+            this.label155.Location = new System.Drawing.Point(499, 114);
+            this.label155.Name = "label155";
+            this.label155.Size = new System.Drawing.Size(78, 13);
+            this.label155.TabIndex = 96;
+            this.label155.Text = "IsDeactivating:";
+            // 
+            // label156
+            // 
+            this.label156.AutoSize = true;
+            this.label156.Location = new System.Drawing.Point(482, 101);
+            this.label156.Name = "label156";
+            this.label156.Size = new System.Drawing.Size(95, 13);
+            this.label156.TabIndex = 95;
+            this.label156.Text = "IsReloadingAmmo:";
+            // 
+            // label157
+            // 
+            this.label157.AutoSize = true;
+            this.label157.Location = new System.Drawing.Point(501, 88);
+            this.label157.Name = "label157";
+            this.label157.Size = new System.Drawing.Size(76, 13);
+            this.label157.TabIndex = 94;
+            this.label157.Text = "IsGoingOnline:";
+            // 
+            // label158
+            // 
+            this.label158.AutoSize = true;
+            this.label158.Location = new System.Drawing.Point(529, 75);
+            this.label158.Name = "label158";
+            this.label158.Size = new System.Drawing.Size(48, 13);
+            this.label158.TabIndex = 93;
+            this.label158.Text = "IsOnline:";
+            // 
+            // label159
+            // 
+            this.label159.AutoSize = true;
+            this.label159.Location = new System.Drawing.Point(529, 62);
+            this.label159.Name = "label159";
+            this.label159.Size = new System.Drawing.Size(48, 13);
+            this.label159.TabIndex = 92;
+            this.label159.Text = "IsActive:";
+            // 
+            // label160
+            // 
+            this.label160.AutoSize = true;
+            this.label160.Location = new System.Drawing.Point(578, 50);
+            this.label160.Name = "label160";
+            this.label160.Size = new System.Drawing.Size(47, 13);
+            this.label160.TabIndex = 91;
+            this.label160.Text = "label160";
+            // 
+            // label161
+            // 
+            this.label161.AutoSize = true;
+            this.label161.Location = new System.Drawing.Point(510, 50);
+            this.label161.Name = "label161";
+            this.label161.Size = new System.Drawing.Size(67, 13);
+            this.label161.TabIndex = 90;
+            this.label161.Text = "isActivatable";
+            // 
+            // label162
+            // 
+            this.label162.AutoSize = true;
+            this.label162.Location = new System.Drawing.Point(488, 16);
+            this.label162.Name = "label162";
+            this.label162.Size = new System.Drawing.Size(31, 13);
+            this.label162.TabIndex = 89;
+            this.label162.Text = "Slot1";
             // 
             // label107
             // 
@@ -4294,257 +4090,631 @@
             this.label134.TabIndex = 61;
             this.label134.Text = "Slot1";
             // 
-            // label135
+            // label79
             // 
-            this.label135.AutoSize = true;
-            this.label135.Location = new System.Drawing.Point(578, 206);
-            this.label135.Name = "label135";
-            this.label135.Size = new System.Drawing.Size(47, 13);
-            this.label135.TabIndex = 116;
-            this.label135.Text = "label135";
+            this.label79.AutoSize = true;
+            this.label79.Location = new System.Drawing.Point(256, 206);
+            this.label79.Name = "label79";
+            this.label79.Size = new System.Drawing.Size(41, 13);
+            this.label79.TabIndex = 60;
+            this.label79.Text = "label79";
             // 
-            // label136
+            // label80
             // 
-            this.label136.AutoSize = true;
-            this.label136.Location = new System.Drawing.Point(578, 193);
-            this.label136.Name = "label136";
-            this.label136.Size = new System.Drawing.Size(47, 13);
-            this.label136.TabIndex = 115;
-            this.label136.Text = "label136";
+            this.label80.AutoSize = true;
+            this.label80.Location = new System.Drawing.Point(256, 193);
+            this.label80.Name = "label80";
+            this.label80.Size = new System.Drawing.Size(41, 13);
+            this.label80.TabIndex = 59;
+            this.label80.Text = "label80";
             // 
-            // label137
+            // label81
             // 
-            this.label137.AutoSize = true;
-            this.label137.Location = new System.Drawing.Point(578, 180);
-            this.label137.Name = "label137";
-            this.label137.Size = new System.Drawing.Size(47, 13);
-            this.label137.TabIndex = 114;
-            this.label137.Text = "label137";
+            this.label81.AutoSize = true;
+            this.label81.Location = new System.Drawing.Point(256, 180);
+            this.label81.Name = "label81";
+            this.label81.Size = new System.Drawing.Size(41, 13);
+            this.label81.TabIndex = 58;
+            this.label81.Text = "label81";
             // 
-            // label138
+            // label82
             // 
-            this.label138.AutoSize = true;
-            this.label138.Location = new System.Drawing.Point(578, 167);
-            this.label138.Name = "label138";
-            this.label138.Size = new System.Drawing.Size(47, 13);
-            this.label138.TabIndex = 113;
-            this.label138.Text = "label138";
+            this.label82.AutoSize = true;
+            this.label82.Location = new System.Drawing.Point(256, 167);
+            this.label82.Name = "label82";
+            this.label82.Size = new System.Drawing.Size(41, 13);
+            this.label82.TabIndex = 57;
+            this.label82.Text = "label82";
             // 
-            // label139
+            // label83
             // 
-            this.label139.AutoSize = true;
-            this.label139.Location = new System.Drawing.Point(578, 154);
-            this.label139.Name = "label139";
-            this.label139.Size = new System.Drawing.Size(47, 13);
-            this.label139.TabIndex = 112;
-            this.label139.Text = "label139";
+            this.label83.AutoSize = true;
+            this.label83.Location = new System.Drawing.Point(256, 154);
+            this.label83.Name = "label83";
+            this.label83.Size = new System.Drawing.Size(41, 13);
+            this.label83.TabIndex = 56;
+            this.label83.Text = "label83";
             // 
-            // label140
+            // label84
             // 
-            this.label140.AutoSize = true;
-            this.label140.Location = new System.Drawing.Point(578, 141);
-            this.label140.Name = "label140";
-            this.label140.Size = new System.Drawing.Size(47, 13);
-            this.label140.TabIndex = 111;
-            this.label140.Text = "label140";
+            this.label84.AutoSize = true;
+            this.label84.Location = new System.Drawing.Point(256, 141);
+            this.label84.Name = "label84";
+            this.label84.Size = new System.Drawing.Size(41, 13);
+            this.label84.TabIndex = 55;
+            this.label84.Text = "label84";
             // 
-            // label141
+            // label85
             // 
-            this.label141.AutoSize = true;
-            this.label141.Location = new System.Drawing.Point(578, 128);
-            this.label141.Name = "label141";
-            this.label141.Size = new System.Drawing.Size(47, 13);
-            this.label141.TabIndex = 110;
-            this.label141.Text = "label141";
+            this.label85.AutoSize = true;
+            this.label85.Location = new System.Drawing.Point(256, 128);
+            this.label85.Name = "label85";
+            this.label85.Size = new System.Drawing.Size(41, 13);
+            this.label85.TabIndex = 54;
+            this.label85.Text = "label85";
             // 
-            // label142
+            // label86
             // 
-            this.label142.AutoSize = true;
-            this.label142.Location = new System.Drawing.Point(578, 115);
-            this.label142.Name = "label142";
-            this.label142.Size = new System.Drawing.Size(47, 13);
-            this.label142.TabIndex = 109;
-            this.label142.Text = "label142";
+            this.label86.AutoSize = true;
+            this.label86.Location = new System.Drawing.Point(256, 115);
+            this.label86.Name = "label86";
+            this.label86.Size = new System.Drawing.Size(41, 13);
+            this.label86.TabIndex = 53;
+            this.label86.Text = "label86";
             // 
-            // label143
+            // label87
             // 
-            this.label143.AutoSize = true;
-            this.label143.Location = new System.Drawing.Point(578, 102);
-            this.label143.Name = "label143";
-            this.label143.Size = new System.Drawing.Size(47, 13);
-            this.label143.TabIndex = 108;
-            this.label143.Text = "label143";
+            this.label87.AutoSize = true;
+            this.label87.Location = new System.Drawing.Point(256, 102);
+            this.label87.Name = "label87";
+            this.label87.Size = new System.Drawing.Size(41, 13);
+            this.label87.TabIndex = 52;
+            this.label87.Text = "label87";
             // 
-            // label144
+            // label88
             // 
-            this.label144.AutoSize = true;
-            this.label144.Location = new System.Drawing.Point(578, 89);
-            this.label144.Name = "label144";
-            this.label144.Size = new System.Drawing.Size(47, 13);
-            this.label144.TabIndex = 107;
-            this.label144.Text = "label144";
+            this.label88.AutoSize = true;
+            this.label88.Location = new System.Drawing.Point(256, 89);
+            this.label88.Name = "label88";
+            this.label88.Size = new System.Drawing.Size(41, 13);
+            this.label88.TabIndex = 51;
+            this.label88.Text = "label88";
             // 
-            // label145
+            // label89
             // 
-            this.label145.AutoSize = true;
-            this.label145.Location = new System.Drawing.Point(578, 76);
-            this.label145.Name = "label145";
-            this.label145.Size = new System.Drawing.Size(47, 13);
-            this.label145.TabIndex = 106;
-            this.label145.Text = "label145";
+            this.label89.AutoSize = true;
+            this.label89.Location = new System.Drawing.Point(256, 76);
+            this.label89.Name = "label89";
+            this.label89.Size = new System.Drawing.Size(41, 13);
+            this.label89.TabIndex = 50;
+            this.label89.Text = "label89";
             // 
-            // label146
+            // label90
             // 
-            this.label146.AutoSize = true;
-            this.label146.Location = new System.Drawing.Point(578, 63);
-            this.label146.Name = "label146";
-            this.label146.Size = new System.Drawing.Size(47, 13);
-            this.label146.TabIndex = 105;
-            this.label146.Text = "label146";
+            this.label90.AutoSize = true;
+            this.label90.Location = new System.Drawing.Point(256, 63);
+            this.label90.Name = "label90";
+            this.label90.Size = new System.Drawing.Size(41, 13);
+            this.label90.TabIndex = 49;
+            this.label90.Text = "label90";
             // 
-            // label147
+            // label91
             // 
-            this.label147.AutoSize = true;
-            this.label147.Location = new System.Drawing.Point(530, 16);
-            this.label147.Name = "label147";
-            this.label147.Size = new System.Drawing.Size(81, 13);
-            this.label147.TabIndex = 104;
-            this.label147.Text = "NameOfModule";
+            this.label91.AutoSize = true;
+            this.label91.Location = new System.Drawing.Point(208, 16);
+            this.label91.Name = "label91";
+            this.label91.Size = new System.Drawing.Size(81, 13);
+            this.label91.TabIndex = 48;
+            this.label91.Text = "NameOfModule";
             // 
-            // label148
+            // label92
             // 
-            this.label148.AutoSize = true;
-            this.label148.Location = new System.Drawing.Point(499, 205);
-            this.label148.Name = "label148";
-            this.label148.Size = new System.Drawing.Size(77, 13);
-            this.label148.TabIndex = 103;
-            this.label148.Text = "OptimalRange:";
+            this.label92.AutoSize = true;
+            this.label92.Location = new System.Drawing.Point(177, 205);
+            this.label92.Name = "label92";
+            this.label92.Size = new System.Drawing.Size(77, 13);
+            this.label92.TabIndex = 47;
+            this.label92.Text = "OptimalRange:";
             // 
-            // label149
+            // label93
             // 
-            this.label149.AutoSize = true;
-            this.label149.Location = new System.Drawing.Point(508, 192);
-            this.label149.Name = "label149";
-            this.label149.Size = new System.Drawing.Size(69, 13);
-            this.label149.TabIndex = 102;
-            this.label149.Text = "MaxCharges:";
+            this.label93.AutoSize = true;
+            this.label93.Location = new System.Drawing.Point(186, 192);
+            this.label93.Name = "label93";
+            this.label93.Size = new System.Drawing.Size(69, 13);
+            this.label93.TabIndex = 46;
+            this.label93.Text = "MaxCharges:";
             // 
-            // label150
+            // label94
             // 
-            this.label150.AutoSize = true;
-            this.label150.Location = new System.Drawing.Point(494, 179);
-            this.label150.Name = "label150";
-            this.label150.Size = new System.Drawing.Size(83, 13);
-            this.label150.TabIndex = 101;
-            this.label150.Text = "CurrentCharges:";
+            this.label94.AutoSize = true;
+            this.label94.Location = new System.Drawing.Point(172, 179);
+            this.label94.Name = "label94";
+            this.label94.Size = new System.Drawing.Size(83, 13);
+            this.label94.TabIndex = 45;
+            this.label94.Text = "CurrentCharges:";
             // 
-            // label151
+            // label95
             // 
-            this.label151.AutoSize = true;
-            this.label151.Location = new System.Drawing.Point(533, 166);
-            this.label151.Name = "label151";
-            this.label151.Size = new System.Drawing.Size(44, 13);
-            this.label151.TabIndex = 100;
-            this.label151.Text = "Charge:";
+            this.label95.AutoSize = true;
+            this.label95.Location = new System.Drawing.Point(211, 166);
+            this.label95.Name = "label95";
+            this.label95.Size = new System.Drawing.Size(44, 13);
+            this.label95.TabIndex = 44;
+            this.label95.Text = "Charge:";
             // 
-            // label152
+            // label96
             // 
-            this.label152.AutoSize = true;
-            this.label152.Location = new System.Drawing.Point(494, 153);
-            this.label152.Name = "label152";
-            this.label152.Size = new System.Drawing.Size(83, 13);
-            this.label152.TabIndex = 99;
-            this.label152.Text = "MatchingAmmo:";
+            this.label96.AutoSize = true;
+            this.label96.Location = new System.Drawing.Point(172, 153);
+            this.label96.Name = "label96";
+            this.label96.Size = new System.Drawing.Size(83, 13);
+            this.label96.TabIndex = 43;
+            this.label96.Text = "MatchingAmmo:";
             // 
-            // label153
+            // label97
             // 
-            this.label153.AutoSize = true;
-            this.label153.Location = new System.Drawing.Point(527, 140);
-            this.label153.Name = "label153";
-            this.label153.Size = new System.Drawing.Size(50, 13);
-            this.label153.TabIndex = 98;
-            this.label153.Text = "TargetId:";
+            this.label97.AutoSize = true;
+            this.label97.Location = new System.Drawing.Point(205, 140);
+            this.label97.Name = "label97";
+            this.label97.Size = new System.Drawing.Size(50, 13);
+            this.label97.TabIndex = 42;
+            this.label97.Text = "TargetId:";
             // 
-            // label154
+            // label98
             // 
-            this.label154.AutoSize = true;
-            this.label154.Location = new System.Drawing.Point(486, 127);
-            this.label154.Name = "label154";
-            this.label154.Size = new System.Drawing.Size(92, 13);
-            this.label154.TabIndex = 97;
-            this.label154.Text = "IsChangingAmmo:";
+            this.label98.AutoSize = true;
+            this.label98.Location = new System.Drawing.Point(164, 127);
+            this.label98.Name = "label98";
+            this.label98.Size = new System.Drawing.Size(92, 13);
+            this.label98.TabIndex = 41;
+            this.label98.Text = "IsChangingAmmo:";
             // 
-            // label155
+            // label99
             // 
-            this.label155.AutoSize = true;
-            this.label155.Location = new System.Drawing.Point(499, 114);
-            this.label155.Name = "label155";
-            this.label155.Size = new System.Drawing.Size(78, 13);
-            this.label155.TabIndex = 96;
-            this.label155.Text = "IsDeactivating:";
+            this.label99.AutoSize = true;
+            this.label99.Location = new System.Drawing.Point(177, 114);
+            this.label99.Name = "label99";
+            this.label99.Size = new System.Drawing.Size(78, 13);
+            this.label99.TabIndex = 40;
+            this.label99.Text = "IsDeactivating:";
             // 
-            // label156
+            // label100
             // 
-            this.label156.AutoSize = true;
-            this.label156.Location = new System.Drawing.Point(482, 101);
-            this.label156.Name = "label156";
-            this.label156.Size = new System.Drawing.Size(95, 13);
-            this.label156.TabIndex = 95;
-            this.label156.Text = "IsReloadingAmmo:";
+            this.label100.AutoSize = true;
+            this.label100.Location = new System.Drawing.Point(160, 101);
+            this.label100.Name = "label100";
+            this.label100.Size = new System.Drawing.Size(95, 13);
+            this.label100.TabIndex = 39;
+            this.label100.Text = "IsReloadingAmmo:";
             // 
-            // label157
+            // label101
             // 
-            this.label157.AutoSize = true;
-            this.label157.Location = new System.Drawing.Point(501, 88);
-            this.label157.Name = "label157";
-            this.label157.Size = new System.Drawing.Size(76, 13);
-            this.label157.TabIndex = 94;
-            this.label157.Text = "IsGoingOnline:";
+            this.label101.AutoSize = true;
+            this.label101.Location = new System.Drawing.Point(179, 88);
+            this.label101.Name = "label101";
+            this.label101.Size = new System.Drawing.Size(76, 13);
+            this.label101.TabIndex = 38;
+            this.label101.Text = "IsGoingOnline:";
             // 
-            // label158
+            // label102
             // 
-            this.label158.AutoSize = true;
-            this.label158.Location = new System.Drawing.Point(529, 75);
-            this.label158.Name = "label158";
-            this.label158.Size = new System.Drawing.Size(48, 13);
-            this.label158.TabIndex = 93;
-            this.label158.Text = "IsOnline:";
+            this.label102.AutoSize = true;
+            this.label102.Location = new System.Drawing.Point(207, 75);
+            this.label102.Name = "label102";
+            this.label102.Size = new System.Drawing.Size(48, 13);
+            this.label102.TabIndex = 37;
+            this.label102.Text = "IsOnline:";
             // 
-            // label159
+            // label103
             // 
-            this.label159.AutoSize = true;
-            this.label159.Location = new System.Drawing.Point(529, 62);
-            this.label159.Name = "label159";
-            this.label159.Size = new System.Drawing.Size(48, 13);
-            this.label159.TabIndex = 92;
-            this.label159.Text = "IsActive:";
+            this.label103.AutoSize = true;
+            this.label103.Location = new System.Drawing.Point(207, 62);
+            this.label103.Name = "label103";
+            this.label103.Size = new System.Drawing.Size(48, 13);
+            this.label103.TabIndex = 36;
+            this.label103.Text = "IsActive:";
             // 
-            // label160
+            // label104
             // 
-            this.label160.AutoSize = true;
-            this.label160.Location = new System.Drawing.Point(578, 50);
-            this.label160.Name = "label160";
-            this.label160.Size = new System.Drawing.Size(47, 13);
-            this.label160.TabIndex = 91;
-            this.label160.Text = "label160";
+            this.label104.AutoSize = true;
+            this.label104.Location = new System.Drawing.Point(256, 50);
+            this.label104.Name = "label104";
+            this.label104.Size = new System.Drawing.Size(47, 13);
+            this.label104.TabIndex = 35;
+            this.label104.Text = "label104";
             // 
-            // label161
+            // label105
             // 
-            this.label161.AutoSize = true;
-            this.label161.Location = new System.Drawing.Point(510, 50);
-            this.label161.Name = "label161";
-            this.label161.Size = new System.Drawing.Size(67, 13);
-            this.label161.TabIndex = 90;
-            this.label161.Text = "isActivatable";
+            this.label105.AutoSize = true;
+            this.label105.Location = new System.Drawing.Point(188, 50);
+            this.label105.Name = "label105";
+            this.label105.Size = new System.Drawing.Size(67, 13);
+            this.label105.TabIndex = 34;
+            this.label105.Text = "isActivatable";
             // 
-            // label162
+            // label106
             // 
-            this.label162.AutoSize = true;
-            this.label162.Location = new System.Drawing.Point(488, 16);
-            this.label162.Name = "label162";
-            this.label162.Size = new System.Drawing.Size(31, 13);
-            this.label162.TabIndex = 89;
-            this.label162.Text = "Slot1";
+            this.label106.AutoSize = true;
+            this.label106.Location = new System.Drawing.Point(166, 16);
+            this.label106.Name = "label106";
+            this.label106.Size = new System.Drawing.Size(31, 13);
+            this.label106.TabIndex = 33;
+            this.label106.Text = "Slot1";
+            // 
+            // label78
+            // 
+            this.label78.AutoSize = true;
+            this.label78.Location = new System.Drawing.Point(110, 205);
+            this.label78.Name = "label78";
+            this.label78.Size = new System.Drawing.Size(41, 13);
+            this.label78.TabIndex = 32;
+            this.label78.Text = "label78";
+            // 
+            // label77
+            // 
+            this.label77.AutoSize = true;
+            this.label77.Location = new System.Drawing.Point(110, 192);
+            this.label77.Name = "label77";
+            this.label77.Size = new System.Drawing.Size(41, 13);
+            this.label77.TabIndex = 31;
+            this.label77.Text = "label77";
+            // 
+            // label76
+            // 
+            this.label76.AutoSize = true;
+            this.label76.Location = new System.Drawing.Point(110, 179);
+            this.label76.Name = "label76";
+            this.label76.Size = new System.Drawing.Size(41, 13);
+            this.label76.TabIndex = 30;
+            this.label76.Text = "label76";
+            // 
+            // label75
+            // 
+            this.label75.AutoSize = true;
+            this.label75.Location = new System.Drawing.Point(110, 166);
+            this.label75.Name = "label75";
+            this.label75.Size = new System.Drawing.Size(41, 13);
+            this.label75.TabIndex = 29;
+            this.label75.Text = "label75";
+            // 
+            // label74
+            // 
+            this.label74.AutoSize = true;
+            this.label74.Location = new System.Drawing.Point(110, 153);
+            this.label74.Name = "label74";
+            this.label74.Size = new System.Drawing.Size(41, 13);
+            this.label74.TabIndex = 28;
+            this.label74.Text = "label74";
+            // 
+            // label73
+            // 
+            this.label73.AutoSize = true;
+            this.label73.Location = new System.Drawing.Point(110, 140);
+            this.label73.Name = "label73";
+            this.label73.Size = new System.Drawing.Size(41, 13);
+            this.label73.TabIndex = 27;
+            this.label73.Text = "label73";
+            // 
+            // label72
+            // 
+            this.label72.AutoSize = true;
+            this.label72.Location = new System.Drawing.Point(110, 127);
+            this.label72.Name = "label72";
+            this.label72.Size = new System.Drawing.Size(41, 13);
+            this.label72.TabIndex = 26;
+            this.label72.Text = "label72";
+            // 
+            // label71
+            // 
+            this.label71.AutoSize = true;
+            this.label71.Location = new System.Drawing.Point(110, 114);
+            this.label71.Name = "label71";
+            this.label71.Size = new System.Drawing.Size(41, 13);
+            this.label71.TabIndex = 25;
+            this.label71.Text = "label71";
+            // 
+            // label70
+            // 
+            this.label70.AutoSize = true;
+            this.label70.Location = new System.Drawing.Point(110, 101);
+            this.label70.Name = "label70";
+            this.label70.Size = new System.Drawing.Size(41, 13);
+            this.label70.TabIndex = 24;
+            this.label70.Text = "label70";
+            // 
+            // label69
+            // 
+            this.label69.AutoSize = true;
+            this.label69.Location = new System.Drawing.Point(110, 88);
+            this.label69.Name = "label69";
+            this.label69.Size = new System.Drawing.Size(41, 13);
+            this.label69.TabIndex = 23;
+            this.label69.Text = "label69";
+            // 
+            // label68
+            // 
+            this.label68.AutoSize = true;
+            this.label68.Location = new System.Drawing.Point(110, 75);
+            this.label68.Name = "label68";
+            this.label68.Size = new System.Drawing.Size(41, 13);
+            this.label68.TabIndex = 22;
+            this.label68.Text = "label68";
+            // 
+            // label53
+            // 
+            this.label53.AutoSize = true;
+            this.label53.Location = new System.Drawing.Point(110, 62);
+            this.label53.Name = "label53";
+            this.label53.Size = new System.Drawing.Size(41, 13);
+            this.label53.TabIndex = 21;
+            this.label53.Text = "label53";
+            // 
+            // label52
+            // 
+            this.label52.AutoSize = true;
+            this.label52.Location = new System.Drawing.Point(62, 15);
+            this.label52.Name = "label52";
+            this.label52.Size = new System.Drawing.Size(81, 13);
+            this.label52.TabIndex = 20;
+            this.label52.Text = "NameOfModule";
+            // 
+            // label67
+            // 
+            this.label67.AutoSize = true;
+            this.label67.Location = new System.Drawing.Point(31, 204);
+            this.label67.Name = "label67";
+            this.label67.Size = new System.Drawing.Size(77, 13);
+            this.label67.TabIndex = 19;
+            this.label67.Text = "OptimalRange:";
+            // 
+            // label58
+            // 
+            this.label58.AutoSize = true;
+            this.label58.Location = new System.Drawing.Point(40, 191);
+            this.label58.Name = "label58";
+            this.label58.Size = new System.Drawing.Size(69, 13);
+            this.label58.TabIndex = 18;
+            this.label58.Text = "MaxCharges:";
+            // 
+            // label55
+            // 
+            this.label55.AutoSize = true;
+            this.label55.Location = new System.Drawing.Point(26, 178);
+            this.label55.Name = "label55";
+            this.label55.Size = new System.Drawing.Size(83, 13);
+            this.label55.TabIndex = 17;
+            this.label55.Text = "CurrentCharges:";
+            // 
+            // label54
+            // 
+            this.label54.AutoSize = true;
+            this.label54.Location = new System.Drawing.Point(65, 165);
+            this.label54.Name = "label54";
+            this.label54.Size = new System.Drawing.Size(44, 13);
+            this.label54.TabIndex = 16;
+            this.label54.Text = "Charge:";
+            // 
+            // label66
+            // 
+            this.label66.AutoSize = true;
+            this.label66.Location = new System.Drawing.Point(26, 152);
+            this.label66.Name = "label66";
+            this.label66.Size = new System.Drawing.Size(83, 13);
+            this.label66.TabIndex = 15;
+            this.label66.Text = "MatchingAmmo:";
+            // 
+            // label65
+            // 
+            this.label65.AutoSize = true;
+            this.label65.Location = new System.Drawing.Point(59, 139);
+            this.label65.Name = "label65";
+            this.label65.Size = new System.Drawing.Size(50, 13);
+            this.label65.TabIndex = 14;
+            this.label65.Text = "TargetId:";
+            // 
+            // label64
+            // 
+            this.label64.AutoSize = true;
+            this.label64.Location = new System.Drawing.Point(18, 126);
+            this.label64.Name = "label64";
+            this.label64.Size = new System.Drawing.Size(92, 13);
+            this.label64.TabIndex = 13;
+            this.label64.Text = "IsChangingAmmo:";
+            // 
+            // label63
+            // 
+            this.label63.AutoSize = true;
+            this.label63.Location = new System.Drawing.Point(31, 113);
+            this.label63.Name = "label63";
+            this.label63.Size = new System.Drawing.Size(78, 13);
+            this.label63.TabIndex = 12;
+            this.label63.Text = "IsDeactivating:";
+            // 
+            // label62
+            // 
+            this.label62.AutoSize = true;
+            this.label62.Location = new System.Drawing.Point(14, 100);
+            this.label62.Name = "label62";
+            this.label62.Size = new System.Drawing.Size(95, 13);
+            this.label62.TabIndex = 11;
+            this.label62.Text = "IsReloadingAmmo:";
+            // 
+            // label61
+            // 
+            this.label61.AutoSize = true;
+            this.label61.Location = new System.Drawing.Point(33, 87);
+            this.label61.Name = "label61";
+            this.label61.Size = new System.Drawing.Size(76, 13);
+            this.label61.TabIndex = 10;
+            this.label61.Text = "IsGoingOnline:";
+            // 
+            // label60
+            // 
+            this.label60.AutoSize = true;
+            this.label60.Location = new System.Drawing.Point(61, 74);
+            this.label60.Name = "label60";
+            this.label60.Size = new System.Drawing.Size(48, 13);
+            this.label60.TabIndex = 9;
+            this.label60.Text = "IsOnline:";
+            // 
+            // label59
+            // 
+            this.label59.AutoSize = true;
+            this.label59.Location = new System.Drawing.Point(61, 61);
+            this.label59.Name = "label59";
+            this.label59.Size = new System.Drawing.Size(48, 13);
+            this.label59.TabIndex = 8;
+            this.label59.Text = "IsActive:";
+            // 
+            // label57
+            // 
+            this.label57.AutoSize = true;
+            this.label57.Location = new System.Drawing.Point(110, 49);
+            this.label57.Name = "label57";
+            this.label57.Size = new System.Drawing.Size(41, 13);
+            this.label57.TabIndex = 6;
+            this.label57.Text = "label57";
+            // 
+            // label56
+            // 
+            this.label56.AutoSize = true;
+            this.label56.Location = new System.Drawing.Point(42, 49);
+            this.label56.Name = "label56";
+            this.label56.Size = new System.Drawing.Size(67, 13);
+            this.label56.TabIndex = 5;
+            this.label56.Text = "isActivatable";
+            // 
+            // label51
+            // 
+            this.label51.AutoSize = true;
+            this.label51.Location = new System.Drawing.Point(20, 15);
+            this.label51.Name = "label51";
+            this.label51.Size = new System.Drawing.Size(31, 13);
+            this.label51.TabIndex = 0;
+            this.label51.Text = "Slot1";
+            // 
+            // tabHighSlots5to8
+            // 
+            this.tabHighSlots5to8.Controls.Add(this.label163);
+            this.tabHighSlots5to8.Controls.Add(this.label164);
+            this.tabHighSlots5to8.Controls.Add(this.label165);
+            this.tabHighSlots5to8.Controls.Add(this.label166);
+            this.tabHighSlots5to8.Controls.Add(this.label167);
+            this.tabHighSlots5to8.Controls.Add(this.label168);
+            this.tabHighSlots5to8.Controls.Add(this.label169);
+            this.tabHighSlots5to8.Controls.Add(this.label170);
+            this.tabHighSlots5to8.Controls.Add(this.label171);
+            this.tabHighSlots5to8.Controls.Add(this.label172);
+            this.tabHighSlots5to8.Controls.Add(this.label173);
+            this.tabHighSlots5to8.Controls.Add(this.label174);
+            this.tabHighSlots5to8.Controls.Add(this.label175);
+            this.tabHighSlots5to8.Controls.Add(this.label176);
+            this.tabHighSlots5to8.Controls.Add(this.label177);
+            this.tabHighSlots5to8.Controls.Add(this.label178);
+            this.tabHighSlots5to8.Controls.Add(this.label179);
+            this.tabHighSlots5to8.Controls.Add(this.label180);
+            this.tabHighSlots5to8.Controls.Add(this.label181);
+            this.tabHighSlots5to8.Controls.Add(this.label182);
+            this.tabHighSlots5to8.Controls.Add(this.label183);
+            this.tabHighSlots5to8.Controls.Add(this.label184);
+            this.tabHighSlots5to8.Controls.Add(this.label185);
+            this.tabHighSlots5to8.Controls.Add(this.label186);
+            this.tabHighSlots5to8.Controls.Add(this.label187);
+            this.tabHighSlots5to8.Controls.Add(this.label188);
+            this.tabHighSlots5to8.Controls.Add(this.label189);
+            this.tabHighSlots5to8.Controls.Add(this.label190);
+            this.tabHighSlots5to8.Controls.Add(this.label191);
+            this.tabHighSlots5to8.Controls.Add(this.label192);
+            this.tabHighSlots5to8.Controls.Add(this.label193);
+            this.tabHighSlots5to8.Controls.Add(this.label194);
+            this.tabHighSlots5to8.Controls.Add(this.label195);
+            this.tabHighSlots5to8.Controls.Add(this.label196);
+            this.tabHighSlots5to8.Controls.Add(this.label197);
+            this.tabHighSlots5to8.Controls.Add(this.label198);
+            this.tabHighSlots5to8.Controls.Add(this.label199);
+            this.tabHighSlots5to8.Controls.Add(this.label200);
+            this.tabHighSlots5to8.Controls.Add(this.label201);
+            this.tabHighSlots5to8.Controls.Add(this.label202);
+            this.tabHighSlots5to8.Controls.Add(this.label203);
+            this.tabHighSlots5to8.Controls.Add(this.label204);
+            this.tabHighSlots5to8.Controls.Add(this.label205);
+            this.tabHighSlots5to8.Controls.Add(this.label206);
+            this.tabHighSlots5to8.Controls.Add(this.label207);
+            this.tabHighSlots5to8.Controls.Add(this.label208);
+            this.tabHighSlots5to8.Controls.Add(this.label209);
+            this.tabHighSlots5to8.Controls.Add(this.label210);
+            this.tabHighSlots5to8.Controls.Add(this.label211);
+            this.tabHighSlots5to8.Controls.Add(this.label212);
+            this.tabHighSlots5to8.Controls.Add(this.label213);
+            this.tabHighSlots5to8.Controls.Add(this.label214);
+            this.tabHighSlots5to8.Controls.Add(this.label215);
+            this.tabHighSlots5to8.Controls.Add(this.label216);
+            this.tabHighSlots5to8.Controls.Add(this.label217);
+            this.tabHighSlots5to8.Controls.Add(this.label218);
+            this.tabHighSlots5to8.Controls.Add(this.label219);
+            this.tabHighSlots5to8.Controls.Add(this.label220);
+            this.tabHighSlots5to8.Controls.Add(this.label221);
+            this.tabHighSlots5to8.Controls.Add(this.label222);
+            this.tabHighSlots5to8.Controls.Add(this.label223);
+            this.tabHighSlots5to8.Controls.Add(this.label224);
+            this.tabHighSlots5to8.Controls.Add(this.label225);
+            this.tabHighSlots5to8.Controls.Add(this.label226);
+            this.tabHighSlots5to8.Controls.Add(this.label227);
+            this.tabHighSlots5to8.Controls.Add(this.label228);
+            this.tabHighSlots5to8.Controls.Add(this.label229);
+            this.tabHighSlots5to8.Controls.Add(this.label230);
+            this.tabHighSlots5to8.Controls.Add(this.label231);
+            this.tabHighSlots5to8.Controls.Add(this.label232);
+            this.tabHighSlots5to8.Controls.Add(this.label233);
+            this.tabHighSlots5to8.Controls.Add(this.label234);
+            this.tabHighSlots5to8.Controls.Add(this.label235);
+            this.tabHighSlots5to8.Controls.Add(this.label236);
+            this.tabHighSlots5to8.Controls.Add(this.label237);
+            this.tabHighSlots5to8.Controls.Add(this.label238);
+            this.tabHighSlots5to8.Controls.Add(this.label239);
+            this.tabHighSlots5to8.Controls.Add(this.label240);
+            this.tabHighSlots5to8.Controls.Add(this.label241);
+            this.tabHighSlots5to8.Controls.Add(this.label242);
+            this.tabHighSlots5to8.Controls.Add(this.label243);
+            this.tabHighSlots5to8.Controls.Add(this.label244);
+            this.tabHighSlots5to8.Controls.Add(this.label245);
+            this.tabHighSlots5to8.Controls.Add(this.label246);
+            this.tabHighSlots5to8.Controls.Add(this.label247);
+            this.tabHighSlots5to8.Controls.Add(this.label248);
+            this.tabHighSlots5to8.Controls.Add(this.label249);
+            this.tabHighSlots5to8.Controls.Add(this.label250);
+            this.tabHighSlots5to8.Controls.Add(this.label251);
+            this.tabHighSlots5to8.Controls.Add(this.label252);
+            this.tabHighSlots5to8.Controls.Add(this.label253);
+            this.tabHighSlots5to8.Controls.Add(this.label254);
+            this.tabHighSlots5to8.Controls.Add(this.label255);
+            this.tabHighSlots5to8.Controls.Add(this.label256);
+            this.tabHighSlots5to8.Controls.Add(this.label257);
+            this.tabHighSlots5to8.Controls.Add(this.label258);
+            this.tabHighSlots5to8.Controls.Add(this.label259);
+            this.tabHighSlots5to8.Controls.Add(this.label260);
+            this.tabHighSlots5to8.Controls.Add(this.label261);
+            this.tabHighSlots5to8.Controls.Add(this.label262);
+            this.tabHighSlots5to8.Controls.Add(this.label263);
+            this.tabHighSlots5to8.Controls.Add(this.label264);
+            this.tabHighSlots5to8.Controls.Add(this.label265);
+            this.tabHighSlots5to8.Controls.Add(this.label266);
+            this.tabHighSlots5to8.Controls.Add(this.label267);
+            this.tabHighSlots5to8.Controls.Add(this.label268);
+            this.tabHighSlots5to8.Controls.Add(this.label269);
+            this.tabHighSlots5to8.Controls.Add(this.label270);
+            this.tabHighSlots5to8.Controls.Add(this.label271);
+            this.tabHighSlots5to8.Controls.Add(this.label272);
+            this.tabHighSlots5to8.Controls.Add(this.label273);
+            this.tabHighSlots5to8.Controls.Add(this.label274);
+            this.tabHighSlots5to8.Location = new System.Drawing.Point(4, 22);
+            this.tabHighSlots5to8.Name = "tabHighSlots5to8";
+            this.tabHighSlots5to8.Padding = new System.Windows.Forms.Padding(3);
+            this.tabHighSlots5to8.Size = new System.Drawing.Size(673, 233);
+            this.tabHighSlots5to8.TabIndex = 1;
+            this.tabHighSlots5to8.Text = "HighSlots 5-8";
+            this.tabHighSlots5to8.UseVisualStyleBackColor = true;
             // 
             // label163
             // 
@@ -5554,6 +5724,58 @@
             this.label274.TabIndex = 117;
             this.label274.Text = "Slot1";
             // 
+            // tabLowSlots
+            // 
+            this.tabLowSlots.Location = new System.Drawing.Point(4, 22);
+            this.tabLowSlots.Name = "tabLowSlots";
+            this.tabLowSlots.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLowSlots.Size = new System.Drawing.Size(673, 233);
+            this.tabLowSlots.TabIndex = 2;
+            this.tabLowSlots.Text = "LowSlots";
+            this.tabLowSlots.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.bttnCloseCargoHold);
+            this.groupBox3.Controls.Add(this.bttnStackCargoHold);
+            this.groupBox3.Controls.Add(this.bttnOpenCargoHold);
+            this.groupBox3.Location = new System.Drawing.Point(21, 11);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(173, 49);
+            this.groupBox3.TabIndex = 156;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Cargo Hold Tests";
+            // 
+            // bttnCloseCargoHold
+            // 
+            this.bttnCloseCargoHold.Location = new System.Drawing.Point(115, 19);
+            this.bttnCloseCargoHold.Name = "bttnCloseCargoHold";
+            this.bttnCloseCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnCloseCargoHold.TabIndex = 151;
+            this.bttnCloseCargoHold.Text = "Close";
+            this.bttnCloseCargoHold.UseVisualStyleBackColor = true;
+            this.bttnCloseCargoHold.Click += new System.EventHandler(this.bttnCloseCargoHold_Click);
+            // 
+            // bttnStackCargoHold
+            // 
+            this.bttnStackCargoHold.Location = new System.Drawing.Point(63, 19);
+            this.bttnStackCargoHold.Name = "bttnStackCargoHold";
+            this.bttnStackCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnStackCargoHold.TabIndex = 149;
+            this.bttnStackCargoHold.Text = "Stack";
+            this.bttnStackCargoHold.UseVisualStyleBackColor = true;
+            this.bttnStackCargoHold.Click += new System.EventHandler(this.bttnStackCargoHold_Click);
+            // 
+            // bttnOpenCargoHold
+            // 
+            this.bttnOpenCargoHold.Location = new System.Drawing.Point(11, 19);
+            this.bttnOpenCargoHold.Name = "bttnOpenCargoHold";
+            this.bttnOpenCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnOpenCargoHold.TabIndex = 148;
+            this.bttnOpenCargoHold.Text = "Open";
+            this.bttnOpenCargoHold.UseVisualStyleBackColor = true;
+            this.bttnOpenCargoHold.Click += new System.EventHandler(this.bttnOpenCargoHold_Click);
+            // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -5611,14 +5833,25 @@
             this.tabConsole.PerformLayout();
             this.Tabs.ResumeLayout(false);
             this.Inventory.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupQuestorsLoothangarTests.ResumeLayout(false);
+            this.groupQuestorsAmmoHangarTests.ResumeLayout(false);
+            this.groupCorpLootHangarTests.ResumeLayout(false);
+            this.groupCorpAmmoHangarTests.ResumeLayout(false);
+            this.groupLootContainerTests.ResumeLayout(false);
+            this.groupShipHangarTests.ResumeLayout(false);
+            this.groupItemHangarTests.ResumeLayout(false);
             this.tabModules.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
+            this.tabShipInfo.ResumeLayout(false);
+            this.tabShipInfo.PerformLayout();
             this.tabHighSlots1to4.ResumeLayout(false);
             this.tabHighSlots1to4.PerformLayout();
             this.tabHighSlots5to8.ResumeLayout(false);
             this.tabHighSlots5to8.PerformLayout();
-            this.tabShipInfo.ResumeLayout(false);
-            this.tabShipInfo.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -5837,31 +6070,6 @@
         private System.Windows.Forms.Label AutostartData;
         private System.Windows.Forms.Label Autostartlbl;
         private System.Windows.Forms.TabPage Inventory;
-        private System.Windows.Forms.Label lbllocalHangarTests;
-        private System.Windows.Forms.Button btnStackCorpLootHangar;
-        private System.Windows.Forms.Button btnStackCorpAmmoHangar;
-        private System.Windows.Forms.Button btnOpenCorpAmmoHangar;
-        private System.Windows.Forms.Button btnStackShipsHangar;
-        private System.Windows.Forms.Button btnStackItemsHangar;
-        private System.Windows.Forms.Button btnOpenFreightContainer;
-        private System.Windows.Forms.Button btnOpenShipsHangar;
-        private System.Windows.Forms.Button btnOpenItemsHangar;
-        private System.Windows.Forms.Button btnOpenCorpLootHangar;
-        private System.Windows.Forms.Label lblCorpHangarTests;
-        private System.Windows.Forms.Button btnStackFreightContainer;
-        private System.Windows.Forms.Label lblQuestorConfiguredHangarTests;
-        private System.Windows.Forms.Button btnStackLootHangar;
-        private System.Windows.Forms.Button btnStackAmmoHangar;
-        private System.Windows.Forms.Button btnOpenAmmoHangar;
-        private System.Windows.Forms.Button btnOpenLootHangar;
-        private System.Windows.Forms.Label lblSpecificHangarTests;
-        private System.Windows.Forms.Button bttnCloseLootContainer;
-        private System.Windows.Forms.Button bttnCloseItemsHangar;
-        private System.Windows.Forms.Button bttnCloseShipsHangar;
-        private System.Windows.Forms.Button bttnCloseLootHangar;
-        private System.Windows.Forms.Button bttnCloseAmmoHangar;
-        private System.Windows.Forms.Button bttnCloseCorpLootHangar;
-        private System.Windows.Forms.Button bttnCloseCorpAmmoHangar;
         private System.Windows.Forms.Button bttnCloseAllInventoryWindows;
         private System.Windows.Forms.TabPage tabModules;
         private System.Windows.Forms.TabControl tabControl1;
@@ -6122,6 +6330,50 @@
         private System.Windows.Forms.Label label272;
         private System.Windows.Forms.Label label273;
         private System.Windows.Forms.Label label274;
+        private System.Windows.Forms.GroupBox groupCorpAmmoHangarTests;
+        private System.Windows.Forms.Button bttnCloseCorpAmmoHangar;
+        private System.Windows.Forms.Button btnStackCorpAmmoHangar;
+        private System.Windows.Forms.Button btnOpenCorpAmmoHangar;
+        private System.Windows.Forms.GroupBox groupLootContainerTests;
+        private System.Windows.Forms.Button bttnCloseLootContainer;
+        private System.Windows.Forms.Button btnStackFreightContainer;
+        private System.Windows.Forms.Button btnOpenFreightContainer;
+        private System.Windows.Forms.GroupBox groupShipHangarTests;
+        private System.Windows.Forms.Button bttnCloseShipsHangar;
+        private System.Windows.Forms.Button btnStackShipsHangar;
+        private System.Windows.Forms.Button btnOpenShipsHangar;
+        private System.Windows.Forms.GroupBox groupItemHangarTests;
+        private System.Windows.Forms.Button bttnCloseItemsHangar;
+        private System.Windows.Forms.Button btnStackItemsHangar;
+        private System.Windows.Forms.Button btnOpenItemsHangar;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button bttnQueryLootHangarID;
+        private System.Windows.Forms.Button bttnQueryAmmoHangarID;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label lblLootHangarID;
+        private System.Windows.Forms.Label lblAmmoHangarID;
+        private System.Windows.Forms.GroupBox groupQuestorsLoothangarTests;
+        private System.Windows.Forms.Button bttnCloseLootHangar;
+        private System.Windows.Forms.Button btnStackLootHangar;
+        private System.Windows.Forms.Button btnOpenLootHangar;
+        private System.Windows.Forms.GroupBox groupQuestorsAmmoHangarTests;
+        private System.Windows.Forms.Button bttnCloseAmmoHangar;
+        private System.Windows.Forms.Button btnStackAmmoHangar;
+        private System.Windows.Forms.Button btnOpenAmmoHangar;
+        private System.Windows.Forms.GroupBox groupCorpLootHangarTests;
+        private System.Windows.Forms.Button bttnCloseCorpLootHangar;
+        private System.Windows.Forms.Button btnStackCorpLootHangar;
+        private System.Windows.Forms.Button btnOpenCorpLootHangar;
+        private System.Windows.Forms.Label DataLootHangarID;
+        private System.Windows.Forms.Label DataAmmoHangarID;
+        private System.Windows.Forms.Label DataAmmoHangarName;
+        private System.Windows.Forms.Label DataLootHangarName;
+        private System.Windows.Forms.Label lblLootHangar;
+        private System.Windows.Forms.Label lblAmmoHangar;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button bttnCloseCargoHold;
+        private System.Windows.Forms.Button bttnStackCargoHold;
+        private System.Windows.Forms.Button bttnOpenCargoHold;
     }
 }
 

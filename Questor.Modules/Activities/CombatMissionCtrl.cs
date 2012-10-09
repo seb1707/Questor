@@ -1606,8 +1606,7 @@ namespace Questor.Modules.Activities
                         _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
 
                         // Is there a gate?
-                        IEnumerable<EntityCache> gates = Cache.Instance.EntitiesByName("Acceleration Gate");
-                        if (gates != null && gates.Any())
+                        if (Cache.Instance.AccelerationGates != null && Cache.Instance.AccelerationGates.Any())
                         {
                             // Activate it (Activate action also moves to the gate)
                             _pocketActions.Add(new Actions.Action { State = ActionState.Activate });

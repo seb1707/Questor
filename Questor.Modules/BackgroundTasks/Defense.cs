@@ -339,7 +339,6 @@ namespace Questor.Modules.BackgroundTasks
                 ModuleNumber++;
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                 continue;
-                ModuleNumber = 0;
             }
 
             ModuleNumber = 0;

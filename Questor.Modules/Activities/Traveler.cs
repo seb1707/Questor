@@ -146,8 +146,8 @@ namespace Questor.Modules.Activities
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.Teal);
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             // Find the stargate associated with it
-            IEnumerable<EntityCache> stargates = Cache.Instance.EntitiesByName(_locationName).Where(e => e.GroupId == (int)Group.Stargate).ToList();
-            if (!stargates.Any())
+            
+            if(!Cache.Instance.Stargates.Any())
             {
                 // not found, that cant be true?!?!?!?!
                 Logging.Log("Traveler", "Error [" + Logging.Yellow + _locationName + Logging.Green + "] not found, most likely lag waiting [" + Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds + "] seconds.", Logging.Red);
@@ -156,7 +156,7 @@ namespace Questor.Modules.Activities
             }
 
             // Warp to, approach or jump the stargate
-            EntityCache stargate = stargates.First();
+            EntityCache stargate = Cache.Instance.Stargates.First();
             if (stargate.Distance < (int)Distance.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
             {
                 Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);

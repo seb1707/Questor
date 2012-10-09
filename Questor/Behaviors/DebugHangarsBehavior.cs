@@ -574,10 +574,10 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugHangarsBehaviorState.CloseItemsHangar:
-                    //Logging.Log("DebugHangars", "DebugHangarsState.CloseItemsHangar:", Logging.White);
-                    //if (!Cache.Instance.CloseItemHangar("DebugHangars")) return;
-                    //Cache.Instance.DebugInventoryWindows("DebugHangars");
-                    //_States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Logging.Log("DebugHangars", "DebugHangarsState.CloseItemsHangar:", Logging.White);
+                    if (!Cache.Instance.CloseItemsHangar("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;
                     break;
 
@@ -600,10 +600,10 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugHangarsBehaviorState.CloseShipsHangar:
-                    //Logging.Log("DebugHangars", "DebugHangarsState.CloseShipsHangar:", Logging.White);
-                    //if (!Cache.Instance.CloseShipsHangar("DebugHangars")) return;
-                    //Cache.Instance.DebugInventoryWindows("DebugHangars");
-                    //_States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Logging.Log("DebugHangars", "DebugHangarsState.CloseShipsHangar:", Logging.White);
+                    if (!Cache.Instance.CloseShipsHangar("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;
                     break;
 
@@ -624,10 +624,10 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugHangarsBehaviorState.CloseLootContainer:
-                    //Logging.Log("DebugHangars", "DebugHangarsState.CloseLootContainer:", Logging.White);
-                    //if (!Cache.Instance.CloseLootContainer("DebugHangars")) return;
-                    //Cache.Instance.DebugInventoryWindows("DebugHangars");
-                    //_States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Logging.Log("DebugHangars", "DebugHangarsState.CloseLootContainer:", Logging.White);
+                    if (!Cache.Instance.CloseLootContainer("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     //Cache.Instance.Paused = true;
                     break;
 
@@ -730,6 +730,48 @@ namespace Questor.Behaviors
                 case DebugHangarsBehaviorState.CloseAllInventoryWindows:
                     Logging.Log("DebugHangars", "DebugHangarsState.CloseAllInventoryWindows:", Logging.White);
                     if (!Cleanup.CloseInventoryWindows()) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case DebugHangarsBehaviorState.OpenCargoHold:
+                    Logging.Log("DebugHangars", "DebugHangarsState.StackLootHangar:", Logging.White);
+                    if (!Cache.Instance.OpenCargoHold("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case DebugHangarsBehaviorState.StackCargoHold:
+                    Logging.Log("DebugHangars", "DebugHangarsState.CloseLootHangar:", Logging.White);
+                    if (!Cache.Instance.StackCargoHold("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case DebugHangarsBehaviorState.CloseCargoHold:
+                    Logging.Log("DebugHangars", "DebugHangarsState.CloseAllInventoryWindows:", Logging.White);
+                    if (!Cache.Instance.CloseCargoHold("DebugHangars")) return;
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case DebugHangarsBehaviorState.GetAmmoHangarID:
+                    Logging.Log("DebugHangars", "DebugHangarsState.GetAmmoHangarID:", Logging.White);
+                    if(!Cache.Instance.GetCorpAmmoHangarID()) return;
+                    Logging.Log("DebugHangars", "AmmoHangarId [" + Cache.Instance.AmmoHangarID + "]", Logging.White);
+                    Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
+                    Cache.Instance.Paused = true;
+                    break;
+
+                case DebugHangarsBehaviorState.GetLootHangarID:
+                    Logging.Log("DebugHangars", "DebugHangarsState.GetLootHangarID:", Logging.White);
+                    if(!Cache.Instance.GetCorpLootHangarID()) return;
+                    Logging.Log("DebugHangars", "LootHangarId [" + Cache.Instance.LootHangarID + "]", Logging.White);
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;

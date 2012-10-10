@@ -1080,7 +1080,7 @@ namespace Questor
             }
             catch (Exception ex)
             {
-                //if we get an exception here ignore it as it shouldnt effect anything, theu GUI is only displaying data collected and processed elsewhere
+                //if we get an exception here ignore it as it should not effect anything, the GUI is only displaying data collected and processed elsewhere
                 if (Settings.Instance.DebugExceptions || (Settings.Instance.DebugUI)) Logging.Log("QuestorUI","Exception was [" + ex.Message + "]",Logging.Teal);
             }
         }
@@ -1609,51 +1609,5 @@ namespace Questor
             _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
             _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseCargoHold;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        //private void comboBoxQuestorMode_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    Settings.Instance.CharacterMode = comboBoxQuestorMode.Text;
-        //    // If you are at the controls enough to change modes... assume that panic needs to do nothing
-        //    _questor.panicstatereset = true;
-        //}
-
-        //
-        // all the GUI stoptime stuff needs new plumbing as a different feature... and the stoptime stuff likely needs
-        // to be combined with the 'pause' and 'wait' stuff planned in station and in combat...
-        //
-        //
-        //private void checkBoxStopTimeSpecified_CheckedChanged(object sender, EventArgs e)
-        //{
-        //    if (checkBoxStopTimeSpecified.Checked)
-        //    {
-        //        dateTimePickerStopTime.Enabled = false;
-        //        Cache.Instance.StopTimeSpecified = false;
-        //    }
-        //    else
-        //    {
-        //        dateTimePickerStopTime.Enabled = true;
-        //        Cache.Instance.StopTimeSpecified = true;
-        //    }
-        //
-        //}
     }
 }

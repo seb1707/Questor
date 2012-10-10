@@ -23,8 +23,7 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
-    using HtmlAgilityPack;
-
+    
     public class AgentInteraction
     {
         public const string RequestMission = "Request Mission";
@@ -44,15 +43,15 @@ namespace Questor.Modules.Actions
         DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
 
         //private DateTime _waitingOnAgentResponse;
-        private bool _waitingonmission;
+        private bool _waitingOnMission;
 
-        private DateTime _waitingonmissiontimer = DateTime.Now;
+        private DateTime _waitingOnMissionTimer = DateTime.Now;
 
-        private bool _waitingonagentwindow;
-        private DateTime _waitingonagentwindowtimer = DateTime.Now;
+        private bool _waitingOnAgentWindow;
+        private DateTime _waitingOnAgentWindowTimer = DateTime.Now;
 
-        private bool _waitingonagentresponse;
-        private DateTime _waitingonagentresponsetimer = DateTime.Now;
+        private bool _waitingOnAgentResponse;
+        private DateTime _waitingOnAgentResponseTimer = DateTime.Now;
         private DateTime _agentWindowTimeStamp = DateTime.MinValue;
 
         public bool WaitDecline { get; set; }
@@ -107,20 +106,20 @@ namespace Questor.Modules.Actions
             DirectAgentWindow agentWindow = Agent.Window;
             if (agentWindow == null || !agentWindow.IsReady)
             {
-                if (_waitingonagentwindow == false)
+                if (_waitingOnAgentWindow == false)
                 {
-                    _waitingonagentwindowtimer = DateTime.Now;
-                    _waitingonagentwindow = true;
+                    _waitingOnAgentWindowTimer = DateTime.Now;
+                    _waitingOnAgentWindow = true;
                 }
-                if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 10)
+                if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 10)
                 {
                     Logging.Log("AgentInteraction", "ReplyToAgent: Agent.window is not yet open : waiting", Logging.Yellow);
 
-                    if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 15)
+                    if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 15)
                     {
                         Logging.Log("AgentInteraction.Agentid", " [" + AgentId + "] Regular Mission AgentID [ " + Cache.Instance.AgentId + "] these should match when not doing a storyline mission", Logging.Yellow);
                     }
-                    if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 90)
+                    if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 90)
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -132,26 +131,26 @@ namespace Questor.Modules.Actions
                 return;
             }
             
-            _waitingonagentwindow = false;
+            _waitingOnAgentWindow = false;
 
             List<DirectAgentResponse> responses = agentWindow.AgentResponses;
             if (responses == null || responses.Count == 0)
             {
-                if (_waitingonagentresponse == false)
+                if (_waitingOnAgentResponse == false)
                 {
-                    _waitingonagentresponsetimer = DateTime.Now;
-                    _waitingonagentresponse = true;
+                    _waitingOnAgentResponseTimer = DateTime.Now;
+                    _waitingOnAgentResponse = true;
                 }
-                if (DateTime.Now.Subtract(_waitingonagentresponsetimer).TotalSeconds > 15)
+                if (DateTime.Now.Subtract(_waitingOnAgentResponseTimer).TotalSeconds > 15)
                 {
                     Logging.Log("AgentInteraction", "ReplyToAgent: agentWindowAgentresponses == null : trying to close the agent window", Logging.Yellow);
                     agentWindow.Close();
-                    _waitingonagentwindowtimer = DateTime.Now;
+                    _waitingOnAgentWindowTimer = DateTime.Now;
                 }
                 return;
             }
             
-            _waitingonagentresponse = false;
+            _waitingOnAgentResponse = false;
 
             DirectAgentResponse request = responses.FirstOrDefault(r => r.Text.Contains(RequestMission));
             DirectAgentResponse complete = responses.FirstOrDefault(r => r.Text.Contains(CompleteMission));
@@ -165,7 +164,7 @@ namespace Questor.Modules.Actions
             //
             // Read the possibly responces and make sure we are 'doing the right thing' - set AgentInteractionPurpose to fit the state of the agent window
             //
-            if (Purpose != AgentInteractionPurpose.AmmoCheck) //dont change the AgentInteractionPurpose if we are checking which ammo type to use.
+            if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.
             {
                 if (accept != null && decline != null && delay != null)
                 {
@@ -208,7 +207,7 @@ namespace Questor.Modules.Actions
             {
                 if (Purpose == AgentInteractionPurpose.CompleteMission)
                 {
-                    // Complete the mission, close convo
+                    // Complete the mission, close conversation
                     Logging.Log("AgentInteraction", "Saying [Complete Mission]", Logging.Yellow);
                     complete.Say();
                     Cache.Instance.FactionName = string.Empty;
@@ -273,7 +272,7 @@ namespace Questor.Modules.Actions
 
         private void GetDungeonId(string html)
         {
-            HtmlAgilityPack.HtmlDocument missionHtml = new HtmlDocument();
+            HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
             missionHtml.LoadHtml(html);
             foreach (HtmlAgilityPack.HtmlNode nd in missionHtml.DocumentNode.SelectNodes("//a[@href]"))
             {
@@ -326,7 +325,7 @@ namespace Questor.Modules.Actions
             
 
             bool roguedrones = false;
-            bool mercinaries = false;
+            bool mercenaries = false;
             bool eom = false;
             bool seven = false;
             if (!string.IsNullOrEmpty(html))
@@ -335,7 +334,7 @@ namespace Questor.Modules.Actions
                 roguedrones |= html.Contains("Rogue Drone Harassment Objectives");
                 roguedrones |= html.Contains("Air Show! Objectives");
                 roguedrones |= html.Contains("Alluring Emanations Objectives");
-                roguedrones |= html.Contains("Anomoly Objectives");
+                roguedrones |= html.Contains("Anomaly Objectives");
                 roguedrones |= html.Contains("Attack of the Drones Objectives");
                 roguedrones |= html.Contains("Drone Detritus Objectives");
                 roguedrones |= html.Contains("Drone Infestation Objectives");
@@ -368,9 +367,9 @@ namespace Questor.Modules.Actions
                 Cache.Instance.FactionName = "eom";
                 return;
             }
-            if (mercinaries)
+            if (mercenaries)
             {
-                Cache.Instance.FactionName = "mercinaries";
+                Cache.Instance.FactionName = "mercenaries";
                 return;
             }
             if (seven)
@@ -417,20 +416,20 @@ namespace Questor.Modules.Actions
             DirectAgentWindow agentWindow = Agent.Window;
             if (agentWindow == null || !agentWindow.IsReady)
             {
-                if (_waitingonagentwindow == false)
+                if (_waitingOnAgentWindow == false)
                 {
-                    _waitingonagentwindowtimer = DateTime.Now;
-                    _waitingonagentwindow = true;
+                    _waitingOnAgentWindowTimer = DateTime.Now;
+                    _waitingOnAgentWindow = true;
                 }
-                if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 10)
+                if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 10)
                 {
                     Logging.Log("AgentInteraction", "WaitForMission: Agent.window is not yet open : waiting", Logging.Yellow);
 
-                    if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 15)
+                    if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 15)
                     {
                         Logging.Log("AgentInteraction.Agentid", " [" + AgentId + "] Cache.Instance.AgentId [ " + Cache.Instance.AgentId + "] should be the same if not doing a storyline mission", Logging.Yellow);
                     }
-                    if (DateTime.Now.Subtract(_waitingonagentwindowtimer).TotalSeconds > 90)
+                    if (DateTime.Now.Subtract(_waitingOnAgentWindowTimer).TotalSeconds > 90)
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -442,7 +441,7 @@ namespace Questor.Modules.Actions
                 return;
             }
             
-            _waitingonagentwindow = false;
+            _waitingOnAgentWindow = false;
 
             //open the journal window
             if (!Cache.Instance.OpenJournalWindow("AgentInteraction")) return;
@@ -450,16 +449,16 @@ namespace Questor.Modules.Actions
             Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
             if (Cache.Instance.Mission == null)
             {
-                if (_waitingonmission == false)
+                if (_waitingOnMission == false)
                 {
-                    _waitingonmissiontimer = DateTime.Now;
-                    _waitingonmission = true;
+                    _waitingOnMissionTimer = DateTime.Now;
+                    _waitingOnMission = true;
                 }
-                if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 30)
+                if (DateTime.Now.Subtract(_waitingOnMissionTimer).TotalSeconds > 30)
                 {
                     Logging.Log("AgentInteraction", "WaitForMission: Unable to find mission from that agent (yet?) : AgentInteraction.AgentId [" + AgentId + "] regular Mission AgentID [" + Cache.Instance.AgentId + "]", Logging.Yellow);
                     Cache.Instance.JournalWindow.Close();
-                    if (DateTime.Now.Subtract(_waitingonmissiontimer).TotalSeconds > 120)
+                    if (DateTime.Now.Subtract(_waitingOnMissionTimer).TotalSeconds > 120)
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -471,7 +470,7 @@ namespace Questor.Modules.Actions
                 return;
             }
             
-            _waitingonmission = false;
+            _waitingOnMission = false;
 
             MissionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
 
@@ -489,7 +488,7 @@ namespace Questor.Modules.Actions
                 return;
             }
             
-            if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the blacklist and might be on the greylist we havent checked yet", Logging.White);
+            if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the blacklist and might be on the GreyList we havent checked yet", Logging.White);
 
             if (Settings.Instance.MissionGreylist.Any(m => m.ToLower() == MissionName.ToLower())) //-1.7
             {
@@ -497,17 +496,17 @@ namespace Questor.Modules.Actions
                 {
                     Cache.Instance.LastGreylistMissionDeclined = MissionName;
                     Cache.Instance.GreyListedMissionsDeclined++;
-                    Logging.Log("AgentInteraction", "Declining greylisted mission [" + MissionName + "]", Logging.Yellow);
+                    Logging.Log("AgentInteraction", "Declining GreyListed mission [" + MissionName + "]", Logging.Yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                     _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(5, 10));
                     return;
                 }
                 
-                Logging.Log("AgentInteraction", "Unable to decline greylisted mission: AgentEffectiveStandings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] >  MinGreyListStandings [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.Orange);
+                Logging.Log("AgentInteraction", "Unable to decline GreyListed mission: AgentEffectiveStandings [" + Cache.Instance.AgentEffectiveStandingtoMe + "] >  MinGreyListStandings [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.Orange);
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the greylist and will likely be run if it isnt in lowsec, we havent checked for that yet", Logging.White);
+                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the GreyList and will likely be run if it is not in lowsec, we havent checked for that yet", Logging.White);
             }
 
             //public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
@@ -576,7 +575,7 @@ namespace Questor.Modules.Actions
                     try
                     {
                         XDocument missionXml = XDocument.Load(Cache.Instance.MissionXmlPath);
-                        //load mission specific ammo and weapongroupid if specified in the mission xml
+                        //load mission specific ammo and WeaponGroupID if specified in the mission xml
                         if (missionXml.Root != null)
                         {
                             XElement ammoTypes = missionXml.Root.Element("missionammo");
@@ -653,7 +652,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentAgentInteractionState = AgentInteractionState.AcceptMission;
                 _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 7));
             }
-            else // If we already accepted the mission, close the convo
+            else // If we already accepted the mission, close the conversation
             {
                 Logging.Log("AgentInteraction", "Mission [" + MissionName + "] already accepted", Logging.Yellow);
                 Logging.Log("AgentInteraction", "Closing conversation", Logging.Yellow);
@@ -793,7 +792,7 @@ namespace Questor.Modules.Actions
                         // we have bad standings and we DO have an agent to switch to
                         // we have decent standings and can decline again
                         //
-                        // what other scenerio is there?
+                        // what other scenario is there?
                     }
                     //add timer to current agent
                     if (!Cache.Instance.AllAgentsStillInDeclineCoolDown && Settings.Instance.MultiAgentSupport)

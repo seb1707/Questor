@@ -7,6 +7,7 @@
 //    http://www.thehackerwithin.com/license.htm)
 //  </copyright>
 //-------------------------------------------------------------------------------
+
 #define manual
 
 namespace ValueDump

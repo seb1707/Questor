@@ -3481,7 +3481,7 @@ namespace Questor.Modules.Caching
                     if (firstLootContainer != null)
                     {
                         long lootContainerID = firstLootContainer.ItemId;
-                        if (!OpenAndSelectInvItem(module, lootContainerID, Settings.Instance.LootContainer))
+                        if (!OpenAndSelectInvItem(module, lootContainerID))
                             return false;
                     }
                     else return false;

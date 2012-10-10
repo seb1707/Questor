@@ -243,6 +243,10 @@
             this.txtExtConsole = new System.Windows.Forms.RichTextBox();
             this.Tabs = new System.Windows.Forms.TabControl();
             this.Inventory = new System.Windows.Forms.TabPage();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.bttnCloseCargoHold = new System.Windows.Forms.Button();
+            this.bttnStackCargoHold = new System.Windows.Forms.Button();
+            this.bttnOpenCargoHold = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.bttnQueryLootHangarID = new System.Windows.Forms.Button();
             this.bttnQueryAmmoHangarID = new System.Windows.Forms.Button();
@@ -255,6 +259,7 @@
             this.DataAmmoHangarID = new System.Windows.Forms.Label();
             this.lblLootHangarID = new System.Windows.Forms.Label();
             this.lblAmmoHangarID = new System.Windows.Forms.Label();
+            this.bttnCloseAllInventoryWindows = new System.Windows.Forms.Button();
             this.groupQuestorsLoothangarTests = new System.Windows.Forms.GroupBox();
             this.bttnCloseLootHangar = new System.Windows.Forms.Button();
             this.btnStackLootHangar = new System.Windows.Forms.Button();
@@ -283,7 +288,6 @@
             this.bttnCloseItemsHangar = new System.Windows.Forms.Button();
             this.btnStackItemsHangar = new System.Windows.Forms.Button();
             this.btnOpenItemsHangar = new System.Windows.Forms.Button();
-            this.bttnCloseAllInventoryWindows = new System.Windows.Forms.Button();
             this.tabModules = new System.Windows.Forms.TabPage();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabShipInfo = new System.Windows.Forms.TabPage();
@@ -543,10 +547,6 @@
             this.label273 = new System.Windows.Forms.Label();
             this.label274 = new System.Windows.Forms.Label();
             this.tabLowSlots = new System.Windows.Forms.TabPage();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.bttnCloseCargoHold = new System.Windows.Forms.Button();
-            this.bttnStackCargoHold = new System.Windows.Forms.Button();
-            this.bttnOpenCargoHold = new System.Windows.Forms.Button();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -559,6 +559,7 @@
             this.tabConsole.SuspendLayout();
             this.Tabs.SuspendLayout();
             this.Inventory.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupQuestorsLoothangarTests.SuspendLayout();
@@ -573,7 +574,6 @@
             this.tabShipInfo.SuspendLayout();
             this.tabHighSlots1to4.SuspendLayout();
             this.tabHighSlots5to8.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // AutoStartCheckBox
@@ -2716,6 +2716,48 @@
             this.Inventory.Text = "Inventory";
             this.Inventory.UseVisualStyleBackColor = true;
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.bttnCloseCargoHold);
+            this.groupBox3.Controls.Add(this.bttnStackCargoHold);
+            this.groupBox3.Controls.Add(this.bttnOpenCargoHold);
+            this.groupBox3.Location = new System.Drawing.Point(21, 11);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(173, 49);
+            this.groupBox3.TabIndex = 156;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Cargo Hold Tests";
+            // 
+            // bttnCloseCargoHold
+            // 
+            this.bttnCloseCargoHold.Location = new System.Drawing.Point(115, 19);
+            this.bttnCloseCargoHold.Name = "bttnCloseCargoHold";
+            this.bttnCloseCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnCloseCargoHold.TabIndex = 151;
+            this.bttnCloseCargoHold.Text = "Close";
+            this.bttnCloseCargoHold.UseVisualStyleBackColor = true;
+            this.bttnCloseCargoHold.Click += new System.EventHandler(this.bttnCloseCargoHold_Click);
+            // 
+            // bttnStackCargoHold
+            // 
+            this.bttnStackCargoHold.Location = new System.Drawing.Point(63, 19);
+            this.bttnStackCargoHold.Name = "bttnStackCargoHold";
+            this.bttnStackCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnStackCargoHold.TabIndex = 149;
+            this.bttnStackCargoHold.Text = "Stack";
+            this.bttnStackCargoHold.UseVisualStyleBackColor = true;
+            this.bttnStackCargoHold.Click += new System.EventHandler(this.bttnStackCargoHold_Click);
+            // 
+            // bttnOpenCargoHold
+            // 
+            this.bttnOpenCargoHold.Location = new System.Drawing.Point(11, 19);
+            this.bttnOpenCargoHold.Name = "bttnOpenCargoHold";
+            this.bttnOpenCargoHold.Size = new System.Drawing.Size(46, 23);
+            this.bttnOpenCargoHold.TabIndex = 148;
+            this.bttnOpenCargoHold.Text = "Open";
+            this.bttnOpenCargoHold.UseVisualStyleBackColor = true;
+            this.bttnOpenCargoHold.Click += new System.EventHandler(this.bttnOpenCargoHold_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.bttnQueryLootHangarID);
@@ -2836,6 +2878,16 @@
             this.lblAmmoHangarID.Size = new System.Drawing.Size(85, 13);
             this.lblAmmoHangarID.TabIndex = 162;
             this.lblAmmoHangarID.Text = "AmmoHangarID:";
+            // 
+            // bttnCloseAllInventoryWindows
+            // 
+            this.bttnCloseAllInventoryWindows.Location = new System.Drawing.Point(6, 177);
+            this.bttnCloseAllInventoryWindows.Name = "bttnCloseAllInventoryWindows";
+            this.bttnCloseAllInventoryWindows.Size = new System.Drawing.Size(150, 35);
+            this.bttnCloseAllInventoryWindows.TabIndex = 152;
+            this.bttnCloseAllInventoryWindows.Text = "Close ALL Inventory Windows";
+            this.bttnCloseAllInventoryWindows.UseVisualStyleBackColor = true;
+            this.bttnCloseAllInventoryWindows.Click += new System.EventHandler(this.BttnCloseAllInventoryWindowsClick);
             // 
             // groupQuestorsLoothangarTests
             // 
@@ -3130,16 +3182,6 @@
             this.btnOpenItemsHangar.Text = "Open";
             this.btnOpenItemsHangar.UseVisualStyleBackColor = true;
             this.btnOpenItemsHangar.Click += new System.EventHandler(this.btnOpenItemsHangar_Click);
-            // 
-            // bttnCloseAllInventoryWindows
-            // 
-            this.bttnCloseAllInventoryWindows.Location = new System.Drawing.Point(6, 177);
-            this.bttnCloseAllInventoryWindows.Name = "bttnCloseAllInventoryWindows";
-            this.bttnCloseAllInventoryWindows.Size = new System.Drawing.Size(150, 35);
-            this.bttnCloseAllInventoryWindows.TabIndex = 152;
-            this.bttnCloseAllInventoryWindows.Text = "Close ALL Inventory Windows";
-            this.bttnCloseAllInventoryWindows.UseVisualStyleBackColor = true;
-            this.bttnCloseAllInventoryWindows.Click += new System.EventHandler(this.BttnCloseAllInventoryWindowsClick);
             // 
             // tabModules
             // 
@@ -5734,54 +5776,12 @@
             this.tabLowSlots.Text = "LowSlots";
             this.tabLowSlots.UseVisualStyleBackColor = true;
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.bttnCloseCargoHold);
-            this.groupBox3.Controls.Add(this.bttnStackCargoHold);
-            this.groupBox3.Controls.Add(this.bttnOpenCargoHold);
-            this.groupBox3.Location = new System.Drawing.Point(21, 11);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(173, 49);
-            this.groupBox3.TabIndex = 156;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Cargo Hold Tests";
-            // 
-            // bttnCloseCargoHold
-            // 
-            this.bttnCloseCargoHold.Location = new System.Drawing.Point(115, 19);
-            this.bttnCloseCargoHold.Name = "bttnCloseCargoHold";
-            this.bttnCloseCargoHold.Size = new System.Drawing.Size(46, 23);
-            this.bttnCloseCargoHold.TabIndex = 151;
-            this.bttnCloseCargoHold.Text = "Close";
-            this.bttnCloseCargoHold.UseVisualStyleBackColor = true;
-            this.bttnCloseCargoHold.Click += new System.EventHandler(this.bttnCloseCargoHold_Click);
-            // 
-            // bttnStackCargoHold
-            // 
-            this.bttnStackCargoHold.Location = new System.Drawing.Point(63, 19);
-            this.bttnStackCargoHold.Name = "bttnStackCargoHold";
-            this.bttnStackCargoHold.Size = new System.Drawing.Size(46, 23);
-            this.bttnStackCargoHold.TabIndex = 149;
-            this.bttnStackCargoHold.Text = "Stack";
-            this.bttnStackCargoHold.UseVisualStyleBackColor = true;
-            this.bttnStackCargoHold.Click += new System.EventHandler(this.bttnStackCargoHold_Click);
-            // 
-            // bttnOpenCargoHold
-            // 
-            this.bttnOpenCargoHold.Location = new System.Drawing.Point(11, 19);
-            this.bttnOpenCargoHold.Name = "bttnOpenCargoHold";
-            this.bttnOpenCargoHold.Size = new System.Drawing.Size(46, 23);
-            this.bttnOpenCargoHold.TabIndex = 148;
-            this.bttnOpenCargoHold.Text = "Open";
-            this.bttnOpenCargoHold.UseVisualStyleBackColor = true;
-            this.bttnOpenCargoHold.Click += new System.EventHandler(this.bttnOpenCargoHold_Click);
-            // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(362, 124);
+            this.ClientSize = new System.Drawing.Size(356, 96);
             this.Controls.Add(this.label26);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.buttonQuestormanager);
@@ -5833,6 +5833,7 @@
             this.tabConsole.PerformLayout();
             this.Tabs.ResumeLayout(false);
             this.Inventory.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -5851,7 +5852,6 @@
             this.tabHighSlots1to4.PerformLayout();
             this.tabHighSlots5to8.ResumeLayout(false);
             this.tabHighSlots5to8.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

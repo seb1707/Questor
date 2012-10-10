@@ -3281,11 +3281,11 @@ namespace Questor.Modules.Caching
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (LootHangar.Window == null)
                 {
-                    var firstlootcontainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
-                    if (firstlootcontainer != null)
+                    var firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    if (firstLootContainer != null)
                     {
-                        long lootContainerID = firstlootcontainer.ItemId;
-                        if (!OpenAndSelectInvItem(module, lootContainerID))
+                        long lootContainerID = firstLootContainer.ItemId;
+                        if (!OpenAndSelectInvItem(module, lootContainerID, Settings.Instance.LootContainer))
                             return false;
                     }
                     else return false;

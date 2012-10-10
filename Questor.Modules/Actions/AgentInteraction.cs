@@ -781,6 +781,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
+                Statistics.Instance.MissionCompletionErrors = 0;
                 return;
             }
             if (_States.CurrentStorylineState == StorylineState.DeclineMission)
@@ -791,6 +792,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
+                Statistics.Instance.MissionCompletionErrors = 0;
                 return;
             }
             // Decline and request a new mission
@@ -800,6 +802,7 @@ namespace Questor.Modules.Actions
             Logging.Log("AgentInteraction", "Replying to agent", Logging.Yellow);
             _States.CurrentAgentInteractionState = AgentInteractionState.ReplyToAgent;
             _nextAgentAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 7));
+            Statistics.Instance.MissionCompletionErrors = 0;
         }
 
         public bool CheckFaction()

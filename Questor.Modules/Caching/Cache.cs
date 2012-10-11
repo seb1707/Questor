@@ -1310,21 +1310,20 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Stargates
         {
-            get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList()); }
+            get { return _stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList(); }
         }
 
         public EntityCache ClosestStargate
         {
-            get { return _closestStargate ?? (_closestStargate = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault()); }
+            get { return _closestStargate = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
         }
 
         public EntityCache StargateByName(string locationName)
         {
             {
-                return _stargate ??
-                       (_stargate =
+                return _stargate =
                         Cache.Instance.EntitiesByName(locationName).FirstOrDefault(
-                            e => e.GroupId == (int)Group.Stargate));
+                            e => e.GroupId == (int)Group.Stargate);
             }
         }
 
@@ -1332,13 +1331,13 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjects ?? (_bigObjects = Entities.Where(e =>
+                return _bigObjects = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
                        e.GroupId == (int)Group.LargeCollidableObject ||
                        e.GroupId == (int)Group.LargeCollidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
             }
         }
 
@@ -1346,9 +1345,9 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _gates ?? (_gates = Entities.Where(e =>
+                return _gates = Entities.Where(e =>
                        e.GroupId == (int)Group.AccellerationGate &&
-                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList();
             }
         }
 
@@ -1356,14 +1355,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
+                return _bigObjectsAndGates = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
                        e.GroupId == (int)Group.LargeCollidableObject ||
                        e.GroupId == (int)Group.LargeCollidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccellerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
             }
         }
 
@@ -1384,7 +1383,7 @@ namespace Questor.Modules.Caching
 
         public EntityCache Star
         {
-            get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
+            get { return _star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star); }
         }
 
         public IEnumerable<EntityCache> PriorityTargets

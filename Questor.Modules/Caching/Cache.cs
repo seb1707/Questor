@@ -4003,7 +4003,7 @@ namespace Questor.Modules.Caching
                 if (!Cache.Instance.OpenShipsHangar(module)) return false;
                 if (!Cache.Instance.OpenItemsHangar(module)) return false;
 
-                List<DirectItem> items = Cache.Instance.ShipHangar.Items;
+                List<DirectItem> items = Cache.Instance.DroneBay.Items;
                 List<DirectItem> dronesToRepair = null;
                 //items.AddRange(Cache.Instance.ItemHangar.Items);
 

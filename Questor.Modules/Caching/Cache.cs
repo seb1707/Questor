@@ -4011,7 +4011,7 @@ namespace Questor.Modules.Caching
                 {
                     if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
                     {
-                        Logging.Log(module, "Add items to repair list", Logging.White);
+                        Logging.Log(module, "Add drones to repair list", Logging.White);
                         foreach (DirectItem item in items)
                         {
                             if (item.GroupId == (int)Group.ProximityDrone ||
@@ -4023,25 +4023,28 @@ namespace Questor.Modules.Caching
                                 item.GroupId == (int)Group.WebbingDrone
                                 )
                             {
-                                Logging.Log(module, "Items: " + item.TypeName, Logging.White);
+                                Logging.Log(module, "Drones: " + item.TypeName, Logging.White);
                                 dronesToRepair.Add(item);
                             }
                         }
 
                         if (dronesToRepair != null)
                         {
-                            Logging.Log(module, "Repairing [" + dronesToRepair.Count() + "] Drones", Logging.White);
+                            Logging.Log(module, "Get Quote for Repairing [" + dronesToRepair.Count() + "] Drones", Logging.White);
                             repairWindow.RepairItems(dronesToRepair);
                             NextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(20, 40));
-                            return true;
+                            return false;
                         }
-
+                        Logging.Log(module, "No drones are damaged, nothing to repair.", Logging.Orange);
                         NextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                         return true;
                     }
+                    Logging.Log(module, "Repairing Drones", Logging.White);
+                    repairWindow.RepairAll();
+                    return true;
                 }
                 else
-                    Logging.Log(module, "No items are damaged, nothing to repair.", Logging.Orange);
+                    Logging.Log(module, "No drones are damaged, nothing to repair.", Logging.Orange);
 
                 return true;
             }

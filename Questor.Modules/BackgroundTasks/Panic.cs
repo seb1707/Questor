@@ -353,6 +353,10 @@ namespace Questor.Modules.BackgroundTasks
                     isSafe &= Cache.Instance.DirectEve.ActiveShip.ArmorPercentage > Settings.Instance.SafeArmorPct;
                     if (isSafe)
                     {
+                        if (Cache.Instance.InSpace)
+                        {
+                            Cache.Instance.RepairAll = true;
+                        }
                         Logging.Log("Panic", "We've recovered, resume mission", Logging.Red);
                         _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }

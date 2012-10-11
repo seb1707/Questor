@@ -463,9 +463,17 @@ namespace Questor.Modules.Actions
                         _States.CurrentArmState = ArmState.NotEnoughDrones;
                         break;
                     }
-
-                    if (!Cache.Instance.RepairDrones("Repair Drones Function")) break; //attempt to use repair facilities if avail in station    
-
+                    
+                    if (Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
+                    {
+                        if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
+                        Cache.Instance.RepairAll = false;
+                    }
+                    else
+                    {
+                        if (!Cache.Instance.RepairDrones("Repair Drones Function")) break; //attempt to use repair facilities if avail in station        
+                    }
+                    
                     double neededDrones = Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                     Logging.Log("Arm", "neededDrones: " + neededDrones, Logging.White);
                     if ((int)neededDrones == 0 && ((Settings.Instance.UseFittingManager && DefaultFittingFound) && !(UseMissionShip && !(Cache.Instance.ChangeMissionShipFittings)) && _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior))

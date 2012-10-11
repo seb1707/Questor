@@ -267,6 +267,7 @@ namespace Questor.Modules.Caching
         public bool OpenWrecks = false;
         public bool NormalApproach = true;
         public bool CourierMission = false;
+        public bool RepairAll = false;
         public string MissionName = "";
         public int MissionsThisSession = 0;
         public int StopSessionAfterMissionNumber = int.MaxValue;

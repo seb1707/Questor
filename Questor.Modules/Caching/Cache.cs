@@ -360,7 +360,7 @@ namespace Questor.Modules.Caching
                 try
                 {
                     // Is our ship's cargo available?
-                    if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.Window.IsReady))
+                    if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.IsValid))
                         ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
                     else
                         return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
@@ -2731,7 +2731,7 @@ namespace Questor.Modules.Caching
                 // Is the ShipHangar ready to be used?
                 if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                 {
-                    Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
+                    //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
                     return true;
                 }
             }
@@ -4018,6 +4018,7 @@ namespace Questor.Modules.Caching
 
                 if (doneUsingRepairWindow)
                 {
+                    Logging.Log(module, "Done with RepairShop: closing", Logging.White);
                     doneUsingRepairWindow = false;
                     if (repairWindow != null) repairWindow.Close();
                     return true;
@@ -4039,9 +4040,12 @@ namespace Questor.Modules.Caching
                     NextRepairDronesAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                     return false;
                 }
-                
-                if (!Cache.Instance.ReadyDroneBay(module)) return false;
-                
+
+                if (Cache.Instance.DroneBay == null)
+                {
+                    if (!Cache.Instance.ReadyDroneBay(module)) return false;
+                }
+
                 List<DirectItem> dronesToRepair = Cache.Instance.DroneBay.Items;
                 
                 if (dronesToRepair.Any())

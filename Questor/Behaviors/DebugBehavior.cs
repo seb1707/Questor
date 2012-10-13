@@ -31,24 +31,24 @@ namespace Questor.Behaviors
         private readonly Combat _combat;
         private readonly Drones _drones;
 
-        private DateTime _lastPulse;
+        //private DateTime _lastPulse;
         private readonly Panic _panic;
         private readonly Salvage _salvage;
         private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
-        private readonly Random _random;
+        //private readonly Random _random;
 
         //private int _randomDelay;
         public static long AgentID;
 
         private readonly Stopwatch _watch;
 
-        public bool Panicstatereset; //false;
+        public bool PanicStateReset; //false;
 
         private bool ValidSettings { get; set; }
 
-        public bool CloseQuestorflag = true;
+        public bool CloseQuestorFlag = true;
 
         public string CharacterName { get; set; }
 
@@ -56,9 +56,9 @@ namespace Questor.Behaviors
 
         public DebugBehavior()
         {
-            _lastPulse = DateTime.MinValue;
+            //_lastPulse = DateTime.MinValue;
 
-            _random = new Random();
+            //_random = new Random();
             _salvage = new Salvage();
             _combat = new Combat();
             _drones = new Drones();
@@ -198,7 +198,7 @@ namespace Questor.Behaviors
 
         private void AvoidBumpingThings()
         {
-            //if It hasn't been at least 60 seconds since we last session changed do not do anything
+            //if It has not been at least 60 seconds since we last session changed do not do anything
             if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
                 return;
             //
@@ -305,10 +305,10 @@ namespace Questor.Behaviors
                 _States.CurrentDebugBehaviorState = DebugBehaviorState.Panic;
 
                 DebugDebugBehaviorStates();
-                if (Panicstatereset)
+                if (PanicStateReset)
                 {
                     _States.CurrentPanicState = PanicState.Normal;
-                    Panicstatereset = false;
+                    PanicStateReset = false;
                 }
             }
             else if (_States.CurrentPanicState == PanicState.Resume)
@@ -462,7 +462,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("DebugBehavior", "GotoBase: We are at destination", Logging.White);
-                        Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
+                        Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' GoToBase
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
 
                         if (_States.CurrentDebugBehaviorState == DebugBehaviorState.GotoBase) _States.CurrentDebugBehaviorState = DebugBehaviorState.UnloadLoot;
@@ -507,7 +507,7 @@ namespace Questor.Behaviors
                     List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
-                        // happens if autopilot isn't set and this questorstate is chosen manually
+                        // happens if autopilot is not set and this QuestorState is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("DebugBehavior.Traveler", "No destination?", Logging.White);
                         if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;

@@ -387,6 +387,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 //
                 // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
+                // add repairship, lpstore, marketwindow, etc
                 //
             }
             Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(2);
@@ -532,7 +533,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.Windows == null)
                     {
-                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.intance.windows returned null", Logging.White);
+                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null", Logging.White);
                         _lastCleanupAction = DateTime.Now;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;

@@ -382,7 +382,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
                 //
-                // at this point the module should be active but isn't: activate it, set the delay and return. The process will resume on the next tick
+                // at this point the module should be active but is not: activate it, set the delay and return. The process will resume on the next tick
                 //
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
@@ -471,7 +471,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (aggressiveEntities == 0 && Cache.Instance.Entities.Count(e => e.Distance < (int)Distance.OnGridWithMe && e.IsStation) == 1)
                         {
                             Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(15);
-                            Logging.Log("Defense", "Repairing Armor outside station with no aggo (yet): delaying docking for [15]seconds" , Logging.White);
+                            Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds" , Logging.White);
                         }
                     }
 
@@ -602,7 +602,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
                 return;
 
-            // Cap is SO low that we shouldn't care about hardeners/boosters as we aren't being targeted anyhow
+            // Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow
             if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
                 return;
 

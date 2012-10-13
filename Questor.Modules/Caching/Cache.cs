@@ -2631,13 +2631,13 @@ namespace Questor.Modules.Caching
 
                 if (!Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "cargo window is ready and is a secondary inventory window", Logging.White);
+                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DebugHangars: cargo window is ready and is a secondary inventory window", Logging.DebugHangars);
                     return true;
                 }
 
                 if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "Opening cargo window as secondary", Logging.White);
+                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DebugHangars:Opening cargo window as secondary", Logging.DebugHangars);
                     Cache.Instance.CargoHold.Window.OpenAsSecondary();
                     //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
@@ -2796,7 +2796,7 @@ namespace Questor.Modules.Caching
                 // Is the items hangar open?
                 if (Cache.Instance.ShipHangar.Window == null)
                 {
-                    Logging.Log(module, "Item Hangar: is closed", Logging.White);
+                    Logging.Log(module, "Ship Hangar: is closed", Logging.White);
                     return true;
                 }
 

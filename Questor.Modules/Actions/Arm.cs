@@ -294,13 +294,13 @@ namespace Questor.Modules.Actions
                     // Is CargoBay  and AmmoHangar open?
                     if (!Cache.Instance.OpenAmmoHangar("Arm"))
                     {
-                        Logging.Log("Arm", "Opening ammo hangar", Logging.White);
+                        if (Settings.Instance.DebugHangars) Logging.Log("Arm", "Opening ammo hangar", Logging.White);
                         break;
                     }
 
                     if (!Cache.Instance.OpenCargoHold("Arm"))
                     {
-                        Logging.Log("Arm", "Opening cargohold", Logging.White);
+                        if (Settings.Instance.DebugHangars) Logging.Log("Arm", "Opening cargohold", Logging.White);
                         break;
                     }
 
@@ -419,12 +419,12 @@ namespace Questor.Modules.Actions
                         {
                             if (UseMissionShip)
                             {
-                                Logging.Log("Arm", "Couldn't find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
+                                Logging.Log("Arm", "Could not find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
                                 _States.CurrentArmState = ArmState.MoveItems;
                                 break;
                             }
                             
-                            Logging.Log("Arm", "Couldn't find fitting - switching to default", Logging.Orange);
+                            Logging.Log("Arm", "Could not find fitting - switching to default", Logging.Orange);
                             Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
                             break;
                         }
@@ -466,12 +466,12 @@ namespace Questor.Modules.Actions
                     
                     if (Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
                     {
-                        if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
+                        if (!Cache.Instance.RepairItems("Repair All")) break; //attempt to use repair facilities if avail in station
                         Cache.Instance.RepairAll = false;
                     }
                     else
                     {
-                        if (!Cache.Instance.RepairDrones("Repair Drones Function")) break; //attempt to use repair facilities if avail in station        
+                        if (!Cache.Instance.RepairDrones("Repair Drones")) break; //attempt to use repair facilities if avail in station        
                     }
                     
                     double neededDrones = Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
@@ -561,7 +561,7 @@ namespace Questor.Modules.Actions
                         moveAmmoQuantity = Math.Max(moveAmmoQuantity, 1);
                         Cache.Instance.CargoHold.Add(item, moveAmmoQuantity);
 
-                        Logging.Log("Arm", "Moving [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [" + Cache.Instance.AmmoHangar.Window.Name + "] to CargoHold", Logging.White);
+                        Logging.Log("Arm", "Moving [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
 
                         ammo.Quantity -= moveAmmoQuantity;
                         if (ammo.Quantity <= 0)

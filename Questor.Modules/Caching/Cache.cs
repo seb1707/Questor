@@ -3147,7 +3147,7 @@ namespace Questor.Modules.Caching
 
         //public DirectContainer LootContainer { get; set; }
 
-        public bool OpenLootContainer(String module)
+        public bool ReadyLootContainer(String module)
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -3168,56 +3168,32 @@ namespace Questor.Modules.Caching
                         long lootContainerID = firstLootContainer.ItemId;
                         Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetContainer(lootContainerID);
 
-                        if (Cache.Instance.LootHangar != null)
+                        if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.IsValid)
                         {
-                            DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == Settings.Instance.LootContainer);
-                            if (Settings.Instance.DebugHangars) Logging.Log("OpenCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
-                            
-                            if (lootHangarWindow == null)
-                            {
-                                if (!Cache.Instance.OpenAndSelectInvItem(module, lootContainerID)) return false;
-
-                                if (Cache.Instance.PrimaryInventoryWindow != null)
-                                {
-                                    if (Cache.Instance.PrimaryInventoryWindow.OpenAsSecondary())
-                                    {
-                                        if (Settings.Instance.DebugHangars) Logging.Log(module, "OpenLootContainer: Open Secondary Window", Logging.White);
-                                    }
-
-                                    Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                                    return false;
-                                }
-                            }
-                            
-                            if (lootHangarWindow != null)
-                            {
-                                if (lootHangarWindow.IsReady)
-                                {
-                                    if (Settings.Instance.DebugHangars) Logging.Log(module, "OpenLootContainer: Ready as a Secondary Window", Logging.White);
-                                    Cache.Instance.ClosePrimaryInventoryWindow("OpenCorpLootHangar");
-                                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(1, 3));
-                                    return true;
-                                }
-
-                                if (!lootHangarWindow.IsReady)
-                                {
-                                    if (Settings.Instance.DebugHangars) Logging.Log(module, "OpenLootContainer: Window is not ready", Logging.White);
-                                    return false;
-                                }
-                                
-                            }
+                            if (Settings.Instance.DebugHangars) Logging.Log(module, "LootHangar is defined (no window needed)", Logging.DebugHangars);
+                            return true;
                         }
-                    }
-                    else
-                    {
-                        Logging.Log(module, "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.Orange);
-                        var firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
-                        if (firstOtherContainer != null)
+
+                        if (Cache.Instance.LootHangar == null)
                         {
-                            Logging.Log(module, "we did however find a container named [ " + firstOtherContainer.GivenName + " ]", Logging.Orange);
+                            if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                                Logging.Log(module, "Opening Corporate Loot Hangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
                             return false;
                         }
+
+                        if (Settings.Instance.DebugHangars) Logging.Log(module, "AmmoHangar is not yet ready. waiting...", Logging.DebugHangars);
+                        return false;
                     }
+                    
+                    Logging.Log(module, "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.Orange);
+                    var firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
+                        
+                    if (firstOtherContainer != null)
+                    {
+                        Logging.Log(module, "we did however find a container named [ " + firstOtherContainer.GivenName + " ]", Logging.Orange);
+                        return false;
+                    }
+                    return false;
                 }
                 return true;
             }
@@ -3311,7 +3287,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!Cache.Instance.OpenLootContainer("Cache.StackLootContainer")) return false;
+                if (!Cache.Instance.ReadyLootContainer("Cache.StackLootContainer")) return false;
                 Cache.Instance.NextOpenLootContainerAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (LootHangar.Window == null)
                 {
@@ -3447,7 +3423,7 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer)) // Freight Container in my local items hangar = LootHangar
                 {
                     if (!Cache.Instance.OpenItemsHangarAsLootHangar(module)) return false;
-                    if (!Cache.Instance.OpenLootContainer(module)) return false;
+                    if (!Cache.Instance.ReadyLootContainer(module)) return false;
                     return true;
                 }
 

@@ -110,7 +110,7 @@ namespace ValueDump
             Cache.Instance.InvalidateCache();
 
             // Update settings (settings only load if character name changed)
-            if (!Settings.Instance.Defaultsettingsloaded)
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
                 Settings.Instance.LoadSettings();
             }

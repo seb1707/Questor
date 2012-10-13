@@ -525,7 +525,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White); 
-                        Settings.Instance.SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 0;
+                        Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                         Cache.Instance.SessionState = "Quitting";
                         Cleanup.CloseQuestor();
                         return;
@@ -656,7 +656,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = true;
                                 Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
-                                Settings.Instance.SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 0;
+                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                                 Cache.Instance.SessionState = "Quitting";
                                 Cleanup.CloseQuestor();
                                 return;
@@ -671,7 +671,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorEndProcess = false;
                                 Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
                                 Cache.Instance.SessionState = "Quitting";
-                                Settings.Instance.SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 30;
+                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
                                 Cleanup.CloseQuestor();
                                 return;

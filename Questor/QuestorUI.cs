@@ -810,7 +810,7 @@ namespace Questor
                 buttonOpenMissionXML.Enabled = false;
             }
 
-            if (Settings.Instance.Defaultsettingsloaded)
+            if (Settings.Instance.DefaultSettingsLoaded)
             {
                 buttonOpenCharacterXML.Enabled = false;
                 buttonOpenSchedulesXML.Enabled = false;

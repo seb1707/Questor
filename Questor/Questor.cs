@@ -42,7 +42,7 @@ namespace Questor
 
         public DateTime LastAction;
 
-        public bool Panicstatereset = false;
+        public bool PanicStateReset = false;
         private bool _runOnce30SecAfterStartupalreadyProcessed;
 
         private readonly Stopwatch _watch;
@@ -76,7 +76,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe lic server is down";
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe license server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor();
             }
@@ -219,7 +219,7 @@ namespace Questor
             if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
             {
                 // quit questor
-                Logging.Log("Questor", "Maximum runtime exceeded.  Quiting...", Logging.White);
+                Logging.Log("Questor", "Maximum runtime exceeded.  Quitting...", Logging.White);
                 Cache.Instance.ReasonToStopQuestor = "Maximum runtime specified and reached.";
                 Settings.Instance.AutoStart = false;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
@@ -291,8 +291,8 @@ namespace Questor
         public static void WalletCheck()
         {
             Cache.Instance.LastWalletCheck = DateTime.Now;
-            //Logging.Log("[Questor] Wallet Balance Debug Info: lastknowngoodconnectedtime = " + Settings.Instance.lastKnownGoodConnectedTime);
-            //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - lastknowngoodconnectedtime = " + DateTime.Now.Subtract(Settings.Instance.lastKnownGoodConnectedTime).TotalSeconds);
+            //Logging.Log("[Questor] Wallet Balance Debug Info: LastKnownGoodConnectedTime = " + Settings.Instance.lastKnownGoodConnectedTime);
+            //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.Now - LastKnownGoodConnectedTime = " + DateTime.Now.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);
             if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
             {
                 Logging.Log("Questor", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.",
@@ -301,9 +301,9 @@ namespace Questor
                                                   TotalMinutes, 0)), Logging.White);
             }
 
-            //Settings.Instance.walletbalancechangelogoffdelay = 2;  //used for debugging purposes
-            //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.lastKnownGoodConnectedTime);
-            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.Walletbalancechangelogoffdelay)
+            //Settings.Instance.WalletBalanceChangeLogOffDelay = 2;  //used for debugging purposes
+            //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.LastKnownGoodConnectedTime);
+            if (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.WalletBalanceChangeLogOffDelay)
             {
                 if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth)
                 {
@@ -311,12 +311,12 @@ namespace Questor
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 }
             }
-            else if (Settings.Instance.Walletbalancechangelogoffdelay != 0)
+            else if (Settings.Instance.WalletBalanceChangeLogOffDelay != 0)
             {
-                if ((Cache.Instance.InStation) || (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > Settings.Instance.Walletbalancechangelogoffdelay + 5))
+                if ((Cache.Instance.InStation) || (Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > Settings.Instance.WalletBalanceChangeLogOffDelay + 5))
                 {
                     Logging.Log("Questor", String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
-                    Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.Walletbalancechangelogoffdelay + "min";
+                    Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.WalletBalanceChangeLogOffDelay + "min";
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.SessionState = "Exiting";
@@ -391,7 +391,7 @@ namespace Questor
             _lastPulse = DateTime.Now;
 
             // Update settings (settings only load if character name changed)
-            if (!Settings.Instance.Defaultsettingsloaded)
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
                 Settings.Instance.LoadSettings();
             }
@@ -465,7 +465,7 @@ namespace Questor
 
             if (!Cache.Instance.Paused)
             {
-                if (DateTime.Now.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > Time.Instance.WalletCheck_minutes && !Settings.Instance.Defaultsettingsloaded)
+                if (DateTime.Now.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > Time.Instance.WalletCheck_minutes && !Settings.Instance.DefaultSettingsLoaded)
                 {
                     WalletCheck();
                 }
@@ -607,10 +607,10 @@ namespace Questor
                     Logging.Log("Questor", "CloseQuestorCMDUplinkISboxerCharacterSet: " + Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet, Logging.White);
                     Logging.Log("Questor", "CloseQuestorArbitraryOSCmd" + Settings.Instance.CloseQuestorArbitraryOSCmd, Logging.White);
                     Logging.Log("Questor", "CloseQuestorOSCmdContents" + Settings.Instance.CloseQuestorOSCmdContents, Logging.White);
-                    Logging.Log("Questor", "walletbalancechangelogoffdelay: " + Settings.Instance.Walletbalancechangelogoffdelay, Logging.White);
-                    Logging.Log("Questor", "walletbalancechangelogoffdelayLogofforExit: " + Settings.Instance.WalletbalancechangelogoffdelayLogofforExit, Logging.White);
+                    Logging.Log("Questor", "WalletBalanceChangeLogOffDelay: " + Settings.Instance.WalletBalanceChangeLogOffDelay, Logging.White);
+                    Logging.Log("Questor", "WalletBalanceChangeLogOffDelayLogoffOrExit: " + Settings.Instance.WalletBalanceChangeLogOffDelayLogoffOrExit, Logging.White);
                     Logging.Log("Questor", "EVEProcessMemoryCeiling: " + Settings.Instance.EVEProcessMemoryCeiling, Logging.White);
-                    Logging.Log("Questor", "EVEProcessMemoryCielingLogofforExit: " + Settings.Instance.EVEProcessMemoryCeilingLogofforExit, Logging.White);
+                    Logging.Log("Questor", "EVEProcessMemoryCeilingLogofforExit: " + Settings.Instance.EVEProcessMemoryCeilingLogofforExit, Logging.White);
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorCMDExitGame: " + Cache.Instance.CloseQuestorCMDExitGame, Logging.White);
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorCMDLogoff: " + Cache.Instance.CloseQuestorCMDLogoff, Logging.White);
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorEndProcess: " + Cache.Instance.CloseQuestorEndProcess, Logging.White);
@@ -666,12 +666,12 @@ namespace Questor
                     Logging.Log("DebugInventoryTree", "InventoryWindow.currInvIdName: " + Cache.Instance.PrimaryInventoryWindow.currInvIdName, Logging.Red);
                     Logging.Log("DebugInventoryTree", "InventoryWindow.currInvIdName: " + Cache.Instance.PrimaryInventoryWindow.currInvIdItem, Logging.Red);
 
-                    foreach (Int64 itemintree in Cache.Instance.IDsinInventoryTree)
+                    foreach (Int64 itemInTree in Cache.Instance.IDsinInventoryTree)
                     {
-                        if (Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false).Contains(itemintree))
+                        if (Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false).Contains(itemInTree))
                         {
-                            Cache.Instance.PrimaryInventoryWindow.SelectTreeEntryByID(itemintree);
-                            Cache.Instance.IDsinInventoryTree.Remove(itemintree);
+                            Cache.Instance.PrimaryInventoryWindow.SelectTreeEntryByID(itemInTree);
+                            Cache.Instance.IDsinInventoryTree.Remove(itemInTree);
                             break;
                         }
                     }

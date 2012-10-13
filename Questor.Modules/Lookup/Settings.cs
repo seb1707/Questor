@@ -211,8 +211,10 @@ namespace Questor.Modules.Lookup
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
         //
-        public int Walletbalancechangelogoffdelay { get; set; }
-        public string WalletbalancechangelogoffdelayLogofforExit { get; set; }
+        public int WalletBalanceChangeLogOffDelay { get; set; }
+
+        public string WalletBalanceChangeLogOffDelayLogoffOrExit { get; set; }
+
         public Int64 EVEProcessMemoryCeiling { get; set; }
         public string EVEProcessMemoryCeilingLogofforExit { get; set; }
         public bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
@@ -224,11 +226,12 @@ namespace Questor.Modules.Lookup
         public string LoginQuestorOSCmdContents { get; set; }
         public bool LoginQuestorLavishScriptCmd { get; set; }
         public string LoginQuestorLavishScriptContents { get; set; }
-        public int SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 240;
+        public int SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
+
         public string LavishIsBoxerCharacterSet { get; set; }
         public string LavishInnerspaceProfile { get; set; }
         public string LavishGame { get; set; }
-        //public int missionbookmarktoagentloops { get; set; }  //not yet used - although it is likely a good ide to fix it so it is used - it would eliminate going back and fourth to the same mission over and over
+
         public List<int> ItemsBlackList { get; set; }
         public List<int> WreckBlackList { get; set; }
         public bool WreckBlackListSmallWrecks { get; set; }
@@ -303,8 +306,8 @@ namespace Questor.Modules.Lookup
         public int TrackingLinkScript { get; private set; }
         public int SensorBoosterScript { get; private set; }
         public int SensorDampenerScript { get; private set; }
-        public int AncillaryShieldBoosterScript { get; private set; } //they arent scripts, but they work the same, but are consumable for ourpurposes that doesnt matter
-        public int CapacitorInjectorScript { get; private set; }      //they arent scripts, but they work the same, but are consumable for ourpurposes that doesnt matter
+        public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
+        public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
 
         //
         // Speed and Movement Settings
@@ -395,7 +398,9 @@ namespace Questor.Modules.Lookup
         public string Path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public string SettingsPath { get; private set; }
         public event EventHandler<EventArgs> SettingsLoaded;
-        public bool Defaultsettingsloaded;
+
+        public bool DefaultSettingsLoaded;
+
         public void LoadSettings()
         {
             try
@@ -422,10 +427,10 @@ namespace Questor.Modules.Lookup
             Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
             Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
 
-            if (!File.Exists(Settings.Instance.SettingsPath) && !Defaultsettingsloaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
+            if (!File.Exists(Settings.Instance.SettingsPath) && !DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
                 Settings.Instance.CharacterXMLExists = false;
-                Defaultsettingsloaded = true;
+                DefaultSettingsLoaded = true;
                 //LavishScript.ExecuteCommand("log " + Cache.Instance.DirectEve.Me.Name + ".log");
                 //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.Instance.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.SettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
@@ -543,9 +548,9 @@ namespace Questor.Modules.Lookup
                 LoginQuestorLavishScriptCmd = false;
                 LoginQuestorLavishScriptContents = string.Empty;
                 
-                Walletbalancechangelogoffdelay = 30;
-                WalletbalancechangelogoffdelayLogofforExit = "exit";
-                SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 240;
+                WalletBalanceChangeLogOffDelay = 30;
+                WalletBalanceChangeLogOffDelayLogoffOrExit = "exit";
+                SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
                 //
                 // Value - Used in calculations
@@ -636,8 +641,8 @@ namespace Questor.Modules.Lookup
                 // 29005 Optimal Range Disruption Script  // tracking disruptor
                 // 29011 Scan Resolution Script           // sensor booster
                 // 29009 Targeting Range Script           // sensor booster
-                // 29015 Targeting Range Dampening Script // sensor dampner
-                // 29013 Scan Resolution Dampening Script // sensor dampner
+                // 29015 Targeting Range Dampening Script // sensor dampener
+                // 29013 Scan Resolution Dampening Script // sensor dampener
                 // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
                 // 28999 Optimal Range Script             // tracking enhancer and tracking computer
                 
@@ -745,8 +750,6 @@ namespace Questor.Modules.Lookup
                 FactionBlacklist.Clear();
 
                 MissionName = null;
-                //missionbookmarktoagentloops = 0;
-                //return;
             }
             else //if the settings file exists - load the characters settings XML
             {
@@ -775,7 +778,7 @@ namespace Questor.Modules.Lookup
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
-                    DebugReloadorChangeAmmo = (bool?)xml.Element("debugreloadorChangeAmmo") ?? false;
+                    DebugReloadorChangeAmmo = (bool?)xml.Element("debugReloadOrChangeAmmo") ?? false;
                     DebugStatistics = (bool?)xml.Element("debugStatistics") ?? false;
                     DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
                     DebugIdle = (bool?)xml.Element("debugIdle") ?? false;
@@ -949,10 +952,10 @@ namespace Questor.Modules.Lookup
 
                     //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
 
-                    Walletbalancechangelogoffdelay = (int?)xml.Element("walletbalancechangelogoffdelay") ?? 30;
-                    WalletbalancechangelogoffdelayLogofforExit =
+                    WalletBalanceChangeLogOffDelay = (int?)xml.Element("walletbalancechangelogoffdelay") ?? 30;
+                    WalletBalanceChangeLogOffDelayLogoffOrExit =
                         (string)xml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
-                    SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE = 240;
+                    SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
                     if (UseInnerspace)
                     {
@@ -1007,8 +1010,8 @@ namespace Questor.Modules.Lookup
                     // 29005 Optimal Range Disruption Script  // tracking disruptor
                     // 29011 Scan Resolution Script           // sensor booster
                     // 29009 Targeting Range Script           // sensor booster
-                    // 29015 Targeting Range Dampening Script // sensor dampner
-                    // 29013 Scan Resolution Dampening Script // sensor dampner
+                    // 29015 Targeting Range Dampening Script // sensor dampener
+                    // 29013 Scan Resolution Dampening Script // sensor dampener
                     // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
                     // 28999 Optimal Range Script             // tracking enhancer and tracking computer
 
@@ -1318,7 +1321,7 @@ namespace Questor.Modules.Lookup
             Directory.CreateDirectory(MissionDungeonIdLogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
             Directory.CreateDirectory(PocketObjectStatisticsPath);
-            if (!Defaultsettingsloaded)
+            if (!DefaultSettingsLoaded)
             {
                 if (SettingsLoaded != null)
                     SettingsLoaded(this, new EventArgs());

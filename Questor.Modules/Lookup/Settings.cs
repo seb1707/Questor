@@ -64,33 +64,34 @@ namespace Questor.Modules.Lookup
         //
         // Debug Variables
         //
-        public bool DebugStates { get; set; }
-        public bool DebugPerformance { get; set; }
-        public bool DetailedCurrentTargetHealthLogging { get; set; }
-        public bool DebugLootWrecks { get; set; }
         public bool DebugActivateWeapons { get; set; }
-        public bool DebugReloadorChangeAmmo { get; set; }
-        public bool DebugStatistics { get; set; }
-        public bool DebugGotobase { get; set; }
-        public bool DebugIdle { get; set; }
-        public bool DebugAutoStart { get; set; }
-        public bool DebugDecline { get; set; }
-        public bool DebugHangars { get; set; }
-        public bool DebugLogging { get; set; }
-        public bool DebugSalvage { get; set; }
-        public bool DebugUI { get; set; }
-        public bool DebugReloadAll { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
-        public bool DebugDroneHealth { get; set; }
-        public bool DebugNavigateOnGrid { get; set; }
-        public bool DebugTraveler { get; set; }
-        public bool DebugValuedump { get; set; }
-        public bool DebugOnframe { get; set; }
+        public bool DebugAutoStart { get; set; }
         public bool DebugCleanup { get; set; }
-        public bool DebugScheduler { get; set; }
-        public bool DebugUnloadLoot { get; set; }
+        public bool DebugDecline { get; set; }
+        public bool DebugDefense { get; set; }
+        public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
+        public bool DebugGotobase { get; set; }
+        public bool DebugHangars { get; set; }
+        public bool DebugIdle { get; set; }
         public bool DebugLoadScripts { get; set; }
+        public bool DebugLogging { get; set; }
+        public bool DebugLootWrecks { get; set; }
+        public bool DebugNavigateOnGrid { get; set; }
+        public bool DebugOnframe { get; set; }
+        public bool DebugPerformance { get; set; }
+        public bool DebugReloadAll { get; set; }
+        public bool DebugReloadorChangeAmmo { get; set; }
+        public bool DebugSalvage { get; set; }
+        public bool DebugScheduler { get; set; }
+        public bool DebugStatistics { get; set; }
+        public bool DebugTraveler { get; set; }
+        public bool DebugUI { get; set; }
+        public bool DebugUnloadLoot { get; set; }
+        public bool DebugValuedump { get; set; }
+        public bool DetailedCurrentTargetHealthLogging { get; set; }
+        public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
 
@@ -434,35 +435,34 @@ namespace Questor.Modules.Lookup
                 //LavishScript.ExecuteCommand("log " + Cache.Instance.DirectEve.Me.Name + ".log");
                 //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.Instance.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.SettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
-                DebugStates = false;
-                //enables more console logging having to do with the sub-states within each state
-                DebugPerformance = false;
-                //enabled more console logging having to do with the time it takes to execute each state
-                DetailedCurrentTargetHealthLogging = false;
-                DebugLootWrecks = false;
                 DebugActivateWeapons = false;
-                DebugReloadorChangeAmmo = false;
-                DebugStatistics = false;
-                DebugGotobase = false;
-                DebugIdle = false;
-                DebugAutoStart = false;
-                DebugDecline = false;
-                DebugHangars = false;
-                DebugLogging = false;
-                DebugSalvage = false;
-                DebugUI = false;
                 DebugAttachVSDebugger = false;
-                DebugDroneHealth = false;
-                DebugNavigateOnGrid = false;
-                DebugReloadAll = false;
-                DebugTraveler = false;
-                DebugValuedump = false;
-                DebugOnframe = false;
+                DebugAutoStart = false;
                 DebugCleanup = false;
-                DebugScheduler = false;
-                DebugUnloadLoot = false;
+                DebugDecline = false;
+                DebugDefense = false;
+                DebugDroneHealth = false;
                 DebugExceptions = false;
+                DebugGotobase = false;
+                DebugHangars = false;
+                DebugIdle = false;
                 DebugLoadScripts = false;
+                DebugLogging = false;
+                DebugLootWrecks = false;
+                DebugNavigateOnGrid = false;
+                DebugOnframe = false;
+                DebugPerformance = false;
+                DebugReloadAll = false;
+                DebugReloadorChangeAmmo = false;
+                DebugSalvage = false;
+                DebugScheduler = false;
+                DebugStates = false;
+                DebugStatistics = false;
+                DebugTraveler = false;
+                DebugUI = false;
+                DebugUnloadLoot = false;
+                DebugValuedump = false;
+                DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
                 //
@@ -769,37 +769,35 @@ namespace Questor.Modules.Lookup
 
                     //
                     // Debug Settings
-                    //
-
-                    DebugStates = (bool?)xml.Element("debugStates") ?? false;
-                    //enables more console logging having to do with the sub-states within each state
-                    DebugPerformance = (bool?)xml.Element("debugPerformance") ?? false;
-                    //enabled more console logging having to do with the time it takes to execute each state
-                    DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
-                    DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
+                    // 
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
-                    DebugReloadorChangeAmmo = (bool?)xml.Element("debugReloadOrChangeAmmo") ?? false;
-                    DebugStatistics = (bool?)xml.Element("debugStatistics") ?? false;
-                    DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
-                    DebugIdle = (bool?)xml.Element("debugIdle") ?? false;
-                    DebugAutoStart = (bool?)xml.Element("debugAutoStart") ?? false;
-                    DebugDecline = (bool?)xml.Element("debugDecline") ?? false;
-                    DebugHangars = (bool?)xml.Element("debugHangars") ?? false;
-                    DebugLogging = (bool?)xml.Element("debugLogging") ?? false;
-                    DebugSalvage = (bool?)xml.Element("debugSalvage") ?? false;
-                    DebugUI = (bool?)xml.Element("debugUI") ?? false;
                     DebugAttachVSDebugger = (bool?)xml.Element("debugAttachVSDebugger") ?? false;
-                    DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
-                    DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;
-                    DebugReloadAll = (bool?)xml.Element("debugReloadAll") ?? false;
-                    DebugTraveler = (bool?)xml.Element("debugTraveler") ?? false;
-                    DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
-                    DebugScheduler = (bool?)xml.Element("debugScheduler") ?? false;
-                    DebugOnframe = (bool?)xml.Element("debugOnframe") ?? false;
+                    DebugAutoStart = (bool?)xml.Element("debugAutoStart") ?? false;
                     DebugCleanup = (bool?)xml.Element("debugCleanup") ?? false;
-                    DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
+                    DebugDecline = (bool?)xml.Element("debugDecline") ?? false;
+                    DebugDefense = (bool?)xml.Element("debugDefense") ?? false;
+                    DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
                     DebugExceptions = (bool?)xml.Element("debugExceptions") ?? false;
+                    DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
+                    DebugHangars = (bool?)xml.Element("debugHangars") ?? false;
+                    DebugIdle = (bool?)xml.Element("debugIdle") ?? false;
                     DebugLoadScripts = (bool?)xml.Element("debugLoadScripts") ?? false;
+                    DebugLogging = (bool?)xml.Element("debugLogging") ?? false;
+                    DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
+                    DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;
+                    DebugOnframe = (bool?)xml.Element("debugOnframe") ?? false;
+                    DebugPerformance = (bool?)xml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
+                    DebugReloadAll = (bool?)xml.Element("debugReloadAll") ?? false;
+                    DebugReloadorChangeAmmo = (bool?)xml.Element("debugReloadOrChangeAmmo") ?? false;
+                    DebugSalvage = (bool?)xml.Element("debugSalvage") ?? false;
+                    DebugScheduler = (bool?)xml.Element("debugScheduler") ?? false;
+                    DebugStates = (bool?)xml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
+                    DebugStatistics = (bool?)xml.Element("debugStatistics") ?? false;
+                    DebugTraveler = (bool?)xml.Element("debugTraveler") ?? false;
+                    DebugUI = (bool?)xml.Element("debugUI") ?? false;
+                    DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
+                    DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
+                    DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
 

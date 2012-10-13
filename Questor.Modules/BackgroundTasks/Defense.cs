@@ -386,7 +386,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 module.Click();
                 Cache.Instance.NextActivateSupportModules = DateTime.Now.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
                 continue;
             }
             ModuleNumber = 0;
@@ -594,7 +594,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (DateTime.Now.Subtract(_lastSessionChange).TotalSeconds < 7)
             {
-                Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
                 return;
             }
 

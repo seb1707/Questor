@@ -118,7 +118,7 @@ namespace QuestorManager
                     List.Add(_item);
                 }
 
-            RefreshJobs();
+            RefreshAvailableXMLJobs();
             _directEve.OnFrame += OnFrame;
 
             //if (Settings.Instance.UseInnerspace)
@@ -1000,10 +1000,10 @@ namespace QuestorManager
             XDocument fileXml = new XDocument(xml);
             fileXml.Save(fic);
 
-            RefreshJobs();
+            RefreshAvailableXMLJobs();
         }
 
-        private void RefreshJobs()
+        private void RefreshAvailableXMLJobs()
         {
             cmbXML.Items.Clear();
 

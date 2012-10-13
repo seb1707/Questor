@@ -3984,7 +3984,9 @@ namespace Questor.Modules.Caching
                     
                     Logging.Log(module, "Repairing Items", Logging.White);
                     repairWindow.RepairAll();
+                    Cache.Instance.RepairAll = false;
                     NextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(1, 2));
+                    return false;
                 }
                 
                 Logging.Log(module, "No items available, nothing to repair.", Logging.Orange);

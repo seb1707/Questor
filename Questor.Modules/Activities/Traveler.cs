@@ -51,11 +51,10 @@ namespace Questor.Modules.Activities
         public bool SetStationDestination(long stationId)
         {
             _location = Cache.Instance.DirectEve.Navigation.GetLocation(stationId);
-            Logging.Log("Traveler", "Location = [" + Logging.Yellow + Cache.Instance.DirectEve.Navigation.GetLocationName(stationId) + Logging.Green + "]", Logging.Green);
+            if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Location = [" + Logging.Yellow + Cache.Instance.DirectEve.Navigation.GetLocationName(stationId) + Logging.Green + "]", Logging.Green);
             if (_location.IsValid)
             {
                 _locationErrors = 0;
-                Logging.Log("Traveler", "Setting destination to [" + Logging.Yellow + _location.Name + Logging.Green + "]", Logging.Green);
                 if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Setting destination to [" + Logging.Yellow + _location.Name + Logging.Green + "]", Logging.Teal);
                 _location.SetDestination();
                 return true;

@@ -665,7 +665,7 @@ namespace ValueDump
                         IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId));
                         if (!Cache.Instance.OpenCargoHold("ValueDump")) break;
 
-                        if (!Cache.Instance.OpenAmmoHangar("ValueDump")) break;
+                        if (!Cache.Instance.ReadyAmmoHangar("ValueDump")) break;
                         if (refineItems != null)
                         {
                             Logging.Log("Arm", "Moving loot to refine to CargoHold", Logging.White);

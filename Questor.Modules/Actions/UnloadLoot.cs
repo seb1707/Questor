@@ -68,7 +68,7 @@ namespace Questor.Modules.Actions
 
                 case UnloadLootState.MoveCommonMissionCompletionItemsToAmmoHangar:
                     if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.Instance.OpenAmmoHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
                     //
                     // how do we get IsMissionItem to work for us here? (see ItemCache)
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
@@ -206,22 +206,26 @@ namespace Questor.Modules.Actions
 
                 case UnloadLootState.MoveAmmo:
                     if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.Instance.OpenAmmoHangar("UnloadLoot")) return;
+                    if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
                     //
                     // if items in the hangar + items to move is greater than 1000 then we need to do something else (what?)
                     // - we could possibly move less items at a time, and stack in between?
                     // - maybe like 10 items at a time until we cant even move 10...
                     //
                     // could we get fancy and move things into a freight container??!?
-                    //
-                    Logging.Log("UnloadLoot", "Moving Ammo to AmmoHangar [" + Cache.Instance.AmmoHangar.Window.Name + "][" + Cache.Instance.AmmoHangar.DataId + "]", Logging.White);
-                    // Move the mission item & ammo to the ammo hangar
-                    Cache.Instance.AmmoHangar.Add(Cache.Instance.CargoHold.Items.Where(i => ((i.TypeName ?? string.Empty).ToLower() == Cache.Instance.BringMissionItem || Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId))));
-                    //Cache.Instance.AmmoHangar.Add(Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)));
-                    Logging.Log("UnloadLoot", "Waiting for items to move to AmmoHangar", Logging.White);
-                    _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                    _lastUnloadAction = DateTime.Now;
-                    _States.CurrentUnloadLootState = UnloadLootState.StackAmmoHangar;
+                    if (Cache.Instance.AmmoHangar.IsValid)
+                    {
+                        Logging.Log("UnloadLoot", "Moving Ammo to AmmoHangar [" + Cache.Instance.AmmoHangar.DataId + "]", Logging.White);
+                        // Move the mission item & ammo to the ammo hangar
+                        Cache.Instance.AmmoHangar.Add(Cache.Instance.CargoHold.Items.Where(i => ((i.TypeName ?? string.Empty).ToLower() == Cache.Instance.BringMissionItem || Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId))));
+                        //Cache.Instance.AmmoHangar.Add(Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)));
+                        Logging.Log("UnloadLoot", "Waiting for items to move to AmmoHangar", Logging.White);
+                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                        _lastUnloadAction = DateTime.Now;
+                        _States.CurrentUnloadLootState = UnloadLootState.StackAmmoHangar;
+                        break;
+                    }
+                    Logging.Log("UnloadLoot", "AmmoHangar is not yet ready. waiting...", Logging.White);
                     break;
 
                 case UnloadLootState.WaitForMove:

@@ -213,8 +213,8 @@ namespace Questor.Modules.Logging
                 {
                     if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
                     {
-                        if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return false;
-                        if (Cache.Instance.DroneBay.Window == null) return true; //if the drone window does not exist, assume we cant log any drone stats
+                        if (!Cache.Instance.ReadyDroneBay("Statistics: WriteDroneStatsLog")) return false;
+                        if (!Cache.Instance.DroneBay.IsValid) return true; //if the dronebay does not exist, assume we cant log any drone stats
 
                         InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                         Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);

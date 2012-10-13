@@ -451,7 +451,7 @@ namespace Questor.Modules.Actions
                 case ArmState.MoveDrones:
                     if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
-                    if (!Cache.Instance.OpenDroneBay("Arm")) break;
+                    if (!Cache.Instance.ReadyDroneBay("Arm")) break;
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
 
@@ -609,7 +609,7 @@ namespace Questor.Modules.Actions
                     {
                         // Close the drone bay, its not required in space.
                         //if (Cache.Instance.DroneBay.IsReady) //why is not .isready and .isvalid working at the moment? 4/2012
-                        Cache.Instance.DroneBay.Window.Close();
+                        Cache.Instance.CloseDroneBay("Arm");
                     }
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)

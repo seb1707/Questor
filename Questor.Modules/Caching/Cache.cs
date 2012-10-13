@@ -899,6 +899,8 @@ namespace Questor.Modules.Caching
 
         public int PanicAttemptsThisPocket { get; set; }
 
+        private int GetShipsDroneBayAttempts { get; set; }
+
         public double LowestShieldPercentageThisMission { get; set; }
 
         public double LowestArmorPercentageThisMission { get; set; }
@@ -3583,28 +3585,37 @@ namespace Questor.Modules.Caching
         //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
         //}
 
-        public bool OpenDroneBay(String module)
+        public bool ReadyDroneBay(String module)
         {
             if (DateTime.Now < Cache.Instance.NextDroneBayAction)
             {
                 //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]",Logging.White);
                 return false;
             }
+
             if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
             {
                 Logging.Log(module, "Opening Drone Bay: We are not in station or space?!", Logging.Orange);
                 return false;
             }
+
             //if(Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == 31)
             //{
             //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
             //    return false;
             //}
+
             if (Cache.Instance.InStation || Cache.Instance.InSpace)
             {
                 Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
             }
             else return false;
+
+            if (GetShipsDroneBayAttempts > 10) //we her havent located a dronebay in over 10 attempts, we are not going to 
+            {
+                if (Settings.Instance.DebugHangars) Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.DebugHangars);
+                return true;
+            }
 
             if (Cache.Instance.DroneBay == null)
             {
@@ -3612,29 +3623,18 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "Opening Drone Bay: --- waiting [" +
                                 Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) +
                                 "sec]", Logging.White);
-
-                return false;
-            }
-            // Is the drone bay open?
-            if (Cache.Instance.DroneBay.Window == null)
-            {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenDroneBay", "DroneBay window is null at the moment", Logging.White);
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                return false;
-            }
-            if (!Cache.Instance.DroneBay.Window.IsReady)
-            {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenDroneBay", "DroneBay window is not ready yet", Logging.White);
+                GetShipsDroneBayAttempts++;
                 return false;
             }
 
-            if (Cache.Instance.DroneBay.Window.IsReady)
+            if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.IsValid)
             {
                 Cache.Instance.NextDroneBayAction = DateTime.Now.AddSeconds(1 + Cache.Instance.RandomNumber(1, 2));
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenDroneBay", "DroneBay window is ready. waiting [" + Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
+                if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
+                GetShipsDroneBayAttempts = 0;
                 return true;
             }
-            Logging.Log(module, "DroneBay is not ready but made it past the return above?!? how?", Logging.White);
+            if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is not ready...", Logging.White);
             return false;
         }
 
@@ -3919,7 +3919,7 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.Now < NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                Logging.Log(module, "Waiting...", Logging.Orange);
+                //Logging.Log(module, "Waiting...", Logging.Orange);
                 return false;
             }
 
@@ -3933,47 +3933,59 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                //Cache.Instance.DirectEve.OpenRepairShop();
                 DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
+
+                DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
+
+                if (doneUsingRepairWindow)
+                {
+                    doneUsingRepairWindow = false;
+                    if (repairWindow != null) repairWindow.Close();
+                    return true;
+                }
+
+                if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
+                {
+                    if (repairQuote.Html != null) Logging.Log("Cleanup", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                    Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
+                    repairQuote.AnswerModal("OK");
+                    doneUsingRepairWindow = true;
+                    return false;
+                }
 
                 if (repairWindow == null)
                 {
                     Logging.Log(module, "Opening repairshop window", Logging.White);
                     Cache.Instance.DirectEve.OpenRepairShop();
-
-                    NextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                    NextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                     return false;
                 }
                 
                 if (!Cache.Instance.ReadyShipsHangar(module)) return false;
                 if (!Cache.Instance.OpenItemsHangar(module)) return false;
+                if (!Cache.Instance.ReadyDroneBay(module)) return false;
 
                 //repair ships in ships hangar
-                List<DirectItem> items = Cache.Instance.ShipHangar.Items;
-                //repair items in items hangar also
-                items.AddRange(Cache.Instance.ItemHangar.Items);
+                List<DirectItem> repairAllItems = Cache.Instance.ShipHangar.Items;
+                //repair items in items hangar and drone bay of active ship also
+                repairAllItems.AddRange(Cache.Instance.ItemHangar.Items);
+                repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
 
-                if (items.Any())
+                if (repairAllItems.Any())
                 {
                     if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
                     {
                         Logging.Log(module, "Add items to repair list", Logging.White);
-                        //                          foreach (DirectItem item in items)
-                        //                          {
-                        //                              Logging.Log(module, "Items: " + item.TypeName, Logging.White);
-                        //                          }
-                        repairWindow.RepairItems(items);
-
-                        NextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                        repairWindow.RepairItems(repairAllItems);
                         return false;
                     }
                     
                     Logging.Log(module, "Repairing Items", Logging.White);
                     repairWindow.RepairAll();
+                    NextRepairItemsAction = DateTime.Now.AddSeconds(Settings.Instance.RandomNumber(1, 2));
                 }
-                else
-                    Logging.Log(module, "No items are damaged, nothing to repair.", Logging.Orange);
-
+                
+                Logging.Log(module, "No items available, nothing to repair.", Logging.Orange);
                 return true;
             }
             Logging.Log(module, "Not in station.", Logging.Orange);
@@ -3998,7 +4010,6 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                //Cache.Instance.DirectEve.OpenRepairShop();
                 DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
 
                 DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
@@ -4007,6 +4018,7 @@ namespace Questor.Modules.Caching
                 {
                     doneUsingRepairWindow = false;
                     if (repairWindow != null) repairWindow.Close();
+                    return true;
                 }
 
                 if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
@@ -4015,7 +4027,7 @@ namespace Questor.Modules.Caching
                     Logging.Log(module, "Closing Quote for Repairing Drones with OK", Logging.White);
                     repairQuote.AnswerModal("OK");
                     doneUsingRepairWindow = true;
-                    return true;
+                    return false;
                 }
 
                 if (repairWindow == null)
@@ -4026,9 +4038,8 @@ namespace Questor.Modules.Caching
                     return false;
                 }
                 
-                if (!Cache.Instance.ReadyShipsHangar(module)) return false;
-                if (!Cache.Instance.OpenItemsHangar(module)) return false;
-
+                if (!Cache.Instance.ReadyDroneBay(module)) return false;
+                
                 List<DirectItem> dronesToRepair = Cache.Instance.DroneBay.Items;
                 
                 if (dronesToRepair.Any())

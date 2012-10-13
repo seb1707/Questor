@@ -2346,6 +2346,13 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(1, 2));
+                    return false;
+                }
+
+                if (!Cache.Instance.ItemHangar.Window.IsReady)
+                {
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar.window is not yet ready", Logging.Teal);
                     Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 3));
                     Logging.Log(module, "Opening Item Hangar: waiting [" +
                                 Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
@@ -2353,11 +2360,6 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (!Cache.Instance.ItemHangar.Window.IsReady)
-                {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar.window is not yet ready", Logging.Teal);
-                    return false;
-                }
                 if (Cache.Instance.ItemHangar.Window.IsReady)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar.window ready", Logging.Teal);
@@ -3946,9 +3948,26 @@ namespace Questor.Modules.Caching
                     return true;
                 }
 
+                foreach (DirectWindow window in Cache.Instance.Windows)
+                {
+                    if (window.Name == "modal")
+                    {
+                        if (!string.IsNullOrEmpty(window.Html))
+                        {
+                            if (window.Html.Contains("Repairing these items will cost"))
+                            {
+                                Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
+                                window.AnswerModal("Yes");
+                                doneUsingRepairWindow = true;
+                                return false;
+                            }
+                        }
+                    }
+                }
+
                 if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
                 {
-                    if (repairQuote.Html != null) Logging.Log("Cleanup", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                    if (repairQuote.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                     Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
                     repairQuote.AnswerModal("OK");
                     doneUsingRepairWindow = true;

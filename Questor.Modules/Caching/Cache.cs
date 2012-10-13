@@ -128,19 +128,9 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _stations;
 
         /// <summary>
-        ///   Station cache
-        /// </summary>
-        private EntityCache _closeststation;
-
-        /// <summary>
         ///   Stargate cache
         /// </summary>
         private List<EntityCache> _stargates;
-
-        /// <summary>
-        ///   Stargate by name
-        /// </summary>
-        private EntityCache _closestStargate;
 
         /// <summary>
         ///   Stargate by name
@@ -170,7 +160,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   IDs in Inventory window tree (on left)
         /// </summary>
-        public List<long> IdsinInventoryTree;
+        public List<long> _IDsinInventoryTree;
 
         /// <summary>
         ///   Returns all unlooted wrecks & containers
@@ -346,8 +336,6 @@ namespace Questor.Modules.Caching
         ///   Best orbit distance for the mission
         /// </summary>
         public int OrbitDistance { get; set; }
-
-        private int CorpHangarOpenAttempts { get; set; }
 
         /// <summary>
         ///   Force Salvaging after mission
@@ -1158,26 +1146,12 @@ namespace Questor.Modules.Caching
             get { return _targeting ?? (_targeting = Entities.Where(e => e.IsTargeting).ToList()); }
         }
 
-        public DateTime DsInInventoryTreeTimeStamp;
-
         public List<long> IDsinInventoryTree
         {
             get
             {
-                if (IdsinInventoryTree.Any())
-                {
-                    if (DateTime.Now > DsInInventoryTreeTimeStamp.AddSeconds(30))
-                    {
-                        Logging.Log("Cache.IDsinInventoryTree", "Refreshing IDs from inventory tree, it has been longer than 30 seconds since the last refresh", Logging.Teal);
-                        DsInInventoryTreeTimeStamp = DateTime.Now;
-                        return IdsinInventoryTree = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false);
-                    }
-                    
-                    return IdsinInventoryTree ?? (IdsinInventoryTree = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false));
-                }
-                
-                DsInInventoryTreeTimeStamp = DateTime.Now;
-                return IdsinInventoryTree = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false);
+                Logging.Log("Cache.IDsinInventoryTree", "Refreshing IDs from inventory tree, it has been longer than 30 seconds since the last refresh", Logging.Teal);
+                return _IDsinInventoryTree ?? (_IDsinInventoryTree = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false));
             }
         }
 
@@ -1210,7 +1184,7 @@ namespace Questor.Modules.Caching
                 if (!InSpace)
                     return new List<EntityCache>();
 
-                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid && e.Name != Settings.Instance.CharacterName).ToList());
+                return DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid && e.Name != Settings.Instance.CharacterName).ToList();
             }
         }
 
@@ -1292,7 +1266,7 @@ namespace Questor.Modules.Caching
 
         public EntityCache ClosestStation
         {
-            get { return _closeststation ?? (_closeststation = Entities.Where(e => e.CategoryId == (int)CategoryID.Station).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault()); }
+            get { return Stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
         }
 
         public EntityCache StationByName(string stationName)
@@ -1312,20 +1286,20 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Stargates
         {
-            get { return _stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList(); }
+            get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList()); }
         }
 
         public EntityCache ClosestStargate
         {
-            get { return _closestStargate = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList().OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
+            get { return Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
         }
 
         public EntityCache StargateByName(string locationName)
         {
             {
-                return _stargate =
+                return _stargate ?? (_stargate =
                         Cache.Instance.EntitiesByName(locationName).FirstOrDefault(
-                            e => e.GroupId == (int)Group.Stargate);
+                            e => e.GroupId == (int)Group.Stargate));
             }
         }
 
@@ -1333,13 +1307,13 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjects = Entities.Where(e =>
+                return _bigObjects ?? (_bigObjects = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
                        e.GroupId == (int)Group.LargeCollidableObject ||
                        e.GroupId == (int)Group.LargeCollidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1347,9 +1321,9 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _gates = Entities.Where(e =>
+                return _gates ?? (_gates = Entities.Where(e =>
                        e.GroupId == (int)Group.AccellerationGate &&
-                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList();
+                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1357,14 +1331,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjectsAndGates = Entities.Where(e =>
+                return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
                        e.GroupId == (int)Group.LargeCollidableStructure ||
                        e.GroupId == (int)Group.LargeCollidableObject ||
                        e.GroupId == (int)Group.LargeCollidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccellerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
+                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1385,7 +1359,7 @@ namespace Questor.Modules.Caching
 
         public EntityCache Star
         {
-            get { return _star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star); }
+            get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
         }
 
         public IEnumerable<EntityCache> PriorityTargets
@@ -1528,7 +1502,9 @@ namespace Questor.Modules.Caching
         public double SessionTotalPerHrGenerated { get; set; }
 
         public bool QuestorJustStarted = true;
+
         public DateTime EnteredCloseQuestor_DateTime;
+
         public bool DropMode { get; set; }
 
         public DirectWindow GetWindowByCaption(string caption)
@@ -1656,22 +1632,32 @@ namespace Questor.Modules.Caching
         /// </summary>
         public void InvalidateCache()
         {
-            _windows = null;
-            _unlootedContainers = null;
+            //
+            // this list of variables is cleared every pulse. 
+            //
+            _activeDrones = null;
+            _agent = null;
+            _aggressed = null;
+            _approaching = null;
+            _activeDrones = null;
+            _bigObjects = null;
+            _bigObjectsAndGates = null;
+            _containers = null;
+            _entities = null;
+            _entitiesById.Clear();
+            _gates = null;
+            _IDsinInventoryTree = null; 
+            _modules = null;
+            _objects = null;
+            _priorityTargets.ForEach(pt => pt.ClearCache());
             _star = null;
             _stations = null;
             _stargates = null;
-            _modules = null;
             _targets = null;
             _targeting = null;
             _targetedBy = null;
-            _entities = null;
-            _agent = null;
-            _approaching = null;
-            _activeDrones = null;
-            _containers = null;
-            _priorityTargets.ForEach(pt => pt.ClearCache());
-            _entitiesById.Clear();
+            _unlootedContainers = null;
+            _windows = null;
         }
 
         public string FilterPath(string path)
@@ -2803,6 +2789,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar.window is not yet ready", Logging.Teal);
                     return false;
                 }
+
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
                     Cache.Instance.ShipHangar.Window.Close();

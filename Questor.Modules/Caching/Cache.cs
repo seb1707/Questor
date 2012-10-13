@@ -1475,6 +1475,8 @@ namespace Questor.Modules.Caching
 
         public DateTime LastInSpace { get; set; }
 
+        public DateTime LastInWarp = DateTime.Now.AddMinutes(5);
+
         public bool CloseQuestorCMDLogoff; //false;
 
         public bool CloseQuestorCMDExitGame = true;

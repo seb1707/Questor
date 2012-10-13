@@ -216,7 +216,7 @@ namespace Questor.Behaviors
                             Logging.Log("DebugHangarsBehavior", _States.CurrentDebugHangarBehaviorState +
                                         ": initiating Orbit of [" + thisBigObject.Name +
                                         "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.White);
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.Instance.OrbitDelay_seconds);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         }
                         return;
                         //we are still too close, do not continue through the rest until we are not "too close" anymore
@@ -306,7 +306,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugHangarsBehaviorState.DelayedGotoBase:
-                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < (int)Time.Instance.DelayedGotoBase_seconds)
+                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
                         break;
 
                     Logging.Log("DebugHangarsBehavior", "Heading back to base", Logging.White);
@@ -538,14 +538,14 @@ namespace Questor.Behaviors
                             {
                                 Logging.Log("DebugHangarsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                 station.Dock();
-                                Cache.Instance.NextDockAction = DateTime.Now.AddSeconds((int)Time.Instance.DockingDelay_seconds);
+                                Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
                             }
                         }
                         else
                         {
                             if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
                             {
-                                Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.Instance.ApproachDelay_seconds);
+                                Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                                 Logging.Log("DebugHangarsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                 station.Approach();
                             }

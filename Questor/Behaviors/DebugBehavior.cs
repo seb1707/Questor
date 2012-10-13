@@ -9,7 +9,6 @@
 // -------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -119,13 +118,13 @@ namespace Questor.Behaviors
             ValidSettings = true;
             if (Settings.Instance.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
             {
-                if (!Settings.Instance.Ammo.Any(a => a.DamageType == DamageType.EM))
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.EM))
                     Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (!Settings.Instance.Ammo.Any(a => a.DamageType == DamageType.Thermal))
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Thermal))
                     Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (!Settings.Instance.Ammo.Any(a => a.DamageType == DamageType.Kinetic))
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Kinetic))
                     Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (!Settings.Instance.Ammo.Any(a => a.DamageType == DamageType.Explosive))
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Explosive))
                     Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
 
                 Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
@@ -221,7 +220,7 @@ namespace Questor.Behaviors
                             Logging.Log("DebugBehavior", _States.CurrentDebugBehaviorState +
                                         ": initiating Orbit of [" + thisBigObject.Name +
                                         "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.White);
-                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds((int)Time.Instance.OrbitDelay_seconds);
+                            Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         }
                         return;
                         //we are still too close, do not continue through the rest until we are not "too close" anymore
@@ -235,7 +234,7 @@ namespace Questor.Behaviors
             // Invalid settings, quit while we're ahead
             if (!ValidSettings)
             {
-                if (DateTime.Now.Subtract(LastAction).TotalSeconds < (int)Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
+                if (DateTime.Now.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
                 {
                     ValidateCombatMissionSettings();
                     LastAction = DateTime.Now;
@@ -348,7 +347,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugBehaviorState.DelayedGotoBase:
-                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < (int)Time.Instance.DelayedGotoBase_seconds)
+                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
                         break;
 
                     Logging.Log("DebugBehavior", "Heading back to base", Logging.White);
@@ -513,9 +512,11 @@ namespace Questor.Behaviors
                         if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                         return;
                     }
-                    else
-                        if (destination.Count == 1 && destination.First() == 0)
-                            destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+                    
+                    if (destination.Count == 1 && destination.First() == 0)
+                    {
+                        destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+                    }
                     if (_traveler.Destination == null || _traveler.Destination.SolarSystemId != destination.Last())
                     {
                         IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
@@ -582,14 +583,14 @@ namespace Questor.Behaviors
                                 {
                                     Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                     station.Dock();
-                                    Cache.Instance.NextDockAction = DateTime.Now.AddSeconds((int)Time.Instance.DockingDelay_seconds);
+                                    Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
                                 }
                             }
                             else
                             {
                                 if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
                                 {
-                                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds((int)Time.Instance.ApproachDelay_seconds);
+                                    Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
                                     Logging.Log("DebugBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                     station.Approach();
                                 }

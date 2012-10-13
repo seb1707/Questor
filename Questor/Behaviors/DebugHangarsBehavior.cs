@@ -609,7 +609,7 @@ namespace Questor.Behaviors
 
                 case DebugHangarsBehaviorState.OpenLootContainer:
                     Logging.Log("DebugHangars", "DebugHangarsState.OpenLootContainer:", Logging.White);
-                    if (!Cache.Instance.OpenLootContainer("DebugHangars")) return;
+                    if (!Cache.Instance.ReadyLootContainer("DebugHangars")) return;
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;

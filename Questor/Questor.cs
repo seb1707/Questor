@@ -156,6 +156,10 @@ namespace Questor
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("Questor", "Running Innerspace command: windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("windowtaskbar on " + Settings.Instance.CharacterName);
+
+                        Logging.Log("Questor", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
+                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+
                         if (Settings.Instance.LoginQuestorArbitraryOSCmd)
                         {
                             Logging.Log("Questor", "After Questor Login: executing LoginQuestorArbitraryOSCmd", Logging.White);

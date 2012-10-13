@@ -602,9 +602,9 @@ namespace Questor.Modules.Actions
 
                 if (!loadedAmmo)
                 {
-                    Logging.Log("AgentInteraction", "Detecting damage type for [" + MissionName + "]", Logging.Yellow);
                     Cache.Instance.DamageType = GetMissionDamageType(html);
                     LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
+                    Logging.Log("AgentInteraction", "Detected configured damage type for [" + MissionName + "] is [" + Cache.Instance.DamageType + "]", Logging.Yellow);
                 }
 
                 if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -786,9 +786,15 @@ namespace Questor.Modules.Actions
                     Logging.Log("AgentInteraction", "Current standings [" + Math.Round(Cache.Instance.AgentEffectiveStandingtoMe, 2) + "] is above our configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.Mission.Name + "]", Logging.Yellow);
                 }
             }
-            if (_States.CurrentStorylineState == StorylineState.AcceptMission)
+            
+            //
+            // this closes the convo, blacklists the agent for this session and goes back to base.
+            //
+            if (_States.CurrentStorylineState == StorylineState.DeclineMission || _States.CurrentStorylineState == StorylineState.AcceptMission)
             {
                 Logging.Log("AgentInteraction", "Storyline: Storylines cannot be declined, thus we will add this agent to the blacklist for this session.", Logging.Yellow);
+                Logging.Log("AgentInteraction", "Saying [Decline]", Logging.Yellow);
+                Cache.Instance.Mission.RemoveOffer();
                 _States.CurrentStorylineState = StorylineState.Idle;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
@@ -796,17 +802,7 @@ namespace Questor.Modules.Actions
                 Statistics.Instance.MissionCompletionErrors = 0;
                 return;
             }
-            if (_States.CurrentStorylineState == StorylineState.DeclineMission)
-            {
-                Logging.Log("AgentInteraction", "Storyline: Declining mission.", Logging.Yellow);
 
-                _States.CurrentStorylineState = StorylineState.Idle;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
-                Statistics.Instance.MissionCompletionErrors = 0;
-                return;
-            }
             // Decline and request a new mission
             Logging.Log("AgentInteraction", "Saying [Decline]", Logging.Yellow);
             decline.Say();
@@ -958,7 +954,7 @@ namespace Questor.Modules.Actions
                     {
                         if (_waitingOnAgentWindow == false)
                         {
-                            Logging.Log("AgentInteraction", "Attempting to Interact with the agent named [" + Agent.Name + "]" , Logging.Yellow);
+                            Logging.Log("AgentInteraction", "Attempting to Interact with the agent named [" + Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(Agent.SolarSystemId) + "]", Logging.Yellow);
                             Agent.InteractWith();
                             _waitingOnAgentWindowTimer = DateTime.Now;
                             _waitingOnAgentWindow = true;

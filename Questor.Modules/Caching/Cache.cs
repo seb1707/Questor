@@ -4016,6 +4016,12 @@ namespace Questor.Modules.Caching
 
                 DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
 
+                if (GetShipsDroneBayAttempts > 10 && Cache.Instance.DroneBay == null)
+                {
+                    Logging.Log(module,"Your current ship does not have a drone bay, aborting repair of drones",Logging.Teal);
+                    return true;
+                }
+
                 if (doneUsingRepairWindow)
                 {
                     Logging.Log(module, "Done with RepairShop: closing", Logging.White);
@@ -4026,7 +4032,7 @@ namespace Questor.Modules.Caching
 
                 if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
                 {
-                    if (repairQuote.Html != null) Logging.Log("Cleanup", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                    if (repairQuote.Html != null) Logging.Log("RepairDrones", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                     Logging.Log(module, "Closing Quote for Repairing Drones with OK", Logging.White);
                     repairQuote.AnswerModal("OK");
                     doneUsingRepairWindow = true;

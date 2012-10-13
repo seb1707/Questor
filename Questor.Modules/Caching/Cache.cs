@@ -2712,7 +2712,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ShipHangar { get; set; }
 
-        public bool OpenShipsHangar(String module)
+        public bool ReadyShipsHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -2733,41 +2733,16 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                // Is the ship hangar open?
-                if (Cache.Instance.ShipHangar.Window == null)
-                {
-                    // No, command it to open
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Ship Hangar: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]", Logging.White);
-                    return false;
-                }
-                if (!Cache.Instance.ShipHangar.Window.IsReady)
-                {
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
-                    return false;
-                }
+                //if (Cache.Instance.PrimaryInventoryWindow == null)
+                //{
+                //    Cache.Instance.OpenInventoryWindow("ReadyShipsHangar");
+                //}
 
-                if (Cache.Instance.ShipHangar.Window.IsReady)
+                // Is the ShipHangar ready to be used?
+                if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                 {
-                    if (!Cache.Instance.ShipHangar.Window.IsPrimary())
-                    {
-                        if (Settings.Instance.DebugHangars) Logging.Log(module, "Ship Hangar is Ready and is a secondary inventory window", Logging.White);
-                        return true;
-                    }
-
-                    if (Cache.Instance.ShipHangar.Window.IsPrimary())
-                    {
-                        if (Settings.Instance.DebugHangars) Logging.Log(module, "Opening Ship Hangar as secondary", Logging.White);
-                        Cache.Instance.ShipHangar.Window.OpenAsSecondary();
-                        //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                        return false;
-                    }
-                    Logging.Log(module, "OpenShipsHangar: ShipHangar.Window.IsReady but it is neither .IsPrimary or !.IsPrimary (this should not be possible if DE is working correctly!)", Logging.White);
-                    return false;
+                    Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
+                    return true;
                 }
             }
             return false;

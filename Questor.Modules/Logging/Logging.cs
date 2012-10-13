@@ -46,6 +46,8 @@ namespace Questor.Modules.Logging
         public const string TravelerGenericLogging = White;
         public const string TravelerDestinationColor = White;
 
+        public const string DebugHangars = White;
+
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
         public static void Log(string module, string line, string color)

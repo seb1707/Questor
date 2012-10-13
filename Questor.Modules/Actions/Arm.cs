@@ -107,7 +107,7 @@ namespace Questor.Modules.Actions
                 case ArmState.SwitchToSalvageShip:
                     if (DateTime.Now > Cache.Instance.NextArmAction) //default 10 seconds
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+                        if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
                         if (_States.CurrentArmState == ArmState.OpenShipHangar)
                         {
@@ -140,7 +140,7 @@ namespace Questor.Modules.Actions
                     }
                     if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+                        if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
                         List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
@@ -178,7 +178,7 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+                                if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
@@ -233,7 +233,7 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.Now > Cache.Instance.NextArmAction)
                             {
-                                if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+                                if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 var ship = ships.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipName);
@@ -449,7 +449,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.MoveDrones:
-                    if (!Cache.Instance.OpenShipsHangar("Arm")) break;
+                    if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
 
                     if (!Cache.Instance.OpenDroneBay("Arm")) break;
 

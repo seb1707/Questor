@@ -35,7 +35,7 @@ namespace Questor.Modules.Actions
             DirectContainer hangar = null;
 
             if (!Cache.Instance.OpenItemsHangar("Grab")) return;
-            if (!Cache.Instance.OpenShipsHangar("Grab")) return;
+            if (!Cache.Instance.ReadyShipsHangar("Grab")) return;
 
             if ("Local Hangar" == Hangar)
                 hangar = Cache.Instance.ItemHangar;
@@ -64,7 +64,7 @@ namespace Questor.Modules.Actions
                     }
                     else if ("Ship Hangar" == Hangar)
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Drop")) return;
+                        if (!Cache.Instance.ReadyShipsHangar("Drop")) return;
 
                         if (hangar != null && (hangar.Window == null || !hangar.Window.IsReady))
                             break;

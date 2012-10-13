@@ -420,12 +420,10 @@ namespace QuestorManager
 
                 case QuestormanagerState.MakeShip:
 
-                    if (!Cache.Instance.OpenShipsHangar("QuestorManager")) break;
+                    if (!Cache.Instance.ReadyShipsHangar("QuestorManager")) break;
 
                     if (DateTime.Now > _lastAction)
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
-
                         List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == txtNameShip.Text))
                         {

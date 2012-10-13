@@ -575,7 +575,7 @@ namespace Questor.Behaviors
                     
                     if (!Cache.Instance.OpenCargoHold("DedicatedBookmarkSalvageBehavior: Salvage")) break;
 
-                    if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.Window.IsReady && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
+                    if (Cache.Instance.CargoHold.IsValid && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
                     {
                         Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We are full, go to base to unload", Logging.White);
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
@@ -587,6 +587,16 @@ namespace Questor.Behaviors
                         Cache.Instance.DeleteBookmarksOnGrid("DedicatedBookmarkSalvageBehavior");
                         return;
                     }
+                    else
+                    {
+                        if (DateTime.Now > Cache.Instance.LastInWarp.AddMinutes(20))
+                        {
+                            Logging.Log("DedicatedBookmarkSalvagerBehavior", "It has been over 20 min since we were last in warp. Assuming something went wrong: setting GoToBase", Logging.Orange);
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                            return;
+                        }
+                    }
+
                     if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: we have more wrecks to salvage", Logging.White);
                     //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
                     Salvage.MoveIntoRangeOfWrecks();

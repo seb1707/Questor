@@ -455,7 +455,7 @@ namespace Questor.Modules.Actions
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
 
-                    DirectItem drone = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
+                    DirectItem drone = Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
                     if (drone == null || drone.Stacksize < 1)
                     {
                         string ammoHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangar) ? "ItemHangar" : Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture);

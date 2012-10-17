@@ -226,6 +226,7 @@ namespace Questor.Modules.Lookup
         public string LoginQuestorOSCmdContents { get; set; }
         public bool LoginQuestorLavishScriptCmd { get; set; }
         public string LoginQuestorLavishScriptContents { get; set; }
+        public bool MinimizeEveAfterStartingUp { get; set; }
         public int SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
         public string LavishIsBoxerCharacterSet { get; set; }
@@ -564,6 +565,7 @@ namespace Questor.Modules.Lookup
                 LoginQuestorOSCmdContents = String.Empty;
                 LoginQuestorLavishScriptCmd = false;
                 LoginQuestorLavishScriptContents = string.Empty;
+                MinimizeEveAfterStartingUp = false;
                 
                 WalletBalanceChangeLogOffDelay = 30;
                 WalletBalanceChangeLogOffDelayLogoffOrExit = "exit";
@@ -964,6 +966,7 @@ namespace Questor.Modules.Lookup
                     LoginQuestorLavishScriptContents = (string)xml.Element("LoginQuestorLavishScriptContents") ??
                                                 "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
 
+                    MinimizeEveAfterStartingUp = (bool?)xml.Element("MinimizeEveAfterStartingUp") ?? false;
 
                     //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
 

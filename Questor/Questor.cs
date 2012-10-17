@@ -160,6 +160,12 @@ namespace Questor
                         Logging.Log("Questor", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
 
+                        if (Settings.Instance.MinimizeEveAfterStartingUp)
+                        {
+                            Logging.Log("Questor", "MinimizeEveAfterStartingUp is true: Minimizing EVE with: WindowCharacteristics -visibility minimize", Logging.White);
+                            LavishScript.ExecuteCommand("WindowCharacteristics -visibility minimize");
+                        }
+
                         if (Settings.Instance.LoginQuestorArbitraryOSCmd)
                         {
                             Logging.Log("Questor", "After Questor Login: executing LoginQuestorArbitraryOSCmd", Logging.White);
@@ -167,6 +173,7 @@ namespace Questor
                             LavishScript.ExecuteCommand("OSExecute " + Settings.Instance.LoginQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                             Logging.Log("Questor", "Done: executing LoginQuestorArbitraryOSCmd", Logging.White);
                         }
+
                         if (Settings.Instance.LoginQuestorLavishScriptCmd)
                         {
                             Logging.Log("Questor", "After Questor Login: executing LoginQuestorLavishScriptCmd", Logging.White);
@@ -174,6 +181,7 @@ namespace Questor
                             LavishScript.ExecuteCommand("runscript " + Settings.Instance.LoginQuestorLavishScriptContents.ToString(CultureInfo.InvariantCulture));
                             Logging.Log("Questor", "Done: executing LoginQuestorLavishScriptCmd", Logging.White);
                         }
+
                         Logging.MaintainConsoleLogs();
                     }
                 }

@@ -861,7 +861,10 @@ namespace Questor.Behaviors
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        if (AgentID != 0)
+                        {
+                            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        }
 
                         if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                         {

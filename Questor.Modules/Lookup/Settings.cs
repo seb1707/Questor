@@ -8,8 +8,6 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
-using Questor.Modules.Caching;
-
 namespace Questor.Modules.Lookup
 {
     using System;
@@ -21,6 +19,7 @@ namespace Questor.Modules.Lookup
     using System.Globalization;
     using InnerSpaceAPI;
     using Questor.Modules.Actions;
+    using Questor.Modules.Caching;
     using Questor.Modules.Logging;
 
     public class Settings
@@ -412,6 +411,24 @@ namespace Questor.Modules.Lookup
             {
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
             }
+
+            if (Settings.Instance.CharacterName == string.Empty)
+            {
+                if (Cache.Instance.LastInStation.AddMinutes(60) > DateTime.Now)
+                {
+                    Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
+                    Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
+                    Cache.Instance.SessionState = "Quitting";
+                    return;
+                }
+                else
+                {
+                    Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
+                    Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
+                    //Cache.Instance.SessionState = "Quitting";
+                }
+            }
+
             Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
             bool reloadSettings = true;
             if (File.Exists(Settings.Instance.SettingsPath))

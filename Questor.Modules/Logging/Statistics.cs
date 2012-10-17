@@ -409,8 +409,16 @@ namespace Questor.Modules.Logging
                 return;
             }
 
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID);
-
+            if (Statistics.Instance.AgentID == 0)
+            {
+                Statistics.Instance.MissionLoggingCompleted = true;
+                return;
+            }
+            else
+            {
+                Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID);
+            }
+            
             if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {
                 Logging.Log("Statistics", "...Checking to see if we should create a mission log now...", Logging.White);

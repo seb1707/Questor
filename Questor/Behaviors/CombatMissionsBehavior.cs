@@ -439,7 +439,7 @@ namespace Questor.Behaviors
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
                     {
-                        if (!Statistics.Instance.MissionLoggingCompleted)
+                        if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName)
                         {
                             Statistics.WriteMissionStatistics();
                             break;

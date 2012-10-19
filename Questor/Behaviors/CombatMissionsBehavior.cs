@@ -436,16 +436,21 @@ namespace Questor.Behaviors
                     _States.CurrentUnloadLootState = UnloadLootState.Idle;
                     _States.CurrentTravelerState = TravelerState.Idle;
 
+                    if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(10))
+                    {
+                        return;
+                    }
+
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
                     {
-                        if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName)
+                        if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                         {
                             Statistics.WriteMissionStatistics();
                             break;
                         }
                     }
-
+                    
                     if (Settings.Instance.AutoStart)
                     {
                         if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "Autostart is currently [" + Settings.Instance.AutoStart + "]", Logging.White);

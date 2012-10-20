@@ -442,11 +442,19 @@ namespace Questor.Behaviors
                     }
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
-                    if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
+                    if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log && (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddMinutes(5)))
                     {
-                        if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                        try
                         {
-                            Statistics.WriteMissionStatistics();
+                            if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                            {
+                                Statistics.WriteMissionStatistics();
+                                break;
+                            }
+                        }
+                        catch
+                        {
+                            Logging.Log("CombatMissionsBehavior.Idle", "Cache.Instance.DirectEve.ActiveShip.GivenName is not yet available... We need to know what ship you are in to determine if we need to write stats or not.  retrying", Logging.Teal);
                             break;
                         }
                     }

@@ -448,7 +448,7 @@ namespace Questor.Behaviors
                                 //Logging.Log("CombatMissionsBehavior.Idle", "Settings.Instance.CombatShipName.ToLower() [" + Settings.Instance.CombatShipName.ToLower() + "]", Logging.Teal);
                                 if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                                 {
-                                    Statistics.WriteMissionStatistics();
+                                    Statistics.WriteMissionStatistics(AgentID);
                                     break;
                                 }
                             }

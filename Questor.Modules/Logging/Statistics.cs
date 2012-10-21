@@ -314,7 +314,7 @@ namespace Questor.Modules.Logging
                 var line = DateTime.Now + ";";                                  // Date
                 line += Cache.Instance.SessionRunningTime + ";";                // RunningTime
                 line += Cache.Instance.SessionState + ";";                      // SessionState
-                line += Cache.Instance.MissionName + ";";                                          // LastMission
+                line += Cache.Instance.MissionName + ";";                       // LastMission
                 line += ((int)Cache.Instance.DirectEve.Me.Wealth + ";");        // WalletBalance
                 line += ((int)Cache.Instance.TotalMegaBytesOfMemoryUsed + ";"); // MemoryUsage
                 line += Cache.Instance.ReasonToStopQuestor + ";";               // Reason to Stop Questor
@@ -393,7 +393,7 @@ namespace Questor.Modules.Logging
             Cache.Instance.WrecksThisPocket = 0;
         }
 
-        public static void WriteMissionStatistics()
+        public static void WriteMissionStatistics(long myCombatMissionAgentID)
         {
             if (Cache.Instance.InSpace)
             {
@@ -409,15 +409,7 @@ namespace Questor.Modules.Logging
                 return;
             }
 
-            if (Statistics.Instance.AgentID == 0)
-            {
-                Statistics.Instance.MissionLoggingCompleted = true;
-                return;
-            }
-            else
-            {
-                Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID);
-            }
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(myCombatMissionAgentID);
             
             if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {
@@ -452,19 +444,19 @@ namespace Questor.Modules.Logging
                         else
                         {
                             Logging.Log("Statistics", "MissionState is Accepted: which means the mission is not yet complete", Logging.White);
-                            Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we shouldn't be trying to log mission stats atm
+                            Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
                         }
                     }
                     else
                     {
                         Logging.Log("Statistics", "mission is NUL - which means we have no current mission", Logging.White);
-                        Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we shouldn't be trying to log mission stats atm
+                        Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
                     }
                 }
                 else
                 {
                     Logging.Log("Statistics", "1 We must NOT have had a mission yet because MissionName is not filled in", Logging.White);
-                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we shouldn't be trying to log mission stats atm
+                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
                 }
             }
             if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.Mission == null || (Cache.Instance.Mission.State != (int)MissionState.Accepted)))
@@ -473,7 +465,7 @@ namespace Questor.Modules.Logging
                 {
                     Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" +  AgentLPRetrivalAttempts + "] giving up", Logging.White);
                     AgentLPRetrivalAttempts = 0;
-                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we shouldn't be trying to log mission stats atm
+                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
                     return;
                 }
 
@@ -486,7 +478,7 @@ namespace Questor.Modules.Logging
                 }
                 AgentLPRetrivalAttempts = 0;
 
-                Statistics.Instance.MissionsThisSession = Statistics.Instance.MissionsThisSession + 1;
+                Statistics.Instance.MissionsThisSession++;
                 if (Statistics.Instance.DebugMissionStatistics) Logging.Log("Statistics", "We jumped through all the hoops: now do the mission logging", Logging.White);
                 Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
                 Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + Statistics.Instance.LootValue);

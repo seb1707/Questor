@@ -212,7 +212,6 @@ namespace Questor.Behaviors
                 //return //we *need* to run _traveler.processState while in station to know that we are done traveling - do NOT return here.
             }
 
-
             Cache.Instance.OpenWrecks = false;
 
             if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
@@ -247,7 +246,6 @@ namespace Questor.Behaviors
                         EVENavdestination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                 }
             }
-            
 
             if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
@@ -422,6 +420,7 @@ namespace Questor.Behaviors
                     }
 
                     if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "if (Cache.Instance.InSpace) else", Logging.White);
+                    
                     _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                     _States.CurrentArmState = ArmState.Idle;
                     _States.CurrentDroneState = DroneState.Idle;

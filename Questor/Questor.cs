@@ -517,7 +517,7 @@ namespace Questor
                         return;
                     }
 
-                    if (_States.CurrentQuestorState == QuestorState.Idle && Settings.Instance.CharacterMode != "none" && CharacterName != null)
+                    if (_States.CurrentQuestorState == QuestorState.Idle && Settings.Instance.CharacterMode != "none" && Settings.Instance.CharacterName != null)
                     {
                         _States.CurrentQuestorState = QuestorState.Start;
                         return;

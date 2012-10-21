@@ -1408,7 +1408,22 @@ namespace Questor.Modules.Caching
         /// <returns>null if no mission could be found</returns>
         public DirectAgentMission GetAgentMission(long agentId)
         {
-            return DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == agentId);
+            try
+            {
+                IEnumerable<DirectAgentMission> myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
+                if (myAgentMissionList.Any())
+                {
+                    DirectAgentMission FirstAgentMission = myAgentMissionList.FirstOrDefault();
+                    return FirstAgentMission;
+                }
+                return null;
+            }
+            catch(Exception exception)
+
+            {
+                Logging.Log("Cache.Instance.GetAgentMission", "DirectEve.AgentMissions failed: [" + exception + "]", Logging.Teal);
+                return null;
+            }
         }
 
         /// <summary>

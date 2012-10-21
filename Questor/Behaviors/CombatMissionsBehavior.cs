@@ -881,6 +881,11 @@ namespace Questor.Behaviors
                         if (AgentID != 0)
                         {
                             Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                            if (Cache.Instance.Mission == null)
+                            {
+                                Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
+                                return;
+                            }
                         }
 
                         if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
@@ -972,6 +977,12 @@ namespace Questor.Behaviors
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        //if (Cache.Instance.Mission == null)
+                        //{
+                        //    Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
+                        //    return;
+                        //}
+
                         if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
                         {
                             Logging.Log("CombatMissionsBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);

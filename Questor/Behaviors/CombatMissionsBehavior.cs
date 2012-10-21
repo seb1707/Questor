@@ -214,9 +214,8 @@ namespace Questor.Behaviors
 
 
             Cache.Instance.OpenWrecks = false;
-            const bool setEVENavDestination = false;
 
-            if (setEVENavDestination) //sets EVEs destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
+            if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
             {
                 if (DateTime.Now > _nextGetDestinationPath || EVENavdestination == null)
                 {

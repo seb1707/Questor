@@ -91,6 +91,7 @@ namespace Questor.Modules.Lookup
         public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
+        public bool setEveClientDestinationWhenTraveling { get; set; }
 
         //
         // Misc Settings
@@ -481,6 +482,7 @@ namespace Questor.Modules.Lookup
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
+                setEveClientDestinationWhenTraveling = false;
                 //
                 // Misc Settings
                 //
@@ -817,6 +819,7 @@ namespace Questor.Modules.Lookup
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
+                    setEveClientDestinationWhenTraveling = (bool?)xml.Element("setEveClientDestinationWhenTraveling") ?? true;
 
                     //
                     // Misc Settings

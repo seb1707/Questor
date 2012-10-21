@@ -1833,6 +1833,13 @@ namespace Questor.Modules.Caching
             BringMissionItem = string.Empty;
             BringOptionalMissionItem = string.Empty;
 
+            if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
+            {
+                Settings.Instance.UseFittingManager = false;
+                //Logging.Log("Cache.RefreshMissionItems", "We are not running missions so we have no mission items to refresh", Logging.Teal);
+                return;
+            }
+
             DirectAgentMission missionDetailsForMissionItems = GetAgentMission(agentId);
             if (missionDetailsForMissionItems == null)
                 return;

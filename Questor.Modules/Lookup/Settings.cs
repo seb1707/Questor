@@ -28,11 +28,9 @@ namespace Questor.Modules.Lookup
         /// Singleton implementation
         /// </summary>
         public static Settings Instance = new Settings();
-
         public string CharacterName;
         private DateTime _lastModifiedDate;
-        private readonly Random _random = new Random();
-
+        
         public Settings()
         {
             Ammo = new List<Ammo>();
@@ -188,7 +186,7 @@ namespace Questor.Modules.Lookup
         //
         public bool CreateSalvageBookmarks { get; set; }
         public string CreateSalvageBookmarksIn { get; set; }
-        public bool SalvageMultpleMissionsinOnePass { get; set; }
+        public bool SalvageMultipleMissionsinOnePass { get; set; }
         public bool FirstSalvageBookmarksInSystem { get; set; }
         public string BookmarkPrefix { get; set; }
         public string UndockPrefix { get; set; }
@@ -621,7 +619,7 @@ namespace Questor.Modules.Lookup
                 MinimumWreckCount = 1;
                 AfterMissionSalvaging = false;
                 FirstSalvageBookmarksInSystem = false;
-                SalvageMultpleMissionsinOnePass = false;
+                SalvageMultipleMissionsinOnePass = false;
                 UnloadLootAtStation = false;
                 ReserveCargoCapacity = 100;
                 MaximumWreckTargets = 0;
@@ -931,7 +929,7 @@ namespace Questor.Modules.Lookup
                     MinimumWreckCount = (int?)xml.Element("minimumWreckCount") ?? 1;
                     AfterMissionSalvaging = (bool?)xml.Element("afterMissionSalvaging") ?? false;
                     FirstSalvageBookmarksInSystem = (bool?)xml.Element("FirstSalvageBookmarksInSystem") ?? false;
-                    SalvageMultpleMissionsinOnePass = (bool?)xml.Element("salvageMultpleMissionsinOnePass") ?? false;
+                    SalvageMultipleMissionsinOnePass = (bool?)xml.Element("salvageMultpleMissionsinOnePass") ?? false;
                     UnloadLootAtStation = (bool?)xml.Element("unloadLootAtStation") ?? false;
                     ReserveCargoCapacity = (int?)xml.Element("reserveCargoCapacity") ?? 0;
                     MaximumWreckTargets = (int?)xml.Element("maximumWreckTargets") ?? 0;
@@ -985,11 +983,10 @@ namespace Questor.Modules.Lookup
                         else
                         {
                             /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
-                            var version = lavishsriptObject.GetValue<float>();
-                            //var TestISVariable = "Game"
-                            //LavishIsBoxerCharacterSet = LavishsriptObject.
-                            Logging.Log("Settings", "Testing: LavishScript Version " +
-                                        version.ToString(CultureInfo.InvariantCulture), Logging.White);
+                            //var version = lavishsriptObject.GetValue<float>();
+                            // //var TestISVariable = "Game"
+                            // //LavishIsBoxerCharacterSet = LavishsriptObject.
+                            //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
                         }
                     }
 

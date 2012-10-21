@@ -128,21 +128,11 @@ namespace Questor
             }
         }
 
-        public string CharacterName { get; set; }
-
-        public static long AgentID;
-
         public void DebugCombatMissionsBehaviorStates()
         {
             if (Settings.Instance.DebugStates)
                 Logging.Log("CombatMissionsBehavior.State is", _States.CurrentQuestorState.ToString(), Logging.White);
         }
-
-        //public void DebugPanicstates()
-        //{
-        //    if (Settings.Instance.DebugStates)
-        //        Logging.Log("Panic.State = " + _panic.State);
-        //    }
 
         public void RunOnce30SecAfterStartup()
         {
@@ -407,8 +397,7 @@ namespace Questor
             {
                 Settings.Instance.LoadSettings();
             }
-            CharacterName = Cache.Instance.DirectEve.Me.Name;
-
+            
             if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
                 Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;

@@ -908,7 +908,7 @@ namespace Questor.Behaviors
                     if (Cache.Instance.InSpace)
                     {
                         Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     }
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)

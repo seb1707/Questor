@@ -222,7 +222,7 @@ namespace Questor.Modules.Actions
                             Cache.Instance.RefreshMissionItems(AgentId);
                             Cache.Instance.ArmLoadedCache = true;
                         }
-                        // If we've got a mission-specific ship defined, switch to it
+                        // If we have got a mission-specific ship defined, switch to it
                         if ((_States.CurrentArmState == ArmState.ActivateCombatShip) && !string.IsNullOrEmpty(Cache.Instance.MissionShip) && TryMissionShip)
                             shipName = Cache.Instance.MissionShip.ToLower();
 
@@ -269,15 +269,6 @@ namespace Questor.Modules.Actions
                         if (TryMissionShip)
                             UseMissionShip = true;
 
-                        //if (State == ArmState.ActivateSalvageShip)
-                        //{
-                        //    Logging.Log("Arm","Done");
-                        //    State = ArmState.Done;
-                        //    return;
-                        //}
-
-                        //_missionItemMoved = false;
-                        //Cache.Instance.RefreshMissionItems(AgentId);
                         if (AmmoToLoad.Count == 0 && string.IsNullOrEmpty(Cache.Instance.BringMissionItem))
                         {
                             Logging.Log("Arm", "Done", Logging.White);
@@ -372,7 +363,7 @@ namespace Questor.Modules.Actions
                             }
                             if (!found)
                             {
-                                Logging.Log("Arm", "Error! Couldn't find Default Fitting.  Disabling fitting manager.", Logging.Orange);
+                                Logging.Log("Arm", "Error! Could not find Default Fitting.  Disabling fitting manager.", Logging.Orange);
                                 DefaultFittingFound = false;
                                 Settings.Instance.UseFittingManager = false;
                                 Logging.Log("Arm", "Closing Fitting Manager", Logging.White);
@@ -413,7 +404,7 @@ namespace Questor.Modules.Actions
                         {
                             return;
                         }
-                        //if we didn't find it, we'll set currentfit to default
+                        //if we did not find it, we'll set currentfit to default
                         //this should provide backwards compatibility without trying to fit always
                         if (!found)
                         {

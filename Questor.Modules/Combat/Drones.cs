@@ -154,7 +154,7 @@ namespace Questor.Modules.Combat
             _lastDronesProcessState = DateTime.Now;
 
             if (Cache.Instance.InStation ||                             // There is really no combat in stations (yet)
-                !Cache.Instance.InSpace ||                             // if we are not in space yet, wait...
+                !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null ||   // What? No ship entity?
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
                 !Settings.Instance.UseDrones                            //if UseDrones is false

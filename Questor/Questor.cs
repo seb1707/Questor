@@ -397,7 +397,7 @@ namespace Questor
             {
                 Settings.Instance.LoadSettings();
             }
-            
+
             if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
                 Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
@@ -517,7 +517,7 @@ namespace Questor
                         return;
                     }
 
-                    if (_States.CurrentQuestorState == QuestorState.Idle && Settings.Instance.CharacterMode != "none")
+                    if (_States.CurrentQuestorState == QuestorState.Idle && Settings.Instance.CharacterMode != "none" && CharacterName != null)
                     {
                         _States.CurrentQuestorState = QuestorState.Start;
                         return;

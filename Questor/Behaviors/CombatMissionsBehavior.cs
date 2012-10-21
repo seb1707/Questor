@@ -880,12 +880,19 @@ namespace Questor.Behaviors
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
                         if (AgentID != 0)
                         {
-                            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
-                            if (Cache.Instance.Mission == null)
+                            try
                             {
-                                Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
-                                return;
+                                Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);    
                             }
+                            catch(Exception exception)
+                            {
+                                Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID); [" + exception + "]", Logging.Teal);
+                            }
+                            //if (Cache.Instance.Mission == null)
+                            //{
+                            //    Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
+                            //    return;
+                            //}
                         }
 
                         if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)

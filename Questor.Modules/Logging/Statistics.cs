@@ -595,10 +595,10 @@ namespace Questor.Modules.Logging
                     line3 += ((long)Statistics.Instance.LootValue) + ";";                                                                        // Loot
                     line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                               // LP
                     line3 += Statistics.Instance.DroneRecalls + ";";                                                                             // Lost Drones
-                    line3 += Statistics.Instance.LostDrones + ";";                                                                               // Lost Drones
+                    line3 += "LostDrones:" + Statistics.Instance.LostDrones + ";";                                                                               // Lost Drones
                     line3 += Statistics.Instance.AmmoConsumption + ";";                                                                          // Ammo Consumption
                     line3 += Statistics.Instance.AmmoValue + ";";                                                                                // Ammo Value
-                    line3 += Cache.Instance.PanicAttemptsThisMission + ";";                                                                      // Panics
+                    line3 += "Panics:" + Cache.Instance.PanicAttemptsThisMission + ";";                                                                      // Panics
                     line3 += ((int)Cache.Instance.LowestShieldPercentageThisMission) + ";";                                                      // Lowest Shield %
                     line3 += ((int)Cache.Instance.LowestArmorPercentageThisMission) + ";";                                                       // Lowest Armor %
                     line3 += ((int)Cache.Instance.LowestCapacitorPercentageThisMission) + ";";                                                   // Lowest Capacitor %

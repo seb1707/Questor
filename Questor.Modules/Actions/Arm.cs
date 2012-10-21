@@ -219,7 +219,10 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.ArmLoadedCache)
                         {
                             _missionItemMoved = false;
-                            Cache.Instance.RefreshMissionItems(AgentId);
+                            if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                            {
+                                Cache.Instance.RefreshMissionItems(AgentId);
+                            }
                             Cache.Instance.ArmLoadedCache = true;
                         }
                         // If we have got a mission-specific ship defined, switch to it
@@ -440,8 +443,6 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.MoveDrones:
-                    if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
-
                     if (!Cache.Instance.ReadyDroneBay("Arm")) break;
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
@@ -458,7 +459,6 @@ namespace Questor.Modules.Actions
                     if (Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
                     {
                         if (!Cache.Instance.RepairItems("Repair All")) break; //attempt to use repair facilities if avail in station
-                        Cache.Instance.RepairAll = false;
                     }
                     else
                     {
@@ -612,8 +612,7 @@ namespace Questor.Modules.Actions
                             //reload the ammo setting for combat
                             try
                             {
-                                DirectAgentMission mission =
-                                    Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
+                                DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
                                 if (mission == null)
                                     return;
 

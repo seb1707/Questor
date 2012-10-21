@@ -620,30 +620,38 @@ namespace Questor
                     return;
 
                 case QuestorState.DebugWindows:
-                    List<DirectWindow> windows = Cache.Instance.Windows;
+                    List<DirectWindow> windows = Cache.Instance.DirectEve.Windows;
 
-                    foreach (DirectWindow window in windows)
+                    if (windows != null && windows.Any())
                     {
-                        Logging.Log("Questor", "--------------------------------------------------", Logging.Orange);
-                        Logging.Log("Questor", "Debug_Window.Name: [" + window.Name + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.Caption: [" + window.Caption + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.IsModal: [" + window.IsModal + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.IsDialog: [" + window.IsDialog + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.Id: [" + window.Id + "]", Logging.White);
-                        Logging.Log("Questor", "Debug_Window.IsKillable: [" + window.IsKillable + "]", Logging.White);
-                        //Logging.Log("Questor", "Debug_Window.Html: [" + window.Html + "]", Logging.White);
-                    }
-                    Logging.Log("Questor", "Debug_InventoryWindows", Logging.White);
-                    foreach (DirectWindow window in windows)
-                    {
-                        if (window.Type.Contains("inventory"))
+                        foreach (DirectWindow window in windows)
                         {
+                            Logging.Log("Questor", "--------------------------------------------------", Logging.Orange);
                             Logging.Log("Questor", "Debug_Window.Name: [" + window.Name + "]", Logging.White);
-                            Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.White);
                             Logging.Log("Questor", "Debug_Window.Caption: [" + window.Caption + "]", Logging.White);
-                            //Logging.Log("Questor", "Debug_Window.Type: [" + window. + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.IsModal: [" + window.IsModal + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.IsDialog: [" + window.IsDialog + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.Id: [" + window.Id + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.IsKillable: [" + window.IsKillable + "]", Logging.White);
+                            Logging.Log("Questor", "Debug_Window.Html: [" + window.Html + "]", Logging.White);
                         }
+                        
+                        //Logging.Log("Questor", "Debug_InventoryWindows", Logging.White);
+                        //foreach (DirectWindow window in windows)
+                        //{
+                        //    if (window.Type.Contains("inventory"))
+                        //    {
+                        //        Logging.Log("Questor", "Debug_Window.Name: [" + window.Name + "]", Logging.White);
+                        //        Logging.Log("Questor", "Debug_Window.Type: [" + window.Type + "]", Logging.White);
+                        //        Logging.Log("Questor", "Debug_Window.Caption: [" + window.Caption + "]", Logging.White);
+                        //        //Logging.Log("Questor", "Debug_Window.Type: [" + window. + "]", Logging.White);
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        Logging.Log("Questor", "DebugWindows: No Windows Found", Logging.White);
                     }
                     _States.CurrentQuestorState = QuestorState.Error;
                     return;

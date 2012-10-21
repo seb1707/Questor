@@ -829,8 +829,8 @@ namespace Questor.Modules.Actions
                 {
                     XElement faction =
                         xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
-                    //Cache.Instance.factionFit = "Default";
-                    //Cache.Instance.Fitting = "Default";
+                    //Cache.Instance.FactionFit = "Default";
+                    Cache.Instance.Fitting = Settings.Instance.DefaultFitting.ToString();
                     Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
@@ -857,7 +857,7 @@ namespace Questor.Modules.Actions
                                             "Faction fitting: No fittings defined for [ " + factionName + " ]",
                                             Logging.Yellow);
                             }
-                            //Cache.Instance.Fitting = Cache.Instance.factionFit;
+                            //Cache.Instance.Fitting = Cache.Instance.FactionFit;
                             return false;
                         }
                     }
@@ -881,7 +881,7 @@ namespace Questor.Modules.Actions
                 {
                     Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + Cache.Instance.FactionName + " ]", Logging.Orange);
                 }
-                //Cache.Instance.Fitting = Cache.Instance.factionFit;
+                //Cache.Instance.Fitting = Cache.Instance.FactionFit;
             }
             return false;
         }

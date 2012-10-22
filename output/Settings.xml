@@ -179,7 +179,10 @@
   <ageofBookmarksForSalvageBehavior>45</ageofBookmarksForSalvageBehavior>
   <!-- Any bookmarks over this age will be deleted without warping there first because the wrecks despawn after ~2 hours anyway: expressed in minutes-->
   <ageofSalvageBookmarksToExpire>120</ageofSalvageBookmarksToExpire>
-
+  <moveCommonMissionCompletionItemsToAmmoHangar>false</moveCommonMissionCompletionItemsToAmmoHangar>
+  <moveCommonMissionCompletionItemsToItemsHangar>true</moveCommonMissionCompletionItemsToItemsHangar>
+  
+  
   <!--                                                -->
   <!--    UNDOCKING SETTINGS     -->
   <!--                                                -->

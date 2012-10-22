@@ -73,11 +73,34 @@ namespace Questor.Modules.Actions
                     // how do we get IsMissionItem to work for us here? (see ItemCache)
                     // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
                     //
-                    IEnumerable<DirectItem> itemsToMove = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == Cache.Instance.BringMissionItem || i.TypeId == 17192 || i.TypeId == 17206 || i.GroupId == 283 || i.GroupId == 314);
+                    if (Settings.Instance.MoveCommonMissionCompletionItemsToAmmoHangar)
+                    {
+                        IEnumerable<DirectItem> itemsToMove = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == Cache.Instance.BringMissionItem || i.TypeId == 17192 || i.TypeId == 17206 || i.GroupId == 283 || i.GroupId == 314);
 
-                    if (Cache.Instance.AmmoHangar != null)
-                        Cache.Instance.AmmoHangar.Add(itemsToMove);
+                        if (Cache.Instance.AmmoHangar != null)
+                        {
+                            Cache.Instance.AmmoHangar.Add(itemsToMove);
+                        }
+                    }
+                    _States.CurrentUnloadLootState = UnloadLootState.MoveCommonMissionCompletionItemsToItemsHangar;
+                    break;
 
+                case UnloadLootState.MoveCommonMissionCompletionItemsToItemsHangar:
+                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+                    if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
+                    //
+                    // how do we get IsMissionItem to work for us here? (see ItemCache)
+                    // Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810, i.groupid == 314 (Misc Mission Items, mainly for storylines) and i.GroupId == 283 (Misc Mission Items, mainly for storylines)
+                    //
+                    if (Settings.Instance.MoveCommonMissionCompletionItemsToItemsHangar)
+                    {
+                        IEnumerable<DirectItem> itemsToMove = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == Cache.Instance.BringMissionItem || i.TypeId == 17192 || i.TypeId == 17206 || i.GroupId == 283 || i.GroupId == 314);
+
+                        if (Cache.Instance.ItemHangar != null)
+                        {
+                            Cache.Instance.ItemHangar.Add(itemsToMove);
+                        }
+                    }
                     _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
                     break;
 

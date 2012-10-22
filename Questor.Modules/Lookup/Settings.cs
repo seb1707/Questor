@@ -181,6 +181,7 @@ namespace Questor.Modules.Lookup
         public string BookmarkHangar { get; set; }
         public string LootContainer { get; set; }
         public bool MoveCommonMissionCompletionItemsToAmmoHangar { get; set; }
+        public bool MoveCommonMissionCompletionItemsToItemsHangar { get; set; }
 
         //
         // Salvage and Loot settings
@@ -608,6 +609,8 @@ namespace Questor.Modules.Lookup
                 BookmarkHangar = String.Empty;
                 LootContainer = String.Empty;
                 MoveCommonMissionCompletionItemsToAmmoHangar = false;
+                MoveCommonMissionCompletionItemsToItemsHangar = true;
+
                 //
                 // Loot and Salvage Settings
                 //
@@ -916,8 +919,19 @@ namespace Questor.Modules.Lookup
                     AmmoHangar = (string)xml.Element("ammoHangar");
                     BookmarkHangar = (string)xml.Element("bookmarkHangar");
                     LootContainer = (string)xml.Element("lootContainer");
-                    MoveCommonMissionCompletionItemsToAmmoHangar =
-                        (bool?)xml.Element("MoveCommonMissionCompletionItemsToAmmoHangar") ?? false;
+                    if (LootContainer != null)
+                    {
+                        LootContainer = LootContainer.ToLower();
+                    }
+                    HighTierLootContainer = (string)xml.Element("highValueLootContainer");
+                    if (HighTierLootContainer != null)
+                    {
+                        HighTierLootContainer = HighTierLootContainer.ToLower();
+                    }
+
+                    MoveCommonMissionCompletionItemsToAmmoHangar = (bool?)xml.Element("MoveCommonMissionCompletionItemsToAmmoHangar") ?? false;
+                    MoveCommonMissionCompletionItemsToItemsHangar = (bool?)xml.Element("MoveCommonMissionCompletionItemsToItemsHangar") ?? true;
+
                     //
                     // Loot and Salvage Settings
                     //

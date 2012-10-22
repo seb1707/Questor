@@ -143,13 +143,12 @@ namespace Questor
                     _runOnce30SecAfterStartupalreadyProcessed = true;
                     if (Settings.Instance.UseInnerspace)
                     {
+                        Logging.Log("Questor", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
+                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("Questor", "Running Innerspace command: windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("windowtaskbar on " + Settings.Instance.CharacterName);
-
-                        Logging.Log("Questor", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
-                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
-
+                        
                         if (Settings.Instance.MinimizeEveAfterStartingUp)
                         {
                             Logging.Log("Questor", "MinimizeEveAfterStartingUp is true: Minimizing EVE with: WindowCharacteristics -visibility minimize", Logging.White);

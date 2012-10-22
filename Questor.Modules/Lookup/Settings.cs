@@ -180,6 +180,9 @@ namespace Questor.Modules.Lookup
         public string AmmoHangar { get; set; }
         public string BookmarkHangar { get; set; }
         public string LootContainer { get; set; }
+
+        public string HighTierLootContainer { get; set; }
+
         public bool MoveCommonMissionCompletionItemsToAmmoHangar { get; set; }
         public bool MoveCommonMissionCompletionItemsToItemsHangar { get; set; }
 

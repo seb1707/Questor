@@ -605,7 +605,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
                 }
 
-                // Don't even try to open a wreck if you are speed tanking and you aren't processing a loot action
+                // Don't even try to open a wreck if you are speed tanking and you are not processing a loot action
                 if (Settings.Instance.SpeedTank && Cache.Instance.OpenWrecks == false)
                 {
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "SpeedTank is true and OpenWrecks is false [" + containerEntity.Id + "]", Logging.White);

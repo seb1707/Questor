@@ -66,7 +66,7 @@ namespace Questor.Storylines
         }
 
         /// <summary>
-        ///   We check what ammo we need by convo'ing the agent and load the appropriate ammo
+        ///   We check what ammo we need by starting a conversation with the agent and load the appropriate ammo
         /// </summary>
         /// <returns></returns>
         public StorylineState Arm(Storyline storyline)

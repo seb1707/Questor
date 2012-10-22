@@ -425,12 +425,10 @@ namespace Questor.Modules.Lookup
                     Cache.Instance.SessionState = "Quitting";
                     return;
                 }
-                else
-                {
-                    Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
-                    Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
-                    //Cache.Instance.SessionState = "Quitting";
-                }
+                
+                Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
+                Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
+                //Cache.Instance.SessionState = "Quitting";
             }
 
             Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
@@ -745,14 +743,6 @@ namespace Questor.Modules.Lookup
                 // number of days of console logs to keep (anything older will be deleted on startup)
                 //
                 ConsoleLogDaysOfLogsToKeep = 14;
-                //
-                // Storage Location for Loot, Ammo, Bookmarks, default is local hangar
-                //
-                LootHangar = string.Empty;
-                AmmoHangar = string.Empty;
-                BookmarkHangar = string.Empty;
-                LootContainer = string.Empty;
-                MoveCommonMissionCompletionItemsToAmmoHangar = false;
 
                 MaximumHighValueTargets = 0;
                 MaximumLowValueTargets = 0;
@@ -965,10 +955,8 @@ namespace Questor.Modules.Lookup
                     EVEProcessMemoryCeilingLogofforExit = (string)xml.Element("EVEProcessMemoryCeilingLogofforExit") ??
                                                           "exit";
 
-                    CloseQuestorCMDUplinkInnerspaceProfile =
-                        (bool?)xml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
-                    CloseQuestorCMDUplinkIsboxerCharacterSet =
-                        (bool?)xml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
+                    CloseQuestorCMDUplinkInnerspaceProfile = (bool?)xml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
+                    CloseQuestorCMDUplinkIsboxerCharacterSet = (bool?)xml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
                     CloseQuestorAllowRestart = (bool?)xml.Element("CloseQuestorAllowRestart") ?? true;
                     CloseQuestorArbitraryOSCmd = (bool?)xml.Element("CloseQuestorArbitraryOSCmd") ?? false;
                     //true or false
@@ -981,16 +969,14 @@ namespace Questor.Modules.Lookup
                                                 "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: LoginQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
                     LoginQuestorLavishScriptCmd = (bool?)xml.Element("LoginQuestorLavishScriptCmd") ?? false;
                     //true or false
-                    LoginQuestorLavishScriptContents = (string)xml.Element("LoginQuestorLavishScriptContents") ??
-                                                "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+                    LoginQuestorLavishScriptContents = (string)xml.Element("LoginQuestorLavishScriptContents") ?? "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
 
                     MinimizeEveAfterStartingUp = (bool?)xml.Element("MinimizeEveAfterStartingUp") ?? false;
 
                     //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
 
                     WalletBalanceChangeLogOffDelay = (int?)xml.Element("walletbalancechangelogoffdelay") ?? 30;
-                    WalletBalanceChangeLogOffDelayLogoffOrExit =
-                        (string)xml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
+                    WalletBalanceChangeLogOffDelayLogoffOrExit = (string)xml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
                     SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
                     if (UseInnerspace)

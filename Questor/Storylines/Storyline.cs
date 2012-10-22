@@ -141,7 +141,7 @@ namespace Questor.Storylines
 
                 missionsInJournal = missionsInJournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId)).ToList();
                 missionsInJournal = missionsInJournal.Where(m => m.Important).ToList();
-                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] availible storyline missions", Logging.Yellow);
+                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] available storyline missions", Logging.Yellow);
                 missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name)));
                 Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do", Logging.Yellow);
                 missionsInJournal = missionsInJournal.Where(m => Settings.Instance.MissionBlacklist.All(b => b.ToLower() != Cache.Instance.FilterPath(m.Name).ToLower())).ToList();

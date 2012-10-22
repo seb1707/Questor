@@ -279,6 +279,10 @@ namespace Questor.Modules.Caching
 
         public DirectAgentMission Mission;
 
+        public DirectAgentMission FirstAgentMission;
+
+        public IEnumerable<DirectAgentMission> myAgentMissionList { get; set; }
+
         public bool DronesKillHighValueTargets { get; set; }
 
         public bool InMission { get; set; }
@@ -408,6 +412,24 @@ namespace Questor.Modules.Caching
         public bool AllAgentsStillInDeclineCoolDown { get; set; }
 
         private string _agentName = "";
+
+
+        //NextGetAgentMissionAction
+
+        private DateTime _nextGetAgentMissionAction;
+
+        public DateTime NextGetAgentMissionAction
+        {
+            get
+            {
+                return _nextGetAgentMissionAction;
+            }
+            set
+            {
+                _nextGetAgentMissionAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
 
         private DateTime _nextOpenContainerInSpaceAction;
 
@@ -1405,15 +1427,30 @@ namespace Questor.Modules.Caching
         ///   Returns the mission for a specific agent
         /// </summary>
         /// <param name="agentId"></param>
+        /// <param name="ForceUpdate"> </param>
         /// <returns>null if no mission could be found</returns>
-        public DirectAgentMission GetAgentMission(long agentId)
+        public DirectAgentMission GetAgentMission(long agentId, bool ForceUpdate)
         {
+            if (DateTime.Now < NextGetAgentMissionAction)
+            {
+                if (FirstAgentMission != null)
+                {
+                    return FirstAgentMission;
+                }
+                return null;
+            }
+
             try
             {
-                IEnumerable<DirectAgentMission> myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
+                if (ForceUpdate || myAgentMissionList == null || !myAgentMissionList.Any())
+                {
+                    myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
+                    NextGetAgentMissionAction = DateTime.Now.AddSeconds(5);
+                }
+
                 if (myAgentMissionList.Any())
                 {
-                    DirectAgentMission FirstAgentMission = myAgentMissionList.FirstOrDefault();
+                    FirstAgentMission = myAgentMissionList.FirstOrDefault();
                     return FirstAgentMission;
                 }
                 return null;
@@ -1596,7 +1633,7 @@ namespace Questor.Modules.Caching
         public DirectAgentMissionBookmark GetMissionBookmark(long agentId, string startsWith)
         {
             // Get the missions
-            DirectAgentMission missionForBookmarkInfo = GetAgentMission(agentId);
+            DirectAgentMission missionForBookmarkInfo = GetAgentMission(agentId, false);
             if (missionForBookmarkInfo == null)
             {
                 Logging.Log("Cache.DirectAgentMissionBookmark", "missionForBookmarkInfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]", Logging.White);
@@ -1709,7 +1746,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public IEnumerable<Actions.Action> LoadMissionActions(long agentId, int pocketId, bool missionMode)
         {
-            DirectAgentMission missiondetails = GetAgentMission(agentId);
+            DirectAgentMission missiondetails = GetAgentMission(agentId, false);
             if (missiondetails == null && missionMode)
                 return new Actions.Action[0];
 
@@ -1855,7 +1892,7 @@ namespace Questor.Modules.Caching
                 return;
             }
 
-            DirectAgentMission missionDetailsForMissionItems = GetAgentMission(agentId);
+            DirectAgentMission missionDetailsForMissionItems = GetAgentMission(agentId, false);
             if (missionDetailsForMissionItems == null)
                 return;
             if (string.IsNullOrEmpty(FactionName))

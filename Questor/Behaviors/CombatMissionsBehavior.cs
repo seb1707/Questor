@@ -446,7 +446,9 @@ namespace Questor.Behaviors
                                 //Logging.Log("CombatMissionsBehavior.Idle", "Settings.Instance.CombatShipName.ToLower() [" + Settings.Instance.CombatShipName.ToLower() + "]", Logging.Teal);
                                 if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                                 {
+                                    if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
                                     Statistics.WriteMissionStatistics(AgentID);
+                                    if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Done w Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
                                     break;
                                 }
                             }
@@ -584,7 +586,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, true);
                         if (Cache.Instance.Mission != null)
                         {
                             // Update loyalty points again (the first time might return -1)
@@ -882,7 +884,7 @@ namespace Questor.Behaviors
                         {
                             try
                             {
-                                Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);    
+                                Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);    
                             }
                             catch(Exception exception)
                             {
@@ -983,7 +985,7 @@ namespace Questor.Behaviors
                     {
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
                         //if (Cache.Instance.Mission == null)
                         //{
                         //    Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);

@@ -454,7 +454,7 @@ namespace Questor.Behaviors
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("CombatHelperBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
 
                         if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.GotoBase) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.UnloadLoot;
 
@@ -478,7 +478,7 @@ namespace Questor.Behaviors
                     {
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
                         if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
                         {
                             Logging.Log("CombatHelperBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);

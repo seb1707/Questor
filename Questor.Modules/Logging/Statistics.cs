@@ -409,7 +409,16 @@ namespace Questor.Modules.Logging
                 return;
             }
 
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(myCombatMissionAgentID);
+            //
+            // we have already turned in the mission we *really* do not want to re-query the list of avail missions
+            //
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(myCombatMissionAgentID, false);
+            if (Cache.Instance.Mission == null)
+            {
+                Logging.Log("Statistics", "We do not have a current mission...", Logging.Teal);
+                Statistics.Instance.MissionLoggingCompleted = true;
+                return;
+            }
             
             if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {

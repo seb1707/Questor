@@ -393,7 +393,7 @@ namespace Questor.Behaviors
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID);
+                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
                         if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoBase) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.UnloadLoot;
                         _traveler.Destination = null;
                     }

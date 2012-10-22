@@ -463,7 +463,7 @@ namespace Questor.Modules.Actions
             //open the journal window
             if (!Cache.Instance.OpenJournalWindow("AgentInteraction")) return;
 
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId);
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId, true);
             if (Cache.Instance.Mission == null)
             {
                 if (_waitingOnMission == false)
@@ -894,18 +894,20 @@ namespace Questor.Modules.Actions
                 return;
             }
             DirectAgentWindow agentWindow = Agent.Window;
+            if (agentWindow == null)
+            {
+                Logging.Log("AgentInteraction", "Done", Logging.Yellow);
+                _States.CurrentAgentInteractionState = AgentInteractionState.Done;
+            }
+
             if (agentWindow != null)
             {
                 Logging.Log("AgentInteraction", "Attempting to close Agent Window", Logging.Yellow);
                 _nextAgentAction = DateTime.Now.AddSeconds(1);
                 agentWindow.Close();
             }
-            if (agentWindow == null)
-            {
-                Logging.Log("AgentInteraction", "Done", Logging.Yellow);
-                _States.CurrentAgentInteractionState = AgentInteractionState.Done;
-                return;
-            }
+
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId, true);
         }
 
         public void ProcessState()

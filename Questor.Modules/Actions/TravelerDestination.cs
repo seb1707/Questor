@@ -445,7 +445,7 @@ namespace Questor.Modules.Actions
 
         private static DirectAgentMissionBookmark GetMissionBookmark(long agentId, string title)
         {
-            DirectAgentMission mission = Cache.Instance.GetAgentMission(agentId);
+            DirectAgentMission mission = Cache.Instance.GetAgentMission(agentId, false);
             if (mission == null)
                 return null;
 

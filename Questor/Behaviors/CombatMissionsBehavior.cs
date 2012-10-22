@@ -614,8 +614,8 @@ namespace Questor.Behaviors
                     //
                     if (Cache.Instance.InSpace)
                     {
-                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     }
 
                     if (_States.CurrentSwitchShipState == SwitchShipState.Idle)
@@ -639,8 +639,8 @@ namespace Questor.Behaviors
                     //
                     if (Cache.Instance.InSpace)
                     {
-                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     }
 
                     if (_States.CurrentArmState == ArmState.Idle)
@@ -966,8 +966,8 @@ namespace Questor.Behaviors
                     //
                     if (Cache.Instance.InSpace)
                     {
-                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: gotomission", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                        Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                     }
 
                     if (_States.CurrentUnloadLootState == UnloadLootState.Idle)

@@ -30,15 +30,11 @@ namespace Questor.Behaviors
         private readonly Combat _combat;
         private readonly Drones _drones;
 
-        //private DateTime _lastPulse;
         private readonly Panic _panic;
         private readonly Salvage _salvage;
         private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
-        //private readonly Random _random;
-
-        //private int _randomDelay;
         public static long AgentID;
 
         private readonly Stopwatch _watch;
@@ -51,13 +47,8 @@ namespace Questor.Behaviors
 
         public string CharacterName { get; set; }
 
-        //DateTime _nextAction = DateTime.Now;
-
         public DebugHangarsBehavior()
         {
-            //_lastPulse = DateTime.MinValue;
-
-            //_random = new Random();
             _salvage = new Salvage();
             _combat = new Combat();
             _drones = new Drones();

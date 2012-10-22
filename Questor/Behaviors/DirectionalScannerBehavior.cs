@@ -37,9 +37,12 @@ namespace Questor.Behaviors
         public static long AgentID;
         private readonly Stopwatch _watch;
 
-        public bool Panicstatereset; //false;
+        public bool PanicstateReset; //false;
+
         private bool ValidSettings { get; set; }
-        public bool CloseQuestorflag = true;
+
+        public bool CloseQuestorFlag = true;
+
         public string CharacterName { get; set; }
 
         //DateTime _nextAction = DateTime.Now;
@@ -58,13 +61,8 @@ namespace Questor.Behaviors
             // this is combat mission specific and needs to be generalized
             //
             Settings.Instance.SettingsLoaded += SettingsLoaded;
-            //Settings.Instance.UseFittingManager = false;
-
-            // States.CurrentDirectionalScannerBehaviorState fixed on ExecuteMission
             _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
-            //_States.CurrentCombatState = CombatState.Idle;
-            //_States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
         }
@@ -253,10 +251,10 @@ namespace Questor.Behaviors
                 _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Panic;
 
                 DebugDirectionalScannerBehaviorStates();
-                if (Panicstatereset)
+                if (PanicstateReset)
                 {
                     _States.CurrentPanicState = PanicState.Normal;
-                    Panicstatereset = false;
+                    PanicstateReset = false;
                 }
             }
             else if (_States.CurrentPanicState == PanicState.Resume)
@@ -329,7 +327,7 @@ namespace Questor.Behaviors
                     List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
-                        // happens if autopilot isn't set and this questorstate is chosen manually
+                        // happens if autopilot is not set and this QuestorState is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("DirectionalScannerBehavior.Traveler", "No destination?", Logging.White);
                         if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Traveler) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;

@@ -17,7 +17,6 @@ namespace Questor.Storylines
     {
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
-        //public List<long> AgentBlacklist;
 
         private readonly Combat _combat;
         private readonly Traveler _traveler;

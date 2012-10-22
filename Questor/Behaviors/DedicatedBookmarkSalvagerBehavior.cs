@@ -35,7 +35,6 @@ namespace Questor.Behaviors
         public DateTime LastAction;
         private DateTime _nextBookmarksrefresh = DateTime.Now;
 
-        //private readonly Random _random;
         public static long AgentID;
 
         private readonly Stopwatch _watch;
@@ -49,10 +48,7 @@ namespace Questor.Behaviors
 
         public string CharacterName { get; set; }
 
-//        public List<DirectBookmark> AfterMissionSalvageBookmarks;
         public List<DirectBookmark> BookmarksThatAreNotReadyYet;
-
-        //DateTime _nextAction = DateTime.Now;
 
         public DedicatedBookmarkSalvagerBehavior()
         {
@@ -71,7 +67,6 @@ namespace Questor.Behaviors
 
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
-            //_States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
         }
@@ -418,7 +413,6 @@ namespace Questor.Behaviors
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
                     }
                     break;
-
 
                 case DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge:
 

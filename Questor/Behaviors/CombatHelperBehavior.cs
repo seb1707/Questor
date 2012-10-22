@@ -28,7 +28,6 @@ namespace Questor.Behaviors
     {
         private readonly Arm _arm;
         private readonly Combat _combat;
-        //private readonly Defense _defense;
         private readonly Drones _drones;
 
         private readonly Panic _panic;
@@ -36,7 +35,6 @@ namespace Questor.Behaviors
         private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
-        //private int _randomDelay;
         public static long AgentID;
 
         private readonly Stopwatch _watch;
@@ -48,8 +46,6 @@ namespace Questor.Behaviors
         public bool CloseQuestorFlag = true;
 
         public string CharacterName { get; set; }
-
-        //DateTime _nextAction = DateTime.Now;
 
         public CombatHelperBehavior()
         {

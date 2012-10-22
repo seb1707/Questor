@@ -30,15 +30,12 @@ namespace Questor.Behaviors
         private readonly Combat _combat;
         private readonly Drones _drones;
 
-        //private DateTime _lastPulse;
         private readonly Panic _panic;
         private readonly Salvage _salvage;
         private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
-        //private readonly Random _random;
 
-        //private int _randomDelay;
         public static long AgentID;
 
         private readonly Stopwatch _watch;
@@ -51,13 +48,8 @@ namespace Questor.Behaviors
 
         public string CharacterName { get; set; }
 
-        //DateTime _nextAction = DateTime.Now;
-
         public DebugBehavior()
         {
-            //_lastPulse = DateTime.MinValue;
-
-            //_random = new Random();
             _salvage = new Salvage();
             _combat = new Combat();
             _drones = new Drones();
@@ -71,12 +63,9 @@ namespace Questor.Behaviors
             // this is combat mission specific and needs to be generalized
             //
             Settings.Instance.SettingsLoaded += SettingsLoaded;
-            //Settings.Instance.UseFittingManager = false;
 
-            // States.CurrentDebugBehaviorState fixed on ExecuteMission
             _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
-            //_States.CurrentCombatState = CombatState.Idle;
             _States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;

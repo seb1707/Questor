@@ -15,15 +15,13 @@ namespace Questor.Modules.BackgroundTasks
     {
         private static DateTime _lastCleanupAction;
         private DateTime _lastCleanupProcessState;
-        private int _dronebayclosingattempts;
+        private int _droneBayClosingAttempts;
 
-        //private DateTime _lastChatWindowAction;
-        //private bool _newprivateconvowindowhandled;
         private static DateTime CloseQuestorDelay { get; set; }
 
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
-        public static bool CloseQuestorflag = true;
+        public static bool CloseQuestorFlag = true;
 
         private void BeginClosingQuestor()
         {
@@ -35,11 +33,12 @@ namespace Questor.Modules.BackgroundTasks
         {
             // 30 seconds + 10 to 90 seconds + 1 to 9 seconds before restarting
             int secRestart = (300 * 1) + Cache.Instance.RandomNumber(1, 9) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
-            Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering closequestor
+            Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering CloseQuestor
             if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
             {
                 Cache.Instance.CloseQuestorCMDExitGame = true;
             }
+
             //if (_traveler.State == TravelerState.Idle)
             //{
             //    Logging.Log(
@@ -50,7 +49,7 @@ namespace Questor.Modules.BackgroundTasks
 
             //if (_traveler.State == TravelerState.AtDestination ||
             //    DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalSeconds >
-            //   Settings.Instance.SecondstoWaitAfterExteringCloseQuestorBeforeExitingEVE)
+            //   Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE)
             //{
             //Logging.Log("QuestorState.CloseQuestor: At Station: Docked");
             // Write to Session log
@@ -61,14 +60,14 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
                 {
-                    if (CloseQuestorflag)
+                    if (CloseQuestorFlag)
                     {
                         Logging.Log("Questor", "Logging off EVE: In theory eve and questor will restart on their own when the client comes back up", Logging.White);
                         if (Settings.Instance.UseInnerspace)
                             LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
-                        Logging.Log("Questor", "you can change this option by setting the wallet and eveprocessmemoryceiling options to use exit instead of logoff: see the settings.xml file", Logging.White);
+                        Logging.Log("Questor", "you can change this option by setting the wallet and EveProcessMemoryCeiling options to use exit instead of logoff: see the settings.xml file", Logging.White);
                         Logging.Log("Questor", "Logging Off eve in 15 seconds.", Logging.White);
-                        CloseQuestorflag = false;
+                        CloseQuestorFlag = false;
                         CloseQuestorDelay =
                             DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                     }
@@ -409,7 +408,7 @@ namespace Questor.Modules.BackgroundTasks
             /*
              *
              if (!m_Parent.Visible)
-            //GUI isn't visible and CloseQuestorflag is true, so that his code block only runs once
+            //GUI is not visible and CloseQuestorFlag is true, so that his code block only runs once
             {
                 //m_Parent.Visible = true; //this does not work for some reason - innerspace issue?
                 Cache.Instance.ReasonToStopQuestor =
@@ -556,11 +555,11 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             bool close = false;
                             bool restart = false;
-                            bool restartharsh = false;
-                            bool gotobasenow = false;
-                            bool sayyes = false;
-                            bool sayok = false;
-                            bool needhumanintervention = false;
+                            bool restartHarsh = false;
+                            bool gotoBaseNow = false;
+                            bool sayYes = false;
+                            bool sayOk = false;
+                            bool needHumanIntervention = false;
                             bool pause = false;
 
                             //bool sayno = false;
@@ -569,17 +568,17 @@ namespace Questor.Modules.BackgroundTasks
                                 // Server going down /unscheduled/ potentially very soon!
                                 // CCP does not reboot in the middle of the day because the server is behaving
                                 // dock now to avoid problems
-                                gotobasenow |= window.Html.Contains("for a short unscheduled reboot");
+                                gotoBaseNow |= window.Html.Contains("for a short unscheduled reboot");
 
                                 //errors that are repeatable and unavoidable even after a restart of eve/questor
-                                needhumanintervention |= window.Html.Contains("One or more mission objectives have not been completed");
-                                needhumanintervention |= window.Html.Contains("Please check your mission journal for further information");
+                                needHumanIntervention |= window.Html.Contains("One or more mission objectives have not been completed");
+                                needHumanIntervention |= window.Html.Contains("Please check your mission journal for further information");
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
                                 pause |= window.Html.Contains("Not all the items could be fitted");
 
                                 if (window.Type == "form.MessageBox" && window.IsDialog && window.IsModal && window.IsKillable)
                                 {
-                                    sayok |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty    
+                                    sayOk |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty    
                                 }
 
                                 // quitting eve?
@@ -617,16 +616,16 @@ namespace Questor.Modules.BackgroundTasks
                                 //trial account
                                 close |= window.Html.Contains("At any time you can log in to the account management page and change your trial account to a paying account");
 
-                                restartharsh |= window.Html.Contains("The user's connection has been usurped on the proxy");
-                                restartharsh |= window.Html.Contains("The connection to the server was closed"); 										//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("server was closed");  															//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("The socket was closed"); 															//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("The connection was closed"); 														//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("Connection to server lost"); 														//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("The user connection has been usurped on the proxy"); 								//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");	//CONNECTION LOST
-                                restartharsh |= window.Html.Contains("Your client has waited"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
-                                restartharsh |= window.Html.Contains("This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
+                                restartHarsh |= window.Html.Contains("The user's connection has been usurped on the proxy");
+                                restartHarsh |= window.Html.Contains("The connection to the server was closed"); 										//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("server was closed");  															//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("The socket was closed"); 															//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("The connection was closed"); 														//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("Connection to server lost"); 														//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("The user connection has been usurped on the proxy"); 								//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");	//CONNECTION LOST
+                                restartHarsh |= window.Html.Contains("Your client has waited"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
+                                restartHarsh |= window.Html.Contains("This could mean the server is very loaded"); //SOUL-CRUSHING LAG - Your client has waited x minutes for a remote call to complete.
 
                                 //
                                 // restart the client if these are encountered
@@ -636,24 +635,25 @@ namespace Questor.Modules.BackgroundTasks
                                 //
                                 // Modal Dialogs the need "yes" pressed
                                 //
-                                sayyes |= window.Html.Contains("objectives requiring a total capacity");
-                                sayyes |= window.Html.Contains("your ship only has space for");
-                                sayyes |= window.Html.Contains("Are you sure you want to remove location");
+                                sayYes |= window.Html.Contains("objectives requiring a total capacity");
+                                sayYes |= window.Html.Contains("your ship only has space for");
+                                sayYes |= window.Html.Contains("Are you sure you want to remove location");
                                 //sayyes |= window.Html.Contains("Repairing these items will cost");
-                                sayyes |= window.Html.Contains("Are you sure you would like to decline this mission");
+                                sayYes |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 //sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
+
                                 
                                 //
                                 // LP Store "Accept offer" dialog
                                 //
-                                sayok |= window.Html.Contains("Are you sure you want to accept this offer?");
+                                sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
                                 //
                                 // Modal Dialogs the need "no" pressed
                                 //
                                 //sayno |= window.Html.Contains("Do you wish to proceed with this dangerous action
                             }
 
-                            if (restartharsh)
+                            if (restartHarsh)
                             {
                                 Logging.Log("Cleanup: RestartWindow", "Restarting eve...", Logging.White);
                                 Logging.Log("Cleanup: RestartWindow", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
@@ -682,7 +682,7 @@ namespace Questor.Modules.BackgroundTasks
                                 return;
                             }
 
-                            if (sayyes)
+                            if (sayYes)
                             {
                                 Logging.Log("Cleanup", "Found a window that needs 'yes' chosen...", Logging.White);
                                 Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
@@ -690,16 +690,16 @@ namespace Questor.Modules.BackgroundTasks
                                 continue;
                             }
 
-                            if (sayok)
+                            if (sayOk)
                             {
                                 Logging.Log("Cleanup", "Saying OK to modal window for lpstore offer.", Logging.White);
                                 window.AnswerModal("OK");
                                 continue;
                             }
 
-                            if (gotobasenow)
+                            if (gotoBaseNow)
                             {
-                                Logging.Log("Cleanup", "Evidentially the cluster is dieing... and CCP is restarting the server", Logging.White);
+                                Logging.Log("Cleanup", "Evidently the cluster is dieing... and CCP is restarting the server", Logging.White);
                                 Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                                 Cache.Instance.GotoBaseNow = true;
                                 Settings.Instance.AutoStart = false;
@@ -720,7 +720,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.Paused = true;
                             }
 
-                            if (needhumanintervention)
+                            if (needHumanIntervention)
                             {
                                 Statistics.Instance.MissionCompletionErrors++;
                                 Logging.Log("Cleanup", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
@@ -769,17 +769,17 @@ namespace Questor.Modules.BackgroundTasks
                                    (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 &&
                                     Cache.Instance.DirectEve.ActiveShip.GroupId != 28 &&
                                     Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&
-                                    _dronebayclosingattempts <= 1))
+                                    _droneBayClosingAttempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.Now;
-                                    _dronebayclosingattempts++;
+                                    _droneBayClosingAttempts++;
                                     // Close the drone bay, its not required in space.
                                     window.Close();
                                 }
                             }
                             else
                             {
-                                _dronebayclosingattempts = 0;
+                                _droneBayClosingAttempts = 0;
                             }
                         }
                     }

@@ -176,6 +176,7 @@ namespace Questor.Modules.Lookup
         //
         // Storage location for loot, ammo, and bookmarks
         //
+        public string HomeBookmarkName { get; set; }
         public string LootHangar { get; set; }
         public string AmmoHangar { get; set; }
         public string BookmarkHangar { get; set; }
@@ -605,6 +606,7 @@ namespace Questor.Modules.Lookup
                 //
                 // Storage Location for Loot, Ammo, Bookmarks
                 //
+                HomeBookmarkName = "myHomeBookmark";
                 LootHangar = String.Empty;
                 AmmoHangar = String.Empty;
                 BookmarkHangar = String.Empty;
@@ -908,6 +910,7 @@ namespace Questor.Modules.Lookup
                     //
                     // Storage Location for Loot, Ammo, Bookmarks
                     //
+                    HomeBookmarkName = (string)xml.Element("homeBookmarkName") ?? "myHomeBookmark";
                     LootHangar = (string)xml.Element("lootHangar");
                     AmmoHangar = (string)xml.Element("ammoHangar");
                     BookmarkHangar = (string)xml.Element("bookmarkHangar");

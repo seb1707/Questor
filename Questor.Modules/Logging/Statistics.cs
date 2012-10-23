@@ -31,19 +31,22 @@ namespace Questor.Modules.Logging
         public int AmmoValue { get; set; }
         public int MissionsThisSession { get; set; }
         public int MissionCompletionErrors { get; set; }
-        public static int AgentLPRetrivalAttempts { get; set; }
+
+        public static int AgentLPRetrievalAttempts { get; set; }
+
         public bool MissionLoggingCompleted; //false
         public bool DroneLoggingCompleted; //false
         public long AgentID { get; set; }
         //private bool PocketLoggingCompleted = false;
         //private bool SessionLoggingCompleted = false;
-        public bool DebugMissionStatistics; //false
+
         public bool MissionLoggingStarted = true;
 
         /// <summary>
         ///   Singleton implementation
         /// </summary>
         private static readonly Statistics _instance = new Statistics();
+        public DateTime LastMissionCompletionError;
 
         public static Statistics Instance
         {
@@ -232,7 +235,7 @@ namespace Questor.Modules.Logging
                     }
                     else
                     {
-                        Logging.Log("DroneStats", "Couldn't find the drone TypeID specified in the character settings xml; this shouldn't happen!", Logging.White);
+                        Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
                     }
                 }
                 else
@@ -393,34 +396,24 @@ namespace Questor.Modules.Logging
             Cache.Instance.WrecksThisPocket = 0;
         }
 
-        public static void WriteMissionStatistics(long myCombatMissionAgentID)
+        public static void WriteMissionStatistics(long statisticsForThisAgent)
         {
             if (Cache.Instance.InSpace)
             {
-                Logging.Log("Statistics","We've started questor in space, assume we do not need to write any statistics at the moment.",Logging.Teal);
+                Logging.Log("Statistics","We have started questor in space, assume we do not need to write any statistics at the moment.",Logging.Teal);
                 Statistics.Instance.MissionLoggingCompleted = true; //if the mission was completed more than 10 min ago assume the logging has been done already.
                 return;
             }
+
             //Logging.Log("StatisticsState: MissionLogCompleted is false: we still need to create the mission logs for this last mission");
-            if ((DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes > 5 && DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes > 45) || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you aren't after mission salvaging this timestamp is the same as FinishedMission
+            if ((DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes > 5 && DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes > 45) || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you are not after mission salvaging this timestamp is the same as FinishedMission
             {
                 Logging.Log("Statistics: WriteMissionStatistics", "It is unlikely a mission has been run yet this session... No Mission log needs to be written.", Logging.White);
                 Statistics.Instance.MissionLoggingCompleted = true; //if the mission was completed more than 10 min ago assume the logging has been done already.
                 return;
             }
-
-            //
-            // we have already turned in the mission we *really* do not want to re-query the list of avail missions
-            //
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(myCombatMissionAgentID, false);
-            if (Cache.Instance.Mission == null)
-            {
-                Logging.Log("Statistics", "We do not have a current mission...", Logging.Teal);
-                Statistics.Instance.MissionLoggingCompleted = true;
-                return;
-            }
-            
-            if (Statistics.Instance.DebugMissionStatistics) // we only need to see the following wall of comments if debugging mission statistics
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(statisticsForThisAgent, true);
+            if (Settings.Instance.DebugStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {
                 Logging.Log("Statistics", "...Checking to see if we should create a mission log now...", Logging.White);
                 Logging.Log("Statistics", " ", Logging.White);
@@ -430,14 +423,14 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics", "2) Cache.Instance.MissionName must not be empty - we must have had a mission already this session", Logging.White);
                 Logging.Log("Statistics", "AND", Logging.White);
                 Logging.Log("Statistics", "3a Cache.Instance.mission == null - their must not be a current mission OR", Logging.White);
-                Logging.Log("Statistics", "3b Cache.Instance.mission.State != (int)MissionState.Accepted) - the missionstate isn't 'Accepted'", Logging.White);
+                Logging.Log("Statistics", "3b Cache.Instance.mission.State != (int)MissionState.Accepted) - the missionstate is not 'Accepted'", Logging.White);
                 Logging.Log("Statistics", " ", Logging.White);
                 Logging.Log("Statistics", " ", Logging.White);
                 Logging.Log("Statistics", "If those are all met then we get to create a log for the previous mission.", Logging.White);
 
                 if (!string.IsNullOrEmpty(Cache.Instance.MissionName)) //condition 1
                 {
-                    Logging.Log("Statistics", "1 We must have a mission because Missionmame is filled in", Logging.White);
+                    Logging.Log("Statistics", "1 We must have a mission because MissionName is filled in", Logging.White);
                     Logging.Log("Statistics", "1 Mission is: " + Cache.Instance.MissionName, Logging.White);
 
                     if (Cache.Instance.Mission != null) //condition 2
@@ -453,49 +446,49 @@ namespace Questor.Modules.Logging
                         else
                         {
                             Logging.Log("Statistics", "MissionState is Accepted: which means the mission is not yet complete", Logging.White);
-                            Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
+                            Statistics.Instance.MissionLoggingCompleted = true; //if it is not true - this means we should not be trying to log mission stats atm
                         }
                     }
                     else
                     {
-                        Logging.Log("Statistics", "mission is NUL - which means we have no current mission", Logging.White);
-                        Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
+                        Logging.Log("Statistics", "mission is NULL - which means we have no current mission", Logging.White);
+                        Statistics.Instance.MissionLoggingCompleted = true; //if it is not true - this means we should not be trying to log mission stats atm
                     }
                 }
                 else
                 {
                     Logging.Log("Statistics", "1 We must NOT have had a mission yet because MissionName is not filled in", Logging.White);
-                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
+                    Statistics.Instance.MissionLoggingCompleted = true; //if it is not true - this means we should not be trying to log mission stats atm
                 }
             }
             if (!string.IsNullOrEmpty(Cache.Instance.MissionName) && (Cache.Instance.Mission == null || (Cache.Instance.Mission.State != (int)MissionState.Accepted)))
             {
-                if (AgentLPRetrivalAttempts > 20)
+                if (AgentLPRetrievalAttempts > 20)
                 {
-                    Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" +  AgentLPRetrivalAttempts + "] giving up", Logging.White);
-                    AgentLPRetrivalAttempts = 0;
-                    Statistics.Instance.MissionLoggingCompleted = true; //if it isn't true - this means we should not be trying to log mission stats atm
+                    Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" +  AgentLPRetrievalAttempts + "] giving up", Logging.White);
+                    AgentLPRetrievalAttempts = 0;
+                    Statistics.Instance.MissionLoggingCompleted = true; //if it is not true - this means we should not be trying to log mission stats atm
                     return;
                 }
 
                 // Seeing as we completed a mission, we will have loyalty points for this agent
                 if (Cache.Instance.Agent.LoyaltyPoints == -1)
                 {
-                    AgentLPRetrivalAttempts++;
-                    Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrivalAttempts + "] retrying...", Logging.White);
+                    AgentLPRetrievalAttempts++;
+                    Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrievalAttempts + "] retrying...", Logging.White);
                     return;
                 }
-                AgentLPRetrivalAttempts = 0;
+                AgentLPRetrievalAttempts = 0;
 
                 Statistics.Instance.MissionsThisSession++;
-                if (Statistics.Instance.DebugMissionStatistics) Logging.Log("Statistics", "We jumped through all the hoops: now do the mission logging", Logging.White);
+                if (Settings.Instance.DebugStatistics) Logging.Log("Statistics", "We jumped through all the hoops: now do the mission logging", Logging.White);
                 Cache.Instance.SessionIskGenerated = (Cache.Instance.SessionIskGenerated + (Cache.Instance.DirectEve.Me.Wealth - Cache.Instance.Wealth));
                 Cache.Instance.SessionLootGenerated = (Cache.Instance.SessionLootGenerated + Statistics.Instance.LootValue);
                 Cache.Instance.SessionLPGenerated = (Cache.Instance.SessionLPGenerated + (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints));
                 Logging.Log("Statistics", "Printing All Statistics Related Variables to the console log:", Logging.White);
                 Logging.Log("Statistics", "Mission Name: [" + Cache.Instance.MissionName + "]", Logging.White);
                 Logging.Log("Statistics", "Faction: [" + Cache.Instance.FactionName + "]", Logging.White);
-                Logging.Log("Statistics", "System: [" + Cache.Instance.MissionSolarSystem.ToString() + "]", Logging.White);
+                Logging.Log("Statistics", "System: [" + Cache.Instance.MissionSolarSystem + "]", Logging.White);
                 Logging.Log("Statistics", "Total Missions completed this session: [" + Statistics.Instance.MissionsThisSession + "]", Logging.White);
                 Logging.Log("Statistics", "StartedMission: [ " + Statistics.Instance.StartedMission + "]", Logging.White);
                 Logging.Log("Statistics", "FinishedMission: [ " + Statistics.Instance.FinishedMission + "]", Logging.White);
@@ -518,11 +511,11 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics", "MissionXMLIsAvailable: [" + Cache.Instance.MissionXMLIsAvailable + "]", Logging.White);
                 Logging.Log("Statistics", "MissionCompletionerrors: [" + Statistics.Instance.MissionCompletionErrors + "]", Logging.White);
                 Logging.Log("Statistics", "the stats below may not yet be correct and need some TLC", Logging.White);
-                var weaponnum = 0;
+                var weaponNumber = 0;
                 foreach (ModuleCache weapon in Cache.Instance.Weapons)
                 {
-                    weaponnum++;
-                    Logging.Log("Statistics", "Time Spent Reloading: [" + weaponnum + "][" + weapon.ReloadTimeThisMission + "]", Logging.White);
+                    weaponNumber++;
+                    Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + weapon.ReloadTimeThisMission + "]", Logging.White);
                 }
                 Logging.Log("Statistics", "Time Spent IN Mission: [" + Cache.Instance.TimeSpentInMission_seconds + "sec]", Logging.White);
                 Logging.Log("Statistics", "Time Spent In Range: [" + Cache.Instance.TimeSpentInMissionInRange + "]", Logging.White);

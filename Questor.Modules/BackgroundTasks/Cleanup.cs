@@ -559,7 +559,6 @@ namespace Questor.Modules.BackgroundTasks
                             bool gotoBaseNow = false;
                             bool sayYes = false;
                             bool sayOk = false;
-                            bool needHumanIntervention = false;
                             bool pause = false;
 
                             //bool sayno = false;
@@ -570,9 +569,6 @@ namespace Questor.Modules.BackgroundTasks
                                 // dock now to avoid problems
                                 gotoBaseNow |= window.Html.Contains("for a short unscheduled reboot");
 
-                                //errors that are repeatable and unavoidable even after a restart of eve/questor
-                                needHumanIntervention |= window.Html.Contains("One or more mission objectives have not been completed");
-                                needHumanIntervention |= window.Html.Contains("Please check your mission journal for further information");
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
                                 pause |= window.Html.Contains("Not all the items could be fitted");
 
@@ -718,38 +714,6 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 Logging.Log("Cleanup", "This window indicates an error fitting the ship. pausing", Logging.White);
                                 Cache.Instance.Paused = true;
-                            }
-
-                            if (needHumanIntervention)
-                            {
-                                Statistics.Instance.MissionCompletionErrors++;
-                                Logging.Log("Cleanup", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
-                                window.Close();
-                                if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
-                                {
-                                    if (Cache.Instance.MissionXMLIsAvailable)
-                                    {
-                                        Logging.Log("Cleanup", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
-                                        Settings.Instance.AutoStart = false;
-                                        //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
-                                        //Cache.Instance.CloseQuestorCMDLogoff = false;
-                                        //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                        //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                        //Cache.Instance.SessionState = "Exiting";
-                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
-                                    }
-                                    else
-                                    {
-                                        Logging.Log("Cleanup", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
-                                        Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
-                                        //Cache.Instance.CloseQuestorCMDLogoff = false;
-                                        //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                        //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                        //Cache.Instance.SessionState = "Exiting";
-                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
-                                    }
-                                }
-                                continue;
                             }
 
                             if (close)

@@ -317,36 +317,6 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
-                    if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log) 
-                    {
-                        if (DateTime.Now > (Cache.Instance.QuestorStarted_DateTime.AddMinutes(5)))
-                        {
-                            try
-                            {
-                                //Logging.Log("CombatMissionsBehavior.Idle", "Cache.Instance.DirectEve.Activeship.Givenname.ToLower() [" + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() + "]", Logging.Teal);
-                                //Logging.Log("CombatMissionsBehavior.Idle", "Settings.Instance.CombatShipName.ToLower() [" + Settings.Instance.CombatShipName.ToLower() + "]", Logging.Teal);
-                                if (!Statistics.Instance.MissionLoggingCompleted && Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
-                                {
-                                    if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
-                                    Statistics.WriteMissionStatistics(AgentID);
-                                    if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Done w Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
-                                    break;
-                                }
-                            }
-                            catch
-                            {
-                                Logging.Log("CombatMissionsBehavior.Idle", "[" + DateTime.Now + " > " + Cache.Instance.QuestorStarted_DateTime.AddMinutes(5) + "]", Logging.Teal);
-                                Logging.Log("CombatMissionsBehavior.Idle", "if (Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())", Logging.Teal);
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            Logging.Log("CombatMissionsBehavior.Idle", "There are no mission statistics to record yet: waiting until the next idle state", Logging.Teal);
-                        }
-                    }
-                    
                     if (Settings.Instance.AutoStart)
                     {
                         if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "Autostart is currently [" + Settings.Instance.AutoStart + "]", Logging.White);
@@ -835,12 +805,42 @@ namespace Questor.Behaviors
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                             _States.CurrentQuestorState = QuestorState.Idle;
                         }
+                        else if (Statistics.Instance.LastMissionCompletionError.AddSeconds(10) < DateTime.Now)
+                        {              
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Statistics;
+                        }
                         else
                         {
+                            Logging.Log("CurrentCombatMissionBehavior.CompleteMission", "Skipping statistics: We did not yet complete the mission", Logging.Teal);
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
                         }
                         return;
                     }
+                    break;
+
+                case CombatMissionsBehaviorState.Statistics:
+                    // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
+                    if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
+                    {
+                        try
+                        {
+                            //Logging.Log("CombatMissionsBehavior.Idle", "Cache.Instance.DirectEve.Activeship.Givenname.ToLower() [" + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() + "]", Logging.Teal);
+                            //Logging.Log("CombatMissionsBehavior.Idle", "Settings.Instance.CombatShipName.ToLower() [" + Settings.Instance.CombatShipName.ToLower() + "]", Logging.Teal);
+                            if (!Statistics.Instance.MissionLoggingCompleted)
+                            {
+                                if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
+                                Statistics.WriteMissionStatistics(AgentID);
+                                if (Settings.Instance.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Done w Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
+                                return;
+                            }
+                        }
+                        catch
+                        {
+                            Logging.Log("CombatMissionsBehavior.Idle", "if (Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())", Logging.Teal);
+                        }
+                    }
+
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
                     break;
 
                 case CombatMissionsBehaviorState.UnloadLoot:

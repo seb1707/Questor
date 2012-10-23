@@ -103,6 +103,7 @@ namespace Questor.Modules.Actions
         private void ReplyToAgent()
         {
             _waitingOnAgentWindow = false;
+            if (Agent.Window == null) return;
 
             List<DirectAgentResponse> responses = Agent.Window.AgentResponses;
             if (responses == null || responses.Count == 0)
@@ -120,60 +121,8 @@ namespace Questor.Modules.Actions
                 }
                 return;
             }
-            
+
             _waitingOnAgentResponse = false;
-
-            foreach (DirectWindow window in Cache.Instance.Windows)
-            {
-                if (window.Name == "modal")
-                {
-                    bool needHumanIntervention = false;
-
-                    if (!string.IsNullOrEmpty(window.Html))
-                    {
-                        //errors that are repeatable and unavoidable even after a restart of eve/questor
-                        needHumanIntervention |= window.Html.Contains("One or more mission objectives have not been completed");
-                        needHumanIntervention |= window.Html.Contains("Please check your mission journal for further information");
-                    }
-
-                    if (needHumanIntervention)
-                    {
-                        Statistics.Instance.MissionCompletionErrors++;
-                        Statistics.Instance.LastMissionCompletionError = DateTime.Now;
-
-                        Logging.Log("Cleanup", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
-                        window.Close();
-
-                        if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
-                        {
-                            if (Cache.Instance.MissionXMLIsAvailable)
-                            {
-                                Logging.Log("Cleanup", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
-                                Settings.Instance.AutoStart = false;
-                                //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
-                                //Cache.Instance.CloseQuestorCMDLogoff = false;
-                                //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                //Cache.Instance.SessionState = "Exiting";
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
-                            }
-                            else
-                            {
-                                Logging.Log("Cleanup", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
-                                Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
-                                //Cache.Instance.CloseQuestorCMDLogoff = false;
-                                //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                //Cache.Instance.SessionState = "Exiting";
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
-                            }
-                        }
-                        continue;
-                    }
-                }
-            }
-
-
 
             DirectAgentResponse request = responses.FirstOrDefault(r => r.Text.Contains(RequestMission));
             DirectAgentResponse complete = responses.FirstOrDefault(r => r.Text.Contains(CompleteMission));
@@ -976,6 +925,56 @@ namespace Questor.Modules.Actions
 
             if (Cache.Instance.InSpace)
                 return;
+
+            foreach (DirectWindow window in Cache.Instance.Windows)
+            {
+                if (window.Name == "modal")
+                {
+                    bool needHumanIntervention = false;
+
+                    if (!string.IsNullOrEmpty(window.Html))
+                    {
+                        //errors that are repeatable and unavoidable even after a restart of eve/questor
+                        needHumanIntervention |= window.Html.Contains("One or more mission objectives have not been completed");
+                        needHumanIntervention |= window.Html.Contains("Please check your mission journal for further information");
+                    }
+
+                    if (needHumanIntervention)
+                    {
+                        Statistics.Instance.MissionCompletionErrors++;
+                        Statistics.Instance.LastMissionCompletionError = DateTime.Now;
+
+                        Logging.Log("Cleanup", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
+                        window.Close();
+
+                        if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
+                        {
+                            if (Cache.Instance.MissionXMLIsAvailable)
+                            {
+                                Logging.Log("Cleanup", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Settings.Instance.AutoStart = false;
+                                //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
+                                //Cache.Instance.CloseQuestorCMDLogoff = false;
+                                //Cache.Instance.CloseQuestorCMDExitGame = true;
+                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cache.Instance.SessionState = "Exiting";
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                            }
+                            else
+                            {
+                                Logging.Log("Cleanup", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
+                                //Cache.Instance.CloseQuestorCMDLogoff = false;
+                                //Cache.Instance.CloseQuestorCMDExitGame = true;
+                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cache.Instance.SessionState = "Exiting";
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
 
             // Wait a bit before doing "things"
             if (DateTime.Now < _nextAgentAction)

@@ -291,17 +291,24 @@ namespace Questor.Modules.Actions
         {
             HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
             missionHtml.LoadHtml(html);
-            foreach (HtmlAgilityPack.HtmlNode nd in missionHtml.DocumentNode.SelectNodes("//a[@href]"))
+            try
             {
-                if (nd.Attributes["href"].Value.Contains("dungeonID="))
+                foreach (HtmlAgilityPack.HtmlNode nd in missionHtml.DocumentNode.SelectNodes("//a[@href]"))
                 {
-                    Cache.Instance.DungeonId = nd.Attributes["href"].Value;
-                    Logging.Log("GetDungeonId", "DungeonID is: " + Cache.Instance.DungeonId, Logging.White);
+                    if (nd.Attributes["href"].Value.Contains("dungeonID="))
+                    {
+                        Cache.Instance.DungeonId = nd.Attributes["href"].Value;
+                        Logging.Log("GetDungeonId", "DungeonID is: " + Cache.Instance.DungeonId, Logging.White);
+                    }
+                    else
+                    {
+                        Cache.Instance.DungeonId = "n/a";
+                    }
                 }
-                else
-                {
-                    Cache.Instance.DungeonId = "n/a";
-                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("GetDungeonId", "if (nd.Attributes[href].Value.Contains(dungeonID=)) - Exception: [" + exception + "]", Logging.White);
             }
         }
 

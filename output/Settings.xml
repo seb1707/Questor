@@ -23,6 +23,8 @@
   <debugSalvage>false</debugSalvage>
   <debugUI>false</debugUI>
   <debugReloadAll>false</debugReloadAll>
+  <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
+  <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <useInnerspace>true</useInnerspace>
   

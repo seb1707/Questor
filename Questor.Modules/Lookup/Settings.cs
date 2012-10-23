@@ -66,6 +66,8 @@ namespace Questor.Modules.Lookup
         public bool DebugAutoStart { get; set; }
         public bool DebugCleanup { get; set; }
         public bool DebugDecline { get; set; }
+        public bool DebugAllMissionsOnBlackList { get; set; }
+        public bool DebugAllMissionsOnGreyList { get; set; }
         public bool DebugDefense { get; set; }
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
@@ -460,6 +462,8 @@ namespace Questor.Modules.Lookup
                 DebugAutoStart = false;
                 DebugCleanup = false;
                 DebugDecline = false;
+                DebugAllMissionsOnBlackList = false;
+                DebugAllMissionsOnGreyList = false;
                 DebugDefense = false;
                 DebugDroneHealth = false;
                 DebugExceptions = false;
@@ -792,6 +796,8 @@ namespace Questor.Modules.Lookup
                     DebugAutoStart = (bool?)xml.Element("debugAutoStart") ?? false;
                     DebugCleanup = (bool?)xml.Element("debugCleanup") ?? false;
                     DebugDecline = (bool?)xml.Element("debugDecline") ?? false;
+                    DebugAllMissionsOnBlackList = (bool?)xml.Element("debugAllMissionsOnBlackList") ?? false;
+                    DebugAllMissionsOnGreyList = (bool?)xml.Element("debugAllMissionsOnGreyList") ?? false;
                     DebugDefense = (bool?)xml.Element("debugDefense") ?? false;
                     DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
                     DebugExceptions = (bool?)xml.Element("debugExceptions") ?? false;

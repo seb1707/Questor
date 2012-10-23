@@ -19,7 +19,6 @@ namespace Questor.Storylines
         private readonly Dictionary<string, IStoryline> _storylines;
 
         private readonly Combat _combat;
-        private readonly Traveler _traveler;
         private readonly AgentInteraction _agentInteraction;
 
         private DateTime _nextAction = DateTime.Now;
@@ -31,7 +30,6 @@ namespace Questor.Storylines
         public Storyline()
         {
             _combat = new Combat();
-            _traveler = new Traveler();
             _agentInteraction = new AgentInteraction();
 
             Cache.Instance.AgentBlacklist = new List<long>();
@@ -127,7 +125,7 @@ namespace Questor.Storylines
             _storyline = null;
             _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
-            _traveler.Destination = null;
+            Traveler.Destination = null;
         }
 
         private DirectAgentMission StorylineMission
@@ -191,10 +189,10 @@ namespace Questor.Storylines
                 return;
             }
 
-            var baseDestination = _traveler.Destination as StationDestination;
+            var baseDestination = Traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
             {
-                _traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
+                Traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
                 return;
             }
 
@@ -203,7 +201,7 @@ namespace Questor.Storylines
                 // if we haven't already done so, set Eve's autopilot
                 if (!_setDestinationStation)
                 {
-                    if (!_traveler.SetStationDestination(storylineagent.StationId))
+                    if (!Traveler.SetStationDestination(storylineagent.StationId))
                     {
                         Logging.Log("Storyline", "GotoAgent: Unable to find route to storyline agent. Skipping.", Logging.Yellow);
                         _States.CurrentStorylineState = StorylineState.Done;
@@ -243,11 +241,11 @@ namespace Questor.Storylines
                 _combat.ProcessState();
             }
 
-            _traveler.ProcessState();
+            Traveler.ProcessState();
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
                 _States.CurrentStorylineState = nextState;
-                _traveler.Destination = null;
+                Traveler.Destination = null;
                 _setDestinationStation = false;
             }
 

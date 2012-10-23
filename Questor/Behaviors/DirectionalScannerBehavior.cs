@@ -32,7 +32,6 @@ namespace Questor.Behaviors
 
         private readonly Panic _panic;
         private readonly Salvage _salvage;
-        private readonly Traveler _traveler;
         public DateTime LastAction;
         public static long AgentID;
         private readonly Stopwatch _watch;
@@ -52,7 +51,6 @@ namespace Questor.Behaviors
             _salvage = new Salvage();
             _combat = new Combat();
             _drones = new Drones();
-            _traveler = new Traveler();
             _arm = new Arm();
             _panic = new Panic();
             _watch = new Stopwatch();
@@ -142,42 +140,6 @@ namespace Questor.Behaviors
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
-        }
-
-        private void TravelToAgentsStation()
-        {
-            try
-            {
-                var baseDestination = _traveler.Destination as StationDestination;
-                if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-                    _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId,
-                                                                   Cache.Instance.Agent.StationId,
-                                                                   Cache.Instance.DirectEve.GetLocationName(
-                                                                       Cache.Instance.Agent.StationId));
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("DirectionalScanner", "TravelToAgentsStation: Exception caught: [" + ex.Message + "]", Logging.Red);
-                return;
-            }
-            if (Cache.Instance.InSpace)
-            {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.Now))
-                {
-                    _combat.ProcessState();
-                    _drones.ProcessState(); //do we really want to use drones here?
-                }
-            }
-            if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-            {
-                Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
-                //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.White);
-            }
-            _traveler.ProcessState();
-            if (Settings.Instance.DebugStates)
-            {
-                Logging.Log("Traveler.State", "is " + _States.CurrentTravelerState, Logging.White);
-            }
         }
 
         public void ProcessState()
@@ -306,9 +268,9 @@ namespace Questor.Behaviors
 
                     NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DirectionalScannerBehaviorState.GotoBase");
 
-                    if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: TravelToAgentsStation()", Logging.White);
+                    if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: Traveler.TravelHome()", Logging.White);
 
-                    TravelToAgentsStation();
+                    Traveler.TravelHome("DirectionalScannerBehavior");
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
@@ -318,7 +280,7 @@ namespace Questor.Behaviors
 
                         if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.GotoBase) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
 
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                     }
                     break;
 
@@ -336,20 +298,20 @@ namespace Questor.Behaviors
                     
                     if (destination.Count == 1 && destination.FirstOrDefault() == 0)
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-                    if (_traveler.Destination == null || _traveler.Destination.SolarSystemId != destination.LastOrDefault())
+                    if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.LastOrDefault())
                     {
                         IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
-                            _traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
+                            Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
                         else
                         {
                             Logging.Log("DirectionalScannerBehavior.Traveler", "Destination: [" + Cache.Instance.DirectEve.Navigation.GetLocation(destination.Last()).Name + "]", Logging.White);
-                            _traveler.Destination = new SolarSystemDestination(destination.LastOrDefault());
+                            Traveler.Destination = new SolarSystemDestination(destination.LastOrDefault());
                         }
                     }
                     else
                     {
-                        _traveler.ProcessState();
+                        Traveler.ProcessState();
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;

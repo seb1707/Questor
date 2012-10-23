@@ -13,13 +13,7 @@ namespace Questor.Storylines
     public class TransactionDataDelivery : IStoryline
     {
         private DateTime _nextAction;
-        private readonly Traveler _traveler;
         private TransactionDataDeliveryState _state;
-
-        public TransactionDataDelivery()
-        {
-            _traveler = new Traveler();
-        }
 
         /// <summary>
         ///   Arm does nothing but get into a (assembled) shuttle
@@ -64,22 +58,22 @@ namespace Questor.Storylines
             _state = TransactionDataDeliveryState.GotoPickupLocation;
 
             _States.CurrentTravelerState = TravelerState.Idle;
-            _traveler.Destination = null;
+            Traveler.Destination = null;
 
             return StorylineState.AcceptMission;
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = _traveler.Destination as MissionBookmarkDestination;
+            var destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
-                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-            _traveler.ProcessState();
+            Traveler.ProcessState();
 
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
-                _traveler.Destination = null;
+                Traveler.Destination = null;
                 return true;
             }
 

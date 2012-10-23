@@ -30,7 +30,6 @@ namespace Questor.Behaviors
         private readonly Panic _panic;
         private readonly Statistics _statistics;
         private readonly Salvage _salvage;
-        private readonly Traveler _traveler;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private DateTime _nextBookmarksrefresh = DateTime.Now;
@@ -53,7 +52,6 @@ namespace Questor.Behaviors
         public DedicatedBookmarkSalvagerBehavior()
         {
             _salvage = new Salvage();
-            _traveler = new Traveler();
             _unloadLoot = new UnloadLoot();
             _arm = new Arm();
             _panic = new Panic();
@@ -138,18 +136,6 @@ namespace Questor.Behaviors
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
-        }
-
-        private void TravelToAgentsStation()
-        {
-            var baseDestination = _traveler.Destination as StationDestination;
-            if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
-                _traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId, Cache.Instance.Agent.StationId, Cache.Instance.DirectEve.GetLocationName(Cache.Instance.Agent.StationId));
-            _traveler.ProcessState();
-            if (Settings.Instance.DebugStates)
-            {
-                Logging.Log("Traveler.State is ", _States.CurrentTravelerState.ToString(), Logging.White);
-            }
         }
 
         public void ProcessState()
@@ -382,15 +368,15 @@ namespace Questor.Behaviors
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DedicatedBookmarkSalvagerBehaviorState.GotoBase");
-                    if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: TravelToAgentsStation()", Logging.White);
-                    TravelToAgentsStation();
+                    if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: Traveler.TravelHome()", Logging.White);
+                    Traveler.TravelHome("DedicatedBookmarkSalvagerBehavior");
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
                         if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoBase) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.UnloadLoot;
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                     }
                     break;
 
@@ -493,11 +479,11 @@ namespace Questor.Behaviors
                         DirectBookmark localBookmark = bookmarksInLocal.FirstOrDefault();
                         if (localBookmark != null)
                         {
-                            _traveler.Destination = new BookmarkDestination(localBookmark);
+                            Traveler.Destination = new BookmarkDestination(localBookmark);
                         }
                         else
                         {
-                            _traveler.Destination = new BookmarkDestination(bookmark);
+                            Traveler.Destination = new BookmarkDestination(bookmark);
                         }
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark;
                         //we know we are connected here
@@ -508,7 +494,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoSalvageBookmark:
-                    _traveler.ProcessState();
+                    Traveler.ProcessState();
                     if (Cache.Instance.GateInGrid())
                     {
                         Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoSalvageBookmark: We found gate in salvage bookmark. Going back to Base", Logging.White);
@@ -516,7 +502,7 @@ namespace Questor.Behaviors
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                         Cache.Instance.NextSalvageTrip = DateTime.Now.AddMinutes(Time.Instance.DelayBetweenSalvagingSessions_minutes);
                         return;
                     }
@@ -529,7 +515,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Salvage;
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                         return;
                     }
 

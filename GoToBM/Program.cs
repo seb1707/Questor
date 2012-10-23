@@ -14,7 +14,6 @@ namespace GoToBM
     internal static class Program
     {
         private static DirectEve _directEve;
-        private static Traveler _traveler;
         private static Cleanup _cleanup;
         private static Defense _defense;
         private static DirectBookmark _bookmark;
@@ -39,7 +38,6 @@ namespace GoToBM
             _directEve = new DirectEve();
             Cache.Instance.DirectEve = _directEve;
             _directEve.OnFrame += OnFrame;
-            _traveler = new Traveler();
             _cleanup = new Cleanup();
             _defense = new Defense();
 
@@ -130,9 +128,9 @@ namespace GoToBM
                     _done = true;
                     return;
                 }
-                _traveler.Destination = new BookmarkDestination(_bookmark);
+                Traveler.Destination = new BookmarkDestination(_bookmark);
             }
-            _traveler.ProcessState();
+            Traveler.ProcessState();
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
                 _done = true;

@@ -25,11 +25,11 @@ namespace Questor.Modules.Activities
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = _traveler.Destination as MissionBookmarkDestination;
+            var destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-                _traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
-            _traveler.ProcessState();
+            Traveler.ProcessState();
 
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
@@ -39,7 +39,7 @@ namespace Questor.Modules.Activities
                 {
                     Logging.Log("CourierMissionCtrl", "destination is null", Logging.White); //how would this occur exactly?
                 }
-                _traveler.Destination = null;
+                Traveler.Destination = null;
                 return true;
             }
 

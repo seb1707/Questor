@@ -62,7 +62,6 @@ namespace QuestorManager
 
         private DateTime _lastPulse;
 
-        private readonly Traveler _traveler;
         private readonly Grab _grab;
         private readonly Drop _drop;
         private readonly Buy _buy;
@@ -83,7 +82,6 @@ namespace QuestorManager
         {
             InitializeComponent();
 
-            _traveler = new Traveler();
             _grab = new Grab();
             _drop = new Drop();
             _buy = new Buy();
@@ -541,7 +539,7 @@ namespace QuestorManager
                     if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.ActiveShip.Entity != null && Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
                         return;
 
-                    TravelerDestination travelerDestination = _traveler.Destination;
+                    TravelerDestination travelerDestination = Traveler.Destination;
                     if (_destination == null)
                         travelerDestination = null;
 
@@ -564,10 +562,10 @@ namespace QuestorManager
                     }
 
                     // Check to see if destination changed, since changing it will set the traveler to Idle
-                    if (_traveler.Destination != travelerDestination)
-                        _traveler.Destination = travelerDestination;
+                    if (Traveler.Destination != travelerDestination)
+                        Traveler.Destination = travelerDestination;
 
-                    _traveler.ProcessState();
+                    Traveler.ProcessState();
 
                     // Record number of jumps
                     _jumps = Cache.Instance.DirectEve.Navigation.GetDestinationPath().Count;
@@ -577,7 +575,7 @@ namespace QuestorManager
                     {
                         Logging.Log("QuestorManager", "Arrived at destination", Logging.White);
 
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                         _destination = null;
                         LstTask.Items.Remove(LstTask.Items[0]);
                         _lastAction = DateTime.Now;
@@ -587,11 +585,11 @@ namespace QuestorManager
                     // An error occurred, reset traveler
                     if (_States.CurrentTravelerState == TravelerState.Error)
                     {
-                        if (_traveler.Destination != null)
+                        if (Traveler.Destination != null)
                             Logging.Log("QuestorManager", "Stopped traveling, QuestorManager threw an error...", Logging.White);
 
                         _destination = null;
-                        _traveler.Destination = null;
+                        Traveler.Destination = null;
                         _start = false;
                         State = QuestormanagerState.Idle;
                     }

@@ -120,9 +120,9 @@
   <!--                                                -->
   <!--              SHIP NAMES             -->
   <!--                                                -->
-  <!-- Ship used for combat missions, empty means current ship  -->
+  <!-- Ship used for combat missions - required-->
   <combatShipName></combatShipName><!-- needs to be customized -->
-  <!-- Ship used for after mission salvaging, empty means current ship -->
+  <!-- Ship used for after mission salvaging - required if salvaging -->
   <salvageShipName></salvageShipName><!-- needs to be customized-->
   <!-- Ship used for Enemy Abound 2of5 -->
   <transportShipName></transportShipName><!-- needs to be customized-->

@@ -434,13 +434,15 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // Walk through the list of items ordered by highest value item first
-                foreach (ItemCache item in items.OrderByDescending(i => i.IskPerM3))
+                foreach (ItemCache item in items.OrderByDescending(i => i.IsAliveandWontFitInContainers).ThenByDescending(i => i.IsContraband).ThenByDescending(i => i.IskPerM3))
                 {
                     if (freeCargoCapacity < 1000) //this should allow BSs to not pickup large low value items but haulers and noctus' to scoop everything
                     {
                         // We never want to pick up a cap booster
                         if (item.GroupID == (int)Group.CapacitorGroupCharge)
+                        {
                             continue;
+                        }
                     }
                     // We pick up loot depending on isk per m3
                     bool isMissionItem = _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior && Cache.Instance.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
@@ -449,6 +451,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (!isMissionItem && item.IsContraband)
                     {
                         if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "["  + item.Name + "] is not the mission item and is considered Contraband: ignore it", Logging.Teal);
+                        Cache.Instance.LootedContainers.Add(containerEntity.Id);
                         continue;
                     }
 
@@ -458,11 +461,12 @@ namespace Questor.Modules.BackgroundTasks
 
                     // Do not pick up items that cannot enter in a freighter container (unless its the mission item)
                     // Note: some mission items that are alive have been allowed to be
-                    //       scooped because unloadlootstate.MoveCommonMissionCompletionitems
+                    //       scooped because UnloadLootState.MoveCommonMissionCompletionitems
                     //       will move them into the hangar floor not the loot location
                     if (!isMissionItem && item.IsAliveandWontFitInContainers)
                     {
                         if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and is Alive and Wont fit in Containers: ignore it", Logging.Teal);
+                        Cache.Instance.LootedContainers.Add(containerEntity.Id);
                         continue;
                     }
 
@@ -473,6 +477,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (!isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
                         {
                             if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
+                            Cache.Instance.LootedContainers.Add(containerEntity.Id);
                             continue;
                         }
 

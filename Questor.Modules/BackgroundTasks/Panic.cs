@@ -111,11 +111,10 @@ namespace Questor.Modules.BackgroundTasks
                     _delayedResume = false;
                     if (Cache.Instance.InMission)
                     {
-                        int frigates = Cache.Instance.Entities.Count(e => e.IsFrigate && e.IsPlayer);
-                        int cruisers = Cache.Instance.Entities.Count(e => e.IsCruiser && e.IsPlayer);
-                        int battlecruisers = Cache.Instance.Entities.Count(e => e.IsBattlecruiser && e.IsPlayer);
-                        int battleships = Cache.Instance.Entities.Count(e => e.IsBattleship && e.IsPlayer);
-
+                        int frigates = Cache.Instance.EntitiesNotSelf.Count(e => e.IsFrigate && e.IsPlayer);
+                        int cruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsCruiser && e.IsPlayer);
+                        int battlecruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattlecruiser && e.IsPlayer);
+                        int battleships = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattleship && e.IsPlayer);
                         if (Settings.Instance.FrigateInvasionLimit > 0 && frigates >= Settings.Instance.FrigateInvasionLimit)
                         {
                             _delayedResume = true;

@@ -423,11 +423,12 @@ namespace Questor.Modules.Combat
                 {
                     if (Settings.Instance.WeaponGroupId == 55 || Settings.Instance.WeaponGroupId == 508 || Settings.Instance.WeaponGroupId == 506)
                     {
-                        if (target.Distance <= (int)Distance.InsideThisRangeIsLIkelyToBeMostlyFrigates && !target.TargetValue.HasValue && target.GroupId != (int)Group.LargeCollidableStructure)
+                        if (!target.TargetValue.HasValue && target.IsNPCFrigate)
                         {
                             if (weapon.IsActive)
                             {
                                 //if we are already shooting at it, stop
+                                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are already shooting at it, stop", Logging.Teal);
                                 weapon.Click();
                                 continue;
                             }

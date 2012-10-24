@@ -419,7 +419,9 @@ namespace Questor.Modules.Lookup
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
             }
 
-            if (Settings.Instance.CharacterName == string.Empty)
+            Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
+            
+            if (Settings.Instance.SettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
                 if (Cache.Instance.LastInStation.AddMinutes(60) > DateTime.Now)
                 {
@@ -434,7 +436,6 @@ namespace Questor.Modules.Lookup
                 //Cache.Instance.SessionState = "Quitting";
             }
 
-            Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
             bool reloadSettings = true;
             if (File.Exists(Settings.Instance.SettingsPath))
                 reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.SettingsPath);

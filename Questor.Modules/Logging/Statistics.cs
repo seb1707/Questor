@@ -405,13 +405,6 @@ namespace Questor.Modules.Logging
                 return;
             }
 
-            //Logging.Log("StatisticsState: MissionLogCompleted is false: we still need to create the mission logs for this last mission");
-            if ((DateTime.Now.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes > 5 && DateTime.Now.Subtract(Statistics.Instance.FinishedMission).TotalMinutes > 45) || DateTime.Now.Subtract(Cache.Instance.StartTime).TotalMinutes < 5) //FinishedSalvaging is the later of the 2 timestamps (FinishedMission and FinishedSalvaging), if you are not after mission salvaging this timestamp is the same as FinishedMission
-            {
-                Logging.Log("Statistics: WriteMissionStatistics", "It is unlikely a mission has been run yet this session... No Mission log needs to be written.", Logging.White);
-                Statistics.Instance.MissionLoggingCompleted = true; //if the mission was completed more than 10 min ago assume the logging has been done already.
-                return;
-            }
             Cache.Instance.Mission = Cache.Instance.GetAgentMission(statisticsForThisAgent, true);
             if (Settings.Instance.DebugStatistics) // we only need to see the following wall of comments if debugging mission statistics
             {

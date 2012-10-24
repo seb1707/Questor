@@ -1230,8 +1230,8 @@ namespace Questor.Modules.Lookup
                     if (blacklist != null)
                     {
                         Logging.Log("Settings","Loading Mission Blacklist",Logging.White);
-                        foreach (XElement blacklistedmission in blacklist.Elements("mission"))
-                            MissionBlacklist.Add((string)blacklistedmission);
+                        foreach (XElement BlacklistedMission in blacklist.Elements("mission"))
+                            MissionBlacklist.Add((string)BlacklistedMission);
                         Logging.Log("Settings", "Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
                     }
 
@@ -1243,8 +1243,8 @@ namespace Questor.Modules.Lookup
                     if (greylist != null)
                     {
                         Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
-                        foreach (XElement greylistedmission in greylist.Elements("mission"))
-                            MissionGreylist.Add((string)greylistedmission);
+                        foreach (XElement GreylistedMission in greylist.Elements("mission"))
+                            MissionGreylist.Add((string)GreylistedMission);
                         Logging.Log("Settings", "Mission Greylist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
                     }
 

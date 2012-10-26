@@ -112,8 +112,6 @@ namespace Questor.Behaviors
             }
             else
             {
-                //_agentInteraction.AgentId = agent.AgentId;
-                //_combatMissionCtrl.AgentId = agent.AgentId;
                 _arm.AgentId = agent.AgentId;
                 _statistics.AgentID = agent.AgentId;
                 AgentID = agent.AgentId;

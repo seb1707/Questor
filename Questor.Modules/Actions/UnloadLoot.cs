@@ -30,7 +30,6 @@ namespace Questor.Modules.Actions
         private static bool AmmoIsBeingMoved;
         private static bool LootIsBeingMoved;
         private static bool AllLootWillFit;
-        private static List<ItemCache> ItemsToMove;
         private static IEnumerable<DirectItem> ammoToMove;
         private static IEnumerable<DirectItem> scriptsToMove;
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
@@ -41,6 +40,317 @@ namespace Questor.Modules.Actions
         //}
 
         //public double LootValue { get; set; }
+
+        private void MoveLoot()
+        {
+            if (DateTime.Now < _nextUnloadAction)
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
+                return;
+            }
+
+            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+            if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
+
+            if (LootIsBeingMoved && AllLootWillFit)
+            {
+                if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
+                {
+                    if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                    {
+                        Logging.Log("UnloadLoot", "Moving Loot timed out, clearing item locks", Logging.Orange);
+                        Cache.Instance.DirectEve.UnlockItems();
+                        _lastUnloadAction = DateTime.Now.AddSeconds(-10);
+                        _States.CurrentUnloadLootState = UnloadLootState.Begin;
+                        return;
+                    }
+
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                    return;
+                }
+                LootIsBeingMoved = false;
+                AllLootWillFit = false;
+            }
+
+            if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
+            {
+                if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return;
+                Logging.Log("UnloadLoot", "Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
+                LootIsBeingMoved = false;
+                _States.CurrentUnloadLootState = UnloadLootState.Done;
+            }
+
+            if (Cache.Instance.CargoHold.IsValid)
+            {
+                IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.ToList();
+                IEnumerable<DirectItem> somelootToMove = lootToMove;
+                foreach (DirectItem item in lootToMove)
+                {
+                    if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
+                        continue;
+
+                    Statistics.Instance.LootValue += (int)item.AveragePrice() * Math.Max(item.Quantity, 1);
+                }
+                if (lootToMove.Any())
+                {
+                    if (Cache.Instance.LootHangar.IsValid)
+                    {
+                        if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured. 
+                        {
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
+                            // Move loot to the loot hangar
+                            int roominHangar = (999 - Cache.Instance.LootHangar.Items.Count);
+                            if (roominHangar > lootToMove.Count())
+                            {
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has plenty of room to move loot all in one go", Logging.White);
+                                Cache.Instance.LootHangar.Add(lootToMove);
+                                AllLootWillFit = true;
+                                _lootToMoveWillStillNotFitCount = 0;
+                                return;
+                            }
+
+                            AllLootWillFit = false;
+                            Logging.Log("Unloadloot", "LootHangar is almost full and contains [" + Cache.Instance.LootHangar.Items.Count + "] of 999 total possible stacks", Logging.Orange);
+                            if (roominHangar > 50)
+                            {
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has more than 50 item slots left", Logging.White);
+                                somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 49).ToList();
+                            }
+                            else if (roominHangar > 20)
+                            {
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has more than 20 item slots left", Logging.White);
+                                somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 19).ToList();
+                            }
+
+                            if (somelootToMove.Any())
+                            {
+                                Logging.Log("UnloadLoot", "Moving [" + somelootToMove.Count() + "]  of [" + lootToMove.Count() + "] items into the LootHangar", Logging.White);
+                                Cache.Instance.LootHangar.Add(somelootToMove);
+                                return;
+                            }
+
+                            if (_lootToMoveWillStillNotFitCount < 7)
+                            {
+                                _lootToMoveWillStillNotFitCount++;
+                                if (!Cache.Instance.StackLootHangar("Unloadloot")) return;
+                                return;
+                            }
+
+                            Logging.Log("Unloadloot", "We tried to stack the loothangar 7 times and we still could not fit all the LootToMove into the LootHangar [" + Cache.Instance.LootHangar.Items.Count + " items ]", Logging.Red);
+                            _States.CurrentQuestorState = QuestorState.Error;
+                            return;
+                        }
+                        
+                        //
+                        // if we are using the local items hangar then just grab all the loot in one go.
+                        //
+                        if (lootToMove.Any())
+                        {
+                            Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count + "] items in it now.", Logging.White);
+                            AllLootWillFit = true;
+                            Cache.Instance.LootHangar.Add(lootToMove);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Cache.Instance.LootHangar is not yet valid", Logging.White);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
+                return;
+            }
+            //
+            // Stack LootHangar
+            //
+            if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return;
+        }
+
+        private void MoveAmmo()
+        {
+            if (DateTime.Now < _nextUnloadAction)
+            {
+                Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
+                return;
+            }
+
+            if (AmmoIsBeingMoved)
+            {
+                if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
+                {
+                    if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                    {
+                        Logging.Log("UnloadLoot", "Moving Ammo timed out, clearing item locks", Logging.Orange);
+                        Cache.Instance.DirectEve.UnlockItems();
+                        _lastUnloadAction = DateTime.Now.AddSeconds(-10);
+                        _States.CurrentUnloadLootState = UnloadLootState.Begin;
+                        return;
+                    }
+
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                    return;
+                }
+                AmmoIsBeingMoved = false;
+                return;
+            }
+
+            if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
+                if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return;
+                Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);
+                AmmoIsBeingMoved = false;
+                _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
+            }
+
+            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+
+            if (Cache.Instance.CargoHold.IsValid)
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
+                
+                if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
+
+                if (Cache.Instance.AmmoHangar.IsValid)
+                {
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.AmmoHangar.IsValid)", Logging.Teal);
+
+
+                    //
+                    // Add Ammo to the list of things to move
+                    //                        
+                    try
+                    {
+                        ammoToMove = Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId)).ToList();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Ammo Found in CargoHold: moving on. [" + exception + "]", Logging.White);
+                    }
+
+                    if (ammoToMove != null)
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (ammoToMove != null)", Logging.White);
+                        if (ammoToMove.Any())
+                        {
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (ammoToMove.Any())", Logging.White);
+                            if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
+                            Logging.Log("UnloadLoot", "Moving [" + ammoToMove.Count() + "] Ammo Stacks to AmmoHangar", Logging.White);
+                            AmmoIsBeingMoved = true;
+                            Cache.Instance.AmmoHangar.Add(ammoToMove);
+                            _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                            return;
+                        }
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Ammo Found in CargoHold: moving on.", Logging.White);
+                    }
+
+                    //
+                    // Add mission item  to the list of things to move
+                    //
+                    try
+                    {
+                        commonMissionCompletionItemsToMove = Cache.Instance.CargoHold.Items.Where(i => i.GroupId == (int)Group.Livestock).ToList();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Mission CompletionItems Found in CargoHold: moving on. [" + exception + "]", Logging.White);
+                    }
+
+                    if (Settings.Instance.MoveCommonMissionCompletionItemsToItemsHangar)
+                    {
+                        if (commonMissionCompletionItemsToMove != null)
+                        {
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (commonMissionCompletionItemsToMove != null)", Logging.White);
+                            if (commonMissionCompletionItemsToMove.Any())
+                            {
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
+                                if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
+                                Logging.Log("UnloadLoot", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
+                                Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
+                                AmmoIsBeingMoved = true;
+                                _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                                return;
+                            }
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);
+                        }
+                    }
+
+                    if (Settings.Instance.MoveCommonMissionCompletionItemsToAmmoHangar)
+                    {
+                        if (commonMissionCompletionItemsToMove != null)
+                        {
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (commonMissionCompletionItemsToMove != null)", Logging.White);
+                            if (commonMissionCompletionItemsToMove.Any())
+                            {
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
+                                if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
+                                Logging.Log("UnloadLoot", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to AmmoHangar", Logging.White);
+                                AmmoIsBeingMoved = true;
+                                Cache.Instance.AmmoHangar.Add(commonMissionCompletionItemsToMove);
+                                _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                                return;
+                            }
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);                    
+                        }
+                    }
+                    //
+                    // Add Scripts (by groupID) to the list of things to move
+                    //                        
+
+                    try
+                    {
+                        //
+                        // items to move has to be cleared here before assigning but is currently not being cleared here
+                        //
+                        scriptsToMove = Cache.Instance.CargoHold.Items.Where(i =>
+                            i.GroupId == (int)Group.TrackingScript ||
+                            i.GroupId == (int)Group.WarpDisruptionScript ||
+                            i.GroupId == (int)Group.TrackingDisruptionScript ||
+                            i.GroupId == (int)Group.SensorBoosterScript ||
+                            i.GroupId == (int)Group.SensorDampenerScript ||
+                            i.GroupId == (int)Group.CapacitorGroupCharge).ToList();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Scripts Found in CargoHold: moving on. [" + exception + "]", Logging.White);
+                    }
+
+                    if (scriptsToMove != null)
+                    {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (scriptsToMove != null)", Logging.White);
+                        if (scriptsToMove.Any())
+                        {
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (scriptsToMove.Any())", Logging.White);
+                            if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
+                            Logging.Log("UnloadLoot", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
+                            AmmoIsBeingMoved = true;
+                            Cache.Instance.ItemHangar.Add(scriptsToMove);
+                            _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                            return;
+                        }
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Scripts Found in CargoHold: moving on.", Logging.White);
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            //
+            // Stack AmmoHangar
+            //
+            if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
+            return;
+        }
 
         public void ProcessState()
         {
@@ -76,266 +386,12 @@ namespace Questor.Modules.Actions
                     _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
                     break;
 
-                case UnloadLootState.MoveLoot:
-                    if (DateTime.Now < _nextUnloadAction)
-                    {
-                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
-                        break;
-                    }
-
-                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
-                    if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
-
-                    if (LootIsBeingMoved && AllLootWillFit)
-                    {
-                        if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
-                        {
-                            if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
-                            {
-                                Logging.Log("UnloadLoot", "Moving Loot timed out, clearing item locks", Logging.Orange);
-                                Cache.Instance.DirectEve.UnlockItems();
-                                _lastUnloadAction = DateTime.Now.AddSeconds(-10);
-                                _States.CurrentUnloadLootState = UnloadLootState.Begin;
-                                break;
-                            }
-
-                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
-                            return;
-                        }
-
-                        if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveAmmo")) break;
-                        Logging.Log("UnloadLoot", "Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
-                        LootIsBeingMoved = false;
-                        _States.CurrentUnloadLootState = UnloadLootState.Done;
-                    }
-
-                    if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())
-                    {
-                        IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList();
-                        IEnumerable<DirectItem> somelootToMove = lootToMove;
-                        foreach (DirectItem item in lootToMove)
-                        {
-                            if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
-                                continue;
-
-                            Statistics.Instance.LootValue += (int)item.AveragePrice() * Math.Max(item.Quantity, 1);
-                        }
-
-                        if (Cache.Instance.LootHangar.IsValid)
-                        {
-                            if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured. 
-                            {
-                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "loothangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
-                                // Move loot to the loot hangar
-                                int roominHangar = (999 - Cache.Instance.LootHangar.Items.Count);
-                                if (roominHangar > lootToMove.Count())
-                                {
-                                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Loothangar has plenty of room to move loot all in one go", Logging.White);
-                                    Cache.Instance.LootHangar.Add(lootToMove);
-                                    AllLootWillFit = true;
-                                    _lootToMoveWillStillNotFitCount = 0;
-                                    return;
-                                }
-
-                                AllLootWillFit = false;
-                                Logging.Log("Unloadloot", "Loothangar is almost full and contains [" + Cache.Instance.LootHangar.Items.Count + "] of 999 total possible stacks", Logging.Orange);
-                                if (roominHangar > 50)
-                                {
-                                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Loothangar has more than 50 item slots left", Logging.White);
-                                    somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 49).ToList();
-                                }
-                                else if (roominHangar > 20)
-                                {
-                                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Loothangar has more than 20 item slots left", Logging.White);
-                                    somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 19).ToList();
-                                }
-
-                                if (somelootToMove.Any())
-                                {
-                                    Logging.Log("UnloadLoot", "Moving [" + somelootToMove.Count() + "]  of [" + lootToMove.Count() + "] items into the loot hangar", Logging.White);
-                                    Cache.Instance.LootHangar.Add(somelootToMove);
-                                    return;
-                                }
-
-                                if (_lootToMoveWillStillNotFitCount < 7)
-                                {
-                                    _lootToMoveWillStillNotFitCount++;
-                                    if (!Cache.Instance.StackLootHangar("Unloadloot")) return;
-                                    return;
-                                }
-
-                                Logging.Log("Unloadloot", "We tried to stack the loothangar 7 times and we still could not fit all the LootToMove into the LootHangar [" + Cache.Instance.LootHangar.Items.Count + " items ]", Logging.Red);
-                                _States.CurrentQuestorState = QuestorState.Error;
-                                return;
-                            }
-                            else //we must be using the corp hangar as the loothangar
-                            {
-                                if (lootToMove.Any())
-                                {
-                                    Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "]  of [" + Cache.Instance.LootHangar.Items.Count + "] items into the loot hangar", Logging.White);
-                                    AllLootWillFit = true;
-                                    Cache.Instance.LootHangar.Add(lootToMove);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                    //
-                    // Stack LootHangar
-                    //
-                    if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return;
+                case UnloadLootState.MoveAmmo:
+                    MoveAmmo();
                     break;
 
-                case UnloadLootState.MoveAmmo:
-                    if (DateTime.Now < _nextUnloadAction)
-                    {
-                        Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
-                        break;
-                    }
-
-                    if (AmmoIsBeingMoved)
-                    {
-                        if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
-                        {
-                            if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
-                            {
-                                Logging.Log("UnloadLoot", "Moving Ammo timed out, clearing item locks", Logging.Orange);
-                                Cache.Instance.DirectEve.UnlockItems();
-                                _lastUnloadAction = DateTime.Now.AddSeconds(-10);
-                                _States.CurrentUnloadLootState = UnloadLootState.Begin;
-                                break;
-                            }
-
-                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
-                            return;
-                        }
-
-                        if (Cache.Instance.LastStackAmmoHangar.AddSeconds(30) > DateTime.Now)
-                        {
-                            if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) break;
-                            Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);
-                            AmmoIsBeingMoved = false;
-                            _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
-                        }
-                    }
-                    
-                    if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
-                    
-                    if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())
-                    {
-                        if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
-
-                        if (Cache.Instance.AmmoHangar.IsValid)
-                        {
-                            
-                            //
-                            // Add mission item  to the list of things to move
-                            //
-                            try
-                            {
-                                commonMissionCompletionItemsToMove = Cache.Instance.CargoHold.Items.Where(i => i.GroupId == (int)Group.Livestock).ToList();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Mission CompletionItems Found in CargoHold: moving on. [" + exception + "]", Logging.White);
-                            }
-        
-                            if (Settings.Instance.MoveCommonMissionCompletionItemsToItemsHangar)
-                            {
-                                if (commonMissionCompletionItemsToMove != null)
-                                {
-                                    if (commonMissionCompletionItemsToMove.Any())
-                                    {
-                                        if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
-                                        Logging.Log("UnloadLoot", "Moving [" + ItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
-                                        Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
-                                        AmmoIsBeingMoved = true;
-                                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                                        return;
-                                    }
-                                }
-                            }
-
-                            if (Settings.Instance.MoveCommonMissionCompletionItemsToAmmoHangar)
-                            {
-                                if (commonMissionCompletionItemsToMove != null)
-                                {
-                                    if (commonMissionCompletionItemsToMove.Any())
-                                    {
-                                        if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
-                                        Logging.Log("UnloadLoot", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to AmmoHangar", Logging.White);
-                                        Cache.Instance.AmmoHangar.Add(commonMissionCompletionItemsToMove);
-                                        _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                                        return;
-                                    }
-                                }
-                            }
-
-                            //
-                            // Add Ammo to the list of things to move
-                            //                        
-                            try
-                            {
-                                ammoToMove = Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.All(a => a.TypeId == i.TypeId)).ToList();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Ammo Found in CargoHold: moving on. [" + exception + "]", Logging.White);
-                            }
-
-                            if (ammoToMove != null)
-                            {
-                                if (ammoToMove.Any())
-                                {
-                                    if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return;
-                                    Logging.Log("UnloadLoot", "Moving [" + ammoToMove.Count() + "] Ammo Stacks to AmmoHangar", Logging.White);
-                                    Cache.Instance.AmmoHangar.Add(ammoToMove);
-                                    _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                                    return;
-                                }
-                            }
-
-                            //
-                            // Add Scripts (by groupID) to the list of things to move
-                            //                        
-
-                            try
-                            {
-                                //
-                                // items to move has to be cleared here before assigning but is currently not being cleared here
-                                //
-                                scriptsToMove = Cache.Instance.CargoHold.Items.Where(i => 
-                                    i.GroupId == (int)Group.TrackingScript || 
-                                    i.GroupId == (int)Group.WarpDisruptionScript ||
-                                    i.GroupId == (int)Group.TrackingDisruptionScript ||
-                                    i.GroupId == (int)Group.SensorBoosterScript ||
-                                    i.GroupId == (int)Group.SensorDampenerScript ||
-                                    i.GroupId == (int)Group.CapacitorGroupCharge).ToList();
-                            }
-                            catch (Exception exception)
-                            {
-                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "MoveAmmo: No Scripts Found in CargoHold: moving on. [" + exception + "]", Logging.White);
-                            }
-
-                            if (scriptsToMove != null)
-                            {
-                                if (scriptsToMove.Any())
-                                {
-                                    if (!Cache.Instance.OpenItemsHangar("UnloadLoot")) return;
-                                    Logging.Log("UnloadLoot", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
-                                    Cache.Instance.ItemHangar.Add(scriptsToMove);
-                                    _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
-                    //
-                    // Stack AmmoHangar
-                    //
-                    if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
-
+                case UnloadLootState.MoveLoot:
+                    MoveLoot();
                     break;
             }
         }

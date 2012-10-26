@@ -2986,12 +2986,18 @@ namespace Questor.Modules.Caching
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
-            if (Cache.Instance.LastStackAmmoHangar.AddSeconds(60) > DateTime.Now)
+            Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Cache.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.Now: [" + DateTime.Now + "]", Logging.Teal);
+
+            if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)
             {
-                if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
+                Logging.Log("StackCorpAmmoHangar", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
+    
+                if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                 {
+                    Logging.Log("StackCorpAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
                     return true;
                 }
+                Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                 if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                 {
@@ -3000,6 +3006,7 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastStackAmmoHangar = DateTime.Now.AddSeconds(-60);
                     return false;
                 }
+                Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
                 return false;
             }
 
@@ -3620,8 +3627,11 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))", Logging.Teal);
 
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
-
+                    if (Cache.Instance.AmmoHangar == null)
+                    {
+                        Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangar);
+                    }
+                    
                     // Is the corp Ammo Hangar open?
                     if (Cache.Instance.AmmoHangar != null)
                     {
@@ -3655,19 +3665,18 @@ namespace Questor.Modules.Caching
                 }
                 else //use local items hangar
                 {
-                    Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
                     if (Cache.Instance.AmmoHangar == null)
+                    {
+                        Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetItemHangar();
                         return false;
+                    }
 
                     // Is the items hangar open?
                     if (Cache.Instance.AmmoHangar.Window != null)
                     {
                         // if open command it to close
                         Cache.Instance.AmmoHangar.Window.Close();
-                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                        Logging.Log(module, "Closing Item Hangar: waiting [" +
-                                    Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) +
-                                    "sec]", Logging.White);
+                        Logging.Log(module, "Closing AmmoHangar Hangar", Logging.White);
                         return false;
                     }
                     return true;

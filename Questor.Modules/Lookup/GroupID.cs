@@ -15,11 +15,11 @@ namespace Questor.Modules.Lookup
         Station = 15,
         Stargate = 10,
         AsteroidBelt = 9,
-        AccellerationGate = 366,
+        AccelerationGate = 366,
 
         Capsule = 29,
 
-        // Note: This includes microwarpdrives as well!
+        // Note: This includes MicroWarpDrives as well!
         Afterburner = 46,
 
         CapacitorInjector = 76,
@@ -38,6 +38,12 @@ namespace Questor.Modules.Lookup
         SensorDampener = 208,
         TrackingComputer = 213,
         TrackingDisruptor = 291,
+        
+        TrackingScript = 907,
+        WarpDisruptionScript = 908,
+        TrackingDisruptionScript = 909,
+        SensorBoosterScript = 910,
+        SensorDampenerScript = 911,
 
         ProximityDrone = 97,
         CombatDrone = 100,
@@ -91,6 +97,8 @@ namespace Questor.Modules.Lookup
         MissionContainer = 952,
 
         Wreck = 186,
+
+        Livestock = 283, //this includes most CommonMissionCompletionitems like Militants and Marines
 
         ConcordDrone = 301,
         PoliceDrone = 182,

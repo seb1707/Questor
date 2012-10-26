@@ -1346,7 +1346,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _gates ?? (_gates = Entities.Where(e =>
-                       e.GroupId == (int)Group.AccellerationGate &&
+                       e.GroupId == (int)Group.AccelerationGate &&
                        e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
         }
@@ -1360,7 +1360,7 @@ namespace Questor.Modules.Caching
                        e.GroupId == (int)Group.LargeCollidableObject ||
                        e.GroupId == (int)Group.LargeCollidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
-                       e.GroupId == (int)Group.AccellerationGate ||
+                       e.GroupId == (int)Group.AccelerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }

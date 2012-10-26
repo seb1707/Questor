@@ -1,33 +1,42 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <settings>
   <!--                                                -->
-  <!--         DEBUG SETTINGS         -->
+  <!--         DEBUG SETTINGS        -->
   <!--                                                -->
   
-  <!-- debugStates: creates more verbose logging: use for debugging purposes only -->
-  <debugStates>false</debugStates>  <!-- default is false -->
-  <!-- debugPerformance: creates more verbose logging: use for debugging purposes only -->
-  <debugPerformance>false</debugPerformance>  <!-- default is false -->
-  <!-- debugCurrentTarget: Shows detailed Shields and Armor levels for the currenttarget as things get killed (or not) -->  
-  <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
-  <debugLootWrecks>false</debugLootWrecks>
   <debugActivateWeapons>false</debugActivateWeapons>
-  <debugreloadorChangeAmmo>false</debugreloadorChangeAmmo>
-  <debugStatistics>false</debugStatistics>
-  <debugGotobase>false</debugGotobase>
-  <debugIdle>false</debugIdle>
-  <debugAutoStart>false</debugAutoStart>
-  <debugDecline>false</debugDecline>
-  <debugHangars>false</debugHangars>
-  <debugLogging>false</debugLogging>
-  <debugSalvage>false</debugSalvage>
-  <debugUI>false</debugUI>
-  <debugReloadAll>false</debugReloadAll>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
+  <debugAutoStart>false</debugAutoStart>
+  <debugCleanup>false</debugCleanup>
+  <debugDecline>false</debugDecline>
+  <debugDefense>false</debugDefense>
+  <debugDroneHealth>false</debugDroneHealth>
+  <debugExceptions>false</debugExceptions>
+  <debugGotobase>false</debugGotobase>
+  <debugHangars>false</debugHangars>
+  <debugIdle>false</debugIdle>
+  <debugLoadScripts>false</debugLoadScripts>
+  <debugLogging>false</debugLogging>
+  <debugLootWrecks>false</debugLootWrecks>
+  <debugNavigateOnGrid>false</debugNavigateOnGrid>
+  <debugOnframe>false</debugOnframe>
+  <debugPerformance>false</debugPerformance>
+  <debugReloadAll>false</debugReloadAll>
+  <debugReloadorChangeAmmo>false</debugReloadorChangeAmmo>
+  <debugSalvage>false</debugSalvage>
+  <debugScheduler>false</debugScheduler>
+  <debugStates>false</debugStates>
+  <debugStatistics>false</debugStatistics>
+  <debugTraveler>false</debugTraveler>
+  <debugUI>false</debugUI>
+  <debugUnloadLoot>false</debugUnloadLoot>
+  <debugValuedump>false</debugValuedump>
+  <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
+  <defendWhileTraveling>true</defendWhileTraveling>
   <useInnerspace>true</useInnerspace>
-  
+  <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->

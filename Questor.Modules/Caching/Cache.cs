@@ -2986,18 +2986,18 @@ namespace Questor.Modules.Caching
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
-            Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Cache.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.Now: [" + DateTime.Now + "]", Logging.Teal);
+            if(Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Cache.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.Now: [" + DateTime.Now + "]", Logging.Teal);
 
             if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)
             {
-                Logging.Log("StackCorpAmmoHangar", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
     
                 if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                 {
-                    Logging.Log("StackCorpAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
                     return true;
                 }
-                Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                 if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                 {
@@ -3006,7 +3006,7 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastStackAmmoHangar = DateTime.Now.AddSeconds(-60);
                     return false;
                 }
-                Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
                 return false;
             }
 

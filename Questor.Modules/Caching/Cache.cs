@@ -2611,8 +2611,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                //if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
-                //if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "OpenItemsHangarAsLootHangar returned true", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (Cache.Instance.InStation)", Logging.Teal);
                 if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.Window.IsReady)
                 {
                     Logging.Log(module, "Stacking Item Hangar", Logging.White);
@@ -2621,6 +2620,8 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastStackItemHangar = DateTime.Now;
                     return false;
                 }
+                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (!Cache.Instance.OpenItemsHangarAsLootHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
+                if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
                 return false;
             }
             return false;
@@ -2658,8 +2659,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                //if (!Cache.Instance.OpenItemsHangarAsAmmoHangar("Cache.StackItemsHangar")) return false;
-                //if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "OpenItemsHangarAsAmmoHangar returned true", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (Cache.Instance.InStation)", Logging.Teal);
                 if (Cache.Instance.AmmoHangar != null && Cache.Instance.AmmoHangar.Window.IsReady)
                 {
                     Logging.Log(module, "Stacking Item Hangar", Logging.White);
@@ -2668,6 +2668,8 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastStackItemHangar = DateTime.Now;
                     return false;
                 }
+                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (!Cache.Instance.OpenItemsHangarAsAmmoHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
+                if (!Cache.Instance.OpenItemsHangarAsAmmoHangar("Cache.StackItemsHangar")) return false;
                 return false;
             }
             return false;

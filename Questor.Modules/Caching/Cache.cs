@@ -2480,11 +2480,11 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation)
             {
                 if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "We are in Station", Logging.Teal);
+                Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
 
                 if (Cache.Instance.LootHangar == null)
                 {
                     if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar was null", Logging.Teal);
-                    Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetItemHangar();
                     return false;
                 }
 
@@ -2510,34 +2510,16 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.LootHangar.Window.IsReady)
                 {
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar.window ready", Logging.Teal);
-
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar.window ready", Logging.Teal);
                     if (Cache.Instance.LootHangar.Window.IsPrimary())
                     {
-                        if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar.window is primary, opening as secondary", Logging.Teal);
+                        if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar.window is primary, opening as secondary", Logging.Teal);
                         Cache.Instance.LootHangar.Window.OpenAsSecondary();
-                        return true; // FIXME
+                        return false;
                     }
-
-                    if (Cache.Instance.LootHangar.Window.Type.Contains("form.InventorySecondary"))
-                    {
-                        if (Settings.Instance.DebugItemHangar) Logging.Log("Questor", "LootHangar.Window is a secondary inventory window", Logging.Teal);
-                        return true;
-                    }
-
-                    if (Settings.Instance.DebugItemHangar)
-                    {
-                        Logging.Log("Questor", "-----LootHangar.Window-----", Logging.Orange);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.Name: [" + Cache.Instance.LootHangar.Window.Name + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.Caption: [" + Cache.Instance.LootHangar.Window.Caption + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.Type: [" + Cache.Instance.LootHangar.Window.Type + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.IsModal: [" + Cache.Instance.LootHangar.Window.IsModal + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.IsDialog: [" + Cache.Instance.LootHangar.Window.IsDialog + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.Id: [" + Cache.Instance.LootHangar.Window.Id + "]", Logging.White);
-                        Logging.Log("Questor", "Cache.Instance.LootHangar.Window.IsKillable: [" + Cache.Instance.LootHangar.Window.IsKillable + "]", Logging.White);
-                    }
-                    return false;
+                    return true;
                 }
+                return false;
             }
             return false;
         }
@@ -3536,7 +3518,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool OpenLootHangar(String module)
+        public bool ReadyLootHangar(String module)
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -3548,17 +3530,20 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootHangar)) // Corporate hangar = LootHangar
                 {
+                    if (Settings.Instance.DebugHangars) Logging.Log(module, "using Corporate hangar as Loot hangar", Logging.White);
                     if (!Cache.Instance.ReadyCorpLootHangar(module)) return false;
                     return true;
                 }
 
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainer)) // Freight Container in my local items hangar = LootHangar
                 {
+                    if (Settings.Instance.DebugHangars) Logging.Log(module, "using Loot Container in Local Items hangar as Loot hangar", Logging.White);
                     if (!Cache.Instance.OpenItemsHangarAsLootHangar(module)) return false;
                     if (!Cache.Instance.ReadyLootContainer(module)) return false;
                     return true;
                 }
 
+                if (Settings.Instance.DebugHangars) Logging.Log(module, "using Local items hangar as Loot hangar", Logging.White);
                 if (!Cache.Instance.OpenItemsHangarAsLootHangar(module)) return false;
                 return true;
             }

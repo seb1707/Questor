@@ -97,9 +97,9 @@ namespace Questor.Modules.Actions
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "foreach (DirectItem item in lootToMove) (done)", Logging.White);
                 if (lootToMove.Any() && !LootIsBeingMoved)
                 {
-                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any())", Logging.White);
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
 
-                    if (!Cache.Instance.OpenLootHangar("UnloadLoot.MoveLoot")) return;
+                    if (!Cache.Instance.ReadyLootHangar("UnloadLoot.MoveLoot")) return;
 
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.LootHangar.IsValid)", Logging.White);
 

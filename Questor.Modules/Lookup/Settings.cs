@@ -74,6 +74,7 @@ namespace Questor.Modules.Lookup
         public bool DebugGotobase { get; set; }
         public bool DebugHangars { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugItemHangar { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
@@ -471,6 +472,7 @@ namespace Questor.Modules.Lookup
                 DebugGotobase = false;
                 DebugHangars = false;
                 DebugIdle = false;
+                DebugItemHangar = false;
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
@@ -805,6 +807,7 @@ namespace Questor.Modules.Lookup
                     DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
                     DebugHangars = (bool?)xml.Element("debugHangars") ?? false;
                     DebugIdle = (bool?)xml.Element("debugIdle") ?? false;
+                    DebugItemHangar = (bool?)xml.Element("debugItemHangar") ?? false;
                     DebugLoadScripts = (bool?)xml.Element("debugLoadScripts") ?? false;
                     DebugLogging = (bool?)xml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;

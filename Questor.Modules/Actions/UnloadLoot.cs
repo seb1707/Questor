@@ -49,23 +49,20 @@ namespace Questor.Modules.Actions
                 return;
             }
 
-            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
-            if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
-
             if (LootIsBeingMoved && AllLootWillFit)
             {
                 if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 {
                     if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
                     {
-                        Logging.Log("UnloadLoot", "Moving Loot timed out, clearing item locks", Logging.Orange);
+                        Logging.Log("UnloadLootState.Moveloot", "Moving Loot timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
                         _lastUnloadAction = DateTime.Now.AddSeconds(-10);
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                         return;
                     }
 
-                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
                     return;
                 }
                 LootIsBeingMoved = false;
@@ -74,16 +71,22 @@ namespace Questor.Modules.Actions
 
             if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
                 if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return;
                 Logging.Log("UnloadLoot", "Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
                 LootIsBeingMoved = false;
                 _States.CurrentUnloadLootState = UnloadLootState.Done;
             }
 
+            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+            if (!Cache.Instance.OpenLootHangar("UnloadLoot")) return;
+
             if (Cache.Instance.CargoHold.IsValid)
             {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "if (Cache.Instance.CargoHold.IsValid)", Logging.White);        
                 IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.ToList();
                 IEnumerable<DirectItem> somelootToMove = lootToMove;
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "foreach (DirectItem item in lootToMove) (start)", Logging.White);
                 foreach (DirectItem item in lootToMove)
                 {
                     if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
@@ -91,18 +94,22 @@ namespace Questor.Modules.Actions
 
                     Statistics.Instance.LootValue += (int)item.AveragePrice() * Math.Max(item.Quantity, 1);
                 }
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "foreach (DirectItem item in lootToMove) (done)", Logging.White);    
                 if (lootToMove.Any())
                 {
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "if (lootToMove.Any())", Logging.White);        
+                
                     if (Cache.Instance.LootHangar.IsValid)
                     {
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "if (Cache.Instance.LootHangar.IsValid)", Logging.White);
                         if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured. 
                         {
-                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
+                            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "LootHangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
                             // Move loot to the loot hangar
                             int roominHangar = (999 - Cache.Instance.LootHangar.Items.Count);
                             if (roominHangar > lootToMove.Count())
                             {
-                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has plenty of room to move loot all in one go", Logging.White);
+                                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "LootHangar has plenty of room to move loot all in one go", Logging.White);
                                 Cache.Instance.LootHangar.Add(lootToMove);
                                 AllLootWillFit = true;
                                 _lootToMoveWillStillNotFitCount = 0;
@@ -148,9 +155,13 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count + "] items in it now.", Logging.White);
                             AllLootWillFit = true;
+                            LootIsBeingMoved = true;
                             Cache.Instance.LootHangar.Add(lootToMove);
                             return;
                         }
+                        if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "if (lootToMove.Any()) is false", Logging.White);
+                        AllLootWillFit = true;
+                        LootIsBeingMoved = true;
                     }
                     else
                     {
@@ -158,16 +169,21 @@ namespace Questor.Modules.Actions
                         return;
                     }
                 }
+                else
+                {
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "if (lootToMove.Any()) is false", Logging.White);
+                    //
+                    // Stack LootHangar
+                    //
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "if (!Cache.Instance.StackLootHangar(UnloadLoot.MoveLoot)) return;", Logging.White);
+                    if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return;
+                }
             }
             else
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
                 return;
             }
-            //
-            // Stack LootHangar
-            //
-            if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return;
         }
 
         private void MoveAmmo()

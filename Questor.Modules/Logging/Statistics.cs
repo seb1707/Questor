@@ -347,7 +347,7 @@ namespace Questor.Modules.Logging
             //    return;
 
             //agentID needs to change if its a storyline mission - so its assigned in storyline.cs to the various modules directly.
-            //Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID); cant we assume this is already up to date? I think we can.
+            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID, true);
             string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
             if (Settings.Instance.PocketStatistics)
             {

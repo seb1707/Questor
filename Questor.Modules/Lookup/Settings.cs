@@ -64,6 +64,7 @@ namespace Questor.Modules.Lookup
         public bool DebugActivateWeapons { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
         public bool DebugAutoStart { get; set; }
+        public bool DebugCargoHold { get; set; }
         public bool DebugCleanup { get; set; }
         public bool DebugDecline { get; set; }
         public bool DebugAllMissionsOnBlackList { get; set; }
@@ -462,6 +463,7 @@ namespace Questor.Modules.Lookup
                 DebugActivateWeapons = false;
                 DebugAttachVSDebugger = false;
                 DebugAutoStart = false;
+                DebugCargoHold = false;
                 DebugCleanup = false;
                 DebugDecline = false;
                 DebugAllMissionsOnBlackList = false;
@@ -797,6 +799,7 @@ namespace Questor.Modules.Lookup
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
                     DebugAttachVSDebugger = (bool?)xml.Element("debugAttachVSDebugger") ?? false;
                     DebugAutoStart = (bool?)xml.Element("debugAutoStart") ?? false;
+                    DebugCargoHold = (bool?)xml.Element("debugCargoHold") ?? false;
                     DebugCleanup = (bool?)xml.Element("debugCleanup") ?? false;
                     DebugDecline = (bool?)xml.Element("debugDecline") ?? false;
                     DebugAllMissionsOnBlackList = (bool?)xml.Element("debugAllMissionsOnBlackList") ?? false;

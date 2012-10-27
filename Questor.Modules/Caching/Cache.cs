@@ -2480,6 +2480,7 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation)
             {
                 if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "We are in Station", Logging.Teal);
+
                 if (Cache.Instance.LootHangar == null)
                 {
                     if (Settings.Instance.DebugItemHangar) Logging.Log("OpenItemsHangarAsLootHangar", "LootHangar was null", Logging.Teal);
@@ -2601,7 +2602,7 @@ namespace Questor.Modules.Caching
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
                 return false;
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 60)
+            if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 15)
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
 
@@ -2612,7 +2613,7 @@ namespace Questor.Modules.Caching
                 }
                 if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
+                if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds > 30)
                 {
                     Logging.Log(module, "Stacking Corp Loot Hangar timed out, clearing item locks", Logging.Orange);
                     Cache.Instance.DirectEve.UnlockItems();
@@ -2625,11 +2626,10 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
-                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "OpenItemsHangarAsLootHangar returned true", Logging.Teal);
+                //if (!Cache.Instance.OpenItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
+                //if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "OpenItemsHangarAsLootHangar returned true", Logging.Teal);
                 if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.Window.IsReady)
                 {
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                     Logging.Log(module, "Stacking Item Hangar", Logging.White);
                     Cache.Instance.LootHangar.StackAll();
                     Cache.Instance.LastStackLootHangar = DateTime.Now;
@@ -2707,13 +2707,13 @@ namespace Questor.Modules.Caching
 
                 if (!Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DebugHangars: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
+                    if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
                     return true;
                 }
 
                 if (Cache.Instance.CargoHold.Window.IsPrimary())
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
+                    if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
                     Cache.Instance.CargoHold.Window.OpenAsSecondary();
                     Cache.Instance.NextOpenCargoAction = DateTime.Now.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                     return false;

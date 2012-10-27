@@ -475,6 +475,7 @@ namespace Questor.Modules.Actions
                     }
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
+                    if (!Cache.Instance.OpenItemsHangar("Arm")) break;
 
                     DirectItem drone = Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId) ??
                                        Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);

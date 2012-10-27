@@ -17,6 +17,7 @@
   <debugGotobase>false</debugGotobase>
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
+  <debugItemHangar>false</debugItemHangar>
   <debugLoadScripts>false</debugLoadScripts>
   <debugLogging>false</debugLogging>
   <debugLootWrecks>false</debugLootWrecks>
@@ -138,7 +139,7 @@
 
   
   <!--                                                                                                     -->
-  <!-- STORAGE LOCATION FOR LOOT, AMNMO AND BOOKMARKS -->
+  <!-- STORAGE LOCATION FOR LOOT, AMMO AND BOOKMARKS -->
   <!--                                                                                                     -->
 
   <!-- Corporation hangar to use for loot (empty is personal hangar) -->
@@ -416,8 +417,7 @@
   <longRangeDroneRecallCapacitorPct>30</longRangeDroneRecallCapacitorPct>
   <!-- Drones normally kill low value targets (frigates) first. If you would prefer your drones to kill high value targets first set this to true -->
   <dronesKillHighValueTargets>false</dronesKillHighValueTargets>
-  <!-- When docked drones below this number of hitpoints will be removed from your drone bay and put in the loothangar - so they can be manually repaired (we cannot auto repair them) -->
-  <belowThisHealthLevelRemoveFromDroneBay>150</belowThisHealthLevelRemoveFromDroneBay> <!-- light drones have a total of about 300 HP -->
+
   <!--                                                        -->
   <!-- MISSION BLACKLIST SETTINGS -->
   <!--                                                        -->

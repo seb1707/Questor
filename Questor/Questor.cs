@@ -391,10 +391,14 @@ namespace Questor
                 return false;
             _lastPulse = DateTime.Now;
 
-            // Update settings (settings only load if character name changed)
-            if (!Settings.Instance.DefaultSettingsLoaded)
+
+            if (Cache.Instance.SessionState != "Quitting")
             {
-                Settings.Instance.LoadSettings();
+                // Update settings (settings only load if character name changed)
+                if (!Settings.Instance.DefaultSettingsLoaded)
+                {
+                    Settings.Instance.LoadSettings();
+                }
             }
 
             if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))

@@ -21,6 +21,7 @@ namespace Questor.Modules.Lookup
     using Questor.Modules.Actions;
     using Questor.Modules.Caching;
     using Questor.Modules.Logging;
+    using Questor.Modules.States;
 
     public class Settings
     {
@@ -429,7 +430,9 @@ namespace Questor.Modules.Lookup
                 {
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
+                    Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
                     Cache.Instance.SessionState = "Quitting";
+                    _States.CurrentQuestorState = QuestorState.CloseQuestor;
                     return;
                 }
                 

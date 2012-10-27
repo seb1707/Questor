@@ -477,8 +477,8 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
                     if (!Cache.Instance.OpenItemsHangar("Arm")) break;
 
-                    DirectItem drone = Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId) ??
-                                       Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
+                    DirectItem drone = Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId) ??
+                                       Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
 
                     if (drone == null || drone.Stacksize < 1)
                     {
@@ -522,8 +522,8 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm")) break;
                         
-                        DirectItem missionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
-                                                 Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        DirectItem missionItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
+                                                 Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
                         if (missionItem != null && !string.IsNullOrEmpty(missionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                         {
@@ -541,8 +541,8 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm")) break;
                     
-                        DirectItem optionalmissionItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
-                                                         Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+                        DirectItem optionalmissionItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
+                                                         Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
 
                         if (optionalmissionItem != null && !string.IsNullOrEmpty(optionalmissionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                         {

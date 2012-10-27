@@ -1006,14 +1006,14 @@ namespace Questor.Modules.Actions
                         Statistics.Instance.MissionCompletionErrors++;
                         Statistics.Instance.LastMissionCompletionError = DateTime.Now;
 
-                        Logging.Log("Cleanup", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
+                        Logging.Log("AgentInteraction", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
                         window.Close();
 
                         if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
                         {
                             if (Cache.Instance.MissionXMLIsAvailable)
                             {
-                                Logging.Log("Cleanup", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Logging.Log("AgentInteraction", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
                                 Settings.Instance.AutoStart = false;
                                 //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
@@ -1024,7 +1024,7 @@ namespace Questor.Modules.Actions
                             }
                             else
                             {
-                                Logging.Log("Cleanup", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Logging.Log("AgentInteraction", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
                                 Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;

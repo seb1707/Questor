@@ -53,6 +53,8 @@
   <minimumDelay>20</minimumDelay><!-- default is 20 -->
   <!-- RandomDelay is a number and is a random amount of seconds it will wait between getting missions in station added with minimumdelay or by itself -->
   <randomDelay>45</randomDelay><!-- default is 45 -->
+  <!-- Use Station repair Service if it exists-->
+  <useStationRepair>true<useStationRepair>
   
   <!--                                                -->
   <!--   CONSOLE LOG SETTINGS   -->

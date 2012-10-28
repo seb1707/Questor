@@ -4261,13 +4261,19 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (Cache.Instance.DroneBay == null)
+                if (!Cache.Instance.ReadyDroneBay("Repair Drones")) return false;
+
+                List<DirectItem> dronesToRepair;
+                try
                 {
-                    if (!Cache.Instance.ReadyDroneBay(module)) return false;
+                    dronesToRepair = Cache.Instance.DroneBay.Items;    
+                }
+                catch(Exception exception)
+                {
+                    Logging.Log(module, "Dronebay.Items could not be listed, nothing to repair.[" + exception + "]", Logging.Orange);
+                    return true;
                 }
 
-                List<DirectItem> dronesToRepair = Cache.Instance.DroneBay.Items;
-                
                 if (dronesToRepair.Any())
                 {
                     if (String.IsNullOrEmpty(repairWindow.AvgDamage()))

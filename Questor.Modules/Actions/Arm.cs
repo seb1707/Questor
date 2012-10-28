@@ -26,6 +26,7 @@ namespace Questor.Modules.Actions
     {
         private bool _missionItemMoved;
         private bool _optionalMissionItemMoved;
+        private bool ItemsAreBeingMoved;
         private DateTime _lastPulse;
         private DateTime _lastArmAction;
 
@@ -102,6 +103,8 @@ namespace Questor.Modules.Actions
                     DefaultFittingFound = false;      //Did we find the default fitting?
                     CustomFittingFound = false;
                     WaitForFittingToLoad = false;
+                    _missionItemMoved = false;
+                    _optionalMissionItemMoved = false;
                     _States.CurrentArmState = ArmState.OpenShipHangar;
                     _States.CurrentCombatState = CombatState.Idle;
                     Cache.Instance.NextArmAction = DateTime.Now;
@@ -507,21 +510,42 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.MoveItems:
-                    
+                    if (DateTime.Now < Cache.Instance.NextArmAction)
+                        return;
+
+                    if (ItemsAreBeingMoved)
+                    {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "if (ItemsAreBeingMoved)", Logging.Teal);
+                            
+                        if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
+                        {
+                            if (DateTime.Now.Subtract(Cache.Instance.NextArmAction).TotalSeconds > 120)
+                            {
+                                Logging.Log("Unloadloot.MoveItems", "Moving Items timed out, clearing item locks", Logging.Orange);
+                                Cache.Instance.DirectEve.UnlockItems();
+                                Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(-10);
+                                _States.CurrentArmState = ArmState.Begin;
+                                return;
+                            }
+
+                            if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                            return;
+                        }
+                        ItemsAreBeingMoved = false;
+                        return;
+                    }
+                    //
+                    // Bring item
+                    //
                     string bringItem = Cache.Instance.BringMissionItem;
                     if (string.IsNullOrEmpty(bringItem))
                         _missionItemMoved = true;
 
                     int bringitemQuantity = Math.Max(Cache.Instance.BringMissionItemQuantity, 1);
 
-                    string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
-                    if (string.IsNullOrEmpty(bringOptionalItem))
-                        _optionalMissionItemMoved = true;
-
-                    int bringOptionalitemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
-
                     if (!_missionItemMoved)
                     {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm")) break;
@@ -534,13 +558,24 @@ namespace Questor.Modules.Actions
                             Logging.Log("Arm", "Moving MissionItem [" + missionItem.TypeName + "] to CargoHold", Logging.White);
 
                             Cache.Instance.CargoHold.Add(missionItem, bringitemQuantity);
+                            ItemsAreBeingMoved = true;
                             _missionItemMoved = true;
-                            break;
+                            return;
                         }
                     }
 
+                    //
+                    // Try To Bring item
+                    //
+                    string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
+                    if (string.IsNullOrEmpty(bringOptionalItem))
+                        _optionalMissionItemMoved = true;
+
+                    int bringOptionalitemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
+
                     if (!_optionalMissionItemMoved)
                     {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm")) break;
@@ -554,7 +589,8 @@ namespace Questor.Modules.Actions
 
                             Cache.Instance.CargoHold.Add(optionalmissionItem, bringOptionalitemQuantity);
                             _optionalMissionItemMoved = true;
-                            break;
+                            ItemsAreBeingMoved = true;
+                            return;
                         }
                     }
 
@@ -604,6 +640,8 @@ namespace Questor.Modules.Actions
                     }
                     else if (!ammoMoved)
                     {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "else if (!ammoMoved)", Logging.Teal);
+
                         if (AmmoToLoad.Count > 0)
                         {
                             foreach (Ammo ammo in AmmoToLoad)

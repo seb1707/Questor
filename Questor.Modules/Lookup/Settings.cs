@@ -63,6 +63,7 @@ namespace Questor.Modules.Lookup
         // Debug Variables
         //
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugArm { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
         public bool DebugAutoStart { get; set; }
         public bool DebugCargoHold { get; set; }
@@ -474,6 +475,7 @@ namespace Questor.Modules.Lookup
                 //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.Instance.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.SettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
                 DebugActivateWeapons = false;
+                DebugArm = false;
                 DebugAttachVSDebugger = false;
                 DebugAutoStart = false;
                 DebugCargoHold = false;
@@ -814,6 +816,7 @@ namespace Questor.Modules.Lookup
                     // Debug Settings
                     // 
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
+                    DebugArm = (bool?)xml.Element("debugArm") ?? false;
                     DebugAttachVSDebugger = (bool?)xml.Element("debugAttachVSDebugger") ?? false;
                     DebugAutoStart = (bool?)xml.Element("debugAutoStart") ?? false;
                     DebugCargoHold = (bool?)xml.Element("debugCargoHold") ?? false;

@@ -7,6 +7,7 @@
   <debugActivateWeapons>false</debugActivateWeapons>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
+  <debugArm>false</debugArm>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <debugAutoStart>false</debugAutoStart>
   <debugCleanup>false</debugCleanup>
@@ -455,11 +456,11 @@
   <windowYPosition>1050</windowYPosition> <!-- needs to be customized -->
 
   <!-- X Position of EVE Window -->
-  <eveWindowXPosition></eveWindowXPosition> <!-- blank leaves the EVE Window Untouched  -->
+  <eveWindowXPosition></eveWindowXPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings -->
   <!-- Y Position of EVE Window -->
-  <eveWindowYPosition></eveWindowYPosition> <!-- blank leaves the EVE Window Untouched  -->
+  <eveWindowYPosition></eveWindowYPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings  -->
   <!-- X Size of EVE Window -->
-  <eveWindowXSize></eveWindowXSize> <!-- blank leaves the EVE Window Untouched -->
+  <eveWindowXSize></eveWindowXSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings -->
   <!-- Y Size of EVE Window -->
-  <eveWindowYSize></eveWindowYSize> <!-- blank leaves the EVE Window Untouched  -->
+  <eveWindowYSize></eveWindowYSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings  -->
 </settings>

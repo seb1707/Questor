@@ -354,6 +354,7 @@ namespace Questor.Modules.BackgroundTasks
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                 return false;
             }
+            return false;
         }
 
         public static bool CloseInventoryWindows()

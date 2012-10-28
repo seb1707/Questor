@@ -54,7 +54,7 @@
   <!-- RandomDelay is a number and is a random amount of seconds it will wait between getting missions in station added with minimumdelay or by itself -->
   <randomDelay>45</randomDelay><!-- default is 45 -->
   <!-- Use Station repair Service if it exists-->
-  <useStationRepair>true<useStationRepair>
+  <useStationRepair>true</useStationRepair>
   
   <!--                                                -->
   <!--   CONSOLE LOG SETTINGS   -->
@@ -462,7 +462,4 @@
   <eveWindowXSize></eveWindowXSize> <!-- blank leaves the EVE Window Untouched -->
   <!-- Y Size of EVE Window -->
   <eveWindowYSize></eveWindowYSize> <!-- blank leaves the EVE Window Untouched  -->
-
-  
-  
 </settings>

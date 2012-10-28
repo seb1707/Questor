@@ -93,7 +93,7 @@ namespace Questor.Modules.BackgroundTasks
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
                     if (!Cache.Instance.IsApproachingOrOrbiting)
                     {
-                        Logging.Log("CombatMissionCtrl.NavigateIntoRange", "We are not approaching nor orbiting", Logging.Teal);
+                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("CombatMissionCtrl.NavigateIntoRange", "We are not approaching nor orbiting", Logging.Teal);
 
                         EntityCache structure = Cache.Instance.Entities.Where(i => i.Name.Contains("Gate")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
 

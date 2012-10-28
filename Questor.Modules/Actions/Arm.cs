@@ -512,9 +512,13 @@ namespace Questor.Modules.Actions
                     if (string.IsNullOrEmpty(bringItem))
                         _missionItemMoved = true;
 
+                    int bringitemQuantity = Math.Max(Cache.Instance.BringMissionItemQuantity, 1);
+
                     string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
                     if (string.IsNullOrEmpty(bringOptionalItem))
                         _optionalMissionItemMoved = true;
+
+                    int bringOptionalitemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
 
                     if (!_missionItemMoved)
                     {
@@ -529,7 +533,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm", "Moving MissionItem [" + missionItem.TypeName + "] to CargoHold", Logging.White);
 
-                            Cache.Instance.CargoHold.Add(missionItem, 1);
+                            Cache.Instance.CargoHold.Add(missionItem, bringitemQuantity);
                             _missionItemMoved = true;
                             break;
                         }
@@ -548,7 +552,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm", "Moving MissionItem [" + optionalmissionItem.TypeName + "] to CargoHold", Logging.White);
 
-                            Cache.Instance.CargoHold.Add(optionalmissionItem, 1);
+                            Cache.Instance.CargoHold.Add(optionalmissionItem, bringOptionalitemQuantity);
                             _optionalMissionItemMoved = true;
                             break;
                         }

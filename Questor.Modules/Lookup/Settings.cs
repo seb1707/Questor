@@ -945,27 +945,27 @@ namespace Questor.Modules.Lookup
                     // Location of the Questor GUI on startup (default is off the screen)
                     //
                     //X Questor GUI window position (needs to be changed, default is off screen)
-                    WindowXPosition = (int?)xml.Element("windowXPosition") ?? 1600;
+                    WindowXPosition = (int?)xml.Element("windowXPosition") ?? 1;
                     //Y Questor GUI window position (needs to be changed, default is off screen)
-                    WindowYPosition = (int?)xml.Element("windowYPosition") ?? 1050;
+                    WindowYPosition = (int?)xml.Element("windowYPosition") ?? 1;
                     //
                     // Location of the EVE Window on startup (default is to leave the window alone)
                     //
                     try
                     {
                         //EVE Client window position
-                        EVEWindowXPosition = (int?)xml.Element("eveWindowXPosition") ?? 111;
+                        EVEWindowXPosition = (int?)xml.Element("eveWindowXPosition") ?? 0;
                         //EVE Client window position
-                        EVEWindowYPosition = (int?)xml.Element("eveWindowYPosition") ?? 111;
+                        EVEWindowYPosition = (int?)xml.Element("eveWindowYPosition") ?? 0;
                         //
                         // Size of the EVE Window on startup (default is to leave the window alone)
                         // This CAN and WILL distort the proportions of the EVE client if you configure it to do so.
                         // ISBOXER arguably does this with more elegance...
                         //
                         //EVE Client window position
-                        EVEWindowXSize = (int?)xml.Element("eveWindowXSize") ?? 111;
+                        EVEWindowXSize = (int?)xml.Element("eveWindowXSize") ?? 0;
                         //EVE Client window position
-                        EVEWindowYSize = (int?)xml.Element("eveWindowYSize") ?? 111;
+                        EVEWindowYSize = (int?)xml.Element("eveWindowYSize") ?? 0;
                     }
                     catch
                     {

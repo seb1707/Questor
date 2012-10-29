@@ -154,9 +154,9 @@ namespace Questor
                             Settings.Instance.EVEWindowXSize != 111 && 
                             Settings.Instance.EVEWindowYSize != 111)
                         {
-                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace Command: WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize, Logging.White);
+                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize, Logging.White);
                             LavishScript.ExecuteCommand("WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize);
-                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace Command: WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition, Logging.White); 
+                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition, Logging.White); 
                             LavishScript.ExecuteCommand("WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition);
                         }
 

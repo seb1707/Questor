@@ -1906,7 +1906,7 @@ namespace Questor.Modules.Caching
             if (Settings.Instance.UseFittingManager)
             {
                 //Set fitting to default
-                DefaultFitting = Settings.Instance.DefaultFitting.ToString();
+                DefaultFitting = Settings.Instance.DefaultFitting.Fitting;
                 Fitting = DefaultFitting;
                 MissionShip = "";
                 ChangeMissionShipFittings = false;
@@ -3759,7 +3759,7 @@ namespace Questor.Modules.Caching
 
             if (GetShipsDroneBayAttempts > 10) //we her havent located a dronebay in over 10 attempts, we are not going to 
             {
-                if (Settings.Instance.DebugHangars) Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.DebugHangars);
+                Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.DebugHangars);
                 return true;
             }
 
@@ -3871,9 +3871,9 @@ namespace Questor.Modules.Caching
             return true; //if we are not in station then the LP Store should have auto closed already.
         }
 
-        public DirectFittingManagerWindow FittingWindow { get; set; }
+        public DirectFittingManagerWindow FittingManagerWindow { get; set; }
 
-        public bool OpenFittingWindow(String module)
+        public bool OpenFittingManagerWindow(String module)
         {
             if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -3887,36 +3887,47 @@ namespace Questor.Modules.Caching
             if (!Cache.Instance.InStation)
             {
                 Logging.Log(module, "Opening Fitting Window: We are not in station?! We can't refit with the fitting window in space, waiting...", Logging.Orange);
+                Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(10);
                 return false;
             }
 
             if (Cache.Instance.InStation)
             {
-                Cache.Instance.FittingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-                if (Cache.Instance.FittingWindow == null)
+                Cache.Instance.FittingManagerWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+                
+                //open it again ?
+                if (Cache.Instance.FittingManagerWindow == null)
                 {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
-                    Logging.Log(module, "Opening Fitting Window", Logging.White);
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2);
+                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
+                    Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
+                    Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Opening fitting manager: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
-                return true;
+                
+                if (Cache.Instance.FittingManagerWindow != null && (Cache.Instance.FittingManagerWindow.IsReady)) //check if it's ready
+                {
+                    Logging.Log(module, "Fitting Manager is ready.", Logging.White); 
+                    return true;
+                }
+                
+                return false;
             }
             return false;
         }
 
-        public bool CloseFitting(String module)
+        public bool CloseFittingManager(String module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
             {
                 return false;
             }
 
-            Cache.Instance.FittingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-            if (Cache.Instance.FittingWindow != null)
+            Cache.Instance.FittingManagerWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+            if (Cache.Instance.FittingManagerWindow != null)
             {
-                Logging.Log(module, "Closing Fitting Window", Logging.White);
-                Cache.Instance.FittingWindow.Close();
+                Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
+                Cache.Instance.FittingManagerWindow.Close();
                 return false;
             }
             return true;

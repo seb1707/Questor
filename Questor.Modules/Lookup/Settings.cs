@@ -74,6 +74,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDefense { get; set; }
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
+        public bool DebugFittingMgr { get; set; }
         public bool DebugGotobase { get; set; }
         public bool DebugHangars { get; set; }
         public bool DebugIdle { get; set; }
@@ -486,6 +487,7 @@ namespace Questor.Modules.Lookup
                 DebugDefense = false;
                 DebugDroneHealth = false;
                 DebugExceptions = false;
+                DebugFittingMgr = false;
                 DebugGotobase = false;
                 DebugHangars = false;
                 DebugIdle = false;
@@ -827,6 +829,7 @@ namespace Questor.Modules.Lookup
                     DebugDefense = (bool?)xml.Element("debugDefense") ?? false;
                     DebugDroneHealth = (bool?)xml.Element("debugDroneHealth") ?? false;
                     DebugExceptions = (bool?)xml.Element("debugExceptions") ?? false;
+                    DebugFittingMgr = (bool?)xml.Element("debugFittingMgr") ?? false;
                     DebugGotobase = (bool?)xml.Element("debugGotobase") ?? false;
                     DebugHangars = (bool?)xml.Element("debugHangars") ?? false;
                     DebugIdle = (bool?)xml.Element("debugIdle") ?? false;

@@ -144,6 +144,23 @@ namespace Questor.Modules.Lookup
         Slaves = 283,
         SmallArms = 280,
 
+        Plagioclase = 458,
+        Spodumain = 461,
+        Kernite = 457,
+        Hedbergite = 454,
+        Arkonor = 450,
+        Bistot = 451,
+        Pyroxeres = 459,
+        Crokite = 452,
+        Jaspet = 456,
+        Omber = 469,
+        Scordite = 460,
+        Gneiss = 467,
+        Veldspar = 462,
+        Hemorphite = 455,
+        DarkOchre = 453,
+        Ice = 465,
+        
         //
         // various NPCs
         //

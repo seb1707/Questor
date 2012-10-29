@@ -951,19 +951,26 @@ namespace Questor.Modules.Lookup
                     //
                     // Location of the EVE Window on startup (default is to leave the window alone)
                     //
-                    //EVE Client window position
-                    EVEWindowXPosition = (int?)xml.Element("eveWindowXPosition") ?? 111;
-                    //EVE Client window position
-                    EVEWindowYPosition = (int?)xml.Element("eveWindowYPosition") ?? 111;
-                    //
-                    // Size of the EVE Window on startup (default is to leave the window alone)
-                    // This CAN and WILL distort the proportions of the EVE client if you configure it to do so.
-                    // ISBOXER arguably does this with more elegance...
-                    //
-                    //EVE Client window position
-                    EVEWindowXSize = (int?)xml.Element("eveWindowXSize") ?? 111;
-                    //EVE Client window position
-                    EVEWindowYSize = (int?)xml.Element("eveWindowYSize") ?? 111;
+                    try
+                    {
+                        //EVE Client window position
+                        EVEWindowXPosition = (int?)xml.Element("eveWindowXPosition") ?? 111;
+                        //EVE Client window position
+                        EVEWindowYPosition = (int?)xml.Element("eveWindowYPosition") ?? 111;
+                        //
+                        // Size of the EVE Window on startup (default is to leave the window alone)
+                        // This CAN and WILL distort the proportions of the EVE client if you configure it to do so.
+                        // ISBOXER arguably does this with more elegance...
+                        //
+                        //EVE Client window position
+                        EVEWindowXSize = (int?)xml.Element("eveWindowXSize") ?? 111;
+                        //EVE Client window position
+                        EVEWindowYSize = (int?)xml.Element("eveWindowYSize") ?? 111;
+                    }
+                    catch
+                    {
+                        Logging.Log("Settings","Invalid Format for eveWindow Settings - skipping",Logging.Teal);
+                    }
 
                     //
                     // Ship Names

@@ -421,6 +421,21 @@ namespace Questor.Modules.Caching
 
         //NextGetAgentMissionAction
 
+        private DateTime _nextAgentWindowAction;
+
+        public DateTime NextAgentWindowAction
+        {
+            get
+            {
+                return _nextAgentWindowAction;
+            }
+            set
+            {
+                _nextAgentWindowAction = value;
+                _lastAction = DateTime.Now;
+            }
+        }
+
         private DateTime _nextGetAgentMissionAction;
 
         public DateTime NextGetAgentMissionAction
@@ -3942,6 +3957,49 @@ namespace Questor.Modules.Caching
                 return false;
             }
             return true;
+        }
+
+        public DirectWindow AgentWindow { get; set; }
+
+        public bool OpenAgentWindow(string module)
+        {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                return false;
+            }
+
+            if (DateTime.Now < Cache.Instance.NextAgentWindowAction)
+            {
+                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.Now < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
+                return false;
+            }
+
+            if (!Agent.IsValid)
+            {
+                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (!Agent.IsValid)]", Logging.Yellow);
+                Cache.Instance.NextAgentWindowAction = DateTime.Now.AddSeconds(2);
+                return false;
+            }
+
+            if (Agent.Window == null)
+            {
+                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(Agent.SolarSystemId) + "]", Logging.Yellow);
+                Cache.Instance.NextAgentWindowAction = DateTime.Now.AddSeconds(10);
+                Agent.InteractWith();
+                return false;
+            }
+
+            if (!Agent.Window.IsReady)
+            {
+                return false;
+            }
+
+            if (Agent.Window.IsReady)
+            {
+                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
+                return true;
+            }
+            return false;
         }
 
         public DirectWindow JournalWindow { get; set; }

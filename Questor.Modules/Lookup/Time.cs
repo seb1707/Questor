@@ -51,7 +51,7 @@ namespace Questor.Modules.Lookup
         public int NoGateFoundRetryDelay_seconds = 30;                      // no gate found on grid when executing the activate action, wait this long to see if it appears (lag), units: seconds. Default is 30
         public int AlignDelay_minutes = 2;                                  // Delay between the last align command and the next, units: minutes. Default is 2
         public int DelayBetweenJetcans_seconds = 185;                       // Once you have made a jetcan you cannot make another for 3 minutes, units: seconds. Default is 185 (to account for lag)
-        public int SalvageStackItemsDelayBeforeResuming_seconds = 5;        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
+        public int SalvageStackItemsDelayBeforeResuming_seconds = 2;        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
         public int SalvageStackItems_seconds = 150;                         // When salvaging stack items in your cargo every x seconds, units: seconds. Default is 180
         public int SalvageDelayBetweenActions_milliseconds = 500;           //
         public int TravelerExitStationAmIInSpaceYet_seconds = 17;           // Traveler - Exit Station before you are in space delay, units: seconds. Default is 7

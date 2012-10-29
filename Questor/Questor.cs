@@ -148,7 +148,16 @@ namespace Questor
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("Questor", "Running Innerspace command: windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("windowtaskbar on " + Settings.Instance.CharacterName);
-                        
+
+                        if (Settings.Instance.EVEWindowXPosition != 111 && 
+                            Settings.Instance.EVEWindowYPosition != 111 && 
+                            Settings.Instance.EVEWindowXSize != 111 && 
+                            Settings.Instance.EVEWindowYSize != 111)
+                        {
+                            LavishScript.ExecuteCommand("WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "-" + Settings.Instance.EVEWindowYSize);
+                            LavishScript.ExecuteCommand("WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "-" + Settings.Instance.EVEWindowYPosition);
+                        }
+
                         if (Settings.Instance.MinimizeEveAfterStartingUp)
                         {
                             Logging.Log("Questor", "MinimizeEveAfterStartingUp is true: Minimizing EVE with: WindowCharacteristics -visibility minimize", Logging.White);

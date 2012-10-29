@@ -451,16 +451,16 @@
   <!--                                                -->
   
   <!-- X Position of Questor Window -->
-  <windowXPosition>1600</windowXPosition> <!-- needs to be customized -->
+  <windowXPosition>1</windowXPosition> <!-- needs to be customized -->
   <!-- Y Position of Questor Window -->
-  <windowYPosition>1050</windowYPosition> <!-- needs to be customized -->
+  <windowYPosition>1</windowYPosition> <!-- needs to be customized -->
 
   <!-- X Position of EVE Window -->
-  <eveWindowXPosition></eveWindowXPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings -->
+  <eveWindowXPosition>0</eveWindowXPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings -->
   <!-- Y Position of EVE Window -->
-  <eveWindowYPosition></eveWindowYPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings  -->
+  <eveWindowYPosition>0</eveWindowYPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings  -->
   <!-- X Size of EVE Window -->
-  <eveWindowXSize></eveWindowXSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings -->
+  <eveWindowXSize>0</eveWindowXSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings -->
   <!-- Y Size of EVE Window -->
-  <eveWindowYSize></eveWindowYSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings  -->
+  <eveWindowYSize>0</eveWindowYSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings  -->
 </settings>

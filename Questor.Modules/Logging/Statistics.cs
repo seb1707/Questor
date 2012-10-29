@@ -92,14 +92,14 @@ namespace Questor.Modules.Logging
                 string currentPocketName = Cache.Instance.FilterPath("randomgrid");
                 try
                 {
-                    if (!String.IsNullOrEmpty(Cache.Instance.Mission.Name))
+                    if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
                     {
-                        currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+                        currentPocketName = Cache.Instance.FilterPath(Cache.Instance.MissionName);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("Statistics", "PocketObjectStatistics: is cache.Instance.Mission.Name null?: exception was [" + ex.Message + "]",
+                    Logging.Log("Statistics", "PocketObjectStatistics: is cache.Instance.MissionName null?: exception was [" + ex.Message + "]",
                                 Logging.White);
                 }
 
@@ -347,8 +347,7 @@ namespace Questor.Modules.Logging
             //    return;
 
             //agentID needs to change if its a storyline mission - so its assigned in storyline.cs to the various modules directly.
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(Statistics.Instance.AgentID, true);
-            string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+            string currentPocketName = Cache.Instance.FilterPath(Cache.Instance.MissionName);
             if (Settings.Instance.PocketStatistics)
             {
                 if (Settings.Instance.PocketStatsUseIndividualFilesPerPocket)

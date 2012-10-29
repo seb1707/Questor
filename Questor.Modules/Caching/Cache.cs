@@ -1217,6 +1217,17 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public EntityCache MyShip
+        {
+            get
+            {
+                if (!InSpace)
+                    return null;
+
+                return DirectEve.Entities.Select(e => new EntityCache(e)).FirstOrDefault(e => e.IsValid && e.Name == Settings.Instance.CharacterName);
+            }
+        }
+
         public bool InSpace
         {
             get

@@ -38,20 +38,18 @@ namespace Questor.Modules.Actions
 
         public string MissionName;
 
-        private DateTime _nextAgentAction;
         private bool _agentStandingsCheckFlag;  //false;
-        private bool loadedAmmo = false;
-                
-        DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
-
-        //private DateTime _waitingOnAgentResponse;
-        private bool _waitingOnMission;
-
-        private DateTime _waitingOnMissionTimer = DateTime.Now;
-
         private bool _waitingOnAgentResponse;
-        private DateTime _waitingOnAgentResponseTimer = DateTime.Now;
+        private bool _waitingOnMission;
+        private bool loadedAmmo = false;
+        
         private DateTime _agentWindowTimeStamp = DateTime.MinValue;
+        private DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
+        private DateTime _nextAgentAction;
+        private DateTime _waitingOnAgentResponseTimer = DateTime.Now;
+        private DateTime _waitingOnMissionTimer = DateTime.Now;
+        
+        private int LoyaltyPointCounter;
 
         public AgentInteraction()
         {
@@ -651,6 +649,20 @@ namespace Questor.Modules.Actions
             DirectAgentResponse accept = responses.FirstOrDefault(r => r.Text.Contains(Accept));
             if (accept == null)
                 return;
+
+            if (Cache.Instance.Agent.LoyaltyPoints == -1)
+            {
+                if (LoyaltyPointCounter < 10)
+                {
+                    Logging.Log("AgentInteraction", "Loyalty Points still -1; retrying", Logging.Red);
+                    _nextAgentAction = DateTime.Now.AddMilliseconds(500);
+                    LoyaltyPointCounter++;
+                    return;
+                }
+            }
+
+            LoyaltyPointCounter = 0;
+            Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
 
             Logging.Log("AgentInteraction", "Saying [Accept]", Logging.Yellow);
             Cache.Instance.Wealth = Cache.Instance.DirectEve.Me.Wealth;

@@ -591,7 +591,7 @@ namespace Questor.Modules.Activities
 
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
-                DistanceToApproach = 4000;
+                DistanceToApproach = 3000;
 
             bool stopWhenTargeted;
             if (!bool.TryParse(action.GetParameterValue("StopWhenTargeted"), out stopWhenTargeted))
@@ -639,7 +639,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            if (closest.Distance <= DistanceToApproach) // if we are inside the range that we are supposed to approach assume we are done
+            if (closest.Distance <= DistanceToApproach  + 500) // if we are inside the range that we are supposed to approach assume we are done
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are [" + Math.Round(closest.Distance, 0) + "] from a [" + target + "] we do not need to go any further", Logging.Teal);
                 Nextaction();

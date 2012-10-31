@@ -114,7 +114,17 @@ namespace Questor.Modules.Combat
             *****/
 
             // Get the best possible ammo
-            Ammo ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
+            Ammo ammo = correctAmmoIncargo.FirstOrDefault();
+            try
+            {
+                ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
+            }
+            catch(Exception exception)
+            {
+                Logging.Log("Combat", "ReloadNormalAmmo: Unable to find the correct ammo: waiting [" + exception + "]", Logging.Teal);
+                return false;
+            }
+            
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)

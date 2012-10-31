@@ -1297,7 +1297,7 @@ namespace Questor.Modules.Lookup
                     XElement xmlElementBlackListSection = xml.Element("blacklist");
                     if (xmlElementBlackListSection != null)
                     {
-                        Logging.Log("Settings", "Loading Mission Blacklistfrom", Logging.White);
+                        Logging.Log("Settings", "Loading Mission Blacklist", Logging.White);
                         int i = 1;
                         foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
                         {

@@ -146,16 +146,16 @@ namespace Questor
                         Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
-                        Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
+                        Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName);
 
                         if (Settings.Instance.EVEWindowXSize != 0 && 
                             Settings.Instance.EVEWindowYSize != 0)
                         {
-                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize, Logging.White);
+                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize, Logging.White);
                             LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + Settings.Instance.EVEWindowXSize + "x" + Settings.Instance.EVEWindowYSize);
-                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition, Logging.White);
-                            LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition);
+                            Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "x" + Settings.Instance.EVEWindowYPosition, Logging.White);
+                            LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + Settings.Instance.EVEWindowXPosition + "," + Settings.Instance.EVEWindowYPosition);
                         }
 
                         if (Settings.Instance.MinimizeEveAfterStartingUp)

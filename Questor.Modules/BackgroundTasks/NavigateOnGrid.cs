@@ -85,7 +85,7 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.OrbitDistance = 2000;
                 }
 
-                if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
+                if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
@@ -99,18 +99,35 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             structure.Orbit(Cache.Instance.OrbitDistance);
                             Logging.Log(module, "Initiating Orbit [" + structure.Name + "][ID: " + structure.Id + "]", Logging.Teal);
+                            return;
                         }
-                        else if (DateTime.Now > Cache.Instance.NextAlign) //this will spam a bit until we know what "mode" our activeship is when aligning
+                        
+                        //
+                        // OrbitStructure is false
+                        //
+                        if (Settings.Instance.SpeedTank || Cache.Instance.MyShip.Velocity > 300)
+                        {
+                            target.Orbit(Cache.Instance.OrbitDistance);
+                            Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.Teal);
+                            return;
+                        }
+
+                        //
+                        // OrbitStructure is false
+                        // Speedtank is false
+                        //
+                        if (Cache.Instance.MyShip.Velocity < 300 && DateTime.Now > Cache.Instance.NextAlign) //this will spam a bit until we know what "mode" our activeship is when aligning
                         {
                             Cache.Instance.Star.AlignTo();
                             Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + target.Id + "][ActiveShip.Entity.Mode:[" + Cache.Instance.DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                            return;
                         }
                         return;
                     }
                 }
                 else
                 {
-                    Logging.Log(module, "Out of range. ignoring orbit around structure", Logging.Teal);
+                    Logging.Log(module, "Out of range. ignoring orbit around structure.", Logging.Teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
                     Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);

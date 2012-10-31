@@ -29,13 +29,13 @@ namespace Questor.Modules.Actions
         private bool ItemsAreBeingMoved;
         private bool CheckCargoForBringItem;
         private bool CheckCargoForOptionalBringItem;
-        private bool CheckCargoForAmmo;
+        //private bool CheckCargoForAmmo;
 
         private DateTime _lastPulse;
         private DateTime _lastArmAction;
 
-        private int bringItemQuantity = 0;
-        private int bringOptionalItemQuantity = 0;
+        private int bringItemQuantity;
+        private int bringOptionalItemQuantity;
         public Arm()
         {
             AmmoToLoad = new List<Ammo>();
@@ -59,54 +59,59 @@ namespace Questor.Modules.Actions
             AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
         }
 
-        private void FindDefaultFitting(string module)
+        private bool FindDefaultFitting(string module)
         {
             DefaultFittingFound = false;
             if (!DefaultFittingChecked)
             {
-                DefaultFittingChecked = true;
-                Logging.Log(module, "Default Fitting Name [" + Cache.Instance.DefaultFitting.ToLower() + "]", Logging.White);
-
-                if (!Cache.Instance.OpenFittingManagerWindow(module)) return;
+                if (!Cache.Instance.OpenFittingManagerWindow(module)) return false;
+                
+                if (Settings.Instance.DebugFittingMgr) Logging.Log(module, "Character Settings XML says Default Fitting is [" + Cache.Instance.DefaultFitting + "]", Logging.White);
 
                 if (Cache.Instance.FittingManagerWindow.Fittings.Any())
                 {
+                    if (Settings.Instance.DebugFittingMgr) Logging.Log(module, "if (Cache.Instance.FittingManagerWindow.Fittings.Any())", Logging.Teal);
                     int i = 1;
                     foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
                     {
                         //ok found it
                         if (Settings.Instance.DebugFittingMgr)
                         {
-                            Logging.Log(module, "[" + i +  "] Found a Fitting Named [" + fitting.Name.ToLower() + "]", Logging.Teal);
+                            Logging.Log(module, "[" + i +  "] Found a Fitting Named [" + fitting.Name + "]", Logging.Teal);
                         }
 
                         if (fitting.Name.ToLower().Equals(Cache.Instance.DefaultFitting.ToLower()))
                         {
+                            DefaultFittingChecked = true;
                             DefaultFittingFound = true;
                             Logging.Log(module, "[" + i + "] Found Default Fitting [" + fitting.Name + "]", Logging.White);
-                            break;
+                            return true;
                         }
                         i++;
                     }
                 }
                 else
                 {
-                    Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Mangar at all!  Disabling fitting manager.", Logging.Orange); 
+                    Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Mangar at all!  Disabling fitting manager.", Logging.Orange);
+                    DefaultFittingChecked = true;
                     DefaultFittingFound = false;
+                    return true;
                 }
                 
                 if (!DefaultFittingFound)
                 {
                     Logging.Log("Arm.LoadFitting", "Error! Could not find Default Fitting [" + Cache.Instance.DefaultFitting.ToLower() + "].  Disabling fitting manager.", Logging.Orange);
+                    DefaultFittingChecked = true; 
                     DefaultFittingFound = false;
                     Settings.Instance.UseFittingManager = false;
                     Logging.Log("Arm.LoadFitting", "Closing Fitting Manager", Logging.White);
                     Cache.Instance.FittingManagerWindow.Close();
 
                     _States.CurrentArmState = ArmState.MoveItems;
-                    return;
+                    return true;
                 }
             }
+            return false;
         }
 
         public void ProcessState()
@@ -165,7 +170,8 @@ namespace Questor.Modules.Actions
                     bringOptionalItemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
                     _bringoptionalItemMoved = false;
                     CheckCargoForOptionalBringItem = true;
-                    CheckCargoForAmmo = true;
+                    //CheckCargoForAmmo = true;
+
                     _States.CurrentArmState = ArmState.OpenShipHangar;
                     _States.CurrentCombatState = CombatState.Idle;
                     Cache.Instance.NextArmAction = DateTime.UtcNow;
@@ -376,103 +382,111 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction)
                         return;
 
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.LoadSavedFitting", "You Are Here . ", Logging.Teal);
-
-                    //If we are already loading a fitting...
-                    if (WaitForFittingToLoad) 
+                    if (Settings.Instance.UseFittingManager)
                     {
-                        if (Settings.Instance.DebugArm) Logging.Log("Arm.LoadSavedFitting", "if (WaitForFittingToLoad) ", Logging.Teal);
+                        //if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadSavedFitting", "You Are Here . ", Logging.Teal);
 
-                        if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
+                        //If we are already loading a fitting...
+                        if (WaitForFittingToLoad)
                         {
-                            //we should be done fitting, proceed to the next state
-                            if(!Cache.Instance.CloseFittingManager("Arm")) return;
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadSavedFitting", "if (WaitForFittingToLoad) ", Logging.Teal);
 
-                            WaitForFittingToLoad = false;
-                            _States.CurrentArmState = ArmState.MoveItems;
-                            Logging.Log("Arm.LoadFitting", "Done Loading Saved Fitting", Logging.White);
-                            return; 
-                        }
-
-                        
-                        if (DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds > 120)
-                        {
-                            Logging.Log("Arm.LoadFitting", "Loading Fitting timed out, clearing item locks", Logging.Orange);
-                            Cache.Instance.DirectEve.UnlockItems();
-                            _lastArmAction = DateTime.UtcNow.AddSeconds(-10);
-                            _States.CurrentArmState = ArmState.Begin;
-                            break;
-                        }
-
-                        //let's wait 10 seconds if we still have locked items
-                        Logging.Log("Arm.LoadFitting", "Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count, Logging.White);
-                        Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.FittingWindowLoadFittingDelay_seconds);
-                        return;
-                    }
-                    
-                    if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                    {
-                        if (Settings.Instance.DebugArm) Logging.Log("Arm.LoadSavedFitting", "if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)", Logging.Teal);
-
-                        FindDefaultFitting("Arm.LoadSavedFitting");
-
-                        if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || !(UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))
-                        {
-                            if (Settings.Instance.DebugArm) Logging.Log("Arm.LoadSavedFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || !(UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
-                            _States.CurrentArmState = ArmState.MoveItems;
-                            return;
-                        }
-
-                        //let's check first if we need to change fitting at all
-                        Logging.Log("Arm.LoadFitting", "Fitting: " + Cache.Instance.Fitting + " - currentFit: " + Cache.Instance.CurrentFit, Logging.White);
-                        if (Cache.Instance.Fitting.Equals(Cache.Instance.CurrentFit))
-                        {
-                            Logging.Log("Arm.LoadFitting", "Current fit is now correct", Logging.White);
-                            _States.CurrentArmState = ArmState.MoveItems;
-                            return;
-                        }
-
-                        if (!Cache.Instance.OpenFittingManagerWindow("Arm")) return;
-
-                        Logging.Log("Arm.LoadFitting", "Looking for fitting " + Cache.Instance.Fitting, Logging.White);
-
-                        foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
-                        {
-                            //ok found it
-                            DirectActiveShip CurrentShip = Cache.Instance.DirectEve.ActiveShip;
-                            if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
+                            if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                             {
-                                Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                                Logging.Log("Arm.LoadFitting", "Found fitting [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                                //switch to the requested fitting for the current mission
-                                fitting.Fit();
-                                _lastArmAction = DateTime.UtcNow;
-                                WaitForFittingToLoad = true;
-                                Cache.Instance.CurrentFit = fitting.Name;
-                                CustomFittingFound = true;
-                                break;
-                            }
-                        }
+                                //we should be done fitting, proceed to the next state
+                                if (!Cache.Instance.CloseFittingManager("Arm")) return;
 
-                        //if we did not find it, we'll set currentfit to default
-                        //this should provide backwards compatibility without trying to fit always
-                        if (!CustomFittingFound)
-                        {
-                            if (UseMissionShip)
-                            {
-                                Logging.Log("Arm.LoadFitting", "Could not find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
+                                WaitForFittingToLoad = false;
                                 _States.CurrentArmState = ArmState.MoveItems;
+                                Logging.Log("Arm.LoadFitting", "Done Loading Saved Fitting", Logging.White);
+                                return;
+                            }
+
+                            if (DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds > 120)
+                            {
+                                Logging.Log("Arm.LoadFitting", "Loading Fitting timed out, clearing item locks", Logging.Orange);
+                                Cache.Instance.DirectEve.UnlockItems();
+                                _lastArmAction = DateTime.UtcNow.AddSeconds(-10);
+                                _States.CurrentArmState = ArmState.Begin;
                                 break;
                             }
 
-                            Logging.Log("Arm.LoadFitting", "Could not find fitting - switching to default", Logging.Orange);
-                            Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
-                            break;
+                            //let's wait 10 seconds if we still have locked items
+                            Logging.Log("Arm.LoadFitting", "Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count, Logging.White);
+                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.FittingWindowLoadFittingDelay_seconds);
+                            return;
+                        }
+
+                        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                        {
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)", Logging.Teal);
+
+                            if (!FindDefaultFitting("Arm.LoadSavedFitting")) return;
+
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "These are the reasons we would use or not use the fitting manager.(below)", Logging.Teal);
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "DefaultFittingFound [" + DefaultFittingFound + "]", Logging.Teal);
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "UseMissionShip [" + UseMissionShip + "]", Logging.Teal);
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "Cache.Instance.ChangeMissionShipFittings [" + Cache.Instance.ChangeMissionShipFittings + "]", Logging.Teal);
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings)) then do not use fitting manager", Logging.Teal);
+                            if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "These are the reasons we would use or not use the fitting manager.(above)", Logging.Teal);
+
+                            if ((!DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))
+                            {
+                                if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
+                                _States.CurrentArmState = ArmState.MoveItems;
+                                return;
+                            }
+
+                            //let's check first if we need to change fitting at all
+                            Logging.Log("Arm.LoadFitting", "Fitting: " + Cache.Instance.Fitting + " - currentFit: " + Cache.Instance.CurrentFit, Logging.White);
+                            if (Cache.Instance.Fitting.Equals(Cache.Instance.CurrentFit))
+                            {
+                                Logging.Log("Arm.LoadFitting", "Current fit is now correct", Logging.White);
+                                _States.CurrentArmState = ArmState.MoveItems;
+                                return;
+                            }
+
+                            if (!Cache.Instance.OpenFittingManagerWindow("Arm.LoadFitting")) return;
+
+                            Logging.Log("Arm.LoadFitting", "Looking for fitting " + Cache.Instance.Fitting, Logging.White);
+
+                            foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
+                            {
+                                //ok found it
+                                DirectActiveShip CurrentShip = Cache.Instance.DirectEve.ActiveShip;
+                                if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
+                                {
+                                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                                    Logging.Log("Arm.LoadFitting", "Found fitting [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    //switch to the requested fitting for the current mission
+                                    fitting.Fit();
+                                    _lastArmAction = DateTime.UtcNow;
+                                    WaitForFittingToLoad = true;
+                                    Cache.Instance.CurrentFit = fitting.Name;
+                                    CustomFittingFound = true;
+                                    break;
+                                }
+                            }
+
+                            //if we did not find it, we'll set currentfit to default
+                            //this should provide backwards compatibility without trying to fit always
+                            if (!CustomFittingFound)
+                            {
+                                if (UseMissionShip)
+                                {
+                                    Logging.Log("Arm.LoadFitting", "Could not find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
+                                    _States.CurrentArmState = ArmState.MoveItems;
+                                    break;
+                                }
+
+                                Logging.Log("Arm.LoadFitting", "Could not find fitting - switching to default", Logging.Orange);
+                                Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                                break;
+                            }
                         }
                     }
                     
-                    Logging.Log("Arm.LoadFitting", "Closing Fitting Manager", Logging.White);
-                    if (!Cache.Instance.CloseFittingManager("Arm")) return;
+                    if (!Cache.Instance.CloseFittingManager("Arm.LoadFitting")) return;
                     _States.CurrentArmState = ArmState.MoveItems;
                     break;
 
@@ -599,15 +613,15 @@ namespace Questor.Modules.Actions
                             //
                             // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
                             //
-                            foreach (DirectItem bringOptionalItemInCargo in cargoItems)
+                            foreach (DirectItem bringItemInCargo in cargoItems)
                             {
-                                bringOptionalItemQuantity -= bringOptionalItemInCargo.Quantity;
-                                if (bringOptionalItemQuantity <= 0)
+                                bringItemQuantity -= bringItemInCargo.Quantity;
+                                if (bringItemQuantity <= 0)
                                 {
                                     //
                                     // if we already have enough bringItems in our cargoHold then we are done
                                     //
-                                    _bringoptionalItemMoved = true;
+                                    _bringItemMoved = true;
                                     CheckCargoForBringItem = false;
                                     break;
                                 }
@@ -643,7 +657,7 @@ namespace Questor.Modules.Actions
                     }
 
                     //
-                    // Try To Bring item
+                    // Try To Optional Bring item
                     //
                     string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
                     if (string.IsNullOrEmpty(bringOptionalItem))
@@ -714,23 +728,24 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
 
-                    IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                    //IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
                     //
                     // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
                     //
-                    foreach (DirectItem bringItemInCargo in AmmoInCargo)
-                    {
-                        bringItemQuantity -= bringItemInCargo.Quantity;
-                        if (bringItemQuantity <= 0)
-                        {
-                            //
-                            // if we already have enough bringItems in our cargoHold then we are done
-                            //
-                            _bringItemMoved = true;
-                            break;
-                        }
-                    }
+                    //foreach (DirectItem bringItemInCargo in AmmoInCargo)
+                    //{
+                    //    AmmoFlavorFound -= bringItemInCargo.Quantity;
+                    //    if (AmmoFlavorFound <= 0)
+                    //    {
+                    //        //
+                    //        // if we already have enough bringItems in our cargoHold then we are done
+                    //        //
+                    //        Cache.Instance.MissionAmmo.RemoveAll(a => a.TypeId == item.TypeId);
+                    //        AmmoToLoad.RemoveAll(a => a.TypeId == item.TypeId);
+                    //        break;
+                    //    }
+                    //}
 
                     foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity))
                     {
@@ -774,11 +789,6 @@ namespace Questor.Modules.Actions
                             {
                                 Logging.Log("Arm", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
                             }
-                        }
-
-                        if (!_bringItemMoved)
-                        {
-                            Logging.Log("Arm", "Missing mission item [" + bringItem + "]", Logging.Orange);
                         }
 
                         _States.CurrentArmState = ArmState.NotEnoughAmmo;

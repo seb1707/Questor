@@ -56,9 +56,9 @@ namespace Questor.Modules.Actions
             AmmoToLoad = new List<Ammo>();
         }
 
-        public long AgentId { get; set; }
+        public static long AgentId { get; set; }
 
-        public DirectAgent Agent
+        public static DirectAgent Agent
         {
             get { return Cache.Instance.DirectEve.GetAgentById(AgentId); }
         }

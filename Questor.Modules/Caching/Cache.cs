@@ -3974,27 +3974,20 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (!Agent.IsValid)
+            if (AgentInteraction.Agent.Window == null)
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (!Agent.IsValid)]", Logging.Yellow);
-                Cache.Instance.NextAgentWindowAction = DateTime.Now.AddSeconds(2);
-                return false;
-            }
-
-            if (Agent.Window == null)
-            {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(Agent.SolarSystemId) + "]", Logging.Yellow);
+                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
                 Cache.Instance.NextAgentWindowAction = DateTime.Now.AddSeconds(10);
-                Agent.InteractWith();
+                AgentInteraction.Agent.InteractWith();
                 return false;
             }
 
-            if (!Agent.Window.IsReady)
+            if (!AgentInteraction.Agent.Window.IsReady)
             {
                 return false;
             }
 
-            if (Agent.Window.IsReady)
+            if (AgentInteraction.Agent.Window.IsReady)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
                 return true;

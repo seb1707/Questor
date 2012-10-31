@@ -323,7 +323,7 @@ namespace Questor.Storylines
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.DeclineMission;
-                        _agentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
+                        AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
 
                     }
 
@@ -348,7 +348,7 @@ namespace Questor.Storylines
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        _agentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
+                        AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                         _agentInteraction.ForceAccept = true;
                     }
 

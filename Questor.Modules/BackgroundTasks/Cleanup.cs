@@ -98,11 +98,9 @@ namespace Questor.Modules.BackgroundTasks
                         }
                         else
                         {
-                            if ((Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) &&
-                                (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
+                            if ((Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) && (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
                             {
-                                Logging.Log(
-                                        "Questor", "You cant use both the CloseQuestorCMDUplinkIsboxerProfile and the CloseQuestorCMDUplinkIsboxerProfile setting, choose one", Logging.White);
+                                Logging.Log("Questor", "You cant use both the CloseQuestorCMDUplinkIsboxerProfile and the CloseQuestorCMDUplinkIsboxerProfile setting, choose one", Logging.White);
                             }
                             else
                             {
@@ -112,25 +110,16 @@ namespace Questor.Modules.BackgroundTasks
                                     //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is ["+ CloseQuestorCMDUplinkInnerspaceProfile.tostring() +"]");
                                     if (_closeQuestorCMDUplink)
                                     {
-                                        Logging.Log(
-                                                "Questor", "Starting a timer in the innerspace uplink to restart this innerspace profile session", Logging.White);
-                                        LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " +
-                                                                    Settings.Instance.CharacterName +
-                                                                    "'s Questor is starting a timedcommand to restart itself in a moment");
-                                        LavishScript.ExecuteCommand(
-                                            "uplink exec Echo [${Time}] timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
-                                        LavishScript.ExecuteCommand(
-                                            "uplink exec timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
-                                        Logging.Log(
-                                            "Questor", "Done: quitting this session so the new innerspace session can take over", Logging.White);
+                                        Logging.Log("Questor", "Starting a timer in the innerspace uplink to restart this innerspace profile session", Logging.White);
+                                        LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.Instance.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
+                                        LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
+                                        LavishScript.ExecuteCommand("uplink exec timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
+                                        Logging.Log("Questor", "Done: quitting this session so the new innerspace session can take over", Logging.White);
                                         Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.White);
                                         _closeQuestorCMDUplink = false;
-                                        CloseQuestorDelay =
-                                        DateTime.Now.AddSeconds(
-                                            Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                                        CloseQuestorDelay = DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) &&
-                                        (!_closeQuestor10SecWarningDone))
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -175,8 +164,7 @@ namespace Questor.Modules.BackgroundTasks
                                             DateTime.Now.AddSeconds(
                                                 Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) &&
-                                        (!_closeQuestor10SecWarningDone))
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -244,32 +232,19 @@ namespace Questor.Modules.BackgroundTasks
                                     return false;
                                 }
 
-                                if (!Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile &&
-                                    !Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet &&
-                                    !Settings.Instance.CloseQuestorArbitraryOSCmd)
+                                if (!Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile && !Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet && !Settings.Instance.CloseQuestorArbitraryOSCmd)
                                 {
-                                    Logging.Log(
-                                        "Questor", "CloseQuestorArbitraryOSCmd, CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile all false", Logging.White);
+                                    Logging.Log("Questor", "CloseQuestorArbitraryOSCmd, CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile all false", Logging.White);
                                     if (_closeQuestorCMDUplink)
                                     {
                                         _closeQuestorCMDUplink = false;
-                                        CloseQuestorDelay =
-                                            DateTime.Now.AddSeconds(
-                                                Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                                        CloseQuestorDelay =DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) &&
-                                        (!_closeQuestor10SecWarningDone))
+
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
-                                        Cache.Instance.DirecteveDispose();
-                                        if (Cache.Instance.CloseQuestorEndProcess)
-                                        {
-                                            Process.GetCurrentProcess().Kill();
-                                            return false;
-                                        }
-
-                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         return false;
                                     }
                                     if (CloseQuestorDelay < DateTime.Now)
@@ -590,6 +565,7 @@ namespace Questor.Modules.BackgroundTasks
 
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
                                 pause |= window.Html.Contains("Not all the items could be fitted");
+                                pause |= window.Html.Contains("Cannot move");
 
                                 if (window.Type == "form.MessageBox" && window.IsDialog && window.IsModal && window.IsKillable)
                                 {

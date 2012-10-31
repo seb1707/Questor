@@ -528,7 +528,8 @@ namespace Questor
                             Logging.Log("Startup", "Restarting eve...", Logging.Red);
                             Logging.Log("Startup", "Content of modal window (HTML): [" +
                                         (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Red);
-                            _directEve.ExecuteCommand(DirectCmd.CmdQuitGame);
+                            window.AnswerModal("restart");
+                            //_directEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                             continue;
                         }
 
@@ -612,6 +613,13 @@ namespace Questor
 
             if (_directEve.Login.AtLogin)
             {
+                if (!_directEve.HasSupportInstances())
+                {
+                    Logging.Log("Startup", "DirectEVE Requires Active Support Instances to use the convenient like Auto-Login, Market Functions (Valuedump and Market involving storylines) among other features.", Logging.White);
+                    Logging.Log("Startup", "Make sure you have support instances and that you have downloaded your directeve.lic file and placed it in the .net programs folder with your directeve.dll", Logging.White);
+                    _humanInterventionRequired = true;
+                }
+
                 if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 15)
                 {
                     Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);

@@ -73,7 +73,7 @@ namespace Questor.Modules.Activities
                 Logging.Log("CourierMissionCtrl", "Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"), Logging.White);
                 to.Add(item);
             }
-            //_nextCourierAction = DateTime.Now.AddSeconds(8);
+            //_nextCourierAction = DateTime.UtcNow.AddSeconds(8);
             return false;
         }
 

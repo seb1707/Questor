@@ -744,7 +744,7 @@ namespace Questor.Modules.Caching
                 DateTime lastTargeted = Cache.Instance.TargetingIDs[Id];
 
                 // Ignore targeting request
-                double seconds = DateTime.Now.Subtract(lastTargeted).TotalSeconds;
+                double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
                     Logging.Log("EntityCache", "LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
@@ -755,7 +755,7 @@ namespace Questor.Modules.Caching
             // Only add targeting id's when its actually being targeted
             if (_directEntity != null && _directEntity.LockTarget())
             {
-                Cache.Instance.TargetingIDs[Id] = DateTime.Now;
+                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
                 return true;    
             }
             return false;
@@ -770,17 +770,17 @@ namespace Questor.Modules.Caching
         public void Jump()
         {
             if (_directEntity != null)
-                //Cache.Instance._lastDockedorJumping = DateTime.Now;
+                //Cache.Instance._lastDockedorJumping = DateTime.UtcNow;
                 _directEntity.Jump();
         }
 
         public void Activate()
         {
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextActivateAction)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextActivateAction)
             {
                 _directEntity.Activate();
-                Cache.Instance.LastInWarp = DateTime.Now;
-                Cache.Instance.NextActivateAction = DateTime.Now.AddSeconds(15);
+                Cache.Instance.LastInWarp = DateTime.UtcNow;
+                Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
             }
         }
 
@@ -788,9 +788,9 @@ namespace Questor.Modules.Caching
         {
             Cache.Instance.Approaching = this;
 
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextApproachAction)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
             {
-                Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 _directEntity.Approach();
             }
         }
@@ -799,9 +799,9 @@ namespace Questor.Modules.Caching
         {
             Cache.Instance.Approaching = this;
 
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextApproachAction)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
             {
-                Cache.Instance.NextApproachAction = DateTime.Now.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 _directEntity.Approach(range);
             }
         }
@@ -811,49 +811,49 @@ namespace Questor.Modules.Caching
             Cache.Instance.Approaching = this;
 
 
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextOrbit)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextOrbit)
             {
-                Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
+                Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
                 _directEntity.Orbit(range);
             }
         }
 
         public void WarpTo()
         {
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextWarpTo)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo)
             {
-                Cache.Instance.LastInWarp = DateTime.Now;
-                Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                Cache.Instance.LastInWarp = DateTime.UtcNow;
+                Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                 _directEntity.WarpTo();
             }
         }
 
         public void AlignTo()
         {
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextAlign)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextAlign)
             {
-                Cache.Instance.NextAlign = DateTime.Now.AddMinutes(Time.Instance.AlignDelay_minutes);
+                Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
                 _directEntity.AlignTo();
             }
         }
 
         public void WarpToAndDock()
         {
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextWarpTo && DateTime.Now > Cache.Instance.NextDockAction)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
-                Cache.Instance.LastInWarp = DateTime.Now;
-                Cache.Instance.NextWarpTo = DateTime.Now.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
+                Cache.Instance.LastInWarp = DateTime.UtcNow;
+                Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                 _directEntity.WarpToAndDock();
             }
         }
 
         public void Dock()
         {
-            if (_directEntity != null && DateTime.Now > Cache.Instance.NextDockAction)
+            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
                 _directEntity.Dock();
-                Cache.Instance.NextDockAction = DateTime.Now.AddSeconds(Time.Instance.DockingDelay_seconds);
+                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
             }
         }
 
@@ -862,7 +862,7 @@ namespace Questor.Modules.Caching
             if (_directEntity != null)
             {
                 _directEntity.OpenCargo();
-                Cache.Instance.NextOpenCargoAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
             }
         }
 

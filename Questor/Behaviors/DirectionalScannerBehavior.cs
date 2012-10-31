@@ -44,7 +44,7 @@ namespace Questor.Behaviors
 
         public string CharacterName { get; set; }
 
-        //DateTime _nextAction = DateTime.Now;
+        //DateTime _nextAction = DateTime.UtcNow;
 
         public DirectionalScannerBehavior()
         {
@@ -138,7 +138,7 @@ namespace Questor.Behaviors
 
         private void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
@@ -147,10 +147,10 @@ namespace Questor.Behaviors
             // Invalid settings, quit while we're ahead
             if (!ValidSettings)
             {
-                if (DateTime.Now.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
+                if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
                 {
                     ValidateCombatMissionSettings();
-                    LastAction = DateTime.Now;
+                    LastAction = DateTime.UtcNow;
                 }
                 return;
             }
@@ -189,7 +189,7 @@ namespace Questor.Behaviors
                 _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.GotoBase;
             }
 
-            if ((DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
+            if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
                 {
@@ -252,11 +252,11 @@ namespace Questor.Behaviors
                     _States.CurrentTravelerState = TravelerState.Idle;
 
                     Logging.Log("DirectionalScannerBehavior", "Started questor in Directional Scanner (test) mode", Logging.White);
-                    LastAction = DateTime.Now;
+                    LastAction = DateTime.UtcNow;
                     break;
 
                 case DirectionalScannerBehaviorState.DelayedGotoBase:
-                    if (DateTime.Now.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
+                    if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
                         break;
 
                     Logging.Log("DirectionalScannerBehavior", "Heading back to base", Logging.White);
@@ -272,7 +272,7 @@ namespace Questor.Behaviors
 
                     Traveler.TravelHome("DirectionalScannerBehavior");
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
@@ -313,7 +313,7 @@ namespace Questor.Behaviors
                     {
                         Traveler.ProcessState();
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)
@@ -357,7 +357,7 @@ namespace Questor.Behaviors
                         
                         if (station.Distance < 1900)
                         {
-                            if (DateTime.Now > Cache.Instance.NextDockAction)
+                            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                             {
                                 Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                 station.Dock();
@@ -365,7 +365,7 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (Cache.Instance.NextApproachAction < DateTime.Now && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
+                            if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
                             {
                                 Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                                 station.Approach();

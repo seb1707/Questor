@@ -442,11 +442,11 @@ namespace Questor.Modules.Lookup
             
             if (Settings.Instance.SettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
-                if (Cache.Instance.LastInStation.AddMinutes(60) > DateTime.Now)
+                if (Cache.Instance.LastInStation.AddMinutes(60) > DateTime.UtcNow)
                 {
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
-                    Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+                    Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                     Cache.Instance.SessionState = "Quitting";
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
                     return;
@@ -998,8 +998,8 @@ namespace Questor.Modules.Lookup
                         HighTierLootContainer = HighTierLootContainer.ToLower();
                     }
 
-                    MoveCommonMissionCompletionItemsToAmmoHangar = (bool?)xml.Element("MoveCommonMissionCompletionItemsToAmmoHangar") ?? false;
-                    MoveCommonMissionCompletionItemsToItemsHangar = (bool?)xml.Element("MoveCommonMissionCompletionItemsToItemsHangar") ?? true;
+                    MoveCommonMissionCompletionItemsToAmmoHangar = (bool?)xml.Element("moveCommonMissionCompletionItemsToAmmoHangar") ?? false;
+                    MoveCommonMissionCompletionItemsToItemsHangar = (bool?)xml.Element("moveCommonMissionCompletionItemsToItemsHangar") ?? true;
 
                     //
                     // Loot and Salvage Settings

@@ -23,7 +23,7 @@ namespace Questor.Modules.Actions
     {
         public const int StationContainer = 17366;
 
-        private static DateTime _nextUnloadAction = DateTime.Now;
+        private static DateTime _nextUnloadAction = DateTime.UtcNow;
         private static DateTime _lastUnloadAction = DateTime.MinValue;
         //private static int _lootToMoveWillStillNotFitCount;
         private static DateTime _lastPulse;
@@ -43,9 +43,9 @@ namespace Questor.Modules.Actions
 
         private void MoveLoot()
         {
-            if (DateTime.Now < _nextUnloadAction)
+            if (DateTime.UtcNow < _nextUnloadAction)
             {
-                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveLoot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveLoot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ] sec", Logging.White);
                 return;
             }
 
@@ -53,11 +53,11 @@ namespace Questor.Modules.Actions
             {
                 if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 {
-                    if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                    if (DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds > 120)
                     {
                         Logging.Log("UnloadLootState.MoveLoot", "Moving Loot timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        _lastUnloadAction = DateTime.Now.AddSeconds(-10);
+                        _lastUnloadAction = DateTime.UtcNow.AddSeconds(-10);
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                         return;
                     }
@@ -67,9 +67,9 @@ namespace Questor.Modules.Actions
                 }
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 10)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 10)
             {
-                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.Now.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
                 if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return;
                 Logging.Log("UnloadLoot.MoveLoot", "Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
                 LootIsBeingMoved = false;
@@ -184,9 +184,9 @@ namespace Questor.Modules.Actions
 
         private void MoveAmmo()
         {
-            if (DateTime.Now < _nextUnloadAction)
+            if (DateTime.UtcNow < _nextUnloadAction)
             {
-                Logging.Log("Unloadloot.MoveAmmo", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
+                Logging.Log("Unloadloot.MoveAmmo", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ] sec", Logging.White);
                 return;
             }
 
@@ -194,11 +194,11 @@ namespace Questor.Modules.Actions
             {
                 if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 {
-                    if (DateTime.Now.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                    if (DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds > 120)
                     {
                         Logging.Log("Unloadloot.MoveAmmo", "Moving Ammo timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        _lastUnloadAction = DateTime.Now.AddSeconds(-10);
+                        _lastUnloadAction = DateTime.UtcNow.AddSeconds(-10);
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                         return;
                     }
@@ -210,9 +210,9 @@ namespace Questor.Modules.Actions
                 return;
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 10)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 10)
             {
-                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.Now.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
                 if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return;
                 Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);
                 AmmoIsBeingMoved = false;
@@ -254,7 +254,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("Unloadloot.MoveAmmo", "Moving [" + ammoToMove.Count() + "] Ammo Stacks to AmmoHangar", Logging.White);
                             AmmoIsBeingMoved = true;
                             Cache.Instance.AmmoHangar.Add(ammoToMove);
-                            _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                            _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                             return;
                         }
                         if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "No Ammo Found in CargoHold: moving on.", Logging.White);
@@ -284,7 +284,7 @@ namespace Questor.Modules.Actions
                                 Logging.Log("Unloadloot.MoveAmmo", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
                                 Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
                                 AmmoIsBeingMoved = true;
-                                _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                                _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                                 return;
                             }
                             if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);
@@ -303,7 +303,7 @@ namespace Questor.Modules.Actions
                                 Logging.Log("Unloadloot.MoveAmmo", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to AmmoHangar", Logging.White);
                                 AmmoIsBeingMoved = true;
                                 Cache.Instance.AmmoHangar.Add(commonMissionCompletionItemsToMove);
-                                _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                                _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                                 return;
                             }
                             if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);                    
@@ -342,7 +342,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("Unloadloot.MoveAmmo", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
                             AmmoIsBeingMoved = true;
                             Cache.Instance.ItemHangar.Add(scriptsToMove);
-                            _nextUnloadAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                            _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                             return;
                         }
                         if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "No Scripts Found in CargoHold: moving on.", Logging.White);
@@ -368,9 +368,9 @@ namespace Questor.Modules.Actions
         public void ProcessState()
         {
             // Only pulse state changes every 1.5s
-            if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                 return;
-            _lastPulse = DateTime.Now;
+            _lastPulse = DateTime.UtcNow;
 
             if (!Cache.Instance.InStation)
                 return;
@@ -378,7 +378,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             switch (_States.CurrentUnloadLootState)
@@ -388,14 +388,14 @@ namespace Questor.Modules.Actions
                     break;
 
                 case UnloadLootState.Begin:
-                    if (DateTime.Now < _nextUnloadAction)
+                    if (DateTime.UtcNow < _nextUnloadAction)
                     {
-                        if(Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.Now).TotalSeconds, 0) + " ] sec", Logging.White);
+                        if(Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ] sec", Logging.White);
                         break;
                     }
                     AmmoIsBeingMoved = false;
                     LootIsBeingMoved = false;
-                    _lastUnloadAction = DateTime.Now.AddSeconds(-10);
+                    _lastUnloadAction = DateTime.UtcNow.AddSeconds(-10);
                     _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
                     break;
 

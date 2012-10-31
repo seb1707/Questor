@@ -20,9 +20,9 @@ namespace Questor
         private readonly Questor _questor;
         //private DateTime _lastlogmessage
         private DateTime _nextConsoleLogRefresh = DateTime.MinValue;
-        private DateTime _nextUIDataRefresh = DateTime.Now;
-        private DateTime _nextScheduleUpdate = DateTime.Now;
-        //private DateTime _nextWreckUpdate = DateTime.Now;
+        private DateTime _nextUIDataRefresh = DateTime.UtcNow;
+        private DateTime _nextScheduleUpdate = DateTime.UtcNow;
+        //private DateTime _nextWreckUpdate = DateTime.UtcNow;
 
         public QuestorfrmMain()
         {
@@ -150,15 +150,15 @@ namespace Questor
 
         private void RefreshInfoDisplayedInUI()
         {
-            if (DateTime.Now > _nextUIDataRefresh && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (DateTime.UtcNow > _nextUIDataRefresh && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
-                _nextUIDataRefresh = DateTime.Now.AddMilliseconds(1000);
+                _nextUIDataRefresh = DateTime.UtcNow.AddMilliseconds(1000);
                 try
                 {
-                    if (Cache.Instance.LastInSpace.AddMilliseconds(1000) > DateTime.Now)
+                    if (Cache.Instance.LastInSpace.AddMilliseconds(1000) > DateTime.UtcNow)
                     {
-                        CurrentTimeData1.Text = DateTime.Now.ToLongTimeString();
-                        CurrentTimeData2.Text = DateTime.Now.ToLongTimeString();
+                        CurrentTimeData1.Text = DateTime.UtcNow.ToLongTimeString();
+                        CurrentTimeData2.Text = DateTime.UtcNow.ToLongTimeString();
                         NextOpenContainerInSpaceActionData.Text = Cache.Instance.NextOpenContainerInSpaceAction.ToLongTimeString();
                         NextOpenJournalWindowActionData.Text = Cache.Instance.NextOpenJournalWindowAction.ToLongTimeString();
                         NextOpenLootContainerActionData.Text = Cache.Instance.NextOpenLootContainerAction.ToLongTimeString();
@@ -210,9 +210,9 @@ namespace Questor
                         //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
                         //ActiveDronesData.Text = Cache.Instance.ActiveDrones.Count().ToString();                   //causes problems / crashes
-                        //if (!Cache.Instance.InWarp && DateTime.Now > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
+                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
                         //{
-                        //    _nextWreckUpdate = DateTime.Now.AddSeconds(10);
+                        //    _nextWreckUpdate = DateTime.UtcNow.AddSeconds(10);
                             //WrecksData.Text = Cache.Instance.Wrecks.Count().ToString(CultureInfo.InvariantCulture);
                             //UnlootedContainersData.Text = Cache.Instance.UnlootedContainers.Count().ToString(CultureInfo.InvariantCulture); 
                             //ApproachingData.Text = Cache.Instance.IsApproaching.ToString(CultureInfo.InvariantCulture);
@@ -223,7 +223,7 @@ namespace Questor
                         //else if (!Cache.Instance.IsMissionPocketDone) IsMissionPocketDoneData.Text = "false";
                     }
 
-                    if (Cache.Instance.LastInStation.AddSeconds(2) > DateTime.Now)
+                    if (Cache.Instance.LastInStation.AddSeconds(2) > DateTime.UtcNow)
                     {
                         MaxRangeData.Text = "n/a";
                         ActiveDronesData.Text = "n/a";
@@ -246,9 +246,9 @@ namespace Questor
                     if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "RefreshInfoDisplayedInUI: unable to update all UI labels: exception was [" + ex.Message + "]", Logging.Teal);
                 }
             }
-            if (DateTime.Now > _nextScheduleUpdate)
+            if (DateTime.UtcNow > _nextScheduleUpdate)
             {
-                _nextScheduleUpdate = DateTime.Now.AddSeconds(90);
+                _nextScheduleUpdate = DateTime.UtcNow.AddSeconds(90);
                 if (Cache.Instance.StopTimeSpecified)
                 {
                     ScheduledStopTimeData.Text = Cache.Instance.StopTime.ToShortTimeString();
@@ -266,7 +266,7 @@ namespace Questor
                 }
                 else
                 {
-                    dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                    dateTimePicker1.Value = DateTime.UtcNow.AddHours(1);
                     if (!dateTimePicker2.Checked)
                     {
                         Cache.Instance.StopTimeSpecified = true;
@@ -285,7 +285,7 @@ namespace Questor
                 }
                 else
                 {
-                    dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                    dateTimePicker1.Value = DateTime.UtcNow.AddHours(1);
                     if (!dateTimePicker1.Checked)
                     {
                         Cache.Instance.StopTimeSpecified = true;
@@ -622,11 +622,11 @@ namespace Questor
             if (Text != text)
                 Text = text;
 
-            lastSessionisreadyData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] sec ago";
-            LastFrameData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
-            lastInSpaceData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
-            lastInStationData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
-            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.Now.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
+            lastSessionisreadyData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] sec ago";
+            LastFrameData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
+            lastInSpaceData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
+            lastInStationData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
+            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
 
             if (Cache.Instance.SessionState == "Quitting")
             {
@@ -773,7 +773,7 @@ namespace Questor
                     {
                         string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " +
                                                               Math.Round(
-                                                                  DateTime.Now.Subtract(
+                                                                  DateTime.UtcNow.Subtract(
                                                                       Statistics.Instance.StartedMission).TotalMinutes,
                                                                   0) + " min][ #" +
                                                               Statistics.Instance.MissionsThisSession + " ]";
@@ -787,7 +787,7 @@ namespace Questor
                     {
                         string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " +
                                                               Math.Round(
-                                                                  DateTime.Now.Subtract(
+                                                                  DateTime.UtcNow.Subtract(
                                                                       Statistics.Instance.StartedMission).TotalMinutes,
                                                                   0) + " min][ #" +
                                                               Statistics.Instance.MissionsThisSession + " ]";
@@ -886,13 +886,13 @@ namespace Questor
 
             if (!String.IsNullOrEmpty(Cache.Instance.ExtConsole))
             {
-                if (DateTime.Now > _nextConsoleLogRefresh)
+                if (DateTime.UtcNow > _nextConsoleLogRefresh)
                 {
                     if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
                         txtExtConsole.Text = "";
                     txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                     Cache.Instance.ExtConsole = null;
-                    _nextConsoleLogRefresh = DateTime.Now.AddSeconds(1);
+                    _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
                 }
             }
 
@@ -902,13 +902,13 @@ namespace Questor
                 extraWaitSeconds = 60;
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds > (Time.Instance.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 300)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds > (Time.Instance.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.UtcNow.Subtract(Program.AppStarted).TotalSeconds > 300)
             {
-                if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
+                if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
                 {
                     Logging.Log("QuestorUI",
                                 "The Last UI Frame Drawn by EVE was [" +
-                                Math.Round(DateTime.Now.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) +
+                                Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) +
                                 "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
                     //
                     // closing eve would be a very good idea here
@@ -918,14 +918,14 @@ namespace Questor
                 }
             }
 
-            if (DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds > (Time.Instance.NoSessionIsReadyRestart_seconds + extraWaitSeconds) &&
-                    DateTime.Now.Subtract(Program.AppStarted).TotalSeconds > 210)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds > (Time.Instance.NoSessionIsReadyRestart_seconds + extraWaitSeconds) &&
+                    DateTime.UtcNow.Subtract(Program.AppStarted).TotalSeconds > 210)
             {
-                if (DateTime.Now.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
+                if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
                     Logging.Log("QuestorUI",
                                 "The Last Session.IsReady = true was [" +
-                                Math.Round(DateTime.Now.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) +
+                                Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) +
                                 "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
                     CloseQuestor();
                     //Application.Exit();

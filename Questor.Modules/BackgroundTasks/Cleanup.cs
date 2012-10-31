@@ -25,7 +25,7 @@ namespace Questor.Modules.BackgroundTasks
 
         private void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             Cache.Instance.SessionState = "Quitting";
         }
 
@@ -48,7 +48,7 @@ namespace Questor.Modules.BackgroundTasks
             //TravelToAgentsStation();
 
             //if (_traveler.State == TravelerState.AtDestination ||
-            //    DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalSeconds >
+            //    DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalSeconds >
             //   Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE)
             //{
             //Logging.Log("QuestorState.CloseQuestor: At Station: Docked");
@@ -69,13 +69,13 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Questor", "Logging Off eve in 15 seconds.", Logging.White);
                         CloseQuestorFlag = false;
                         CloseQuestorDelay =
-                            DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                            DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                     }
-                    if (CloseQuestorDelay.AddSeconds(-10) < DateTime.Now)
+                    if (CloseQuestorDelay.AddSeconds(-10) < DateTime.UtcNow)
                     {
                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
                     }
-                    if (CloseQuestorDelay < DateTime.Now)
+                    if (CloseQuestorDelay < DateTime.UtcNow)
                     {
                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff);
@@ -117,9 +117,9 @@ namespace Questor.Modules.BackgroundTasks
                                         Logging.Log("Questor", "Done: quitting this session so the new innerspace session can take over", Logging.White);
                                         Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.White);
                                         _closeQuestorCMDUplink = false;
-                                        CloseQuestorDelay = DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                                        CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -133,7 +133,7 @@ namespace Questor.Modules.BackgroundTasks
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         return false;
                                     }
-                                    if (CloseQuestorDelay < DateTime.Now)
+                                    if (CloseQuestorDelay < DateTime.UtcNow)
                                     {
                                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                         Cache.Instance.DirecteveDispose();
@@ -161,10 +161,10 @@ namespace Questor.Modules.BackgroundTasks
                                         Logging.Log("Questor", "Exiting eve.", Logging.White);
                                         _closeQuestorCMDUplink = false;
                                         CloseQuestorDelay =
-                                            DateTime.Now.AddSeconds(
+                                            DateTime.UtcNow.AddSeconds(
                                                 Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -178,7 +178,7 @@ namespace Questor.Modules.BackgroundTasks
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                         return false;
                                     }
-                                    if (CloseQuestorDelay < DateTime.Now)
+                                    if (CloseQuestorDelay < DateTime.UtcNow)
                                     {
                                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                         Cache.Instance.DirecteveDispose();
@@ -213,17 +213,17 @@ namespace Questor.Modules.BackgroundTasks
                                         Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.White);
                                         _closeQuestorCMDUplink = false;
                                         CloseQuestorDelay =
-                                            DateTime.Now.AddSeconds(
+                                            DateTime.UtcNow.AddSeconds(
                                                 Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) &&
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) &&
                                         (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", ": Exiting eve in 10 seconds", Logging.White);
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                                     }
-                                    if (CloseQuestorDelay < DateTime.Now)
+                                    if (CloseQuestorDelay < DateTime.UtcNow)
                                     {
                                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                         Cache.Instance.DirecteveDispose();
@@ -238,16 +238,17 @@ namespace Questor.Modules.BackgroundTasks
                                     if (_closeQuestorCMDUplink)
                                     {
                                         _closeQuestorCMDUplink = false;
-                                        CloseQuestorDelay =DateTime.Now.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                                        CloseQuestorDelay =DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
                                     }
 
-                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
+                                    if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
                                     {
                                         _closeQuestor10SecWarningDone = true;
                                         Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
                                         return false;
                                     }
-                                    if (CloseQuestorDelay < DateTime.Now)
+
+                                    if (CloseQuestorDelay < DateTime.UtcNow)
                                     {
                                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                         Cache.Instance.DirecteveDispose();
@@ -269,8 +270,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Questor", "CloseQuestor: We are configured to NOT use innerspace. useInnerspace = false", Logging.White);
                         Logging.Log("Questor", "CloseQuestor: Currently the questor will exit (and not restart itself) in this configuration, this likely needs additional work to make questor reentrant so we can use a scheduled task?!", Logging.White);
-                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) &&
-                                        (!_closeQuestor10SecWarningDone))
+                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
                         {
                             _closeQuestor10SecWarningDone = true;
                             Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -284,7 +284,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                             return false;
                         }
-                        if (CloseQuestorDelay < DateTime.Now)
+                        if (CloseQuestorDelay < DateTime.UtcNow)
                         {
                             Logging.Log("Questor", "Exiting eve now.", Logging.White);
                             Cache.Instance.DirecteveDispose();
@@ -301,7 +301,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
             }
             Logging.Log("Questor", "Autostart is false: Stopping EVE with quit command (if EVE is going to restart it will do so externally)", Logging.White);
-            if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.Now) && (!_closeQuestor10SecWarningDone))
+            if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
             {
                 _closeQuestor10SecWarningDone = true;
                 Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
@@ -316,7 +316,7 @@ namespace Questor.Modules.BackgroundTasks
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                 return false;
             }
-            if (CloseQuestorDelay < DateTime.Now)
+            if (CloseQuestorDelay < DateTime.UtcNow)
             {
                 if (Cache.Instance.CloseQuestorEndProcess)
                 {
@@ -334,10 +334,10 @@ namespace Questor.Modules.BackgroundTasks
 
         public static bool CloseInventoryWindows()
         {
-            if (DateTime.Now < _lastCleanupAction.AddMilliseconds(500))
+            if (DateTime.UtcNow < _lastCleanupAction.AddMilliseconds(500))
                 return false;
 
-            _lastCleanupAction = DateTime.Now;
+            _lastCleanupAction = DateTime.UtcNow;
             //
             // go through *every* window
             //
@@ -347,35 +347,35 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Drone Bay Window", Logging.White);
                     window.Close();
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
                 if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.White);
                     window.Close();
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
                 if (window.Name.Contains("_StationItems_") && window.Caption.Contains("Item hangar") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Item Hangar Window", Logging.White);
                     window.Close();
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
                 if (window.Name.Contains("_StationShips_") && window.Caption.Contains("Ship hangar") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Ship Hangar Window", Logging.White);
                     window.Close();
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
                 if (window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing other Inventory Window named [ " + window.Name + "]", Logging.White);
                     window.Close();
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
                 //
@@ -383,7 +383,7 @@ namespace Questor.Modules.BackgroundTasks
                 // add repairship, lpstore, marketwindow, etc
                 //
             }
-            Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(2);
+            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
             return true;
         }
 
@@ -453,10 +453,10 @@ namespace Questor.Modules.BackgroundTasks
 
         public void ProcessState()
         {
-            if (DateTime.Now < _lastCleanupProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
-            _lastCleanupProcessState = DateTime.Now;
+            _lastCleanupProcessState = DateTime.UtcNow;
 
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
@@ -466,7 +466,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.Now < Cache.Instance.LastSessionChange.AddSeconds(20))
+            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(20))
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Cache.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
                 return;
@@ -476,7 +476,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InSpace) 
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
-                if (DateTime.Now < Cache.Instance.LastInStation.AddSeconds(10))
+                if (DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(10))
                 {
                     if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in station time is [" + Cache.Instance.LastInStation + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
@@ -486,7 +486,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InStation)
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in station", Logging.Teal);
-                if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(10))
+                if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
                 {
                     if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in space time is [" + Cache.Instance.LastInSpace + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
@@ -497,7 +497,7 @@ namespace Questor.Modules.BackgroundTasks
             {
                 case CleanupState.Idle:
                     //Cleanup State should only run every 4 seconds
-                    if (DateTime.Now.Subtract(_lastCleanupAction).TotalSeconds < 4)
+                    if (DateTime.UtcNow.Subtract(_lastCleanupAction).TotalSeconds < 4)
                         return;
                     _States.CurrentCleanupState = CleanupState.CheckModalWindows;
                     break;
@@ -509,12 +509,12 @@ namespace Questor.Modules.BackgroundTasks
                     if (!Cache.Instance.InSpace && !Cache.Instance.InStation && Settings.Instance.CharacterName != "AtLoginScreenNoCharactersLoggedInYet")
                     {
                         if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
-                        _lastCleanupAction = DateTime.Now;
+                        _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
                     }
 
-                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Cache.Instance.LastInStation.AddHours(1) > DateTime.Now)
+                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Cache.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
                     {
                         Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White); 
@@ -527,7 +527,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.Windows == null)
                     {
                         if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null", Logging.White);
-                        _lastCleanupAction = DateTime.Now;
+                        _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
                     }
@@ -730,7 +730,7 @@ namespace Questor.Modules.BackgroundTasks
                                     Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&
                                     _droneBayClosingAttempts <= 1))
                                 {
-                                    _lastCleanupAction = DateTime.Now;
+                                    _lastCleanupAction = DateTime.UtcNow;
                                     _droneBayClosingAttempts++;
                                     // Close the drone bay, its not required in space.
                                     window.Close();
@@ -747,7 +747,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 case CleanupState.CheckWindowsThatDontBelongInSpace:
 
-                    _lastCleanupAction = DateTime.Now;
+                    _lastCleanupAction = DateTime.UtcNow;
                     _States.CurrentCleanupState = CleanupState.Idle;
                     break;
 

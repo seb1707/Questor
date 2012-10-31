@@ -19,7 +19,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Settings.Instance.AvoidBumpingThings)
             {
                 //if It has not been at least 60 seconds since we last session changed do not do anything
-                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.Now))
+                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                     return;
                 //
                 // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -32,30 +32,30 @@ namespace Questor.Modules.BackgroundTasks
                         if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
                         {
                             //we are no longer "too close" and can proceed.
-                            AvoidBumpingThingsTimeStamp = DateTime.Now;
+                            AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
                             SafeDistanceFromStructureMultiplier = 1;
                             AvoidBumpingThingsWarningSent = false;
                         }
                         else
                         {
-                            if (DateTime.Now > Cache.Instance.NextOrbit)
+                            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                             {
-                                if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddSeconds(30))
+                                if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddSeconds(30))
                                 {
                                     if (SafeDistanceFromStructureMultiplier <= 4)
                                     {
                                         //
                                         // for simplicities sake we reset this timestamp every 30 sec until the multiplier hits 5 then it should stay static until we are not "too close" anymore
                                         //
-                                        AvoidBumpingThingsTimeStamp = DateTime.Now;
+                                        AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
                                         SafeDistanceFromStructureMultiplier++;
                                     }
-                                    if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpingThingsWarningSent)
+                                    if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpingThingsWarningSent)
                                     {
                                         Logging.Log("NavigateOnGrid", "We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.Orange);
                                         AvoidBumpingThingsWarningSent = true;
                                     }
-                                    if (DateTime.Now > AvoidBumpingThingsTimeStamp.AddMinutes(15))
+                                    if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(15))
                                     {
                                         Cache.Instance.CloseQuestorCMDLogoff = false;
                                         Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -77,7 +77,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void OrbitGateorTarget(EntityCache target, string module)
         {
-            if (DateTime.Now > Cache.Instance.NextOrbit)
+            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
             {
                 if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
                 if (Cache.Instance.OrbitDistance == 0)
@@ -116,7 +116,7 @@ namespace Questor.Modules.BackgroundTasks
                         // OrbitStructure is false
                         // Speedtank is false
                         //
-                        if (Cache.Instance.MyShip.Velocity < 300 && DateTime.Now > Cache.Instance.NextAlign) //this will spam a bit until we know what "mode" our activeship is when aligning
+                        if (Cache.Instance.MyShip.Velocity < 300 && DateTime.UtcNow > Cache.Instance.NextAlign) //this will spam a bit until we know what "mode" our activeship is when aligning
                         {
                             Cache.Instance.Star.AlignTo();
                             Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + target.Id + "][ActiveShip.Entity.Mode:[" + Cache.Instance.DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
@@ -130,7 +130,7 @@ namespace Questor.Modules.BackgroundTasks
                     Logging.Log(module, "Out of range. ignoring orbit around structure.", Logging.Teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
                     Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.Id + "]", Logging.Teal);
-                    Cache.Instance.NextOrbit = DateTime.Now.AddSeconds(Time.Instance.OrbitDelay_seconds);
+                    Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
                     return;
                 }
                 return;
@@ -167,7 +167,7 @@ namespace Questor.Modules.BackgroundTasks
             }
             else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
             {
-                if (DateTime.Now > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
                     //if optimalrange is set - use it to determine engagement range
                     if (Settings.Instance.OptimalRange != 0)
@@ -256,7 +256,7 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (Settings.Instance.SpeedTank)
             {   //this should be only executed when no specific actions
-                if (DateTime.Now > Cache.Instance.NextOrbit)
+                if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
                     if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
@@ -291,7 +291,7 @@ namespace Questor.Modules.BackgroundTasks
             }
             else //if we are not speed tanking then check optimalrange setting, if that isn't set use the less of targeting range and weapons range to dictate engagement range
             {
-                if (DateTime.Now > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
                     //if optimalrange is set - use it to determine engagement range
                     //

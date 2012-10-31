@@ -37,7 +37,7 @@ namespace Questor
 
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
-        public static DateTime AppStarted = DateTime.Now;
+        public static DateTime AppStarted = DateTime.UtcNow;
         private static string _username;
         private static string _password;
         private static string _character;
@@ -155,7 +155,7 @@ namespace Questor
                 if (schedule.StartTimeSpecified)
                 {
                     if (schedule.Start1 > schedule.Stop1) schedule.Stop1 = schedule.Stop1.AddDays(1);
-                    if (DateTime.Now.AddHours(2) > schedule.Start1 && DateTime.Now < schedule.Stop1)
+                    if (DateTime.UtcNow.AddHours(2) > schedule.Start1 && DateTime.UtcNow < schedule.Stop1)
                     {
                         StartTime = schedule.Start1;
                         StopTime = schedule.Stop1;
@@ -166,10 +166,11 @@ namespace Questor
                 
                 if (schedule.StartTime2Specified)
                 {
-                    if (DateTime.Now > schedule.Stop1 || DateTime.Now.DayOfYear > schedule.Stop1.DayOfYear) //if after schedule1 stoptime or the next day
+                    if (DateTime.UtcNow > schedule.Stop1 || DateTime.UtcNow.DayOfYear > schedule.Stop1.DayOfYear) //if after schedule1 stoptime or the next day
+
                     {
                         if (schedule.Start2 > schedule.Stop2) schedule.Stop2 = schedule.Stop2.AddDays(1);
-                        if (DateTime.Now.AddHours(2) > schedule.Start2 && DateTime.Now < schedule.Stop2)
+                        if (DateTime.UtcNow.AddHours(2) > schedule.Start2 && DateTime.UtcNow < schedule.Stop2)
                         {
                             StartTime = schedule.Start2;
                             StopTime = schedule.Stop2;
@@ -181,10 +182,10 @@ namespace Questor
                 
                 if (schedule.StartTime3Specified)
                 {
-                    if (DateTime.Now > schedule.Stop2 || DateTime.Now.DayOfYear > schedule.Stop2.DayOfYear) //if after schedule2 stoptime or the next day
+                    if (DateTime.UtcNow > schedule.Stop2 || DateTime.UtcNow.DayOfYear > schedule.Stop2.DayOfYear) //if after schedule2 stoptime or the next day
                     {
                         if (schedule.Start3 > schedule.Stop3) schedule.Stop3 = schedule.Stop3.AddDays(1);
-                        if (DateTime.Now.AddHours(2) > schedule.Start3 && DateTime.Now < schedule.Stop3)
+                        if (DateTime.UtcNow.AddHours(2) > schedule.Start3 && DateTime.UtcNow < schedule.Stop3)
                         {
                             StartTime = schedule.Start3;
                             StopTime = schedule.Stop3;
@@ -209,19 +210,19 @@ namespace Questor
                 if (schedule.StartTimeSpecified || schedule.StartTime2Specified || schedule.StartTime3Specified)
                     StartTime = StartTime.AddSeconds(R.Next(0, (RandStartDelay * 60)));
 
-                if ((DateTime.Now > StartTime))
+                if ((DateTime.UtcNow > StartTime))
                 {
-                    if ((DateTime.Now.Subtract(StartTime).TotalMinutes < 1200)) //if we're less than x hours past start time, start now
+                    if ((DateTime.UtcNow.Subtract(StartTime).TotalMinutes < 1200)) //if we're less than x hours past start time, start now
                     {
-                        StartTime = DateTime.Now;
+                        StartTime = DateTime.UtcNow;
                         _readyToStarta = true;
                     }
                     else
                         StartTime = StartTime.AddDays(1); //otherwise, start tomorrow at start time
                 }
-                else if ((StartTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
+                else if ((StartTime.Subtract(DateTime.UtcNow).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
                     {
-                        StartTime = DateTime.Now;
+                        StartTime = DateTime.UtcNow;
                         _readyToStarta = true;
                     }
 
@@ -238,7 +239,7 @@ namespace Questor
 
                 if (!_readyToStarta)
                 {
-                    _minutesToStart = StartTime.Subtract(DateTime.Now).TotalMinutes;
+                    _minutesToStart = StartTime.Subtract(DateTime.UtcNow).TotalMinutes;
                     Logging.Log("Startup", "Starting at " + StartTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.", Logging.Yellow);
                     Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
                     if (_minutesToStart > 0)
@@ -348,7 +349,7 @@ namespace Questor
                     return;
             }
 
-            StartTime = DateTime.Now;
+            StartTime = DateTime.UtcNow;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -360,15 +361,15 @@ namespace Questor
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 
-            Cache.Instance.LastFrame = DateTime.Now;
-            Cache.Instance.LastSessionIsReady = DateTime.Now; //update this regardless before we login there is no session
+            Cache.Instance.LastFrame = DateTime.UtcNow;
+            Cache.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
 
-            if (DateTime.Now < _nextPulse)
+            if (DateTime.UtcNow < _nextPulse)
             {
-                //Logging.Log("if (DateTime.Now.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
+                //Logging.Log("if (DateTime.UtcNow.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
                 return;
             }
-            _nextPulse = DateTime.Now.AddSeconds(_pulsedelay);
+            _nextPulse = DateTime.UtcNow.AddSeconds(_pulsedelay);
 
             if (!_readyToStart)
             {
@@ -392,7 +393,7 @@ namespace Questor
             if (_directEve.Session.IsReady)
             {
                 Logging.Log("Startup", "We have successfully logged in", Logging.White);
-                Cache.Instance.LastSessionIsReady = DateTime.Now;
+                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
                 _done = true;
                 return;
             }
@@ -620,7 +621,7 @@ namespace Questor
                     _humanInterventionRequired = true;
                 }
 
-                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 15)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 15)
                 {
                     Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);
                     _directEve.Login.Login(_username, _password);
@@ -632,7 +633,7 @@ namespace Questor
 
             if (_directEve.Login.AtCharacterSelection && _directEve.Login.IsCharacterSelectionReady)
             {
-                if (DateTime.Now.Subtract(AppStarted).TotalSeconds > 30)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 30)
                 {
                     foreach (DirectLoginSlot slot in _directEve.Login.CharacterSlots)
                     {

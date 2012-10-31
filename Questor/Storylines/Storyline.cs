@@ -21,8 +21,8 @@ namespace Questor.Storylines
         private readonly Combat _combat;
         private readonly AgentInteraction _agentInteraction;
 
-        private DateTime _nextAction = DateTime.Now;
-        private DateTime _nextStoryLineAttempt = DateTime.Now;
+        private DateTime _nextAction = DateTime.UtcNow;
+        private DateTime _nextStoryLineAttempt = DateTime.UtcNow;
         private int _highSecCounter;
         private bool _highSecChecked;
         private bool _setDestinationStation;
@@ -153,7 +153,7 @@ namespace Questor.Storylines
             DirectAgentMission currentStorylineMission = StorylineMission;
             if (currentStorylineMission == null)
             {
-                _nextStoryLineAttempt = DateTime.Now.AddMinutes(15);
+                _nextStoryLineAttempt = DateTime.UtcNow.AddMinutes(15);
                 _States.CurrentStorylineState = StorylineState.Done;
                 Cache.Instance.MissionName = String.Empty;
                 return;
@@ -179,7 +179,7 @@ namespace Questor.Storylines
 
         private void GotoAgent(StorylineState nextState)
         {
-            if (_nextAction > DateTime.Now)
+            if (_nextAction > DateTime.UtcNow)
                 return;
 
             DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
@@ -208,7 +208,7 @@ namespace Questor.Storylines
                         return;
                     }
                     _setDestinationStation = true;
-                    _nextAction = DateTime.Now.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    _nextAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                     return;
                 }
 
@@ -255,7 +255,7 @@ namespace Questor.Storylines
 
         private void BringSpoilsOfWar()
         {
-            if (_nextAction > DateTime.Now)
+            if (_nextAction > DateTime.UtcNow)
                 return;
 
             // Open the item hangar (should still be open)
@@ -287,7 +287,7 @@ namespace Questor.Storylines
                     Logging.Log("Storyline", "Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo", Logging.Yellow);
                     Cache.Instance.CargoHold.Add(item, item.Quantity);
                 }
-                _nextAction = DateTime.Now.AddSeconds(10);
+                _nextAction = DateTime.UtcNow.AddSeconds(10);
             }
             return;
         }
@@ -406,7 +406,7 @@ namespace Questor.Storylines
                     break;
 
                 case StorylineState.Done:
-                    if (DateTime.Now > _nextStoryLineAttempt)
+                    if (DateTime.UtcNow > _nextStoryLineAttempt)
                     {
                         _States.CurrentStorylineState = StorylineState.Idle;
                     }

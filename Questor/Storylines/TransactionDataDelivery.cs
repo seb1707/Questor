@@ -21,7 +21,7 @@ namespace Questor.Storylines
         /// <returns></returns>
         public StorylineState Arm(Storyline storyline)
         {
-            if (_nextAction > DateTime.Now)
+            if (_nextAction > DateTime.UtcNow)
                 return StorylineState.Arm;
 
             // Are we in a shuttle?  Yes, go to the agent
@@ -38,7 +38,7 @@ namespace Questor.Storylines
             {
                 Logging.Log("TransactionDataDelivery", "Switching to shuttle", Logging.White);
 
-                _nextAction = DateTime.Now.AddSeconds(10);
+                _nextAction = DateTime.UtcNow.AddSeconds(10);
 
                 item.ActivateShip();
                 return StorylineState.Arm;
@@ -107,7 +107,7 @@ namespace Questor.Storylines
                 Logging.Log("TransactionDataDelivery", "Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"), Logging.White);
                 to.Add(item);
             }
-            _nextAction = DateTime.Now.AddSeconds(10);
+            _nextAction = DateTime.UtcNow.AddSeconds(10);
             return false;
         }
 
@@ -123,7 +123,7 @@ namespace Questor.Storylines
         /// <returns></returns>
         public StorylineState ExecuteMission(Storyline storyline)
         {
-            if (_nextAction > DateTime.Now)
+            if (_nextAction > DateTime.UtcNow)
                 return StorylineState.ExecuteMission;
 
             switch (_state)

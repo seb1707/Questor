@@ -24,12 +24,18 @@ namespace Questor.Modules.Actions
 
     public class Arm
     {
-        private bool _missionItemMoved;
-        private bool _optionalMissionItemMoved;
+        private bool _bringItemMoved;
+        private bool _optionalBringItemMoved;
         private bool ItemsAreBeingMoved;
+        private bool CheckCargoForBringItem;
+        private bool CheckCargoForOptionalBringItem;
+        private bool CheckCargoForAmmo;
+
         private DateTime _lastPulse;
         private DateTime _lastArmAction;
 
+        private int bringItemQuantity = 0;
+        private int bringOptionalItemQuantity = 0;
         public Arm()
         {
             AmmoToLoad = new List<Ammo>();
@@ -153,8 +159,13 @@ namespace Questor.Modules.Actions
                     DefaultFittingFound = false;      //Did we find the default fitting?
                     CustomFittingFound = false;
                     WaitForFittingToLoad = false;
-                    _missionItemMoved = false;
-                    _optionalMissionItemMoved = false;
+                    _bringItemMoved = false;
+                    bringItemQuantity = Math.Max(Cache.Instance.BringMissionItemQuantity, 1);
+                    CheckCargoForBringItem = true;
+                    bringOptionalItemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
+                    _optionalBringItemMoved = false;
+                    CheckCargoForOptionalBringItem = true;
+                    CheckCargoForAmmo = true;
                     _States.CurrentArmState = ArmState.OpenShipHangar;
                     _States.CurrentCombatState = CombatState.Idle;
                     Cache.Instance.NextArmAction = DateTime.Now;
@@ -282,7 +293,7 @@ namespace Questor.Modules.Actions
 
                     if (!Cache.Instance.ArmLoadedCache)
                     {
-                        _missionItemMoved = false;
+                        _bringItemMoved = false;
                         if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                         {
                             Cache.Instance.RefreshMissionItems(AgentId);
@@ -566,30 +577,69 @@ namespace Questor.Modules.Actions
                     //
                     string bringItem = Cache.Instance.BringMissionItem;
                     if (string.IsNullOrEmpty(bringItem))
-                        _missionItemMoved = true;
+                        _bringItemMoved = true;
 
-                    int bringitemQuantity = Math.Max(Cache.Instance.BringMissionItemQuantity, 1);
-
-                    if (!_missionItemMoved)
+                    if (!_bringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                        if (!Cache.Instance.StackCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
+                        if (!Cache.Instance.StackAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
-                        
-                        DirectItem missionItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
-                                                 Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        //if (!Cache.Instance.StackItemsHangar("Arm.MoveItems")) break;
 
-                        if (missionItem != null && !string.IsNullOrEmpty(missionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+
+                        DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
+                                                Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+
+                        //
+                        // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+                        //
+                        foreach (DirectItem bringItemInCargo in cargoItems)
                         {
-                            Logging.Log("Arm.MoveItems", "Moving MissionItem [" + missionItem.TypeName + "] to CargoHold", Logging.White);
+                            bringItemQuantity -= bringItemInCargo.Quantity;
+                            if (bringItemQuantity <= 0)
+                            {
+                                //
+                                // if we already have enough bringItems in our cargoHold then we are done
+                                //
+                                _bringItemMoved = true;
+                                //
+                                // this doesnt work because we will check the cargohold on EVERY iteration and remove the needed ammo
+                                // on every pulse... meaning we subtract the same ammo again and again... this needs a flag
+                                //
+                                .........................................
+                                break;
+                            }
+                        }
 
-                            Cache.Instance.CargoHold.Add(missionItem, bringitemQuantity);
+                        if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                        {
+                            if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                            {
+                                _optionalBringItemMoved = true;
+                                return;
+                            }
+
+                            int moveBringItemQuantity = Math.Min(hangarItem.Quantity, bringItemQuantity);
+                            moveBringItemQuantity = Math.Max(moveBringItemQuantity, 1);
+                            Logging.Log("Arm.MoveItems", "Moving MissionItem [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
+                            Cache.Instance.CargoHold.Add(hangarItem, moveBringItemQuantity);
+
+                            bringItemQuantity -= moveBringItemQuantity;
+                            if (bringItemQuantity <= 0)
+                            {
+                                _bringItemMoved = true;
+                            }
                             ItemsAreBeingMoved = true;
-                            _missionItemMoved = true;
                             Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(1);
                             return;
                         }
+                        _bringItemMoved = false;
+                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                        Cache.Instance.Paused = true;
                     }
 
                     //
@@ -597,30 +647,61 @@ namespace Questor.Modules.Actions
                     //
                     string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
                     if (string.IsNullOrEmpty(bringOptionalItem))
-                        _optionalMissionItemMoved = true;
+                        _optionalBringItemMoved = true;
 
-                    int bringOptionalitemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
-
-                    if (!_optionalMissionItemMoved)
+                    if (!_optionalBringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
-                    
-                        DirectItem optionalmissionItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
-                                                         Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
 
-                        if (optionalmissionItem != null && !string.IsNullOrEmpty(optionalmissionItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+
+                        DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
+                                                Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+
+                        if (CheckCargoForBringItem)
                         {
-                            Logging.Log("Arm.MoveItems", "Moving MissionItem [" + optionalmissionItem.TypeName + "] to CargoHold", Logging.White);
+                            //
+                            // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+                            //
+                            foreach (DirectItem bringOptionalItemInCargo in cargoItems)
+                            {
+                                bringOptionalItemQuantity -= bringOptionalItemInCargo.Quantity;
+                                if (bringOptionalItemQuantity <= 0)
+                                {
+                                    //
+                                    // if we already have enough bringOptionalItems in our cargoHold then we are done
+                                    //
+                                    _optionalBringItemMoved = true;
+                                    CheckCargoForBringItem = false;
+                                    break;
+                                }
+                            }
+                            CheckCargoForBringItem = false;
+                        }
+                        
 
-                            Cache.Instance.CargoHold.Add(optionalmissionItem, bringOptionalitemQuantity);
-                            _optionalMissionItemMoved = true;
+
+                        if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                        {
+                            if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                            {
+                                _optionalBringItemMoved = true;
+                                return;
+                            }
+
+                            int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Quantity, bringOptionalItemQuantity);
+                            moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
+                            Logging.Log("Arm.MoveItems", "Moving MissionItem [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
+                            Cache.Instance.CargoHold.Add(hangarItem, moveOptionalMissionItemQuantity);
+                            _optionalBringItemMoved = true;
                             ItemsAreBeingMoved = true;
                             Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(1);
                             return;
                         }
+                        _optionalBringItemMoved = true;
                     }
 
                     bool ammoMoved = false;
@@ -634,6 +715,24 @@ namespace Questor.Modules.Actions
                     //
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
+
+                    IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+
+                    //
+                    // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+                    //
+                    foreach (DirectItem bringItemInCargo in AmmoInCargo)
+                    {
+                        bringItemQuantity -= bringItemInCargo.Quantity;
+                        if (bringItemQuantity <= 0)
+                        {
+                            //
+                            // if we already have enough bringItems in our cargoHold then we are done
+                            //
+                            _bringItemMoved = true;
+                            break;
+                        }
+                    }
 
                     foreach (DirectItem item in Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity))
                     {
@@ -660,7 +759,7 @@ namespace Questor.Modules.Actions
                         break;
                     }
 
-                    if (AmmoToLoad.Count == 0 && _missionItemMoved)
+                    if (AmmoToLoad.Count == 0 && _bringItemMoved)
                     {
                         Cache.Instance.NextArmAction = DateTime.Now.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
 
@@ -679,7 +778,7 @@ namespace Questor.Modules.Actions
                             }
                         }
 
-                        if (!_missionItemMoved)
+                        if (!_bringItemMoved)
                         {
                             Logging.Log("Arm", "Missing mission item [" + bringItem + "]", Logging.Orange);
                         }

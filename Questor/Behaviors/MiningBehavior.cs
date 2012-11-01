@@ -260,7 +260,7 @@ namespace Questor.Behaviors
 
 
                 case MiningState.GotoBelt:
-                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2) //default: 1500ms
                         return;
 
                     if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
@@ -275,11 +275,18 @@ namespace Questor.Behaviors
                     if (asteroidShortcutGTB != null)
                     {
 
-                        if (_States.CurrentMiningState == MiningState.GotoBelt)
-                            _States.CurrentMiningState = MiningState.Mine;
+                        if (Cache.Instance.EntityById(_currentBelt.Id).Distance < 65000)
+                        {
+                            if (_States.CurrentMiningState == MiningState.GotoBelt)
+                                _States.CurrentMiningState = MiningState.Mine;
 
-                        asteroidShortcutGTB.WarpTo();
-                        _lastPulse = DateTime.UtcNow;
+                            Traveler.Destination = null;
+                        }
+                        else
+                        {
+                            asteroidShortcutGTB.WarpTo();
+                            _lastPulse = DateTime.UtcNow;
+                        }
                         break;
                     }
                     else
@@ -454,24 +461,25 @@ namespace Questor.Behaviors
 
                     if (_targetAsteroid.Distance < 10000)
                     {
-
-                        if (_asteroidBookmarkForID != _targetAsteroid.Id)
+                        if (_targetAsteroid.Distance < 94000)
                         {
-
-                            DirectBookmark asteroidShortcutBM = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
-
-                            if (asteroidShortcutBM != null)
+                            if (_asteroidBookmarkForID != _targetAsteroid.Id)
                             {
-                                asteroidShortcutBM.UpdateBookmark("Asteroid Location", "Mining Shortcut");
-                            }
-                            else
-                            {
-                                Cache.Instance.DirectEve.BookmarkCurrentLocation("Asteroid Location", "Mining Shortcut", null);
-                            }
 
-                            _asteroidBookmarkForID = _targetAsteroid.Id;
-                        } 
+                                DirectBookmark asteroidShortcutBM = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
 
+                                if (asteroidShortcutBM != null)
+                                {
+                                    asteroidShortcutBM.UpdateBookmark("Asteroid Location", "Mining Shortcut");
+                                }
+                                else
+                                {
+                                    Cache.Instance.DirectEve.BookmarkCurrentLocation("Asteroid Location", "Mining Shortcut", null);
+                                }
+
+                                _asteroidBookmarkForID = _targetAsteroid.Id;
+                            }
+                        }
 
                         if (Cache.Instance.Targeting.Contains(_targetAsteroid))
                         {

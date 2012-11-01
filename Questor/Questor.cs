@@ -38,6 +38,7 @@ namespace Questor
         private readonly DedicatedBookmarkSalvagerBehavior _dedicatedBookmarkSalvagerBehavior;
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
+        private readonly MiningBehavior _miningBehavior;
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
@@ -58,6 +59,7 @@ namespace Questor
             _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
             _directionalScannerBehavior = new DirectionalScannerBehavior();
             _debugHangarsBehavior = new DebugHangarsBehavior();
+            _miningBehavior = new MiningBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
 
@@ -579,6 +581,10 @@ namespace Questor
                     _States.CurrentQuestorState = QuestorState.Start;
                     break;
 
+                case QuestorState.Mining:
+                    _miningBehavior.ProcessState();
+                    break;
+
                 case QuestorState.Start:
                     switch (Settings.Instance.CharacterMode.ToLower())
                     {
@@ -592,6 +598,13 @@ namespace Questor
                         case "salvage":
                             Logging.Log("Questor", "Start Salvaging Behavior", Logging.White);
                             _States.CurrentQuestorState = QuestorState.DedicatedBookmarkSalvagerBehavior;
+                            break;
+
+
+                        case "mining":
+                            Logging.Log("Questor", "Start Mining Behavior", Logging.White);
+                            _States.CurrentQuestorState = QuestorState.Mining;
+                            _States.CurrentMiningState = MiningState.Default;
                             break;
 
                         case "combat helper":

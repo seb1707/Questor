@@ -1012,8 +1012,7 @@ namespace Questor.Modules.Caching
                         try
                         {
                             _agentName = SwitchAgent;
-                            Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]",
-                                        Logging.White);
+                            Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]", Logging.White);
                             Cache.Instance.CurrentAgentText = CurrentAgent;
                         }
                         catch (Exception ex)
@@ -1427,12 +1426,9 @@ namespace Questor.Modules.Caching
             get
             {
                 return _objects ?? (_objects = Entities.Where(e =>
-                    //e.CategoryId != (int)CategoryID.Entity && 
                        !e.IsPlayer &&
                        e.GroupId != (int)Group.SpawnContainer &&
                        e.GroupId != (int)Group.Wreck &&
-                       //e.GroupId != (int)Group.Stargate &&
-                       //e.GroupId != (int)Group.Station &&
                        e.Distance < 200000).OrderBy(t => t.Distance).ToList());
             }
         }
@@ -1644,7 +1640,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public IEnumerable<EntityCache> EntitiesByName(string name)
         {
-            return Entities.Where(e => e.Name == name).ToList();
+            return Entities.Where(e => e.Name.ToLower() == name.ToLower()).ToList();
         }
 
         /// <summary>
@@ -1659,7 +1655,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> EntitiesByNamePart(string name)
         {
-            return Entities.Where(e => e.Name.Contains(name)).ToList();
+            return Entities.Where(e => e.Name.ToLower().Contains(name.ToLower())).ToList();
         }
 
         /// <summary>
@@ -1668,7 +1664,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public IEnumerable<EntityCache> EntitiesThatContainTheName(string label)
         {
-            return Entities.Where(e => !string.IsNullOrEmpty(e.Name) && e.Name.Contains(label)).ToList();
+            return Entities.Where(e => !string.IsNullOrEmpty(e.Name) && e.Name.ToLower().Contains(label.ToLower())).ToList();
         }
 
         /// <summary>
@@ -1732,7 +1728,7 @@ namespace Questor.Modules.Caching
         public List<DirectBookmark> BookmarksByLabel(string label)
         {
             // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.StartsWith(label)).OrderBy(f => f.LocationId).ToList();
+            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ToList();
         }
 
         /// <summary>
@@ -1742,7 +1738,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public List<DirectBookmark> BookmarksThatContain(string label)
         {
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.Contains(label)).ToList();
+            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().Contains(label.ToLower())).ToList();
         }
 
         /// <summary>
@@ -1970,9 +1966,14 @@ namespace Questor.Modules.Caching
 
             DirectAgentMission missionDetailsForMissionItems = GetAgentMission(agentId, false);
             if (missionDetailsForMissionItems == null)
+            {
                 return;
+            }
+
             if (string.IsNullOrEmpty(FactionName))
+            {
                 FactionName = "Default";
+            }
 
             if (Settings.Instance.UseFittingManager)
             {
@@ -1987,9 +1988,13 @@ namespace Questor.Modules.Caching
 
                     // if we have got multiple copies of the same mission, find the one with the matching faction
                     if (Settings.Instance.MissionFitting.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())))
+                    {
                         missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower()));
+                    }
                     else //otherwise just use the first copy of that mission
+                    {
                         missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower());
+                    }
 
                     if (missionFitting != null)
                     {
@@ -2001,22 +2006,31 @@ namespace Questor.Modules.Caching
                             Fitting = missionFit;
                         }
                         else if (!string.IsNullOrEmpty(FactionFit))
+                        {
                             Fitting = FactionFit;
+                        }
+
                         Logging.Log("Cache", "Mission: " + missionFitting.Mission + " - Faction: " + FactionName + " - Fitting: " + missionFit + " - Ship: " + missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings, Logging.White);
                         MissionShip = missionShip;
                     }
                 }
                 else if (!string.IsNullOrEmpty(FactionFit)) // if no mission fittings defined, try to match by faction
+                {
                     Fitting = FactionFit;
+                }
 
                 if (Fitting == "") // otherwise use the default
+                {
                     Fitting = DefaultFitting;
+                }
             }
 
             string missionName = FilterPath(missionDetailsForMissionItems.Name);
             Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
             if (!File.Exists(Cache.Instance.MissionXmlPath))
+            {
                 return;
+            }
 
             try
             {
@@ -2024,17 +2038,17 @@ namespace Questor.Modules.Caching
                 IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
                 MissionItems.AddRange(items);
 
-                if (xdoc.Root != null) BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
-                BringMissionItem = BringMissionItem.ToLower();
-
-                if (xdoc.Root != null) BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
-                BringMissionItemQuantity = BringMissionItemQuantity;
-
-                if (xdoc.Root != null) BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
-                BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
-
-                if (xdoc.Root != null) BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
-                BringOptionalMissionItemQuantity = BringOptionalMissionItemQuantity;
+                if (xdoc.Root != null)
+                {
+                    BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
+                    BringMissionItem = BringMissionItem.ToLower();
+                    BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
+                    BringMissionItemQuantity = BringMissionItemQuantity;
+                    BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
+                    BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
+                    BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
+                    BringOptionalMissionItemQuantity = BringOptionalMissionItemQuantity;
+                }
 
                 //load fitting setting from the mission file
                 //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";
@@ -2064,7 +2078,9 @@ namespace Questor.Modules.Caching
             foreach (EntityCache target in targets)
             {
                 if (_priorityTargets.Any(pt => pt.EntityID == target.Id))
+                {
                     continue;
+                }
 
                 _priorityTargets.Add(new PriorityTarget { EntityID = target.Id, Priority = priority });
             }
@@ -2080,7 +2096,9 @@ namespace Questor.Modules.Caching
         public double DistanceFromMe(double x, double y, double z)
         {
             if (DirectEve.ActiveShip.Entity == null)
+            {
                 return double.MaxValue;
+            }
 
             double curX = DirectEve.ActiveShip.Entity.X;
             double curY = DirectEve.ActiveShip.Entity.Y;
@@ -2100,7 +2118,9 @@ namespace Questor.Modules.Caching
         public double DistanceFromEntity(double x, double y, double z, DirectEntity entity)
         {
             if (entity == null)
+            {
                 return double.MaxValue;
+            }
 
             double curX = entity.X;
             double curY = entity.Y;
@@ -2118,9 +2138,13 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.AfterMissionSalvageBookmarks.Count() < 100)
             {
                 if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
+                {
                     DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+                }
                 else
+                {
                     DirectEve.BookmarkCurrentLocation(label, "", null);
+                }
             }
             else
             {
@@ -2210,22 +2234,30 @@ namespace Questor.Modules.Caching
             {
                 // Is our current target a webbing priority target?
                 if (currentTarget != null && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && PriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWebbingMe && pt.IsTarget))
+                {
                     return currentTarget;
+                }
 
                 // Get the closest webbing priority target frigate
                 EntityCache webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCFrigate && pt.IsTarget); //frigates
                 if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
+                {
                     return webbingtarget;
+                }
 
                 // Get the closest webbing priority target cruiser
                 webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsNPCCruiser && pt.IsTarget); //cruisers
                 if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
+                {
                     return webbingtarget;
+                }
 
                 // Get the closest webbing priority target (anything else)
                 webbingtarget = PriorityTargets.OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsWebbingMe && pt.IsTarget); //everything else
                 if (webbingtarget != null && !Cache.Instance.IgnoreTargets.Contains(webbingtarget.Name.Trim()))
+                {
                     return webbingtarget;
+                }
             }
 
             // Is our current target any other priority target?
@@ -3510,6 +3542,7 @@ namespace Questor.Modules.Caching
                 }
                 return true;
             }
+
             return false;
         }
 

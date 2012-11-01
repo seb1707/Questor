@@ -91,7 +91,7 @@ namespace Questor
             }
             else
             {
-                Cache.Instance.StopTime = DateTime.UtcNow.AddHours(Time.Instance.QuestorScheduleNotUsed_Hours);
+                Cache.Instance.StopTime = DateTime.Now.AddHours(Time.Instance.QuestorScheduleNotUsed_Hours);
                 Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime  set to [" + Time.Instance.QuestorScheduleNotUsed_Hours + "] hours from now at [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
                 Logging.Log("Questor", "You can correct this by editing schedules.xml to have an entry for this toon", Logging.Orange);
                 Logging.Log("Questor", "Ex: <char user=\"" + Settings.Instance.CharacterName + "\" pw=\"MyPasswordForEVEHere\" name=\"MyLoginNameForEVEHere\" start=\"06:45\" stop=\"08:10\" start2=\"09:05\" stop2=\"14:20\"/>", Logging.Orange);
@@ -99,7 +99,7 @@ namespace Questor
                 Logging.Log("Questor", "dotnet questor questor -x -c \"MyEVECharacterName\"", Logging.Orange);
             }
             Cache.Instance.StartTime = Program.StartTime;
-            Cache.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
+            Cache.Instance.QuestorStarted_DateTime = DateTime.Now;
 
             // get the current process
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -136,9 +136,9 @@ namespace Questor
 
         public void RunOnce30SecAfterStartup()
         {
-            if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
-                if (Settings.Instance.CharacterName != null && DateTime.UtcNow > Cache.Instance.NextStartupAction)
+                if (Settings.Instance.CharacterName != null && DateTime.Now > Cache.Instance.NextStartupAction)
                 {
                     _runOnce30SecAfterStartupalreadyProcessed = true;
                     if (Settings.Instance.UseInnerspace)
@@ -226,7 +226,7 @@ namespace Questor
                         "] StopTime [ " + Cache.Instance.StopTime +
                         "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.White);
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
+            if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
             {
                 // quit questor
                 Logging.Log("Questor", "Maximum runtime exceeded.  Quitting...", Logging.White);
@@ -240,7 +240,7 @@ namespace Questor
             }
             if (Cache.Instance.StopTimeSpecified)
             {
-                if (DateTime.UtcNow >= Cache.Instance.StopTime)
+                if (DateTime.Now >= Cache.Instance.StopTime)
                 {
                     Logging.Log("Questor", "Time to stop. StopTimeSpecified and reached. Quitting game.", Logging.White);
                     Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
@@ -252,7 +252,7 @@ namespace Questor
                     return;
                 }
             }
-            if (DateTime.UtcNow >= Cache.Instance.ManualRestartTime)
+            if (DateTime.Now >= Cache.Instance.ManualRestartTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualRestartTime reached. Quitting game.", Logging.White);
                 Cache.Instance.ReasonToStopQuestor = "ManualRestartTime reached.";
@@ -263,7 +263,7 @@ namespace Questor
                 BeginClosingQuestor();
                 return;
             }
-            if (DateTime.UtcNow >= Cache.Instance.ManualStopTime)
+            if (DateTime.Now >= Cache.Instance.ManualStopTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualStopTime reached. Quitting game.", Logging.White);
                 Cache.Instance.ReasonToStopQuestor = "ManualStopTime reached.";
@@ -410,7 +410,7 @@ namespace Questor
                 }
             }
 
-            if (DateTime.UtcNow < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
                 Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
             }

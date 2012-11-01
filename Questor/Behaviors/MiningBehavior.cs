@@ -21,7 +21,7 @@ namespace Questor.Behaviors
         private static List<int> MiningToolGroupIDs = new List<int>();
         private readonly Arm _arm;
         private readonly Panic _panic;
-        private readonly Combat _combat; 
+        private readonly Combat _combat;
         private readonly Drones _drones;
         private readonly UnloadLoot _unloadLoot;
 
@@ -68,7 +68,7 @@ namespace Questor.Behaviors
                 _States.CurrentMiningState = MiningState.GotoBase;
             }
 
-            if ((DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) 
+            if ((DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10)
                 && (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
@@ -128,10 +128,10 @@ namespace Questor.Behaviors
 
 
                 case MiningState.GotoBase:
-                    DirectBookmark miningHome = Cache.Instance.BookmarksByLabel("Mining Home").FirstOrDefault();  
+                    DirectBookmark miningHome = Cache.Instance.BookmarksByLabel("Mining Home").FirstOrDefault();
                     //Cache.Instance.DirectEve.Navigation.GetDestinationPath
                     Traveler.TravelToMiningHomeBookmark(miningHome, "Mining go to base");
-                    
+
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("MiningBehavior", "GotoBase: We are at destination", Logging.White);
@@ -164,7 +164,7 @@ namespace Questor.Behaviors
                         Cache.Instance.LootAlreadyUnloaded = true;
                         _States.CurrentUnloadLootState = UnloadLootState.Idle;
 
-                        if (_States.CurrentCombatState == CombatState.OutOfAmmo) 
+                        if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                         {
                             Logging.Log("MiningBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);
                             _States.CurrentMiningState = MiningState.Idle;
@@ -200,9 +200,10 @@ namespace Questor.Behaviors
                         Logging.Log("Arm", "Begin", Logging.White);
                         _States.CurrentArmState = ArmState.Begin;
 
-                        // Load right ammo based on mission
+                        // Load ammo... this "fixes" the problem I experienced with not reloading after second arm phase. The quantity was getting set to 0.
                         _arm.AmmoToLoad.Clear();
                         _arm.AmmoToLoad.Add(Settings.Instance.Ammo.FirstOrDefault());
+                        if (_arm.AmmoToLoad.FirstOrDefault().Quantity == 0) { _arm.AmmoToLoad.FirstOrDefault().Quantity = 333; }
                     }
 
                     _arm.ProcessState();
@@ -254,8 +255,8 @@ namespace Questor.Behaviors
 
                     if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
                         break;
-                      
-                     
+
+
 
                     Logging.Log("MiningBehavior", "Setting Destination to 1st Asteroid belt.", Logging.White);
 
@@ -288,7 +289,7 @@ namespace Questor.Behaviors
                         _States.CurrentMiningState = MiningState.GotoBase;
                         Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
                         //BeginClosingQuestor();
-                    } 
+                    }
                     break;
 
                 case MiningState.Mine:
@@ -335,7 +336,7 @@ namespace Questor.Behaviors
                     }
 
                     if (asteroid == null)
-                    { 
+                    {
                         _States.CurrentMiningState = MiningState.GotoBase;
                         Logging.Log("MiningBehavior", "Could not find a suitable Asteroid to mine.", Logging.White);
                     }
@@ -351,23 +352,29 @@ namespace Questor.Behaviors
 
 
                 case MiningState.MineAsteroid:
+                    if (Cache.Instance.EntityById(_targetAsteroid.Id) == null)
+                    {
+                        //asteroid is depleted
+                        _States.CurrentMiningState = MiningState.Mine;
+                        return;
+                    }
                     _targetAsteroid = Cache.Instance.EntityById(_targetAsteroid.Id);
                     _combat.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("MiningBehavior:MineAsteroid", "Combat processed. Combat.State is: " + _States.CurrentCombatState.ToString(), Logging.White);
-                     
-                    _drones.ProcessState(); 
+
+                    _drones.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.White);
- 
+
                     // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship
                     // and try the mission again
                     if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                     {
                         Logging.Log("Combat", "Out of Ammo!", Logging.Orange);
-                        _States.CurrentMiningState = MiningState.GotoBase;  
+                        _States.CurrentMiningState = MiningState.GotoBase;
                     }
 
                     if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
@@ -378,14 +385,25 @@ namespace Questor.Behaviors
                     //check if we're full
 
                     if (!Cache.Instance.OpenCargoHold("Miner: Check cargohold capacity")) break;
-                    if (Cache.Instance.CargoHold.IsValid 
-                        && (Cache.Instance.CargoHold.Capacity == Cache.Instance.CargoHold.UsedCapacity)
-                        && Cache.Instance.CargoHold.Capacity > 0)
+
+                    //should I check Cache.Instance.ActiveDrones.Any() instead?
+                    if (Cache.Instance.CargoHold.IsValid
+                        && (Cache.Instance.CargoHold.UsedCapacity >= Cache.Instance.CargoHold.Capacity * .9)
+                        && Cache.Instance.CargoHold.Capacity > 0
+                        && _States.CurrentDroneState == DroneState.WaitingForTargets)
                     {
+
                         Logging.Log("Miner:MineAsteroid", "We are full, go to base to unload. Capacity is: " + Cache.Instance.CargoHold.Capacity
                             + ", Used: " + Cache.Instance.CargoHold.UsedCapacity, Logging.White);
                         _States.CurrentMiningState = MiningState.GotoBase;
                         break;
+                    }
+                    else if (Cache.Instance.CargoHold.IsValid
+                      && (Cache.Instance.CargoHold.UsedCapacity >= Cache.Instance.CargoHold.Capacity * .9)
+                      && Cache.Instance.CargoHold.Capacity > 0
+                      && _States.CurrentDroneState != DroneState.WaitingForTargets)
+                    {
+                        Logging.Log("Miner:MineAsteroid", "We are full, but drones are busy. Drone state: " + _States.CurrentDroneState.ToString(), Logging.White);
                     }
 
 
@@ -477,10 +495,17 @@ namespace Questor.Behaviors
                         }
                     } //check 10K distance
                     else
-                    { 
-                        Logging.Log("Miner:MineAsteroid", "Distance greater than 10K.", Logging.White);
+                    {
 
-                        if ((int)Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
+                        Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
+                            + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
+                            + "] _targetRoid.Id [" + _targetAsteroid.Id
+                            + "] targetting me count [" + _combat.TargetingMe.Count
+                            + "]", Logging.White);
+                        //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check combatstate instead.
+                        if (Cache.Instance.Approaching.TargetValue == null
+                            || (Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
+                            )
                         {
                             if (_lastApproachCommand.AddSeconds(1) < DateTime.Now)
                             {
@@ -489,7 +514,7 @@ namespace Questor.Behaviors
                             }
                         }
                     }
-                      
+
                     break;
             } //ends MiningState switch
 

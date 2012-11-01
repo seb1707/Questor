@@ -606,7 +606,7 @@ namespace Questor
                         case "mining":
                             Logging.Log("Questor", "Start Mining Behavior", Logging.White);
                             _States.CurrentQuestorState = QuestorState.Mining;
-                            _States.CurrentMiningState = MiningState.Default;
+                            _States.CurrentMiningState = MiningState.Start;
                             break;
 
                         case "combat helper":

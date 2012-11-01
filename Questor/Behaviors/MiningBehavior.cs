@@ -19,6 +19,7 @@ namespace Questor.Behaviors
     public class MiningBehavior
     {
         private static List<int> MiningToolGroupIDs = new List<int>();
+        private List<long> EmptyBelts = new List<long>();
         private readonly Arm _arm;
         private readonly Panic _panic;
         private readonly Combat _combat;
@@ -30,6 +31,8 @@ namespace Questor.Behaviors
         private int _minerNumber = 0;
         private double _lastAsteroidPosition = 0;
         private EntityCache _targetAsteroid;
+        private EntityCache _currentBelt;
+        private long _asteroidBookmarkForID = 0;
 
         private DateTime _lastModuleActivation = DateTime.MinValue;
         private DateTime _lastPulse;
@@ -48,6 +51,7 @@ namespace Questor.Behaviors
             MiningToolGroupIDs.Add(54); //miners
             MiningToolGroupIDs.Add(464); //strip miners
             MiningToolGroupIDs.Add(483); //modulated strip miners
+            
         }
 
         private void BeginClosingQuestor()
@@ -123,8 +127,8 @@ namespace Questor.Behaviors
                         break;
                     }
 
-                    Questor.CheckEVEStatus();
-                    _States.CurrentMiningState = MiningState.Start;
+                    Questor.CheckEVEStatus(); 
+                    _States.CurrentMiningState = MiningState.Arm;
                     break;
 
 
@@ -174,7 +178,6 @@ namespace Questor.Behaviors
 
 
                         _States.CurrentMiningState = MiningState.Idle;
-                        _States.CurrentQuestorState = QuestorState.Idle;
                         Logging.Log("MiningBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], MiningState: [" + _States.CurrentMiningState + "]", Logging.White);
                         return;
 
@@ -184,6 +187,12 @@ namespace Questor.Behaviors
                 case MiningState.Start:
                     Cache.Instance.OpenWrecks = false;
                     _States.CurrentMiningState = MiningState.Arm;
+                    DirectBookmark asteroidShortcut = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
+
+                    if (asteroidShortcut != null)
+                    {
+                        asteroidShortcut.Delete();
+                    }
                     break;
 
                 case MiningState.Arm:
@@ -261,35 +270,49 @@ namespace Questor.Behaviors
 
                     Logging.Log("MiningBehavior", "Setting Destination to 1st Asteroid belt.", Logging.White);
 
-                    var belts = Cache.Instance.Entities.Where(i => i.GroupId == 9 && !i.Name.ToLower().Contains("ice"));
-                    var belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
-                    //Traveler.Destination = new MissionBookmarkDestination(belt);
+                    DirectBookmark asteroidShortcutGTB = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
 
-
-                    if (belt != null)
+                    if (asteroidShortcutGTB != null)
                     {
-                        if (belt.Distance < 35000)
-                        {
-                            if (_States.CurrentMiningState == MiningState.GotoBelt)
-                                _States.CurrentMiningState = MiningState.Mine;
 
-                            // Seeing as we just warped to the mission, start the mission controller
-                            _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
-                            //_States.CurrentCombatState = CombatState.CheckTargets;
-                            Traveler.Destination = null;
-                        }
-                        else
-                        {
-                            belt.WarpTo();
-                            _lastPulse = DateTime.UtcNow;
-                        }
+                        if (_States.CurrentMiningState == MiningState.GotoBelt)
+                            _States.CurrentMiningState = MiningState.Mine;
+
+                        asteroidShortcutGTB.WarpTo();
+                        _lastPulse = DateTime.UtcNow;
                         break;
                     }
                     else
                     {
-                        _States.CurrentMiningState = MiningState.GotoBase;
-                        Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
-                        //BeginClosingQuestor();
+                        var belts = Cache.Instance.Entities.Where(i => i.GroupId == 9 && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
+                        var belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
+                        _currentBelt = belt;
+
+                        //Traveler.Destination = new MissionBookmarkDestination(belt);
+
+
+                        if (belt != null)
+                        {
+                            if (belt.Distance < 35000)
+                            {
+                                if (_States.CurrentMiningState == MiningState.GotoBelt)
+                                    _States.CurrentMiningState = MiningState.Mine;
+                                 
+                                Traveler.Destination = null;
+                            }
+                            else
+                            {
+                                belt.WarpTo();
+                                _lastPulse = DateTime.UtcNow;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            _States.CurrentMiningState = MiningState.GotoBase;
+                            Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
+                            BeginClosingQuestor();
+                        }
                     }
                     break;
 
@@ -349,8 +372,15 @@ namespace Questor.Behaviors
 
                     if (asteroid == null)
                     {
-                        _States.CurrentMiningState = MiningState.GotoBase;
-                        Logging.Log("MiningBehavior", "Could not find a suitable Asteroid to mine.", Logging.White);
+                        _States.CurrentMiningState = MiningState.GotoBelt;
+                        EmptyBelts.Add(_currentBelt.Id);
+                        DirectBookmark asteroidShortcutBM2 = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
+
+                        if (asteroidShortcutBM2 != null)
+                        {
+                            asteroidShortcutBM2.Delete();
+                        }
+                        Logging.Log("MiningBehavior", "Could not find a suitable Asteroid to mine in this belt.", Logging.White);
                     }
                     else
                     {
@@ -424,6 +454,24 @@ namespace Questor.Behaviors
 
                     if (_targetAsteroid.Distance < 10000)
                     {
+
+                        if (_asteroidBookmarkForID != _targetAsteroid.Id)
+                        {
+
+                            DirectBookmark asteroidShortcutBM = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
+
+                            if (asteroidShortcutBM != null)
+                            {
+                                asteroidShortcutBM.UpdateBookmark("Asteroid Location", "Mining Shortcut");
+                            }
+                            else
+                            {
+                                Cache.Instance.DirectEve.BookmarkCurrentLocation("Asteroid Location", "Mining Shortcut", null);
+                            }
+
+                            _asteroidBookmarkForID = _targetAsteroid.Id;
+                        } 
+
 
                         if (Cache.Instance.Targeting.Contains(_targetAsteroid))
                         {

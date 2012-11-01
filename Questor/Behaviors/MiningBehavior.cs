@@ -52,7 +52,7 @@ namespace Questor.Behaviors
 
         private void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.Now;
+            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
@@ -69,8 +69,8 @@ namespace Questor.Behaviors
                 _States.CurrentMiningState = MiningState.GotoBase;
             }
 
-            if ((DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10)
-                && (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
+            if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10)
+                && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
                 {
@@ -133,7 +133,7 @@ namespace Questor.Behaviors
                     //Cache.Instance.DirectEve.Navigation.GetDestinationPath
                     Traveler.TravelToMiningHomeBookmark(miningHome, "Mining go to base"); 
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("MiningBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
@@ -215,7 +215,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -226,7 +226,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -236,7 +236,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentArmState == ArmState.Done)
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.Now;
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentArmState = ArmState.Idle;
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
@@ -244,14 +244,14 @@ namespace Questor.Behaviors
                         //exit the station
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                         //set up a wait of 10 seconds so the undock can complete
-                        _lastPulse = DateTime.Now.AddSeconds(10);
+                        _lastPulse = DateTime.UtcNow.AddSeconds(10);
                         _States.CurrentMiningState = MiningState.GotoBelt;
                     }
                     break;
 
 
                 case MiningState.GotoBelt:
-                    if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                         return;
 
                     if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
@@ -281,7 +281,7 @@ namespace Questor.Behaviors
                         else
                         {
                             belt.WarpTo();
-                            _lastPulse = DateTime.Now;
+                            _lastPulse = DateTime.UtcNow;
                         }
                         break;
                     }
@@ -356,7 +356,7 @@ namespace Questor.Behaviors
                     {
                         Logging.Log("Mining: ", asteroid.Name + "; " + asteroid.GroupId, Logging.White);
                         _targetAsteroid = asteroid;
-                        _lastApproachCommand = DateTime.Now;
+                        _lastApproachCommand = DateTime.UtcNow;
                         _targetAsteroid.Approach();
                         _States.CurrentMiningState = MiningState.MineAsteroid;
                     }
@@ -389,10 +389,10 @@ namespace Questor.Behaviors
                         _States.CurrentMiningState = MiningState.GotoBase;
                     }
 
-                    if (DateTime.Now.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                         return;
 
-                    _lastPulse = DateTime.Now;
+                    _lastPulse = DateTime.UtcNow;
 
                     //check if we're full
 
@@ -445,7 +445,7 @@ namespace Questor.Behaviors
                             {
 
 
-                                if (miningTool.ActivatedTimeStamp.AddSeconds(3) > DateTime.Now)
+                                if (miningTool.ActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
                                     continue;
 
                                 _minerNumber++;
@@ -466,13 +466,13 @@ namespace Questor.Behaviors
                                     continue;
 
                                 //only activate one module per third of a second
-                                if (_lastModuleActivation < DateTime.Now.AddMilliseconds(-350))
+                                if (_lastModuleActivation < DateTime.UtcNow.AddMilliseconds(-350))
                                 {
-                                    _lastModuleActivation = DateTime.Now;
+                                    _lastModuleActivation = DateTime.UtcNow;
                                     Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][ID: " + _targetAsteroid.Id + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
 
                                     miningTool.Activate(_targetAsteroid.Id);
-                                    miningTool.ActivatedTimeStamp = DateTime.Now;
+                                    miningTool.ActivatedTimeStamp = DateTime.UtcNow;
                                 }
 
 
@@ -484,7 +484,7 @@ namespace Questor.Behaviors
 
                             if (Settings.Instance.DebugStates)
                                 Logging.Log("Miner:MineAsteroid", "Asteroid not targetted.", Logging.White);
-                            if (DateTime.Now < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
+                            if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                                 return;
 
                             if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
@@ -507,7 +507,7 @@ namespace Questor.Behaviors
                             _isJammed = false;
 
                             _targetAsteroid.LockTarget();
-                            Cache.Instance.NextTargetAction = DateTime.Now.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                         }
                     } //check 10K distance
                     else
@@ -527,10 +527,10 @@ namespace Questor.Behaviors
                             veloicty <= 0 && Cache.Instance.TargetedBy.Count() == 0
                             )
                         {
-                            if (_lastApproachCommand.AddSeconds(2) < DateTime.Now)
+                            if (_lastApproachCommand.AddSeconds(2) < DateTime.UtcNow)
                             {
                                 _targetAsteroid.Approach();
-                                _lastApproachCommand = DateTime.Now;
+                                _lastApproachCommand = DateTime.UtcNow;
                             }
                         }
                     }

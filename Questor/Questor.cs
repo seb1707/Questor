@@ -302,6 +302,8 @@ namespace Questor
 
         public static void WalletCheck()
         {
+            if (_States.CurrentQuestorState == QuestorState.Mining) { return; }
+
             Cache.Instance.LastWalletCheck = DateTime.UtcNow;
             //Logging.Log("[Questor] Wallet Balance Debug Info: LastKnownGoodConnectedTime = " + Settings.Instance.lastKnownGoodConnectedTime);
             //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.UtcNow - LastKnownGoodConnectedTime = " + DateTime.UtcNow.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);

@@ -25,10 +25,11 @@ namespace Questor.Behaviors
         private readonly Drones _drones;
         private readonly UnloadLoot _unloadLoot;
 
-        public bool PanicStateReset = false;
-        public bool _isJammed = false;
-        public int _minerNumber = 0;
-        public EntityCache _targetAsteroid;
+        private bool PanicStateReset = false;
+        private bool _isJammed = false;
+        private int _minerNumber = 0;
+        private double _lastAsteroidPosition = 0;
+        private EntityCache _targetAsteroid;
 
         private DateTime _lastModuleActivation = DateTime.MinValue;
         private DateTime _lastPulse;
@@ -130,7 +131,7 @@ namespace Questor.Behaviors
                 case MiningState.GotoBase:
                     DirectBookmark miningHome = Cache.Instance.BookmarksByLabel("Mining Home").FirstOrDefault();
                     //Cache.Instance.DirectEve.Navigation.GetDestinationPath
-                    Traveler.TravelToMiningHomeBookmark(miningHome, "Mining go to base");
+                    Traveler.TravelToMiningHomeBookmark(miningHome, "Mining go to base"); 
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.Now.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
@@ -308,6 +309,17 @@ namespace Questor.Behaviors
                         Cache.Instance.Entities.Where(i =>
                             i.Distance < 65000
                             && (
+                                i.Name.ToLower().Contains("plagioclase")
+                                )
+                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                    }
+
+                    if (asteroid == null)
+                    {
+                        asteroid =
+                        Cache.Instance.Entities.Where(i =>
+                            i.Distance < 65000
+                            && (
                                 i.Name.ToLower().Contains("pyroxeres")
                                 )
                         ).OrderBy(i => i.Distance).FirstOrDefault();
@@ -407,21 +419,24 @@ namespace Questor.Behaviors
                     }
 
 
-                    Logging.Log("Miner:MineAsteroid", "Distance to Asteroid is: " + _targetAsteroid.Distance, Logging.White);
+                    if (Settings.Instance.DebugStates)
+                        Logging.Log("Miner:MineAsteroid", "Distance to Asteroid is: " + _targetAsteroid.Distance, Logging.White);
 
                     if (_targetAsteroid.Distance < 10000)
                     {
 
                         if (Cache.Instance.Targeting.Contains(_targetAsteroid))
                         {
-                            Logging.Log("Miner:MineAsteroid", "Targetting asteroid.", Logging.White);
+                            if (Settings.Instance.DebugStates)
+                                Logging.Log("Miner:MineAsteroid", "Targetting asteroid.", Logging.White);
                             return;
                             //wait
                         }
                         else if (Cache.Instance.Targets.Contains(_targetAsteroid))
                         {
 
-                            Logging.Log("Miner:MineAsteroid", "Asteroid Targetted.", Logging.White);
+                            if (Settings.Instance.DebugStates)
+                                Logging.Log("Miner:MineAsteroid", "Asteroid Targetted.", Logging.White);
                             //if(!_targetAsteroid.IsActiveTarget) _targetAsteroid.MakeActiveTarget();
                             List<ModuleCache> miningTools = Cache.Instance.Modules.Where(m => MiningToolGroupIDs.Contains(m.GroupId)).ToList();
 
@@ -467,7 +482,8 @@ namespace Questor.Behaviors
                         else
                         { //asteroid isn't targetted
 
-                            Logging.Log("Miner:MineAsteroid", "Asteroid not targetted.", Logging.White);
+                            if (Settings.Instance.DebugStates)
+                                Logging.Log("Miner:MineAsteroid", "Asteroid not targetted.", Logging.White);
                             if (DateTime.Now < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                                 return;
 
@@ -496,18 +512,22 @@ namespace Questor.Behaviors
                     } //check 10K distance
                     else
                     {
+                        double veloicty = _lastAsteroidPosition - _targetAsteroid.Distance;
+                        _lastAsteroidPosition = _targetAsteroid.Distance;
 
-                        Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
-                            + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
-                            + "] _targetRoid.Id [" + _targetAsteroid.Id
-                            + "] targetting me count [" + _combat.TargetingMe.Count
-                            + "]", Logging.White);
+                        if (Settings.Instance.DebugStates)
+                            Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
+                                + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
+                                + "] _targetRoid.Id [" + _targetAsteroid.Id
+                                + "] targetting me count [" + _combat.TargetingMe.Count
+                                + "]", Logging.White);
                         //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check combatstate instead.
-                        if (Cache.Instance.Approaching.TargetValue == null
-                            || (Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
+                        if (//Cache.Instance.Approaching.TargetValue == null
+                            //|| (Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
+                            veloicty <= 0 && Cache.Instance.TargetedBy.Count() == 0
                             )
                         {
-                            if (_lastApproachCommand.AddSeconds(1) < DateTime.Now)
+                            if (_lastApproachCommand.AddSeconds(2) < DateTime.Now)
                             {
                                 _targetAsteroid.Approach();
                                 _lastApproachCommand = DateTime.Now;

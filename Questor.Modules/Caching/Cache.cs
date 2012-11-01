@@ -1224,7 +1224,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> TargetedBy
         {
-            get { return _targetedBy ?? (_targetedBy = Entities.Where(e => e.IsTargetedBy).ToList()); }
+            get { return _targetedBy ?? (_targetedBy = Entities.Where(e => e.IsTargetedBy && !e.IsBadIdea).ToList()); }
         }
 
         public IEnumerable<EntityCache> Aggressed
@@ -1241,7 +1241,7 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
+                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid && !e.IsBadIdea).ToList());
             }
         }
 
@@ -1252,7 +1252,7 @@ namespace Questor.Modules.Caching
                 if (!InSpace)
                     return new List<EntityCache>();
 
-                return DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid && e.Name != Settings.Instance.CharacterName).ToList();
+                return Cache.Instance.Entities.Where(e => e.IsValid && e.Name != Settings.Instance.CharacterName).ToList();
             }
         }
 
@@ -2293,7 +2293,7 @@ namespace Questor.Modules.Caching
             }
 
             // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

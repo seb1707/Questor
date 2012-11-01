@@ -250,21 +250,20 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Questor", "CloseQuestor: We are configured to NOT use innerspace. useInnerspace = false", Logging.White);
                         Logging.Log("Questor", "CloseQuestor: Currently the questor will exit (and not restart itself) in this configuration, this likely needs additional work to make questor reentrant so we can use a scheduled task?!", Logging.White);
-                        if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
+                        if (_closeQuestorCMDUplink)
+                        {
+                            _closeQuestorCMDUplink = false;
+                            CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                        } 
+                        
+                        if (!_closeQuestor10SecWarningDone)
                         {
                             _closeQuestor10SecWarningDone = true;
-                            Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
-                            Cache.Instance.DirecteveDispose();
-                            if (Cache.Instance.CloseQuestorEndProcess)
-                            {
-                                Process.GetCurrentProcess().Kill();
-                                return false;
-                            }
-
-                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
+                            Logging.Log("Questor", "Exiting eve in [" + Time.Instance.CloseQuestorDelayBeforeExit_seconds + "] seconds", Logging.White);
                             return false;
                         }
-                        if (CloseQuestorDelay < DateTime.UtcNow)
+
+                        if (DateTime.UtcNow > CloseQuestorDelay)
                         {
                             Logging.Log("Questor", "Exiting eve now.", Logging.White);
                             Cache.Instance.DirecteveDispose();
@@ -280,23 +279,20 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
             }
-            Logging.Log("Questor", "Autostart is false: Stopping EVE with quit command (if EVE is going to restart it will do so externally)", Logging.White);
-            if ((CloseQuestorDelay.AddSeconds(-10) == DateTime.UtcNow) && (!_closeQuestor10SecWarningDone))
+            if (_closeQuestorCMDUplink)
+            {
+                Logging.Log("Questor", "Autostart is false: Stopping EVE with quit command (if EVE is going to restart it will do so externally)", Logging.White);
+                _closeQuestorCMDUplink = false;
+                CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+            } 
+            if (!_closeQuestor10SecWarningDone)
             {
                 _closeQuestor10SecWarningDone = true;
-                Logging.Log("Questor", "Exiting eve in 10 seconds", Logging.White);
-                Cache.Instance.DirecteveDispose();
-                if (Cache.Instance.CloseQuestorEndProcess)
-                {
-                    Logging.Log("Questor", "Closing with: Process.GetCurrentProcess().Kill()", Logging.White);
-                    Process.GetCurrentProcess().Kill();
-                    return false;
-                }
-                Logging.Log("Questor", "Closing with: DirectCmd.CmdQuitGame", Logging.White);
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdQuitGame);
+                Logging.Log("Questor", "Exiting eve in [" + Time.Instance.CloseQuestorDelayBeforeExit_seconds + "] seconds", Logging.White);
                 return false;
             }
-            if (CloseQuestorDelay < DateTime.UtcNow)
+
+            if (DateTime.UtcNow > CloseQuestorDelay)
             {
                 if (Cache.Instance.CloseQuestorEndProcess)
                 {

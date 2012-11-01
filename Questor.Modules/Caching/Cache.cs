@@ -2218,7 +2218,7 @@ namespace Questor.Modules.Caching
                     }
             }
             // Is our current target already in armor? keep shooting the same target if so...
-            if (currentTarget != null && currentTarget.ArmorPct * 100 < 60 && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
+            if (currentTarget != null && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
             {
                 //Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget has less than 60% armor, keep killing this target");
                 return currentTarget;

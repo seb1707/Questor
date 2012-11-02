@@ -302,6 +302,8 @@ namespace Questor
 
         public static void WalletCheck()
         {
+            if (_States.CurrentQuestorState == QuestorState.Mining) { return; }
+
             Cache.Instance.LastWalletCheck = DateTime.UtcNow;
             //Logging.Log("[Questor] Wallet Balance Debug Info: LastKnownGoodConnectedTime = " + Settings.Instance.lastKnownGoodConnectedTime);
             //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.UtcNow - LastKnownGoodConnectedTime = " + DateTime.UtcNow.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);
@@ -604,7 +606,7 @@ namespace Questor
                         case "mining":
                             Logging.Log("Questor", "Start Mining Behavior", Logging.White);
                             _States.CurrentQuestorState = QuestorState.Mining;
-                            _States.CurrentMiningState = MiningState.Default;
+                            _States.CurrentMiningState = MiningState.Start;
                             break;
 
                         case "combat helper":

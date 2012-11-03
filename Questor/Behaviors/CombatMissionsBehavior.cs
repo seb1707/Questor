@@ -283,7 +283,6 @@ namespace Questor.Behaviors
                 DebugCombatMissionsBehaviorStates();
             }
             DebugPanicstates();
-            _States.LavishEvent_QuestorCombatMissionsBehaviorState();
 
             switch (_States.CurrentCombatMissionBehaviorState)
             {

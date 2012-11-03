@@ -388,6 +388,10 @@ namespace Questor
                 LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
+                LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
+                LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
+                LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
+                LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
             //}
         }
 
@@ -637,13 +641,84 @@ namespace Questor
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetQuestorStatetoIdle - Changes the QuestorState to Idle which will GotoBase and then Exit", Logging.White);
+                Logging.Log("QuestorUI", "SetQuestorStatetoIdle - Changes the QuestorState to Idle", Logging.White);
                 return -1;
             }
 
             _States.CurrentQuestorState = QuestorState.Idle;
 
             Logging.Log("QuestorUI", "QuestorState is now: Idle ", Logging.White);
+            return 0;
+        }
+
+        private int SetCombatMissionsBehaviorStatetoGotoBase(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase - Changes the CombatMissionsBehaviorState to GotoBase", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+
+            Logging.Log("QuestorUI", "CombatMissionsBehaviorState is now: GotoBase ", Logging.White);
+            return 0;
+        }
+
+        private int SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase - Changes the SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase to GotoBase", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+
+            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase is now: GotoBase ", Logging.White);
+            return 0;
+        }
+        
+
+        private int ListQuestorCommands(string[] args)
+        {
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "Questor commands you can run from innerspace", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "SetAutoStart                                 - SetAutoStart true|false", Logging.White);
+            Logging.Log("QuestorUI", "SetDisable3D                                 - SetDisable3D true|false", Logging.White);
+            Logging.Log("QuestorUI", "SetExitWhenIdle                              - SetExitWhenIdle true|false", Logging.White);
+            Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor                - SetQuestorStatetoCloseQuestor true", Logging.White);
+            Logging.Log("QuestorUI", "SetQuestorStatetoIdle                        - SetQuestorStatetoIdle true", Logging.White);
+            Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase     - SetCombatMissionsBehaviorStatetoGotoBase true", Logging.White);
+            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase     - SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase true", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorCommands                              - (this command) ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            return 0;
+        }
+
+        private int ListQuestorEvents(string[] args)
+        {
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "Questor Events you can listen for from an innerspace script", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorState                                  - This Event fires when the State changes", Logging.White);
+            Logging.Log("QuestorUI", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
+            Logging.Log("QuestorUI", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
+            Logging.Log("QuestorUI", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
+            Logging.Log("QuestorUI", " ", Logging.White);
             return 0;
         }
 
@@ -686,12 +761,20 @@ namespace Questor
             if ((string)QuestorStateComboBox.SelectedItem != _States.CurrentQuestorState.ToString() && !QuestorStateComboBox.DroppedDown)
             {
                 QuestorStateComboBox.SelectedItem = _States.CurrentQuestorState.ToString();
+                _States.LavishEvent_QuestorState();
+                if (_States.CurrentQuestorState == QuestorState.Idle)
+                {
+                    _States.LavishEvent_QuestorIdle();
+                }
             }
 
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
             {
                 if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
                     BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();
+                    _States.LavishEvent_QuestorCombatMissionsBehaviorState();
+                }
             }
 
             if (_States.CurrentQuestorState == QuestorState.Mining)
@@ -703,7 +786,10 @@ namespace Questor
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
             {
                 if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
                     BehaviorComboBox.SelectedItem = _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString();
+                    _States.LavishEvent_QuestorDedicatedBookmarkSalvagerBehaviorState();
+                }
             }
 
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
@@ -724,13 +810,22 @@ namespace Questor
             // Middle group
             //
             if ((string)PanicStateComboBox.SelectedItem != _States.CurrentPanicState.ToString() && !PanicStateComboBox.DroppedDown)
+            {
                 PanicStateComboBox.SelectedItem = _States.CurrentPanicState.ToString();
+                _States.LavishEvent_QuestorPanicState();
+            }
 
             if ((string)CombatStateComboBox.SelectedItem != _States.CurrentCombatState.ToString() && !CombatStateComboBox.DroppedDown)
+            {
                 CombatStateComboBox.SelectedItem = _States.CurrentCombatState.ToString();
+                _States.LavishEvent_QuestorCombatState();
+            }
 
             if ((string)DronesStateComboBox.SelectedItem != _States.CurrentDroneState.ToString() && !DronesStateComboBox.DroppedDown)
+            {
                 DronesStateComboBox.SelectedItem = _States.CurrentDroneState.ToString();
+                _States.LavishEvent_QuestorDronesState();
+            }
 
             if ((string)CleanupStateComboBox.SelectedItem != _States.CurrentCleanupState.ToString() && !CleanupStateComboBox.DroppedDown)
                 CleanupStateComboBox.SelectedItem = _States.CurrentCleanupState.ToString();
@@ -757,7 +852,10 @@ namespace Questor
                 UnloadStateComboBox.SelectedItem = _States.CurrentUnloadLootState.ToString();
 
             if ((string)TravelerStateComboBox.SelectedItem != _States.CurrentTravelerState.ToString() && !TravelerStateComboBox.DroppedDown)
+            {
                 TravelerStateComboBox.SelectedItem = _States.CurrentTravelerState.ToString();
+                _States.LavishEvent_QuestorTravelerState();
+            }
 
             if ((string)AgentInteractionStateComboBox.SelectedItem != _States.CurrentAgentInteractionState.ToString() && !AgentInteractionStateComboBox.DroppedDown)
                 AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
@@ -770,16 +868,19 @@ namespace Questor
             if (AutoStartCheckBox.Checked != Settings.Instance.AutoStart)
             {
                 AutoStartCheckBox.Checked = Settings.Instance.AutoStart;
+                _States.LavishEvent_QuestorAutoStartState();
             }
 
             if (PauseCheckBox.Checked != Cache.Instance.Paused)
             {
                 PauseCheckBox.Checked = Cache.Instance.Paused;
+                _States.LavishEvent_QuestorPausedState();
             }
 
             if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
             {
                 Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
+                _States.LavishEvent_QuestorDisable3DState();
             }
 
             if (Settings.Instance.WindowXPosition.HasValue)
@@ -983,11 +1084,13 @@ namespace Questor
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)
         {
             Cache.Instance.Paused = PauseCheckBox.Checked;
+            _States.LavishEvent_QuestorPausedState();
         }
 
         private void Disable3DCheckBoxCheckedChanged(object sender, EventArgs e)
         {
             Settings.Instance.Disable3D = Disable3DCheckBox.Checked;
+            _States.LavishEvent_QuestorDisable3DState();
         }
 
         private void TxtComandKeyPress(object sender, KeyPressEventArgs e)
@@ -1053,6 +1156,7 @@ namespace Questor
             if (Settings.Instance.DebugStates) Logging.Log("QuestorUI", "QuestorState has been changed to [" + QuestorStateComboBox.Text + "]", Logging.White);
             PopulateBehaviorStateComboBox();
             PopulateMissionLists();
+            _States.LavishEvent_QuestorState();
             // If you are at the controls enough to change states... assume that panic needs to do nothing
             //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
         }
@@ -1062,16 +1166,14 @@ namespace Questor
             //Logging.Log("QuestorUI","BehaviorComboBoxChanged: Current QuestorState is: [" + _States.CurrentQuestorState + "]",Logging.White);
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
             {
-                _States.CurrentCombatMissionBehaviorState =
-                    (CombatMissionsBehaviorState)
-                    Enum.Parse(typeof(CombatMissionsBehaviorState), BehaviorComboBox.Text);
+                _States.CurrentCombatMissionBehaviorState = (CombatMissionsBehaviorState)Enum.Parse(typeof(CombatMissionsBehaviorState), BehaviorComboBox.Text);
+                _States.LavishEvent_QuestorCombatMissionsBehaviorState();
             }
 
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
             {
-                _States.CurrentDedicatedBookmarkSalvagerBehaviorState =
-                    (DedicatedBookmarkSalvagerBehaviorState)
-                    Enum.Parse(typeof(DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
+                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = (DedicatedBookmarkSalvagerBehaviorState)Enum.Parse(typeof(DedicatedBookmarkSalvagerBehaviorState), BehaviorComboBox.Text);
+                _States.LavishEvent_QuestorDedicatedBookmarkSalvagerBehaviorState();
             }
 
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
@@ -1139,16 +1241,19 @@ namespace Questor
             _States.CurrentPanicState = (PanicState)Enum.Parse(typeof(PanicState), PanicStateComboBox.Text);
             // If you are at the controls enough to change states... assume that panic needs to do nothing
             //_questor.panicstatereset = true; //this cannot be reset when the index changes, as that happens during natural state changes, this needs to be a mouse event
+            _States.LavishEvent_QuestorPanicState();
         }
 
         private void CombatStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             _States.CurrentCombatState = (CombatState)Enum.Parse(typeof(CombatState), CombatStateComboBox.Text);
+            _States.LavishEvent_QuestorCombatState();
         }
 
         private void DronesStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             _States.CurrentDroneState = (DroneState)Enum.Parse(typeof(DroneState), DronesStateComboBox.Text);
+            _States.LavishEvent_QuestorDronesState();
         }
 
         private void CleanupStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
@@ -1184,6 +1289,7 @@ namespace Questor
         private void TravelerStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             _States.CurrentTravelerState = (TravelerState)Enum.Parse(typeof(TravelerState), TravelerStateComboBox.Text);
+            _States.LavishEvent_QuestorTravelerState();
         }
 
         private void AgentInteractionStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
@@ -1199,6 +1305,7 @@ namespace Questor
         private void AutoStartCheckBoxCheckedChanged(object sender, EventArgs e)
         {
             Settings.Instance.AutoStart = AutoStartCheckBox.Checked;
+            _States.LavishEvent_QuestorAutoStartState();
         }
 
         private void ButtonOpenCharacterXMLClick(object sender, EventArgs e)
@@ -1270,6 +1377,7 @@ namespace Questor
             Cache.Instance.ExitWhenIdle = ExitWhenIdleCheckBox.Checked;
             AutoStartCheckBox.Checked = false;
             Settings.Instance.AutoStart = false;
+            _States.LavishEvent_QuestorExitWhenIdleState();
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)

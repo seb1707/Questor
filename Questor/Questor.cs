@@ -402,7 +402,6 @@ namespace Questor
 
             _lastPulse = DateTime.UtcNow;
 
-
             if (Cache.Instance.SessionState != "Quitting")
             {
                 // Update settings (settings only load if character name changed)
@@ -524,13 +523,11 @@ namespace Questor
                 return;
             }
 
-            _States.LavishEvent_QuestorState();
 
             //DirectAgentMission mission;
             switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:
-                    _States.LavishEvent_QuestorIdle();
                     TimeCheck(); //Should we close questor due to stoptime or runtime?
 
                     if (Cache.Instance.StopBot)

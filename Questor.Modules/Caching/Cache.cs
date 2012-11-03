@@ -2857,7 +2857,9 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
+            Cache.Instance.CargoHold = null;
             Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
+
             if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
             {
                 if (Cache.Instance.CargoHold.Window == null)

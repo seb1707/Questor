@@ -207,6 +207,8 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     string transportshipName = Settings.Instance.TransportShipName.ToLower();
 
+                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
+
                     if (string.IsNullOrEmpty(transportshipName))
                     {
                         _States.CurrentArmState = ArmState.NotEnoughAmmo;
@@ -245,6 +247,8 @@ namespace Questor.Modules.Actions
 
                     if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 10 seconds
                     {
+                        if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
+
                         if (string.IsNullOrEmpty(salvageshipName))
                         {
                             _States.CurrentArmState = ArmState.NotEnoughAmmo;
@@ -288,6 +292,8 @@ namespace Questor.Modules.Actions
                 case ArmState.ActivateCombatShip:                    
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) 
                         return;
+
+                    if (!Cache.Instance.CloseCargoHold("Arm>ActivateCombatShip")) return;
 
                     string shipNameToUseNow = Settings.Instance.CombatShipName.ToLower();
                     if (string.IsNullOrEmpty(shipNameToUseNow))

@@ -381,14 +381,14 @@ namespace Questor
 
         private void CreateLavishCommands()
         {
-            if (Settings.Instance.UseInnerspace)
-            {
+            //if (Settings.Instance.UseInnerspace)
+            //{
                 LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);
                 LavishScript.Commands.AddCommand("SetDisable3D", SetDisable3D);
                 LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
-            }
+            //}
         }
 
         public void CloseQuestor()

@@ -387,7 +387,7 @@ namespace Questor.Behaviors
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                         break;
                     }
-
+                    ValidateCombatMissionSettings();
                     Questor.CheckEVEStatus();
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Start;
                     break;

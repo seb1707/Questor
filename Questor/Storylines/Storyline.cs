@@ -213,7 +213,7 @@ namespace Questor.Storylines
                 }
 
                 // Make sure we have got a clear path to the agent
-                if (!Settings.Instance.LowSecMissionsInShuttles && !Cache.Instance.CheckifRouteIsAllHighSec())
+                if (!Cache.Instance.CheckifRouteIsAllHighSec())
                 {
                     if (_highSecCounter < 5)
                     {

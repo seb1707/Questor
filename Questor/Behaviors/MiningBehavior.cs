@@ -48,10 +48,9 @@ namespace Questor.Behaviors
 
             _lastPulse = DateTime.MinValue;
 
-            MiningToolGroupIDs.Add(54); //miners
-            MiningToolGroupIDs.Add(464); //strip miners
-            MiningToolGroupIDs.Add(483); //modulated strip miners
-            
+            MiningToolGroupIDs.Add((int)Group.Miners);              //miners
+            MiningToolGroupIDs.Add((int)Group.StripMiners);         //strip miners
+            MiningToolGroupIDs.Add((int)Group.ModulatedStripMiners);//modulated strip miners
         }
 
         private void BeginClosingQuestor()
@@ -86,7 +85,6 @@ namespace Questor.Behaviors
                 }
             }
 
-
             _panic.ProcessState();
 
             if (_States.CurrentPanicState == PanicState.Panic || _States.CurrentPanicState == PanicState.Panicking)
@@ -104,21 +102,21 @@ namespace Questor.Behaviors
             {
                 // Reset panic state
                 _States.CurrentPanicState = PanicState.Normal;
-
-
                 _States.CurrentTravelerState = TravelerState.Idle;
                 _States.CurrentMiningState = MiningState.GotoBelt;
             }
 
             if (Settings.Instance.DebugStates)
+            {
                 Logging.Log("MiningBehavior", "Pre-switch", Logging.White);
+            }
+
             switch (_States.CurrentMiningState)
             {
                 case MiningState.Default:
                 case MiningState.Idle:
                     _States.CurrentMiningState = MiningState.Cleanup;
                     break;
-
 
                 case MiningState.Cleanup:
                     if (Cache.Instance.LootAlreadyUnloaded == false)
@@ -127,10 +125,9 @@ namespace Questor.Behaviors
                         break;
                     }
 
-                    Questor.CheckEVEStatus(); 
+                    Questor.CheckEVEStatus();
                     _States.CurrentMiningState = MiningState.Arm;
                     break;
-
 
                 case MiningState.GotoBase:
                     DirectBookmark miningHome = Cache.Instance.BookmarksByLabel("Mining Home").FirstOrDefault();
@@ -148,7 +145,7 @@ namespace Questor.Behaviors
 
                 case MiningState.UnloadLoot:
                     //
-                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotobase
                     //
                     if (Cache.Instance.InSpace)
                     {
@@ -176,8 +173,8 @@ namespace Questor.Behaviors
                             return;
                         }
 
-
                         _States.CurrentMiningState = MiningState.Idle;
+                        _States.CurrentQuestorState = QuestorState.Idle;
                         Logging.Log("MiningBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], MiningState: [" + _States.CurrentMiningState + "]", Logging.White);
                         return;
 
@@ -197,7 +194,7 @@ namespace Questor.Behaviors
 
                 case MiningState.Arm:
                     //
-                    // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
+                    // this state should never be reached in space. if we are in space and in this state we should switch to gotobase
                     //
                     if (Cache.Instance.InSpace)
                     {
@@ -213,6 +210,7 @@ namespace Questor.Behaviors
                         // Load ammo... this "fixes" the problem I experienced with not reloading after second arm phase. The quantity was getting set to 0.
                         _arm.AmmoToLoad.Clear();
                         _arm.AmmoToLoad.Add(Settings.Instance.Ammo.FirstOrDefault());
+                        //FIXME: bad hack - this shoul dbe fixed differently / elsewhere
                         if (_arm.AmmoToLoad.FirstOrDefault().Quantity == 0) { _arm.AmmoToLoad.FirstOrDefault().Quantity = 333; }
                     }
 
@@ -266,8 +264,10 @@ namespace Questor.Behaviors
                     if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
                         break;
 
-
-
+                    //
+                    // this should goto a mining system bookmark (one of possibly many)
+                    // then goto the 1st belt. This would allow for mining in systems without stations
+                    //
                     Logging.Log("MiningBehavior", "Setting Destination to 1st Asteroid belt.", Logging.White);
 
                     DirectBookmark asteroidShortcutGTB = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();

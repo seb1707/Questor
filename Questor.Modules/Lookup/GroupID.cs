@@ -72,6 +72,11 @@ namespace Questor.Modules.Lookup
         HeavyMissilelaunchers = 510,
         AssaultMissilelaunchers = 511,
         DefenderMissilelaunchers = 512,
+        
+        Miners = 54, // Miner I, Miner II, etc - Mining Tool GroupIDs
+        StripMiners = 464, // Strip Miner I, etc - Mining Tool GroupIDs
+        ModulatedStripMiners = 483, // Modulated Strip Miners, etc - Mining Tool GroupIDs
+        
         SentryGun = 99,                       //Protecting the weak and upholding the law
 
         ProtectiveSentryGun = 180,

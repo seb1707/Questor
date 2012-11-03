@@ -270,7 +270,9 @@ namespace Questor.Behaviors
                 {
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Storyline;
                     if (_storyline.StorylineHandler is GenericCombatStoryline)
-                        (_storyline.StorylineHandler as GenericCombatStoryline).State = GenericCombatStorylineState.GotoMission;
+                    {
+                        (_storyline.StorylineHandler as GenericCombatStoryline).State = GenericCombatStorylineState.GotoMission;   
+                    }
                 }
                 else
                 {
@@ -342,6 +344,7 @@ namespace Questor.Behaviors
                             Logging.Log("CombatMissionsBehavior", "Random start delay of [" + _randomDelay + "] seconds", Logging.White);
                             return;
                         }
+
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Cleanup;
                         return;
                     }
@@ -354,7 +357,9 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.DelayedStart:
                     if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < _randomDelay)
+                    {
                         break;
+                    }
 
                     _storyline.Reset();
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Cleanup;
@@ -362,7 +367,9 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.DelayedGotoBase:
                     if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
+                    {
                         break;
+                    }
 
                     Logging.Log("CombatMissionsBehavior", "Heading back to base", Logging.White);
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;

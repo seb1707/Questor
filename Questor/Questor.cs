@@ -361,12 +361,8 @@ namespace Questor
             if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) &&
                         Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
             {
-                Logging.Log(
-                    "Questor", ": Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " +
-                    Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-                Cache.Instance.ReasonToStopQuestor =
-                    "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " +
-                    Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
+                Logging.Log("Questor", ": Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
+                Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
                 if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
                 {
                     Cache.Instance.CloseQuestorCMDLogoff = true;
@@ -383,8 +379,7 @@ namespace Questor
                     BeginClosingQuestor();
                     return;
                 }
-                Logging.Log(
-                    "Questor", "EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ", Logging.White);
+                Logging.Log("Questor", "EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ", Logging.White);
             }
             else
             {
@@ -401,7 +396,10 @@ namespace Questor
 
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+            {
                 return false;
+            }
+
             _lastPulse = DateTime.UtcNow;
 
 
@@ -434,10 +432,14 @@ namespace Questor
 
             // Session is not ready yet, do not continue
             if (!Cache.Instance.DirectEve.Session.IsReady)
+            {
                 return false;
+            }
 
             if (Cache.Instance.DirectEve.Session.IsReady)
+            {
                 Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+            }
 
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
@@ -459,15 +461,14 @@ namespace Questor
             }
 
             // Check 3D rendering
-            if (Cache.Instance.DirectEve.Session.IsInSpace &&
-                Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
-                Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
-
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds <
-                Time.Instance.SessionRunningTimeUpdate_seconds)
+            if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
             {
-                Cache.Instance.SessionRunningTime =
-                    (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
+                Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
+            }
+
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
+            {
+                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
                 Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
             }
             return true;
@@ -519,7 +520,9 @@ namespace Questor
 
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InWarp)
+            {
                 return;
+            }
 
             //DirectAgentMission mission;
             switch (_States.CurrentQuestorState)

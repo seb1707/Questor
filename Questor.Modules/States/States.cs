@@ -1,4 +1,6 @@
 ﻿
+using Questor.Modules.Caching;
+
 namespace Questor.Modules.States
 {
     using LavishScriptAPI;

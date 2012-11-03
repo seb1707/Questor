@@ -284,9 +284,14 @@ namespace Questor
                 {
                     Cache.Instance.ManualStopTime = dateTimePicker1.Value;
                     if (Cache.Instance.ManualStopTime > Cache.Instance.StopTime)
+                    {
                         Cache.Instance.StopTimeSpecified = false;
+                    }
+
                     if (Cache.Instance.ManualStopTime < Cache.Instance.StopTime)
+                    {
                         Cache.Instance.StopTimeSpecified = true;
+                    }
                 }
                 else
                 {
@@ -303,9 +308,14 @@ namespace Questor
                 {
                     Cache.Instance.ManualRestartTime = dateTimePicker2.Value;
                     if (Cache.Instance.ManualRestartTime > Cache.Instance.StopTime)
+                    {
                         Cache.Instance.StopTimeSpecified = false;
+                    }
+
                     if (Cache.Instance.ManualRestartTime < Cache.Instance.StopTime)
+                    {
                         Cache.Instance.StopTimeSpecified = true;
+                    }
                 }
                 else
                 {
@@ -780,7 +790,9 @@ namespace Questor
             if (_States.CurrentQuestorState == QuestorState.Mining)
             {
                 if ((string)BehaviorComboBox.SelectedItem != _States.CurrentMiningState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
                     BehaviorComboBox.SelectedItem = _States.CurrentMiningState.ToString();
+                }
             }
 
             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
@@ -795,17 +807,23 @@ namespace Questor
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
             {
                 if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
                     BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
+                }
             }
 
             if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
             {
                 if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
                     BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
+                }
             }
 
             if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.DamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+            {
                 DamageTypeComboBox.SelectedItem = Cache.Instance.DamageType.ToString();
+            }
             //
             // Middle group
             //
@@ -828,28 +846,42 @@ namespace Questor
             }
 
             if ((string)CleanupStateComboBox.SelectedItem != _States.CurrentCleanupState.ToString() && !CleanupStateComboBox.DroppedDown)
+            {
                 CleanupStateComboBox.SelectedItem = _States.CurrentCleanupState.ToString();
+            }
 
             if ((string)LocalWatchStateComboBox.SelectedItem != _States.CurrentLocalWatchState.ToString() && !LocalWatchStateComboBox.DroppedDown)
+            {
                 LocalWatchStateComboBox.SelectedItem = _States.CurrentLocalWatchState.ToString();
+            }
 
             if ((string)SalvageStateComboBox.SelectedItem != _States.CurrentSalvageState.ToString() && !SalvageStateComboBox.DroppedDown)
+            {
                 SalvageStateComboBox.SelectedItem = _States.CurrentSalvageState.ToString();
+            }
 
             //
             // Right Group
             //
             if ((string)CombatMissionCtrlStateComboBox.SelectedItem != text && !CombatMissionCtrlStateComboBox.DroppedDown)
+            {
                 CombatMissionCtrlStateComboBox.SelectedItem = text;
+            }
 
             if ((string)StorylineStateComboBox.SelectedItem != _States.CurrentStorylineState.ToString() && !StorylineStateComboBox.DroppedDown)
+            {
                 StorylineStateComboBox.SelectedItem = _States.CurrentStorylineState.ToString();
+            }
 
             if ((string)ArmStateComboBox.SelectedItem != _States.CurrentArmState.ToString() && !ArmStateComboBox.DroppedDown)
+            {
                 ArmStateComboBox.SelectedItem = _States.CurrentArmState.ToString();
+            }
 
             if ((string)UnloadStateComboBox.SelectedItem != _States.CurrentUnloadLootState.ToString() && !UnloadStateComboBox.DroppedDown)
+            {
                 UnloadStateComboBox.SelectedItem = _States.CurrentUnloadLootState.ToString();
+            }
 
             if ((string)TravelerStateComboBox.SelectedItem != _States.CurrentTravelerState.ToString() && !TravelerStateComboBox.DroppedDown)
             {
@@ -858,7 +890,9 @@ namespace Questor
             }
 
             if ((string)AgentInteractionStateComboBox.SelectedItem != _States.CurrentAgentInteractionState.ToString() && !AgentInteractionStateComboBox.DroppedDown)
+            {
                 AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
+            }
 
             //if (Settings.Instance.CharacterMode.ToLower() == "dps" || Settings.Instance.CharacterMode.ToLower() == "combat missions")
             //{
@@ -1038,7 +1072,9 @@ namespace Questor
                 if (DateTime.UtcNow > _nextConsoleLogRefresh)
                 {
                     if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                    {
                         txtExtConsole.Text = "";
+                    }
                     txtExtConsole.AppendText(Cache.Instance.ExtConsole);
                     Cache.Instance.ExtConsole = null;
                     _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
@@ -1178,16 +1214,12 @@ namespace Questor
 
             if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
             {
-                _States.CurrentCombatHelperBehaviorState =
-                    (CombatHelperBehaviorState)
-                    Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);
+                _States.CurrentCombatHelperBehaviorState = (CombatHelperBehaviorState)Enum.Parse(typeof(CombatHelperBehaviorState), BehaviorComboBox.Text);
             }
 
             if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
             {
-                _States.CurrentDirectionalScannerBehaviorState =
-                    (DirectionalScannerBehaviorState)
-                    Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
+                _States.CurrentDirectionalScannerBehaviorState =(DirectionalScannerBehaviorState)Enum.Parse(typeof(DirectionalScannerBehaviorState), BehaviorComboBox.Text);
             }
 
             //if (_States.CurrentQuestorState == QuestorState.DebugInventoryTree)
@@ -1199,16 +1231,12 @@ namespace Questor
 
             if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
             {
-                _States.CurrentDebugHangarBehaviorState =
-                    (DebugHangarsBehaviorState)
-                    Enum.Parse(typeof(DebugHangarsBehaviorState), BehaviorComboBox.Text);
+                _States.CurrentDebugHangarBehaviorState =(DebugHangarsBehaviorState)Enum.Parse(typeof(DebugHangarsBehaviorState), BehaviorComboBox.Text);
             }
 
             if (_States.CurrentQuestorState == QuestorState.Mining)
             {
-                _States.CurrentMiningState =
-                    (MiningState)
-                    Enum.Parse(typeof(MiningState), BehaviorComboBox.Text);
+                _States.CurrentMiningState =(MiningState)Enum.Parse(typeof(MiningState), BehaviorComboBox.Text);
             }
 
             try

@@ -1,7 +1,38 @@
-﻿namespace Questor.Modules.States
+﻿
+namespace Questor.Modules.States
 {
+    using LavishScriptAPI;
+    using Questor.Modules.Lookup;
+
     public class _States
     {
+        public static void LavishEvent_QuestorIdle()
+        {
+            if (Settings.Instance.UseInnerspace)
+            {
+                uint QuestorIdleEvent = LavishScript.Events.RegisterEvent("QuestorIdle");
+                LavishScript.Events.ExecuteEvent(QuestorIdleEvent, "");
+            }
+        }
+
+        public static void LavishEvent_QuestorState()
+        {
+            if (Settings.Instance.UseInnerspace)
+            {
+                uint QuestorStateEvent = LavishScript.Events.RegisterEvent("QuestorState");
+                LavishScript.Events.ExecuteEvent(QuestorStateEvent, _States.CurrentQuestorState.ToString());
+            }
+        }
+
+        public static void LavishEvent_QuestorCombatMissionsBehaviorState()
+        {
+            if (Settings.Instance.UseInnerspace)
+            {
+                uint QuestorCombatMissionsBehaviorStateEvent = LavishScript.Events.RegisterEvent("QuestorCombatMissionsBehaviorState");
+                LavishScript.Events.ExecuteEvent(QuestorCombatMissionsBehaviorStateEvent, _States.CurrentCombatMissionBehaviorState.ToString());
+            }
+        }
+
         public static QuestorState CurrentQuestorState { get; set; }
 
         public static DroneState CurrentDroneState { get; set; }

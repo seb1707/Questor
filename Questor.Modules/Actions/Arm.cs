@@ -648,7 +648,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("Arm.MoveItems", "Moving MissionItem [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
                             Cache.Instance.CargoHold.Add(hangarItem, moveBringItemQuantity);
 
-                            bringItemQuantity -= moveBringItemQuantity;
+                            bringItemQuantity = bringItemQuantity - moveBringItemQuantity;
                             if (bringItemQuantity <= 0)
                             {
                                 _bringItemMoved = true;
@@ -714,7 +714,12 @@ namespace Questor.Modules.Actions
                             moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
                             Logging.Log("Arm.MoveItems", "Moving MissionItem [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
                             Cache.Instance.CargoHold.Add(hangarItem, moveOptionalMissionItemQuantity);
-                            _bringoptionalItemMoved = true;
+
+                            bringOptionalItemQuantity = bringOptionalItemQuantity - moveOptionalMissionItemQuantity;
+                            if (bringOptionalItemQuantity < 1)
+                            {
+                                _bringoptionalItemMoved = true;
+                            }
                             ItemsAreBeingMoved = true;
                             Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(1);
                             return;

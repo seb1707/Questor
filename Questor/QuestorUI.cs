@@ -18,11 +18,9 @@ namespace Questor
     public partial class QuestorfrmMain : Form
     {
         private readonly Questor _questor;
-        //private DateTime _lastlogmessage
         private DateTime _nextConsoleLogRefresh = DateTime.MinValue;
         private DateTime _nextUIDataRefresh = DateTime.UtcNow;
         private DateTime _nextScheduleUpdate = DateTime.UtcNow;
-        //private DateTime _nextWreckUpdate = DateTime.UtcNow;
 
         public QuestorfrmMain()
         {
@@ -73,61 +71,87 @@ namespace Questor
                 //
                 DamageTypeComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(DamageType)))
+                {
                     DamageTypeComboBox.Items.Add(text);
+                }
 
                 //
                 // middle column
                 //
                 PanicStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(PanicState)))
+                {
                     PanicStateComboBox.Items.Add(text);
+                }
 
                 CombatStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(CombatState)))
+                {
                     CombatStateComboBox.Items.Add(text);
+                }
 
                 DronesStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(DroneState)))
+                {
                     DronesStateComboBox.Items.Add(text);
+                }
 
                 CleanupStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(CleanupState)))
+                {
                     CleanupStateComboBox.Items.Add(text);
+                }
 
                 LocalWatchStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(LocalWatchState)))
+                {
                     LocalWatchStateComboBox.Items.Add(text);
+                }
 
                 SalvageStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(SalvageState)))
+                {
                     SalvageStateComboBox.Items.Add(text);
+                }
 
                 //
                 // right column
                 //
                 CombatMissionCtrlStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(CombatMissionCtrlState)))
+                {
                     CombatMissionCtrlStateComboBox.Items.Add(text);
+                }
 
                 StorylineStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(StorylineState)))
+                {
                     StorylineStateComboBox.Items.Add(text);
+                }
 
                 ArmStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(ArmState)))
+                {
                     ArmStateComboBox.Items.Add(text);
+                }
 
                 UnloadStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(UnloadLootState)))
+                {
                     UnloadStateComboBox.Items.Add(text);
+                }
 
                 TravelerStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(TravelerState)))
+                {
                     TravelerStateComboBox.Items.Add(text);
+                }
 
                 AgentInteractionStateComboBox.Items.Clear();
                 foreach (string text in Enum.GetNames(typeof(AgentInteractionState)))
+                {
                     AgentInteractionStateComboBox.Items.Add(text);
+                }
             }
         }
 
@@ -142,9 +166,9 @@ namespace Questor
 
             //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.White);
             GreyListedMissionsTextBox.Text = "";
-            foreach (string greylistedmission in Settings.Instance.MissionGreylist)
+            foreach (string GreyListedMission in Settings.Instance.MissionGreylist)
             {
-                GreyListedMissionsTextBox.AppendText(greylistedmission + "\r\n");
+                GreyListedMissionsTextBox.AppendText(GreyListedMission + "\r\n");
             }
         }
 
@@ -308,37 +332,49 @@ namespace Questor
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(CombatMissionsBehaviorState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 }
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(DedicatedBookmarkSalvagerBehaviorState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 }
                 if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(CombatHelperBehaviorState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 } 
                 if (_States.CurrentQuestorState == QuestorState.Mining)
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(MiningState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 }
                 if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(DirectionalScannerBehaviorState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 }
                 if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
                 {
                     BehaviorComboBox.Items.Clear();
                     foreach (string text in Enum.GetNames(typeof(DebugHangarsBehaviorState)))
+                    {
                         BehaviorComboBox.Items.Add(text);
+                    }
                 }
             }
         }
@@ -737,10 +773,14 @@ namespace Questor
             }
 
             if (PauseCheckBox.Checked != Cache.Instance.Paused)
+            {
                 PauseCheckBox.Checked = Cache.Instance.Paused;
+            }
 
             if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
+            {
                 Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
+            }
 
             if (Settings.Instance.WindowXPosition.HasValue)
             {
@@ -758,7 +798,9 @@ namespace Questor
             {
                 string newlblCurrentPocketActiontext = "[ " + Cache.Instance.CurrentPocketAction + " ] Action";
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                {
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                }
             }
             else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage ||
                      _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoSalvageBookmark ||
@@ -768,13 +810,17 @@ namespace Questor
             {
                 const string newlblCurrentPocketActiontext = "[ " + "After Mission Salvaging" + " ] ";
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                {
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                }
             }
             else
             {
                 const string newlblCurrentPocketActiontext = "[ ]";
                 if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                {
                     lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                }
             }
 
             if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
@@ -783,12 +829,7 @@ namespace Questor
                 {
                     if (File.Exists(Cache.Instance.MissionXmlPath))
                     {
-                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " +
-                                                              Math.Round(
-                                                                  DateTime.UtcNow.Subtract(
-                                                                      Statistics.Instance.StartedMission).TotalMinutes,
-                                                                  0) + " min][ #" +
-                                                              Statistics.Instance.MissionsThisSession + " ]";
+                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.Instance.MissionsThisSession + " ]";
                         if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
                         {
                             lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
@@ -797,12 +838,7 @@ namespace Questor
                     }
                     else
                     {
-                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " +
-                                                              Math.Round(
-                                                                  DateTime.UtcNow.Subtract(
-                                                                      Statistics.Instance.StartedMission).TotalMinutes,
-                                                                  0) + " min][ #" +
-                                                              Statistics.Instance.MissionsThisSession + " ]";
+                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.Instance.MissionsThisSession + " ]";
                         if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
                         {
                             lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
@@ -813,7 +849,7 @@ namespace Questor
             }
             else if (String.IsNullOrEmpty(Cache.Instance.MissionName))
             {
-                lblCurrentMissionInfo.Text = "No Mission Selected Yet";
+                lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
                 buttonOpenMissionXML.Enabled = false;
             }
             else
@@ -918,10 +954,7 @@ namespace Questor
             {
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
                 {
-                    Logging.Log("QuestorUI",
-                                "The Last UI Frame Drawn by EVE was [" +
-                                Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) +
-                                "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
+                    Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
                     //
                     // closing eve would be a very good idea here
                     //
@@ -935,10 +968,7 @@ namespace Questor
             {
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
-                    Logging.Log("QuestorUI",
-                                "The Last Session.IsReady = true was [" +
-                                Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) +
-                                "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
+                    Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
                     CloseQuestor();
                     //Application.Exit();
                 }

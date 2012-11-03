@@ -1567,11 +1567,11 @@ namespace Questor.Modules.Caching
 
         public bool StopTimeSpecified = true;
 
-        public DateTime StopTime = DateTime.UtcNow.AddHours(10);
+        public DateTime StopTime = DateTime.Now.AddHours(10);
 
-        public DateTime ManualStopTime = DateTime.UtcNow.AddHours(10);
+        public DateTime ManualStopTime = DateTime.Now.AddHours(10);
 
-        public DateTime ManualRestartTime = DateTime.UtcNow.AddHours(10);
+        public DateTime ManualRestartTime = DateTime.Now.AddHours(10);
 
         public DateTime StartTime { get; set; }
 

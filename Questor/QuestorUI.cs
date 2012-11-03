@@ -1,4 +1,6 @@
 ﻿
+using Questor.Properties;
+
 namespace Questor
 {
     using System;
@@ -249,15 +251,15 @@ namespace Questor
 
                     if (Cache.Instance.LastInStation.AddSeconds(2) > DateTime.UtcNow)
                     {
-                        MaxRangeData.Text = "n/a";
-                        ActiveDronesData.Text = "n/a";
-                        ApproachingData.Text = "n/a";
-                        DamagedDronesData.Text = "n/a";
-                        PriorityTargetsData.Text = "n/a";
-                        WeaponRangeData.Text = "n/a";
-                        IsMissionPocketDoneData.Text = "n/a";
-                        WrecksData.Text = "n/a";
-                        UnlootedContainersData.Text = "n/a";
+                        MaxRangeData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        ActiveDronesData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        ApproachingData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        DamagedDronesData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        PriorityTargetsData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        WeaponRangeData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        IsMissionPocketDoneData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        WrecksData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
+                        UnlootedContainersData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
 
                         DataAmmoHangarID.Text = Cache.Instance.AmmoHangarID.ToString(CultureInfo.InvariantCulture);
                         DataAmmoHangarName.Text = Settings.Instance.AmmoHangar;

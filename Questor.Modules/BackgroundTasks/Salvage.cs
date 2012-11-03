@@ -466,10 +466,13 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
-                    // Do we want to loot other items?
-                    //if (!isMissionItem && !LootEverything)
-                    //    continue;
-
+                    if (!Settings.Instance.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion)
+                    {
+                        // Do we want to loot other items?
+                        if (!isMissionItem && !LootEverything)
+                            continue;    
+                    }
+                    
                     // Do not pick up items that cannot enter in a freighter container (unless its the mission item)
                     // Note: some mission items that are alive have been allowed to be
                     //       scooped because UnloadLootState.MoveCommonMissionCompletionitems

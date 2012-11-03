@@ -189,6 +189,9 @@
        and the action is finished as soon as the mission item is in the ship's cargo, if turned
        on then the bot will loot all wrecks/cans before finishing the loot-action -->
   <lootEverything>true</lootEverything>
+  <!-- lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion if true will ignore the lootEverything setting and will loot 'on the fly' but will not slow down to finish looting -->
+  <!-- questor will only loot in the background and will happily finish pockets that have loot still in them, use loot (to loot the field) or lootitem (to get a specific item only) actions as needed -->
+  <lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion>false</lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion>
   <!-- This is the age bookmarks have to reach in minutes before the dedicated salvager will attempt to use the bookmark: expressed in minutes -->
   <!-- It is HIGHLY recommended that you leave this at greater than 30 min - wrecks roughly (exactly?) 2 hours -->
   <ageofBookmarksForSalvageBehavior>45</ageofBookmarksForSalvageBehavior>

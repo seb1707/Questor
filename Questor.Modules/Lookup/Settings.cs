@@ -219,6 +219,8 @@ namespace Questor.Modules.Lookup
         public int AgeofBookmarksForSalvageBehavior { get; set; } //in minutes
         public int AgeofSalvageBookmarksToExpire { get; set; } //in minutes
         public bool DeleteBookmarksWithNPC { get; set; }
+
+        public bool LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion { get; set; }
         //
         // undocking settings
         //
@@ -675,6 +677,7 @@ namespace Questor.Modules.Lookup
                 AgeofBookmarksForSalvageBehavior = 60;
                 AgeofSalvageBookmarksToExpire = 120;
                 DeleteBookmarksWithNPC = false;
+                LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = false;
                 //
                 // Enable / Disable the different types of logging that are available
                 //
@@ -1058,6 +1061,7 @@ namespace Questor.Modules.Lookup
                         WreckBlackListMediumWrecks = (bool?)xml.Element("WreckBlackListMediumWrecks") ?? false;
                         AgeofBookmarksForSalvageBehavior = (int?)xml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
                         AgeofSalvageBookmarksToExpire = (int?)xml.Element("ageofSalvageBookmarksToExpire") ?? 120;
+                        LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = (bool?)xml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? false;
     
                     }
                     catch (Exception exception)

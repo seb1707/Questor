@@ -131,7 +131,7 @@ namespace Questor.Storylines
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: MoveItem")) return false;
 
-            if (!Cache.Instance.OpenCargoHold("GenericCourierStoryline: MoveItem")) return false;
+            if (!Cache.Instance.ReadyCargoHold("GenericCourierStoryline: MoveItem")) return false;
 
             // 314 == Giant Sealed Cargo Containers
             const int containersGroupId = 314;

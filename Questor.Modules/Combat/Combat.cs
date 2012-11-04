@@ -299,7 +299,7 @@ namespace Questor.Modules.Combat
         public static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             // We need the cargo bay open for both reload actions
-            if (!Cache.Instance.OpenCargoHold("Questor: ReloadAmmo")) return false;
+            if (!Cache.Instance.ReadyCargoHold("Questor: ReloadAmmo")) return false;
 
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
         }
@@ -741,7 +741,7 @@ namespace Questor.Modules.Combat
             //
             // ???bounty tracking code goes here???
             //
-            if (!Cache.Instance.OpenCargoHold("Combat.TargetCombatants")) return;
+            if (!Cache.Instance.ReadyCargoHold("Combat.TargetCombatants")) return;
             // What is the range that we can target at
 
             // Get a list of combat targets (combine targets + targeting)
@@ -944,7 +944,7 @@ namespace Questor.Modules.Combat
                     //    Cache.Instance._priorityTargets_text = Cache.Instance._priorityTargets_text + "[ " + i + " ][ " + Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "k away][" + Cache.Instance._priorityTargets[i].Entity.Health + "TH][" + Cache.Instance._priorityTargets[i].Entity.ShieldPct + "S][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.ArmorPct, 0) + "A][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.StructurePct, 0) + "H][" + NPCValue.Value.ToString() + "isk],";
                     //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
                     //}
-                    if (!Cache.Instance.OpenCargoHold("Combat")) break;
+                    if (!Cache.Instance.ReadyCargoHold("Combat")) break;
                     _States.CurrentCombatState = CombatState.CheckTargets;
                     TargetingCache.CurrentWeaponsTarget = GetTarget();
                     if (TargetingCache.CurrentWeaponsTarget != null)

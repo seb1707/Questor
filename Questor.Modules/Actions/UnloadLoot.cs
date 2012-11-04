@@ -77,7 +77,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentUnloadLootState = UnloadLootState.Done;
             }
 
-            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+            if (!Cache.Instance.ReadyCargoHold("UnloadLoot")) return;
 
             if (Cache.Instance.CargoHold.IsValid)
             {
@@ -219,7 +219,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
             }
 
-            if (!Cache.Instance.OpenCargoHold("Unloadloot.MoveAmmo")) return;
+            if (!Cache.Instance.ReadyCargoHold("Unloadloot.MoveAmmo")) return;
 
             if (Cache.Instance.CargoHold.IsValid)
             {

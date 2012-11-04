@@ -87,7 +87,7 @@ namespace Questor.Storylines
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
 
-            if (!Cache.Instance.OpenCargoHold("TransactionDataDelivery")) return false;
+            if (!Cache.Instance.ReadyCargoHold("TransactionDataDelivery")) return false;
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;

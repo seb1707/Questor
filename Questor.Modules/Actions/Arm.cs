@@ -602,12 +602,14 @@ namespace Questor.Modules.Actions
                     if (!_bringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
-                        if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                        if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.StackCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.StackAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
                         //if (!Cache.Instance.StackItemsHangar("Arm.MoveItems")) break;
+
+                        if (!Cache.Instance.CargoHold.IsReady || !Cache.Instance.CargoHold.IsValid ) return;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
@@ -672,7 +674,7 @@ namespace Questor.Modules.Actions
                     if (!_bringoptionalItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
-                        if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                        if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
@@ -736,8 +738,10 @@ namespace Questor.Modules.Actions
                     //
                     // load ammo
                     //
-                    if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                    if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
+
+                    if (!Cache.Instance.CargoHold.IsReady || !Cache.Instance.CargoHold.IsValid) return;
 
                     //IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
@@ -811,7 +815,7 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction)
                         break;
 
-                    if (!Cache.Instance.OpenCargoHold("Arm.WaitForItems")) break;
+                    if (!Cache.Instance.ReadyCargoHold("Arm.WaitForItems")) break;
 
                     if (Cache.Instance.CargoHold.Items.Count == 0)
                         break;
@@ -844,8 +848,12 @@ namespace Questor.Modules.Actions
                                 {
                                     XElement ammoTypes = missionXml.Root.Element("missionammo");
                                     if (ammoTypes != null)
+                                    {
                                         foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                                        {
                                             Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+                                        }
+                                    }
                                 }
                             }
                             catch (Exception ex)

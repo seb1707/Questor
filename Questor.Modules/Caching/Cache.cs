@@ -2841,7 +2841,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer CargoHold { get; set; }
 
-        public bool OpenCargoHold(String module)
+        public bool ReadyCargoHold(String module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -2859,42 +2859,8 @@ namespace Questor.Modules.Caching
 
             Cache.Instance.CargoHold = null;
             Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
-
-            if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
-            {
-                if (Cache.Instance.CargoHold.Window == null)
-                {
-                    // No, command it to open
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
-                    Logging.Log(module, "Opening Cargohold of active ship: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) +
-                                "sec]", Logging.White);
-                    return false;
-                }
-
-                if (!Cache.Instance.CargoHold.Window.IsReady)
-                {
-                    //Logging.Log(module, "cargo window is not ready", Logging.White);
-                    return false;
-                }
-
-                if (!Cache.Instance.CargoHold.Window.IsPrimary())
-                {
-                    if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
-                    return true;
-                }
-
-                if (Cache.Instance.CargoHold.Window.IsPrimary())
-                {
-                    if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
-                    Cache.Instance.CargoHold.Window.OpenAsSecondary();
-                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                    return false;
-                }
-                return true;
-            }
-            return false;
+            NextOpenCargoAction = DateTime.UtcNow.AddSeconds(3);
+            return true;
         }
 
         public bool StackCargoHold(String module)
@@ -2939,7 +2905,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.CargoHold.Window == null)
                 {
                     Logging.Log(module, "Cargohold is closed", Logging.White);
-                    return false;
+                    return true;
                 }
 
                 if (!Cache.Instance.CargoHold.Window.IsReady)

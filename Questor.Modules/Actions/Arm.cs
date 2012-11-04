@@ -293,7 +293,7 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) 
                         return;
 
-                    if (!Cache.Instance.CloseCargoHold("Arm>ActivateCombatShip")) return;
+                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateCombatShip")) return;
 
                     string shipNameToUseNow = Settings.Instance.CombatShipName.ToLower();
                     if (string.IsNullOrEmpty(shipNameToUseNow))

@@ -1171,13 +1171,13 @@ namespace Questor.Modules.Lookup
                     // 32006 Navy Cap Booster 400
                     // 32014 Navy Cap Booster 800
 
-                    TrackingDisruptorScript = (int?)xml.Element("trackingDisruptorScript") ?? 29007;
-                    TrackingComputerScript = (int?)xml.Element("trackingComputerScript") ?? 29001;
-                    TrackingLinkScript = (int?)xml.Element("trackingLinkScript") ?? 29001;
-                    SensorBoosterScript = (int?)xml.Element("sensorBoosterScript") ?? 29009;
-                    SensorDampenerScript = (int?)xml.Element("sensorDampenerScript") ?? 29015;
-                    AncillaryShieldBoosterScript = (int?)xml.Element("ancillaryShieldBoosterScript") ?? 11289;
-                    CapacitorInjectorScript = (int?)xml.Element("capacitorInjectorScript") ?? 11289;
+                    TrackingDisruptorScript = (int?)xml.Element("trackingDisruptorScript") ?? (int)TypeID.TrackingDisruptorScript;
+                    TrackingComputerScript = (int?)xml.Element("trackingComputerScript") ?? (int)TypeID.TrackingComputerScript;
+                    TrackingLinkScript = (int?)xml.Element("trackingLinkScript") ?? (int)TypeID.TrackingLinkScript;
+                    SensorBoosterScript = (int?)xml.Element("sensorBoosterScript") ?? (int)TypeID.SensorBoosterScript;
+                    SensorDampenerScript = (int?)xml.Element("sensorDampenerScript") ?? (int)TypeID.SensorDampenerScript;
+                    AncillaryShieldBoosterScript = (int?)xml.Element("ancillaryShieldBoosterScript") ?? (int)TypeID.AncillaryShieldBoosterScript;
+                    CapacitorInjectorScript = (int?)xml.Element("capacitorInjectorScript") ?? (int)TypeID.CapacitorInjectorScript;
 
                     //
                     // Speed and Movement Settings

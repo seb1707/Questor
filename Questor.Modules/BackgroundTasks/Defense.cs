@@ -586,7 +586,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            if (Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
             {
                 _lastSessionChange = DateTime.UtcNow;
                 return;

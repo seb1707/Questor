@@ -8,16 +8,16 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Drawing;
-using System.Windows.Forms;
-using Questor.Modules.Caching;
-using Questor.Modules.Lookup;
-
 namespace Questor.Modules.Logging
 {
     using System;
-    using InnerSpaceAPI;
     using System.IO;
+    using System.Drawing;
+    using System.Windows.Forms;
+    using Questor.Modules.Caching;
+    using Questor.Modules.Lookup;
+    using Questor.Modules.States;
+    using InnerSpaceAPI;
     using LavishScriptAPI;
 
     public static class Logging

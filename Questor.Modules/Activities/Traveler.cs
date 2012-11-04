@@ -209,7 +209,7 @@ namespace Questor.Modules.Activities
                 }
                 return;
             }
-            if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return;
+            if (!Combat.ReloadAll(Cache.Instance.MyShip)) return;
             return;
         }
 

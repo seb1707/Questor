@@ -189,7 +189,7 @@ namespace Questor.Modules.Activities
                         BookmarkPocketForSalvaging();
 
                     //Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
-                    if (!Combat.ReloadAll(closest)) return;
+                    if (!Combat.ReloadAll(Cache.Instance.MyShip)) return;
                     
                     if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
                     {

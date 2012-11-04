@@ -1081,13 +1081,11 @@ namespace Questor.Modules.Lookup
                     CloseQuestorAllowRestart = (bool?)xml.Element("CloseQuestorAllowRestart") ?? true;
                     CloseQuestorArbitraryOSCmd = (bool?)xml.Element("CloseQuestorArbitraryOSCmd") ?? false;
                     //true or false
-                    CloseQuestorOSCmdContents = (string)xml.Element("CloseQuestorOSCmdContents") ??
-                                                "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: CloseQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+                    CloseQuestorOSCmdContents = (string)xml.Element("CloseQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: CloseQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
 
                     LoginQuestorArbitraryOSCmd = (bool?)xml.Element("LoginQuestorArbitraryOSCmd") ?? false;
                     //true or false
-                    LoginQuestorOSCmdContents = (string)xml.Element("LoginQuestorOSCmdContents") ??
-                                                "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: LoginQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+                    LoginQuestorOSCmdContents = (string)xml.Element("LoginQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: LoginQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
                     LoginQuestorLavishScriptCmd = (bool?)xml.Element("LoginQuestorLavishScriptCmd") ?? false;
                     //true or false
                     LoginQuestorLavishScriptContents = (string)xml.Element("LoginQuestorLavishScriptContents") ?? "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
@@ -1138,8 +1136,7 @@ namespace Questor.Modules.Lookup
                     // Weapon and targeting Settings
                     //
                     WeaponGroupId = (int?)xml.Element("weaponGroupId") ?? 0;
-                    DontShootFrigatesWithSiegeorAutoCannons =
-                        (bool?)xml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
+                    DontShootFrigatesWithSiegeorAutoCannons = (bool?)xml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
                     MaximumHighValueTargets = (int?)xml.Element("maximumHighValueTargets") ?? 2;
                     MaximumLowValueTargets = (int?)xml.Element("maximumLowValueTargets") ?? 2;
                     DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)xml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
@@ -1237,8 +1234,12 @@ namespace Questor.Modules.Lookup
                     Ammo.Clear();
                     XElement ammoTypes = xml.Element("ammoTypes");
                     if (ammoTypes != null)
+                    {
                         foreach (XElement ammo in ammoTypes.Elements("ammoType"))
+                        {
                             Ammo.Add(new Ammo(ammo));
+                        }
+                    }
 
                     MinimumAmmoCharges = (int?)xml.Element("minimumAmmoCharges") ?? 0;
 

@@ -85,7 +85,7 @@ namespace Questor.Storylines
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
+            if (!Cache.Instance.ReadyItemsHangar("TransactionDataDelivery")) return false;
 
             if (!Cache.Instance.ReadyCargoHold("TransactionDataDelivery")) return false;
 

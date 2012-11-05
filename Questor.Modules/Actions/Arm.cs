@@ -293,9 +293,9 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) 
                         return;
 
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateCombatShip")) return;
+                    //if (!Cache.Instance.CloseCargoHold("Arm.ActivateCombatShip")) return;
 
-                    string shipNameToUseNow = Settings.Instance.CombatShipName.ToLower();
+                    string shipNameToUseNow = Settings.Instance.CombatShipName;
                     if (string.IsNullOrEmpty(shipNameToUseNow))
                     {
                         _States.CurrentArmState = ArmState.NotEnoughAmmo;
@@ -318,7 +318,7 @@ namespace Questor.Modules.Actions
                     //
                     if (!string.IsNullOrEmpty(Cache.Instance.MissionShip) &&  TryMissionShip)
                     {
-                        shipNameToUseNow = Cache.Instance.MissionShip.ToLower();
+                        shipNameToUseNow = Cache.Instance.MissionShip;
                         TryMissionShip = true;
                     }
                     else
@@ -329,7 +329,10 @@ namespace Questor.Modules.Actions
                     //
                     // if we have a ship to use defined and we are not currently in that defined ship. change to that ship
                     //
-                    if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipNameToUseNow))
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateCombatShip", "shipNameToUseNow = [" + shipNameToUseNow + "]", Logging.Teal);
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateCombatShip", "Cache.Instance.DirectEve.ActiveShip.GivenName   = [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.Teal);
+                    
+                    if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.DirectEve.ActiveShip.GivenName != shipNameToUseNow))
                     {
                         if (!Cache.Instance.ReadyShipsHangar("Arm.ActivateCombatShip")) break;
 
@@ -534,7 +537,7 @@ namespace Questor.Modules.Actions
                     }
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveDrones")) break;
-                    if (!Cache.Instance.OpenItemsHangar("Arm.MoveDrones")) break;
+                    if (!Cache.Instance.ReadyItemsHangar("Arm.MoveDrones")) break;
 
                     DirectItem drone = Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId) ??
                                        Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == Settings.Instance.DroneTypeId);
@@ -567,9 +570,14 @@ namespace Questor.Modules.Actions
 
                 case ArmState.MoveItems:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction)
+                    {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
                         return;
+                    }
 
+                    if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", " start if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
                     if (!Cache.Instance.CloseFittingManager("Arm")) return;
+                    if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", " finish if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
 
                     if (ItemsAreBeingMoved)
                     {
@@ -597,19 +605,16 @@ namespace Questor.Modules.Actions
                     //
                     string bringItem = Cache.Instance.BringMissionItem;
                     if (string.IsNullOrEmpty(bringItem))
+                    {
                         _bringItemMoved = true;
+                    }
 
                     if (!_bringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
-                        if (!Cache.Instance.StackCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
-                        if (!Cache.Instance.StackAmmoHangar("Arm.MoveItems")) break;
-                        if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
-                        //if (!Cache.Instance.StackItemsHangar("Arm.MoveItems")) break;
-
-                        if (!Cache.Instance.CargoHold.IsReady || !Cache.Instance.CargoHold.IsValid ) return;
+                        if (!Cache.Instance.ReadyItemsHangar("Arm.MoveItems")) break;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
@@ -676,7 +681,7 @@ namespace Questor.Modules.Actions
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
-                        if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
+                        if (!Cache.Instance.ReadyItemsHangar("Arm.MoveItems")) break;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
 
@@ -740,8 +745,6 @@ namespace Questor.Modules.Actions
                     //
                     if (!Cache.Instance.ReadyCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
-
-                    if (!Cache.Instance.CargoHold.IsReady || !Cache.Instance.CargoHold.IsValid) return;
 
                     //IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 

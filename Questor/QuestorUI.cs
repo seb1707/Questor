@@ -1589,12 +1589,12 @@ namespace Questor
             _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseAllInventoryWindows;
         }
 
-        private void btnOpenItemsHangar_Click(object sender, EventArgs e)
+        private void btnReadyItemsHangar_Click(object sender, EventArgs e)
         {
             Cache.Instance.Paused = false;
             Logging.Log("QuestorUI", "Open ItemsHangar button was pressed", Logging.Teal);
             _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenItemsHangar;
+            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.ReadyItemsHangar;
         }
 
         private void btnStackItemsHangar_Click(object sender, EventArgs e)

@@ -546,9 +546,9 @@ namespace Questor.Behaviors
                     }
                     break;
 
-                case DebugHangarsBehaviorState.OpenItemsHangar:
-                    Logging.Log("DebugHangars", "DebugHangarsState.OpenItemsHangar:", Logging.White);
-                    if (!Cache.Instance.OpenItemsHangar("DebugHangars")) return;
+                case DebugHangarsBehaviorState.ReadyItemsHangar:
+                    Logging.Log("DebugHangars", "DebugHangarsState.ReadyItemsHangar:", Logging.White);
+                    if (!Cache.Instance.ReadyItemsHangar("DebugHangars")) return;
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;

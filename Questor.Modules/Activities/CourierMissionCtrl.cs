@@ -51,7 +51,7 @@ namespace Questor.Modules.Activities
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
+            if (!Cache.Instance.ReadyItemsHangar("CourierMissionCtrl")) return false;
 
             if (!Cache.Instance.ReadyCargoHold("CourierMissionCtrl")) return false;
 

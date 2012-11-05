@@ -34,6 +34,9 @@ namespace Questor.Modules.Logging
         public const string Teal = "\at";     //log debug
         public const string White = "\aw";    //questor
 
+
+        public const string Debug = Teal;     //log debug
+
         public const string CombatUserCorrectableErrors = Orange;
         public const string CombatFatalErrors = Red;
         public const string CombatGenericLogging = White;

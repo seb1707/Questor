@@ -46,7 +46,7 @@ namespace Questor.Modules.Actions
                         break;
                     _lastAction = DateTime.UtcNow;
 
-                    if (!Cache.Instance.OpenItemsHangar("Sell")) break;
+                    if (!Cache.Instance.ReadyItemsHangar("Sell")) break;
 
                     DirectItem directItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeId == Item));
                     if (directItem == null)

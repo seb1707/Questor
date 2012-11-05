@@ -280,7 +280,7 @@ namespace Questor.Modules.Actions
                             if (commonMissionCompletionItemsToMove.Any())
                             {
                                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot", "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
-                                if (!Cache.Instance.OpenItemsHangar("Unloadloot.MoveAmmo")) return;
+                                if (!Cache.Instance.ReadyItemsHangar("Unloadloot.MoveAmmo")) return;
                                 Logging.Log("Unloadloot.MoveAmmo", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
                                 Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
                                 AmmoIsBeingMoved = true;
@@ -338,7 +338,7 @@ namespace Questor.Modules.Actions
                         if (scriptsToMove.Any())
                         {
                             if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "if (scriptsToMove.Any())", Logging.White);
-                            if (!Cache.Instance.OpenItemsHangar("Unloadloot.MoveAmmo")) return;
+                            if (!Cache.Instance.ReadyItemsHangar("Unloadloot.MoveAmmo")) return;
                             Logging.Log("Unloadloot.MoveAmmo", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
                             AmmoIsBeingMoved = true;
                             Cache.Instance.ItemHangar.Add(scriptsToMove);
@@ -350,18 +350,22 @@ namespace Questor.Modules.Actions
                 }
                 else
                 {
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.AmmoHangar is Not yet valid", Logging.Teal);
                     return;
                 }
             }
             else
             {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
                 return;
             }
 
             //
             // Stack AmmoHangar
             //
+            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "starting Cache.Instance.StackAmmoHangar", Logging.Teal);
             if (!Cache.Instance.StackAmmoHangar("Unloadloot.MoveAmmo")) return;
+            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "finished Cache.Instance.StackAmmoHangar", Logging.Teal);
             return;
         }
 

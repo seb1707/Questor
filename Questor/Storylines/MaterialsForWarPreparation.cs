@@ -69,12 +69,12 @@ namespace Questor.Storylines
             int orequantity = Settings.Instance.MaterialsForWarOreQty; //999
 
             // Open the item hangar
-            if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
+            if (!Cache.Instance.ReadyItemsHangar("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
 
             if (Cache.Instance.ItemHangar.Window == null)
             {
                 Logging.Log("MaterialsForWar", "PreAcceptMission: ItemHangar is null", Logging.Orange);
-                if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
+                if (!Cache.Instance.ReadyItemsHangar("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
                 return StorylineState.PreAcceptMission;
             }
 

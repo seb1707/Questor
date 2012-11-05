@@ -259,7 +259,7 @@ namespace Questor.Storylines
                 return;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("Storyline")) return;
+            if (!Cache.Instance.ReadyItemsHangar("Storyline")) return;
 
             // Do we have any implants?
             if (!Cache.Instance.ItemHangar.Items.Any(i => i.GroupId >= 738 && i.GroupId <= 750))

@@ -29,7 +29,7 @@ namespace Questor.Storylines
             //    return StorylineState.GotoAgent;
 
             //// Open the ship hangar
-            //if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: Arm")) return StorylineState.Arm;
+            //if (!Cache.Instance.ReadyItemsHangar("GenericCourierStoryline: Arm")) return StorylineState.Arm;
 
             ////  Look for an industrial
             //var item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && (i.TypeId == 648 || i.TypeId == 649 || i.TypeId == 650 || i.TypeId == 651 || i.TypeId == 652 || i.TypeId == 653 || i.TypeId == 654 || i.TypeId == 655 || i.TypeId == 656 || i.TypeId == 657 || i.TypeId == 1944 || i.TypeId == 19744));
@@ -129,7 +129,7 @@ namespace Questor.Storylines
             var directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: MoveItem")) return false;
+            if (!Cache.Instance.ReadyItemsHangar("GenericCourierStoryline: MoveItem")) return false;
 
             if (!Cache.Instance.ReadyCargoHold("GenericCourierStoryline: MoveItem")) return false;
 

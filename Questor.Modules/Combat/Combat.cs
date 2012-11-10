@@ -921,10 +921,17 @@ namespace Questor.Modules.Combat
                 return;
             }
 
-            if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+            try
             {
-                Logging.Log("Combat", "No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!", Logging.Red);
-                _States.CurrentCombatState = CombatState.OutOfAmmo;
+                if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                {
+                    Logging.Log("Combat", "No weapons with GroupId [" + Settings.Instance.WeaponGroupId + "] found!", Logging.Red);
+                    _States.CurrentCombatState = CombatState.OutOfAmmo;
+                }
+            }
+            catch (Exception exception)
+            {
+                if (Settings.Instance.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName)", Logging.White);
             }
 
             switch (_States.CurrentCombatState)

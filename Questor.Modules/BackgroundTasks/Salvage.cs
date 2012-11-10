@@ -724,7 +724,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (!Cache.Instance.ReadyCargoHold("Salvage")) 
+            if (!Cache.Instance.OpenCargoHold("Salvage")) 
                 return;
 
             switch (_States.CurrentSalvageState)

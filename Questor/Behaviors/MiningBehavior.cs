@@ -433,7 +433,7 @@ namespace Questor.Behaviors
 
                     //check if we're full
 
-                    if (!Cache.Instance.ReadyCargoHold("Miner: Check cargohold capacity")) break;
+                    if (!Cache.Instance.OpenCargoHold("Miner: Check cargohold capacity")) break;
 
                     //should I check Cache.Instance.ActiveDrones.Any() instead?
                     if (Cache.Instance.CargoHold.IsValid

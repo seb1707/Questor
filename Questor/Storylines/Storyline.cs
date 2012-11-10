@@ -269,7 +269,7 @@ namespace Questor.Storylines
             }
 
             // Yes, open the ships cargo
-            if (!Cache.Instance.ReadyCargoHold("Storyline")) return;
+            if (!Cache.Instance.OpenCargoHold("Storyline")) return;
 
             // If we are not moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)

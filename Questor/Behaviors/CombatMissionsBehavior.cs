@@ -1044,7 +1044,7 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.Salvage:
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage: attempting to open cargo hold", Logging.White);
-                    if (!Cache.Instance.ReadyCargoHold("CombatMissionsBehavior: Salvage")) break;
+                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;

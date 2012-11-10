@@ -4925,13 +4925,14 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Add items to repair list", Logging.White);
                         repairWindow.RepairItems(repairAllItems);
+                        NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                         return false;
                     }
                     
                     Logging.Log(module, "Repairing Items", Logging.White);
                     repairWindow.RepairAll();
                     Cache.Instance.RepairAll = false;
-                    NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 2));
+                    NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                     return false;
                 }
                 

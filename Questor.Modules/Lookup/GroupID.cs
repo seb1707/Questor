@@ -150,6 +150,7 @@ namespace Questor.Modules.Lookup
         ToxicWaste = 282,
         Slaves = 283,
         SmallArms = 280,
+        AccelerationGateKeys = 474,
 
         Plagioclase = 458,
         Spodumain = 461,

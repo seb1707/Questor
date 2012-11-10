@@ -47,7 +47,7 @@ namespace Questor.Storylines
             //    Logging.Log("GenericCourier", "No industrial found, going in active ship", Logging.White);
             //    return StorylineState.GotoAgent;
             //}
-            string transportshipName = Settings.Instance.TransportShipName.ToLower();
+            string transportshipName = Settings.Instance.TransportShipName;
 
             if (string.IsNullOrEmpty(transportshipName))
             {
@@ -57,7 +57,7 @@ namespace Questor.Storylines
             }
             try
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
+                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())
                 {
                     List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                     foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
@@ -78,7 +78,7 @@ namespace Questor.Storylines
             
             if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 7 seconds
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName)
+                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == transportshipName.ToLower())
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.White);
                     _States.CurrentArmState = ArmState.Done;
@@ -87,9 +87,6 @@ namespace Questor.Storylines
             }
 
             return StorylineState.Arm;
-
-
-
         }
 
         /// <summary>

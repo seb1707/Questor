@@ -265,7 +265,10 @@ namespace Questor.Modules.Actions
                     //
                     try
                     {
-                        commonMissionCompletionItemsToMove = Cache.Instance.CargoHold.Items.Where(i => i.GroupId == (int)Group.Livestock).ToList();
+                        commonMissionCompletionItemsToMove = Cache.Instance.CargoHold.Items.Where(i => i.GroupId == (int)Group.Livestock || 
+                                                                                                       i.TypeId == (int)TypeID.AngelDiamondTag ||
+                                                                                                       i.TypeId == (int)TypeID.GuristasDiamondTag ||
+                                                                                                       i.GroupId == (int)Group.AccelerationGateKeys).ToList();
                     }
                     catch (Exception exception)
                     {

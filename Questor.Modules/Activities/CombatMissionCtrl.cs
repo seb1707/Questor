@@ -229,10 +229,18 @@ namespace Questor.Modules.Activities
             {
                 if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < (int)Distance.WarptoDistance)", Logging.Green);
                 // Move to the target
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction) 
                 {
-                    Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    closest.Approach();
+                    if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShip.Velocity < 100)
+                    {
+                        Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        closest.Approach();
+                        return;    
+                    }
+
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Cache.Instance.IsOrbiting [" + Cache.Instance.IsOrbiting + "] Cache.Instance.MyShip.Velocity [" + Cache.Instance.MyShip.Velocity + "]", Logging.Green);
+                    if (Settings.Instance.DebugActivateGate) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl", "Cache.Instance.Approaching.Id [" + Cache.Instance.Approaching.Id + "][closest.Id: " + closest.Id + "]", Logging.Green);
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
                     return;
                 }
                 

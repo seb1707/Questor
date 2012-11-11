@@ -223,7 +223,7 @@ namespace Questor
 
             Cache.Instance.NextTimeCheckAction = DateTime.UtcNow.AddMinutes(5);
             Logging.Log("Questor",
-                        "Checking: Current time [" + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) +
+                        "Checking: Current time [" + DateTime.Now.ToString(CultureInfo.InvariantCulture) +
                         "] StopTimeSpecified [" + Cache.Instance.StopTimeSpecified +
                         "] StopTime [ " + Cache.Instance.StopTime +
                         "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.White);

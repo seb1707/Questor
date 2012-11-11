@@ -591,7 +591,7 @@ namespace Questor.Modules.Activities
 
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
-                DistanceToApproach = 3000;
+                DistanceToApproach = (int)Distance.GateActivationRange;
 
             bool stopWhenTargeted;
             if (!bool.TryParse(action.GetParameterValue("StopWhenTargeted"), out stopWhenTargeted))

@@ -661,12 +661,19 @@ namespace Questor.Modules.Activities
 
             if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warptorange you need to approach (you cant warp from here)
             {
-                if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distance.WarptoDistance)]", Logging.Teal);
+                if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distance.WarptoDistance)] -  NextApproachAction [" + Cache.Instance.NextApproachAction + "]", Logging.Teal);
                 // Move to the target
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    closest.Approach();
+                    if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (DateTime.UtcNow > Cache.Instance.NextApproachAction)", Logging.Teal);
+                    if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching == null) Logging.Log("CombatMissionCtrl.MoveTo", "if (Cache.Instance.Approaching == null)", Logging.Teal);
+                    if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl.MoveTo", "Cache.Instance.Approaching.Id [" + Cache.Instance.Approaching.Id + "]", Logging.Teal);
+
+                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                    {
+                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        closest.Approach();    
+                    }
                 }
                 return;
             }

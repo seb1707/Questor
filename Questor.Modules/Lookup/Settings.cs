@@ -19,6 +19,7 @@ namespace Questor.Modules.Lookup
     using System.Globalization;
     using InnerSpaceAPI;
     using Questor.Modules.Actions;
+    using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
     using Questor.Modules.Logging;
     using Questor.Modules.States;
@@ -447,13 +448,14 @@ namespace Questor.Modules.Lookup
             
             if (Settings.Instance.SettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
-                if (Cache.Instance.LastInStation.AddMinutes(60) > DateTime.UtcNow)
+                if (Cache.Instance.LastInStation.AddMinutes(600) > DateTime.UtcNow)
                 {
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                     Cache.Instance.SessionState = "Quitting";
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                    Cleanup.CloseQuestor();
                     return;
                 }
                 

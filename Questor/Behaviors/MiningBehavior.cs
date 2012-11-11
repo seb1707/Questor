@@ -125,7 +125,7 @@ namespace Questor.Behaviors
                         break;
                     }
 
-                    Questor.CheckEVEStatus();
+                    Cleanup.CheckEVEStatus();
                     _States.CurrentMiningState = MiningState.Arm;
                     break;
 

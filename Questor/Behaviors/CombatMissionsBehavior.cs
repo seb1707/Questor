@@ -388,7 +388,7 @@ namespace Questor.Behaviors
                         break;
                     }
                     ValidateCombatMissionSettings();
-                    Questor.CheckEVEStatus();
+                    Cleanup.CheckEVEStatus();
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Start;
                     break;
 
@@ -1075,7 +1075,7 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (!Cache.Instance.ReadyCargoHold("CombatMissionsBehavior: Salvage")) break;
+                        if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
                         if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.IsValid && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
                         {

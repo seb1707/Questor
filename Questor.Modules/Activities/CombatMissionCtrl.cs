@@ -158,7 +158,7 @@ namespace Questor.Modules.Activities
 
             //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
             EntityCache closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < (int)Distance.GateActivationRange + 5000)
+            if (closest.Distance < (int)Distance.GateActivationRange)
             {
                 // Tell the drones module to retract drones
                 Cache.Instance.IsMissionPocketDone = true;

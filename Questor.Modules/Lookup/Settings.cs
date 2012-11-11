@@ -87,6 +87,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLootWrecks { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMissionFittings { get; set; }
+        public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
         public bool DebugPerformance { get; set; }
         public bool DebugReloadAll { get; set; }
@@ -507,6 +508,7 @@ namespace Questor.Modules.Lookup
                 DebugLogging = false;
                 DebugLootWrecks = false;
                 DebugMissionFittings = false;
+                DebugMoveTo = false;
                 DebugNavigateOnGrid = false;
                 DebugOnframe = false;
                 DebugPerformance = false;
@@ -855,6 +857,7 @@ namespace Questor.Modules.Lookup
                     DebugLogging = (bool?)xml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
                     DebugMissionFittings = (bool?)xml.Element("debugMissionFittings") ?? false;
+                    DebugMoveTo = (bool?)xml.Element("debugMoveTo") ?? false;
                     DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;
                     DebugOnframe = (bool?)xml.Element("debugOnframe") ?? false;
                     DebugPerformance = (bool?)xml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state

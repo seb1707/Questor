@@ -110,6 +110,7 @@ namespace Questor.Modules.Lookup
         CustomsOfficial = 446,
         Billboard = 323,
         Merchant = 297,
+        Mission_Merchant = 1006, //dread pirate scarlet
         FactionWarfareNPC = 288,
 
 

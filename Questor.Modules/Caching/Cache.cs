@@ -985,6 +985,17 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextEVEMemoryManagerAction;
+
+        public DateTime NextEVEMemoryManagerAction
+        {
+            get { return _nextEVEMemoryManagerAction; }
+            set
+            {
+                _nextEVEMemoryManagerAction = value;
+                _lastAction = DateTime.UtcNow;
+            }
+        }
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;
         public DateTime LastScheduleCheck = DateTime.UtcNow;

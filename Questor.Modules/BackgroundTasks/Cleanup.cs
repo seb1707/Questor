@@ -696,7 +696,22 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case CleanupState.CleanupTasks:
+                    if (Settings.Instance.EVEMemoryManager)
+                    {
+                        if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
+                        {
 
+                            // get the current process
+                            Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
+                            // get the physical mem usage (this only runs between missions)
+                            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+                            Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
+                            Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [" + "dotnet memmanager memmanager 524288000 " + "] (300MB ceiling)", Logging.White);
+                            LavishScript.ExecuteCommand("dotnet memmanager memmanager 524288000");
+                            Cache.Instance.NextEVEMemoryManagerAction = DateTime.UtcNow.AddMinutes(5);
+                        }
+                    }
                     _lastCleanupAction = DateTime.UtcNow;
                     _States.CurrentCleanupState = CleanupState.Idle;
                     break;

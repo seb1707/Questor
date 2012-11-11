@@ -55,6 +55,7 @@ namespace Questor.Modules.Lookup
 
         public bool CharacterXMLExists = true;
         public bool SchedulesXMLExists = true;
+        public bool EVEMemoryManager = false;
         public bool FactionXMLExists = true;
         public bool QuestorStatisticsExists = true;
         public bool QuestorSettingsExists = true;
@@ -474,6 +475,7 @@ namespace Questor.Modules.Lookup
 
             _lastModifiedDate = File.GetLastWriteTime(SettingsPath);
 
+            Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
             Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
             Settings.Instance.SchedulesXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "schedules.XML"));
             Settings.Instance.QuestorManagerExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorManager.exe"));

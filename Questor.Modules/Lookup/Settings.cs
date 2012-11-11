@@ -63,6 +63,7 @@ namespace Questor.Modules.Lookup
         //
         // Debug Variables
         //
+        public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
         public bool DebugAllMissionsOnBlackList { get; set; }
@@ -486,6 +487,7 @@ namespace Questor.Modules.Lookup
                 //LavishScript.ExecuteCommand("log " + Cache.Instance.DirectEve.Me.Name + ".log");
                 //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.Instance.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.SettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
+                DebugActivateGate = false;
                 DebugActivateWeapons = false;
                 DebugAgentInteractionReplyToAgent = false;
                 DebugAllMissionsOnBlackList = false;
@@ -835,6 +837,7 @@ namespace Questor.Modules.Lookup
                     //
                     // Debug Settings
                     // 
+                    DebugActivateGate = (bool?)xml.Element("debugActivateGate") ?? false;
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
                     DebugAgentInteractionReplyToAgent = (bool?)xml.Element("debugAgentInteractionReplyToAgent") ?? false;
                     DebugAllMissionsOnBlackList = (bool?)xml.Element("debugAllMissionsOnBlackList") ?? false;

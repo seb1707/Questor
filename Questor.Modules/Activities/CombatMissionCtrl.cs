@@ -123,13 +123,17 @@ namespace Questor.Modules.Activities
         {
             bool optional;
             if (!bool.TryParse(action.GetParameterValue("optional"), out optional))
+            {
                 optional = false;
+            }
 
             string target = action.GetParameterValue("target");
 
             // No parameter? Although we should not really allow it, assume its the acceleration gate :)
             if (string.IsNullOrEmpty(target))
+            {
                 target = "Acceleration Gate";
+            }
 
             IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
             if (!targets.Any())
@@ -148,9 +152,13 @@ namespace Questor.Modules.Activities
                                     "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error",
                                     Logging.Teal);
                         if (optional) //if this action has the optional paramater defined as true then we are done if we cant find the gate
+                        {
                             DoneAction();
+                        }
                         else
+                        {
                             _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Error;
+                        }
                     }
                 }
                 return;
@@ -158,14 +166,19 @@ namespace Questor.Modules.Activities
 
             //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
             EntityCache closest = targets.OrderBy(t => t.Distance).First();
-            if (closest.Distance < (int)Distance.GateActivationRange)
+            if (closest.Distance <= (int)Distance.GateActivationRange)
             {
+                if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance [" + closest.Distance + "] <= (int)Distance.GateActivationRange [" + (int)Distance.GateActivationRange + "])", Logging.Green);
+                        
                 // Tell the drones module to retract drones
                 Cache.Instance.IsMissionPocketDone = true;
 
                 // We cant activate if we have drones out
                 if (Cache.Instance.ActiveDrones.Any())
+                {
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (Cache.Instance.ActiveDrones.Any())", Logging.Green);
                     return;
+                }
 
                 //
                 // this is a bad idea for a speed tank, we ought to somehow cache the object they are orbiting/approaching, etc
@@ -174,6 +187,8 @@ namespace Questor.Modules.Activities
                 //
                 if (closest.Distance < -10100)
                 {
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < -10100)", Logging.Green);
+                    
                     if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                     {
                         closest.Orbit(1000);
@@ -184,12 +199,16 @@ namespace Questor.Modules.Activities
                 
                 if (closest.Distance >= -10100)
                 {
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance >= -10100)", Logging.Green);
                     // Add bookmark (before we activate)
                     if (Settings.Instance.CreateSalvageBookmarks)
+                    {
                         BookmarkPocketForSalvaging();
+                    }
 
-                    //Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.teal);
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
                     if (!Combat.ReloadAll(Cache.Instance.MyShip)) return;
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Done reloading", Logging.Teal);
                     
                     if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
                     {
@@ -202,22 +221,32 @@ namespace Questor.Modules.Activities
                     }
                     return;
                 }
+                if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
+                return;
             }
-            else if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
+
+            if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
             {
+                if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < (int)Distance.WarptoDistance)", Logging.Green);
                 // Move to the target
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                 {
                     Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                     closest.Approach();
+                    return;
                 }
-                else if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                
+                if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                 {
                     Logging.Log("CombatMissionCtrl", "Activate: Delaying approach for: [" + Math.Round(Cache.Instance.NextApproachAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.Teal);
+                    return;
                 }
+
+                if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
                 return;
             }
-            else if (closest.Distance > (int)Distance.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
+
+            if (closest.Distance > (int)Distance.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
             {
                 // We cant warp if we have drones out - but we are aligning not warping so we do not care
                 //if (Cache.Instance.ActiveDrones.Count() > 0)
@@ -228,18 +257,15 @@ namespace Questor.Modules.Activities
                     // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
                     Logging.Log("CombatMissionCtrl", "Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]", Logging.Teal);
                     closest.AlignTo();
+                    return;
                 }
-                else
-                {
-                    Logging.Log("CombatMissionCtrl", "Activate: Unable to align: Next Align in [" + Cache.Instance.NextAlign.Subtract(DateTime.UtcNow).TotalSeconds + "] seconds", Logging.Teal);
-                }
+
+                Logging.Log("CombatMissionCtrl", "Activate: Unable to align: Next Align in [" + Cache.Instance.NextAlign.Subtract(DateTime.UtcNow).TotalSeconds + "] seconds", Logging.Teal);
                 return;
             }
-            else //how in the world would we ever get here?
-            {
-                Logging.Log("CombatMissionCtrl", "Activate: Error: [" + closest.Name + "] at [" + closest.Distance + "] is not within jump distance, within warpable distance or outside warpable distance, (!!!), retrying action.", Logging.Teal);
-                return;
-            }
+
+            Logging.Log("CombatMissionCtrl", "Activate: Error: [" + closest.Name + "] at [" + closest.Distance + "] is not within jump distance, within warpable distance or outside warpable distance, (!!!), retrying action.", Logging.Teal);
+            return;
         }
 
         private void ClearAggroAction(Actions.Action action)

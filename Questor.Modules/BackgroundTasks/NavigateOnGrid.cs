@@ -87,7 +87,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)
                 {
-                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)", Logging.White);
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
                     if (!Cache.Instance.IsApproachingOrOrbiting)
                     {
@@ -186,13 +186,13 @@ namespace Questor.Modules.BackgroundTasks
                     //if optimalrange is set - use it to determine engagement range
                     if (Settings.Instance.OptimalRange != 0)
                     {
-                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: OptimalRange [ " + Settings.Instance.OptimalRange + "] Current Distance to [" + target.Name + "] is [" + target.Distance + "]", Logging.White);
+                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: OptimalRange [ " + Settings.Instance.OptimalRange + "] Current Distance to [" + target.Name + "] is [" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
 
                         if (target.Distance > Settings.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
                             if (target.IsNPCFrigate)
                             {
-                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + target.Distance + "]", Logging.White);
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
                                 OrbitGateorTarget(target, module);
                                 return;
                             }

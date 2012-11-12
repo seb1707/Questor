@@ -3055,9 +3055,13 @@ namespace Questor.Modules.Caching
                     // Is the ShipHangar ready to be used?
                     if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                     {
-                        if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
-                        //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
-                        return true;
+                        if (Cache.Instance.ShipHangar.Items.Any())
+                        {
+                            if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
+                            //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
+                            return true;
+                        }
+                        return false;
                     }
                 }
                 return false;    

@@ -47,7 +47,7 @@ namespace Questor.Storylines
             //    Logging.Log("GenericCourier", "No industrial found, going in active ship", Logging.White);
             //    return StorylineState.GotoAgent;
             //}
-            string transportshipName = Settings.Instance.TransportShipName;
+            string transportshipName = Settings.Instance.TransportShipName.ToLower();
 
             if (string.IsNullOrEmpty(transportshipName))
             {
@@ -57,10 +57,17 @@ namespace Questor.Storylines
             }
             try
             {
+                if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
                 if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())
                 {
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
+                    if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; //no ships?!?
+
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; done", Logging.White);
+                    
                     List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "List<DirectItem> ships = Cache.Instance.ShipHangar.Items;", Logging.White);
+                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName.ToLower()))
                     {
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                         ship.ActivateShip();

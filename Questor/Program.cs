@@ -348,7 +348,7 @@ namespace Questor
                     return;
             }
 
-            StartTime = DateTime.UtcNow;
+            StartTime = DateTime.Now;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

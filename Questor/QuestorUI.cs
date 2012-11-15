@@ -584,7 +584,7 @@ namespace Questor
 
             if (Cache.Instance.SessionState == "Quitting")
             {
-                if (Cache.Instance.ReasonToStopQuestor == "A message from ccp indicated we were disconnected")
+                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
                     Cleanup.CloseQuestor();
                 }

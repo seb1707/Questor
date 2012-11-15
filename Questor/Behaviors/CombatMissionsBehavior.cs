@@ -131,33 +131,27 @@ namespace Questor.Behaviors
             ValidSettings = true;
             if (Settings.Instance.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
             {
-                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.EM))
-                    Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Thermal))
-                    Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Kinetic))
-                    Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Explosive))
-                    Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.EM)) Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Thermal)) Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Kinetic)) Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
+                if (Settings.Instance.Ammo.All(a => a.DamageType != DamageType.Explosive)) Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
 
                 Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
                 ValidSettings = false;
             }
 
-
             if (Cache.Instance.Agent == null || !Cache.Instance.Agent.IsValid)
             {
                 Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
                 ValidSettings = false;
+                return;
             }
-            else
-            {
-                AgentInteraction.AgentId = Cache.Instance.AgentId;
-                _combatMissionCtrl.AgentId = Cache.Instance.AgentId;
-                _arm.AgentId = Cache.Instance.AgentId;
-                _statistics.AgentID = Cache.Instance.AgentId;
-                AgentID = Cache.Instance.AgentId;
-            }
+
+            AgentInteraction.AgentId = Cache.Instance.AgentId;
+            _combatMissionCtrl.AgentId = Cache.Instance.AgentId;
+            _arm.AgentId = Cache.Instance.AgentId;
+            _statistics.AgentID = Cache.Instance.AgentId;
+            AgentID = Cache.Instance.AgentId;
         }
 
         public void ApplySalvageSettings()

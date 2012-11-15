@@ -66,7 +66,7 @@
                         Logging.Log("Questor", "Logging off EVE: In theory eve and questor will restart on their own when the client comes back up", Logging.White);
                         if (Settings.Instance.UseInnerspace)
                         {
-                            LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");    
+                            LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
                         }
                         Logging.Log("Questor", "you can change this option by setting the wallet and EveProcessMemoryCeiling options to use exit instead of logoff: see the settings.xml file", Logging.White);
                         Logging.Log("Questor", "Logging Off eve in 15 seconds.", Logging.White);
@@ -94,10 +94,8 @@
                     if (Settings.Instance.UseInnerspace)
                     {
                         //Logging.Log("Questor: We are in station: Exit option has been configured.");
-                        if (((Settings.Instance.CloseQuestorArbitraryOSCmd) &&
-                             (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)) ||
-                            (Settings.Instance.CloseQuestorArbitraryOSCmd) &&
-                            (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
+                        if (((Settings.Instance.CloseQuestorArbitraryOSCmd) && (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)) ||
+                             (Settings.Instance.CloseQuestorArbitraryOSCmd) && (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
                         {
                             Logging.Log("Questor", "You can't combine CloseQuestorArbitraryOSCmd with either of the other two options, fix your settings", Logging.White);
                             return false;
@@ -243,8 +241,8 @@
                         {
                             _closeQuestorCMDUplink = false;
                             CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
-                        } 
-                        
+                        }
+
                         if (!_closeQuestor10SecWarningDone)
                         {
                             _closeQuestor10SecWarningDone = true;
@@ -268,7 +266,7 @@
                 Logging.Log("Questor", "Autostart is false: Stopping EVE with quit command (if EVE is going to restart it will do so externally)", Logging.White);
                 _closeQuestorCMDUplink = false;
                 CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
-            } 
+            }
             if (!_closeQuestor10SecWarningDone)
             {
                 _closeQuestor10SecWarningDone = true;
@@ -292,6 +290,7 @@
                 return false;
 
             _lastCleanupAction = DateTime.UtcNow;
+
             //
             // go through *every* window
             //
@@ -332,6 +331,7 @@
                     _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
+
                 //
                 // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
                 // add repairship, lpstore, marketwindow, etc
@@ -399,8 +399,7 @@
                 return;
             }
 
-
-            if (Cache.Instance.InSpace) 
+            if (Cache.Instance.InSpace)
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
                 if (DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(10))
@@ -423,6 +422,7 @@
             switch (_States.CurrentCleanupState)
             {
                 case CleanupState.Idle:
+
                     //Cleanup State should only run every 4 seconds
                     if (DateTime.UtcNow.Subtract(_lastCleanupAction).TotalSeconds < 4)
                         return;
@@ -430,6 +430,7 @@
                     break;
 
                 case CleanupState.CheckModalWindows:
+
                     //
                     // go through *every* window
                     //
@@ -444,7 +445,7 @@
                     if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Cache.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
                     {
                         Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
-                        Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White); 
+                        Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White);
                         Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                         Cache.Instance.SessionState = "Quitting";
                         Cleanup.CloseQuestor();
@@ -496,7 +497,7 @@
 
                                 if (window.Type == "form.MessageBox" && window.IsDialog && window.IsModal && window.IsKillable)
                                 {
-                                    sayOk |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty    
+                                    sayOk |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty
                                 }
 
                                 // quitting eve?
@@ -559,8 +560,8 @@
                                 //sayyes |= window.Html.Contains("Repairing these items will cost");
                                 sayYes |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 //sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
+                                sayYes |= window.Html.Contains("has no other missions to offer right now. Are you sure you want to decline");
 
-                                
                                 //
                                 // LP Store "Accept offer" dialog
                                 //
@@ -621,6 +622,7 @@
                                 Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                                 Cache.Instance.GotoBaseNow = true;
                                 Settings.Instance.AutoStart = false;
+
                                 //
                                 // do not close eve, let the shutdown of the server do that
                                 //
@@ -645,7 +647,6 @@
                                 window.Close();
                                 continue;
                             }
-
                         }
                         if (Cache.Instance.InSpace)
                         {
@@ -659,6 +660,7 @@
                                 {
                                     _lastCleanupAction = DateTime.UtcNow;
                                     _droneBayClosingAttempts++;
+
                                     // Close the drone bay, its not required in space.
                                     window.Close();
                                 }
@@ -677,7 +679,6 @@
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
                         {
-
                             // get the current process
                             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
@@ -706,6 +707,7 @@
                     break;
 
                 default:
+
                     // Next state
                     _States.CurrentCleanupState = CleanupState.Idle;
                     break;

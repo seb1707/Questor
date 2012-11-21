@@ -221,7 +221,7 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.OpenCargoHold("Unloadloot.MoveAmmo")) return;
 
-            if (Cache.Instance.CargoHold.IsValid)
+            if (Cache.Instance.CargoHold.Window.IsReady)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
 

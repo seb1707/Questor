@@ -182,7 +182,7 @@ namespace Questor.Modules.Actions
                 case ArmState.SwitchToSalvageShip:
                     if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 10 seconds
                     {
-                        if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
+                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
                         if (_States.CurrentArmState == ArmState.OpenShipHangar)
                         {
@@ -218,7 +218,7 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName)
                     {
-                        if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
+                        if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
                         List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                         foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == transportshipName))
@@ -260,7 +260,7 @@ namespace Questor.Modules.Actions
                         {
                             if (DateTime.UtcNow > Cache.Instance.NextArmAction)
                             {
-                                if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
+                                if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
@@ -334,7 +334,7 @@ namespace Questor.Modules.Actions
                     
                     if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.DirectEve.ActiveShip.GivenName != shipNameToUseNow))
                     {
-                        if (!Cache.Instance.ReadyShipsHangar("Arm.ActivateCombatShip")) break;
+                        if (!Cache.Instance.OpenShipsHangar("Arm.ActivateCombatShip")) break;
 
                         List<DirectItem> shipsInShipHangar = Cache.Instance.ShipHangar.Items;
                         DirectItem shipToUseNow = shipsInShipHangar.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipNameToUseNow.ToLower());

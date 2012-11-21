@@ -3029,6 +3029,59 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ShipHangar { get; set; }
 
+        public bool OpenShipsHangar(String module)
+        {
+            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                return false;
+            }
+
+            if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+            {
+                return false;
+            }
+
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
+                if (Cache.Instance.ShipHangar == null)
+                {
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
+                    return false;
+                }
+
+                // Is the ship hangar open?
+                if (Cache.Instance.ShipHangar.Window == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Opening Ship Hangar: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
+                                           0) + "sec]", Logging.White);
+                    return false;
+                }
+                if (!Cache.Instance.ShipHangar.Window.IsReady)
+                {
+                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
+                    return false;
+                }
+                if (Cache.Instance.ShipHangar.Window.IsReady)
+                {
+                    if (Cache.Instance.ShipHangar.Window.IsPrimary())
+                    {
+                        Logging.Log(module, "Opening Ship Hangar as secondary", Logging.White);
+                        Cache.Instance.ShipHangar.Window.OpenAsSecondary();
+                        //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public bool ReadyShipsHangar(String module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -3055,21 +3108,22 @@ namespace Questor.Modules.Caching
                     // Is the ShipHangar ready to be used?
                     if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                     {
-                        if (Cache.Instance.ShipHangar.Items.Any())
-                        {
+                        //if (Cache.Instance.ShipHangar.Items.Any())
+                        //{
                             if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
+
                             //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
                             return true;
-                        }
+                        //}
                         return false;
                     }
                 }
-                return false;    
+                return false;
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Logging.Log("ReadyShipsHangar", "Unable to complete ReadyShipsHangar [" + exception + "]", Logging.Teal);
-                return false; 
+                return false;
             }
         }
 

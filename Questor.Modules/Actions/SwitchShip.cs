@@ -41,7 +41,7 @@
                 case SwitchShipState.OpenShipHangar:
 
                     // Is the ship hangar open?
-                    if (!Cache.Instance.ReadyShipsHangar("SwitchShip")) break;
+                    if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
 
                     Logging.Log("SwitchShip", "Activating combat ship", Logging.White);
 
@@ -56,7 +56,7 @@
                     {
                         if (DateTime.UtcNow.Subtract(_lastSwitchShipAction).TotalSeconds > Time.Instance.SwitchShipsDelay_seconds)
                         {
-                            if (!Cache.Instance.ReadyShipsHangar("Arm")) break;
+                            if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
                             List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                             foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))

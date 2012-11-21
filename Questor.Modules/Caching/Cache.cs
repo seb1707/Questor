@@ -3074,7 +3074,7 @@ namespace Questor.Modules.Caching
                         Cache.Instance.ShipHangar.Window.OpenAsSecondary();
                         //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
                         Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                        return false;
+                        return true;
                     }
                     return true;
                 }
@@ -4977,8 +4977,8 @@ namespace Questor.Modules.Caching
                     NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                     return false;
                 }
-                
-                if (!Cache.Instance.ReadyShipsHangar(module)) return false;
+
+                if (!Cache.Instance.OpenShipsHangar(module)) return false;
                 if (!Cache.Instance.ReadyItemsHangar(module)) return false;
                 if (!Cache.Instance.ReadyDroneBay(module)) return false;
 

@@ -1276,58 +1276,68 @@ namespace Questor.Modules.Activities
 
         private void LootItemAction(Actions.Action action)
         {
-            Cache.Instance.MissionLoot = true;
-            List<string> items = action.GetParameterValues("item");
-            List<string> targetNames = action.GetParameterValues("target");
-
-            // if we are not generally looting we need to re-enable the opening of wrecks to
-            // find this LootItems we are looking for
-            Cache.Instance.OpenWrecks = true;
-
-            int quantity;
-            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
-                quantity = 1;
-
-            bool done = items.Count == 0;
-            if (!done)
+            try
             {
-                DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+                Cache.Instance.MissionLoot = true;
+                List<string> items = action.GetParameterValues("item");
+                List<string> targetNames = action.GetParameterValues("target");
 
-                // We assume that the ship's cargo will be opened somewhere else
-                if (cargo.Window.IsReady)
-                    done |= cargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
-            }
-            if (done)
-            {
-                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
+                // if we are not generally looting we need to re-enable the opening of wrecks to
+                // find this LootItems we are looking for
+                Cache.Instance.OpenWrecks = true;
 
-                // now that we have completed this action revert OpenWrecks to false
-                Cache.Instance.OpenWrecks = false;
-                Cache.Instance.MissionLoot = false;
-                _currentAction++;
-                return;
-            }
-
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
-            //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
-            if (!containers.Any())
-            {
-                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
-
-                _currentAction++;
-                return;
-            }
-
-            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-            if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
-            {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id))
+                int quantity;
+                if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
                 {
-                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][ID: " + container.Id + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    container.Approach();
+                    quantity = 1;
                 }
+
+                bool done = items.Count == 0;
+                if (!done)
+                {
+                    if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
+                    if (Cache.Instance.CargoHold.Window.IsReady)
+                    {
+                        done |= Cache.Instance.CargoHold.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
+                    }
+                }
+
+                if (done)
+                {
+                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
+
+                    // now that we have completed this action revert OpenWrecks to false
+                    Cache.Instance.OpenWrecks = false;
+                    Cache.Instance.MissionLoot = false;
+                    _currentAction++;
+                    return;
+                }
+
+                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+
+                //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
+                //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
+                if (!containers.Any())
+                {
+                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
+
+                    _currentAction++;
+                    return;
+                }
+
+                EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+                if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
+                {
+                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id))
+                    {
+                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][ID: " + container.Id + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        container.Approach();
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("CombatMissionCtrl.LootItemAction","Exception logged was [" + exception +  "]",Logging.Teal);    
             }
         }
 

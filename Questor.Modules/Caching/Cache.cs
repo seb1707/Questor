@@ -2887,7 +2887,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
                         Cache.Instance.CargoHold.Window.OpenAsSecondary();
-                        Cache.Instance.NextOpenCargoAction = DateTime.Now.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                         return false;
                     }
                     return true;
@@ -3031,49 +3031,56 @@ namespace Questor.Modules.Caching
 
         public bool OpenShipsHangar(String module)
         {
-            if (DateTime.Now < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.Now < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
             if (Cache.Instance.InStation)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.InStation)", Logging.Teal);
+
                 Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
                 if (Cache.Instance.ShipHangar == null)
                 {
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar == null)", Logging.Teal);
+                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
 
                 // Is the ship hangar open?
                 if (Cache.Instance.ShipHangar.Window == null)
                 {
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Ship Hangar: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds,
-                                           0) + "sec]", Logging.White);
+                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Opening Ship Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
+
                 if (!Cache.Instance.ShipHangar.Window.IsReady)
                 {
-                    Cache.Instance.NextOpenHangarAction = DateTime.Now.AddMilliseconds(500);
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (!Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
+                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
+
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
                     if (Cache.Instance.ShipHangar.Window.IsPrimary())
                     {
                         Logging.Log(module, "Opening Ship Hangar as secondary", Logging.White);
                         Cache.Instance.ShipHangar.Window.OpenAsSecondary();
                         //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                        Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                         return true;
                     }
                     return true;

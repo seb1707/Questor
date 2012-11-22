@@ -489,6 +489,8 @@ namespace Questor.Modules.Caching
 
         //NextGetAgentMissionAction
 
+        private double MyCurrentWealth { get; set; }
+
         private DateTime _nextAgentWindowAction;
 
         public DateTime NextAgentWindowAction

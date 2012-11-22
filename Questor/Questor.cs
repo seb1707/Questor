@@ -140,7 +140,7 @@ namespace Questor
         {
             if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
-                if (Settings.Instance.CharacterName != null && DateTime.Now > Cache.Instance.NextStartupAction)
+                if (Settings.Instance.CharacterName != null && DateTime.UtcNow > Cache.Instance.NextStartupAction)
                 {
                     _runOnce30SecAfterStartupalreadyProcessed = true;
                     if (Settings.Instance.UseInnerspace)
@@ -302,6 +302,7 @@ namespace Questor
             if (_States.CurrentQuestorState == QuestorState.Mining) { return; }
 
             Cache.Instance.LastWalletCheck = DateTime.UtcNow;
+
             //Logging.Log("[Questor] Wallet Balance Debug Info: LastKnownGoodConnectedTime = " + Settings.Instance.lastKnownGoodConnectedTime);
             //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.UtcNow - LastKnownGoodConnectedTime = " + DateTime.UtcNow.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);
             if (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
@@ -316,10 +317,17 @@ namespace Questor
             //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.LastKnownGoodConnectedTime);
             if (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.WalletBalanceChangeLogOffDelay)
             {
-                if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth)
+                try
                 {
-                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                    if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth || (Cache.Instance.DirectEve.Me.Wealth >= 0))
+                    {
+                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Questor.WalletCheck", "Checking my wallet balance caused an exception [" + exception + "]", Logging.White);
                 }
             }
             else if (Settings.Instance.WalletBalanceChangeLogOffDelay != 0)

@@ -2898,9 +2898,8 @@ namespace Questor.Modules.Caching
                     }
                     return true;
                 }
-                return false;
 
-                return true;
+                return false;
             }
             catch (Exception exception)
             {
@@ -3128,7 +3127,7 @@ namespace Questor.Modules.Caching
                             //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
                             return true;
                         //}
-                        return false;
+                        //return false;
                     }
                 }
                 return false;

@@ -34,7 +34,12 @@
         {
             // 30 seconds + 10 to 90 seconds + 1 to 9 seconds before restarting
             int secRestart = (300 * 1) + Cache.Instance.RandomNumber(1, 9) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
-            Cache.Instance.SessionState = "Quitting!!"; //so that IF we changed the state we would not be caught in a loop of re-entering CloseQuestor
+
+            // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
+            // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 
+            // (roughly 20x before the timer expires and we actually close questor)
+            Cache.Instance.SessionState = "Quitting!!"; 
+            
             if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
             {
                 Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -86,9 +91,9 @@
                         Logging.Log("Questor", "Exiting eve now.", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff);
                     }
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdLogOff);
                     return true;
                 }
+
                 if (Cache.Instance.CloseQuestorCMDExitGame)
                 {
                     if (Settings.Instance.UseInnerspace)
@@ -128,15 +133,14 @@
                             {
                                 _closeQuestor10SecWarningDone = true;
                                 Logging.Log("Questor", "Exiting eve in [" + Time.Instance.CloseQuestorDelayBeforeExit_seconds + "] seconds", Logging.White);
-                                return false;
+                               return false;
                             }
 
                             if (DateTime.UtcNow > CloseQuestorDelay)
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                 Cache.Instance.DirecteveDispose();
-                                Process.GetCurrentProcess().Kill();
-                                Environment.Exit(0);
+                                return false;
                             }
                             return false;
                         }
@@ -167,9 +171,7 @@
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                 Cache.Instance.DirecteveDispose();
-                                Process.GetCurrentProcess().Kill();
-                                Environment.Exit(0);
-                                //return false;
+                                return false;
                             }
                             return false;
                         }
@@ -199,9 +201,7 @@
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                 Cache.Instance.DirecteveDispose();
-                                Process.GetCurrentProcess().Kill();
-                                Environment.Exit(0);
-                                //return false;
+                                return false;
                             }
                             return false;
                         }
@@ -226,9 +226,7 @@
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
                                 Cache.Instance.DirecteveDispose();
-                                Process.GetCurrentProcess().Kill();
-                                Environment.Exit(0);
-                                //return false;
+                                return false;
                             }
                             return false;
                         }
@@ -254,9 +252,7 @@
                         {
                             Logging.Log("Questor", "Exiting eve now.", Logging.White);
                             Cache.Instance.DirecteveDispose();
-                            Process.GetCurrentProcess().Kill();
-                            Environment.Exit(0);
-                            //return false;
+                            return false;
                         }
                     }
                 }
@@ -267,6 +263,7 @@
                 _closeQuestorCMDUplink = false;
                 CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
             }
+
             if (!_closeQuestor10SecWarningDone)
             {
                 _closeQuestor10SecWarningDone = true;
@@ -277,9 +274,8 @@
             if (DateTime.UtcNow > CloseQuestorDelay)
             {
                 Logging.Log("Questor", "Closing with: Process.GetCurrentProcess().Kill()", Logging.White);
-                Process.GetCurrentProcess().Kill();
-                Environment.Exit(0);
-                //return false;
+                Cache.Instance.DirecteveDispose();
+                return false;
             }
             return false;
         }

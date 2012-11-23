@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Diagnostics;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -173,9 +175,11 @@ namespace Questor.Modules.Caching
 
         public void DirecteveDispose()
         {
-            Logging.Log("QuestorUI", "started calling DirectEve.Dispose()", Logging.White);
+            Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
             Cache.Instance.DirectEve.Dispose(); //could this hang?
-            Logging.Log("QuestorUI", "finished calling DirectEve.Dispose()", Logging.White);
+            Logging.Log("Questor", "finished calling DirectEve.Dispose()", Logging.White);
+            Process.GetCurrentProcess().Kill();
+            Environment.Exit(0);
         }
 
         public void IterateInvTypes()

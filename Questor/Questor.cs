@@ -8,18 +8,18 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Globalization;
-using Questor.Behaviors;
-using Questor.Modules.Combat;
-
 namespace Questor
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using DirectEve;
+    using System.Globalization;
     using System.Linq;
+    using System.Windows.Forms;
+    using DirectEve;
+    using global::Questor.Behaviors;
     using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
@@ -208,14 +208,13 @@ namespace Questor
                 Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
         }
 
-        public static void TimeCheck()
+        public static bool TimeCheck()
         {
             if (DateTime.UtcNow < Cache.Instance.NextTimeCheckAction)
-                return;
+                return false;
 
-            Cache.Instance.NextTimeCheckAction = DateTime.UtcNow.AddMinutes(5);
-            Logging.Log("Questor",
-                        "Checking: Current time [" + DateTime.Now.ToString(CultureInfo.InvariantCulture) +
+            Cache.Instance.NextTimeCheckAction = DateTime.UtcNow.AddSeconds(90);
+            Logging.Log("Questor", "Checking: Current time [" + DateTime.Now.ToString(CultureInfo.InvariantCulture) +
                         "] StopTimeSpecified [" + Cache.Instance.StopTimeSpecified +
                         "] StopTime [ " + Cache.Instance.StopTime +
                         "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.White);
@@ -230,7 +229,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
-                return;
+                return true;
             }
 
             if (Cache.Instance.StopTimeSpecified)
@@ -244,7 +243,7 @@ namespace Questor
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.SessionState = "Exiting";
                     Cleanup.BeginClosingQuestor();
-                    return;
+                    return true;
                 }
             }
 
@@ -257,7 +256,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
-                return;
+                return true;
             }
 
             if (DateTime.Now >= Cache.Instance.ManualStopTime)
@@ -269,7 +268,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
-                return;
+                return true;
             }
 
             if (Cache.Instance.ExitWhenIdle)
@@ -281,7 +280,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
-                return;
+                return true;
             }
 
             if (Cache.Instance.MissionsThisSession > Cache.Instance.StopSessionAfterMissionNumber)
@@ -293,8 +292,9 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
-                return;
+                return true;
             }
+            return false;
         }
 
         public static void WalletCheck()
@@ -493,7 +493,7 @@ namespace Questor
             switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:
-                    TimeCheck(); //Should we close questor due to stoptime or runtime?
+                    if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
 
                     if (Cache.Instance.StopBot)
                     {
@@ -508,7 +508,7 @@ namespace Questor
                     }
 
                     Logging.Log("Questor", "Settings.Instance.CharacterMode = [" + Settings.Instance.CharacterMode + "]", Logging.Orange);
-                    _States.CurrentQuestorState = QuestorState.Error;
+                     _States.CurrentQuestorState = QuestorState.Error;    
                     break;
 
                 case QuestorState.CombatMissionsBehavior:

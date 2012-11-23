@@ -343,7 +343,9 @@ namespace Questor.Modules.Logging
                 // Get the path
 
                 if (!Directory.Exists(Settings.Instance.SessionsLogPath))
+                {
                     Directory.CreateDirectory(Settings.Instance.SessionsLogPath);
+                }
 
                 Cache.Instance.SessionIskPerHrGenerated = ((int)Cache.Instance.SessionIskGenerated / (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
                 Cache.Instance.SessionLootPerHrGenerated = ((int)Cache.Instance.SessionLootGenerated / (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
@@ -353,7 +355,9 @@ namespace Questor.Modules.Logging
 
                 // Write the header
                 if (!File.Exists(Settings.Instance.SessionsLogFile))
+                {
                     File.AppendAllText(Settings.Instance.SessionsLogFile, "Date;RunningTime;SessionState;LastMission;WalletBalance;MemoryUsage;Reason;IskGenerated;LootGenerated;LPGenerated;Isk/Hr;Loot/Hr;LP/HR;Total/HR;\r\n");
+                }
 
                 // Build the line
                 var line = DateTimeForLogs + ";";                               // Date

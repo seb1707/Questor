@@ -191,9 +191,7 @@ namespace Questor
                             StartTime = schedule.Start3;
                             StopTime = schedule.Stop3;
                             StopTimeSpecified = true;
-                            Logging.Log("Startup",
-                                        "Schedule3: Start3: " + schedule.Start3 + " Stop3: " + schedule.Stop3,
-                                        Logging.White);
+                            Logging.Log("Startup", "Schedule3: Start3: " + schedule.Start3 + " Stop3: " + schedule.Stop3, Logging.White);
                         }
                     }
                 }

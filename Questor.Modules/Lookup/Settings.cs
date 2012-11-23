@@ -32,7 +32,7 @@ namespace Questor.Modules.Lookup
         public static Settings Instance = new Settings();
         public string CharacterName;
         private DateTime _lastModifiedDate;
-        
+
         public Settings()
         {
             Ammo = new List<Ammo>();
@@ -398,12 +398,12 @@ namespace Questor.Modules.Lookup
         public bool DronesKillHighValueTargets { get; set; }
         public int MaterialsForWarOreID { get; set; }
         public int MaterialsForWarOreQty { get; set; }
-        
+
         //
         // number of days of console logs to keep (anything older will be deleted on startup)
         //
         public int ConsoleLogDaysOfLogsToKeep { get; set; }
-        
+
         //
         // Mission Blacklist / Greylist Settings
         //
@@ -447,7 +447,7 @@ namespace Questor.Modules.Lookup
             }
 
             Settings.Instance.SettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
-            
+
             if (Settings.Instance.SettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
                 if (Cache.Instance.LastInStation.AddMinutes(600) > DateTime.UtcNow)
@@ -460,7 +460,7 @@ namespace Questor.Modules.Lookup
                     Cleanup.CloseQuestor();
                     return;
                 }
-                
+
                 Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
                 //Cache.Instance.SessionState = "Quitting";
@@ -617,7 +617,7 @@ namespace Questor.Modules.Lookup
                 LoginQuestorLavishScriptCmd = false;
                 LoginQuestorLavishScriptContents = string.Empty;
                 MinimizeEveAfterStartingUp = false;
-                
+
                 WalletBalanceChangeLogOffDelay = 30;
                 WalletBalanceChangeLogOffDelayLogoffOrExit = "exit";
                 SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
@@ -722,7 +722,7 @@ namespace Questor.Modules.Lookup
                 // 29013 Scan Resolution Dampening Script // sensor dampener
                 // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
                 // 28999 Optimal Range Script             // tracking enhancer and tracking computer
-                
+
                 // 3554  Cap Booster 100
                 // 11283 Cap Booster 150
                 // 11285 Cap Booster 200
@@ -736,7 +736,7 @@ namespace Questor.Modules.Lookup
                 // 31998 Navy Cap Booster 200
                 // 32006 Navy Cap Booster 400
                 // 32014 Navy Cap Booster 800
-                
+
                 TrackingDisruptorScript = 29007;
                 TrackingComputerScript = 29001;
                 TrackingLinkScript = 29001;
@@ -744,7 +744,6 @@ namespace Questor.Modules.Lookup
                 SensorDampenerScript = 29015;
                 AncillaryShieldBoosterScript = 11289;
                 CapacitorInjectorScript = 11289;
-
 
                 //
                 // Speed and Movement Settings
@@ -838,7 +837,7 @@ namespace Questor.Modules.Lookup
 
                     //
                     // Debug Settings
-                    // 
+                    //
                     DebugActivateGate = (bool?)xml.Element("debugActivateGate") ?? false;
                     DebugActivateWeapons = (bool?)xml.Element("debugActivateWeapons") ?? false;
                     DebugAgentInteractionReplyToAgent = (bool?)xml.Element("debugAgentInteractionReplyToAgent") ?? false;
@@ -986,7 +985,7 @@ namespace Questor.Modules.Lookup
                     }
                     catch
                     {
-                        Logging.Log("Settings","Invalid Format for eveWindow Settings - skipping",Logging.Teal);
+                        Logging.Log("Settings", "Invalid Format for eveWindow Settings - skipping", Logging.Teal);
                     }
 
                     try
@@ -1013,7 +1012,7 @@ namespace Questor.Modules.Lookup
                         LootHangar = (string)xml.Element("lootHangar");
                         if (string.IsNullOrEmpty(Settings.Instance.LootHangar))
                         {
-                            Logging.Log("Settings","Loothangar [" +  "ItemsHangar" + "]",Logging.White);
+                            Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
                         }
                         else
                         {
@@ -1045,11 +1044,9 @@ namespace Questor.Modules.Lookup
                     }
                     catch (Exception exception)
                     {
-                        Logging.Log("Settings","Error Loading Hangar Settings [" + exception + "]",Logging.Teal);
+                        Logging.Log("Settings", "Error Loading Hangar Settings [" + exception + "]", Logging.Teal);
                     }
-                    
 
-                    
                     try
                     {
                         //
@@ -1075,13 +1072,12 @@ namespace Questor.Modules.Lookup
                         AgeofBookmarksForSalvageBehavior = (int?)xml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
                         AgeofSalvageBookmarksToExpire = (int?)xml.Element("ageofSalvageBookmarksToExpire") ?? 120;
                         LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = (bool?)xml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? false;
-    
                     }
                     catch (Exception exception)
                     {
                         Logging.Log("Settings", "Error Loading Loot and Salvage Settings [" + exception + "]", Logging.Teal);
                     }
-                    
+
                     //
                     // at what memory usage do we need to restart this session?
                     //
@@ -1153,6 +1149,7 @@ namespace Questor.Modules.Lookup
                     MaximumHighValueTargets = (int?)xml.Element("maximumHighValueTargets") ?? 2;
                     MaximumLowValueTargets = (int?)xml.Element("maximumLowValueTargets") ?? 2;
                     DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)xml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
+
                     //
                     // Script Settings - TypeIDs for the scripts you would like to use in these modules
                     //
@@ -1274,22 +1271,17 @@ namespace Questor.Modules.Lookup
                             if (i >= 2)
                             {
                                 MultiAgentSupport = true;
-                                Logging.Log(
-                                    "Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" +
-                                    MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
+                                Logging.Log("Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
                             }
                             else
                             {
                                 MultiAgentSupport = false;
-                                Logging.Log(
-                                    "Settings", "Found only one agent in your character XML: MultiAgentSupport is [" +
-                                    MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
+                                Logging.Log("Settings", "Found only one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
                             }
                         }
                         else
                         {
-                            Logging.Log(
-                                "Settings", "agentList exists in your characters config but no agents were listed.", Logging.Red);
+                            Logging.Log("Settings", "agentList exists in your characters config but no agents were listed.", Logging.Red);
                         }
                     }
                     else
@@ -1328,6 +1320,7 @@ namespace Questor.Modules.Lookup
                             Logging.Log("Settings", "No faction fittings specified.  Fitting manager will not be used.", Logging.Orange);
                         }
                     }
+
                     //
                     // Fitting based on the name of the mission
                     //
@@ -1372,7 +1365,7 @@ namespace Questor.Modules.Lookup
                     //
                     MissionGreylist.Clear();
                     XElement xmlElementGreyListSection = xml.Element("graylist");
-                    
+
                     if (xmlElementGreyListSection != null)
                     {
                         Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
@@ -1404,6 +1397,7 @@ namespace Questor.Modules.Lookup
                     }
                 }
             }
+
             //
             // if enabled the following would keep you from looting or salvaging small wrecks
             //

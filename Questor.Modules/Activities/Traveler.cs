@@ -232,6 +232,7 @@ namespace Questor.Modules.Activities
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: we are not scrambled - pulling drones.", Logging.White);
                         Cache.Instance.IsMissionPocketDone = true; //tells drones.cs that we can pull drones
+
                         //Logging.Log("CombatmissionBehavior","TravelToAgentStation: not pointed",Logging.White);
                     }
                     else if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
@@ -246,8 +247,6 @@ namespace Questor.Modules.Activities
 
             Cache.Instance.OpenWrecks = false;
 
-
-
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
 
@@ -258,6 +257,7 @@ namespace Questor.Modules.Activities
                 //Cache.Instance.DirectEve.Navigation.GetLocation((long)myHomeBookmark.LocationId).SetDestination();
 
                 _destination = new BookmarkDestination(myHomeBookmark);
+
                 //_destination = new StationDestination(Cache.Instance.AgentSolarSystemID, Cache.Instance.AgentStationID, Cache.Instance.AgentStationName);
                 _States.CurrentTravelerState = TravelerState.Idle;
                 return;
@@ -310,7 +310,6 @@ namespace Questor.Modules.Activities
             }
             return;
         }
-
 
         public static void TravelHome(string module)
         {

@@ -98,15 +98,12 @@ namespace Questor.Modules.Logging
                             Directory.CreateDirectory(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile));
                             if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
                             {
-                                Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs,
-                                                                           "[" + module + "]" + plainLogLine + "\r\n");
+                                Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
                                 Cache.Instance.ConsoleLogOpened = true;
                             }
                             else
                             {
-                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs,
-                                                              "Logging: Unable to find (or create): " +
-                                                              Settings.Instance.ConsoleLogPath));
+                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
                             }
                             line = "";
                         }
@@ -121,12 +118,10 @@ namespace Questor.Modules.Logging
 
                 if (Cache.Instance.ConsoleLogOpened)
                 {
-                    if (Settings.Instance.ConsoleLogFile != null)
-                        File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog);               //Write In Memory Console log to File
+                    if (Settings.Instance.ConsoleLogFile != null) File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog);               //Write In Memory Console log to File
                     Cache.Instance.ConsoleLog = null;
 
-                    if (Settings.Instance.ConsoleLogFileRedacted != null)
-                        File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
+                    if (Settings.Instance.ConsoleLogFileRedacted != null) File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
                     Cache.Instance.ConsoleLogRedacted = null;
                 }
             }
@@ -147,6 +142,7 @@ namespace Questor.Modules.Logging
                 line = line.Replace("[" + Settings.Instance.CharacterName + "]", "[_MyEVECharacterNameRedacted_]");
                 line = line.Replace(Settings.Instance.CharacterName + ".xml", "_MyEVECharacterNameRedacted_.xml");
             }
+
             //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
             //{
             //    if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
@@ -221,20 +217,24 @@ namespace Questor.Modules.Logging
 
             //calculate the current date - the number of keep days (make sure you use the negative value if Settings.Instance.ConsoleLogDaysOfLogsToKeep as we want to keep that many days in the past, not that many days in the future)
             DateTime keepdate = DateTime.UtcNow.AddDays(-Settings.Instance.ConsoleLogDaysOfLogsToKeep);
- 
+
             //this is where it gets the directory and looks at
             //the files in the directory to compare the last write time
             //against the keepdate variable.
             try
             {
+                if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "ConsoleLogPath is [" + Settings.Instance.ConsoleLogPath + "]", Logging.White);
                 DirectoryInfo fileListing = new DirectoryInfo(Settings.Instance.ConsoleLogPath);
 
                 if (fileListing.Exists)
                 {
+                    if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (fileListing.Exists)", Logging.White);
                     foreach (FileInfo log in fileListing.GetFiles(searchpattern))
                     {
+                        if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "foreach (FileInfo log in fileListing.GetFiles(searchpattern))", Logging.White);
                         if (log.LastWriteTime <= keepdate)
                         {
+                            if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (log.LastWriteTime <= keepdate)", Logging.White);
                             try
                             {
                                 Logging.Log("Logging", "Removing old console log named [" + log.Name + "] Dated [" + log.LastWriteTime + "]", Logging.White);
@@ -252,7 +252,6 @@ namespace Questor.Modules.Logging
             {
                 Logging.Log("Logging.MaintainConsoleLogs", "Unable to maintain console logs: [" + exception + "]", Logging.Teal);
             }
-
         }
     }
 }

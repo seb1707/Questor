@@ -1,4 +1,5 @@
-﻿using Questor.Properties;
+﻿using Questor.Modules.Alerts;
+using Questor.Properties;
 
 namespace Questor
 {
@@ -1651,6 +1652,12 @@ namespace Questor
         {
             Logging.Log("QuestorUI", "Starting Logging.MaintainConsoleLogs() Routine.", Logging.Debug);
             Logging.MaintainConsoleLogs();
+        }
+
+        private void btnSendTestEmail_Click(object sender, EventArgs e)
+        {
+            Logging.Log("QuestorUI", "This Button Sends a test email to the configured email address", Logging.Debug);
+            Email.SendEmail("Someone Pushed the Test Email Button","This is Just a Test Email from Questor");
         }
     }
 }

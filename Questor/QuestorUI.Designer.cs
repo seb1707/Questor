@@ -183,6 +183,8 @@
             this.BlacklistedMissionstextbox = new System.Windows.Forms.TextBox();
             this.GreyListedMissionsTextBox = new System.Windows.Forms.TextBox();
             this.tabSchedule = new System.Windows.Forms.TabPage();
+            this.btnSetQuestorQuittingFlag = new System.Windows.Forms.Button();
+            this.brnSetStopTimetoNow = new System.Windows.Forms.Button();
             this.dataStopTimeSpecified = new System.Windows.Forms.Label();
             this.lblStopTimeSpecified = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -209,6 +211,7 @@
             this.ScheduleWarninglabel1 = new System.Windows.Forms.Label();
             this.ExitWhenIdleCheckBox = new System.Windows.Forms.CheckBox();
             this.tabStates = new System.Windows.Forms.TabPage();
+            this.bttnMaintainConsoleLogs = new System.Windows.Forms.Button();
             this.OutOfAmmo = new System.Windows.Forms.Button();
             this.ReloadAll = new System.Windows.Forms.Button();
             this.label19 = new System.Windows.Forms.Label();
@@ -549,9 +552,7 @@
             this.label273 = new System.Windows.Forms.Label();
             this.label274 = new System.Windows.Forms.Label();
             this.tabLowSlots = new System.Windows.Forms.TabPage();
-            this.brnSetStopTimetoNow = new System.Windows.Forms.Button();
-            this.btnSetQuestorQuittingFlag = new System.Windows.Forms.Button();
-            this.bttnMaintainConsoleLogs = new System.Windows.Forms.Button();
+            this.btnSendTestEmail = new System.Windows.Forms.Button();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -2096,6 +2097,24 @@
             this.tabSchedule.Text = "Schedule";
             this.tabSchedule.UseVisualStyleBackColor = true;
             // 
+            // btnSetQuestorQuittingFlag
+            // 
+            this.btnSetQuestorQuittingFlag.Location = new System.Drawing.Point(395, 179);
+            this.btnSetQuestorQuittingFlag.Name = "btnSetQuestorQuittingFlag";
+            this.btnSetQuestorQuittingFlag.Size = new System.Drawing.Size(131, 52);
+            this.btnSetQuestorQuittingFlag.TabIndex = 197;
+            this.btnSetQuestorQuittingFlag.Text = "Debug: Set QuestorQuitting Flag";
+            this.btnSetQuestorQuittingFlag.UseVisualStyleBackColor = true;
+            // 
+            // brnSetStopTimetoNow
+            // 
+            this.brnSetStopTimetoNow.Location = new System.Drawing.Point(532, 179);
+            this.brnSetStopTimetoNow.Name = "brnSetStopTimetoNow";
+            this.brnSetStopTimetoNow.Size = new System.Drawing.Size(131, 52);
+            this.brnSetStopTimetoNow.TabIndex = 196;
+            this.brnSetStopTimetoNow.Text = "Debug: SetStopTime timestamp to NOW";
+            this.brnSetStopTimetoNow.UseVisualStyleBackColor = true;
+            // 
             // dataStopTimeSpecified
             // 
             this.dataStopTimeSpecified.AutoSize = true;
@@ -2307,7 +2326,7 @@
             this.label27.Size = new System.Drawing.Size(460, 13);
             this.label27.TabIndex = 169;
             this.label27.Text = "These values are used this session only and will be overwritten if questor restar" +
-    "ts for ANY reason";
+                "ts for ANY reason";
             // 
             // ScheduleWarninglabel1
             // 
@@ -2317,7 +2336,7 @@
             this.ScheduleWarninglabel1.Size = new System.Drawing.Size(460, 13);
             this.ScheduleWarninglabel1.TabIndex = 168;
             this.ScheduleWarninglabel1.Text = "These values are used this session only and will be overwritten if questor restar" +
-    "ts for ANY reason";
+                "ts for ANY reason";
             // 
             // ExitWhenIdleCheckBox
             // 
@@ -2333,6 +2352,7 @@
             // 
             // tabStates
             // 
+            this.tabStates.Controls.Add(this.btnSendTestEmail);
             this.tabStates.Controls.Add(this.bttnMaintainConsoleLogs);
             this.tabStates.Controls.Add(this.OutOfAmmo);
             this.tabStates.Controls.Add(this.ReloadAll);
@@ -2348,6 +2368,16 @@
             this.tabStates.Text = "States";
             this.tabStates.UseVisualStyleBackColor = true;
             // 
+            // bttnMaintainConsoleLogs
+            // 
+            this.bttnMaintainConsoleLogs.Location = new System.Drawing.Point(544, 95);
+            this.bttnMaintainConsoleLogs.Name = "bttnMaintainConsoleLogs";
+            this.bttnMaintainConsoleLogs.Size = new System.Drawing.Size(131, 23);
+            this.bttnMaintainConsoleLogs.TabIndex = 171;
+            this.bttnMaintainConsoleLogs.Text = "Maintain Console Logs";
+            this.bttnMaintainConsoleLogs.UseVisualStyleBackColor = true;
+            this.bttnMaintainConsoleLogs.Click += new System.EventHandler(this.bttnMaintainConsoleLogs_Click);
+            // 
             // OutOfAmmo
             // 
             this.OutOfAmmo.Location = new System.Drawing.Point(544, 63);
@@ -2360,7 +2390,7 @@
             // 
             // ReloadAll
             // 
-            this.ReloadAll.Location = new System.Drawing.Point(544, 34);
+            this.ReloadAll.Location = new System.Drawing.Point(544, 33);
             this.ReloadAll.Name = "ReloadAll";
             this.ReloadAll.Size = new System.Drawing.Size(131, 23);
             this.ReloadAll.TabIndex = 169;
@@ -2376,7 +2406,7 @@
             this.label19.Size = new System.Drawing.Size(400, 13);
             this.label19.TabIndex = 168;
             this.label19.Text = "it is a very bad idea to change these states unless you understand what will happ" +
-    "en";
+                "en";
             // 
             // label11
             // 
@@ -2386,7 +2416,7 @@
             this.label11.Size = new System.Drawing.Size(400, 13);
             this.label11.TabIndex = 167;
             this.label11.Text = "it is a very bad idea to change these states unless you understand what will happ" +
-    "en";
+                "en";
             // 
             // panel2
             // 
@@ -5804,33 +5834,15 @@
             this.tabLowSlots.Text = "LowSlots";
             this.tabLowSlots.UseVisualStyleBackColor = true;
             // 
-            // brnSetStopTimetoNow
+            // btnSendTestEmail
             // 
-            this.brnSetStopTimetoNow.Location = new System.Drawing.Point(532, 179);
-            this.brnSetStopTimetoNow.Name = "brnSetStopTimetoNow";
-            this.brnSetStopTimetoNow.Size = new System.Drawing.Size(131, 52);
-            this.brnSetStopTimetoNow.TabIndex = 196;
-            this.brnSetStopTimetoNow.Text = "Debug: SetStopTime timestamp to NOW";
-            this.brnSetStopTimetoNow.UseVisualStyleBackColor = true;
-            // 
-            // btnSetQuestorQuittingFlag
-            // 
-            this.btnSetQuestorQuittingFlag.Location = new System.Drawing.Point(395, 179);
-            this.btnSetQuestorQuittingFlag.Name = "btnSetQuestorQuittingFlag";
-            this.btnSetQuestorQuittingFlag.Size = new System.Drawing.Size(131, 52);
-            this.btnSetQuestorQuittingFlag.TabIndex = 197;
-            this.btnSetQuestorQuittingFlag.Text = "Debug: Set QuestorQuitting Flag";
-            this.btnSetQuestorQuittingFlag.UseVisualStyleBackColor = true;
-            // 
-            // bttnMaintainConsoleLogs
-            // 
-            this.bttnMaintainConsoleLogs.Location = new System.Drawing.Point(544, 95);
-            this.bttnMaintainConsoleLogs.Name = "bttnMaintainConsoleLogs";
-            this.bttnMaintainConsoleLogs.Size = new System.Drawing.Size(131, 36);
-            this.bttnMaintainConsoleLogs.TabIndex = 171;
-            this.bttnMaintainConsoleLogs.Text = "Debug: Maintain Console Logs";
-            this.bttnMaintainConsoleLogs.UseVisualStyleBackColor = true;
-            this.bttnMaintainConsoleLogs.Click += new System.EventHandler(this.bttnMaintainConsoleLogs_Click);
+            this.btnSendTestEmail.Location = new System.Drawing.Point(544, 124);
+            this.btnSendTestEmail.Name = "btnSendTestEmail";
+            this.btnSendTestEmail.Size = new System.Drawing.Size(131, 23);
+            this.btnSendTestEmail.TabIndex = 172;
+            this.btnSendTestEmail.Text = "Debug: Send Test Email";
+            this.btnSendTestEmail.UseVisualStyleBackColor = true;
+            this.btnSendTestEmail.Click += new System.EventHandler(this.btnSendTestEmail_Click);
             // 
             // QuestorfrmMain
             // 

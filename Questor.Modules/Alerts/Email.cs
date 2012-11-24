@@ -11,7 +11,6 @@
 namespace Questor.Modules.Alerts
 {
     using System;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -19,6 +18,7 @@ namespace Questor.Modules.Alerts
     using System.Net;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
+    using Questor.Modules.Logging;
     using Questor.Modules.States;
     using InnerSpaceAPI;
     using LavishScriptAPI;
@@ -26,8 +26,54 @@ namespace Questor.Modules.Alerts
     public static class Email
     {
         public static DateTime DateTimeForLogs;
+        private static bool ShipLostEmailSent;
+        private static bool QuestorRestartedEmailSent;
 
-        public static void SendEmail(string subject, string body)
+        public static bool Email_ShipLost()
+        {
+            try
+            {
+                string _locationName;
+                if (Cache.Instance.InStation)
+                {
+                    _locationName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0);
+                }
+                else
+                {
+                    long mySolarSystemlocation = Cache.Instance.DirectEve.ActiveShip.LocationId;
+                    _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(mySolarSystemlocation);
+                }
+                
+                if (!ShipLostEmailSent)
+                {
+                    string subject = "ShipLostEmail: [" + Settings.Instance.CharacterName + "] is in a pod";
+                    string body = "ShipLostEmail: [" + Settings.Instance.CharacterName + "] is in a pod in [" + _locationName + "]";
+                    if (SendEmail(subject, body))
+                    {
+                        ShipLostEmailSent = true;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                
+            }
+        }
+
+        public static bool Email_QuestorRestarted()
+        {
+            if (!QuestorRestartedEmailSent)
+            {
+                string subject = "subject test";
+                string body = "body test";
+                if (SendEmail(subject, body))
+                {
+                    QuestorRestartedEmailSent = true;
+                }
+            }
+        }
+
+        public static bool SendEmail(string subject, string body)
         {
             if (Settings.Instance.EmailSupport)
             {
@@ -47,16 +93,26 @@ namespace Questor.Modules.Alerts
                     !String.IsNullOrEmpty(Settings.Instance.EmailAddressToSendAlerts)
                     )
                 {
-                    var client = new SmtpClient(Settings.Instance.EmailSMTPServer, Settings.Instance.EmailSMTPPort) //587
+                    try
                     {
-                        Credentials = new NetworkCredential(Settings.Instance.EmailAddress, Settings.Instance.EmailPassword),
-                        EnableSsl = _useSSL
-                    };
-                    client.Send(Settings.Instance.EmailAddress, Settings.Instance.EmailAddressToSendAlerts, subject, body);
-                    Console.WriteLine("Sent Email to [" + Settings.Instance.EmailAddressToSendAlerts + "]");
-                    Console.ReadLine();
-                }    
+                        var smtpClient = new SmtpClient(Settings.Instance.EmailSMTPServer, Settings.Instance.EmailSMTPPort) //587
+                        {
+                            Credentials = new NetworkCredential(Settings.Instance.EmailAddress, Settings.Instance.EmailPassword),
+                            EnableSsl = _useSSL
+                        };
+                        smtpClient.Send(Settings.Instance.EmailAddress, Settings.Instance.EmailAddressToSendAlerts, subject, body);
+                        Logging.Log("Email.SendEmail", "Sent Email to [" + Settings.Instance.EmailAddressToSendAlerts + "]", Logging.Debug);
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log("Email.SendEmail", "Sending Email caused an exception [" + exception + "]",Logging.Debug);
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
             }
+            return true;
         }
     }
 }

@@ -318,7 +318,7 @@ namespace Questor
             {
                 try
                 {
-                    if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth || (Cache.Instance.DirectEve.Me.Wealth >= 0))
+                    if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth)
                     {
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;

@@ -220,6 +220,7 @@ namespace Questor
                         AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
 
                         DamageTypeData.Text = Cache.Instance.DamageType.ToString();
+
                         //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
                         //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
                         //AgentIdData.Text = Cache.Instance.AgentId.ToString(CultureInfo.InvariantCulture);
@@ -279,6 +280,7 @@ namespace Questor
                 {
                     ScheduledStopTimeData.Text = Cache.Instance.StopTime.ToLongTimeString();
                 }
+
                 //
                 // if control is enabled (checked) then update ManualStopTime so that on next idle questor will check to see if it needs to stop
                 //
@@ -1643,6 +1645,12 @@ namespace Questor
             Cache.Instance.StopTimeSpecified = true;
             Cache.Instance.NextTimeCheckAction = DateTime.UtcNow;
             Cache.Instance.StopTime = DateTime.Now; //(use local time not UTC time because this is Arm schedule related timer)
+        }
+
+        private void bttnMaintainConsoleLogs_Click(object sender, EventArgs e)
+        {
+            Logging.Log("QuestorUI", "Starting Logging.MaintainConsoleLogs() Routine.", Logging.Debug);
+            Logging.MaintainConsoleLogs();
         }
     }
 }

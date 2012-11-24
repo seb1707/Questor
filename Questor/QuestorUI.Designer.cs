@@ -183,6 +183,8 @@
             this.BlacklistedMissionstextbox = new System.Windows.Forms.TextBox();
             this.GreyListedMissionsTextBox = new System.Windows.Forms.TextBox();
             this.tabSchedule = new System.Windows.Forms.TabPage();
+            this.dataStopTimeSpecified = new System.Windows.Forms.Label();
+            this.lblStopTimeSpecified = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.MissionsThisSessionData = new System.Windows.Forms.Label();
             this.MissionsThisSessionlbl = new System.Windows.Forms.Label();
@@ -207,8 +209,6 @@
             this.ScheduleWarninglabel1 = new System.Windows.Forms.Label();
             this.ExitWhenIdleCheckBox = new System.Windows.Forms.CheckBox();
             this.tabStates = new System.Windows.Forms.TabPage();
-            this.btnSetQuestorQuittingFlag = new System.Windows.Forms.Button();
-            this.brnSetStopTimetoNow = new System.Windows.Forms.Button();
             this.OutOfAmmo = new System.Windows.Forms.Button();
             this.ReloadAll = new System.Windows.Forms.Button();
             this.label19 = new System.Windows.Forms.Label();
@@ -549,8 +549,9 @@
             this.label273 = new System.Windows.Forms.Label();
             this.label274 = new System.Windows.Forms.Label();
             this.tabLowSlots = new System.Windows.Forms.TabPage();
-            this.lblStopTimeSpecified = new System.Windows.Forms.Label();
-            this.dataStopTimeSpecified = new System.Windows.Forms.Label();
+            this.brnSetStopTimetoNow = new System.Windows.Forms.Button();
+            this.btnSetQuestorQuittingFlag = new System.Windows.Forms.Button();
+            this.bttnMaintainConsoleLogs = new System.Windows.Forms.Button();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -2060,6 +2061,8 @@
             // 
             // tabSchedule
             // 
+            this.tabSchedule.Controls.Add(this.btnSetQuestorQuittingFlag);
+            this.tabSchedule.Controls.Add(this.brnSetStopTimetoNow);
             this.tabSchedule.Controls.Add(this.dataStopTimeSpecified);
             this.tabSchedule.Controls.Add(this.lblStopTimeSpecified);
             this.tabSchedule.Controls.Add(this.numericUpDown1);
@@ -2093,6 +2096,24 @@
             this.tabSchedule.Text = "Schedule";
             this.tabSchedule.UseVisualStyleBackColor = true;
             // 
+            // dataStopTimeSpecified
+            // 
+            this.dataStopTimeSpecified.AutoSize = true;
+            this.dataStopTimeSpecified.Location = new System.Drawing.Point(625, 154);
+            this.dataStopTimeSpecified.Name = "dataStopTimeSpecified";
+            this.dataStopTimeSpecified.Size = new System.Drawing.Size(27, 13);
+            this.dataStopTimeSpecified.TabIndex = 195;
+            this.dataStopTimeSpecified.Text = "N/A";
+            // 
+            // lblStopTimeSpecified
+            // 
+            this.lblStopTimeSpecified.AutoSize = true;
+            this.lblStopTimeSpecified.Location = new System.Drawing.Point(529, 154);
+            this.lblStopTimeSpecified.Name = "lblStopTimeSpecified";
+            this.lblStopTimeSpecified.Size = new System.Drawing.Size(94, 13);
+            this.lblStopTimeSpecified.TabIndex = 194;
+            this.lblStopTimeSpecified.Text = "stopTimeSpecified";
+            // 
             // numericUpDown1
             // 
             this.numericUpDown1.Location = new System.Drawing.Point(152, 166);
@@ -2104,7 +2125,7 @@
             // MissionsThisSessionData
             // 
             this.MissionsThisSessionData.AutoSize = true;
-            this.MissionsThisSessionData.Location = new System.Drawing.Point(401, 168);
+            this.MissionsThisSessionData.Location = new System.Drawing.Point(629, 15);
             this.MissionsThisSessionData.Name = "MissionsThisSessionData";
             this.MissionsThisSessionData.Size = new System.Drawing.Size(24, 13);
             this.MissionsThisSessionData.TabIndex = 192;
@@ -2113,7 +2134,7 @@
             // MissionsThisSessionlbl
             // 
             this.MissionsThisSessionlbl.AutoSize = true;
-            this.MissionsThisSessionlbl.Location = new System.Drawing.Point(288, 168);
+            this.MissionsThisSessionlbl.Location = new System.Drawing.Point(516, 15);
             this.MissionsThisSessionlbl.Name = "MissionsThisSessionlbl";
             this.MissionsThisSessionlbl.Size = new System.Drawing.Size(107, 13);
             this.MissionsThisSessionlbl.TabIndex = 191;
@@ -2312,8 +2333,7 @@
             // 
             // tabStates
             // 
-            this.tabStates.Controls.Add(this.btnSetQuestorQuittingFlag);
-            this.tabStates.Controls.Add(this.brnSetStopTimetoNow);
+            this.tabStates.Controls.Add(this.bttnMaintainConsoleLogs);
             this.tabStates.Controls.Add(this.OutOfAmmo);
             this.tabStates.Controls.Add(this.ReloadAll);
             this.tabStates.Controls.Add(this.label19);
@@ -2328,26 +2348,6 @@
             this.tabStates.Text = "States";
             this.tabStates.UseVisualStyleBackColor = true;
             // 
-            // btnSetQuestorQuittingFlag
-            // 
-            this.btnSetQuestorQuittingFlag.Location = new System.Drawing.Point(544, 157);
-            this.btnSetQuestorQuittingFlag.Name = "btnSetQuestorQuittingFlag";
-            this.btnSetQuestorQuittingFlag.Size = new System.Drawing.Size(131, 52);
-            this.btnSetQuestorQuittingFlag.TabIndex = 173;
-            this.btnSetQuestorQuittingFlag.Text = "Debug: Set QuestorQuitting Flag";
-            this.btnSetQuestorQuittingFlag.UseVisualStyleBackColor = true;
-            this.btnSetQuestorQuittingFlag.Click += new System.EventHandler(this.btnSetQuestorQuittingFlag_Click);
-            // 
-            // brnSetStopTimetoNow
-            // 
-            this.brnSetStopTimetoNow.Location = new System.Drawing.Point(544, 95);
-            this.brnSetStopTimetoNow.Name = "brnSetStopTimetoNow";
-            this.brnSetStopTimetoNow.Size = new System.Drawing.Size(131, 52);
-            this.brnSetStopTimetoNow.TabIndex = 171;
-            this.brnSetStopTimetoNow.Text = "Debug: SetStopTime timestamp to NOW";
-            this.brnSetStopTimetoNow.UseVisualStyleBackColor = true;
-            this.brnSetStopTimetoNow.Click += new System.EventHandler(this.brnSetStopTimetoNow_Click);
-            // 
             // OutOfAmmo
             // 
             this.OutOfAmmo.Location = new System.Drawing.Point(544, 63);
@@ -2360,7 +2360,7 @@
             // 
             // ReloadAll
             // 
-            this.ReloadAll.Location = new System.Drawing.Point(544, 36);
+            this.ReloadAll.Location = new System.Drawing.Point(544, 34);
             this.ReloadAll.Name = "ReloadAll";
             this.ReloadAll.Size = new System.Drawing.Size(131, 23);
             this.ReloadAll.TabIndex = 169;
@@ -5804,23 +5804,33 @@
             this.tabLowSlots.Text = "LowSlots";
             this.tabLowSlots.UseVisualStyleBackColor = true;
             // 
-            // lblStopTimeSpecified
+            // brnSetStopTimetoNow
             // 
-            this.lblStopTimeSpecified.AutoSize = true;
-            this.lblStopTimeSpecified.Location = new System.Drawing.Point(529, 154);
-            this.lblStopTimeSpecified.Name = "lblStopTimeSpecified";
-            this.lblStopTimeSpecified.Size = new System.Drawing.Size(94, 13);
-            this.lblStopTimeSpecified.TabIndex = 194;
-            this.lblStopTimeSpecified.Text = "stopTimeSpecified";
+            this.brnSetStopTimetoNow.Location = new System.Drawing.Point(532, 179);
+            this.brnSetStopTimetoNow.Name = "brnSetStopTimetoNow";
+            this.brnSetStopTimetoNow.Size = new System.Drawing.Size(131, 52);
+            this.brnSetStopTimetoNow.TabIndex = 196;
+            this.brnSetStopTimetoNow.Text = "Debug: SetStopTime timestamp to NOW";
+            this.brnSetStopTimetoNow.UseVisualStyleBackColor = true;
             // 
-            // dataStopTimeSpecified
+            // btnSetQuestorQuittingFlag
             // 
-            this.dataStopTimeSpecified.AutoSize = true;
-            this.dataStopTimeSpecified.Location = new System.Drawing.Point(625, 154);
-            this.dataStopTimeSpecified.Name = "dataStopTimeSpecified";
-            this.dataStopTimeSpecified.Size = new System.Drawing.Size(27, 13);
-            this.dataStopTimeSpecified.TabIndex = 195;
-            this.dataStopTimeSpecified.Text = "N/A";
+            this.btnSetQuestorQuittingFlag.Location = new System.Drawing.Point(395, 179);
+            this.btnSetQuestorQuittingFlag.Name = "btnSetQuestorQuittingFlag";
+            this.btnSetQuestorQuittingFlag.Size = new System.Drawing.Size(131, 52);
+            this.btnSetQuestorQuittingFlag.TabIndex = 197;
+            this.btnSetQuestorQuittingFlag.Text = "Debug: Set QuestorQuitting Flag";
+            this.btnSetQuestorQuittingFlag.UseVisualStyleBackColor = true;
+            // 
+            // bttnMaintainConsoleLogs
+            // 
+            this.bttnMaintainConsoleLogs.Location = new System.Drawing.Point(544, 95);
+            this.bttnMaintainConsoleLogs.Name = "bttnMaintainConsoleLogs";
+            this.bttnMaintainConsoleLogs.Size = new System.Drawing.Size(131, 36);
+            this.bttnMaintainConsoleLogs.TabIndex = 171;
+            this.bttnMaintainConsoleLogs.Text = "Debug: Maintain Console Logs";
+            this.bttnMaintainConsoleLogs.UseVisualStyleBackColor = true;
+            this.bttnMaintainConsoleLogs.Click += new System.EventHandler(this.bttnMaintainConsoleLogs_Click);
             // 
             // QuestorfrmMain
             // 
@@ -6420,10 +6430,11 @@
         private System.Windows.Forms.Button bttnCloseCargoHold;
         private System.Windows.Forms.Button bttnStackCargoHold;
         private System.Windows.Forms.Button bttnOpenCargoHold;
-        private System.Windows.Forms.Button btnSetQuestorQuittingFlag;
-        private System.Windows.Forms.Button brnSetStopTimetoNow;
         private System.Windows.Forms.Label dataStopTimeSpecified;
         private System.Windows.Forms.Label lblStopTimeSpecified;
+        private System.Windows.Forms.Button btnSetQuestorQuittingFlag;
+        private System.Windows.Forms.Button brnSetStopTimetoNow;
+        private System.Windows.Forms.Button bttnMaintainConsoleLogs;
     }
 }
 

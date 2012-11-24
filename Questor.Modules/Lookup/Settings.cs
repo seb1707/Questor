@@ -89,6 +89,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
+        public bool DebugMaintainConsoleLogs { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
@@ -539,6 +540,7 @@ namespace Questor.Modules.Lookup
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
+                DebugMaintainConsoleLogs = false;
                 DebugMissionFittings = false;
                 DebugMoveTo = false;
                 DebugNavigateOnGrid = false;
@@ -899,6 +901,7 @@ namespace Questor.Modules.Lookup
                     DebugLoadScripts = (bool?)xml.Element("debugLoadScripts") ?? false;
                     DebugLogging = (bool?)xml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)xml.Element("debugLootWrecks") ?? false;
+                    DebugMaintainConsoleLogs = (bool?)xml.Element("debugMaintainConsoleLogs") ?? false;
                     DebugMissionFittings = (bool?)xml.Element("debugMissionFittings") ?? false;
                     DebugMoveTo = (bool?)xml.Element("debugMoveTo") ?? false;
                     DebugNavigateOnGrid = (bool?)xml.Element("debugNavigateOnGrid") ?? false;

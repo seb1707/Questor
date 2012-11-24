@@ -16,6 +16,7 @@ namespace Questor.Modules.Lookup
         Stargate = 10,
         AsteroidBelt = 9,
         AccelerationGate = 366,
+        JumpBridge = 707,
 
         Capsule = 29,
 

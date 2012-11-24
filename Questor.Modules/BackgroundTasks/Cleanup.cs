@@ -133,7 +133,7 @@
                             {
                                 _closeQuestor10SecWarningDone = true;
                                 Logging.Log("Questor", "Exiting eve in [" + Time.Instance.CloseQuestorDelayBeforeExit_seconds + "] seconds", Logging.White);
-                               return false;
+                                return false;
                             }
 
                             if (DateTime.UtcNow > CloseQuestorDelay)
@@ -299,6 +299,7 @@
                     _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
+
                 if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.White);
@@ -306,6 +307,7 @@
                     _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
+
                 if (window.Name.Contains("_StationItems_") && window.Caption.Contains("Item hangar") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Item Hangar Window", Logging.White);
@@ -313,6 +315,7 @@
                     _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
+
                 if (window.Name.Contains("_StationShips_") && window.Caption.Contains("Ship hangar") && window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing Ship Hangar Window", Logging.White);
@@ -320,6 +323,7 @@
                     _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
+
                 if (window.Type.Contains("Inventory"))
                 {
                     Logging.Log("Cleanup", "CloseInventoryWindows: Closing other Inventory Window named [ " + window.Name + "]", Logging.White);

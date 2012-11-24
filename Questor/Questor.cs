@@ -15,7 +15,6 @@ namespace Questor
     using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
-    using System.Windows.Forms;
     using DirectEve;
     using global::Questor.Behaviors;
     using global::Questor.Modules.Caching;
@@ -508,7 +507,7 @@ namespace Questor
                     }
 
                     Logging.Log("Questor", "Settings.Instance.CharacterMode = [" + Settings.Instance.CharacterMode + "]", Logging.Orange);
-                     _States.CurrentQuestorState = QuestorState.Error;    
+                    _States.CurrentQuestorState = QuestorState.Error;
                     break;
 
                 case QuestorState.CombatMissionsBehavior:

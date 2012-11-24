@@ -8,13 +8,12 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Diagnostics;
-
 namespace Questor.Modules.Caching
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -140,6 +139,11 @@ namespace Questor.Modules.Caching
         ///   Stargate by name
         /// </summary>
         private EntityCache _stargate;
+
+        /// <summary>
+        ///   JumpBridges
+        /// </summary>
+        private IEnumerable<EntityCache> _jumpBridges;
 
         /// <summary>
         ///   Targeted by cache
@@ -1432,6 +1436,11 @@ namespace Questor.Modules.Caching
                 var solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
                 return solarSystems;
             }
+        }
+
+        public IEnumerable<EntityCache> JumpBridges
+        {
+            get { return _jumpBridges ?? (_jumpBridges = Entities.Where(e => e.GroupId == (int)Group.JumpBridge).ToList()); }
         }
 
         public IEnumerable<EntityCache> Stargates

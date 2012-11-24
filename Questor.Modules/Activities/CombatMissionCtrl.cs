@@ -119,6 +119,14 @@ namespace Questor.Modules.Activities
             _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
         }
 
+        private void LogWhatIsOnGridAction(Actions.Action action)
+        {
+
+            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Log Entities on Grid.", Logging.Teal);
+            if (!Statistics.EntityStatistics(Cache.Instance.Entities)) return;
+            Nextaction();
+        }
+
         private void ActivateAction(Actions.Action action)
         {
             bool optional;
@@ -585,6 +593,46 @@ namespace Questor.Modules.Activities
 
             // Reset timeout
             _clearPocketTimeout = null;
+        }
+
+        private void OrbitEntityAction(Actions.Action action)
+        {
+            if (Cache.Instance.NormalApproach)
+                Cache.Instance.NormalApproach = false;
+
+            string target = action.GetParameterValue("target");
+
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+                notTheClosest = false;
+
+            // No parameter? Although we should not really allow it, assume its the acceleration gate :)
+            if (string.IsNullOrEmpty(target))
+            {
+                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "No Entity Specified to orbit: skipping OrbitEntity Action", Logging.Teal);
+                Nextaction();
+                return;
+            }
+               
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByNamePart(target).ToList();
+            if (!targets.Any())
+            {
+                // Unlike activate, no target just means next action
+                _currentAction++;
+                return;
+            }
+
+            EntityCache closest = targets.OrderBy(t => t.Distance).First();
+
+            if (notTheClosest)
+            {
+                closest = targets.OrderByDescending(t => t.Distance).First();
+            }
+
+            // Move to the target
+            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Setting [" + closest.Name + "][ID: " + closest.Id + "][" + Math.Round(closest.Distance / 1000, 0) + "k away as the Orbit Target]", Logging.Teal);
+            closest.Orbit(Cache.Instance.OrbitDistance);
+            Nextaction();
         }
 
         private void MoveToBackgroundAction(Actions.Action action)
@@ -1498,6 +1546,10 @@ namespace Questor.Modules.Activities
         {
             switch (action.State)
             {
+                case ActionState.LogWhatIsOnGrid:
+                    LogWhatIsOnGridAction(action);
+                    break;
+
                 case ActionState.Activate:
                     ActivateAction(action);
                     break;
@@ -1546,6 +1598,10 @@ namespace Questor.Modules.Activities
 
                 case ActionState.MoveTo:
                     MoveToAction(action);
+                    break;
+
+                case ActionState.OrbitEntity:
+                    OrbitEntityAction(action);
                     break;
 
                 case ActionState.MoveToBackground:

@@ -115,6 +115,8 @@ namespace Questor.Modules.Caching
 
         public String _priorityTargets_text;
 
+        public String OrbitEntityNamed;
+
         public DirectLocation MissionSolarSystem;
 
         public string DungeonId;

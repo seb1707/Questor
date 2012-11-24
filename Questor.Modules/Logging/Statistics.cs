@@ -160,7 +160,7 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool EntityStatistics(List<EntityCache> things)
+        public static bool EntityStatistics(IEnumerable<EntityCache> things)
         {
             string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;ID;\r\n";
             Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.White);
@@ -450,6 +450,7 @@ namespace Questor.Modules.Logging
             Cache.Instance.RepairCycleTimeThisPocket = 0;
             Cache.Instance.WrecksThisMission += Cache.Instance.WrecksThisPocket;
             Cache.Instance.WrecksThisPocket = 0;
+            Cache.Instance.OrbitEntityNamed = null;
         }
 
         public static void WriteMissionStatistics(long statisticsForThisAgent)
@@ -725,6 +726,7 @@ namespace Questor.Modules.Logging
             Cache.Instance.TimeSpentInMissionOutOfRange = 0;           // time spent in range - with targets to kill (or no targets?!)
             Cache.Instance.MissionSolarSystem = null;
             Cache.Instance.DungeonId = "n/a";
+            Cache.Instance.OrbitEntityNamed = null;
         }
 
         public void ProcessState()

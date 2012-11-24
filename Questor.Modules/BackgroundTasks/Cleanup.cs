@@ -393,7 +393,7 @@
                 return;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(20))
+            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Cache.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
                 return;
@@ -691,9 +691,16 @@
                         }
                     }
 
-                    if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30) && (Settings.Instance.CharacterName != Cache.Instance.DirectEve.Me.Name))
+                    if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30) && (
+                        _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior ||
+                        _States.CurrentQuestorState == QuestorState.CombatHelperBehavior ||
+                        _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior ||
+                        _States.CurrentQuestorState == QuestorState.Idle ||
+                        _States.CurrentQuestorState == QuestorState.Cleanup) && 
+                        Settings.Instance.CharacterName != Cache.Instance.DirectEve.Me.Name 
+                       )
                     {
-                        Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
+                        Logging.Log("Cleanup", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                         Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                         Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                         Cache.Instance.SessionState = "Quitting";

@@ -439,7 +439,16 @@ namespace Questor.Modules.Lookup
         {
             try
             {
-                Settings.Instance.CharacterName = Cache.Instance.DirectEve.Me.Name;
+                if (CharSchedule.ScheduleCharacterName != null)
+                {
+                    Settings.Instance.CharacterName = CharSchedule.ScheduleCharacterName;
+                    Logging.Log("Settings", "CharacterName was pulled from the Scheduler: [" + Settings.Instance.CharacterName + "]", Logging.White);
+                }
+                else
+                {
+                    Settings.Instance.CharacterName = Cache.Instance.DirectEve.Me.Name;
+                    Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.Instance.CharacterName + "]", Logging.White);
+                }
             }
             catch (Exception)
             {

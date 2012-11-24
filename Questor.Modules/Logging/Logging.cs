@@ -62,17 +62,21 @@ namespace Questor.Modules.Logging
             //}
             //else //assume LocalTime
             //{
-                DateTimeForLogs = DateTime.Now;
+            DateTimeForLogs = DateTime.Now;
+
             //}
-            
+
             string colorLogLine = line;
+
             //colorLogLine contains color and is for the InnerSpace console
-            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange +  "] " + color + colorLogLine));                            //Innerspace Console Log
+            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));                            //Innerspace Console Log
             string plainLogLine = FilterColorsFromLogs(line);
+
             //plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
             Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");               //Questor GUI Console Log
             Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");               //In memory Console Log
             Cache.Instance.ConsoleLogRedacted += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+
             if (Settings.Instance.SaveConsoleLog)
             {
                 if (!Cache.Instance.ConsoleLogOpened)
@@ -81,12 +85,12 @@ namespace Questor.Modules.Logging
                     {
                         module = "Logging";
                         line = "Writing to Daily Console Log ";
-                        if (Settings.Instance.InnerspaceGeneratedConsoleLog) 
+                        if (Settings.Instance.InnerspaceGeneratedConsoleLog)
                         {
                             InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
                             LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
                         }
-                        InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));                            //Innerspace Console Log
+
                         Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
 
                         if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))

@@ -190,6 +190,8 @@ namespace Questor.Modules.Actions
                 return;
             }
 
+            if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Entering MoveAmmo(), again...", Logging.White);
+            
             if (AmmoIsBeingMoved)
             {
                 if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)

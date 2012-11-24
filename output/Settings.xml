@@ -425,6 +425,17 @@
   <dronesKillHighValueTargets>false</dronesKillHighValueTargets>
 
   <!--                                                        -->
+  <!-- EMAIL SETTINGS -->
+  <!--                                                        -->
+  <emailSupport>false</emailSupport>
+  <emailAddress></emailAddress>
+  <emailPassword></emailPassword>
+  <emailSMTPServer></emailSMTPServer> <!--  ex: mail.myEmailProvider.com-->
+  <emailSMTPPort>25</emailSMTPPort>
+  <emailAddressToSendAlerts></emailAddressToSendAlerts>
+  <emailEnableSSL>false</emailEnableSSL>
+  
+  <!--                                                        -->
   <!-- MISSION BLACKLIST SETTINGS -->
   <!--                                                        -->
 

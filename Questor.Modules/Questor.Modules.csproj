@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alerts\Email.cs" />
     <Compile Include="BackgroundTasks\NavigateOnGrid.cs" />
     <Compile Include="Caching\ItemCacheMarket.cs" />
     <Compile Include="Caching\TargetingCache.cs" />

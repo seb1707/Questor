@@ -427,6 +427,23 @@ namespace Questor.Modules.Lookup
         public int? EVEWindowYSize { get; set; }
 
         //
+        // Email SMTP settings
+        //
+        public bool EmailSupport { get; set; }
+
+        public string EmailAddress { get; set; }
+
+        public string EmailPassword { get; set; }
+
+        public string EmailSMTPServer { get; set; }
+
+        public int EmailSMTPPort { get; set; }
+
+        public string EmailAddressToSendAlerts { get; set; }
+
+        public bool? EmailEnableSSL { get; set; }
+
+        //
         // path information - used to load the XML and used in other modules
         //
         public string Path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -808,6 +825,17 @@ namespace Questor.Modules.Lookup
 
                 MaximumHighValueTargets = 0;
                 MaximumLowValueTargets = 0;
+
+                //
+                // Email Settings
+                //
+                EmailSupport = false;
+                EmailAddress = "";
+                EmailPassword = "";
+                EmailSMTPServer = "";
+                EmailSMTPPort = 25;
+                EmailAddressToSendAlerts = "";
+                EmailEnableSSL = false;
 
                 //
                 // Clear various lists
@@ -1241,6 +1269,17 @@ namespace Questor.Modules.Lookup
                     LongRangeDroneRecallCapacitorPct = (int?)xml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
                     DronesKillHighValueTargets = (bool?)xml.Element("dronesKillHighValueTargets") ?? false;
                     BelowThisHealthLevelRemoveFromDroneBay = (int?)xml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? 150;
+
+                    //
+                    // Email Settings
+                    //
+                    EmailSupport = (bool?)xml.Element("emailSupport") ?? false;
+                    EmailAddress = (string)xml.Element("emailAddress") ?? "";
+                    EmailPassword = (string)xml.Element("emailPassword") ?? "";
+                    EmailSMTPServer = (string)xml.Element("emailSMTPServer") ?? "";
+                    EmailSMTPPort = (int?)xml.Element("emailSMTPPort") ?? 25;
+                    EmailAddressToSendAlerts = (string)xml.Element("emailAddressToSendAlerts") ?? "";
+                    EmailEnableSSL = (bool?)xml.Element("emailEnableSSL") ?? false;
 
                     //
                     // number of days of console logs to keep (anything older will be deleted on startup)

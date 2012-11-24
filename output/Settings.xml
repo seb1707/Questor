@@ -4,24 +4,34 @@
   <!--         DEBUG SETTINGS        -->
   <!--                                                -->
   
+  <debugActivateGate>false</debugActivateGate>
   <debugActivateWeapons>false</debugActivateWeapons>
+  <DebugAgentInteractionReplyToAgent>false</DebugAgentInteractionReplyToAgent>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
   <debugArm>false</debugArm>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <debugAutoStart>false</debugAutoStart>
+  <DebugBlackList>false</DebugBlackList>
+  <DebugCargoHold>false</DebugCargoHold>
   <debugCleanup>false</debugCleanup>
   <debugDecline>false</debugDecline>
   <debugDefense>false</debugDefense>
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>
+  <DebugFittingMgr>false</DebugFittingMgr>
   <debugGotobase>false</debugGotobase>
+  <DebugGreyList>false</DebugGreyList>
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
   <debugItemHangar>false</debugItemHangar>
   <debugLoadScripts>false</debugLoadScripts>
   <debugLogging>false</debugLogging>
   <debugLootWrecks>false</debugLootWrecks>
+  <DebugLootValue>false</DebugLootValue>
+  <DebugMaintainConsoleLogs>false</DebugMaintainConsoleLogs>
+  <DebugMissionFittings>false</DebugMissionFittings>
+  <DebugMoveTo>false</DebugMoveTo>
   <debugNavigateOnGrid>false</debugNavigateOnGrid>
   <debugOnframe>false</debugOnframe>
   <debugPerformance>false</debugPerformance>
@@ -31,7 +41,9 @@
   <debugScheduler>false</debugScheduler>
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
+  <DebugStorylineMissions>false</DebugStorylineMissions>
   <debugTraveler>false</debugTraveler>
+  <DebugTractorBeams>false</DebugTractorBeams>
   <debugUI>false</debugUI>
   <debugUnloadLoot>false</debugUnloadLoot>
   <debugValuedump>false</debugValuedump>

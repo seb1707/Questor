@@ -29,7 +29,7 @@ namespace Questor.Modules.Alerts
         private static bool ShipLostEmailSent;
         private static bool QuestorRestartedEmailSent;
 
-        public static bool Email_ShipLost()
+        public static void Email_ShipLost()
         {
             try
             {
@@ -56,11 +56,11 @@ namespace Questor.Modules.Alerts
             }
             catch (Exception exception)
             {
-                
+                Logging.Log("Email_ShipLost", "Exception was [" + exception + "]", Logging.Debug);
             }
         }
 
-        public static bool Email_QuestorRestarted()
+        public static void Email_QuestorRestarted()
         {
             if (!QuestorRestartedEmailSent)
             {

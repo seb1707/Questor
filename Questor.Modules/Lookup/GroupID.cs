@@ -153,6 +153,8 @@ namespace Questor.Modules.Lookup
         SmallArms = 280,
         AccelerationGateKeys = 474,
 
+        Minerals = 18,
+
         Plagioclase = 458,
         Spodumain = 461,
         Kernite = 457,

@@ -562,6 +562,21 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextOpenMarketAction;
+
+        public DateTime NextOpenMarketAction
+        {
+            get
+            {
+                return _nextOpenMarketAction;
+            }
+            set
+            {
+                _nextOpenMarketAction = value;
+                _lastAction = DateTime.UtcNow;
+            }
+        }
+
         private DateTime _nextOpenLootContainerAction;
 
         public DateTime NextOpenLootContainerAction
@@ -4773,6 +4788,73 @@ namespace Questor.Modules.Caching
             }
 
             return false;
+        }
+
+        public DirectMarketWindow MarketWindow { get; set; }
+
+        public bool OpenMarket(String module)
+        {
+            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                return false;
+            }
+
+            if (DateTime.UtcNow < Cache.Instance.NextOpenMarketAction)
+            {
+                return false;
+            }
+
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.MarketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+                
+                // Is the Market window open?
+                if (Cache.Instance.MarketWindow == null)
+                {
+                    // No, command it to open
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                    Cache.Instance.NextOpenMarketAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    Logging.Log(module, "Opening Market Window: waiting [" +
+                                Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,
+                                           0) + "sec]", Logging.White);
+                    return false;
+                }
+
+                return true; //if MarketWindow is not null then the window must be open.
+            }
+
+            return false;
+        }
+
+        public bool CloseMarket(String module)
+        {
+            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
+                return false;
+            }
+
+            if (DateTime.UtcNow < Cache.Instance.NextOpenMarketAction)
+            {
+                return false;
+            }
+
+            if (Cache.Instance.InStation)
+            {
+                Cache.Instance.MarketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+
+                // Is the Market window open?
+                if (Cache.Instance.MarketWindow == null)
+                {
+                    //already closed
+                    return true;
+                }
+
+                //if MarketWindow is not null then the window must be open, so close it.
+                Cache.Instance.MarketWindow.Close();
+                return true; 
+            }
+
+            return true;
         }
 
         public DirectContainer ContainerInSpace { get; set; }

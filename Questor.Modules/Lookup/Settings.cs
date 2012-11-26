@@ -460,15 +460,15 @@ namespace Questor.Modules.Lookup
         {
             try
             {
-                if (CharSchedule.ScheduleCharacterName != null)
+                if (Cache.Instance.ScheduleCharacterName != null)
                 {
-                    Settings.Instance.CharacterName = CharSchedule.ScheduleCharacterName;
-                    Logging.Log("Settings", "CharacterName was pulled from the Scheduler: [" + Settings.Instance.CharacterName + "]", Logging.White);
+                    Settings.Instance.CharacterName = Cache.Instance.ScheduleCharacterName;
+                    //Logging.Log("Settings", "CharacterName was pulled from the Scheduler: [" + Settings.Instance.CharacterName + "]", Logging.White);
                 }
                 else
                 {
                     Settings.Instance.CharacterName = Cache.Instance.DirectEve.Me.Name;
-                    Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.Instance.CharacterName + "]", Logging.White);
+                    //Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.Instance.CharacterName + "]", Logging.White);
                 }
             }
             catch (Exception)
@@ -664,20 +664,24 @@ namespace Questor.Modules.Lookup
                 //
                 UndockDelay = 10; //Delay when undocking - not in use
                 UndockPrefix = "Insta";
+
                 //Undock bookmark prefix - used by traveler - not in use
                 BookmarkWarpOut = "";
 
                 //
                 // Location of the Questor GUI on startup (default is off the screen)
                 //
-                WindowXPosition = 600;
+                WindowXPosition = 0;
+
                 //windows position (needs to be changed, default is off screen)
-                WindowYPosition = 400;
+                WindowYPosition = 0;
+
                 //windows position (needs to be changed, default is off screen)
-                EVEWindowXPosition = 111;
-                EVEWindowYPosition = 111;
-                EVEWindowXSize = 111;
-                EVEWindowYSize = 111;
+                EVEWindowXPosition = 0;
+                EVEWindowYPosition = 0;
+                EVEWindowXSize = 0;
+                EVEWindowYSize = 0;
+
                 //
                 // Ship Names
                 //

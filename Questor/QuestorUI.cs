@@ -1659,5 +1659,14 @@ namespace Questor
             Logging.Log("QuestorUI", "This Button Sends a test email to the configured email address", Logging.Debug);
             Email.SendEmail("Someone Pushed the Test Email Button","This is Just a Test Email from Questor");
         }
+
+        private void bttnResizeEVEWindow_Click(object sender, EventArgs e)
+        {
+            Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960, Logging.White);
+            LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
+            Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0, Logging.White);
+            LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
+                        
+        }
     }
 }

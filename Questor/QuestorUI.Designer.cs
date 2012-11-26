@@ -211,6 +211,7 @@
             this.ScheduleWarninglabel1 = new System.Windows.Forms.Label();
             this.ExitWhenIdleCheckBox = new System.Windows.Forms.CheckBox();
             this.tabStates = new System.Windows.Forms.TabPage();
+            this.btnSendTestEmail = new System.Windows.Forms.Button();
             this.bttnMaintainConsoleLogs = new System.Windows.Forms.Button();
             this.OutOfAmmo = new System.Windows.Forms.Button();
             this.ReloadAll = new System.Windows.Forms.Button();
@@ -552,7 +553,7 @@
             this.label273 = new System.Windows.Forms.Label();
             this.label274 = new System.Windows.Forms.Label();
             this.tabLowSlots = new System.Windows.Forms.TabPage();
-            this.btnSendTestEmail = new System.Windows.Forms.Button();
+            this.bttnResizeEVEWindow = new System.Windows.Forms.Button();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -2352,6 +2353,7 @@
             // 
             // tabStates
             // 
+            this.tabStates.Controls.Add(this.bttnResizeEVEWindow);
             this.tabStates.Controls.Add(this.btnSendTestEmail);
             this.tabStates.Controls.Add(this.bttnMaintainConsoleLogs);
             this.tabStates.Controls.Add(this.OutOfAmmo);
@@ -2367,6 +2369,16 @@
             this.tabStates.TabIndex = 1;
             this.tabStates.Text = "States";
             this.tabStates.UseVisualStyleBackColor = true;
+            // 
+            // btnSendTestEmail
+            // 
+            this.btnSendTestEmail.Location = new System.Drawing.Point(544, 124);
+            this.btnSendTestEmail.Name = "btnSendTestEmail";
+            this.btnSendTestEmail.Size = new System.Drawing.Size(131, 23);
+            this.btnSendTestEmail.TabIndex = 172;
+            this.btnSendTestEmail.Text = "Debug: Send Test Email";
+            this.btnSendTestEmail.UseVisualStyleBackColor = true;
+            this.btnSendTestEmail.Click += new System.EventHandler(this.btnSendTestEmail_Click);
             // 
             // bttnMaintainConsoleLogs
             // 
@@ -5834,15 +5846,15 @@
             this.tabLowSlots.Text = "LowSlots";
             this.tabLowSlots.UseVisualStyleBackColor = true;
             // 
-            // btnSendTestEmail
+            // bttnResizeEVEWindow
             // 
-            this.btnSendTestEmail.Location = new System.Drawing.Point(544, 124);
-            this.btnSendTestEmail.Name = "btnSendTestEmail";
-            this.btnSendTestEmail.Size = new System.Drawing.Size(131, 23);
-            this.btnSendTestEmail.TabIndex = 172;
-            this.btnSendTestEmail.Text = "Debug: Send Test Email";
-            this.btnSendTestEmail.UseVisualStyleBackColor = true;
-            this.btnSendTestEmail.Click += new System.EventHandler(this.btnSendTestEmail_Click);
+            this.bttnResizeEVEWindow.Location = new System.Drawing.Point(544, 155);
+            this.bttnResizeEVEWindow.Name = "bttnResizeEVEWindow";
+            this.bttnResizeEVEWindow.Size = new System.Drawing.Size(131, 47);
+            this.bttnResizeEVEWindow.TabIndex = 173;
+            this.bttnResizeEVEWindow.Text = "Debug: Resize EVE Window to 1280x960";
+            this.bttnResizeEVEWindow.UseVisualStyleBackColor = true;
+            this.bttnResizeEVEWindow.Click += new System.EventHandler(this.bttnResizeEVEWindow_Click);
             // 
             // QuestorfrmMain
             // 
@@ -6447,6 +6459,8 @@
         private System.Windows.Forms.Button btnSetQuestorQuittingFlag;
         private System.Windows.Forms.Button brnSetStopTimetoNow;
         private System.Windows.Forms.Button bttnMaintainConsoleLogs;
+        private System.Windows.Forms.Button btnSendTestEmail;
+        private System.Windows.Forms.Button bttnResizeEVEWindow;
     }
 }
 

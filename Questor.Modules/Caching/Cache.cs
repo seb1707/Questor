@@ -325,6 +325,7 @@ namespace Questor.Modules.Caching
 
         public int PocketNumber { get; set; }
 
+        public string ScheduleCharacterName; //= Program._character;
         public bool OpenWrecks = false;
         public bool NormalApproach = true;
         public bool CourierMission = false;

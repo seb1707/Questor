@@ -6,7 +6,7 @@
     using DirectEve;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
-    using Questor.Modules.Lookup;
+    using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
     public class Drop
@@ -16,6 +16,7 @@
         public int Unit { get; set; }
 
         public string DestinationHangarName { get; set; }
+        public DirectContainer dropHangar = null;
 
         private DateTime _lastAction;
 
@@ -27,24 +28,8 @@
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
-
-            DirectContainer dropHangar = null;
-
-            if (!Cache.Instance.ReadyItemsHangar("Drop")) return;
-            if (!Cache.Instance.OpenShipsHangar("Drop")) return;
-
-            if (DestinationHangarName == "Local Hangar")
-            {
-                dropHangar = Cache.Instance.ItemHangar;
-            }
-            else if (DestinationHangarName == "Ship Hangar")
-            {
-                dropHangar = Cache.Instance.ShipHangar;
-            }
-            //else
-                //_hangar = Cache.Instance.DirectEve.GetCorporationHangar(Hangar); //this needs to be fixed
 
             switch (_States.CurrentDropState)
             {
@@ -53,20 +38,25 @@
                     break;
 
                 case DropState.Begin:
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: Begin", Logging.Debug);
+                    
                     _States.CurrentDropState = DropState.ReadyItemhangar;
                     break;
 
                 case DropState.ReadyItemhangar:
-
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: ReadyItemhangar", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
-
+                    dropHangar = Cache.Instance.ItemHangar;
+                    
                     if (DestinationHangarName == "Local Hangar")
                     {
                         if (!Cache.Instance.ReadyItemsHangar("Drop")) return;
+                        dropHangar = Cache.Instance.ItemHangar;
                     }
                     else if (DestinationHangarName == "Ship Hangar")
                     {
                         if (!Cache.Instance.OpenShipsHangar("Drop")) return;
+                        dropHangar = Cache.Instance.ShipHangar;
                     }
                     else
                     {
@@ -85,7 +75,8 @@
                     break;
 
                 case DropState.OpenCargo:
-
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: OpenCargo", Logging.Debug);
+                    
                     if (!Cache.Instance.OpenCargoHold("Drop")) return;
 
                     Logging.Log("Drop", "Opening Cargo Hold", Logging.White);
@@ -95,7 +86,9 @@
 
                 case DropState.MoveItems:
 
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: MoveItems", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
+                    if (!Cache.Instance.OpenCargoHold("Drop")) return;
 
                     DirectItem dropItem;
 
@@ -103,18 +96,30 @@
                     {
                         try
                         {
-                            if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "[]", Logging.Debug);
-                            if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Item = [" + Item + "]",Logging.Debug);
-                            if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "[]", Logging.Debug);
-                            //dropItem = Cache.Instance.CargoHold.Items.FirstOrDefault(i => (i.TypeId == Item));
-                            dropItem = Cache.Instance.CargoHold.Items.FirstOrDefault(i => i.TypeId == Item);
-                            if (dropItem != null)
+                            if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Item TypeID is [" + Item + "]",Logging.Debug);
+                            
+                            int x = 1;
+                            foreach (DirectItem ItemTest in Cache.Instance.CargoHold.Items)
                             {
-                                if (dropHangar != null) dropHangar.Add(dropItem, dropItem.Quantity);
-                                Logging.Log("Drop", "Moving all the items", Logging.White);
-                                _lastAction = DateTime.UtcNow;
-                                _States.CurrentDropState = DropState.WaitForMove;
-                                return;
+                                if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "[" + x + "] ItemName: [" + ItemTest.TypeName + "]", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.CargoHold.Items.Any(i => i.TypeId == Item))
+                            {
+                                dropItem = Cache.Instance.CargoHold.Items.FirstOrDefault(i => i.TypeId == Item);
+                                if (dropItem != null)
+                                {
+                                    if (Settings.Instance.DebugQuestorManager) Logging.Log("DropItem", "dropItem = [" + dropItem.TypeName + "]", Logging.Debug);
+                                    if (dropHangar != null) dropHangar.Add(dropItem, dropItem.Quantity);
+                                    Logging.Log("Drop", "Moving all the items", Logging.White);
+                                    _lastAction = DateTime.UtcNow;
+                                    _States.CurrentDropState = DropState.WaitForMove;
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                if (Settings.Instance.DebugQuestorManager) Logging.Log("DropItem", "missing item with typeID of [" + Item + "]", Logging.Debug);
                             }
                         }
                         catch (Exception exception)
@@ -147,7 +152,7 @@
                     break;
 
                 case DropState.AllItems:
-
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: AllItems", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
 
                     List<DirectItem> allItem = Cache.Instance.CargoHold.Items;
@@ -163,14 +168,10 @@
                     break;
 
                 case DropState.WaitForMove:
-                    if (Cache.Instance.CargoHold.Items.Count != 0)
-                    {
-                        _lastAction = DateTime.UtcNow;
-                        break;
-                    }
-
-                    // Wait 5 seconds after moving
-                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 5) return;
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: WaitForMove", Logging.Debug);
+                    
+                    // Wait 2 seconds after moving
+                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
@@ -178,7 +179,7 @@
                         return;
                     }
 
-                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds > 120)
+                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds > 60)
                     {
                         Logging.Log("Drop", "Moving items timed out, clearing item locks", Logging.White);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -189,11 +190,12 @@
                     break;
 
                 case DropState.StackItemsHangar:
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: StackItemsHangar", Logging.Debug);
                     // Do not stack until 5 seconds after the cargo has cleared
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 5) return;
-
+                    
                     // Stack everything
-                    if (dropHangar != null && dropHangar.Window.IsReady)
+                    if (dropHangar != null)
                     {
                         Logging.Log("Drop", "Stacking items", Logging.White);
                         dropHangar.StackAll();
@@ -204,6 +206,7 @@
                     break;
 
                 case DropState.WaitForStacking:
+                    if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: WaitForStacking", Logging.Debug);
                     // Wait 5 seconds after stacking
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 5) return;
 

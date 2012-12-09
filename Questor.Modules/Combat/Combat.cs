@@ -400,6 +400,34 @@ namespace Questor.Modules.Combat
             return Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
         }
 
+        private void TargetInfo()
+        {
+            // Find the first active weapon's target
+            EntityCache weaponTarget = null;
+            foreach (ModuleCache weapon in Cache.Instance.Weapons.Where(m => m.IsActive))
+            {
+                // Find the target associated with the weapon
+                weaponTarget = Cache.Instance.EntityById(weapon.TargetId);
+                if (weaponTarget != null)
+                    break;
+            }
+            if (weaponTarget != null)
+            {
+                Logging.Log("TargetInfo", "              Name: " + weaponTarget.Name, Logging.Teal);
+                Logging.Log("TargetInfo", "        CategoryId: " + weaponTarget.CategoryId, Logging.Teal);
+                Logging.Log("TargetInfo", "          Distance: " + weaponTarget.Distance, Logging.Teal);
+                Logging.Log("TargetInfo", "           GroupID: " + weaponTarget.GroupId, Logging.Teal);
+                Logging.Log("TargetInfo", "          Velocity: " + weaponTarget.Velocity, Logging.Teal);
+                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
+                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
+                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
+                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
+                Logging.Log("TargetInfo", "      IsNPCCruiser: " + weaponTarget.IsNPCCruiser, Logging.Teal);
+                Logging.Log("TargetInfo", "IsNPCBattlecruiser: " + weaponTarget.IsNPCBattlecruiser, Logging.Teal);
+                Logging.Log("TargetInfo", "   IsNPCBattleship: " + weaponTarget.IsNPCBattleship, Logging.Teal);
+            }
+        }
+
         /// <summary> Activate weapons
         /// </summary>
         private void ActivateWeapons(EntityCache target)

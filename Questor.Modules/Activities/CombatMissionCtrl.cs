@@ -1354,6 +1354,7 @@ namespace Questor.Modules.Activities
                 if (!done)
                 {
                     if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
+                    if (!Cache.Instance.OpenInventoryWindow("CombatMissionCtrl.LootItemAction")) return;
                     if (Cache.Instance.CargoHold.Window.IsReady)
                     {
                         done |= Cache.Instance.CargoHold.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));

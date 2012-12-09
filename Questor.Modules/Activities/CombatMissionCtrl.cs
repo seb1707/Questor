@@ -1356,13 +1356,16 @@ namespace Questor.Modules.Activities
                     if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
                     if (Cache.Instance.CargoHold.Window.IsReady)
                     {
-                        done |= Cache.Instance.CargoHold.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity)));
+                        if (Cache.Instance.CargoHold.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity))))
+                        {
+                            done = true;
+                        }
                     }
                 }
 
                 if (done)
                 {
-                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting - we have the item(s)", Logging.Teal);
 
                     // now that we have completed this action revert OpenWrecks to false
                     Cache.Instance.OpenWrecks = false;
@@ -1377,7 +1380,7 @@ namespace Questor.Modules.Activities
                 //IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.Id);
                 if (!containers.Any())
                 {
-                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "We are done looting - no containers left to loot", Logging.Teal);
 
                     _currentAction++;
                     return;

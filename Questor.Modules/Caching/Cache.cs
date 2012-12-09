@@ -2583,7 +2583,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.Inventory" && w.Caption.Contains("Item hangar"));
+                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.StationItems") && w.Caption.Contains("Item hangar"));
 
                 // Is the items hangar open?
                 if (lootHangarWindow == null)
@@ -3116,14 +3116,6 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
-                    if (Cache.Instance.ShipHangar.Window.IsPrimary())
-                    {
-                        Logging.Log(module, "Opening Ship Hangar as secondary", Logging.White);
-                        Cache.Instance.ShipHangar.Window.OpenAsSecondary();
-                        //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                        return true;
-                    }
                     return true;
                 }
             }
@@ -3158,7 +3150,7 @@ namespace Questor.Modules.Caching
                     {
                         //if (Cache.Instance.ShipHangar.Items.Any())
                         //{
-                            if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
+                            //if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
 
                             //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
                             return true;
@@ -3481,7 +3473,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.Inventory" && w.Name == "('Inventory', None)");
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
 
             if (Cache.Instance.PrimaryInventoryWindow == null)
             {
@@ -3733,7 +3725,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation && !String.IsNullOrEmpty(window))
                 {
-                    DirectContainerWindow corpHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == window);
+                    DirectContainerWindow corpHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption == window);
 
                     if (corpHangarWindow != null)
                     {
@@ -3766,7 +3758,7 @@ namespace Questor.Modules.Caching
             {
                 foreach (DirectWindow window in Cache.Instance.Windows)
                 {
-                    if (window.Type.Equals("form.Inventory"))
+                    if (window.Type.Contains("form.Inventory"))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log(module, "ClosePrimaryInventoryWindow: Closing Primary Inventory Window Named [" + window.Name + "]", Logging.White);
                         window.Close();
@@ -3972,7 +3964,7 @@ namespace Questor.Modules.Caching
 
             if (!Cache.Instance.OpenInventoryWindow(module)) return false;
 
-            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.Inventory" && w.Name == "('Inventory', None)");
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
 
             if (Cache.Instance.PrimaryInventoryWindow != null && Cache.Instance.PrimaryInventoryWindow.IsReady)
             {
@@ -4084,7 +4076,7 @@ namespace Questor.Modules.Caching
             if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == Settings.Instance.LootContainer);
+                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainer);
 
                 if (lootHangarWindow != null)
                 {
@@ -4120,7 +4112,7 @@ namespace Questor.Modules.Caching
                         // Is the corp loot Hangar open?
                         if (Cache.Instance.LootHangar != null)
                         {
-                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == Settings.Instance.LootHangar);
+                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootHangar));
                             if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpLootHangarSecondaryWindow != null)
@@ -4148,7 +4140,7 @@ namespace Questor.Modules.Caching
                     else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == Settings.Instance.LootContainer);
+                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainer));
 
                         if (lootHangarWindow != null)
                         {
@@ -4417,7 +4409,7 @@ namespace Questor.Modules.Caching
                         // Is the corp Ammo Hangar open?
                         if (Cache.Instance.AmmoHangar != null)
                         {
-                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type == "form.InventorySecondary" && w.Caption == Settings.Instance.AmmoHangar);
+                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.AmmoHangar));
                             if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpAmmoHangarSecondaryWindow != null)
@@ -5115,6 +5107,8 @@ namespace Questor.Modules.Caching
                     }
 
                     Logging.Log(module, "Repairing Items", Logging.White);
+                    Logging.Log(module, "repairWindow.Html: " + repairWindow.Html, Logging.White);
+                    
                     repairWindow.RepairAll();
                     Cache.Instance.RepairAll = false;
                     NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));

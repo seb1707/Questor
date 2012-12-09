@@ -8,11 +8,6 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
-using System.Globalization;
-//using LavishScriptAPI;
-using Questor.Modules.BackgroundTasks;
-using Questor.Modules.Caching;
-
 namespace Questor
 {
     using System;
@@ -24,6 +19,10 @@ namespace Questor
     using System.IO;
     using System.Timers;
     using Mono.Options;
+    using System.Globalization;
+    //using LavishScriptAPI;
+    using global::Questor.Modules.BackgroundTasks;
+    using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using DirectEve;
@@ -351,7 +350,9 @@ namespace Questor
 
                 // If the last parameter is false, then we only auto-login
                 if (_loginOnly)
+                {
                     return;
+                }
             }
 
             StartTime = DateTime.Now;
@@ -625,7 +626,7 @@ namespace Questor
                 return;
             }
 
-            if (_directEve.Login.AtLogin)
+            if (_directEve.Login.AtLogin && !_directEve.Login.IsLoading && !_directEve.Login.IsConnecting)
             {
                 //if (!_directEve.HasSupportInstances())
                 //{
@@ -634,7 +635,7 @@ namespace Questor
                 //    _humanInterventionRequired = true;
                 //}
 
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 15)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)
                 {
                     Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);
                     _directEve.Login.Login(_username, _password);
@@ -644,14 +645,16 @@ namespace Questor
                 }
             }
 
-            if (_directEve.Login.AtCharacterSelection && _directEve.Login.IsCharacterSelectionReady)
+            if (_directEve.Login.AtCharacterSelection && _directEve.Login.IsCharacterSelectionReady && !_directEve.Login.IsConnecting && !_directEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 30)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 20)
                 {
                     foreach (DirectLoginSlot slot in _directEve.Login.CharacterSlots)
                     {
                         if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && System.String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
+                        {
                             continue;
+                        }
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
                         slot.Activate();

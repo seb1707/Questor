@@ -8,19 +8,18 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using Questor.Modules.States;
-
 namespace Questor.Modules.Actions
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Xml.Linq;
     using DirectEve;
+    using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
-    using global::Questor.Modules.Caching;
-
+    using global::Questor.Modules.States;
+    
     public class Market
     {
         //private DateTime _lastPulse;

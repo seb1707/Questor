@@ -5066,7 +5066,8 @@ namespace Questor.Modules.Caching
                         {
                             if (window.Html.Contains("Repairing these items will cost"))
                             {
-                                Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
+                                if (window.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White); 
+                                Logging.Log(module, "Closing Quote for Repairing All with YES", Logging.White);
                                 window.AnswerModal("Yes");
                                 doneUsingRepairWindow = true;
                                 return false;

@@ -138,11 +138,11 @@ namespace Questor.Modules.Combat
             }
 
             // Retry later, assume its ok now
-            if (!weapon.MatchingAmmo.Any())
-            {
-                LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
-                return true;
-            }
+            //if (!weapon.MatchingAmmo.Any())
+            //{
+            //    LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
+            //    return true;
+            //}
 
             DirectItem charge = cargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges);
 

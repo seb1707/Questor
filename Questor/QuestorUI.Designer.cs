@@ -6485,6 +6485,8 @@
         private System.Windows.Forms.Button bttnMaintainConsoleLogs;
         private System.Windows.Forms.Button btnSendTestEmail;
         private System.Windows.Forms.Button bttnResizeEVEWindow;
+        private System.Windows.Forms.Button bttnLogContainersOnGrid;
+        private System.Windows.Forms.Button bttnLogEntitiesOnGrid;
     }
 }
 

@@ -1242,9 +1242,21 @@ namespace Questor.Modules.Caching
             get
             {
                 return _containers ?? (_containers = Entities.Where(e =>
-                          e.IsContainer && e.HaveLootRights && (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
-                          (e.Name != "Abandoned Container")).
-                          ToList());
+                           e.IsContainer && 
+                           e.HaveLootRights && 
+                          (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
+                          (e.Name != "Abandoned Container")).ToList());
+            }
+        }
+
+        public IEnumerable<EntityCache> ContainersIgnoringLootRights
+        {
+            get
+            {
+                return _containers ?? (_containers = Entities.Where(e =>
+                           e.IsContainer &&
+                          (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
+                          (e.Name != "Abandoned Container")).ToList());
             }
         }
 

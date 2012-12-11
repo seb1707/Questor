@@ -693,7 +693,7 @@ namespace Questor.Modules.Actions
             {
                 if (Settings.Instance.DebugValuedump) Logging.Log(module, "RefineItems: if (refine)", Logging.Debug);
                         
-                if (!Cache.Instance.ReadyItemsHangar(module)) return false;
+                if (!Cache.Instance.OpenItemsHangar(module)) return false;
                 DirectReprocessingWindow reprocessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
 
                 if (reprocessingWindow == null)

@@ -201,6 +201,12 @@ namespace Questor.Modules.Lookup
         public string TravelShipName { get; set; }
 
         //
+        //Use Homebookmark
+        //
+        public bool UseHomebookmark { get; set; }
+
+
+        //
         // Storage location for loot, ammo, and bookmarks
         //
         public string HomeBookmarkName { get; set; }
@@ -699,6 +705,9 @@ namespace Questor.Modules.Lookup
                 TravelShipName = "Travel";
 
                 //
+                // Usage of Homebookmark @ dedicated salvager
+                UseHomebookmark = false;
+                //
                 // Storage Location for Loot, Ammo, Bookmarks
                 //
                 HomeBookmarkName = "myHomeBookmark";
@@ -1055,11 +1064,23 @@ namespace Questor.Modules.Lookup
                         CombatShipName = (string)xml.Element("combatShipName") ?? "My frigate of doom";
                         SalvageShipName = (string)xml.Element("salvageShipName") ?? "My Destroyer of salvage";
                         TransportShipName = (string)xml.Element("transportShipName") ?? "My Hauler of transportation";
-                        TravelShipName = (string)xml.Element("travelShipName") ?? "My Shuttle of traveling";
+                        TravelShipName = (string)xml.Element ("travelShipName") ?? "My Shuttle of traveling";
                     }
                     catch (Exception exception)
                     {
                         Logging.Log("Settings", "Error Loading Ship Name Settings [" + exception + "]", Logging.Teal);
+                    }
+
+                    try
+                    {
+                        //
+                        // Storage Location for Loot, Ammo, Bookmarks
+                        //
+                        UseHomebookmark = (bool?)xml.Element("UseHomebookmark") ?? false;
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log("Settings", "Error Loading UseHomebookmark [" + exception + "]", Logging.Teal);
                     }
 
                     try

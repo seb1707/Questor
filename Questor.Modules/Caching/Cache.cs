@@ -1250,7 +1250,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Wrecks
         {
-            get { return _containers ?? (_containers = Entities.Where(e => (e.GroupId != (int)Group.Wreck)).ToList()); }
+            get { return _containers ?? (_containers = Entities.Where(e => (e.GroupId == (int)Group.Wreck)).ToList()); }
         }
 
         public IEnumerable<EntityCache> UnlootedContainers

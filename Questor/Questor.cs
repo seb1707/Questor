@@ -87,6 +87,23 @@ namespace Questor
             }
             Cache.Instance.DirectEve = _directEve;
 
+            try
+            {
+                if (_directEve.HasSupportInstances())
+                {
+                    Logging.Log("Questor", "You have a valid directeve.lic file and have instances available", Logging.Orange);
+                }
+                else
+                {
+                    Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
+                }
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+            }
+            
             Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;
             Cache.Instance.MaxRuntime = Program.MaxRuntime;
             if (Program.StartTime.AddMinutes(10) < Program.StopTime)
@@ -110,8 +127,7 @@ namespace Questor
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
             // get the physical mem usage
             Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
-            Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " +
-                        Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
+            Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
             Cache.Instance.SessionIskGenerated = 0;
             Cache.Instance.SessionLootGenerated = 0;
             Cache.Instance.SessionLPGenerated = 0;
@@ -122,7 +138,7 @@ namespace Questor
             }
             catch (Exception ex)
             {
-                Logging.Log("Startup", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
+                Logging.Log("Questor", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
@@ -539,7 +555,6 @@ namespace Questor
                 return;
             }
 
-            //DirectAgentMission mission;
             switch (_States.CurrentQuestorState)
             {
                 case QuestorState.Idle:

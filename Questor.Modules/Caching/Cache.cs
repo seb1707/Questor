@@ -3494,7 +3494,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow is null, opening InventoryWindow", Logging.Teal);
 
                 // No, command it to open
-                Cache.Instance.DirectEve.OpenInventory();
+                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenInventory);
                 Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
                 Logging.Log(module, "Opening Inventory Window: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 return false;
@@ -4041,6 +4041,48 @@ namespace Questor.Modules.Caching
             return false;
         }
 
+        public bool ListInvTree(string module)
+        {
+            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+            {
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                return false;
+            }
+
+            if (DateTime.UtcNow < NextOpenHangarAction)
+            {
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
+                return false;
+            }
+
+            if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: about to: if (!Cache.Instance.OpenInventoryWindow", Logging.Teal);
+
+            if (!Cache.Instance.OpenInventoryWindow(module)) return false;
+
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
+
+            if (Cache.Instance.PrimaryInventoryWindow != null && Cache.Instance.PrimaryInventoryWindow.IsReady)
+            {
+                List<long> idsInInvTreeView = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false);
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: IDs Found in the Inv Tree [" + idsInInvTreeView.Count() + "]", Logging.Teal);
+
+                if (Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
+                {
+                    Logging.Log(module, "ExpandCorpHangar executed", Logging.Teal);
+                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
+                    return false;
+                }
+
+                foreach (Int64 itemInTree in idsInInvTreeView)
+                {
+                    Logging.Log(module, "ID: " + itemInTree, Logging.Red);
+                }
+                return false;
+            }
+
+            return false;
+        }
+
         public bool StackLootContainer(String module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -4102,6 +4144,41 @@ namespace Questor.Modules.Caching
             }
 
             return true;
+        }
+
+        public DirectContainerWindow OreHoldWindow { get; set; }
+
+        public bool OpenOreHold(String module)
+        {
+            if (DateTime.Now < Cache.Instance.NextOpenHangarAction) return false;
+
+            if (!Cache.Instance.OpenInventoryWindow("OpenOreHold")) return false;
+
+            //
+            // does the current ship have an ore hold?
+            //
+            Cache.Instance.OreHoldWindow = Cache.Instance.PrimaryInventoryWindow;
+
+            if (Cache.Instance.OreHoldWindow == null)
+            {
+                // No, command it to open
+                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
+                long OreHoldID = 1;  //no idea how to get this value atm. this is not yet correct.
+                if (!Cache.Instance.PrimaryInventoryWindow.SelectTreeEntry("Ore Hold", OreHoldID - 1))
+                {
+                    if (!Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
+                    {
+                        Logging.Log(module, "Failed to expand corp hangar tree", Logging.Red);
+                        return false;
+                    }
+                }
+                return false;
+            }
+            if (!Cache.Instance.OreHoldWindow.IsReady)
+                return false;
+
+            return false;
         }
 
         public DirectContainer LootHangar { get; set; }

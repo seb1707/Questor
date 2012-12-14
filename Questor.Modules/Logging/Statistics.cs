@@ -32,6 +32,8 @@ namespace Questor.Modules.Logging
         public int MissionsThisSession { get; set; }
         public int MissionCompletionErrors { get; set; }
 
+        public int OutOfDronesCount { get; set; }
+
         public static int AgentLPRetrievalAttempts { get; set; }
 
         public bool MissionLoggingCompleted; //false
@@ -642,7 +644,7 @@ namespace Questor.Modules.Logging
 
                 // Write the header
                 if (!File.Exists(Settings.Instance.MissionStats3LogFile))
-                    File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;Faction;SolarSystem;DungeonID;\r\n");
+                    File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;Faction;SolarSystem;DungeonID;OutOfDronesCount;\r\n");
 
                 // Build the line
                 string line3 = DateTimeForLogs + ";";                                                                                           // Date
@@ -666,6 +668,7 @@ namespace Questor.Modules.Logging
                 line3 += Cache.Instance.FactionName + ";";                                                                                   // FactionName that the mission is against
                 line3 += Cache.Instance.MissionSolarSystem + ";";                                                                            // SolarSystem the mission was located in
                 line3 += Cache.Instance.DungeonId + ";";                                                                                     // DungeonID - the unique identifier for this mission
+                line3 += Statistics.Instance.OutOfDronesCount + ";";                                                                         // OutOfDronesCount - number of times we totally ran out of drones and had to go re-arm
                 line3 += "\r\n";
 
                 // The mission is finished
@@ -712,6 +715,7 @@ namespace Questor.Modules.Logging
             Statistics.Instance.AmmoValue = 0;
             Statistics.Instance.DroneLoggingCompleted = false;
             Statistics.Instance.MissionCompletionErrors = 0;
+            Statistics.Instance.OutOfDronesCount = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weapon.ReloadTimeThisMission = 0;

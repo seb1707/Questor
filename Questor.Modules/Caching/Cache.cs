@@ -1032,6 +1032,7 @@ namespace Questor.Modules.Caching
         public DateTime LastUpdateOfSessionRunningTime;
         public DateTime NextInSpaceorInStation;
         public DateTime NextTimeCheckAction = DateTime.UtcNow;
+        public DateTime NextSkillsCheckAction = DateTime.UtcNow;
 
         public DateTime LastFrame = DateTime.UtcNow;
         public DateTime LastSessionIsReady = DateTime.UtcNow;

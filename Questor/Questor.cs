@@ -14,6 +14,7 @@ namespace Questor
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using DirectEve;
     using global::Questor.Behaviors;
@@ -207,6 +208,49 @@ namespace Questor
             _watch.Stop();
             if (Settings.Instance.DebugPerformance)
                 Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
+        }
+
+        public static bool SkillQueueCheck()
+        {
+            if (DateTime.UtcNow < Cache.Instance.NextSkillsCheckAction)
+                return false;
+
+            if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
+            {
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
+                if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalDays < 1)
+                {
+                    Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
+                    _States.LavishEvent_SkillQueueHasRoom();
+
+                    string ScriptPath = System.IO.Path.Combine(Settings.Instance.Path, "../Scripts");
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ScriptPath [" + ScriptPath + "]", Logging.White);
+                    string SkillTrainerScriptFullPath = ScriptPath + "\\" + Settings.Instance.SkillTrainerScript;
+                    if (!File.Exists(SkillTrainerScriptFullPath))
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Missing [" + Settings.Instance.SkillTrainerScript + "] from .Net programs - It is not part of questor and is only available as a binary.", Logging.Teal);
+                        return true;
+                    }
+
+                    Logging.Log("Questor.SkillQueueCheck", "Questor will now wait 60 seconds. Launching SkillTrainer", Logging.White);
+                    _nextQuestorAction = DateTime.UtcNow.AddSeconds(60);
+                    //
+                    // this eventually needs to be fixed to use the full path, at the moment if we pass SkillTrainerFullPath to innerspace it has 
+                    // only 1 slash between directories and they get eaten (directory names with no separating slashes)
+                    //
+                    LavishScript.ExecuteCommand("echo runscript " + Settings.Instance.SkillTrainerScript);
+                    LavishScript.ExecuteCommand("runscript " + Settings.Instance.SkillTrainerScript);
+                    return true;
+                }
+                Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
+                Cache.Instance.NextSkillsCheckAction = DateTime.UtcNow.AddHours(3);
+                return true;
+            }
+            
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)", Logging.White);
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Cache.Instance.DirectEve.HasSupportInstances() [" + Cache.Instance.DirectEve.HasSupportInstances() + "]", Logging.White);
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ThisToonShouldBeTrainingSkills [" + Settings.Instance.ThisToonShouldBeTrainingSkills + "]", Logging.White);
+            return true;
         }
 
         public static bool TimeCheck()
@@ -500,6 +544,8 @@ namespace Questor
             {
                 case QuestorState.Idle:
                     if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
+                    
+                    if (!SkillQueueCheck()) return; //Should we 'pause' questor for a few while an external app trains skills?
 
                     if (Cache.Instance.StopBot)
                     {

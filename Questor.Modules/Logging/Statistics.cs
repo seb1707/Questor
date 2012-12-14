@@ -594,13 +594,13 @@ namespace Questor.Modules.Logging
                     File.AppendAllText(Settings.Instance.MissionStats1LogFile, "Date;Mission;TimeMission;TimeSalvage;TotalTime;Isk;Loot;LP;\r\n");
 
                 // Build the line
-                string line = DateTimeForLogs + ";";                                                                                           // Date
+                string line = DateTimeForLogs + ";";                                                                                        // Date
                 line += Cache.Instance.MissionName + ";";                                                                                   // Mission
                 line += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
                 line += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // Time Doing After Mission Salvaging
-                line += ((int)DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";                                // Total Time doing Mission
-                line += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                          // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
-                line += Statistics.Instance.LootValue + ";";                                                                         // Loot
+                line += ((int)DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";                             // Total Time doing Mission
+                line += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                              // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
+                line += Statistics.Instance.LootValue + ";";                                                                                // Loot
                 line += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";\r\n";                                 // LP
 
                 // The mission is finished
@@ -620,12 +620,12 @@ namespace Questor.Modules.Logging
                     File.AppendAllText(Settings.Instance.MissionStats2LogFile, "Date;Mission;Time;Isk;Loot;LP;LostDrones;AmmoConsumption;AmmoValue\r\n");
 
                 // Build the line
-                string line2 = string.Format("{0:MM/dd/yyyy HH:mm:ss}", DateTimeForLogs) + ";";                                                // Date
-                line2 += Cache.Instance.MissionName + ";";                                                                                  // Mission
-                line2 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";        // TimeMission
-                line2 += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                         // Isk
+                string line2 = string.Format("{0:MM/dd/yyyy HH:mm:ss}", DateTimeForLogs) + ";";                                      // Date
+                line2 += Cache.Instance.MissionName + ";";                                                                           // Mission
+                line2 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";"; // TimeMission
+                line2 += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                      // Isk
                 line2 += Statistics.Instance.LootValue + ";";                                                                        // Loot
-                line2 += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                                    // LP
+                line2 += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                             // LP
                 line2 += Statistics.Instance.LostDrones + ";";                                                                       // Lost Drones
                 line2 += Statistics.Instance.AmmoConsumption + ";";                                                                  // Ammo Consumption
                 line2 += Statistics.Instance.AmmoValue + ";\r\n";                                                                    // Ammo Value
@@ -647,10 +647,10 @@ namespace Questor.Modules.Logging
                     File.AppendAllText(Settings.Instance.MissionStats3LogFile, "Date;Mission;Time;Isk;Loot;LP;DroneRecalls;LostDrones;AmmoConsumption;AmmoValue;Panics;LowestShield;LowestArmor;LowestCap;RepairCycles;AfterMissionsalvageTime;TotalMissionTime;MissionXMLAvailable;Faction;SolarSystem;DungeonID;OutOfDronesCount;\r\n");
 
                 // Build the line
-                string line3 = DateTimeForLogs + ";";                                                                                           // Date
+                string line3 = DateTimeForLogs + ";";                                                                                        // Date
                 line3 += Cache.Instance.MissionName + ";";                                                                                   // Mission
                 line3 += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
-                line3 += ((long)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                         // Isk
+                line3 += ((long)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                             // Isk
                 line3 += ((long)Statistics.Instance.LootValue) + ";";                                                                        // Loot
                 line3 += ((long)Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";";                               // LP
                 line3 += Statistics.Instance.DroneRecalls + ";";                                                                             // Lost Drones

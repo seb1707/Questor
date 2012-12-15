@@ -756,7 +756,7 @@ namespace Questor.Modules.Actions
                 // (any lower and we might lose access to this agent)
                 // and no other agents are NOT available (or are also in cooldown)
                 //
-                if (Settings.Instance.WaitDecline)
+                if (Settings.Instance.WaitDecline || (Settings.Instance.WaitDecline && Settings.Instance.MultiAgentSupport && Cache.Instance.AllAgentsStillInDeclineCoolDown))
                 {
                     //
                     // if true we ALWAYS wait (or switch agents?!?)
@@ -798,7 +798,7 @@ namespace Questor.Modules.Actions
                     return;
                 }
 
-                if (Settings.Instance.MultiAgentSupport)
+                if (Settings.Instance.MultiAgentSupport && !Cache.Instance.AllAgentsStillInDeclineCoolDown)
                 {
                     if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
 

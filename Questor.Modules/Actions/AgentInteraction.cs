@@ -774,14 +774,10 @@ namespace Questor.Modules.Actions
                 if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings)
                 {
                     if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
-                    
-                    //
-                    // If we have multiple agents defined - switch agents
-                    //
                     if (Settings.Instance.MultiAgentSupport)
                     {
                         if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
-                        if (Cache.Instance.AllAgentsStillInDeclineCoolDown && Settings.Instance.WaitDecline)
+                        if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
                         {
                             //
                             // wait.
@@ -793,24 +789,17 @@ namespace Questor.Modules.Actions
                             return;
                         }
 
-                        if (!Cache.Instance.AllAgentsStillInDeclineCoolDown)
-                        {
-                            //
-                            //Change Agents
-                            //
-                            if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
-                            CloseConversation();
+                        //
+                        //Change Agents
+                        //
+                        if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
+                        CloseConversation();
 
-                            Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
-                            Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
-                            Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
-                            _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
-                            return;
-                        }
-                        //
-                        // if you have multiple agents defined, but they are all in DeclineCooldown and waitDecline is false then just stay with 
-                        // the agent we have and decline away...
-                        //
+                        Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
+                        Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
+                        Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
+                        _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
+                        return;
                     }
 
                     _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);

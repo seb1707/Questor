@@ -774,10 +774,14 @@ namespace Questor.Modules.Actions
                 if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings)
                 {
                     if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "if (Cache.Instance.AgentEffectiveStandingtoMe <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
-
+                    
+                    //
+                    // If we have multiple agents defined - switch agents
+                    //
                     if (Settings.Instance.MultiAgentSupport)
                     {
                         //TODO - We should probably check if there are other agents who's effective standing is above the minAgentBlackListStanding.
+                        if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
                         if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
                         {
                             //

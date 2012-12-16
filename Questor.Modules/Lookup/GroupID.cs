@@ -144,7 +144,8 @@ namespace Questor.Modules.Lookup
         BlackOps = 898,
         Marauder = 900,
 
-        Salvager = 538,
+        Salvager = 1122,
+        DataMiners = 538, //codebreaker, analyzer, data subverter
         TractorBeam = 650,
 
         Drugs = 313,

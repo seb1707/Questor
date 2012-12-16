@@ -109,6 +109,9 @@ namespace Questor.Modules.Lookup
 
         public bool DebugStatistics { get; set; }
         public bool DebugStorylineMissions { get; set; }
+
+        public bool DebugTargetWrecks { get; set; }
+
         public bool DebugTractorBeams { get; set; }
         public bool DebugTraveler { get; set; }
         public bool DebugUI { get; set; }
@@ -577,6 +580,7 @@ namespace Questor.Modules.Lookup
                 DebugStates = false;
                 DebugStatistics = false;
                 DebugStorylineMissions = false;
+                DebugTargetWrecks = false;
                 DebugTractorBeams = false;
                 DebugTraveler = false;
                 DebugUI = false;
@@ -955,6 +959,7 @@ namespace Questor.Modules.Lookup
                     DebugStates = (bool?)xml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
                     DebugStatistics = (bool?)xml.Element("debugStatistics") ?? false;
                     DebugStorylineMissions = (bool?)xml.Element("debugStorylineMissions") ?? false;
+                    DebugTargetWrecks = (bool?)xml.Element("debugTargetWrecks") ?? false;
                     DebugTraveler = (bool?)xml.Element("debugTraveler") ?? false;
                     DebugTractorBeams = (bool?)xml.Element("debugTractorBeams") ?? false;
                     DebugUI = (bool?)xml.Element("debugUI") ?? false;

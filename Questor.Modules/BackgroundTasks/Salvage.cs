@@ -21,11 +21,6 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Salvage
     {
-        public static HashSet<int> Salvagers = new HashSet<int> { 25861, 26983, 30836 };
-        public static HashSet<int> TractorBeams = new HashSet<int> { 24348, 24620, 24622, 24644, 4250 };
-
-        //private DateTime _lastJettison = DateTime.UtcNow;
-        //private DateTime _nextSalvageAction = DateTime.UtcNow;
         private DateTime _lastSalvageProcessState;
 
         /// <summary>
@@ -193,7 +188,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
+            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => m.TypeId == (int)Group.Salvager).ToList();
 
             if (salvagers.Count == 0)
             {
@@ -266,16 +261,13 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            //List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
-            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => TractorBeams.Contains(m.TypeId)).ToList();
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.TypeId == (int)Group.TractorBeam).ToList();
 
-            //if (salvagers.Count == 0 && tractorBeams.Count == 0)
-            //    return;
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
 
-            bool hasSalvagers = Cache.Instance.Modules.Any(m => Salvagers.Contains(m.TypeId));
+            bool hasSalvagers = Cache.Instance.Modules.Any(m => m.TypeId == (int)Group.Salvager);
             List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.CategoryId == (int)CategoryID.Celestial).ToList();
 
             // Check for cargo containers
@@ -454,12 +446,6 @@ namespace Questor.Modules.BackgroundTasks
             // Open a container in range
             int containersProcessedThisTick = 0;
             List<EntityCache> containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distance.SafeScoopRange).ToList();
-
-            //if (!containersInRange.Any())
-            //{
-            //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (!containersInRange.Any())", Logging.Teal);
-            //    return;
-            //}
 
             foreach (EntityCache containerEntity in containersInRange)
             {

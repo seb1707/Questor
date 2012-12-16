@@ -219,9 +219,6 @@ namespace Questor.Modules.Lookup
 
         public string HighTierLootContainer { get; set; }
 
-        public bool MoveCommonMissionCompletionItemsToAmmoHangar { get; set; }
-        public bool MoveCommonMissionCompletionItemsToItemsHangar { get; set; }
-
         //
         // Salvage and Loot settings
         //
@@ -725,9 +722,7 @@ namespace Questor.Modules.Lookup
                 AmmoHangar = String.Empty;
                 BookmarkHangar = String.Empty;
                 LootContainer = String.Empty;
-                MoveCommonMissionCompletionItemsToAmmoHangar = false;
-                MoveCommonMissionCompletionItemsToItemsHangar = true;
-
+                
                 //
                 // Loot and Salvage Settings
                 //
@@ -1136,9 +1131,6 @@ namespace Questor.Modules.Lookup
                         {
                             HighTierLootContainer = HighTierLootContainer.ToLower();
                         }
-
-                        MoveCommonMissionCompletionItemsToAmmoHangar = (bool?)xml.Element("moveCommonMissionCompletionItemsToAmmoHangar") ?? false;
-                        MoveCommonMissionCompletionItemsToItemsHangar = (bool?)xml.Element("moveCommonMissionCompletionItemsToItemsHangar") ?? true;
                     }
                     catch (Exception exception)
                     {

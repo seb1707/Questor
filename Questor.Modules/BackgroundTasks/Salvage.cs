@@ -178,38 +178,61 @@ namespace Questor.Modules.BackgroundTasks
         private void ActivateSalvagers()
         {
             if (Cache.Instance.NextSalvageAction > DateTime.UtcNow)
+            {
+                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: Cache.Instance.NextLootAction is still in the future, waiting", Logging.Teal);
                 return;
+            }
+
             List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => Salvagers.Contains(m.TypeId)).ToList();
+
             if (salvagers.Count == 0)
+            {
+                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagers.Count == 0)", Logging.Teal);
                 return;
+            }
 
             double salvagerRange = salvagers.Min(s => s.OptimalRange);
             List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange && Settings.Instance.WreckBlackList.All(a => a != t.TypeId)).ToList();
             if (Cache.Instance.SalvageAll)
+            {
                 wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange).ToList();
+            }
 
             if (wrecks.Count == 0)
+            {
+                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (wrecks.Count == 0)", Logging.Teal); 
                 return;
+            }
+
             int salvagersProcessedThisTick = 0;
             ModuleNumber = 0;
             foreach (ModuleCache salvager in salvagers)
             {
                 if (salvager.IsActive || salvager.InLimboState)
+                {
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: Salvager# [" + ModuleNumber + "] if (salvager.IsActive || salvager.InLimboState)", Logging.Teal); 
                     continue;
+                }
 
                 ModuleNumber++;
 
                 // Spread the salvagers around
                 EntityCache wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).First();
                 if (wreck == null)
+                {
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (wreck == null)", Logging.Teal); 
                     return;
+                }
 
                 Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + wreck.Id + "]", Logging.White);
                 salvager.Activate(wreck.Id);
                 salvagersProcessedThisTick++;
                 Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
                 if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                {
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.Teal); 
                     continue;
+                }
 
                 return;
             }
@@ -333,23 +356,20 @@ namespace Questor.Modules.BackgroundTasks
                 wreck.LockTarget();
                 wreckTargets.Add(wreck);
                 wrecksProcessedThisTick++;
-                if (Settings.Instance.DebugSalvage)
-                    Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.Teal);
+                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.Teal);
 
                 if (Cache.Instance.MissionLoot)
                 {
                     if (wreckTargets.Count >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets))
                     {
-                        if (Settings.Instance.DebugSalvage)
-                            Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) [" + Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) + "]", Logging.Teal);
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) [" + Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) + "]", Logging.Teal);
                         return;
                     }
                 }
                 else
                     if (wreckTargets.Count >= MaximumWreckTargets)
                     {
-                        if (Settings.Instance.DebugSalvage)
-                            Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]", Logging.Teal);
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]", Logging.Teal);
                         return;
                     }
                 if (wrecksProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
@@ -724,8 +744,7 @@ namespace Questor.Modules.BackgroundTasks
                 case SalvageState.StackItems:
                     Logging.Log("Salvage", "Stacking items", Logging.White);
 
-                    if (Cache.Instance.CargoHold.IsValid)
-                        Cache.Instance.CargoHold.StackAll();
+                    if (Cache.Instance.CargoHold.IsValid) Cache.Instance.CargoHold.StackAll();
 
                     Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddSeconds(Time.Instance.SalvageStackItemsDelayBeforeResuming_seconds);
                     _States.CurrentSalvageState = SalvageState.WaitForStacking;

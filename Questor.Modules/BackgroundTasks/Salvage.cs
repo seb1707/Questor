@@ -322,7 +322,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            double tractorBeamRange = 0d;
+            double tractorBeamRange = 0;
             if (tractorBeams.Count > 0)
             {
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
@@ -773,7 +773,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     // Default action
                     _States.CurrentSalvageState = SalvageState.TargetWrecks;
-                    if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any() && Cache.Instance.NextSalvageAction < DateTime.UtcNow)
+                    if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any() && Cache.Instance.LastStackCargohold.AddMinutes(5) < DateTime.UtcNow)
                     {
                         // Check if there are actually duplicates
                         bool duplicates = Cache.Instance.CargoHold.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
@@ -785,38 +785,9 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case SalvageState.StackItems:
-                    Logging.Log("Salvage", "Stacking items", Logging.White);
-
-                    if (Cache.Instance.CargoHold.IsValid) Cache.Instance.CargoHold.StackAll();
-
-                    Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddSeconds(Time.Instance.SalvageStackItemsDelayBeforeResuming_seconds);
-                    _States.CurrentSalvageState = SalvageState.WaitForStacking;
-                    break;
-
-                case SalvageState.WaitForStacking:
-
-                    // Wait 5 seconds after stacking
-                    if (Cache.Instance.NextSalvageAction > DateTime.UtcNow)
-                        break;
-
-                    if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
-                    {
-                        Logging.Log("Salvage", "Done stacking", Logging.White);
-                        _States.CurrentSalvageState = SalvageState.TargetWrecks;
-                        Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddSeconds(Time.Instance.SalvageStackItems_seconds);
-                        break;
-                    }
-
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.NextSalvageAction).TotalSeconds > 120)
-                    {
-                        Logging.Log("Salvage", "Stacking items timed out, clearing item locks", Logging.White);
-                        Cache.Instance.DirectEve.UnlockItems();
-
-                        Logging.Log("Salvage", "Done stacking", Logging.White);
-                        _States.CurrentSalvageState = SalvageState.TargetWrecks;
-                        Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddSeconds(Time.Instance.SalvageStackItems_seconds);
-                        break;
-                    }
+                    if (!Cache.Instance.StackCargoHold("Salvage")) return;
+                    Logging.Log("Salvage", "Done stacking", Logging.White);
+                    _States.CurrentSalvageState = SalvageState.TargetWrecks;
                     break;
 
                 case SalvageState.Idle:

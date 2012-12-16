@@ -694,6 +694,20 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DateTime _nextTractorBeamAction = DateTime.UtcNow;
+
+        public DateTime NextTractorBeamAction
+        {
+            get
+            {
+                return _nextTractorBeamAction;
+            }
+            set
+            {
+                _nextTractorBeamAction = value;
+                _lastAction = DateTime.UtcNow;
+            }
+        }
         private DateTime _nextLootAction = DateTime.UtcNow;
 
         public DateTime NextLootAction

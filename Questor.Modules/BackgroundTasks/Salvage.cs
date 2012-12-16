@@ -86,7 +86,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.TypeId == (int)Group.TractorBeam).ToList();
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
             if (tractorBeams.Count == 0)
                 return;
 
@@ -188,7 +188,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => m.TypeId == (int)Group.Salvager).ToList();
+            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Salvager).ToList();
 
             if (salvagers.Count == 0)
             {
@@ -261,13 +261,13 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.TypeId == (int)Group.TractorBeam).ToList();
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
 
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
 
-            bool hasSalvagers = Cache.Instance.Modules.Any(m => m.TypeId == (int)Group.Salvager);
+            bool hasSalvagers = Cache.Instance.Modules.Any(m => m.GroupId == (int)Group.Salvager);
             List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.CategoryId == (int)CategoryID.Celestial).ToList();
 
             // Check for cargo containers

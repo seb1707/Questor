@@ -153,7 +153,9 @@ namespace Questor.Modules.Lookup
         public float MinAgentGreyListStandings { get; set; }
         public string MissionsPath { get; set; }
         public bool RequireMissionXML { get; set; }
-        public bool LowSecMissionsInShuttles { get; set; }
+
+        public bool AllowNonStorylineCourierMissionsInLowSec { get; set; }
+
         public bool WaitDecline { get; set; }
         public bool MultiAgentSupport { get; private set; }
 
@@ -617,7 +619,7 @@ namespace Questor.Modules.Lookup
                 MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                 //Logging.Log("Settings","Default MissionXMLPath is: [" + MissionsPath + "]",Logging.White);
                 RequireMissionXML = false;
-                LowSecMissionsInShuttles = false;
+                AllowNonStorylineCourierMissionsInLowSec = false;
                 MaterialsForWarOreID = 20;
                 MaterialsForWarOreQty = 8000;
                 KillSentries = false;
@@ -999,7 +1001,7 @@ namespace Questor.Modules.Lookup
                     MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                     Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.White);
                     RequireMissionXML = (bool?)xml.Element("requireMissionXML") ?? false;
-                    LowSecMissionsInShuttles = (bool?)xml.Element("LowSecMissions") ?? false;
+                    AllowNonStorylineCourierMissionsInLowSec = (bool?)xml.Element("LowSecMissions") ?? false;
                     MaterialsForWarOreID = (int?)xml.Element("MaterialsForWarOreID") ?? 20;
                     MaterialsForWarOreQty = (int?)xml.Element("MaterialsForWarOreQty") ?? 8000;
                     KillSentries = (bool?)xml.Element("killSentries") ?? false;

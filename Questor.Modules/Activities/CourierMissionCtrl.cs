@@ -72,7 +72,7 @@ namespace Questor.Modules.Activities
                     missionItem = "Amarr Light Marines";
                     break;
 
-                case "Pot and Kettle (3 of 5)":                       //lvl4 courier
+                case "Pot and Kettle - Delivery (3 of 5)":                       //lvl4 courier
                     missionItem = "Large EMP Smartbomb I";
                     break;
 

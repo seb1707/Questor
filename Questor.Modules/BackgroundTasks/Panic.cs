@@ -33,6 +33,7 @@ namespace Questor.Modules.BackgroundTasks
         private DateTime _lastPriorityTargetLogging = DateTime.UtcNow;
         private bool _delayedResume;
         private int _randomDelay;
+        private int BookmarkMyWreckAttempts;
 
         //public bool InMission { get; set; }
 
@@ -78,7 +79,7 @@ namespace Questor.Modules.BackgroundTasks
                     if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
                         return;
 
-                    if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                    if (!Cache.Instance.InMission && Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
                     {
                         Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
                         _States.CurrentPanicState = PanicState.StartPanicking;
@@ -108,9 +109,17 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentPanicState = PanicState.StartPanicking;
                     }
 
+                    BookmarkMyWreckAttempts = 1; // reset to 1 when we are known to not be in a pod anymore
+
                     _delayedResume = false;
                     if (Cache.Instance.InMission)
                     {
+                        if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                        {
+                            Logging.Log("Panic", "You are in a Capsule, you must have died in a mission :(", Logging.Red);
+                            _States.CurrentPanicState = PanicState.BookmarkMyWreck;
+                        }
+
                         int frigates = Cache.Instance.EntitiesNotSelf.Count(e => e.IsFrigate && e.IsPlayer);
                         int cruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsCruiser && e.IsPlayer);
                         int battlecruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattlecruiser && e.IsPlayer);
@@ -226,6 +235,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (station.Distance > (int)Distance.WarptoDistance)
                         {
+                            NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(),"Panic");
                             if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                             {
                                 EntityCache WarpScrambledBy = Cache.Instance.PriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
@@ -330,6 +340,23 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Panic", "At the star, lower panic mode", Logging.Red);
                         _States.CurrentPanicState = PanicState.Panic;
                     }
+                    break;
+
+                case PanicState.BookmarkMyWreck:
+                    BookmarkMyWreckAttempts++;
+                    if(Cache.Instance.Wrecks.Any(i => i.Name.Contains(Settings.Instance.CombatShipName)))
+                    {
+                        Cache.Instance.CreateBookmark("Wreck: " + Settings.Instance.CombatShipName);
+                        _States.CurrentPanicState = PanicState.StartPanicking;
+                        break;
+                    }
+
+                    if (BookmarkMyWreckAttempts++ > 3)
+                    {
+                        _States.CurrentPanicState = PanicState.StartPanicking;
+                        break;
+                    }
+
                     break;
 
                 case PanicState.Panic:

@@ -500,7 +500,7 @@ namespace Questor.Modules.Lookup
 
             if (Settings.Instance.SettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
-                if (Cache.Instance.LastInStation.AddMinutes(600) > DateTime.UtcNow)
+                if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30))
                 {
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
@@ -518,7 +518,9 @@ namespace Questor.Modules.Lookup
 
             bool reloadSettings = true;
             if (File.Exists(Settings.Instance.SettingsPath))
-                reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.SettingsPath);
+            {
+                reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.SettingsPath);   
+            }
 
             if (!reloadSettings)
                 return;

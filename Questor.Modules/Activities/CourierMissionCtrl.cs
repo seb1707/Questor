@@ -123,8 +123,12 @@ namespace Questor.Modules.Activities
                 }
                 else
                 {
-                    Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
-                    Cache.Instance.Paused = true;
+                    from = Cache.Instance.ItemHangar;
+                    //
+                    // we cant do the below because we run this routine multiple times after asking the items to move... maybe we need to track that
+                    //
+                    //Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
+                    //Cache.Instance.Paused = true;
                 }
                 to = Cache.Instance.CargoHold;
             }

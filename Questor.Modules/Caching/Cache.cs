@@ -1094,6 +1094,11 @@ namespace Questor.Modules.Caching
 
         public float AgentEffectiveStandingtoMe;
         public string AgentEffectiveStandingtoMeText;
+        public float AgentCorpEffectiveStandingtoMe;
+        public float AgentFactionEffectiveStandingtoMe;
+        public float StandingUsedToAccessAgent;
+        
+
         public bool MissionBookmarkTimerSet = false;
         public DateTime MissionBookmarkTimeout = DateTime.MaxValue;
 

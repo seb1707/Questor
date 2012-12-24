@@ -135,14 +135,14 @@ namespace Questor.Modules.Combat
                 _lastTarget = target.Id;
 
                 // Engage target
-                Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + target.Name + "][ID: " + target.Id + "]" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Magenta);
+                Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Magenta);
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
                 _lastEngageCommand = DateTime.UtcNow;
             }
             else // Make the target active
             {
                 target.MakeActiveTarget();
-                Logging.Log("Drones", "[" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones", Logging.Magenta);
+                Logging.Log("Drones", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones", Logging.Magenta);
             }
         }
 

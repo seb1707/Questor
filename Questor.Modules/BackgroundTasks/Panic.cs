@@ -190,7 +190,7 @@ namespace Questor.Modules.BackgroundTasks
                             _lastPriorityTargetLogging = DateTime.UtcNow;
                             foreach (EntityCache target in Cache.Instance.PriorityTargets)
                             {
-                                Logging.Log("Panic.ListPriorityTargets", "[" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                Logging.Log("Panic.ListPriorityTargets", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
                                 continue;
                             }
                         }

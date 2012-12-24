@@ -2332,6 +2332,14 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        public string MaskedID(long ID)
+        {
+            int numofCharacters = ID.ToString(CultureInfo.InvariantCulture).Length;
+            string maskedID = ID.ToString(CultureInfo.InvariantCulture).Substring(numofCharacters - 5);
+            maskedID = "[truncatedID]" + maskedID;
+            return maskedID;
+        }
+
         /// <summary>
         ///   Return the best possible target (based on current target, distance and low value first)
         /// </summary>

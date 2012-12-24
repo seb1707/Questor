@@ -316,7 +316,7 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
             }
-            else if (wreckTargets.Count >= MaximumWreckTargets)
+            else if (wreckTargets.Count >= MaximumWreckTargets || Cache.Instance.Targets.Count() >= Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
             {
                 if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: else if (wreckTargets.Count >= MaximumWreckTargets)", Logging.Teal);
                 return;

@@ -106,7 +106,7 @@ namespace Questor.Modules.Activities
         {
             // Tell the drones module to retract drones
             Cache.Instance.IsMissionPocketDone = true;
-            Cache.Instance.UseDrones = true;
+            Cache.Instance.UseDrones = Settings.Instance.UseDrones;
 
             // We do not switch to "done" status if we still have drones out
             if (Cache.Instance.ActiveDrones.Any())
@@ -1155,7 +1155,7 @@ namespace Questor.Modules.Activities
             else
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Enable launch of drones", Logging.Teal);
-                Cache.Instance.UseDrones = true;
+                Cache.Instance.UseDrones = Settings.Instance.UseDrones;
             }
             Nextaction();
             return;

@@ -157,7 +157,7 @@ namespace Questor.Modules.Combat
                 !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null ||   // What? No ship entity?
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
-                !Settings.Instance.UseDrones                            //if UseDrones is false
+                !Cache.Instance.UseDrones                            //if UseDrones is false
                 )
             {
                 _States.CurrentDroneState = DroneState.Idle;
@@ -276,7 +276,7 @@ namespace Questor.Modules.Combat
 
                 case DroneState.OutOfDrones:
 
-                    if (Settings.Instance.UseDrones && Settings.Instance.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
+                    if (Cache.Instance.UseDrones && Settings.Instance.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
                     {
                         if (Statistics.Instance.OutOfDronesCount >= 3)
                         {
@@ -504,7 +504,7 @@ namespace Questor.Modules.Combat
                         Cache.Instance.DirectEve.ActiveShip.Entity != null &&
                         !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
                         Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
-                        Settings.Instance.UseDrones &&
+                        Cache.Instance.UseDrones &&
                         !Cache.Instance.InWarp)
                     {
                         _States.CurrentDroneState = DroneState.WaitingForTargets;

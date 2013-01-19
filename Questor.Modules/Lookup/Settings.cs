@@ -123,6 +123,8 @@ namespace Questor.Modules.Lookup
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
 
+        public string CharacterToAcceptInvitesFrom { get; set; }
+
         //
         // Misc Settings
         //
@@ -475,6 +477,15 @@ namespace Questor.Modules.Lookup
 
         public string SkillTrainerScript { get; set; } //This needs to be in your "Innerspace\Scripts\" Directory
 
+        public string UserDefinedLavishScriptScript1 { get; set; }
+        public string UserDefinedLavishScriptScript1Description { get; set; }
+        public string UserDefinedLavishScriptScript2 { get; set; }
+        public string UserDefinedLavishScriptScript2Description { get; set; }
+        public string UserDefinedLavishScriptScript3 { get; set; }
+        public string UserDefinedLavishScriptScript3Description { get; set; }
+        public string UserDefinedLavishScriptScript4 { get; set; }
+        public string UserDefinedLavishScriptScript4Description { get; set; }
+
         //
         // path information - used to load the XML and used in other modules
         //
@@ -599,6 +610,8 @@ namespace Questor.Modules.Lookup
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
                 setEveClientDestinationWhenTraveling = false;
+
+                CharacterToAcceptInvitesFrom = Settings.Instance.CharacterName;
                 //
                 // Misc Settings
                 //
@@ -892,7 +905,16 @@ namespace Questor.Modules.Lookup
                 ThisToonShouldBeTrainingSkills = true;
                 //This needs to be in your "Innerspace\Scripts\" Directory
                 SkillTrainerScript = "";
-                    
+
+                UserDefinedLavishScriptScript1 = "";
+                UserDefinedLavishScriptScript1Description = "";
+                UserDefinedLavishScriptScript2 = "";
+                UserDefinedLavishScriptScript2Description = ""; 
+                UserDefinedLavishScriptScript3 = "";
+                UserDefinedLavishScriptScript3Description = ""; 
+                UserDefinedLavishScriptScript4 = "";
+                UserDefinedLavishScriptScript4Description = "";
+
                 //
                 // Clear various lists
                 //
@@ -981,6 +1003,8 @@ namespace Questor.Modules.Lookup
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
                     setEveClientDestinationWhenTraveling = (bool?)xml.Element("setEveClientDestinationWhenTraveling") ?? false;
+
+                    CharacterToAcceptInvitesFrom = (string)xml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
 
                     //
                     // Misc Settings
@@ -1361,6 +1385,19 @@ namespace Questor.Modules.Lookup
                     ThisToonShouldBeTrainingSkills = (bool?)xml.Element("thisToonShouldBeTrainingSkills") ?? true;
                     //This needs to be in your "Innerspace\Scripts\" Directory
                     SkillTrainerScript = (string)xml.Element("skillTrainerScript") ?? "skilltrainer.iss";
+                    
+                    //
+                    // User Defined LavishScript Scripts that tie to buttons in the UI
+                    //
+                    UserDefinedLavishScriptScript1 = (string)xml.Element("userDefinedLavishScriptScript1") ?? "";
+                    UserDefinedLavishScriptScript1Description = (string)xml.Element("userDefinedLavishScriptScript1Description") ?? "";
+                    UserDefinedLavishScriptScript2 = (string)xml.Element("userDefinedLavishScriptScript2") ?? "";
+                    UserDefinedLavishScriptScript2Description = (string)xml.Element("userDefinedLavishScriptScript2Description") ?? "";
+                    UserDefinedLavishScriptScript3 = (string)xml.Element("userDefinedLavishScriptScript3") ?? "";
+                    UserDefinedLavishScriptScript3Description = (string)xml.Element("userDefinedLavishScriptScript3Description") ?? "";
+                    UserDefinedLavishScriptScript4 = (string)xml.Element("userDefinedLavishScriptScript4") ?? "";
+                    UserDefinedLavishScriptScript4Description = (string)xml.Element("userDefinedLavishScriptScript4Description") ?? "";
+
                     //
                     // number of days of console logs to keep (anything older will be deleted on startup)
                     //

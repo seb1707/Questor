@@ -512,10 +512,6 @@ namespace Questor.Modules.Caching
 
         private string _agentName = "";
 
-        //NextGetAgentMissionAction
-
-        private double MyCurrentWealth { get; set; }
-
         private DateTime _nextAgentWindowAction;
 
         public DateTime NextAgentWindowAction
@@ -5095,7 +5091,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (AgentInteraction.Agent.Window.IsReady)
+            if (AgentInteraction.Agent.Window.IsReady && AgentInteraction.AgentId == AgentInteraction.Agent.AgentId)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
                 return true;
@@ -5301,11 +5297,17 @@ namespace Questor.Modules.Caching
         {
             get
             {
+                DirectBookmark bm = Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ??
+                                    Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
+                                    Cache.Instance.BookmarksByLabel("Jita").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
+                                    Cache.Instance.BookmarksByLabel("Rens").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
+                                    Cache.Instance.BookmarksByLabel("Amarr").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
+                                    Cache.Instance.BookmarksByLabel("Dodixie").OrderByDescending(b => b.CreatedOn).FirstOrDefault();
 
-                DirectBookmark bm = Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix + " ").OrderByDescending(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ??
-                                    Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix + " ").OrderByDescending(b => b.CreatedOn).FirstOrDefault(); ;
-
-                Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.White);
+                if (bm !=null)
+                {
+                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "GetTravelBookmark ["  + bm.Title +  "][" + bm.LocationId  + "]", Logging.White);
+                }
                 return bm;    
             }
         }
@@ -5457,7 +5459,10 @@ namespace Questor.Modules.Caching
 
                 if (!Cache.Instance.OpenShipsHangar(module)) return false;
                 if (!Cache.Instance.OpenItemsHangar(module)) return false;
-                if (!Cache.Instance.OpenDroneBay(module)) return false;
+                if (Settings.Instance.UseDrones)
+                {
+                    if (!Cache.Instance.OpenDroneBay(module)) {return false;}
+                }
 
                 //repair ships in ships hangar
                 List<DirectItem> repairAllItems = Cache.Instance.ShipHangar.Items;

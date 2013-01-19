@@ -40,6 +40,7 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
+        //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
@@ -61,6 +62,7 @@ namespace Questor
             _directionalScannerBehavior = new DirectionalScannerBehavior();
             _debugHangarsBehavior = new DebugHangarsBehavior();
             _miningBehavior = new MiningBehavior();
+            //_backgroundbehavior = new BackgroundBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
 
@@ -75,14 +77,14 @@ namespace Questor
             }
             catch (Exception ex)
             {
-                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
-                Cache.Instance.CloseQuestorCMDLogoff = false;
-                Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe license server is down";
-                Cache.Instance.SessionState = "Quitting";
+                Logging.Log("Questor", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("Questor", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                //Cache.Instance.CloseQuestorCMDLogoff = false;
+                //Cache.Instance.CloseQuestorCMDExitGame = true;
+                //Cache.Instance.CloseQuestorEndProcess = true;
+                //Settings.Instance.AutoStart = true;
+                //Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe license server is down";
+                //Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor();
             }
             Cache.Instance.DirectEve = _directEve;
@@ -157,7 +159,7 @@ namespace Questor
 
         public void RunOnce30SecAfterStartup()
         {
-            if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (!_runOnce30SecAfterStartupalreadyProcessed && DateTime.Now > Cache.Instance.QuestorStarted_DateTime.AddSeconds(30) && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(15))
             {
                 if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
                 {
@@ -360,7 +362,13 @@ namespace Questor
 
         public static void WalletCheck()
         {
-            if (_States.CurrentQuestorState == QuestorState.Mining) { return; }
+            if (_States.CurrentQuestorState == QuestorState.Mining ||
+                _States.CurrentQuestorState == QuestorState.CombatHelperBehavior ||
+                _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+                //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+            {
+                return;
+            }
 
             Cache.Instance.LastWalletCheck = DateTime.UtcNow;
 
@@ -655,6 +663,11 @@ namespace Questor
                             _States.CurrentQuestorState = QuestorState.CombatHelperBehavior;
                             break;
 
+                        case "custom":
+                            Logging.Log("Questor", "Start Custom Behavior", Logging.White);
+                            //_States.CurrentQuestorState = QuestorState.BackgroundBehavior;
+                            break;
+
                         case "directionalscanner":
                             Logging.Log("Questor", "Start DirectionalScanner Behavior", Logging.White);
                             _States.CurrentQuestorState = QuestorState.DirectionalScannerBehavior;
@@ -751,6 +764,14 @@ namespace Questor
                             break;
                         }
                     }
+                    break;
+
+                //case QuestorState.BackgroundBehavior:
+
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    //_backgroundbehavior.ProcessState();
                     break;
             }
         }

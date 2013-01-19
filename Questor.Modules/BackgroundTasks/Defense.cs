@@ -101,6 +101,7 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.TrackingLink ||
                     module.GroupId == (int)Group.SensorBooster ||
                     module.GroupId == (int)Group.SensorDampener ||
+                    module.GroupId == (int)Group.CapacitorInjector ||
                     module.GroupId == (int)Group.AncillaryShieldBooster)
                 {
                     //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
@@ -437,7 +438,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 bool inCombat = Cache.Instance.TargetedBy.Any();
-                if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct)))
+                if (!module.IsActive && ((inCombat && cap < Settings.Instance.InjectCapPerc) || (inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct)))
                 {
                     if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {
@@ -463,7 +464,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
                         module.Click();
 
-                    if (module.GroupId == (int)Group.AncillaryShieldBooster)
+                    if (module.GroupId == (int)Group.AncillaryShieldBooster || module.GroupId == (int)Group.CapacitorInjector)
                     {
                         if (module.CurrentCharges > 0)
                         {

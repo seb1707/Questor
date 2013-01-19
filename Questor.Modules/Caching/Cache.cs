@@ -328,6 +328,9 @@ namespace Questor.Modules.Caching
 
         public int PocketNumber { get; set; }
 
+        public int StackLootHangarAttempts { get; set; }
+        public int StackAmmoHangarAttempts { get; set; }
+
         public string ScheduleCharacterName; //= Program._character;
         public bool OpenWrecks = false;
         public bool NormalApproach = true;
@@ -2961,7 +2964,7 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "public bool StackItemsHangarAsLootHangar(String module)", Logging.Teal);
 
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 25)
+                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
                 {
                     if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
 
@@ -2992,10 +2995,19 @@ namespace Questor.Modules.Caching
                     {
                         try
                         {
-                            Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                            Cache.Instance.LootHangar.StackAll();
-                            Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
-                            Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                            if (Cache.Instance.StackLootHangarAttempts <= 2)
+                            {
+                                Cache.Instance.StackLootHangarAttempts++;
+                                Logging.Log(module, "Stacking Item Hangar", Logging.White);
+                                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(5);
+                                Cache.Instance.LootHangar.StackAll();
+                                Cache.Instance.StackLootHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
+                                Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
+                                Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                                return true;
+                            }
+
+                            Logging.Log(module, "Not Stacking LootHangar", Logging.White);
                             return true;
                         }
                         catch (Exception exception)
@@ -3037,7 +3049,7 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 25)
+                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
 
@@ -3068,10 +3080,19 @@ namespace Questor.Modules.Caching
                     {
                         try
                         {
-                            Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                            Cache.Instance.AmmoHangar.StackAll();
-                            Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
-                            Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                            if (Cache.Instance.StackAmmoHangarAttempts <= 2)
+                            {
+                                Cache.Instance.StackAmmoHangarAttempts++;
+                                Logging.Log(module, "Stacking Item Hangar", Logging.White);
+                                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(5);
+                                Cache.Instance.AmmoHangar.StackAll();
+                                Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
+                                Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                                return true;
+                            }
+
+                            Logging.Log(module, "Not Stacking AmmoHangar[" + "ItemHangar" + "]", Logging.White);
                             return true;
                         }
                         catch (Exception exception)
@@ -3223,8 +3244,8 @@ namespace Questor.Modules.Caching
                 {
                     try
                     {
-                        Cache.Instance.CargoHold.StackAll();
                         Cache.Instance.LastStackCargohold = DateTime.UtcNow;
+                        Cache.Instance.CargoHold.StackAll();
                         return true;
                     }
                     catch (Exception exception)
@@ -3404,9 +3425,9 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                     {
                         Logging.Log(module, "Stacking Ship Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                        Cache.Instance.ShipHangar.StackAll();
                         Cache.Instance.LastStackShipsHangar = DateTime.UtcNow;
                         Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                        Cache.Instance.ShipHangar.StackAll();
                         return true;
                     }
                     Logging.Log(module, "Stacking Ship Hangar: not yet ready: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
@@ -3661,9 +3682,18 @@ namespace Questor.Modules.Caching
                         {
                             try
                             {
-                                Logging.Log(module, "Stacking Corporate Ammo Hangar", Logging.White);
-                                Cache.Instance.AmmoHangar.StackAll();
-                                Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                if (Cache.Instance.StackAmmoHangarAttempts <= 2)
+                                {
+                                    Cache.Instance.StackAmmoHangarAttempts++;
+                                    Logging.Log(module, "Stacking Corporate Ammo Hangar", Logging.White);
+                                    Cache.Instance.AmmoHangar.StackAll();
+                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                    Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
+                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                    return true;
+                                }
+
+                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.Instance.AmmoHangar + "]", Logging.White);
                                 return true;
                             }
                             catch (Exception exception)
@@ -3828,11 +3858,20 @@ namespace Questor.Modules.Caching
                         {
                             try
                             {
-                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                            Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                            Cache.Instance.LootHangar.StackAll();
-                            Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
-                            return true;
+                                if (Cache.Instance.StackLootHangarAttempts <= 2)
+                                {
+                                    Cache.Instance.StackLootHangarAttempts++;
+                                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                    Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
+                                    Cache.Instance.LastStackLootContainer = DateTime.UtcNow;
+                                    Cache.Instance.LootHangar.StackAll();
+                                    Cache.Instance.StackLootHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
+                                    return true;
+                                }
+
+                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.Instance.AmmoHangar + "]", Logging.White);
+                                return true;
                             }
                             catch (Exception exception)
                             {

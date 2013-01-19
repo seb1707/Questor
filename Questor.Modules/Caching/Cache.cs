@@ -372,6 +372,8 @@ namespace Questor.Modules.Caching
         public DateTime LastStackShipsHangar = DateTime.UtcNow;
         public DateTime LastStackCargohold = DateTime.UtcNow;
         public DateTime LastStackLootContainer = DateTime.UtcNow;
+        public DateTime LastAccelerationGateDetected = DateTime.UtcNow;
+
         public bool MissionXMLIsAvailable { get; set; }
 
         public string MissionXmlPath { get; set; }
@@ -5315,6 +5317,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
+            Cache.Instance.LastAccelerationGateDetected = DateTime.UtcNow;
             return true;
         }
 
@@ -5385,7 +5388,6 @@ namespace Questor.Modules.Caching
             _bookmarkDeletionAttempt = 0;
             Cache.Instance.NextSalvageTrip = DateTime.UtcNow;
             Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
-            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
             return true;
         }
 

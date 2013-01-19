@@ -148,7 +148,15 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _trackingComputerScriptAttempts++;
                             if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingComputer Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
+                            DirectItem TrackingComputerScript = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
+                            
+                            EntityCache EntityTrackingDisruptingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
+                            if (EntityTrackingDisruptingMe != null || TrackingComputerScript == null)
+                            {
+                                TrackingComputerScript = Cache.Instance.CheckCargoForItem((int)TypeID.OptimalRangeScript, 1);
+                            }
+
+                            scriptToLoad = TrackingComputerScript;
                             if (scriptToLoad != null)
                             {
                                 if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingComputer", Logging.White);

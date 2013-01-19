@@ -423,6 +423,11 @@ namespace Questor.Modules.Caching
         public int OrbitDistance { get; set; }
 
         /// <summary>
+        ///   Current OptimalRange during the mission (effected by ewar)
+        /// </summary>
+        public int OptimalRange { get; set; }
+
+        /// <summary>
         ///   Force Salvaging after mission
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
@@ -1960,6 +1965,7 @@ namespace Questor.Modules.Caching
                 {
                     //No mission file but we need to set some cache settings
                     OrbitDistance = Settings.Instance.OrbitDistance;
+                    OptimalRange = Settings.Instance.OptimalRange;
                     AfterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
                     return new Actions.Action[0];
                 }
@@ -1997,6 +2003,17 @@ namespace Questor.Modules.Caching
                                 {
                                     OrbitDistance = Settings.Instance.OrbitDistance;
                                     Logging.Log("Cache", "Using Settings Orbit distance [" + OrbitDistance + "]", Logging.White);
+                                }
+
+                                if (pocket.Element("optimalrange") != null) 	//Load OrbitDistance from mission.xml, if present
+                                {
+                                    OptimalRange = (int)pocket.Element("optimalrange");
+                                    Logging.Log("Cache", "Using Mission OptimalRange [" + OptimalRange + "]", Logging.White);
+                                }
+                                else //Otherwise, use value defined in charname.xml file
+                                {
+                                    OptimalRange = Settings.Instance.OptimalRange;
+                                    Logging.Log("Cache", "Using Settings OptimalRange [" + OptimalRange + "]", Logging.White);
                                 }
 
                                 if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
@@ -2058,6 +2075,7 @@ namespace Questor.Modules.Caching
 
                     // if we reach this code there is no mission XML file, so we set some things -- Assail
 
+                    OptimalRange = Settings.Instance.OptimalRange;
                     OrbitDistance = Settings.Instance.OrbitDistance;
                     Logging.Log("Cache", "Using Settings Orbit distance [" + Settings.Instance.OrbitDistance + "]", Logging.White);
 

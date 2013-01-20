@@ -1340,7 +1340,7 @@ namespace Questor.Modules.Lookup
                     //
                     ActivateRepairModules = (int?)xml.Element("activateRepairModules") ?? 65;
                     DeactivateRepairModules = (int?)xml.Element("deactivateRepairModules") ?? 95;
-                    InjectCapPerc = (int?)xml.Element("injectcapperc") ?? 95;
+                    InjectCapPerc = (int?)xml.Element("injectcapperc") ?? 60;
 
                     //
                     // Panic Settings

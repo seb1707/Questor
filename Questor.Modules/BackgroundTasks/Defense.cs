@@ -39,11 +39,11 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (scriptToLoad != null)
             {
-                if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
+                if (module.IsReloadingAmmo || module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                     return false;
 
                 // We have enough ammo loaded
-                if (module.Charge != null && module.Charge.TypeId == scriptToLoad.TypeId && module.CurrentCharges >= 1)
+                if (module.Charge != null && module.Charge.TypeId == scriptToLoad.TypeId && module.CurrentCharges == module.MaxCharges)
                 {
                     Logging.Log("LoadthisScript", "module is already loaded with the script we wanted", Logging.Teal);
                     NextScriptReload[module.ItemId] = DateTime.UtcNow.AddSeconds(15); //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
@@ -105,7 +105,7 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.AncillaryShieldBooster)
                 {
                     //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
-                    if (module.CurrentCharges < 1)
+                    if (module.CurrentCharges < module.MaxCharges)
                     {
                         if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module with no charge[typeID:" + module.TypeId + "]", Logging.White);
                         DirectItem scriptToLoad;
@@ -300,7 +300,8 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
+                                bool inCombat = Cache.Instance.TargetedBy.Any();
+                                if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
                                     Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
@@ -333,7 +334,8 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
+                                bool inCombat = Cache.Instance.TargetedBy.Any();
+                                if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
                                     Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
@@ -438,7 +440,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 bool inCombat = Cache.Instance.TargetedBy.Any();
-                if (!module.IsActive && ((inCombat && cap < Settings.Instance.InjectCapPerc) || (inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct)))
+                if (!module.IsActive && ((inCombat && cap < Settings.Instance.InjectCapPerc) || (inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
                 {
                     if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {

@@ -468,7 +468,7 @@ namespace Questor.Behaviors
                     {
                         _States.CurrentArmState = ArmState.Idle;
 
-                        if (_afterMissionSalvageBookmarks == null)
+                        if (_afterMissionSalvageBookmarks == null || Cache.Instance.InStation)
                         {
                             _afterMissionSalvageBookmarks = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList(); 
                         }

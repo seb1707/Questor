@@ -439,8 +439,18 @@ namespace Questor.Modules.BackgroundTasks
                 else
                     continue;
 
+                // Module is either for Cap or Tank recharging, so we look at these seperated (or random things will happen, like cap recharging when we need to repair but cap is near max) 
+                // Cap recharging
                 bool inCombat = Cache.Instance.TargetedBy.Any();
-                if (!module.IsActive && ((inCombat && cap < Settings.Instance.InjectCapPerc) || (inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
+                if (inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
+                {
+                    module.Click();
+                    perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                    Logging.Log("Defense", "Cap: [" + Math.Round(cap, 0) + "%] Capacitor Booster: [" + ModuleNumber + "] activated", Logging.White);
+                }
+
+                // Shield/Armor recharging
+                else if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
                 {
                     if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {
@@ -466,17 +476,18 @@ namespace Questor.Modules.BackgroundTasks
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
                         module.Click();
 
-                    if (module.GroupId == (int)Group.AncillaryShieldBooster || module.GroupId == (int)Group.CapacitorInjector)
+                    if (module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
                         if (module.CurrentCharges > 0)
                         {
                             module.Click();
                         }
                     }
+                    
 
                     Cache.Instance.StartedBoosting = DateTime.UtcNow;
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster || module.GroupId == (int)Group.CapacitorInjector)
+                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);

@@ -122,11 +122,13 @@ namespace Questor
                 Logging.Log("Questor", "make sure each toon has its own innerspace profile and specify the following startup program line:", Logging.Orange);
                 Logging.Log("Questor", "dotnet questor questor -x -c \"MyEVECharacterName\"", Logging.Orange);
             }
+
             Cache.Instance.StartTime = Program.StartTime;
             Cache.Instance.QuestorStarted_DateTime = DateTime.Now;
 
             // get the current process
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
             // get the physical mem usage
             Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
@@ -168,6 +170,7 @@ namespace Questor
                     {
                         Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("Questor.RunOnce30SecAfterStartup", "Running Innerspace command: timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName);

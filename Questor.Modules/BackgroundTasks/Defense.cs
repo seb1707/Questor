@@ -109,6 +109,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module with no charge[typeID:" + module.TypeId + "]", Logging.White);
                         DirectItem scriptToLoad;
+
                         if (module.GroupId == (int)Group.TrackingDisruptor && _trackingDisruptorScriptAttempts < 5)
                         {
                             _trackingDisruptorScriptAttempts++;
@@ -422,7 +423,9 @@ namespace Questor.Modules.BackgroundTasks
 
                 double perc;
                 double cap;
-                if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster || module.GroupId == (int)Group.CapacitorInjector)
+                if (module.GroupId == (int)Group.ShieldBoosters || 
+                    module.GroupId == (int)Group.AncillaryShieldBooster || 
+                    module.GroupId == (int)Group.CapacitorInjector)
                 {
                     ModuleNumber++;
                     perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;

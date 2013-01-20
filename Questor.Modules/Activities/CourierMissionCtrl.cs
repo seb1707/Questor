@@ -113,11 +113,11 @@ namespace Questor.Modules.Activities
                 {
                     from = Cache.Instance.ItemHangar;
                 }
-                else if (Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                else if (Settings.Instance.AmmoHangar != null && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                 {
                     from = Cache.Instance.AmmoHangar;
                 }
-                else if (Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                else if (Settings.Instance.LootHangar != null && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                 {
                     from = Cache.Instance.LootHangar;
                 }
@@ -135,7 +135,6 @@ namespace Questor.Modules.Activities
 
             if (_States.CurrentCourierMissionCtrlState == CourierMissionCtrlState.DropOffItem || !pickup)
             {
-
                 from = Cache.Instance.CargoHold;
                 to = Cache.Instance.ItemHangar;
             }
@@ -160,6 +159,7 @@ namespace Questor.Modules.Activities
                 to.Add(item);
                 continue;
             }
+
             //_nextCourierAction = DateTime.UtcNow.AddSeconds(8);
             moveItemRetryCounter++;
             return false;
@@ -190,6 +190,8 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CourierMissionCtrlState.PickupItem:
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) return;
+
                     if (moveItemRetryCounter > 20)
                     {
                         Cache.Instance.Paused = true;

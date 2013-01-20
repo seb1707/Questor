@@ -468,6 +468,11 @@ namespace Questor.Behaviors
                     {
                         _States.CurrentArmState = ArmState.Idle;
 
+                        if (_afterMissionSalvageBookmarks == null)
+                        {
+                            _afterMissionSalvageBookmarks = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList(); 
+                        }
+
                         _afterMissionSalvageBookmarks = _afterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList();
                         if (DateTime.UtcNow < Cache.Instance.LastAccelerationGateDetected.AddSeconds(10)) //long enough that the timer should expire if we have to warp even small distances to the next bm
                         {

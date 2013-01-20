@@ -468,10 +468,6 @@ namespace Questor.Behaviors
                     {
                         _States.CurrentArmState = ArmState.Idle;
 
-                        // this can eventually be moved to somewhere else like unloadloot BUT...
-                        // that will mean keeping track of bookmarks we delete and such in this local list. 
-                        _afterMissionSalvageBookmarks = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList(); 
-                        
                         _afterMissionSalvageBookmarks = _afterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList();
                         if (DateTime.UtcNow < Cache.Instance.LastAccelerationGateDetected.AddSeconds(10)) //long enough that the timer should expire if we have to warp even small distances to the next bm
                         {
@@ -586,7 +582,10 @@ namespace Questor.Behaviors
                     if (!Cache.Instance.UnlootedContainers.Any())
                     {
                         if (!Cache.Instance.DeleteBookmarksOnGrid("DedicatedBookmarkSalvageBehavior")) return;
-                        
+                        // this can eventually be moved to somewhere else like unloadloot BUT...
+                        // that will mean keeping track of bookmarks we delete and such in this local list. 
+                        _afterMissionSalvageBookmarks = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(b => b.CreatedOn).ToList(); 
+                       
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;    
                         return;
                     }

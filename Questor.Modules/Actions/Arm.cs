@@ -853,8 +853,48 @@ namespace Questor.Modules.Actions
                         AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
                     }
 
+                    Cache.Instance.InvalidateCache();
+
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
+
+                    DirectContainer container = Cache.Instance.DirectEve.GetShipsModules();
+
+                    foreach (DirectItem module in container.Items)
+                    {
+                        if (module.GroupId == (int)Group.CapacitorInjector)
+                        {
+                            int capsToLoad = Settings.Instance.CapBoosterToLoad;
+                            
+                            if (capsToLoad <= 0) break;
+
+                            foreach (DirectItem item in Cache.Instance.AmmoHangar.Items)
+                            {
+                                if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
+                                    continue;
+
+                                if (item.TypeId != Settings.Instance.CapacitorInjectorScript)
+                                    continue;
+
+                                int moveCapQuantity = Math.Min(item.Quantity, capsToLoad);
+                                Cache.Instance.CargoHold.Add(item, moveCapQuantity);
+
+                                Logging.Log("Arm.MoveItems", "Moving [" + moveCapQuantity + "] units of Cap  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
+
+                                capsToLoad -= moveCapQuantity;
+                                if (capsToLoad <= 0)
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (capsToLoad <= 0) break;
+
+                            Logging.Log("Arm", "Missing [" + capsToLoad + "] units of Cap Booster with TypeId [" + Settings.Instance.CapacitorInjectorScript + "]", Logging.Orange);
+                            _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                            break;
+                        }
+                    }
 
                     //IEnumerable<DirectItem> AmmoInCargo = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 

@@ -5474,7 +5474,10 @@ namespace Questor.Modules.Caching
 
                 //repair items in items hangar and drone bay of active ship also
                 repairAllItems.AddRange(Cache.Instance.ItemHangar.Items);
-                repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
+                if (Settings.Instance.UseDrones)
+                {
+                    repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
+                }
 
                 if (repairAllItems.Any())
                 {

@@ -853,8 +853,6 @@ namespace Questor.Modules.Actions
                         AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
                     }
 
-                    Cache.Instance.InvalidateCache();
-
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
 

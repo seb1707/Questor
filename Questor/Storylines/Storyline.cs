@@ -66,7 +66,6 @@
                                {"Eradication", new GenericCourier()},
                                {"Evacuation", new GenericCourier()},
                                {"The Natural Way", new GenericCourier()},
-                               {"Amphibian Error", new GenericCourier()},
                                /* COURIER/DELIVERY - MINMATAR */
                                {"Very Important Pirates", new GenericCourier()},
                                {"A Cargo With Attitude", new GenericCourier()},

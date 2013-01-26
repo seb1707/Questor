@@ -48,6 +48,7 @@
   <debugUI>false</debugUI>
   <debugUnloadLoot>false</debugUnloadLoot>
   <debugValuedump>false</debugValuedump>
+  <debugWatchForActiveWars>false</debugWatchForActiveWars>
   <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
   <defendWhileTraveling>true</defendWhileTraveling>
   <useInnerspace>true</useInnerspace>
@@ -94,6 +95,8 @@
   <UseLocalWatch>true</UseLocalWatch><!-- if false all local watching for bad standings pilots is disabled -->
   <!-- UseFittingManager is either true of false and allows questor to use the IN GAME EVE fitting manager to change your fits per faction/mission -->
   <UseFittingManager>true</UseFittingManager><!-- default is true -->
+  <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
+  <WatchForActiveWars>true</WatchForActiveWars><!-- default is true -->
   
   <!--                                                         -->
   <!-- AGENT AND MISSION SETTINGS -->

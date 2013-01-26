@@ -493,7 +493,6 @@ namespace Questor.Modules.BackgroundTasks
                             module.Click();
                         }
                     }
-                    
 
                     Cache.Instance.StartedBoosting = DateTime.UtcNow;
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);

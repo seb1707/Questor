@@ -472,7 +472,7 @@ namespace Questor.Modules.Actions
                             return;
                         }
 
-                        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.BackgroundBehavior)
                         {
                             if (Settings.Instance.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)", Logging.Teal);
 
@@ -736,6 +736,7 @@ namespace Questor.Modules.Actions
                                 retryCount = 0;
                                 return;
                             }
+
                             ItemsAreBeingMoved = true;
                             Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(1);
                             return;
@@ -801,6 +802,7 @@ namespace Questor.Modules.Actions
 
                                 continue;
                             }
+
                             CheckCargoForOptionalBringItem = false;
                         }
 
@@ -826,6 +828,7 @@ namespace Questor.Modules.Actions
                                 retryCount = 0;
                                 return;
                             }
+
                             ItemsAreBeingMoved = true;
                             Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(1);
                             return;
@@ -975,7 +978,7 @@ namespace Questor.Modules.Actions
 
                     if (Cache.Instance.CargoHold.Items.Count == 0) return;
 
-                    if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 && Cache.Instance.DirectEve.ActiveShip.GroupId != 28 && Cache.Instance.DirectEve.ActiveShip.GroupId != 380))
+                    if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip))
                     {
                         // Close the drone bay, its not required in space.
                         //if (Cache.Instance.DroneBay.IsReady) //why is not .isready and .isvalid working at the moment? 4/2012

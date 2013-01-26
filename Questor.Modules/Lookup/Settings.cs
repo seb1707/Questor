@@ -119,6 +119,9 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
+
+        public bool DebugWatchForActiveWars { get; set; }
+
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
@@ -146,6 +149,8 @@ namespace Questor.Modules.Lookup
         public bool EnableStorylines { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
+
+        public bool WatchForActiveWars { get; set; }
 
         //
         // Agent and mission settings
@@ -607,6 +612,7 @@ namespace Questor.Modules.Lookup
                 DebugUI = false;
                 DebugUnloadLoot = false;
                 DebugValuedump = false;
+                DebugWatchForActiveWars = true;
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
@@ -628,6 +634,7 @@ namespace Questor.Modules.Lookup
                 UseFittingManager = false;
                 EnableStorylines = false;
                 UseLocalWatch = false;
+                WatchForActiveWars = true;
 
                 // Console Log Settings
                 //
@@ -1002,6 +1009,7 @@ namespace Questor.Modules.Lookup
                     DebugUI = (bool?)xml.Element("debugUI") ?? false;
                     DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
                     DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
+                    DebugWatchForActiveWars = (bool?)xml.Element("debugWatchForActiveWars") ?? true;
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
@@ -1032,7 +1040,7 @@ namespace Questor.Modules.Lookup
                     UseFittingManager = (bool?)xml.Element("UseFittingManager") ?? true;
                     EnableStorylines = (bool?)xml.Element("enableStorylines") ?? false;
                     UseLocalWatch = (bool?)xml.Element("UseLocalWatch") ?? true;
-
+                    WatchForActiveWars = (bool?)xml.Element("watchForActiveWars") ?? true;
                     //
                     // Agent Standings and Mission Settings
                     //

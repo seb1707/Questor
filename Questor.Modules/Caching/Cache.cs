@@ -382,6 +382,20 @@ namespace Questor.Modules.Caching
         public XDocument invIgnore;
         public string Path;
 
+        public bool IsCorpInWar
+        {
+            get
+            {
+                bool war = DirectEve.Me.IsAtWar;
+                if (!war)
+                    Logging.Log("Cache", "Your corp are not involved in any war", Logging.Green);
+                else
+                    Logging.Log("Cache", "Your corp are involved in a war, be carefull", Logging.Orange);
+
+                return war;
+            }
+        }
+
         public bool LocalSafe(int maxBad, double stand)
         {
             int number = 0;

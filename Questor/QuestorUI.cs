@@ -552,10 +552,10 @@ namespace Questor
                     _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Traveler;
                     return 0;
 
-                case QuestorState.BackgroundBehavior:
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Traveler;
-                    return 0;
+                //case QuestorState.BackgroundBehavior:
+                //    _States.CurrentTravelerState = TravelerState.Idle;
+                //    _States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Traveler;
+                //    return 0;
             }
             return 0;
         }

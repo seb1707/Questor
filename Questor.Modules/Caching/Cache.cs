@@ -396,9 +396,13 @@ namespace Questor.Modules.Caching
 
                     nextCheckCorpisAtWar = DateTime.UtcNow.AddMinutes(15);
                     if (!_isCorpInWar)
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Cache", "Your corp is not involved in any wars (yet)", Logging.Green);
+                    {
+                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is not involved in any wars (yet)", Logging.Green);
+                    }
                     else
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Cache", "Your corp is involved in a war, be carefull", Logging.Orange);
+                    {
+                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is involved in a war, be carefull", Logging.Orange);
+                    }
 
                     return _isCorpInWar;
                 }

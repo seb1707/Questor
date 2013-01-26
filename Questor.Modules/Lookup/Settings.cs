@@ -1009,7 +1009,7 @@ namespace Questor.Modules.Lookup
                     DebugUI = (bool?)xml.Element("debugUI") ?? false;
                     DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
                     DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
-                    DebugWatchForActiveWars = (bool?)xml.Element("debugWatchForActiveWars") ?? true;
+                    DebugWatchForActiveWars = (bool?)xml.Element("debugWatchForActiveWars") ?? false;
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;

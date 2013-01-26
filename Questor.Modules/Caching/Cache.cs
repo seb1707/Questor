@@ -2983,6 +2983,11 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsLootHangar(String module)
         {
+            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackItemHangar || DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootHangar)
+            {
+                return true;
+            }
+
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
@@ -3066,6 +3071,11 @@ namespace Questor.Modules.Caching
         public bool StackItemsHangarAsAmmoHangar(String module)
         {
             Logging.Log("StackItemsHangarAsAmmoHangar", "test", Logging.Teal);
+
+            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackItemHangar || DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackAmmoHangar)
+            {
+                return true;
+            }
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -3242,8 +3252,8 @@ namespace Questor.Modules.Caching
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
 
-            if (DateTime.UtcNow < Cache.Instance.LastStackCargohold.AddSeconds(10))
-                return false;
+            if (DateTime.UtcNow < Cache.Instance.LastStackCargohold.AddSeconds(90))
+                return true;
 
             try
             {
@@ -3261,7 +3271,7 @@ namespace Questor.Modules.Caching
 
                     if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackCargohold).TotalSeconds > 20)
                     {
-                        Logging.Log(module, "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
+                        Logging.Log(module, "Stacking CargoHold timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
                         Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
@@ -3850,6 +3860,11 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(String module)
         {
+            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootHangar)
+            {
+                return true;
+            }
+
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
@@ -4380,6 +4395,11 @@ namespace Questor.Modules.Caching
 
         public bool StackLootContainer(String module)
         {
+            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootContainer)
+            {
+                return true;
+            }
+
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;

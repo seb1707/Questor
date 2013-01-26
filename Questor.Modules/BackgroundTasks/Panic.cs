@@ -188,19 +188,19 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.InSpace)
                     {
-                        EntityCache WarpScrambler = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
-                        if (WarpScrambler != null)
+                        EntityCache EntityIsWarpScramblingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
+                        if (EntityIsWarpScramblingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWarpScramblingMe.Name))
                         {
-                            if (!Settings.Instance.ShootWarpScramblersWithPrimaryWeapons && !Cache.Instance.DronePriorityTargets.Contains(WarpScrambler))
+                            if (!Settings.Instance.ShootWarpScramblersWithPrimaryWeapons && !Cache.Instance.DronePriorityTargets.Contains(EntityIsWarpScramblingMe))
                             {
-                                Logging.Log("Panic", "Adding [" + WarpScrambler.Name + "] as a DronePriorityTarget", Logging.White);
+                                Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a DronePriorityTarget", Logging.White);
                                 Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic");
                             }
-                            else if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(WarpScrambler) || 
-                                (WarpScrambler.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons ||
-                                WarpScrambler.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons))
+                            else if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsWarpScramblingMe) ||
+                                (EntityIsWarpScramblingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons ||
+                                EntityIsWarpScramblingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons))
                             {
-                                Logging.Log("Panic", "Adding [" + WarpScrambler.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                                Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
                             }
                         }

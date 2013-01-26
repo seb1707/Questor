@@ -382,17 +382,28 @@ namespace Questor.Modules.Caching
         public XDocument invIgnore;
         public string Path;
 
+        public bool _isCorpInWar = false;
+        public DateTime nextCheckCorpisAtWar = DateTime.UtcNow;
+
         public bool IsCorpInWar
         {
             get
             {
-                bool war = DirectEve.Me.IsAtWar;
-                if (!war)
-                    Logging.Log("Cache", "Your corp are not involved in any war", Logging.Green);
-                else
-                    Logging.Log("Cache", "Your corp are involved in a war, be carefull", Logging.Orange);
+                if (DateTime.UtcNow > nextCheckCorpisAtWar)
+                {
+                    bool war = DirectEve.Me.IsAtWar;
+                    Cache.Instance._isCorpInWar = war;
 
-                return war;
+                    nextCheckCorpisAtWar = DateTime.UtcNow.AddMinutes(15);
+                    if (!_isCorpInWar)
+                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Cache", "Your corp is not involved in any wars (yet)", Logging.Green);
+                    else
+                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Cache", "Your corp is involved in a war, be carefull", Logging.Orange);
+
+                    return _isCorpInWar;
+                }
+                
+                return _isCorpInWar; 
             }
         }
 

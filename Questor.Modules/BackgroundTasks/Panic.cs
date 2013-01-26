@@ -80,8 +80,9 @@ namespace Questor.Modules.BackgroundTasks
                     if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
                         return;
 
-                    if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
+                    if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
                     {
+                        Logging.Log("Cache", "Your corp is involved in a war, Starting panic!", Logging.Orange);
                         _States.CurrentPanicState = PanicState.StartPanicking;
                         return;
                     }

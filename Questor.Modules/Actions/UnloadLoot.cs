@@ -395,7 +395,7 @@ namespace Questor.Modules.Actions
             // Stack AmmoHangar
             //
             if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "starting Cache.Instance.StackAmmoHangar", Logging.Teal);
-            if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
+            //if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
             if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "finished Cache.Instance.StackAmmoHangar", Logging.Teal);
             return;
         }

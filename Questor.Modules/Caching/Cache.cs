@@ -2983,7 +2983,7 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsLootHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackItemHangar || DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
             }
@@ -3072,7 +3072,7 @@ namespace Questor.Modules.Caching
         {
             Logging.Log("StackItemsHangarAsAmmoHangar", "test", Logging.Teal);
 
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackItemHangar || DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackAmmoHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
@@ -3865,7 +3865,7 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
             }
@@ -4636,7 +4636,7 @@ namespace Questor.Modules.Caching
 
         public bool StackLootHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
             }
@@ -4763,7 +4763,7 @@ namespace Questor.Modules.Caching
 
         public bool StackAmmoHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackAmmoHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }

@@ -378,6 +378,14 @@ namespace Questor.Modules.Actions
                         }
                         if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "No Scripts Found in CargoHold: moving on.", Logging.White);
                     }
+
+                    //
+                    // Stack AmmoHangar
+                    //
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackLootHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
+                    if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
+                    return;
+
                 }
                 else
                 {
@@ -391,12 +399,6 @@ namespace Questor.Modules.Actions
                 return;
             }
 
-            //
-            // Stack AmmoHangar
-            //
-            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "starting Cache.Instance.StackAmmoHangar", Logging.Teal);
-            //if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return;
-            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "finished Cache.Instance.StackAmmoHangar", Logging.Teal);
             return;
         }
 

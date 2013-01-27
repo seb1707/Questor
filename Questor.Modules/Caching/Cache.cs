@@ -374,6 +374,10 @@ namespace Questor.Modules.Caching
         public DateTime LastStackLootContainer = DateTime.UtcNow;
         public DateTime LastAccelerationGateDetected = DateTime.UtcNow;
 
+        public int StackLoothangarAttempts { get; set; }
+        public int StackAmmohangarAttempts { get; set; }
+        public int StackItemhangarAttempts { get; set; }
+        
         public bool MissionXMLIsAvailable { get; set; }
 
         public string MissionXmlPath { get; set; }
@@ -4636,6 +4640,18 @@ namespace Questor.Modules.Caching
 
         public bool StackLootHangar(String module)
         {
+            StackLoothangarAttempts++;
+            if (StackLoothangarAttempts > 10)
+            {
+                Logging.Log("StackLootHangar", "Stacking the lootHangar has failed too many times [" + StackLoothangarAttempts + "]", Logging.Teal);
+                if (StackLoothangarAttempts > 30)
+                {
+                    Logging.Log("StackLootHangar", "Stacking the lootHangar routine has run [" + StackLoothangarAttempts + "] times without success, resetting counter", Logging.Teal);
+                    StackLoothangarAttempts = 0;
+                }
+                return true;
+            }
+
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
@@ -4659,6 +4675,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))", Logging.Teal);
                         if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
+                        StackLoothangarAttempts = 0;
                         return true;
                     }
 
@@ -4666,11 +4683,13 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                         if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
+                        StackLoothangarAttempts = 0;
                         return true;
                     }
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "!Cache.Instance.StackItemsHangarAsLootHangar(Cache.StackLootHangar))", Logging.Teal);
                     if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackLootHangar")) return false;
+                    StackLoothangarAttempts = 0;
                     return true;
                 }
 
@@ -4763,6 +4782,18 @@ namespace Questor.Modules.Caching
 
         public bool StackAmmoHangar(String module)
         {
+            StackAmmohangarAttempts++;
+            if (StackAmmohangarAttempts > 10)
+            {
+                Logging.Log("StackAmmoHangar", "Stacking the ammoHangar has failed too many times [" + StackAmmohangarAttempts + "]", Logging.Teal);
+                if (StackAmmohangarAttempts > 30)
+                {
+                    Logging.Log("StackAmmoHangar", "Stacking the ammoHangar routine has run [" + StackAmmohangarAttempts + "] times without success, resetting counter", Logging.Teal);
+                    StackAmmohangarAttempts = 0;
+                }
+                return true;
+            }
+
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;

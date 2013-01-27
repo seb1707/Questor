@@ -42,12 +42,12 @@ namespace Questor.Modules.Actions
 
         //public double LootValue { get; set; }
 
-        private void MoveLoot()
+        private bool MoveLoot()
         {
             if (DateTime.UtcNow < _nextUnloadAction)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "will Continue in [ " + Math.Round(_nextUnloadAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ] sec", Logging.White);
-                return;
+                return false;
             }
 
             if (LootIsBeingMoved && AllLootWillFit)
@@ -60,25 +60,26 @@ namespace Questor.Modules.Actions
                         Cache.Instance.DirectEve.UnlockItems();
                         _lastUnloadAction = DateTime.UtcNow.AddSeconds(-10);
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
-                        return;
+                        return false;
                     }
 
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
-                    return;
+                    return false;
                 }
             }
 
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 10)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
-                if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return;
+                if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return false;
                 Logging.Log("UnloadLoot.MoveLoot", "Loot was worth an estimated [" + Statistics.Instance.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
                 LootIsBeingMoved = false;
                 AllLootWillFit = false;
                 _States.CurrentUnloadLootState = UnloadLootState.Done;
+                return true;
             }
 
-            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return;
+            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return false;
 
             if (Cache.Instance.CargoHold.IsValid)
             {
@@ -109,7 +110,7 @@ namespace Questor.Modules.Actions
                 {
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
 
-                    if (!Cache.Instance.ReadyLootHangar("UnloadLoot.MoveLoot")) return;
+                    if (!Cache.Instance.ReadyLootHangar("UnloadLoot.MoveLoot")) return false;
 
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.LootHangar.IsValid)", Logging.White);
 
@@ -173,10 +174,10 @@ namespace Questor.Modules.Actions
                         LootIsBeingMoved = true;
                         Cache.Instance.LootHangar.Add(lootToMove);
                         _nextUnloadAction = DateTime.UtcNow.AddSeconds(5);
-                        return;
+                        return false;
                     }
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "1) if (lootToMove.Any()) is false", Logging.White);
-                    return;
+                    return false;
                 }
 
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "2) if (lootToMove.Any()) is false", Logging.White);
@@ -184,12 +185,13 @@ namespace Questor.Modules.Actions
                 // Stack LootHangar
                 //
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "if (!Cache.Instance.StackLootHangar(UnloadLoot.MoveLoot)) return;", Logging.White);
-                if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return;
-                return;
+                _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return false;
+                return true;
             }
 
             if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
-            return;
+            return false;
         }
 
         private bool MoveAmmo()
@@ -383,23 +385,18 @@ namespace Questor.Modules.Actions
                     //
                     // Stack AmmoHangar
                     //
-                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackLootHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
+                    _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4)); 
                     if (!Cache.Instance.StackAmmoHangar("UnloadLoot.MoveAmmo")) return false;
                     return true;
 
                 }
-                else
-                {
-                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.AmmoHangar is Not yet valid", Logging.Teal);
-                    return false;
-                }
-            }
-            else
-            {
-                if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
+                
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.AmmoHangar is Not yet valid", Logging.Teal);
                 return false;
             }
 
+            if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
             return false;
         }
 
@@ -443,7 +440,8 @@ namespace Questor.Modules.Actions
                     break;
 
                 case UnloadLootState.MoveLoot:
-                    MoveLoot();
+                    if (!MoveLoot()) return;
+                    _States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
             }
         }

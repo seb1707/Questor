@@ -3040,7 +3040,7 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.StackLootHangarAttempts++;
                                 Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(5);
+                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
                                 Cache.Instance.LootHangar.StackAll();
                                 Cache.Instance.StackLootHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
                                 Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
@@ -3130,7 +3130,7 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.StackAmmoHangarAttempts++;
                                 Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(5);
+                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
                                 Cache.Instance.AmmoHangar.StackAll();
                                 Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
                                 Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
@@ -3363,6 +3363,7 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
@@ -4486,7 +4487,7 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.OreHoldWindow == null)
             {
                 // No, command it to open
-                Cache.Instance.NextOpenHangarAction = DateTime.Now.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                 Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
                 long OreHoldID = 1;  //no idea how to get this value atm. this is not yet correct.
                 if (!Cache.Instance.PrimaryInventoryWindow.SelectTreeEntry("Ore Hold", OreHoldID - 1))

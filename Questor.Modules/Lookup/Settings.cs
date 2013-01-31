@@ -119,9 +119,14 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
+
+        public bool DebugWatchForActiveWars { get; set; }
+
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
+
+        public string CharacterToAcceptInvitesFrom { get; set; }
 
         //
         // Misc Settings
@@ -144,6 +149,8 @@ namespace Questor.Modules.Lookup
         public bool EnableStorylines { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
+
+        public bool WatchForActiveWars { get; set; }
 
         //
         // Agent and mission settings
@@ -229,6 +236,9 @@ namespace Questor.Modules.Lookup
         public bool SalvageMultipleMissionsinOnePass { get; set; }
         public bool FirstSalvageBookmarksInSystem { get; set; }
         public string BookmarkPrefix { get; set; }
+
+        public string TravelToBookmarkPrefix { get; set; }
+
         public string UndockPrefix { get; set; }
         public int UndockDelay { get; set; }
         public int MinimumWreckCount { get; set; }
@@ -340,6 +350,11 @@ namespace Questor.Modules.Lookup
         public List<Ammo> Ammo { get; private set; }
 
         public int DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage { get; set; }
+
+        public int DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
+        public int SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+        public bool ShootWarpScramblersWithPrimaryWeapons { get; set; }
+
         //
         // Script Settings - TypeIDs for the scripts you would like to use in these modules
         //
@@ -350,7 +365,7 @@ namespace Questor.Modules.Lookup
         public int SensorDampenerScript { get; private set; }
         public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
         public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
-
+        public int CapBoosterToLoad { get; private set; } 
         //
         // Speed and Movement Settings
         //
@@ -368,6 +383,7 @@ namespace Questor.Modules.Lookup
         //
         public int ActivateRepairModules { get; set; }
         public int DeactivateRepairModules { get; set; }
+        public int InjectCapPerc { get; set; }
 
         //
         // Panic Settings
@@ -466,6 +482,15 @@ namespace Questor.Modules.Lookup
         public bool ThisToonShouldBeTrainingSkills { get; set; } //as opposed to another toon on the same account
 
         public string SkillTrainerScript { get; set; } //This needs to be in your "Innerspace\Scripts\" Directory
+
+        public string UserDefinedLavishScriptScript1 { get; set; }
+        public string UserDefinedLavishScriptScript1Description { get; set; }
+        public string UserDefinedLavishScriptScript2 { get; set; }
+        public string UserDefinedLavishScriptScript2Description { get; set; }
+        public string UserDefinedLavishScriptScript3 { get; set; }
+        public string UserDefinedLavishScriptScript3Description { get; set; }
+        public string UserDefinedLavishScriptScript4 { get; set; }
+        public string UserDefinedLavishScriptScript4Description { get; set; }
 
         //
         // path information - used to load the XML and used in other modules
@@ -587,10 +612,13 @@ namespace Questor.Modules.Lookup
                 DebugUI = false;
                 DebugUnloadLoot = false;
                 DebugValuedump = false;
+                DebugWatchForActiveWars = true;
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
                 setEveClientDestinationWhenTraveling = false;
+
+                CharacterToAcceptInvitesFrom = Settings.Instance.CharacterName;
                 //
                 // Misc Settings
                 //
@@ -606,6 +634,7 @@ namespace Questor.Modules.Lookup
                 UseFittingManager = false;
                 EnableStorylines = false;
                 UseLocalWatch = false;
+                WatchForActiveWars = true;
 
                 // Console Log Settings
                 //
@@ -737,6 +766,7 @@ namespace Questor.Modules.Lookup
                 CreateSalvageBookmarksIn = "Player"; //Player or Corp
                 //other setting is "Corp"
                 BookmarkPrefix = "Salvage:";
+                TravelToBookmarkPrefix = "MeetHere:";
                 MinimumWreckCount = 1;
                 AfterMissionSalvaging = false;
                 FirstSalvageBookmarksInSystem = false;
@@ -771,6 +801,10 @@ namespace Questor.Modules.Lookup
                 MaximumHighValueTargets = 2;
                 MaximumLowValueTargets = 2;
                 DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = 60;
+                DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
+                SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+                ShootWarpScramblersWithPrimaryWeapons = true;
+
                 //
                 // Script Settings - TypeIDs for the scripts you would like to use in these modules
                 //
@@ -806,6 +840,7 @@ namespace Questor.Modules.Lookup
                 SensorDampenerScript = 29015;
                 AncillaryShieldBoosterScript = 11289;
                 CapacitorInjectorScript = 11289;
+                CapBoosterToLoad = 15;
 
                 //
                 // Speed and Movement Settings
@@ -824,6 +859,7 @@ namespace Questor.Modules.Lookup
                 //
                 ActivateRepairModules = 65;
                 DeactivateRepairModules = 95;
+                InjectCapPerc = 60;
 
                 //
                 // Panic Settings
@@ -879,7 +915,16 @@ namespace Questor.Modules.Lookup
                 ThisToonShouldBeTrainingSkills = true;
                 //This needs to be in your "Innerspace\Scripts\" Directory
                 SkillTrainerScript = "";
-                    
+
+                UserDefinedLavishScriptScript1 = "";
+                UserDefinedLavishScriptScript1Description = "";
+                UserDefinedLavishScriptScript2 = "";
+                UserDefinedLavishScriptScript2Description = ""; 
+                UserDefinedLavishScriptScript3 = "";
+                UserDefinedLavishScriptScript3Description = ""; 
+                UserDefinedLavishScriptScript4 = "";
+                UserDefinedLavishScriptScript4Description = "";
+
                 //
                 // Clear various lists
                 //
@@ -964,10 +1009,13 @@ namespace Questor.Modules.Lookup
                     DebugUI = (bool?)xml.Element("debugUI") ?? false;
                     DebugUnloadLoot = (bool?)xml.Element("debugUnloadLoot") ?? false;
                     DebugValuedump = (bool?)xml.Element("debugValuedump") ?? false;
+                    DebugWatchForActiveWars = (bool?)xml.Element("debugWatchForActiveWars") ?? false;
                     DetailedCurrentTargetHealthLogging = (bool?)xml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)xml.Element("defendWhileTraveling") ?? true;
                     UseInnerspace = (bool?)xml.Element("useInnerspace") ?? true;
                     setEveClientDestinationWhenTraveling = (bool?)xml.Element("setEveClientDestinationWhenTraveling") ?? false;
+
+                    CharacterToAcceptInvitesFrom = (string)xml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
 
                     //
                     // Misc Settings
@@ -992,7 +1040,7 @@ namespace Questor.Modules.Lookup
                     UseFittingManager = (bool?)xml.Element("UseFittingManager") ?? true;
                     EnableStorylines = (bool?)xml.Element("enableStorylines") ?? false;
                     UseLocalWatch = (bool?)xml.Element("UseLocalWatch") ?? true;
-
+                    WatchForActiveWars = (bool?)xml.Element("watchForActiveWars") ?? true;
                     //
                     // Agent Standings and Mission Settings
                     //
@@ -1154,6 +1202,7 @@ namespace Questor.Modules.Lookup
                         //Player or Corp
                         //other setting is "Corp"
                         BookmarkPrefix = (string)xml.Element("bookmarkPrefix") ?? "Salvage:";
+                        TravelToBookmarkPrefix = (string)xml.Element("travelToBookmarkPrefix") ?? "MeetHere:";
                         MinimumWreckCount = (int?)xml.Element("minimumWreckCount") ?? 1;
                         AfterMissionSalvaging = (bool?)xml.Element("afterMissionSalvaging") ?? false;
                         FirstSalvageBookmarksInSystem = (bool?)xml.Element("FirstSalvageBookmarksInSystem") ?? false;
@@ -1243,6 +1292,9 @@ namespace Questor.Modules.Lookup
                     MaximumHighValueTargets = (int?)xml.Element("maximumHighValueTargets") ?? 2;
                     MaximumLowValueTargets = (int?)xml.Element("maximumLowValueTargets") ?? 2;
                     DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)xml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
+                    DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)xml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
+                    SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)xml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+                    ShootWarpScramblersWithPrimaryWeapons = (bool?)xml.Element("shootWarpScramblersWithPrimaryWeapons") ?? true;
 
                     //
                     // Script Settings - TypeIDs for the scripts you would like to use in these modules
@@ -1272,13 +1324,14 @@ namespace Questor.Modules.Lookup
                     // 32006 Navy Cap Booster 400
                     // 32014 Navy Cap Booster 800
 
-                    TrackingDisruptorScript = (int?)xml.Element("trackingDisruptorScript") ?? (int)TypeID.TrackingDisruptorScript;
-                    TrackingComputerScript = (int?)xml.Element("trackingComputerScript") ?? (int)TypeID.TrackingComputerScript;
-                    TrackingLinkScript = (int?)xml.Element("trackingLinkScript") ?? (int)TypeID.TrackingLinkScript;
-                    SensorBoosterScript = (int?)xml.Element("sensorBoosterScript") ?? (int)TypeID.SensorBoosterScript;
-                    SensorDampenerScript = (int?)xml.Element("sensorDampenerScript") ?? (int)TypeID.SensorDampenerScript;
+                    TrackingDisruptorScript = (int?)xml.Element("trackingDisruptorScript") ?? (int)TypeID.TrackingSpeedDisruptionScript;
+                    TrackingComputerScript = (int?)xml.Element("trackingComputerScript") ?? (int)TypeID.TrackingSpeedScript;
+                    TrackingLinkScript = (int?)xml.Element("trackingLinkScript") ?? (int)TypeID.TrackingSpeedScript;
+                    SensorBoosterScript = (int?)xml.Element("sensorBoosterScript") ?? (int)TypeID.TargetingRangeScript;
+                    SensorDampenerScript = (int?)xml.Element("sensorDampenerScript") ?? (int)TypeID.TargetingRangeDampeningScript;
                     AncillaryShieldBoosterScript = (int?)xml.Element("ancillaryShieldBoosterScript") ?? (int)TypeID.AncillaryShieldBoosterScript;
                     CapacitorInjectorScript = (int?)xml.Element("capacitorInjectorScript") ?? (int)TypeID.CapacitorInjectorScript;
+                    CapBoosterToLoad = (int?)xml.Element("capacitorInjectorToLoad") ?? 15;
 
                     //
                     // Speed and Movement Settings
@@ -1297,6 +1350,7 @@ namespace Questor.Modules.Lookup
                     //
                     ActivateRepairModules = (int?)xml.Element("activateRepairModules") ?? 65;
                     DeactivateRepairModules = (int?)xml.Element("deactivateRepairModules") ?? 95;
+                    InjectCapPerc = (int?)xml.Element("injectcapperc") ?? 60;
 
                     //
                     // Panic Settings
@@ -1344,6 +1398,19 @@ namespace Questor.Modules.Lookup
                     ThisToonShouldBeTrainingSkills = (bool?)xml.Element("thisToonShouldBeTrainingSkills") ?? true;
                     //This needs to be in your "Innerspace\Scripts\" Directory
                     SkillTrainerScript = (string)xml.Element("skillTrainerScript") ?? "skilltrainer.iss";
+                    
+                    //
+                    // User Defined LavishScript Scripts that tie to buttons in the UI
+                    //
+                    UserDefinedLavishScriptScript1 = (string)xml.Element("userDefinedLavishScriptScript1") ?? "";
+                    UserDefinedLavishScriptScript1Description = (string)xml.Element("userDefinedLavishScriptScript1Description") ?? "";
+                    UserDefinedLavishScriptScript2 = (string)xml.Element("userDefinedLavishScriptScript2") ?? "";
+                    UserDefinedLavishScriptScript2Description = (string)xml.Element("userDefinedLavishScriptScript2Description") ?? "";
+                    UserDefinedLavishScriptScript3 = (string)xml.Element("userDefinedLavishScriptScript3") ?? "";
+                    UserDefinedLavishScriptScript3Description = (string)xml.Element("userDefinedLavishScriptScript3Description") ?? "";
+                    UserDefinedLavishScriptScript4 = (string)xml.Element("userDefinedLavishScriptScript4") ?? "";
+                    UserDefinedLavishScriptScript4Description = (string)xml.Element("userDefinedLavishScriptScript4Description") ?? "";
+
                     //
                     // number of days of console logs to keep (anything older will be deleted on startup)
                     //
@@ -1475,7 +1542,7 @@ namespace Questor.Modules.Lookup
                     // Mission Greylist
                     //
                     MissionGreylist.Clear();
-                    XElement xmlElementGreyListSection = xml.Element("graylist");
+                    XElement xmlElementGreyListSection = xml.Element("greylist");
 
                     if (xmlElementGreyListSection != null)
                     {

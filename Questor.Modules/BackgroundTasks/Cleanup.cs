@@ -32,8 +32,8 @@
 
         public static bool CloseQuestor()
         {
-            // 30 seconds + 10 to 90 seconds + 1 to 9 seconds before restarting
-            int secRestart = (300 * 1) + Cache.Instance.RandomNumber(1, 9) * 100 + Cache.Instance.RandomNumber(1, 9) * 10;
+            // 30 seconds + 1 to 60 seconds + 1 to 60 seconds before restarting (this should make each instance a bit more spread out over 2 min)
+            int secRestart = (300 * 1) + Cache.Instance.RandomNumber(10, 600) + Cache.Instance.RandomNumber(10, 600);
 
             // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
             // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 
@@ -558,6 +558,12 @@
                                 sayYes |= window.Html.Contains("objectives requiring a total capacity");
                                 sayYes |= window.Html.Contains("your ship only has space for");
                                 sayYes |= window.Html.Contains("Are you sure you want to remove location");
+
+                                //
+                                // Accept fleet invites from this specific character
+                                //
+                                sayYes |= window.Html.Contains(Settings.Instance.CharacterToAcceptInvitesFrom + " wants you to join their fleet");
+
                                 //sayyes |= window.Html.Contains("Repairing these items will cost");
                                 sayYes |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 //sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
@@ -568,7 +574,8 @@
                                 //
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
-                                
+                                sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
+
                                 //
                                 // Modal Dialogs the need "no" pressed
                                 //
@@ -662,9 +669,9 @@
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&
-                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != 31 &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 28 &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != 380 &&
+                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial &&
+                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
                                     _droneBayClosingAttempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.UtcNow;

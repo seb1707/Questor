@@ -109,6 +109,8 @@
                                {"Whispers in the Dark - Lay and Pray (2 of 4)", new GenericCombatStoryline()},
                                {"Whispers in the Dark - The Outpost (4 of 4)", new GenericCombatStoryline()},
                                {"Inspired", new GenericCombatStoryline()},
+                               {"The Serpent and the Slaves", new GenericCombatStoryline()},
+                               {"Hidden Hope", new GenericCombatStoryline()},
                                /* COMBAT - MINMATAR */
                                {"Amarrian Excavators", new GenericCombatStoryline()},
                                {"Diplomatic Incident", new GenericCombatStoryline()},
@@ -253,7 +255,7 @@
                 _highSecChecked = true;
             }
 
-            if (Cache.Instance.PriorityTargets.Any(pt => pt != null && pt.IsValid))
+            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt != null && pt.IsValid) || Cache.Instance.DronePriorityTargets.Any(pt => pt != null && pt.IsValid))
             {
                 Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.Yellow);
                 _combat.ProcessState();

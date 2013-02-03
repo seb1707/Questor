@@ -615,7 +615,10 @@ namespace Questor.Modules.Actions
                         // ItemHangar Drones, this prefers stacks, not singletons
                         //
                         drone = ItemHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
-                        Logging.Log("Arm.MoveDrones", "Found [" + ItemHangarDronesQuantity + "] drones in ItemHangar: using a stack of [" + drone.Quantity + "]", Logging.White);
+                        if (drone != null)
+                        {
+                            Logging.Log("Arm.MoveDrones", "Found [" + ItemHangarDronesQuantity + "] drones in ItemHangar: using a stack of [" + drone.Quantity + "]", Logging.White);        
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
@@ -626,7 +629,10 @@ namespace Questor.Modules.Actions
                             // AmmoHangar Drones, this prefers stacks, not singletons
                             //
                             drone = AmmoHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
-                            Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                            if (drone != null)
+                            {
+                                Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);    
+                            }
                         }
                     }
 
@@ -637,8 +643,11 @@ namespace Questor.Modules.Actions
                             //
                             // LootHangar Drones, this prefers stacks, not singletons
                             //
-                            drone = LootHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
-                            Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                            drone = LootHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault(); 
+                            if (drone != null)
+                            {
+                                Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                            }
                         }
                     }
 

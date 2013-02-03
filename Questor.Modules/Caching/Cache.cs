@@ -3653,12 +3653,27 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar)) //do we have the corp hangar setting setup?
                     {
+                        if (!Cache.Instance.CloseAmmoHangar("OpenCorpAmmoHangar")) return false;
                         if (!Cache.Instance.CloseLootHangar("OpenCorpAmmoHangar")) return false;
                         if (!Cache.Instance.GetCorpAmmoHangarID()) return false;
 
                         if (Cache.Instance.AmmoHangar != null && Cache.Instance.AmmoHangar.IsValid) //do we have a corp hangar tab setup with that name?
                         {
                             if (Settings.Instance.DebugHangars) Logging.Log(module, "AmmoHangar is defined (no window needed)", Logging.DebugHangars);
+                            int AmmoHangarItemCount = -1;
+                            try
+                            {
+                                if (AmmoHangar.Items.Any())
+                                {
+                                    AmmoHangarItemCount = AmmoHangar.Items.Count();
+                                    if (Settings.Instance.DebugHangars) Logging.Log(module, "AmmoHangar [" + Settings.Instance.AmmoHangar.ToString() + "] has [" + AmmoHangarItemCount + "] items", Logging.DebugHangars);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                Logging.Log("ReadyCorpAmmoHangar", "Exception [" + exception + "]", Logging.Debug);
+                            }
+                            
                             return true;
                         }
 

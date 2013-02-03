@@ -525,7 +525,7 @@ namespace Questor
 
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-            _States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Idle;
+            //_States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Idle;
             _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
 
 

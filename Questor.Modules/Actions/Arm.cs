@@ -726,7 +726,7 @@ namespace Questor.Modules.Actions
                     // Bring item
                     //
                     #region Bring Item
-
+                    retryCount++;
                     string bringItem = Cache.Instance.BringMissionItem;
                     if (string.IsNullOrEmpty(bringItem))
                     {
@@ -742,9 +742,21 @@ namespace Questor.Modules.Actions
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
-                        DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
-                                                Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) ??
-                                                Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        DirectItem hangarItem = null;
+                        if (Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                        {
+                           hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem); 
+                        }
+
+                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.AmmoHangar) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                        {
+                            hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        }
+
+                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                        {
+                            hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        }
 
                         if (CheckCargoForBringItem)
                         {
@@ -797,13 +809,14 @@ namespace Questor.Modules.Actions
                             return;
                         }
 
-                        if (retryCount > 30)
+                        if (retryCount > 10)
                         {
+                            Logging.Log("Arm.MoveItems","We do not have enough of bringitem [" + bringItem + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)",Logging.Red);
                             _bringItemMoved = false;
                             _States.CurrentArmState = ArmState.NotEnoughAmmo;
                             Cache.Instance.Paused = true; 
                         }
-                        retryCount++;
+
                         return;
                         
                     }
@@ -815,6 +828,7 @@ namespace Questor.Modules.Actions
                     //
                     #region Optional Bring Item
 
+                    retryCount++;
                     string bringOptionalItem = Cache.Instance.BringOptionalMissionItem;
                     if (string.IsNullOrEmpty(bringOptionalItem))
                     {
@@ -889,11 +903,12 @@ namespace Questor.Modules.Actions
                             return;
                         }
 
-                        if (retryCount > 30)
+                        if (retryCount > 10)
                         {
+                            Logging.Log("Arm.MoveItems", "We do not have enough of bringOptionalItem [" + bringOptionalItem + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
                             _bringoptionalItemMoved = true;    
                         }
-                        retryCount++;
+
                         return;
                     }
                     #endregion optional bring item

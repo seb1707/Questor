@@ -195,6 +195,22 @@ namespace Questor.Modules.Actions
                     
                     if (!Cache.Instance.OpenShipsHangar("Arm")) return;
 
+                    if (string.IsNullOrEmpty(Settings.Instance.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
+                    {
+                        Logging.Log("Arm","CombatShipName and SalvageShipName both have to be populated! Fix your characters config.",Logging.Red);
+                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                        Cache.Instance.Paused = true;
+                        return;
+                    }
+
+                    if (Settings.Instance.CombatShipName == Settings.Instance.SalvageShipName)
+                    {
+                        Logging.Log("Arm", "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.", Logging.Red);
+                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                        Cache.Instance.Paused = true;
+                        return;
+                    }
+
                     if (_States.CurrentArmState == ArmState.OpenShipHangar)
                     {
                         Logging.Log("Arm", "Activating combat ship", Logging.White);
@@ -586,20 +602,20 @@ namespace Questor.Modules.Actions
                     try
                     {
                         ItemHangarDrones = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == Settings.Instance.DroneTypeId).ToList();
-                        ItemHangarDronesQuantity = ItemHangarDrones.Sum(item => item.Quantity);
+                        ItemHangarDronesQuantity = ItemHangarDrones.Sum(item => item.Stacksize);
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + ItemHangarDronesQuantity + "] Drones available in the ItemHangar", Logging.Debug);
 
                         if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
                         {
                             AmmoHangarDrones = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == Settings.Instance.DroneTypeId).ToList();
-                            AmmoHangarDronesQuantity = AmmoHangarDrones.Sum(item => item.Quantity);
+                            AmmoHangarDronesQuantity = AmmoHangarDrones.Sum(item => item.Stacksize);
                             if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);        
                         }
 
                         if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                         {
                             LootHangarDrones = Cache.Instance.LootHangar.Items.Where(i => i.TypeId == Settings.Instance.DroneTypeId).ToList();
-                            LootHangarDronesQuantity = LootHangarDrones.Sum(item => item.Quantity);
+                            LootHangarDronesQuantity = LootHangarDrones.Sum(item => item.Stacksize);
                             if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.Instance.LootHangar.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
                         }
                     }
@@ -614,7 +630,7 @@ namespace Questor.Modules.Actions
                         //
                         // ItemHangar Drones, this prefers stacks, not singletons
                         //
-                        drone = ItemHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
+                        drone = ItemHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
                         if (drone != null)
                         {
                             Logging.Log("Arm.MoveDrones", "Found [" + ItemHangarDronesQuantity + "] drones in ItemHangar: using a stack of [" + drone.Quantity + "]", Logging.White);        
@@ -628,7 +644,7 @@ namespace Questor.Modules.Actions
                             //
                             // AmmoHangar Drones, this prefers stacks, not singletons
                             //
-                            drone = AmmoHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
+                            drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
                             if (drone != null)
                             {
                                 Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);    
@@ -643,7 +659,7 @@ namespace Questor.Modules.Actions
                             //
                             // LootHangar Drones, this prefers stacks, not singletons
                             //
-                            drone = LootHangarDrones.Where(i => i.Quantity >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault(); 
+                            drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault(); 
                             if (drone != null)
                             {
                                 Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);

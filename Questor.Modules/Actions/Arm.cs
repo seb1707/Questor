@@ -592,12 +592,21 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.OpenItemsHangar("Arm.MoveDrones")) break;
                     if (!Cache.Instance.OpenDroneBay("Arm.MoveDrones")) return;
 
+                    retryCount++;
                     List<DirectItem> ItemHangarDrones = null;
                     List<DirectItem> AmmoHangarDrones = null;
                     List<DirectItem> LootHangarDrones = null;
                     int ItemHangarDronesQuantity = 0;
                     int AmmoHangarDronesQuantity = 0;
                     int LootHangarDronesQuantity = 0;
+
+                    if (Cache.Instance.DirectEve.GetShipsDroneBay().Capacity == Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity)
+                    {
+                        retryCount = 0;
+                        Logging.Log("Arm.MoveDrones", "MoveItems", Logging.White);
+                        _States.CurrentArmState = ArmState.MoveItems;
+                        return;
+                    }
 
                     try
                     {
@@ -630,7 +639,7 @@ namespace Questor.Modules.Actions
                         //
                         // ItemHangar Drones, this prefers stacks, not singletons
                         //
-                        drone = ItemHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
+                        drone = ItemHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
                         if (drone != null)
                         {
                             Logging.Log("Arm.MoveDrones", "Found [" + ItemHangarDronesQuantity + "] drones in ItemHangar: using a stack of [" + drone.Quantity + "]", Logging.White);        
@@ -644,7 +653,7 @@ namespace Questor.Modules.Actions
                             //
                             // AmmoHangar Drones, this prefers stacks, not singletons
                             //
-                            drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault();
+                            drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
                             if (drone != null)
                             {
                                 Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);    
@@ -659,7 +668,7 @@ namespace Questor.Modules.Actions
                             //
                             // LootHangar Drones, this prefers stacks, not singletons
                             //
-                            drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderByDescending(i => i.Quantity).FirstOrDefault(); 
+                            drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault(); 
                             if (drone != null)
                             {
                                 Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangar.ToString() + "] using a stack of [" + drone.Quantity + "]", Logging.White);
@@ -667,10 +676,10 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (drone == null || drone.Quantity <= 0)
+                    if (drone == null || drone.Quantity < -1 || retryCount > 30)
                     {
                         string droneHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangar) ? "ItemHangar" : Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture);
-                        Logging.Log("Arm.MoveDrones", "Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + droneHangarName + "]", Logging.Orange);
+                        Logging.Log("Arm.MoveDrones", "Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + droneHangarName + "] retryCount [" + retryCount + "]", Logging.Orange);
                         if (drone != null && Settings.Instance.DebugArm)
                         {
                             Logging.Log("Arm.MoveDrones", "drone.IsSingleton [" + drone.IsSingleton + "]", Logging.Orange);
@@ -679,6 +688,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("Arm.MoveDrones", "drone.Volume [" + drone.Volume + "]", Logging.Orange);
                             Logging.Log("Arm.MoveDrones", "drone.ItemId [" + drone.ItemId + "]", Logging.Orange);
                         }
+                        retryCount = 0;
                         _States.CurrentArmState = ArmState.NotEnoughDrones;
                         return;
                     }
@@ -688,15 +698,16 @@ namespace Questor.Modules.Actions
 
                     if ((int)neededDrones == 0)
                     {
+                        retryCount= 0;
                         Logging.Log("Arm.MoveDrones", "MoveItems", Logging.White);
                         _States.CurrentArmState = ArmState.MoveItems;
                         return;
                     }
 
                     // Move needed drones
-                    Logging.Log("Arm.MoveDrones", "Move [ " + (int)Math.Min(neededDrones, drone.Quantity) + " ] Drones into drone bay", Logging.White);
+                    Logging.Log("Arm.MoveDrones", "Move [ " + (int)Math.Min(neededDrones, drone.Stacksize) + " ] Drones into drone bay", Logging.White);
                     _lastArmAction = DateTime.UtcNow;
-                    Cache.Instance.DroneBay.Add(drone, (int)Math.Min(neededDrones, drone.Quantity));
+                    Cache.Instance.DroneBay.Add(drone, (int)Math.Min(neededDrones, drone.Stacksize));
                     break;
 
                 case ArmState.MoveItems:
@@ -781,7 +792,7 @@ namespace Questor.Modules.Actions
                             //
                             foreach (DirectItem bringItemInCargo in cargoItems)
                             {
-                                bringItemQuantity -= bringItemInCargo.Quantity;
+                                bringItemQuantity -= bringItemInCargo.Stacksize;
                                 if (bringItemQuantity <= 0)
                                 {
                                     //
@@ -808,7 +819,7 @@ namespace Questor.Modules.Actions
                                 return;
                             }
 
-                            int moveBringItemQuantity = Math.Min(hangarItem.Quantity, bringItemQuantity);
+                            int moveBringItemQuantity = Math.Min(hangarItem.Stacksize, bringItemQuantity);
                             moveBringItemQuantity = Math.Max(moveBringItemQuantity, 1);
                             Logging.Log("Arm.MoveItems", "Moving Bring Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
                             Cache.Instance.CargoHold.Add(hangarItem, moveBringItemQuantity);
@@ -903,7 +914,7 @@ namespace Questor.Modules.Actions
                                 return;
                             }
 
-                            int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Quantity, bringOptionalItemQuantity);
+                            int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Stacksize, bringOptionalItemQuantity);
                             moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
                             Logging.Log("Arm.MoveItems", "Moving Bring Optional Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
                             Cache.Instance.CargoHold.Add(hangarItem, moveOptionalMissionItemQuantity);
@@ -967,7 +978,7 @@ namespace Questor.Modules.Actions
                                 if (item.TypeId != Settings.Instance.CapacitorInjectorScript)
                                     continue;
 
-                                int moveCapQuantity = Math.Min(item.Quantity, capsToLoad);
+                                int moveCapQuantity = Math.Min(item.Stacksize, capsToLoad);
                                 Cache.Instance.CargoHold.Add(item, moveCapQuantity);
 
                                 Logging.Log("Arm.MoveItems", "Moving [" + moveCapQuantity + "] units of Cap  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
@@ -1016,7 +1027,7 @@ namespace Questor.Modules.Actions
                         if (ammo == null || ammo.Quantity == 0)
                             continue;
 
-                        int moveAmmoQuantity = Math.Min(item.Quantity, ammo.Quantity);
+                        int moveAmmoQuantity = Math.Min(item.Stacksize, ammo.Quantity);
                         moveAmmoQuantity = Math.Max(moveAmmoQuantity, 1);
                         Cache.Instance.CargoHold.Add(item, moveAmmoQuantity);
 

@@ -78,7 +78,7 @@
                                // COURIER/DELIVERY - AMARR - LEVEL 4
                                //
                                {"Opiate of the Masses".ToLower(), new GenericCourier()}, //lvl4
-                               {"Send the Marines".ToLower(), new GenericCourier()}, //lvl4
+                               //{"Send the Marines".ToLower(), new GenericCourier()}, //lvl4
                                {"Send the Marines!".ToLower(), new GenericCourier()}, //lvl4
                                {"The Governors Ball".ToLower(), new GenericCourier()}, //lvl4
                                {"The State of the Empire".ToLower(), new GenericCourier()}, //lvl4
@@ -358,7 +358,7 @@
 
             _highSecChecked = false;
             _States.CurrentStorylineState = StorylineState.Arm;
-            _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name)];
+            _storyline = _storylines[Cache.Instance.FilterPath(currentStorylineMission.Name.ToLower())];
         }
 
         private void GotoAgent(StorylineState nextState)

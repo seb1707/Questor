@@ -1025,7 +1025,7 @@ namespace Questor.Modules.Actions
                     if (CurrentAmmoToLoad == null)
                     {
                         Logging.Log("Arm", "if (CurrentAmmoToLoad == null)", Logging.Debug);
-                        _States.CurrentArmState = ArmState.Done;
+                        _States.CurrentArmState = ArmState.Cleanup;
                         return;
                     }
 

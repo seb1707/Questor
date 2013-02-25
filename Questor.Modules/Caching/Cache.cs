@@ -201,7 +201,7 @@ namespace Questor.Modules.Caching
 
                 if (!File.Exists(invtypesXmlFile))
                 {
-                    Logging.Log("LoadInvTypesXML", "unable to find [" + invtypesXmlFile + "]", Logging.White);
+                    Logging.Log("IterateInvTypes", "unable to find [" + invtypesXmlFile + "]", Logging.White);
                     return;
                 }
 
@@ -225,7 +225,7 @@ namespace Questor.Modules.Caching
             }
             else
             {
-                Logging.Log("LoadInvTypesXML", "unable to find [" + System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "]", Logging.White);
+                Logging.Log("IterateInvTypes", "unable to find [" + System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "]", Logging.White);
             }
         }
         
@@ -240,7 +240,7 @@ namespace Questor.Modules.Caching
 
                 if (!File.Exists(ShipTargetValuesXmlFile))
                 {
-                    Logging.Log("LoadInvTypesXML", "unable to find [" + ShipTargetValuesXmlFile + "]", Logging.White);
+                    Logging.Log("IterateShipTargetValues", "unable to find [" + ShipTargetValuesXmlFile + "]", Logging.White);
                     return;
                 }
 
@@ -274,7 +274,7 @@ namespace Questor.Modules.Caching
 
                 if (!File.Exists(UnloadLootTheseItemsAreLootItemsXmlFile))
                 {
-                    Logging.Log("LoadInvTypesXML", "unable to find [" + UnloadLootTheseItemsAreLootItemsXmlFile + "]", Logging.White);
+                    Logging.Log("IterateUnloadLootTheseItemsAreLootItems", "unable to find [" + UnloadLootTheseItemsAreLootItemsXmlFile + "]", Logging.White);
                     return;
                 }
 

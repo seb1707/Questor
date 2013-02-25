@@ -198,6 +198,13 @@ namespace Questor.Modules.Caching
             {
                 string invtypesXmlFile = System.IO.Path.Combine(path, "InvTypes.xml");
                 InvTypesById = new Dictionary<int, InvType>();
+
+                if (!File.Exists(invtypesXmlFile))
+                {
+                    Logging.Log("LoadInvTypesXML", "unable to find [" + invtypesXmlFile + "]", Logging.White);
+                    return;
+                }
+
                 try
                 {
                     Cache.Instance.InvTypes = XDocument.Load(invtypesXmlFile);
@@ -228,6 +235,13 @@ namespace Questor.Modules.Caching
             if (path != null)
             {
                 ShipTargetValues = new List<ShipTargetValue>();
+
+                //if (!File.Exists(invtypesXmlFile))
+                //{
+                //    Logging.Log("LoadInvTypesXML", "unable to find [" + invtypesXmlFile + "]", Logging.White);
+                //    return;
+                //}
+
                 try
                 {
                     XDocument values = XDocument.Load(System.IO.Path.Combine(path, "ShipTargetValues.xml"));
@@ -254,6 +268,13 @@ namespace Questor.Modules.Caching
             {
                 string UnloadLootTheseItemsAreLootItemsXmlFile = System.IO.Path.Combine(path, "UnloadLootTheseItemsAreLootItems.xml");
                 UnloadLootTheseItemsAreLootById = new Dictionary<int, InvType>();
+
+                if (!File.Exists(UnloadLootTheseItemsAreLootItemsXmlFile))
+                {
+                    Logging.Log("LoadInvTypesXML", "unable to find [" + UnloadLootTheseItemsAreLootItemsXmlFile + "]", Logging.White);
+                    return;
+                }
+
                 try
                 {
                     Cache.Instance.UnloadLootTheseItemsAreLootItems = XDocument.Load(UnloadLootTheseItemsAreLootItemsXmlFile);

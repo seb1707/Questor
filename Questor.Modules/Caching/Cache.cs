@@ -234,17 +234,18 @@ namespace Questor.Modules.Caching
 
             if (path != null)
             {
+                string ShipTargetValuesXmlFile = System.IO.Path.Combine(path, "ShipTargetValues.xml");
                 ShipTargetValues = new List<ShipTargetValue>();
 
-                //if (!File.Exists(invtypesXmlFile))
-                //{
-                //    Logging.Log("LoadInvTypesXML", "unable to find [" + invtypesXmlFile + "]", Logging.White);
-                //    return;
-                //}
+                if (!File.Exists(ShipTargetValuesXmlFile))
+                {
+                    Logging.Log("LoadInvTypesXML", "unable to find [" + ShipTargetValuesXmlFile + "]", Logging.White);
+                    return;
+                }
 
                 try
                 {
-                    XDocument values = XDocument.Load(System.IO.Path.Combine(path, "ShipTargetValues.xml"));
+                    XDocument values = XDocument.Load(ShipTargetValuesXmlFile);
                     if (values.Root != null)
                     {
                         foreach (XElement value in values.Root.Elements("ship"))

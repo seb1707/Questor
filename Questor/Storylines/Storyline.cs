@@ -35,11 +35,17 @@
 
             _storylines = new Dictionary<string, IStoryline>
                             {
-                               // Examples 
+                               // Examples
                                // note: All storylines must be entered in lowercase or use ".ToLower()"
                                //
                                //{"StorylineCombatNameHere".ToLower(), new GenericCombatStoryline()},
                                //{"StorylineCourierNameHere".ToLower(), new GenericCourier()},
+                               //
+                               // COURIER/DELIVERY - ALL FACTIONS - ALL LEVELS
+                               //
+                               {"Materials For War Preparation".ToLower(), new MaterialsForWarPreparation()},
+                               {"Transaction Data Delivery".ToLower(), new TransactionDataDelivery()},
+                               //{"A Special Delivery".ToLower(), new GenericCourier()}, // Needs 40k m3 cargo (i.e. Iteron Mark V, T2 CHO rigs) for lvl4
 
                                //
                                // COURIER/DELIVERY - ALL FACTIONS - LEVEL 1
@@ -52,16 +58,14 @@
                                //
                                // COURIER/DELIVERY - ALL FACTIONS - LEVEL 3
                                //
+                               {"Kidnappers Strike - The Interrogation (2 of 10)".ToLower(), new GenericCourier()}, //lvl3
+                               {"Kidnappers Strike - Possible Leads (4 of 10)".ToLower(), new GenericCourier()}, //lvl3
+                               {"Kidnappers Strike - The Flu Outbreak (6 of 10)".ToLower(), new GenericCourier()}, //lvl3
 
                                //
                                // COURIER/DELIVERY - ALL FACTIONS - LEVEL 4
                                //
-                               {"Materials For War Preparation".ToLower(), new MaterialsForWarPreparation()},
-                               {"Transaction Data Delivery".ToLower(), new TransactionDataDelivery()},
-                               //{"A Special Delivery", new GenericCourier()}, // Needs 40k m3 cargo capacity (i.e. Iteron Mark V, T2 CHO rigs)
-                               {"Kidnappers Strike - The Interrogation (2 of 10)".ToLower(), new GenericCourier()},//lvl3
-                               {"Kidnappers Strike - Possible Leads (4 of 10)".ToLower(), new GenericCourier()},//lvl3
-                               {"Kidnappers Strike - The Flu Outbreak (6 of 10)".ToLower(), new GenericCourier()},//lvl3
+
                                //
                                // COURIER/DELIVERY - AMARR - LEVEL 1
                                //
@@ -86,11 +90,12 @@
                                //
                                // COURIER/DELIVERY - CALDARI - LEVEL 1
                                //
-                               //{"A Fathers Love", new GenericCourier()},
-                               //{"A Greener World", new GenericCourier()},
-                               //{"Eradication", new GenericCourier()},
-                               //{"Evacuation", new GenericCourier()},
-                               //{"On the Run", new GenericCourier()},
+                               //{"A Fathers Love".ToLower(), new GenericCourier()}, //lvl1
+                               //{"A Greener World".ToLower(), new GenericCourier()}, //lvl1
+                               //{"Eradication".ToLower(), new GenericCourier()}, //lvl1
+                               //{"Evacuation".ToLower(), new GenericCourier()}, //lvl1
+                               //{"On the Run".ToLower(), new GenericCourier()}, //lvl1
+
                                //
                                // COURIER/DELIVERY - CALDARI - LEVEL 2
                                //
@@ -110,11 +115,11 @@
                                //
                                // COURIER/DELIVERY - GALLENTE - LEVEL 1
                                //
-                               //{"A Little Work On The Side", new GenericCourier()},
-                               //{"Ancient Treasures", new GenericCourier()},
-                               //{"Pieces of the Past", new GenericCourier()},
-                               //{"The Latest Style", new GenericCourier()},
-                               //{"Wartime Advances", new GenericCourier()},
+                               //{"A Little Work On The Side".ToLower(), new GenericCourier()}, //lvl1
+                               //{"Ancient Treasures".ToLower(), new GenericCourier()}, //lvl1
+                               //{"Pieces of the Past".ToLower(), new GenericCourier()}, //lvl1
+                               //{"The Latest Style".ToLower(), new GenericCourier()}, //lvl1
+                               //{"Wartime Advances".ToLower(), new GenericCourier()}, //lvl1
                                
                                //
                                // COURIER/DELIVERY - GALLENTE - LEVEL 2
@@ -127,16 +132,16 @@
                                //
                                // COURIER/DELIVERY - GALLENTE - LEVEL 4
                                //
-                               {"A Fathers Love".ToLower(), new GenericCourier()}, //lvl4
+                               //{"A Fathers Love".ToLower(), new GenericCourier()}, //lvl4
                                {"A Fine Wine".ToLower(), new GenericCourier()}, //lvl4
-                               {"A Greener World".ToLower(), new GenericCourier()}, //lvl4
+                               //{"A Greener World".ToLower(), new GenericCourier()}, //lvl4
                                {"Amphibian Error".ToLower(), new GenericCourier()}, //lvl4
-                               {"Eradication".ToLower(), new GenericCourier()}, //lvl4
-                               {"Evacuation".ToLower(), new GenericCourier()}, //lvl4
-                               {"On the Run".ToLower(), new GenericCourier()}, //lvl4
+                               //{"Eradication".ToLower(), new GenericCourier()}, //lvl4
+                               //{"Evacuation".ToLower(), new GenericCourier()}, //lvl4
+                               //{"On the Run".ToLower(), new GenericCourier()}, //lvl4
                                {"Shifting Rocks".ToLower(), new GenericCourier()}, //lvl4
-                               {"The Natural Way".ToLower(), new GenericCourier()}, //lvl4
                                {"The Creeping Cold".ToLower(), new GenericCourier()}, //lvl4
+                               {"The Natural Way".ToLower(), new GenericCourier()}, //lvl4
                                
                                //
                                // COURIER/DELIVERY - MINMATAR - LEVEL 1
@@ -158,8 +163,13 @@
                                {"Brand New Harvesters".ToLower(), new GenericCourier()}, //lvl4
                                {"Heart of the Rogue Drone".ToLower(), new GenericCourier()}, //lvl4
                                {"Their Secret Defense".ToLower(), new GenericCourier()}, //lvl4
-                               {"Very Important Pirates".ToLower(), new GenericCourier()}, //lvl4
-                               
+                               //{"Very Important Pirates".ToLower(), new GenericCourier()}, //lvl4
+
+                               //
+                               // COMBAT - ALL FACTIONS - ALL LEVELS
+                               //
+                               {"Soothe the Salvage Beast".ToLower(), new GenericCombatStoryline()}, //lvl3 and lvl4
+
                                //
                                // COMBAT - ALL FACTIONS - LEVEL 1
                                //
@@ -171,41 +181,38 @@
                                //
                                // COMBAT - ALL FACTIONS - LEVEL 3
                                //
-                               {"Kidnappers Strike - Ambush in the Dark (1 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - The Kidnapping (3 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - Incriminating Evidence (5 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - The Secret Meeting (7 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
-                               {"Kidnappers Strike - The Final Battle (10 of 10)".ToLower(), new GenericCombatStoryline()},//lvl3
+                               {"Kidnappers Strike - Ambush in the Dark (1 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - The Kidnapping (3 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - Incriminating Evidence (5 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - The Secret Meeting (7 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - Defend the Civilian Convoy (8 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - Retrieve the Prisoners (9 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
+                               {"Kidnappers Strike - The Final Battle (10 of 10)".ToLower(), new GenericCombatStoryline()}, //lvl3
                                
                                //
                                // COMBAT - ALL FACTIONS - LEVEL 4
                                //
-                               {"Covering Your Tracks".ToLower(), new GenericCombatStoryline()},//lvl4
-                               {"Evolution".ToLower(), new GenericCombatStoryline()},//lvl4
-                               {"Patient Zero".ToLower(), new GenericCombatStoryline()},//lvl4
-                               {"Record Cleaning".ToLower(), new GenericCombatStoryline()},//lvl4
-                               {"Shipyard Theft".ToLower(), new GenericCombatStoryline()},//lvl4
-                               {"Soothe the Salvage Beast".ToLower(), new GenericCombatStoryline()},//lvl3 and lvl4
+                               {"Covering Your Tracks".ToLower(), new GenericCombatStoryline()}, //lvl4
+                               {"Evolution".ToLower(), new GenericCombatStoryline()}, //lvl4
+                               {"Patient Zero".ToLower(), new GenericCombatStoryline()}, //lvl4
+                               {"Record Cleaning".ToLower(), new GenericCombatStoryline()}, //lvl4
+                               {"Shipyard Theft".ToLower(), new GenericCombatStoryline()}, //lvl4
                                
                                //
                                // COMBAT - AMARR - LEVEL 1
                                //
-
                                //
-                               // COMBAT - AMARR - LEVEL 2 
+                               // COMBAT - AMARR - LEVEL 2
                                //
                                {"Whispers in the Dark - First Contact (1 of 4)".ToLower(), new GenericCombatStoryline()}, //vs sansha lvl2
                                {"Whispers in the Dark - Lay and Pray (2 of 4)".ToLower(), new GenericCombatStoryline()}, //vs sansha lvl2
                                {"Whispers in the Dark - The Outpost (4 of 4)".ToLower(), new GenericCombatStoryline()}, //vs sansha lvl2
-                               
                                //
                                // COMBAT - AMARR - LEVEL 3
                                //
 
                                //
-                               // COMBAT - AMARR - LEVEL 4 
+                               // COMBAT - AMARR - LEVEL 4
                                //
                                {"Blood Farm".ToLower(), new GenericCombatStoryline()}, //amarr lvl4
                                {"Dissidents".ToLower(), new GenericCombatStoryline()}, //amarr lvl4
@@ -220,19 +227,19 @@
                                //
 
                                //
-                               // COMBAT - CALDARI - LEVEL 2 
+                               // COMBAT - CALDARI - LEVEL 2
                                //
 
                                //
-                               // COMBAT - CALDARI - LEVEL 3 
+                               // COMBAT - CALDARI - LEVEL 3
                                //
 
                                //
-                               // COMBAT - CALDARI - LEVEL 4 
+                               // COMBAT - CALDARI - LEVEL 4
                                //
                                {"Crowd Control".ToLower(), new GenericCombatStoryline()}, //caldari lvl4
                                {"Forgotten Outpost".ToLower(), new GenericCombatStoryline()},//caldari lvl4
-                               //{"Illegal Mining", new GenericCombatStoryline()}, //caldari lvl4 note: Extremely high DPS after shooting structures!
+                               //{"Illegal Mining".ToLower(), new GenericCombatStoryline()}, //caldari lvl4 note: Extremely high DPS after shooting structures!
                                {"Innocents in the Crossfire".ToLower(), new GenericCombatStoryline()}, //caldari lvl4
                                {"Stem the Flow".ToLower(), new GenericCombatStoryline()}, //caldari lvl4
                                
@@ -241,40 +248,39 @@
                                //
 
                                //
-                               // COMBAT - GALLENTE - LEVEL 2 
+                               // COMBAT - GALLENTE - LEVEL 2
                                //
                                
                                //
-                               // COMBAT - GALLENTE - LEVEL 3 
-                               //
-                               
-                               //
-                               // COMBAT - GALLENTE - LEVEL 4 
+                               // COMBAT - GALLENTE - LEVEL 3
                                //
                                {"A Force to Be Reckoned With".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
+                               
+                               //
+                               // COMBAT - GALLENTE - LEVEL 4
+                               //
                                {"Federal Confidence".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
-                               ////{"Missing Persons Report", new GenericCombatStoryline()},
                                {"Hidden Hope".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
-                               {"Inspired".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
+                               //{"Missing Persons Report", new GenericCombatStoryline()},
+                               //{"Inspired".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
                                {"Prison Transfer".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
                                {"Serpentis Ship Builders".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
                                {"The Serpent and the Slaves".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
                                {"Tomb of the Unknown Soldiers".ToLower(), new GenericCombatStoryline()}, //gallente lvl4
                                
                                //
-                               //  COMBAT - MINMATAR - LEVEL 1 
+                               // COMBAT - MINMATAR - LEVEL 1
                                //
 
                                //
-                               //  COMBAT - MINMATAR - LEVEL 2 
+                               // COMBAT - MINMATAR - LEVEL 2
                                //
 
                                //
-                               //  COMBAT - MINMATAR - LEVEL 3 
+                               // COMBAT - MINMATAR - LEVEL 3
                                //
-
                                //
-                               //  COMBAT - MINMATAR - LEVEL 4 
+                               // COMBAT - MINMATAR - LEVEL 4
                                //
                                {"Amarrian Excavators".ToLower(), new GenericCombatStoryline()}, //lvl4
                                {"Diplomatic Incident".ToLower(), new GenericCombatStoryline()}, //lvl4
@@ -437,43 +443,54 @@
                 Logging.Log("Traveler.State is", _States.CurrentTravelerState.ToString(), Logging.White);
         }
 
-        private void BringSpoilsOfWar()
+        private bool BringSpoilsOfWar()
         {
-            if (_nextAction > DateTime.UtcNow)
-                return;
+            if (_nextAction > DateTime.UtcNow) return false;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("Storyline")) return;
+            if (!Cache.Instance.OpenItemsHangar("Storyline")) return false;
 
-            // Do we have any implants?
-            if (!Cache.Instance.ItemHangar.Items.Any(i => i.GroupId >= 738 && i.GroupId <= 750))
+            // Do we have anything here we want to bring home, like implants or ?
+            //if (to.Items.Any(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
+
+            if (!Cache.Instance.ItemHangar.Items.Any(i => (i.GroupId >= 738 
+                                                       && i.GroupId <= 750) 
+                                                       || i.GroupId == (int)Group.MiscSpecialMissionItems
+                                                       || i.GroupId == (int)Group.Livestock))
             {
                 _States.CurrentStorylineState = StorylineState.Done;
-                return;
+                return true;
             }
 
             // Yes, open the ships cargo
-            if (!Cache.Instance.OpenCargoHold("Storyline")) return;
+            if (!Cache.Instance.OpenCargoHold("Storyline")) return false;
 
             // If we are not moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
             {
                 // Move all the implants to the cargo bay
-                foreach (DirectItem item in Cache.Instance.ItemHangar.Items.Where(i => i.GroupId >= 738 && i.GroupId <= 750))
+                foreach (DirectItem item in Cache.Instance.ItemHangar.Items.Where(i => (i.GroupId >= 738
+                                                                                     && i.GroupId <= 750)
+                                                                                     || i.GroupId == (int)Group.MiscSpecialMissionItems
+                                                                                     || i.GroupId == (int)Group.Livestock))
                 {
                     if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
                         Logging.Log("Storyline", "We are full, not moving anything else", Logging.Yellow);
                         _States.CurrentStorylineState = StorylineState.Done;
-                        return;
+                        return true;
                     }
 
                     Logging.Log("Storyline", "Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo", Logging.Yellow);
                     Cache.Instance.CargoHold.Add(item, item.Quantity);
+                    return false;
                 }
                 _nextAction = DateTime.UtcNow.AddSeconds(10);
+                return false;
             }
-            return;
+
+            if (Settings.Instance.DebugStorylineMissions) Logging.Log("BringSpoilsOfWar", "There are more items to move: waiting for locks to clear.", Logging.White);
+            return false;
         }
 
         public void ProcessState()
@@ -583,7 +600,7 @@
                     break;
 
                 case StorylineState.BringSpoilsOfWar:
-                    BringSpoilsOfWar();
+                    if (!BringSpoilsOfWar()) return;
                     break;
 
                 case StorylineState.BlacklistAgent:

@@ -360,6 +360,7 @@ namespace Questor.Modules.Caching
         public bool MissionLoot = false;
         public bool SalvageAll = false;
         public bool RouteIsAllHighSecBool = false;
+        public bool CurrentlyShouldBeSalvaging = false;
 
         public double Wealth { get; set; }
 

@@ -268,6 +268,10 @@ namespace Questor.Modules.Lookup
         public bool DeleteBookmarksWithNPC { get; set; }
 
         public bool LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion { get; set; }
+        public int TractorBeamMinimumCapacitor { get; set; }
+        public int SalvagerMinimumCapacitor { get; set; }
+        public bool DoNotDoANYSalvagingOutsideMissionActions { get; set; }
+
         //
         // undocking settings
         //
@@ -810,6 +814,10 @@ namespace Questor.Modules.Lookup
                 AgeofSalvageBookmarksToExpire = 120;
                 DeleteBookmarksWithNPC = false;
                 LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = false;
+                TractorBeamMinimumCapacitor = 0;
+                SalvagerMinimumCapacitor = 0;
+                DoNotDoANYSalvagingOutsideMissionActions = false;
+
                 //
                 // Enable / Disable the different types of logging that are available
                 //
@@ -1260,6 +1268,9 @@ namespace Questor.Modules.Lookup
                         AgeofBookmarksForSalvageBehavior = (int?)xml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
                         AgeofSalvageBookmarksToExpire = (int?)xml.Element("ageofSalvageBookmarksToExpire") ?? 120;
                         LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = (bool?)xml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? false;
+                        TractorBeamMinimumCapacitor = (int?)xml.Element("tractorBeamMinimumCapacitor") ?? 0;
+                        SalvagerMinimumCapacitor = (int?)xml.Element("salvagerMinimumCapacitor") ?? 0;
+                        DoNotDoANYSalvagingOutsideMissionActions = (bool?)xml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? false;
                     }
                     catch (Exception exception)
                     {

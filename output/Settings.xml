@@ -60,6 +60,10 @@
   <!--          MISC SETTINGS          -->
   <!--                                                -->
   
+  <!-- If you like you can create a "common" XML. remove the values you want to be common between toons from the  -->
+  <!-- individual characters XML and if settings.cs cannot find the character level setting it will pull from the common setting file  -->
+  <!-- if you have a setting set in both places, the character level setting always "wins" -->
+  <commonSettingsFileName>common.xml</commonSettingsFileName>
   <!-- Character Mode is either Combat Missions or salvage for combat mode or dedicated salvager mode -->
   <characterMode>Combat Missions</characterMode><!-- default is "Combat Missions" -->
   <!-- Autostart is either true or false and is for automatically running questor when ran -->

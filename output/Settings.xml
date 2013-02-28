@@ -15,6 +15,7 @@
   <debugBlackList>false</debugBlackList>
   <debugCargoHold>false</debugCargoHold>
   <debugCleanup>false</debugCleanup>
+  <debugCourierMissions>false</debugCourierMissions>
   <debugDecline>false</debugDecline>
   <debugDefense>false</debugDefense>
   <debugDroneHealth>false</debugDroneHealth>
@@ -43,6 +44,7 @@
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
+  <debugTargetWrecks>false</debugTargetWrecks>
   <debugTraveler>false</debugTraveler>
   <debugTractorBeams>false</debugTractorBeams>
   <debugUI>false</debugUI>
@@ -65,9 +67,9 @@
   <!-- Disable 3d is either true or false and is for automatically disabling the 3D visuals in game -->
   <disable3D>false</disable3D><!-- default is false -->
   <!-- MinimumDelay is a number and is the minimum amount of seconds it will wait between getting missions in station with randomdelay or by itself -->
-  <minimumDelay>20</minimumDelay><!-- default is 20 -->
+  <minimumDelay>0</minimumDelay><!-- default is 0 -->
   <!-- RandomDelay is a number and is a random amount of seconds it will wait between getting missions in station added with minimumdelay or by itself -->
-  <randomDelay>45</randomDelay><!-- default is 45 -->
+  <randomDelay>10</randomDelay><!-- default is 10 -->
   <!-- Use Station repair Service if it exists-->
   <useStationRepair>true</useStationRepair>
   
@@ -329,7 +331,8 @@
   <!--  If you wish to effectively turn this off you can set the speedTargetsShouldBeIgnoredByMainWeapons to a very high number like: 9999999 -->
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
   <distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>7000</distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
-
+  <!-- MaxRange we should use NOS / Neuts -->
+  <NosDistance>38000</NosDistance>
   
   <!-- Maximum number of targets per value -->
   <maximumHighValueTargets>4</maximumHighValueTargets><!-- default is 4 -->

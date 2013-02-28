@@ -686,7 +686,10 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                Cache.Instance.LootedContainers.Add(containerEntity.Id); //new add
+                                // why is this here? 
+                                // why would we EVER want to add the container with loot we want to the lootedcontainers 
+                                // list BEFORE we are done looting it? (we were out of space so we cant loot it atm)
+                                //Cache.Instance.LootedContainers.Add(containerEntity.Id); //new add
 
                                 Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.White);
 

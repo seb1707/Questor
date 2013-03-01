@@ -386,7 +386,14 @@ namespace Questor.Modules.Caching
             {
                 ShipTargetValue value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
                 if (value == null)
-                    return null;
+                {
+
+                    if (IsNPCBattleship) return 4;
+                    if (IsNPCBattlecruiser) return 3;
+                    if (IsNPCCruiser) return 2;
+                    if (IsNPCFrigate) return 0;
+                    return 2;
+                }
 
                 return value.TargetValue;
             }

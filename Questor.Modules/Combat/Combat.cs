@@ -789,12 +789,12 @@ namespace Questor.Modules.Combat
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
-            List<EntityCache> combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+            List<EntityCache> combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && (e.IsNpc || e.IsNpcByGroupID ) && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
 
             if (Settings.Instance.DebugTargetCombatants)
             {
                 int i = 0;
-                Logging.Log("Combat.TargetCombatants", "list of entities we consider combatTargets below", Logging.Debug);
+                Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider combatTargets below", Logging.Debug);
                     
                 foreach (EntityCache t in combatTargets)
                 {
@@ -802,7 +802,7 @@ namespace Questor.Modules.Combat
                     Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance/1000,2) + "] TypeID [" + t.TypeId + "]", Logging.Debug);
                     continue;
                 }
-                Logging.Log("Combat.TargetCombatants", "list of entities we consider combatTargets above", Logging.Debug);
+                Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider combatTargets above", Logging.Debug);
             }
 
             // Remove any target that is too far out of range (Weapon Range * 1.5)

@@ -384,7 +384,17 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                ShipTargetValue value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                ShipTargetValue value = null;
+
+                try
+                {
+                    value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                }
+                catch (Exception exception)
+                {
+                    if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
+                }
+
                 if (value == null)
                 {
 

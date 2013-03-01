@@ -121,7 +121,7 @@ namespace Questor.Modules.Lookup
 
         public bool DebugStatistics { get; set; }
         public bool DebugStorylineMissions { get; set; }
-
+        public bool DebugTargetCombatants { get; set; }
         public bool DebugTargetWrecks { get; set; }
 
         public bool DebugTractorBeams { get; set; }
@@ -652,6 +652,7 @@ namespace Questor.Modules.Lookup
                 DebugStates = false;
                 DebugStatistics = false;
                 DebugStorylineMissions = false;
+                DebugTargetCombatants = false;
                 DebugTargetWrecks = false;
                 DebugTractorBeams = false;
                 DebugTraveler = false;
@@ -1094,6 +1095,7 @@ namespace Questor.Modules.Lookup
                     DebugStates = (bool?)CharacterSettingsXml.Element("debugStates") ?? (bool?)CommonSettingsXml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
                     DebugStatistics = (bool?)CharacterSettingsXml.Element("debugStatistics") ?? (bool?)CommonSettingsXml.Element("debugStatistics") ?? false;
                     DebugStorylineMissions = (bool?)CharacterSettingsXml.Element("debugStorylineMissions") ?? (bool?)CommonSettingsXml.Element("debugStorylineMissions") ?? false;
+                    DebugTargetCombatants = (bool?)CharacterSettingsXml.Element("debugTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugTargetCombatants") ?? false;
                     DebugTargetWrecks = (bool?)CharacterSettingsXml.Element("debugTargetWrecks") ?? (bool?)CommonSettingsXml.Element("debugTargetWrecks") ?? false;
                     DebugTraveler = (bool?)CharacterSettingsXml.Element("debugTraveler") ?? (bool?)CommonSettingsXml.Element("debugTraveler") ?? false;
                     DebugTractorBeams = (bool?)CharacterSettingsXml.Element("debugTractorBeams") ?? (bool?)CommonSettingsXml.Element("debugTractorBeams") ?? false;

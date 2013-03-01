@@ -791,6 +791,17 @@ namespace Questor.Modules.Combat
             targets.AddRange(Cache.Instance.Targeting);
             List<EntityCache> combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
 
+            if (Settings.Instance.DebugCombat)
+            {
+                int i = 0;
+                foreach (EntityCache t in combatTargets)
+                {
+                    i++;
+                    Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance/1000,2) + "] TypeID [" + t.TypeId + "]", Logging.Debug);
+                    continue;
+                }
+            }
+
             // Remove any target that is too far out of range (Weapon Range * 1.5)
             for (int i = combatTargets.Count - 1; i >= 0; i--)
             {

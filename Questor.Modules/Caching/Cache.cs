@@ -360,6 +360,7 @@ namespace Questor.Modules.Caching
         public bool MissionLoot = false;
         public bool SalvageAll = false;
         public bool RouteIsAllHighSecBool = false;
+        public bool CurrentlyShouldBeSalvaging = false;
 
         public double Wealth { get; set; }
 
@@ -1254,26 +1255,26 @@ namespace Questor.Modules.Caching
                 return SelectNearestAgent();
             }
 
-            AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
-            if (agent == null)
-            {
-                try
+                AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
+                if (agent == null)
                 {
-                    agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                    try
+                    {
+                        agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
+                        Cache.Instance.Paused = true;
+                    }
+                    AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
                 }
-                catch (Exception ex)
-                {
-                    Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
-                    Cache.Instance.Paused = true;
-                }
-                AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
-            }
-            else
-                AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+                else
+                    AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
 
-            if (agent != null) return agent.Name;
-            return null;
-        }
+                if (agent != null) return agent.Name;
+                return null;
+            }
 
         public long AgentId
         {
@@ -1323,7 +1324,7 @@ namespace Questor.Modules.Caching
                     }
                     catch (Exception ex)
                     {
-                        Logging.Log("Cache", "Agent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
+                        Logging.Log("Cache", "Agent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
                         Cache.Instance.Paused = true;
                     }
                     if (_agentId != null) return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
@@ -1821,7 +1822,7 @@ namespace Questor.Modules.Caching
 
         public DateTime LastInStation = DateTime.MinValue;
 
-        public DateTime LastInSpace { get; set; }
+        public DateTime LastInSpace = DateTime.MinValue;
 
         public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
 
@@ -2201,7 +2202,7 @@ namespace Questor.Modules.Caching
                 if (!File.Exists(Cache.Instance.MissionXmlPath))
                 {   
                     //
-                    // This will always fail for courier missions, can we detect those and supress these log messages?
+                    // This will always fail for courier missions, can we detect those and suppress these log messages?
                     //
                     Logging.Log("Cache.SetmissionXmlPath","[" + Cache.Instance.MissionXmlPath +"] not found.", Logging.White);
                     Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + ".xml");
@@ -2396,8 +2397,21 @@ namespace Questor.Modules.Caching
                     continue;
                 }      
                         
-                Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a primary weapon priority target", Logging.Teal);
+                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                {
+                    if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                        || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                    {
+                        Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                        _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                    }
+                }
+                else
+                {
+                    Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
                 _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                }
+
                 if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones)
                 {
                     Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
@@ -2553,6 +2567,32 @@ namespace Questor.Modules.Caching
             return maskedID;
         }
 
+        public bool DoWeCurrentlyHaveTurretsMounted()
+        {
+            //int ModuleNumber = 0;
+            foreach (ModuleCache m in Cache.Instance.Modules)
+            {   
+                if (m.GroupId == (int)Group.ProjectileWeapon
+                 || m.GroupId == (int)Group.EnergyWeapon
+                 || m.GroupId == (int)Group.HybridWeapon
+                 //|| m.GroupId == (int)Group.CruiseMissileLaunchers
+                 //|| m.GroupId == (int)Group.RocketLaunchers
+                 //|| m.GroupId == (int)Group.StandardMissileLaunchers
+                 //|| m.GroupId == (int)Group.TorpedoLaunchers
+                 //|| m.GroupId == (int)Group.AssaultMissilelaunchers
+                 //|| m.GroupId == (int)Group.HeavyMissilelaunchers
+                 //|| m.GroupId == (int)Group.DefenderMissilelaunchers
+                   )
+                {
+                    return true;
+                }
+
+                continue;
+            }
+
+            return false;
+        }
+
         /// <summary>
         ///   Return the best possible target (based on current target, distance and low value first)
         /// </summary>
@@ -2583,11 +2623,12 @@ namespace Questor.Modules.Caching
                 }
 
                 //Logging.Log("ListPriorityTargets", "[" + target.Name + "][ID: " + target.Id + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
-                if (PrimaryWeaponPriorityTarget.Entity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons && 
-                    PrimaryWeaponPriorityTarget.Entity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons && 
-                    PrimaryWeaponPriorityTarget.Entity.IsNPCFrigate && 
-                    Cache.Instance.UseDrones &&
-                    Statistics.Instance.OutOfDronesCount == 0)
+                if (PrimaryWeaponPriorityTarget.Entity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                    && PrimaryWeaponPriorityTarget.Entity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons 
+                    && PrimaryWeaponPriorityTarget.Entity.IsNPCFrigate
+                    && Cache.Instance.DoWeCurrentlyHaveTurretsMounted()
+                    && Cache.Instance.UseDrones
+                    && Statistics.Instance.OutOfDronesCount == 0)
                 {
                     Logging.Log("Cache.GetBesttarget", "[" + PrimaryWeaponPriorityTarget.Entity.Name + "] was removed from the PrimaryWeaponsPriorityTarget list because it was inside [" + Math.Round(PrimaryWeaponPriorityTarget.Entity.Distance, 0) + "] meters and going [" + Math.Round(PrimaryWeaponPriorityTarget.Entity.Velocity, 0 ) + "] meters per second", Logging.Red);
                     Cache.Instance.RemovePrimaryWeaponPriorityTarget(PrimaryWeaponPriorityTarget);
@@ -3768,16 +3809,20 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpAmmoHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackAmmoHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
                 return false;
+            }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            {
                 return false;
+            }
 
             try
             {
@@ -3794,7 +3839,7 @@ namespace Questor.Modules.Caching
                     }
                     if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 20)
+                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -3818,11 +3863,11 @@ namespace Questor.Modules.Caching
                                 if (Cache.Instance.StackAmmoHangarAttempts <= 2)
                                 {
                                     Cache.Instance.StackAmmoHangarAttempts++;
-                                    Logging.Log(module, "Stacking Corporate Ammo Hangar", Logging.White);
+                                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                    Logging.Log(module, "Stacking Corporate Ammo Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     Cache.Instance.AmmoHangar.StackAll();
-                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
-                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     return true;
                                 }
 
@@ -3954,18 +3999,21 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(String module)
         {
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
                 return true;
             }
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
                 return false;
             }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Debug);
                 return false;
             }
 
@@ -3986,6 +4034,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "waiting for item locks: if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)", Logging.Debug);
                     return false;
                 }
 
@@ -4744,11 +4793,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -4758,8 +4809,9 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))", Logging.Teal);
+                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
+                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Finished [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         StackLoothangarAttempts = 0;
                         return true;
                     }
@@ -4905,12 +4957,22 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpAmmoHangar(module)) return false;
                         if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
+                        StackAmmohangarAttempts = 0;
                         return true;
                     }
+
+                    //if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                    //{
+                    //    if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                    //    if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
+                    //    StackLoothangarAttempts = 0;
+                    //    return true;
+                    //}
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
                     if (!Cache.Instance.StackItemsHangarAsAmmoHangar(module)) return false;
                     if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
+                    StackAmmohangarAttempts = 0;
                     return true;
                 }
 

@@ -1206,7 +1206,7 @@ namespace Questor.Modules.Caching
                     {
                         try
                         {
-                            _agentName = SwitchAgent;
+                            _agentName = SwitchAgent();
                             Logging.Log("Cache.CurrentAgent", "[ " + CurrentAgent + " ] AgentID [ " + AgentId + " ]", Logging.White);
                             Cache.Instance.CurrentAgentText = CurrentAgent;
                         }
@@ -1227,30 +1227,52 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public string SwitchAgent
-        {
-            get
-            {
-                AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
-                if (agent == null)
-                {
-                    try
-                    {
-                        agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
-                        Cache.Instance.Paused = true;
-                    }
-                    AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
-                }
-                else
-                    AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+        private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisSolarSystemSelector = (a, s) => a.SolarSystemId == s.SolarSystemId;
+        private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisStationSelector = (a, s) => a.StationId == s.StationId;
 
-                if (agent != null) return agent.Name;
-                return null;
+        private string SelectNearestAgent()
+        {
+            var mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
+            if (mission == null)
+            {
+                var selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+                var nearestAgent = Settings.Instance.AgentsList
+                    .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
+                    .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
+                return nearestAgent != null ? nearestAgent.Agent.Name : Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault().Name;
             }
+
+            return DirectEve.GetAgentById(mission.AgentId).Name;
+        }
+
+        public string SwitchAgent()
+        {
+            if (_agentName == "")
+            {
+                // it means that this is first switch for Questor, so we'll check missions, then station or system for agents.
+                AllAgentsStillInDeclineCoolDown = false;
+                return SelectNearestAgent();
+            }
+
+            AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
+            if (agent == null)
+            {
+                try
+                {
+                    agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.SettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
+                    Cache.Instance.Paused = true;
+                }
+                AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
+            }
+            else
+                AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+
+            if (agent != null) return agent.Name;
+            return null;
         }
 
         public long AgentId

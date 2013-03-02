@@ -2373,10 +2373,23 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || _primaryWeaponPriorityTargets.Any(pwpt => pwpt.EntityID == target.Id || (_dronePriorityTargets.Any(dpt => dpt.EntityID == target.Id && Statistics.Instance.OutOfDronesCount == 0))))
                 {
                     continue;
-                }      
-                        
-                Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a primary weapon priority target", Logging.Teal);
-                _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                }
+
+                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                {
+                    if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                        || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                    {
+                        Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                        _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                    }
+                }
+                else
+                {
+                    Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                }
+
                 if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones)
                 {
                     Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);

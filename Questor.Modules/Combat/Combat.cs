@@ -468,7 +468,6 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.InMission || Settings.Instance.SpeedTank)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.Teal);
-                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("Combat", "ActivateWeapons: NavigateIntoRange: target is NPC Frigate", Logging.White);
                 NavigateOnGrid.NavigateIntoRange(target, "Combat");
             }
 
@@ -819,11 +818,12 @@ namespace Questor.Modules.Combat
                 }
                 else continue;
 
-                target.UnlockTarget();
-                
-                // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
-                combatTargets.RemoveAt(i);
-                return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                if (target.UnlockTarget("Combat.TargetCombatants"))
+                {
+                    // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
+                    combatTargets.RemoveAt(i);
+                    return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                }
             }
 
             //
@@ -872,23 +872,34 @@ namespace Questor.Modules.Combat
                     break;
                 }
 
-                Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                target.UnlockTarget();
-                highValueTargets.Remove(target);
-                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                return;
+                if (target.UnlockTarget("Combat.TargetCombatants"))
+                {
+                    Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    highValueTargets.Remove(target);
+                
+                    //EntityCache TargetToUnlock = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Name == target.Name);
+                    //if (TargetToUnlock != null)
+                    //{
+                    //    IEnumerable<EntityCache> TargetsToUnlock = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).Where(t => t.Name == target.Name); ;
+                    //    Cache.Instance.RemovePrimaryWeaponPriorityTargets(TargetsToUnlock);
+                    //    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    //    return;    
+                    //}
+                }
             }
 
             // Do we have too many low value targets targeted?
             while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.PrimaryWeaponPriorityTargets.Count(), 0))
             {
                 // Unlock any target
-                EntityCache target = lowValueTargets.OrderByDescending(t => t.Distance).First();
-                Logging.Log("Combat", "unlocking low  value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                target.UnlockTarget();
-                lowValueTargets.Remove(target);
-                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                return;
+                EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => t.Distance).FirstOrDefault();
+                if (target.UnlockTarget("Combat.TargetCombatants"))
+                {
+                    Logging.Log("Combat", "unlocking low  value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    lowValueTargets.Remove(target);
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    return;
+                }
             }
 
             // Do we have enough targeted?

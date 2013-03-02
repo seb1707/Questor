@@ -497,7 +497,7 @@ namespace Questor.Behaviors
                         Logging.Log("CombatHelperBehavior.Traveler", "No destination?", Logging.White);
                         if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Traveler) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Error;
                     }
-                    else if (destination.Count == 1 && destination.First() == 0)
+                    else if (destination.Count == 1 && destination.FirstOrDefault() == 0)
                     {
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     }
@@ -507,7 +507,7 @@ namespace Questor.Behaviors
                         IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
                         {
-                            Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
+                            Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
                         }
                         else
                         {

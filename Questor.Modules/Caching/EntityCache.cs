@@ -950,10 +950,15 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public void UnlockTarget()
+        public bool UnlockTarget(string module)
         {
             if (_directEntity != null)
+            {
+                Cache.Instance.TargetingIDs.Remove(Id);
                 _directEntity.UnlockTarget();
+                return true;
+            }
+            return false;
         }
 
         public void Jump()

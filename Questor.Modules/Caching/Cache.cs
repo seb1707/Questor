@@ -1800,7 +1800,7 @@ namespace Questor.Modules.Caching
 
         public DateTime LastInStation = DateTime.MinValue;
 
-        public DateTime LastInSpace { get; set; }
+        public DateTime LastInSpace = DateTime.MinValue;
 
         public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
 
@@ -3774,16 +3774,20 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpAmmoHangar(String module)
         {
-            if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackAmmoHangar)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            {
                 return false;
+            }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            {
                 return false;
+            }
 
             try
             {
@@ -3800,7 +3804,7 @@ namespace Questor.Modules.Caching
                     }
                     if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 20)
+                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -3824,11 +3828,11 @@ namespace Questor.Modules.Caching
                                 if (Cache.Instance.StackAmmoHangarAttempts <= 2)
                                 {
                                     Cache.Instance.StackAmmoHangarAttempts++;
-                                    Logging.Log(module, "Stacking Corporate Ammo Hangar", Logging.White);
+                                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                    Logging.Log(module, "Stacking Corporate Ammo Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     Cache.Instance.AmmoHangar.StackAll();
-                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
-                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     return true;
                                 }
 
@@ -3960,18 +3964,21 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(String module)
         {
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
                 return true;
             }
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
                 return false;
             }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Debug);
                 return false;
             }
 
@@ -3992,6 +3999,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "waiting for item locks: if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)", Logging.Debug);
                     return false;
                 }
 
@@ -4750,11 +4758,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -4764,8 +4774,9 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))", Logging.Teal);
+                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
+                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Finished [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         StackLoothangarAttempts = 0;
                         return true;
                     }
@@ -4911,12 +4922,22 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpAmmoHangar(module)) return false;
                         if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
+                        StackAmmohangarAttempts = 0;
                         return true;
                     }
+
+                    //if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                    //{
+                    //    if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                    //    if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
+                    //    StackLoothangarAttempts = 0;
+                    //    return true;
+                    //}
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
                     if (!Cache.Instance.StackItemsHangarAsAmmoHangar(module)) return false;
                     if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
+                    StackAmmohangarAttempts = 0;
                     return true;
                 }
 

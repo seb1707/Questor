@@ -1484,5 +1484,47 @@ namespace QuestorManager
                 }
             }
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            String content = Clipboard.GetText();
+            int count = 0;
+
+            foreach (string line in content.Split('\n'))
+            {
+                string[] info = line.Split(',');
+                if (info.Count() == 4)
+                {
+                    int surplus;
+                    if (Int32.TryParse(info[3].Replace(".", ""), out surplus))
+                    {
+                        if (surplus < 0)
+                        {
+                            surplus *= -1;
+
+                            foreach (ListItems item in List)
+                            {
+                                string name = item.Name;
+                                if (string.IsNullOrEmpty(name))
+                                {
+                                    continue;
+                                }
+
+                                if (name.ToLower().Equals(info[0].ToLower()))
+                                {
+                                    ListViewItem listItem = new ListViewItem("BuyOrder");
+                                    listItem.SubItems.Add(item.Name);
+                                    listItem.Tag = item.Id.ToString();
+                                    listItem.SubItems.Add(surplus.ToString());
+                                    LstTask.Items.Add(listItem);
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            System.Windows.Forms.MessageBox.Show("Added " + count + " Tasks to your list.");
+        }
     }
 }

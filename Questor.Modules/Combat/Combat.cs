@@ -840,6 +840,15 @@ namespace Questor.Modules.Combat
             List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(t => t.Distance).ToList();
             List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => !t.TargetValue.HasValue).OrderBy(t => t.Distance).ToList();
 
+            if (!Settings.Instance.KillSentries)
+            {
+                highValueTargets = highValueTargets.Where(u => !u.IsSentry).ToList();
+                lowValueTargets = lowValueTargets.Where(u => !u.IsSentry).ToList();
+
+                highValueTargetingMe = highValueTargetingMe.Where(u => !u.IsSentry).ToList();
+                lowValueTargetingMe = lowValueTargetingMe.Where(u => !u.IsSentry).ToList();
+            }
+
             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
             {
                 if (!TargetingMe.Any())

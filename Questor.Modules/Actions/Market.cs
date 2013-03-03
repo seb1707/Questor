@@ -467,7 +467,7 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            DirectOrder competitor = marketWindow.SellOrders.OrderBy(i => i.Price).FirstOrDefault();
+            DirectOrder competitor = marketWindow.SellOrders.Where(i => i.StationId == Cache.Instance.DirectEve.Session.StationId).OrderBy(i => i.Price).FirstOrDefault();
             double newprice = competitor.Price - 0.01;
 
             Cache.Instance.DirectEve.Sell(directItem, (int)Cache.Instance.DirectEve.Session.StationId, directItem.Quantity,newprice, duration, corp);

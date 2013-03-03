@@ -1255,26 +1255,28 @@ namespace Questor.Modules.Caching
                 return SelectNearestAgent();
             }
 
-                AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
-                if (agent == null)
+            AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
+            if (agent == null)
+            {
+                try
                 {
-                    try
-                    {
-                        agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
-                        Cache.Instance.Paused = true;
-                    }
-                    AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
+                    agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
                 }
-                else
-                    AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
-
-                if (agent != null) return agent.Name;
-                return null;
+                catch (Exception ex)
+                {
+                    Logging.Log("Cache", "SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]");
+                    Cache.Instance.Paused = true;
+                }
+                AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
             }
+            else
+            {
+                AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+            }
+
+            if (agent != null) return agent.Name;
+            return null;
+        }
 
         public long AgentId
         {
@@ -2277,7 +2279,7 @@ namespace Questor.Modules.Caching
                     {
                         var missionFit = missionFitting.Fitting;
                         var missionShip = missionFitting.Ship;
-                        if (!(missionFit == "" && missionShip != "")) // if we've both specified a mission specific ship and a fitting, then apply that fitting to the ship
+                        if (!(missionFit == "" && missionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
                         {
                             ChangeMissionShipFittings = true;
                             Fitting = missionFit;
@@ -2343,6 +2345,8 @@ namespace Questor.Modules.Caching
         public bool RemovePrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets)
         {
             int removed = 0;
+            targets = targets.ToList();
+
             if (targets.Any())
             {
                 removed = _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));

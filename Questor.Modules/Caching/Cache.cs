@@ -2503,11 +2503,19 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
                 {
-                    DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+                    DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.Where(i => i.Name == Settings.Instance.BookmarkFolder).FirstOrDefault();
+                    if (folder != null)
+                        DirectEve.CorpBookmarkCurrentLocation(label, "", folder.Id);
+                    else
+                        DirectEve.CorpBookmarkCurrentLocation(label, "", null);
                 }
                 else
                 {
-                    DirectEve.BookmarkCurrentLocation(label, "", null);
+                    DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.Where(i => i.Name == Settings.Instance.BookmarkFolder).FirstOrDefault();
+                    if (folder != null)
+                        DirectEve.BookmarkCurrentLocation(label, "", folder.Id);
+                    else
+                        DirectEve.BookmarkCurrentLocation(label, "", null);
                 }
             }
             else

@@ -32,6 +32,7 @@
             this.UpdateSearchResults = new System.Windows.Forms.Timer(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button4 = new System.Windows.Forms.Button();
             this.cmbXML = new System.Windows.Forms.ComboBox();
             this.bttnSaveTask = new System.Windows.Forms.Button();
             this.chkPause = new System.Windows.Forms.CheckBox();
@@ -148,7 +149,8 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.button4 = new System.Windows.Forms.Button();
+            this.cbxSellOrder = new System.Windows.Forms.CheckBox();
+            this.cbxCorpOrder = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -208,6 +210,16 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(144, 216);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(108, 23);
+            this.button4.TabIndex = 30;
+            this.button4.Text = "Load Shopping List";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // cmbXML
             // 
@@ -702,6 +714,8 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.cbxCorpOrder);
+            this.tabPage4.Controls.Add(this.cbxSellOrder);
             this.tabPage4.Controls.Add(this.chkUpdateMineral);
             this.tabPage4.Controls.Add(this.label8);
             this.tabPage4.Controls.Add(this.RefineEfficiencyInput);
@@ -836,9 +850,9 @@
             this.chMedianBuy,
             this.chStationBuy,
             this.chTotalBuy});
-            this.lvItems.Location = new System.Drawing.Point(7, 57);
+            this.lvItems.Location = new System.Drawing.Point(7, 82);
             this.lvItems.Name = "lvItems";
-            this.lvItems.Size = new System.Drawing.Size(630, 179);
+            this.lvItems.Size = new System.Drawing.Size(630, 154);
             this.lvItems.TabIndex = 15;
             this.lvItems.UseCompatibleStateImageBehavior = false;
             this.lvItems.View = System.Windows.Forms.View.Details;
@@ -1349,15 +1363,25 @@
             this.radioButton3.Text = "Personal Order";
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // cbxSellOrder
             // 
-            this.button4.Location = new System.Drawing.Point(144, 216);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(108, 23);
-            this.button4.TabIndex = 30;
-            this.button4.Text = "Load Shopping List";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.cbxSellOrder.AutoSize = true;
+            this.cbxSellOrder.Location = new System.Drawing.Point(7, 57);
+            this.cbxSellOrder.Name = "cbxSellOrder";
+            this.cbxSellOrder.Size = new System.Drawing.Size(74, 17);
+            this.cbxSellOrder.TabIndex = 27;
+            this.cbxSellOrder.Text = "Use Order";
+            this.cbxSellOrder.UseVisualStyleBackColor = true;
+            // 
+            // cbxCorpOrder
+            // 
+            this.cbxCorpOrder.AutoSize = true;
+            this.cbxCorpOrder.Location = new System.Drawing.Point(83, 57);
+            this.cbxCorpOrder.Name = "cbxCorpOrder";
+            this.cbxCorpOrder.Size = new System.Drawing.Size(77, 17);
+            this.cbxCorpOrder.TabIndex = 28;
+            this.cbxCorpOrder.Text = "Corp Order";
+            this.cbxCorpOrder.UseVisualStyleBackColor = true;
             // 
             // QuestorManagerUI
             // 
@@ -1522,5 +1546,7 @@
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button4;
+        public System.Windows.Forms.CheckBox cbxCorpOrder;
+        public System.Windows.Forms.CheckBox cbxSellOrder;
     }
 }

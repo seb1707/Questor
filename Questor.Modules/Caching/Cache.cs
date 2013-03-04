@@ -1624,9 +1624,9 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjects ?? (_bigObjects = Entities.Where(e =>
-                       e.GroupId == (int)Group.LargeCollidableStructure ||
-                       e.GroupId == (int)Group.LargeCollidableObject ||
-                       e.GroupId == (int)Group.LargeCollidableShip ||
+                       e.GroupId == (int)Group.LargeColidableStructure ||
+                       e.GroupId == (int)Group.LargeColidableObject ||
+                       e.GroupId == (int)Group.LargeColidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
@@ -1648,9 +1648,9 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
-                       e.GroupId == (int)Group.LargeCollidableStructure ||
-                       e.GroupId == (int)Group.LargeCollidableObject ||
-                       e.GroupId == (int)Group.LargeCollidableShip ||
+                       e.GroupId == (int)Group.LargeColidableStructure ||
+                       e.GroupId == (int)Group.LargeColidableObject ||
+                       e.GroupId == (int)Group.LargeColidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccelerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
@@ -2380,6 +2380,8 @@ namespace Questor.Modules.Caching
         public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
         {
             int removed = 0;
+            targets = targets.ToList();
+
             if (targets.Any())
             {
                 removed = _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
@@ -2392,6 +2394,7 @@ namespace Questor.Modules.Caching
         /// </summary>
         /// <param name = "targets"></param>
         /// <param name = "priority"></param>
+        /// <param name="module"> </param>
         public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets, PrimaryWeaponPriority priority, string module)
         {
             foreach (EntityCache target in targets)
@@ -2399,8 +2402,8 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || _primaryWeaponPriorityTargets.Any(pwpt => pwpt.EntityID == target.Id || (_dronePriorityTargets.Any(dpt => dpt.EntityID == target.Id && Statistics.Instance.OutOfDronesCount == 0))))
                 {
                     continue;
-                }      
-                        
+                }
+
                 if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                 {
                     if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
@@ -2413,7 +2416,7 @@ namespace Questor.Modules.Caching
                 else
                 {
                     Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                 }
 
                 if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones)
@@ -2505,17 +2508,25 @@ namespace Questor.Modules.Caching
                 {
                     DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.Where(i => i.Name == Settings.Instance.BookmarkFolder).FirstOrDefault();
                     if (folder != null)
-                        DirectEve.CorpBookmarkCurrentLocation(label, "", folder.Id);
+                    {
+                        Cache.Instance.DirectEve.CorpBookmarkCurrentLocation(label, "", folder.Id);
+                    }
                     else
-                        DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+                    {
+                        Cache.Instance.DirectEve.CorpBookmarkCurrentLocation(label, "", null);
+                    }
                 }
                 else
                 {
                     DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.Where(i => i.Name == Settings.Instance.BookmarkFolder).FirstOrDefault();
                     if (folder != null)
-                        DirectEve.BookmarkCurrentLocation(label, "", folder.Id);
+                    {
+                        Cache.Instance.DirectEve.BookmarkCurrentLocation(label, "", folder.Id);
+                    }
                     else
-                        DirectEve.BookmarkCurrentLocation(label, "", null);
+                    {
+                        Cache.Instance.DirectEve.BookmarkCurrentLocation(label, "", null);
+                    }
                 }
             }
             else
@@ -2552,6 +2563,7 @@ namespace Questor.Modules.Caching
         public bool CheckifRouteIsAllHighSec()
         {
             Cache.Instance.RouteIsAllHighSecBool = false;
+
             // Find the first waypoint
             List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
             if (currentPath == null || !currentPath.Any()) return false;
@@ -2779,7 +2791,7 @@ namespace Questor.Modules.Caching
             }
 
             // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeColidableStructure).ToList();
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
@@ -2806,7 +2818,7 @@ namespace Questor.Modules.Caching
         private void EWarEffectsOnMe()
         {
             // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure).ToList();
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeColidableStructure).ToList();
 
             //
             //Start of Current EWar Effects On Me (below)
@@ -4805,6 +4817,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("StackLootHangar", "Stacking the lootHangar routine has run [" + StackLoothangarAttempts + "] times without success, resetting counter", Logging.Teal);
                     StackLoothangarAttempts = 0;
                 }
+
                 return true;
             }
 

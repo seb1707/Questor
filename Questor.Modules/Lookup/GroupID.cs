@@ -91,9 +91,9 @@ namespace Questor.Modules.Lookup
         DeadspaceOverseersSentry = 495,
         EnergyNeutralizingBattery = 837,
 
-        LargeCollidableStructure = 319,
-        LargeCollidableObject = 226,
-        LargeCollidableShip = 784,
+        LargeColidableStructure = 319,
+        LargeColidableObject = 226,
+        LargeColidableShip = 784,
 
         CargoContainer = 12,
         SpawnContainer = 306,
@@ -158,6 +158,8 @@ namespace Questor.Modules.Lookup
         Commodities = 526,
 
         Minerals = 18,
+
+        SkillBooks = 270,
 
         Plagioclase = 458,
         Spodumain = 461,

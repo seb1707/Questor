@@ -37,6 +37,7 @@ namespace Questor.Behaviors
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionCtrl _combatMissionCtrl;
+        private readonly Traveler _traveler;
         private readonly Panic _panic;
         private readonly Storyline _storyline;
         private readonly Statistics _statistics;
@@ -68,6 +69,7 @@ namespace Questor.Behaviors
         {
             _lastPulse = DateTime.MinValue;
 
+            _traveler = new Traveler();
             _random = new Random();
             _salvage = new Salvage();
             _combat = new Combat();
@@ -1075,7 +1077,7 @@ namespace Questor.Behaviors
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distance.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeCollidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distance.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
                     if (deadlyNPC != null)
                     {
                         // found NPCs that will likely kill out fragile salvage boat!
@@ -1191,7 +1193,7 @@ namespace Questor.Behaviors
                     _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
-                    EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).First();
+                    EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).FirstOrDefault();
                     if (closest.Distance < (int)Distance.DecloakRange)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - GroupID=" + closest.GroupId, Logging.White);

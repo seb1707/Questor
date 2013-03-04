@@ -90,7 +90,7 @@ namespace Questor.Modules.Actions
             //
             if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
             {
-                if (((int)Cache.Instance.StandingUsedToAccessAgent == (int)0.00) && (AgentId == Cache.Instance.AgentId))
+                if (((int)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
                 {
                     if (!_agentStandingsCheckFlag)
                     {
@@ -278,9 +278,10 @@ namespace Questor.Modules.Actions
             //
             // this loads the settings global to the mission, NOT individual pockets
             //
+            XDocument missionXml = null;
             try
             {
-                XDocument missionXml = XDocument.Load(Cache.Instance.MissionXmlPath);
+                missionXml = XDocument.Load(Cache.Instance.MissionXmlPath);
 
                 //load mission specific ammo and WeaponGroupID if specified in the mission xml
                 if (missionXml.Root != null)
@@ -310,13 +311,17 @@ namespace Questor.Modules.Actions
                     LoadSpecificAmmo(damageTypes.Distinct());
                     loadedAmmo = true;
                 }
-                missionXml = null;
-                System.GC.Collect();
             }
             catch (Exception ex)
             {
                 Logging.Log("AgentInteraction", "Error in mission (not pocket) specific XML tags [" + MissionName + "], " + ex.Message, Logging.Orange);
             }
+            finally
+            {
+                missionXml = null;
+                System.GC.Collect();
+            }
+
         }
 
         private void GetDungeonId(string html)
@@ -843,7 +848,7 @@ namespace Questor.Modules.Actions
                     if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
                     CloseConversation();
 
-                    Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent;
+                    Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
                     Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
                     Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
@@ -954,7 +959,7 @@ namespace Questor.Modules.Actions
         {
             if (DateTime.UtcNow < _nextAgentAction)
             {
-                Logging.Log("AgentInteraction.CloseConversation", "will continue in [" + Math.Round(_nextAgentAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "]sec", Logging.Yellow);
+                //Logging.Log("AgentInteraction.CloseConversation", "will continue in [" + Math.Round(_nextAgentAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "]sec", Logging.Yellow);
                 return;
             }
 

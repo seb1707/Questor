@@ -488,17 +488,16 @@ namespace Questor.Modules.Activities
         private void ClearWithinWeaponsRangeOnlyAction(Actions.Action action)
         {
             // Get lowest range
-            double DistanceToConsiderTargets = Cache.Instance.MaxRange;
-
+            double range = Cache.Instance.MaxRange;
             int DistanceToClear;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToClear))
             {
-                DistanceToClear = (int)DistanceToConsiderTargets;
+                DistanceToClear = (int)range;
             }
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToConsiderTargets = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
+                range = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
             }
 
             //
@@ -507,28 +506,28 @@ namespace Questor.Modules.Activities
             EntityCache target = null;
             if (Settings.Instance.SpeedTank)
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToConsiderTargets && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < range && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsJammingMe)));
             }
             else
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToConsiderTargets && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < range && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsJammingMe)));
             }
 
             //
             // if we have no target yet is there a target within DistanceToConsiderTargets that is targeting us?
             //
-            target = target ?? Cache.Instance.TargetedBy.Where(t => t.Distance < DistanceToConsiderTargets && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+            target = target ?? Cache.Instance.TargetedBy.Where(t => t.Distance < range && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
 
             // Or is there any target within DistanceToConsiderTargets?
-            target = target ?? Cache.Instance.Entities.Where(t => t.Distance < DistanceToConsiderTargets && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
+            target = target ?? Cache.Instance.Entities.Where(t => t.Distance < range && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(t => t.Distance).FirstOrDefault();
 
             if (target != null)
             {
                 // Reset timeout
                 _clearPocketTimeout = null;
 
-                // Lock priority target if within weapons range
-                if (target.Distance < Cache.Instance.MaxRange)
+                // Lock target if within weapons range
+                if (target.Distance < range)
                 {
                     if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
                     {
@@ -536,7 +535,23 @@ namespace Questor.Modules.Activities
                         Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
 
-                    return;
+                    //
+                    // if it STILL is not in the PrimaryWeaponPriorityTargets list then it must be a frigate that PrimaryWeaponPriorityTargets does not want to add.
+                    // make sure that it IS a frigate and that it IS in the DronePriorityTarget List and if so move on to the next target.
+                    //
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    {
+                        if (target.IsFrigate && (Cache.Instance.DronePriorityTargets.All(pt => pt.Id == target.Id)))
+                        {
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "[" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "][" + Cache.Instance.MaskedID(target.Id) + "] is a frigate and is already added to the DronePriorityTargetList, moving on to the next target", Logging.White);
+                            Nextaction();
+
+                            // Reset timeout
+                            _clearPocketTimeout = null;
+                            return;
+                        }
+                    }
+
                 }
             }
 

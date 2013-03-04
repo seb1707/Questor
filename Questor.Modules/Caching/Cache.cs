@@ -2634,6 +2634,8 @@ namespace Questor.Modules.Caching
                 currentTarget = null;
             }
 
+            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
+
             //
             // Is our current target too close and too fast to hit with our main weapons? If so, skip it and shoot something we CAN hit please.
             // we purposely do not check for ANY priority targets here, including warp scramblers, if their are any let the drones handle it
@@ -2837,8 +2839,6 @@ namespace Questor.Modules.Caching
 
             // Get all entity targets
             IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeColidableStructure).ToList();
-
-            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
             // Get the closest high value target
             EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();

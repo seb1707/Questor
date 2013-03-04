@@ -129,7 +129,6 @@ namespace QuestorManager.Actions
                     if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectRefinery:", Logging.Debug);
                     if (!Market.InspectRefinery("ValueDump", (double)_form.RefineEfficiencyInput.Value))
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
-
                     break;
 
                 case ValueDumpState.WaitingToFinishQuickSell:

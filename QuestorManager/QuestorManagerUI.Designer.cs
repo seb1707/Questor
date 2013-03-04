@@ -272,7 +272,7 @@
             // LstTask
             // 
             this.LstTask.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LstTask.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.JobHeader1,
@@ -815,7 +815,7 @@
             // lvItems
             // 
             this.lvItems.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lvItems.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chName,

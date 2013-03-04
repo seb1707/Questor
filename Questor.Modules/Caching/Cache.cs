@@ -2419,7 +2419,7 @@ namespace Questor.Modules.Caching
                     _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                 }
 
-                if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones)
+                if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones && _dronePriorityTargets.Any(d => d.EntityID != target.Id))
                 {
                     Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
                     _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = DronePriority.PriorityKillTarget });
@@ -2768,6 +2768,51 @@ namespace Questor.Modules.Caching
             {
                 //Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget has less than 60% armor, keep killing this target");
                 return currentTarget;
+            }
+
+            // process prioritytargets in the following order
+            // w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
+
+            // Get the closest WarpScramblingPriorityTarget priority target
+            EntityCache WarpScramblingPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsWarpScramblingMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (WarpScramblingPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(WarpScramblingPriorityTarget.Name.Trim()))
+            {
+                return WarpScramblingPriorityTarget;
+            }
+
+            // Get the closest TrackingDisruptingPriorityTarget priority target
+            EntityCache TrackingDisruptingPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsTrackingDisruptingMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (TrackingDisruptingPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(TrackingDisruptingPriorityTarget.Name.Trim()))
+            {
+                return TrackingDisruptingPriorityTarget;
+            }
+
+            // Get the closest ECM priority target
+            EntityCache ECMPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsJammingMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (ECMPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(ECMPriorityTarget.Name.Trim()))
+            {
+                return ECMPriorityTarget;
+            }
+
+            // Get the closest WebbingPriorityTarget priority target
+            EntityCache WebbingPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsWebbingMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (WebbingPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(WebbingPriorityTarget.Name.Trim()))
+            {
+                return WebbingPriorityTarget;
+            }
+
+            // Get the closest NeutralizerPriorityTarget priority target
+            EntityCache NeutralizerPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsNeutralizingMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (NeutralizerPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(NeutralizerPriorityTarget.Name.Trim()))
+            {
+                return NeutralizerPriorityTarget;
+            }
+
+            // Get the closest SensorDampPriorityTarget priority target
+            EntityCache SensorDampPriorityTarget = PrimaryWeaponPriorityTargets.Where(i => i.IsSensorDampeningMe).OrderBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault(pt => pt.Distance < distance && pt.IsTarget);
+            if (SensorDampPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(SensorDampPriorityTarget.Name.Trim()))
+            {
+                return SensorDampPriorityTarget;
             }
 
             // Get the closest primary weapon priority target

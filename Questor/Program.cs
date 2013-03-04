@@ -646,7 +646,7 @@ namespace Questor
             if (_directEve.Login.AtLogin && _directEve.Login.ServerStatus != "Status: OK")
             {
                 Logging.Log("Startup", "Server status[" + _directEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
-                _nextPulse = DateTime.UtcNow.AddSeconds(120);
+                _nextPulse = DateTime.UtcNow.AddSeconds(30);
                 return;
             }
 

@@ -36,6 +36,7 @@ namespace Questor.Modules.Activities
         private bool _waiting;
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
+        private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
 
         private bool _targetNull;
 
@@ -399,11 +400,11 @@ namespace Questor.Modules.Activities
 
             if (Settings.Instance.SpeedTank)
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
             }
             else
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
             }
 
             // Or is there a target that is targeting us?
@@ -506,11 +507,11 @@ namespace Questor.Modules.Activities
             EntityCache target = null;
             if (Settings.Instance.SpeedTank)
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < range && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
             }
             else
             {
-                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < range && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsJammingMe)));
+                target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < DistanceToClear && !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
             }
 
             //
@@ -694,6 +695,9 @@ namespace Questor.Modules.Activities
 
         private void MoveToBackgroundAction(Actions.Action action)
         {
+            if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
+                return;
+
             if (Cache.Instance.NormalApproach)
             {
                 Cache.Instance.NormalApproach = false;
@@ -728,6 +732,7 @@ namespace Questor.Modules.Activities
                 // Move to the target
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                 closest.Approach(DistanceToApproach);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
             }
 
             Nextaction();
@@ -736,6 +741,9 @@ namespace Questor.Modules.Activities
 
         private void MoveToAction(Actions.Action action)
         {
+            if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
+                return;
+
             if (Cache.Instance.NormalApproach)
             {
                 Cache.Instance.NormalApproach = false;
@@ -838,6 +846,7 @@ namespace Questor.Modules.Activities
                     {
                         Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                         closest.Approach();
+                        _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
                         return;
                     }
                     if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl.MoveTo", "-----------", Logging.Teal);
@@ -849,6 +858,7 @@ namespace Questor.Modules.Activities
                     // Probably never happens
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Aligning to target [" + closest.Name + "][ID: " + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                     closest.AlignTo();
+                    _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
                     return;
                 }
 

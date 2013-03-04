@@ -145,6 +145,13 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.Cleanup:
+
+                    if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip))
+                    {
+                        // Close the drone bay, its not required in space.
+                        Cache.Instance.CloseDroneBay("Arm.Cleanup");
+                    }
+
                     if (!Cleanup.CloseInventoryWindows()) break;
                     _States.CurrentArmState = ArmState.Done;
                     break;
@@ -1102,13 +1109,6 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.OpenCargoHold("Arm.WaitForItems")) return;
 
                     if (Cache.Instance.CargoHold.Items.Count == 0) return;
-
-                    if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip))
-                    {
-                        // Close the drone bay, its not required in space.
-                        //if (Cache.Instance.DroneBay.IsReady) //why is not .isready and .isvalid working at the moment? 4/2012
-                        Cache.Instance.CloseDroneBay("Arm.WaitForItems");
-                    }
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {

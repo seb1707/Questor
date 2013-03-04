@@ -996,102 +996,109 @@ namespace Questor.Modules.Combat
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow < _lastCombatProcessState.AddMilliseconds(500)) //if it has not been 500ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
-            {
-                return;
-            }
-
-            _lastCombatProcessState = DateTime.UtcNow;
-
-            if ((_States.CurrentCombatState != CombatState.Idle ||
-                _States.CurrentCombatState != CombatState.OutOfAmmo) &&
-                (Cache.Instance.InStation ||// There is really no combat in stations (yet)
-                !Cache.Instance.InSpace || // if we are not in space yet, wait...
-                Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
-                Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))  // There is no combat when cloaked
-            {
-                _States.CurrentCombatState = CombatState.Idle;
-                return;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                _States.CurrentCombatState = CombatState.Idle;
-                return;
-            }
-
             try
             {
-                if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                if (DateTime.UtcNow < _lastCombatProcessState.AddMilliseconds(500)) //if it has not been 500ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 {
-                    Logging.Log("Combat", "You are not in the CombatShipName [" + Settings.Instance.CombatShipName + "] and / or the combatship has no weapons!", Logging.Red);
-                    _States.CurrentCombatState = CombatState.OutOfAmmo;
+                    return;
+                }
+
+                _lastCombatProcessState = DateTime.UtcNow;
+
+                if ((_States.CurrentCombatState != CombatState.Idle ||
+                    _States.CurrentCombatState != CombatState.OutOfAmmo) &&
+                    (Cache.Instance.InStation ||// There is really no combat in stations (yet)
+                    !Cache.Instance.InSpace || // if we are not in space yet, wait...
+                    Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
+                    Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))  // There is no combat when cloaked
+                {
+                    _States.CurrentCombatState = CombatState.Idle;
+                    return;
+                }
+
+                if (Cache.Instance.InStation)
+                {
+                    _States.CurrentCombatState = CombatState.Idle;
+                    return;
+                }
+
+                try
+                {
+                    if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                    {
+                        Logging.Log("Combat", "You are not in the CombatShipName [" + Settings.Instance.CombatShipName + "] and / or the combatship has no weapons!", Logging.Red);
+                        _States.CurrentCombatState = CombatState.OutOfAmmo;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    if (Settings.Instance.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName ) - exception [" + exception + "]", Logging.White);
+                }
+
+                switch (_States.CurrentCombatState)
+                {
+                    case CombatState.CheckTargets:
+                        _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() of the combat state will potentially get reset (important for the outofammo state)
+                        TargetCombatants();
+                        break;
+
+                    case CombatState.KillTargets:
+
+                        //
+                        // iterate through priority targets here !!!!!!!!
+                        //
+                        //Cache.Instance._priorityTargets_text = "";
+                        //for (int i = 0; i < Cache.Instance._priorityTargets.Count; i++) // Loop through List with for
+                        //{
+                        //    Cache.Instance._priorityTargets_text = Cache.Instance._priorityTargets_text + "[ " + i + " ][ " + Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "k away][" + Cache.Instance._priorityTargets[i].Entity.Health + "TH][" + Cache.Instance._priorityTargets[i].Entity.ShieldPct + "S][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.ArmorPct, 0) + "A][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.StructurePct, 0) + "H][" + NPCValue.Value.ToString() + "isk],";
+                        //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
+                        //}
+                        if (!Cache.Instance.OpenCargoHold("Combat")) break;
+                        _States.CurrentCombatState = CombatState.CheckTargets;
+                        TargetingCache.CurrentWeaponsTarget = GetTarget();
+                        if (TargetingCache.CurrentWeaponsTarget != null)
+                        {
+                            ActivateTargetPainters(TargetingCache.CurrentWeaponsTarget);
+                            ActivateStasisWeb(TargetingCache.CurrentWeaponsTarget);
+                            ActivateNos(TargetingCache.CurrentWeaponsTarget);
+                            ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
+                        }
+                        break;
+
+                    case CombatState.OutOfAmmo:
+                        break;
+
+                    case CombatState.Idle:
+
+                        //
+                        // below is the reasons we will start the combat state(s) - if the below is not met do nothing
+                        //
+                        //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
+                        //Logging.Log("Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked: " + Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked);
+                        //Logging.Log("Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower(): " + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower());
+                        //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
+                        if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
+                            Cache.Instance.DirectEve.ActiveShip.Entity != null &&  // we are in a ship!
+                            !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
+                            Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
+                            !Cache.Instance.InWarp) // no longer in warp
+                        {
+                            _States.CurrentCombatState = CombatState.CheckTargets;
+                            return;
+                        }
+                        break;
+
+                    default:
+
+                        // Next state
+                        Logging.Log("Combat", "CurrentCombatState was not set thus ended up at default", Logging.Orange);
+                        _States.CurrentCombatState = CombatState.CheckTargets;
+                        break;
                 }
             }
             catch (Exception exception)
             {
-                if (Settings.Instance.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName ) - exception [" + exception + "]", Logging.White);
-            }
-
-            switch (_States.CurrentCombatState)
-            {
-                case CombatState.CheckTargets:
-                    _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() of the combat state will potentially get reset (important for the outofammo state)
-                    TargetCombatants();
-                    break;
-
-                case CombatState.KillTargets:
-
-                    //
-                    // iterate through priority targets here !!!!!!!!
-                    //
-                    //Cache.Instance._priorityTargets_text = "";
-                    //for (int i = 0; i < Cache.Instance._priorityTargets.Count; i++) // Loop through List with for
-                    //{
-                    //    Cache.Instance._priorityTargets_text = Cache.Instance._priorityTargets_text + "[ " + i + " ][ " + Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "k away][" + Cache.Instance._priorityTargets[i].Entity.Health + "TH][" + Cache.Instance._priorityTargets[i].Entity.ShieldPct + "S][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.ArmorPct, 0) + "A][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.StructurePct, 0) + "H][" + NPCValue.Value.ToString() + "isk],";
-                    //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
-                    //}
-                    if (!Cache.Instance.OpenCargoHold("Combat")) break;
-                    _States.CurrentCombatState = CombatState.CheckTargets;
-                    TargetingCache.CurrentWeaponsTarget = GetTarget();
-                    if (TargetingCache.CurrentWeaponsTarget != null)
-                    {
-                        ActivateTargetPainters(TargetingCache.CurrentWeaponsTarget);
-                        ActivateStasisWeb(TargetingCache.CurrentWeaponsTarget);
-                        ActivateNos(TargetingCache.CurrentWeaponsTarget);
-                        ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
-                    }
-                    break;
-
-                case CombatState.OutOfAmmo:
-                    break;
-
-                case CombatState.Idle:
-
-                    //
-                    // below is the reasons we will start the combat state(s) - if the below is not met do nothing
-                    //
-                    //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
-                    //Logging.Log("Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked: " + Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked);
-                    //Logging.Log("Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower(): " + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower());
-                    //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
-                    if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
-                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&  // we are in a ship!
-                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
-                        Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
-                        !Cache.Instance.InWarp) // no longer in warp
-                    {
-                        _States.CurrentCombatState = CombatState.CheckTargets;
-                        return;
-                    }
-                    break;
-
-                default:
-
-                    // Next state
-                    Logging.Log("Combat", "CurrentCombatState was not set thus ended up at default", Logging.Orange);
-                    _States.CurrentCombatState = CombatState.CheckTargets;
-                    break;
+                Logging.Log("Combat.ProcessState","Exception [" + exception + "]",Logging.Debug);    
             }
         }
     }

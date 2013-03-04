@@ -37,6 +37,7 @@ namespace Questor.Behaviors
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionCtrl _combatMissionCtrl;
+        private readonly Traveler _traveler;
         private readonly Panic _panic;
         private readonly Storyline _storyline;
         private readonly Statistics _statistics;
@@ -68,6 +69,7 @@ namespace Questor.Behaviors
         {
             _lastPulse = DateTime.MinValue;
 
+            _traveler = new Traveler();
             _random = new Random();
             _salvage = new Salvage();
             _combat = new Combat();

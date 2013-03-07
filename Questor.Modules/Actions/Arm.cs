@@ -1048,17 +1048,6 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    foreach (DirectItem itemfound in Cache.Instance.AmmoHangar.Items)
-                    {
-                        if (itemfound.GroupName == "Advanced Autocannon Ammo")
-                        {
-                            Logging.Log("Arm.MoveItems","Found: Name [" + itemfound.TypeName + "] Quantity [" + itemfound.Quantity + "] in the AmmoHangar",Logging.Red);
-
-                        }
-
-                        continue;
-                    }
-
                     IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
                     IEnumerable<DirectItem> AmmoItems = AmmoHangarItems;
                     

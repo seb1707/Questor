@@ -326,6 +326,9 @@ namespace Questor.Modules.Actions
 
         private void GetDungeonId(string html)
         {
+            return;
+            /*
+             * 
             HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
             missionHtml.LoadHtml(html);
             try
@@ -347,6 +350,8 @@ namespace Questor.Modules.Actions
             {
                 Logging.Log("GetDungeonId", "if (nd.Attributes[href].Value.Contains(dungeonID=)) - Exception: [" + exception + "]", Logging.White);
             }
+            *
+            */
         }
 
         private void GetFactionName(string html)

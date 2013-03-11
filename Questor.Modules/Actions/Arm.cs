@@ -1056,6 +1056,11 @@ namespace Questor.Modules.Actions
                         if (!ItemHangarItems.Any())
                         {
                             Logging.Log("Arm.MoveItems", "if (!ItemHangarItems.Any())", Logging.Debug);
+                            foreach (Ammo ammo in AmmoToLoad)
+                            {
+                                Logging.Log("Arm", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                            }
+                            _States.CurrentArmState = ArmState.NotEnoughAmmo;
                             return;
                         }
                     }

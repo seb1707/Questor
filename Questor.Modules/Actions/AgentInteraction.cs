@@ -326,6 +326,9 @@ namespace Questor.Modules.Actions
 
         private void GetDungeonId(string html)
         {
+            return;
+            /*
+             * 
             HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
             missionHtml.LoadHtml(html);
             try
@@ -347,10 +350,13 @@ namespace Questor.Modules.Actions
             {
                 Logging.Log("GetDungeonId", "if (nd.Attributes[href].Value.Contains(dungeonID=)) - Exception: [" + exception + "]", Logging.White);
             }
+            *
+            */
         }
 
         private void GetFactionName(string html)
         {
+            Statistics.SaveMissionHTMLDetails(html, MissionName);
             // We are going to check damage types
             var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
@@ -441,7 +447,6 @@ namespace Questor.Modules.Actions
             Logging.Log("AgentInteraction", "Unable to find the faction for [" + MissionName + "] when searching through the html (listed below)", Logging.Orange);
 
             Logging.Log("AgentInteraction", html, Logging.White);
-            Statistics.SaveMissionHTMLDetails(html, MissionName);
             return;
         }
 

@@ -1236,7 +1236,7 @@ namespace Questor.Modules.Caching
             var mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
             if (mission == null)
             {
-                var selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+                Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
                 var nearestAgent = Settings.Instance.AgentsList
                     .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                     .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
@@ -1246,8 +1246,29 @@ namespace Questor.Modules.Caching
             return DirectEve.GetAgentById(mission.AgentId).Name;
         }
 
+        private string SelectFirstAgent()
+        {
+            Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+            AgentsList FirstAgent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+            if (FirstAgent == null)
+            {
+                Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
+            }
+            if (FirstAgent != null)
+            {
+                return FirstAgent.Name;    
+            }
+
+            return null;
+        }
+
         public string SwitchAgent()
         {
+            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.PrepareStorylineSwitchAgents)
+            {
+                return SelectFirstAgent();
+            }
+
             if (_agentName == "")
             {
                 // it means that this is first switch for Questor, so we'll check missions, then station or system for agents.

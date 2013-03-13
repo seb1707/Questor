@@ -1036,27 +1036,12 @@ namespace Questor.Modules.Actions
                     Ammo CurrentAmmoToLoad = AmmoToLoad.FirstOrDefault();
                     if (CurrentAmmoToLoad == null)
                     {
+                        //
+                        // if we have no more ammo types to be loaded we have to be finished with arm.
+                        //
                         Logging.Log("Arm", "if (CurrentAmmoToLoad == null)", Logging.Debug);
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;
-                    }
-
-                    if (CurrentAmmoToLoad.Quantity == 0)
-                    {
-                        Cache.Instance.MissionAmmo.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
-                        AmmoToLoad.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
-                        return;
-                    }
-
-                    foreach (DirectItem itemfound in Cache.Instance.AmmoHangar.Items)
-                    {
-                        if (itemfound.GroupName == "Advanced Autocannon Ammo")
-                        {
-                            Logging.Log("Arm.MoveItems","Found: Name [" + itemfound.TypeName + "] Quantity [" + itemfound.Quantity + "] in the AmmoHangar",Logging.Red);
-
-                        }
-
-                        continue;
                     }
 
                     IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
@@ -1067,7 +1052,17 @@ namespace Questor.Modules.Actions
                     {
                         IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
                         AmmoItems = ItemHangarItems;
-                        if (Settings.Instance.DebugArm) Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);   
+                        if (Settings.Instance.DebugArm) Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);
+                        if (!ItemHangarItems.Any())
+                        {
+                            Logging.Log("Arm.MoveItems", "if (!ItemHangarItems.Any())", Logging.Debug);
+                            foreach (Ammo ammo in AmmoToLoad)
+                            {
+                                Logging.Log("Arm", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                            }
+                            _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                            return;
+                        }
                     }
 
                     foreach (DirectItem item in AmmoItems)
@@ -1075,13 +1070,28 @@ namespace Questor.Modules.Actions
                         int moveAmmoQuantity = Math.Min(item.Stacksize, CurrentAmmoToLoad.Quantity);
                         moveAmmoQuantity = Math.Max(moveAmmoQuantity, 1);
                         Logging.Log("Arm.MoveItems", "Moving [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
+                        //
+                        // move items to cargo
+                        //
                         Cache.Instance.CargoHold.Add(item, moveAmmoQuantity);
+                        //
+                        // subtract the moved items from the items that need to be moved
+                        //
                         CurrentAmmoToLoad.Quantity -= moveAmmoQuantity;
-                        
+                        if (CurrentAmmoToLoad.Quantity == 0)
+                        {
+                            //
+                            // if we have moved all the ammo of this type that needs to be moved remove this type of ammo from the list of ammos that need to be moved
+                            // 
+                            Cache.Instance.MissionAmmo.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
+                            AmmoToLoad.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
+                            return;
+                        }
+
                         return; //you can only move one set of items per frame.
                     }
 
-                    if (AmmoToLoad.Any())
+                    if (AmmoToLoad.Any()) //if we still have any ammo to load here then we must be missing ammo
                     {
                         foreach (Ammo ammo in AmmoToLoad)
                         {

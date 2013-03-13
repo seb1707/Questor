@@ -576,10 +576,13 @@ namespace Questor.Modules.BackgroundTasks
                 if (!Settings.Instance.SpeedTank && Cache.Instance.IsApproachingOrOrbiting)
                 {
                     // Activate if target is far enough
-                    activate &= Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance;
+                    if (Cache.Instance.Approaching != null)
+                    {
+                        activate &= Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance;
 
-                    // Deactivate if target is too close
-                    deactivate |= Cache.Instance.Approaching.Distance < Settings.Instance.MinimumPropulsionModuleDistance;
+                        // Deactivate if target is too close
+                        deactivate |= Cache.Instance.Approaching.Distance < Settings.Instance.MinimumPropulsionModuleDistance;    
+                    }
                 }
 
                 // If we have less then x% cap, do not activate the module

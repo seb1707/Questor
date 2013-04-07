@@ -1806,6 +1806,9 @@ namespace Questor.Modules.Activities
                     Cache.Instance.WealthatStartofPocket = Cache.Instance.DirectEve.Me.Wealth;
                     Statistics.Instance.StartedPocket = DateTime.UtcNow;
 
+                    // Update UseDrones from settings (this can be overridden with a mission action named UseDrones)
+                    Cache.Instance.UseDrones = Settings.Instance.UseDrones;
+
                     // Reload the items needed for this mission from the XML file
                     Cache.Instance.RefreshMissionItems(AgentId);
 

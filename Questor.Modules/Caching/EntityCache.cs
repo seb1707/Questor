@@ -180,6 +180,42 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsDronePriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsPrimaryWeaponPriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         public bool IsTargeting
         {
             get

@@ -480,24 +480,6 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
-
-                    //
-                    // if it STILL is not in the PrimaryWeaponPriorityTargets list then it must be a frigate that PrimaryWeaponPriorityTargets does not want to add.
-                    // make sure that it IS a frigate and that it IS in the DronePriorityTarget List and if so move on to the next target.
-                    //
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
-                    {
-                        if (target.IsFrigate && (Cache.Instance.DronePriorityTargets.All(pt => pt.Id == target.Id)))
-                        {
-                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "[" + target.Name + "][" + Math.Round(target.Distance/1000, 2) + "][" + Cache.Instance.MaskedID(target.Id) + "] is a frigate and is already added to the DronePriorityTargetList, moving on to the next target", Logging.White);
-                            Nextaction();
-
-                            // Reset timeout
-                            _clearPocketTimeout = null;
-                            return;
-                        }
-                    }
-
                 }
 
                 NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
@@ -579,27 +561,12 @@ namespace Questor.Modules.Activities
                 // Lock target if within weapons range
                 if (target.Distance < range)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
-                    {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
 
-                    //
-                    // if it STILL is not in the PrimaryWeaponPriorityTargets list then it must be a frigate that PrimaryWeaponPriorityTargets does not want to add.
-                    // make sure that it IS a frigate and that it IS in the DronePriorityTarget List and if so move on to the next target.
-                    //
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        if (target.IsFrigate && (Cache.Instance.DronePriorityTargets.All(pt => pt.Id == target.Id)))
-                        {
-                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "[" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "][" + Cache.Instance.MaskedID(target.Id) + "] is a frigate and is already added to the DronePriorityTargetList, moving on to the next target", Logging.White);
-                            Nextaction();
-
-                            // Reset timeout
-                            _clearPocketTimeout = null;
-                            return;
-                        }
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
 
                 }
@@ -664,10 +631,12 @@ namespace Questor.Modules.Activities
                 // Lock priority target if within weapons range
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
 
                     return;
@@ -1169,10 +1138,12 @@ namespace Questor.Modules.Activities
 
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                     
                     if (_targetNull && targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
@@ -1247,10 +1218,12 @@ namespace Questor.Modules.Activities
 
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                 }
 
@@ -1311,10 +1284,12 @@ namespace Questor.Modules.Activities
             {
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                 }
 
@@ -1356,10 +1331,12 @@ namespace Questor.Modules.Activities
 
                 if (target.Distance < Cache.Instance.MaxRange)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != target.Id))
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                    if (target.IsFrigate || Settings.Instance.DronesKillHighValueTargets || Cache.Instance.EntitiesNotSelf.All(i => !i.IsNPCFrigate))
                     {
-                        //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { target }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                 }
 

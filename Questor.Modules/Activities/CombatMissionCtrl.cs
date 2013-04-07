@@ -468,8 +468,6 @@ namespace Questor.Modules.Activities
                         if (!Combat.ReloadAll(target)) return;
                     }
                 }
-
-                return;
             }
 
             // Do we have a timeout?  No, set it to now + 5 seconds

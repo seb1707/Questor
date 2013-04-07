@@ -184,6 +184,10 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _randomDelay = (Settings.Instance.InvasionRandomDelay > 0 ? _random.Next(Settings.Instance.InvasionRandomDelay) : 0);
                             _randomDelay += Settings.Instance.InvasionMinimumDelay;
+                            foreach (EntityCache enemy in Cache.Instance.EntitiesNotSelf.Where(e => e.IsPlayer))
+                            {
+                                Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + enemy.Velocity + "]", Logging.Red);
+                            }
                         }
                     }
 
@@ -192,28 +196,12 @@ namespace Questor.Modules.BackgroundTasks
                         EntityCache EntityIsWarpScramblingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
                         if (EntityIsWarpScramblingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWarpScramblingMe.Name))
                         {
-                            if (!Cache.Instance.DronePriorityTargets.Contains(EntityIsWarpScramblingMe))
-                            {
-                                Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a DronePriorityTarget", Logging.White);
-                                Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic");
-                            }
-
+                            Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic");
+                            
                             if (Settings.Instance.ShootWarpScramblersWithPrimaryWeapons && !Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsWarpScramblingMe))
                             {
-                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                {
-                                    if (EntityIsWarpScramblingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                        || EntityIsWarpScramblingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
-                                    }
-                                }
-                                else
-                                {
-                                    Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
-                                }
+                                //Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
                             }
                         }
 
@@ -222,45 +210,13 @@ namespace Questor.Modules.BackgroundTasks
                             EntityCache EntityIsWebbingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWebbingMe);
                             if (EntityIsWebbingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWebbingMe.Name))
                             {
-                                if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsWebbingMe))
-                                {
-                                    if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                    {
-                                        if (EntityIsWebbingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                            || EntityIsWebbingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                        {
-                                            Logging.Log("Panic", "Adding [" + EntityIsWebbingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), PrimaryWeaponPriority.Webbing, "Panic");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsWebbingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), PrimaryWeaponPriority.Webbing, "Panic");
-                                    }
-                                }
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), PrimaryWeaponPriority.Webbing, "Panic");
                             }
 
                             EntityCache EntityIsTargetPaintingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWebbingMe);
                             if (EntityIsTargetPaintingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsTargetPaintingMe.Name))
                             {
-                                if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsTargetPaintingMe))
-                                {
-                                    if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                    {
-                                        if (EntityIsTargetPaintingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                            || EntityIsTargetPaintingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                        {
-                                            Logging.Log("Panic", "Adding [" + EntityIsTargetPaintingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), PrimaryWeaponPriority.TargetPainting, "Panic");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsTargetPaintingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), PrimaryWeaponPriority.TargetPainting, "Panic");
-                                    }
-                                }
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), PrimaryWeaponPriority.TargetPainting, "Panic");
                             }    
                         }
 
@@ -269,67 +225,19 @@ namespace Questor.Modules.BackgroundTasks
                         EntityCache EntityIsNeutralizingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsNeutralizingMe);
                         if (EntityIsNeutralizingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsNeutralizingMe.Name))
                         {
-                            if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsNeutralizingMe))
-                            {
-                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                {
-                                    if (EntityIsNeutralizingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                        || EntityIsNeutralizingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsNeutralizingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), PrimaryWeaponPriority.Neutralizing, "Panic");
-                                    }
-                                }
-                                else
-                                {
-                                    Logging.Log("Panic", "Adding [" + EntityIsNeutralizingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), PrimaryWeaponPriority.Neutralizing, "Panic");
-                                }
-                            }
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), PrimaryWeaponPriority.Neutralizing, "Panic");
                         }
 
                         EntityCache EntityIsJammingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsJammingMe);
                         if (EntityIsJammingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsJammingMe.Name))
                         {
-                            if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsJammingMe))
-                            {
-                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                {
-                                    if (EntityIsJammingMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                        || EntityIsJammingMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsJammingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), PrimaryWeaponPriority.Jamming, "Panic");
-                                    }
-                                }
-                                else
-                                {
-                                    Logging.Log("Panic", "Adding [" + EntityIsJammingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), PrimaryWeaponPriority.Jamming, "Panic");
-                                }
-                            }
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), PrimaryWeaponPriority.Jamming, "Panic");
                         }
 
                         EntityCache EntityIsSensorDampeningMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsSensorDampeningMe);
                         if (EntityIsSensorDampeningMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsSensorDampeningMe.Name))
                         {
-                            if (!Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsSensorDampeningMe))
-                            {
-                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                                {
-                                    if (EntityIsSensorDampeningMe.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                        || EntityIsSensorDampeningMe.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                                    {
-                                        Logging.Log("Panic", "Adding [" + EntityIsSensorDampeningMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), PrimaryWeaponPriority.Dampening, "Panic");
-                                    }
-                                }
-                                else
-                                {
-                                    Logging.Log("Panic", "Adding [" + EntityIsSensorDampeningMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), PrimaryWeaponPriority.Dampening, "Panic");
-                                }   
-                            }
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), PrimaryWeaponPriority.Dampening, "Panic");
                         }
                         
                         if (Cache.Instance.Modules.Any(m => m.IsTurret))
@@ -459,31 +367,37 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             Logging.Log("Panic", "No station found in local?", Logging.Red);
                         }
-                    }
 
-                    // What is this you say?  No star?
-                    if (Cache.Instance.Star == null) return;
+                        //
+                        // Add option to warp to (the closest) safespot here (can we manage to find the closest safespot by angle instead of AU?)
+                        //
 
-                    if (Cache.Instance.Star.Distance > (int)Distance.WeCanWarpToStarFromHere)
-                    {
-                        if (Cache.Instance.InWarp) return;
+                        // What is this you say?  No star?
+                        if (Cache.Instance.Star == null) return;
 
-                        if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                        if (Cache.Instance.Star.Distance > (int) Distance.WeCanWarpToStarFromHere)
                         {
-                            Logging.Log("Panic", "We are still warp scrambled!", Logging.Red); //This runs every 'tick' so we should see it every 1.5 seconds or so
-                            _lastWarpScrambled = DateTime.UtcNow;
+                            if (Cache.Instance.InWarp) return;
+
+                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                            {
+                                Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
+                                    //This runs every 'tick' so we should see it every 1.5 seconds or so
+                                _lastWarpScrambled = DateTime.UtcNow;
+                                return;
+                            }
+
+                            if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                            {
+                                Logging.Log("Panic", "Warping to [" + Cache.Instance.Star.Name + "][" + Math.Round((Cache.Instance.Star.Distance/1000)/149598000, 2) + " AU away]", Logging.Red);
+                                Cache.Instance.Star.WarpTo();
+                                return;
+                            }
+
+                            Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                             return;
                         }
-
-                        if (DateTime.UtcNow > Cache.Instance.NextWarpTo | DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
-                        {
-                            Logging.Log("Panic", "Warping to [" + Cache.Instance.Star.Name + "][" + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Red);
-                            Cache.Instance.Star.WarpTo();
-                            return;
-                        }
-
-                        Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
-                        return;
                     }
 
                     Logging.Log("Panic", "At the star, lower panic mode", Logging.Red);

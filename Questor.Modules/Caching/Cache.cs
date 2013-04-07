@@ -1727,7 +1727,12 @@ namespace Questor.Modules.Caching
                     }
                 //}
 
-                return _approaching != null && _approaching.IsValid ? _approaching : null;
+                if (_approaching != null && _approaching.IsValid)
+                {
+                    return _approaching;
+                }
+
+                return null;
             }
             set { _approaching = value; }
         }
@@ -2420,31 +2425,33 @@ namespace Questor.Modules.Caching
         {
             foreach (EntityCache target in targets)
             {
-                if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || _primaryWeaponPriorityTargets.Any(pwpt => pwpt.EntityID == target.Id || (_dronePriorityTargets.Any(dpt => dpt.EntityID == target.Id && Statistics.Instance.OutOfDronesCount == 0))))
+                if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || _primaryWeaponPriorityTargets.Any(pwpt => pwpt.EntityID == target.Id || (_dronePriorityTargets.Any(dpt => dpt.EntityID == target.Id))))
                 {
                     continue;
                 }
 
+                //
+                // Primary Weapons
+                //
                 if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                 {
                     if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
                         || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
                     {
-                        Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                        Logging.Log("Panic", "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity, 2) / 1000 + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
                         _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                     }
                 }
                 else
                 {
-                    Logging.Log("Panic", "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
+                    Logging.Log("Panic", "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity, 2) / 1000 + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget", Logging.White);
                     _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                 }
 
-                if (Statistics.Instance.OutOfDronesCount == 0 && Cache.Instance.UseDrones && _dronePriorityTargets.Any(d => d.EntityID != target.Id))
-                {
-                    Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
-                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = DronePriority.PriorityKillTarget });
-                }
+                //
+                // Drones
+                //
+                Cache.Instance.AddDronePriorityTargets(targets, DronePriority.PriorityKillTarget, module);
 
                 continue;
             }
@@ -2467,8 +2474,16 @@ namespace Questor.Modules.Caching
                     continue;
                 }
 
-                Logging.Log(module, "Adding [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
-                _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = priority });
+                if (Cache.Instance.InMission && Cache.Instance.UseDrones)
+                {
+                    Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity, 2) / 1000 + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
+                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = priority });    
+                }
+                else if (Settings.Instance.UseDrones)
+                {
+                    Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity, 2) / 1000 + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target", Logging.Teal);
+                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = priority });    
+                }
             }
 
             return;
@@ -2674,8 +2689,7 @@ namespace Questor.Modules.Caching
                     && PrimaryWeaponPriorityTarget.Entity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons 
                     && PrimaryWeaponPriorityTarget.Entity.IsNPCFrigate
                     && Cache.Instance.DoWeCurrentlyHaveTurretsMounted()
-                    && Cache.Instance.UseDrones
-                    && Statistics.Instance.OutOfDronesCount == 0)
+                    && Cache.Instance.UseDrones)
                 {
                     Logging.Log("Cache.GetBesttarget", "[" + PrimaryWeaponPriorityTarget.Entity.Name + "] was removed from the PrimaryWeaponsPriorityTarget list because it was inside [" + Math.Round(PrimaryWeaponPriorityTarget.Entity.Distance, 0) + "] meters and going [" + Math.Round(PrimaryWeaponPriorityTarget.Entity.Velocity, 0 ) + "] meters per second", Logging.Red);
                     Cache.Instance.RemovePrimaryWeaponPriorityTarget(PrimaryWeaponPriorityTarget);

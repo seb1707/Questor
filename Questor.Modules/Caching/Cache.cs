@@ -2677,7 +2677,7 @@ namespace Questor.Modules.Caching
             // we purposely do not check for ANY priority targets here, including warp scramblers, if their are any let the drones handle it
             //
             
-            foreach (PriorityTarget PrimaryWeaponPriorityTarget in Cache.Instance._primaryWeaponPriorityTargets)
+            foreach (PriorityTarget PrimaryWeaponPriorityTarget in Cache.Instance._primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority).ThenBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct)).ThenBy(pt => pt.Entity.Distance))
             {
                 if (PrimaryWeaponPriorityTarget.Entity == null || PrimaryWeaponPriorityTarget.Entity.Distance > 250000)
                 {

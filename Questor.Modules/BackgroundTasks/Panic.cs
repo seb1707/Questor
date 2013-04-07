@@ -34,6 +34,7 @@ namespace Questor.Modules.BackgroundTasks
         private bool _delayedResume;
         private int _randomDelay;
         private int BookmarkMyWreckAttempts;
+        private int icount = 1;
 
         //public bool InMission { get; set; }
 
@@ -248,9 +249,20 @@ namespace Questor.Modules.BackgroundTasks
                         if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
                         {
                             _lastPriorityTargetLogging = DateTime.UtcNow;
+
+                            icount = 1;
                             foreach (EntityCache target in Cache.Instance.DronePriorityTargets)
                             {
-                                Logging.Log("Panic.ListPriorityTargets", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                icount++;
+                                Logging.Log("Panic.ListDronePriorityTargets", "[" + icount  + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                continue;
+                            }
+
+                            icount = 1;
+                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityTargets)
+                            {
+                                icount++;
+                                Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
                                 continue;
                             }
                         }

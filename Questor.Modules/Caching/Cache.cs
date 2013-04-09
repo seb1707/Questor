@@ -1701,7 +1701,7 @@ namespace Questor.Modules.Caching
             get
             {
                 _primaryWeaponPriorityTargets.RemoveAll(pt => pt.Entity == null);
-                return _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority).ThenBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct)).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                return _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
             }
         }
 
@@ -1710,7 +1710,7 @@ namespace Questor.Modules.Caching
             get
             {
                 _dronePriorityTargets.RemoveAll(pt => pt.Entity == null);
-                return _dronePriorityTargets.OrderBy(pt => pt.DronePriority).ThenBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct)).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                return _dronePriorityTargets.OrderBy(pt => pt.DronePriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
             }
         }
 
@@ -2788,7 +2788,6 @@ namespace Questor.Modules.Caching
             //
 
             EntityCache primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority)
-                                                   .ThenBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
                                                    .ThenBy(pt => pt.Entity.Distance)
                                                    .Select(pt => pt.Entity).FirstOrDefault();
                 
@@ -2801,7 +2800,6 @@ namespace Questor.Modules.Caching
             // Get the closest drone priority target
             //
             EntityCache dronePriorityTarget = _dronePriorityTargets.OrderBy(pt => pt.DronePriority)
-                                                   .ThenBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
                                                    .ThenBy(pt => pt.Entity.Distance)
                                                    .Select(pt => pt.Entity).FirstOrDefault();
             

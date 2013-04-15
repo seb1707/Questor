@@ -76,12 +76,13 @@ namespace Questor
 
             try
             {
-                if (Program._directEve == null)
+                if (Cache.Instance.DirectEve == null)
                 {
                     Logging.Log("Questor", "Existing DirectEve Instance not found: Starting a DirectEve Instance", Logging.Red);
                     try
                     {
-                        _directEve = new DirectEve();
+                        //_directEve = new DirectEve(null, false); //if you use this method You HAVE to use isxstealth!
+                        Cache.Instance.DirectEve = new DirectEve();
                     }
                     catch (Exception ex2)
                     {
@@ -93,7 +94,7 @@ namespace Questor
                 else
                 {
                     Logging.Log("Questor", "Using Existing DirectEve Instance", Logging.Red);
-                    _directEve = Program._directEve;
+                    _directEve = Cache.Instance.DirectEve;
                 }
             }
             catch (Exception ex1)
@@ -101,7 +102,9 @@ namespace Questor
                 Logging.Log("Questor", "[exception] Existing DirectEve Instance not found: Starting a DirectEve Instance [" + ex1 + "]", Logging.Red);
                 try
                 {
-                    _directEve = new DirectEve();
+                    //_directEve = new DirectEve(null, false); //if you use this method You HAVE to use isxstealth!
+                    Cache.Instance.DirectEve = new DirectEve();
+                    _directEve = Cache.Instance.DirectEve;
                 }
                 catch (Exception ex2)
                 {
@@ -110,23 +113,6 @@ namespace Questor
                     Cleanup.CloseQuestor();
                 }
             }
-
-            if (_directEve == null)
-            {
-                Logging.Log("Questor","[2] Starting DirectEve Instance",Logging.Red);
-                try
-                {
-                    _directEve = new DirectEve();
-                }
-                catch (Exception ex)
-                {
-                    Logging.Log("Questor", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                    Logging.Log("Questor", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
-                    Cleanup.CloseQuestor();
-                }
-            }
-            
-            Cache.Instance.DirectEve = _directEve;
 
             try
             {

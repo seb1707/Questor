@@ -146,7 +146,8 @@ namespace Questor
 
             try
             {
-                _directEve = new DirectEve();
+                Cache.Instance.DirectEve = new DirectEve();
+                _directEve = Cache.Instance.DirectEve;
             }
             catch (Exception ex)
             {

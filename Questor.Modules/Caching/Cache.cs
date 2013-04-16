@@ -5643,14 +5643,14 @@ namespace Questor.Modules.Caching
                 if (uselessSalvageBookmark != null)
                 {
                     _bookmarkDeletionAttempt++;
-                    if (_bookmarkDeletionAttempt <= 5)
+                    if (_bookmarkDeletionAttempt <= AfterMissionSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 15)
                     {
                         Logging.Log(module, "removing salvage bookmark that aged more than [" + Settings.Instance.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
                         uselessSalvageBookmark.Delete();
                         return false;
                     }
 
-                    if (_bookmarkDeletionAttempt > 5)
+                    if (_bookmarkDeletionAttempt > AfterMissionSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 15)
                     {
                         Logging.Log(module, "error removing bookmark!" + uselessSalvageBookmark.Title, Logging.White);
                         _States.CurrentQuestorState = QuestorState.Error;

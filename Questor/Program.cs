@@ -30,7 +30,7 @@ namespace Questor
     internal static class Program
     {
         private static bool _done;
-        private static DirectEve _directEve;
+        public static DirectEve _directEve;
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
@@ -146,7 +146,8 @@ namespace Questor
 
             try
             {
-                _directEve = new DirectEve();
+                Cache.Instance.DirectEve = new DirectEve();
+                _directEve = Cache.Instance.DirectEve;
             }
             catch (Exception ex)
             {
@@ -180,7 +181,7 @@ namespace Questor
 
             try
             {
-                _directEve.OnFrame += OnFrame;
+                _directEve.OnFrame += LoginOnFrame;
             }
             catch (Exception ex)
             {
@@ -195,7 +196,10 @@ namespace Questor
 
             try
             {
-                _directEve.Dispose();
+                //
+                // do not dispose here as we want to use the same directeve instance later in the main program
+                //
+                //_directEve.Dispose();
             }
             catch (Exception ex)
             {
@@ -379,7 +383,7 @@ namespace Questor
             //
         }
 
-        private static void OnFrame(object sender, EventArgs e)
+        private static void LoginOnFrame(object sender, EventArgs e)
         {
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();

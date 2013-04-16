@@ -76,21 +76,43 @@ namespace Questor
 
             try
             {
-                _directEve = new DirectEve();
+                if (Cache.Instance.DirectEve == null)
+                {
+                    Logging.Log("Questor", "Existing DirectEve Instance not found: Starting a DirectEve Instance", Logging.Red);
+                    try
+                    {
+                        //_directEve = new DirectEve(null, false); //if you use this method You HAVE to use isxstealth!
+                        Cache.Instance.DirectEve = new DirectEve();
+                    }
+                    catch (Exception ex2)
+                    {
+                        Logging.Log("Questor", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                        Logging.Log("Questor", string.Format("DirectEVE: Exception {0}...", ex2), Logging.White);
+                        Cleanup.CloseQuestor();
+                    }
+                }
+                else
+                {
+                    Logging.Log("Questor", "Using Existing DirectEve Instance", Logging.Red);
+                    _directEve = Cache.Instance.DirectEve;
+                }
             }
-            catch (Exception ex)
+            catch (Exception ex1)
             {
-                Logging.Log("Questor", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("Questor", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
-                //Cache.Instance.CloseQuestorCMDLogoff = false;
-                //Cache.Instance.CloseQuestorCMDExitGame = true;
-                //Cache.Instance.CloseQuestorEndProcess = true;
-                //Settings.Instance.AutoStart = true;
-                //Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe license server is down";
-                //Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor();
+                Logging.Log("Questor", "[exception] Existing DirectEve Instance not found: Starting a DirectEve Instance [" + ex1 + "]", Logging.Red);
+                try
+                {
+                    //_directEve = new DirectEve(null, false); //if you use this method You HAVE to use isxstealth!
+                    Cache.Instance.DirectEve = new DirectEve();
+                    _directEve = Cache.Instance.DirectEve;
+                }
+                catch (Exception ex2)
+                {
+                    Logging.Log("Questor", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                    Logging.Log("Questor", string.Format("DirectEVE: Exception {0}...", ex2), Logging.White);
+                    Cleanup.CloseQuestor();
+                }
             }
-            Cache.Instance.DirectEve = _directEve;
 
             try
             {
@@ -141,7 +163,7 @@ namespace Questor
             Settings.Instance.CharacterMode = "none";
             try
             {
-                _directEve.OnFrame += OnFrame;
+                _directEve.OnFrame += EVEOnFrame;
             }
             catch (Exception ex)
             {
@@ -549,7 +571,7 @@ namespace Questor
             return true;
         }
 
-        private void OnFrame(object sender, EventArgs e)
+        private void EVEOnFrame(object sender, EventArgs e)
         {
             if (!OnframeProcessEveryPulse()) return;
             if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);

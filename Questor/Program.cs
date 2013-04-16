@@ -30,7 +30,7 @@ namespace Questor
     internal static class Program
     {
         private static bool _done;
-        public static DirectEve _directEve;
+        private static DirectEve _directEve;
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 

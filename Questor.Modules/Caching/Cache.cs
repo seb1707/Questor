@@ -2601,20 +2601,27 @@ namespace Questor.Modules.Caching
             Cache.Instance.RouteIsAllHighSecBool = false;
 
             // Find the first waypoint
-            List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
-            if (currentPath == null || !currentPath.Any()) return false;
-            if (currentPath[0] == 0) return false; //No destination set - prevents exception if somehow we have got an invalid destination
-
-            for (int i = currentPath.Count - 1; i >= 0; i--)
+            if (DirectEve.Navigation.GetDestinationPath() != null && DirectEve.Navigation.GetDestinationPath().Count > 0)
             {
-                DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
-                if (solarSystemInRoute.Security < 0.45)
+                List<long> currentPath = DirectEve.Navigation.GetDestinationPath();
+                if (currentPath == null || !currentPath.Any()) return false;
+                if (currentPath[0] == 0) return false; //No destination set - prevents exception if somehow we have got an invalid destination
+
+                for (int i = currentPath.Count - 1; i >= 0; i--)
                 {
-                    //Bad bad bad
-                    Cache.Instance.RouteIsAllHighSecBool = false;
-                    return true;
-                }
+                    DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
+                    if (solarSystemInRoute.Security < 0.45)
+                    {
+                        //Bad bad bad
+                        Cache.Instance.RouteIsAllHighSecBool = false;
+                        return true;
+                    }
+                }    
             }
+
+            //
+            // if DirectEve.Navigation.GetDestinationPath() is null or 0 jumps then it must be safe (can we assume we are not in lowsec or 0.0 already?!)
+            //
             Cache.Instance.RouteIsAllHighSecBool = true;
             return true;
         }

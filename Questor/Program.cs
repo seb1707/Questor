@@ -30,7 +30,6 @@ namespace Questor
     internal static class Program
     {
         private static bool _done;
-        private static DirectEve _directEve;
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
@@ -147,7 +146,6 @@ namespace Questor
             try
             {
                 Cache.Instance.DirectEve = new DirectEve();
-                _directEve = Cache.Instance.DirectEve;
             }
             catch (Exception ex)
             {
@@ -164,13 +162,13 @@ namespace Questor
 
             try
             {
-                if (_directEve.HasSupportInstances())
+                if (Cache.Instance.DirectEve.HasSupportInstances())
                 {
                     Logging.Log("Startup", "You have a valid directeve.lic file and have instances available", Logging.Orange);
                 }
                 else
                 {
-                    Logging.Log("Startup", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
+                    Logging.Log("Startup", "You have 0 Support Instances available [ Cache.Instance.DirectEve.HasSupportInstances() is false ]", Logging.Orange);
                 }
 
             }
@@ -181,7 +179,7 @@ namespace Questor
 
             try
             {
-                _directEve.OnFrame += LoginOnFrame;
+                Cache.Instance.DirectEve.OnFrame += LoginOnFrame;
             }
             catch (Exception ex)
             {
@@ -200,6 +198,7 @@ namespace Questor
                 // do not dispose here as we want to use the same directeve instance later in the main program
                 //
                 //_directEve.Dispose();
+                Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
             }
             catch (Exception ex)
             {
@@ -417,7 +416,7 @@ namespace Questor
             }
 
             // If the session is ready, then we are done :)
-            if (_directEve.Session.IsReady)
+            if (Cache.Instance.DirectEve.Session.IsReady)
             {
                 Logging.Log("Startup", "We have successfully logged in", Logging.White);
                 Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
@@ -426,9 +425,9 @@ namespace Questor
             }
 
             // We should not get any windows
-            if (_directEve.Windows.Count != 0)
+            if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (var window in _directEve.Windows)
+                foreach (var window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -623,7 +622,7 @@ namespace Questor
                     // Replace this try block with the following once new DirectEve is pushed
                     // _directEve.RunScript(_scriptFile);
 
-                    System.Reflection.MethodInfo info = _directEve.GetType().GetMethod("RunScript");
+                    System.Reflection.MethodInfo info = Cache.Instance.DirectEve.GetType().GetMethod("RunScript");
 
                     if (info == null)
                     {
@@ -632,7 +631,7 @@ namespace Questor
                     else
                     {
                         Logging.Log("Startup", string.Format("Running {0}...", _scriptFile), Logging.White);
-                        info.Invoke(_directEve, new Object[] { _scriptFile });
+                        info.Invoke(Cache.Instance.DirectEve, new Object[] { _scriptFile });
                     }
                 }
                 catch (System.Exception ex)
@@ -647,16 +646,16 @@ namespace Questor
                 return;
             }
 
-            if (_directEve.Login.AtLogin && _directEve.Login.ServerStatus != "Status: OK")
+            if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
-                Logging.Log("Startup", "Server status[" + _directEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
+                Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
                 _nextPulse = DateTime.UtcNow.AddSeconds(30);
                 return;
             }
 
-            if (_directEve.Login.AtLogin && !_directEve.Login.IsLoading && !_directEve.Login.IsConnecting)
+            if (Cache.Instance.DirectEve.Login.AtLogin && !Cache.Instance.DirectEve.Login.IsLoading && !Cache.Instance.DirectEve.Login.IsConnecting)
             {
-                if (!_directEve.HasSupportInstances())
+                if (!Cache.Instance.DirectEve.HasSupportInstances())
                 {
                     Logging.Log("Startup", "DirectEVE Requires Active Support Instances to use the convenient like Auto-Login, Market Functions (Valuedump and Market involving storylines) among other features.", Logging.White);
                     Logging.Log("Startup", "Make sure you have support instances and that you have downloaded your directeve.lic file and placed it in the .net programs folder with your directeve.dll", Logging.White);
@@ -666,18 +665,18 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)
                 {
                     Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);
-                    _directEve.Login.Login(_username, _password);
+                    Cache.Instance.DirectEve.Login.Login(_username, _password);
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
                 }
             }
 
-            if (_directEve.Login.AtCharacterSelection && _directEve.Login.IsCharacterSelectionReady && !_directEve.Login.IsConnecting && !_directEve.Login.IsLoading)
+            if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 20)
                 {
-                    foreach (DirectLoginSlot slot in _directEve.Login.CharacterSlots)
+                    foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
                         if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && System.String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
                         {

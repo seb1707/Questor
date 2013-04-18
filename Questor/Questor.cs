@@ -77,17 +77,17 @@ namespace Questor
             {
                 if (Cache.Instance.DirectEve.HasSupportInstances())
                 {
-                    Logging.Log("Questor", "You have a valid directeve.lic file and have instances available", Logging.Orange);
+                    //Logging.Log("Questor", "You have a valid directeve.lic file and have instances available", Logging.Orange);
                 }
                 else
                 {
-                    Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
+                    //Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
                 }
 
             }
             catch (Exception exception)
             {
-                Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+                Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() in questor.cs - exception was: [" + exception + "]", Logging.Orange);
             }
             
             Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;

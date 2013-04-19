@@ -1097,7 +1097,6 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Arm","Error while processing Itemhangar Items exception was: [" + exception + "]",Logging.Debug);
                     }
-                    
 
                     if (AmmoToLoad.Any()) //if we still have any ammo to load here then we must be missing ammo
                     {

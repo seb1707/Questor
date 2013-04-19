@@ -2718,10 +2718,16 @@ namespace Questor.Modules.Caching
                 }
 
                 // Choose any WarpScrambling targets first
-                EntityCache WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
+                EntityCache WarpScramblingDronePriorityTarget = null
+                try
+                {
+                    WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
                                                    .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
                                                    .ThenBy(pt => pt.Entity.Distance)
                                                    .Select(pt => pt.Entity).FirstOrDefault();
+                }
+                catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
+
                 if (WarpScramblingDronePriorityTarget != null)
                 {
                     return WarpScramblingDronePriorityTarget;
@@ -2793,10 +2799,14 @@ namespace Questor.Modules.Caching
             //
             // Get the closest primary weapon priority target
             //
-
-            EntityCache primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority)
-                                                   .ThenBy(pt => pt.Entity.Distance)
-                                                   .Select(pt => pt.Entity).FirstOrDefault();
+            EntityCache primaryWeaponPriorityTarget = null;
+            try
+            {
+                primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority)
+                                                       .ThenBy(pt => pt.Entity.Distance)
+                                                       .Select(pt => pt.Entity).FirstOrDefault();
+            }
+            catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
                 
             if (primaryWeaponPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
             {
@@ -2806,10 +2816,15 @@ namespace Questor.Modules.Caching
             //
             // Get the closest drone priority target
             //
-            EntityCache dronePriorityTarget = _dronePriorityTargets.OrderBy(pt => pt.DronePriority)
+            EntityCache dronePriorityTarget = null;
+            try
+            {
+                dronePriorityTarget = _dronePriorityTargets.OrderBy(pt => pt.DronePriority)
                                                    .ThenBy(pt => pt.Entity.Distance)
                                                    .Select(pt => pt.Entity).FirstOrDefault();
-            
+            }
+            catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
+
             if (dronePriorityTarget != null && callingroutine == "Drones" && !Cache.Instance.IgnoreTargets.Contains(dronePriorityTarget.Name.Trim()))
             {
                 return dronePriorityTarget;

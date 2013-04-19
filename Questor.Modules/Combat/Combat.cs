@@ -766,7 +766,7 @@ namespace Questor.Modules.Combat
             {
                 if (!_isJammed)
                 {
-                    Logging.Log("Combat", "We are jammed and can't target anything", Logging.Orange);
+                    Logging.Log("Combat", "We are jammed and can not target anything", Logging.Orange);
                 }
 
                 _isJammed = true;
@@ -781,9 +781,6 @@ namespace Questor.Modules.Combat
             }
             _isJammed = false;
 
-            //
-            // ???bounty tracking code goes here???
-            //
             if (!Cache.Instance.OpenCargoHold("Combat.TargetCombatants")) return;
 
             // What is the range that we can target at
@@ -792,7 +789,15 @@ namespace Questor.Modules.Combat
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
-            List<EntityCache> combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && (e.IsNpc || e.IsNpcByGroupID ) && !e.IsContainer && !e.IsFactionWarfareNPC && !e.IsEntityIShouldLeaveAlone && !e.IsBadIdea && e.GroupId != (int)Group.LargeColidableStructure).ToList();
+            List<EntityCache> combatTargets = targets.Where(e => 
+                                                            e.CategoryId == (int)CategoryID.Entity 
+                                                        && (e.IsNpc || e.IsNpcByGroupID ) 
+                                                        && !e.IsContainer 
+                                                        && !e.IsFactionWarfareNPC 
+                                                        && !e.IsEntityIShouldLeaveAlone 
+                                                        && !e.IsBadIdea 
+                                                        && e.GroupId != (int)Group.LargeColidableStructure)
+                                                        .ToList();
 
             if (Settings.Instance.DebugTargetCombatants)
             {
@@ -812,7 +817,7 @@ namespace Questor.Modules.Combat
             for (int i = combatTargets.Count - 1; i >= 0; i--)
             {
                 EntityCache target = combatTargets[i];
-                if (target.Distance > Cache.Instance.MaxRange * 1.5d)
+                if (target.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
                 {
                     Logging.Log("Combat", "Unlocking Target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] out of range [" + Math.Round(target.Distance / 1000, 0) + "k away] It will be relocked when it comes back into range. [" + Math.Round(Cache.Instance.MaxRange * 1.5d/1000,2) + "]", Logging.Teal);
                 }

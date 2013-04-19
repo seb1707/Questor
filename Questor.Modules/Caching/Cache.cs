@@ -2718,7 +2718,7 @@ namespace Questor.Modules.Caching
                 }
 
                 // Choose any WarpScrambling targets first
-                EntityCache WarpScramblingDronePriorityTarget = null
+                EntityCache WarpScramblingDronePriorityTarget = null;
                 try
                 {
                     WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)

@@ -878,7 +878,7 @@ namespace Questor.Modules.Combat
             int DronesPTtargeted = Cache.Instance.Targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.PrimaryWeaponPriorityTargets.Contains(t));
 
             //
-            // Do we have too many high (non-priority) value targets targeted?
+            // Do we have too many high value (non-priority) targets targeted?
             //
             while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
@@ -906,7 +906,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have too many low value targets targeted?
             //
-            while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.PrimaryWeaponPriorityTargets.Count(), 0))
+            while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.DronePriorityTargets.Count(dt => !dt.IsTarget), 0))
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => t.Distance).FirstOrDefault();
@@ -920,7 +920,7 @@ namespace Questor.Modules.Combat
             }
 
             //
-            // Do we prioritytargets that can't be targeted?
+            // Do we have prioritytargets that can't be targeted?
             //
             while (Cache.Instance.Targets.Count() >= Settings.Instance.MaximumWreckTargets + Settings.Instance.MaximumHighValueTargets + Settings.Instance.MaximumLowValueTargets 
                 && (Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)))
@@ -956,10 +956,10 @@ namespace Questor.Modules.Combat
             }
 
             //
-            // Do we have any priority targets not yet targeted?
+            // Do we have any drone priority targets not yet targeted?
             //
-            IEnumerable<EntityCache> priority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
-            foreach (EntityCache entity in priority)
+            IEnumerable<EntityCache> dronepriority = Cache.Instance.DronePriorityTargets.Where(t => t.Distance < Settings.Instance.DroneControlRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).Where(c => c.IsWarpScramblingMe).OrderBy(c => c.Distance);
+            foreach (EntityCache entity in dronepriority)
             {
                 // Have we reached the limit of high value targets?
                 if (highValueTargets.Count >= maxHighValueTarget)
@@ -974,7 +974,35 @@ namespace Questor.Modules.Combat
 
                 if (entity.LockTarget())
                 {
-                    Logging.Log("Combat", "Targeting priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
+                    Logging.Log("Combat", "Targeting drone priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
+                    highValueTargets.Add(entity);
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    return;
+                }
+
+                break;
+            }
+
+            //
+            // Do we have any primary weapon priority targets not yet targeted?
+            //
+            IEnumerable<EntityCache> primaryweaponpriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
+            foreach (EntityCache entity in primaryweaponpriority)
+            {
+                // Have we reached the limit of high value targets?
+                if (highValueTargets.Count >= maxHighValueTarget)
+                {
+                    break;
+                }
+
+                if (entity.IsTarget || entity.IsTargeting) //This target is already targeted no need to target it again
+                {
+                    continue;
+                }
+
+                if (entity.LockTarget())
+                {
+                    Logging.Log("Combat", "Targeting primary weapon priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
                     highValueTargets.Add(entity);
                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     return;

@@ -880,13 +880,26 @@ namespace Questor.Modules.Combat
             //TODO 
             //Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.Targets.Contains(t.Id))).Count();
 
+            //
             // Do we have too many high (non-priority) value targets targeted?
+            //
             while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
                 // Unlock any target
-                EntityCache target = highValueTargets.OrderByDescending(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
+                EntityCache target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
                 if (target == null)
                 {
+                    target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(p => !p.IsWarpScramblingMe));
+                }
+                if (target == null)
+                {
+                    target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(p => !p.IsWarpScramblingMe));
+                }
+                if (target == null)
+                {
+                    //
+                    // THIS IS A BAD BAD BAD spot to reach. 
+                    //
                     break;
                 }
 
@@ -906,7 +919,9 @@ namespace Questor.Modules.Combat
                 }
             }
 
+            //
             // Do we have too many low value targets targeted?
+            //
             while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.PrimaryWeaponPriorityTargets.Count(), 0))
             {
                 // Unlock any target that is not warp scrambling me
@@ -920,15 +935,19 @@ namespace Questor.Modules.Combat
                 }
             }
 
-            // Do we have enough targeted?
+            //
+            // Do we have enough targets targeted?
+            //
             if ((highValueTargets.Count >= maxHighValueTarget && lowValueTargets.Count >= maxLowValueTarget) ||
                 ((highValueTargets.Count + lowValueTargets.Count) >= (maxHighValueTarget + maxLowValueTarget)))
             {
                 return;
             }
 
-            // Do we have any priority targets?
-            IEnumerable<EntityCache> priority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
+            //
+            // Do we have any priority targets not yet targeted?
+            //
+            IEnumerable<EntityCache> priority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
             foreach (EntityCache entity in priority)
             {
                 // Have we reached the limit of high value targets?

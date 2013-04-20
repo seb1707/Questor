@@ -2438,13 +2438,13 @@ namespace Questor.Modules.Caching
                     if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
                         || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
                     {
-                        Logging.Log("Panic", "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                        Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
                         _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                     }
                 }
                 else
                 {
-                    Logging.Log("Panic", "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                    Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
                     _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                 }
 
@@ -2684,6 +2684,7 @@ namespace Questor.Modules.Caching
             // If not, clear current target
             if (currentTarget != null && !currentTarget.IsTarget)
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
                 currentTarget = null;
             }
 
@@ -2724,6 +2725,7 @@ namespace Questor.Modules.Caching
                     DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget)
                     )
                 {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget) || DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget)", Logging.Debug);
                     return currentTarget;
                 }
 
@@ -2740,6 +2742,8 @@ namespace Questor.Modules.Caching
 
                 if (WarpScramblingDronePriorityTarget != null)
                 {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (WarpScramblingDronePriorityTarget != null)", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingDronePriorityTarget.Name + "][" + Math.Round(WarpScramblingDronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingDronePriorityTarget.Id) + "]", Logging.Debug);
                     return WarpScramblingDronePriorityTarget;
                 }    
             }
@@ -2747,12 +2751,16 @@ namespace Questor.Modules.Caching
             // Is our current target any other primary weapon priority target?
             if (currentTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id))
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id))", Logging.Debug);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "]", Logging.Debug);
                 return currentTarget;
             }
 
             // Is our current target any other drone priority target?
             if (currentTarget != null && callingroutine == "Drones" && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id))
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Drones && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id))", Logging.Debug);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "]", Logging.Debug);
                 return currentTarget;
             }
 
@@ -2797,9 +2805,9 @@ namespace Questor.Modules.Caching
             }
 
             // Is our current target already in armor? keep shooting the same target if so...
-            if (currentTarget != null && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
+            if (currentTarget != null && currentTarget.IsInOptimalRange && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
             {
-                //Logging.Log(callingroutine + ".GetBestTarget: CurrentTarget has less than 60% armor, keep killing this target");
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] has less than 60% armor, keep killing this target", Logging.Debug);
                 return currentTarget;
             }
 
@@ -2821,6 +2829,8 @@ namespace Questor.Modules.Caching
                 
             if (primaryWeaponPriorityTarget != null && callingroutine == "Combat" && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "]", Logging.Debug);
                 return primaryWeaponPriorityTarget;
             }
 
@@ -2838,12 +2848,16 @@ namespace Questor.Modules.Caching
 
             if (dronePriorityTarget != null && callingroutine == "Drones" && !Cache.Instance.IgnoreTargets.Contains(dronePriorityTarget.Name.Trim()))
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (dronePriorityTarget != null && callingroutine == Drones && !Cache.Instance.IgnoreTargets.Contains(dronePriorityTarget.Name.Trim()))", Logging.Debug);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000,2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "]", Logging.Debug);
                 return dronePriorityTarget;
             }
 
             // Do we have a target?
             if (currentTarget != null)
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (currentTarget != null) return currentTarget;", Logging.Debug);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "]", Logging.Debug);
                 return currentTarget;
             }
 
@@ -2866,16 +2880,30 @@ namespace Questor.Modules.Caching
 
             if (lowValueFirst && lowValueTarget != null)
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "]", Logging.Debug);
                 return lowValueTarget;
             }
 
             if (!lowValueFirst && highValueTarget != null)
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "]", Logging.Debug);
                 return highValueTarget;
             }
 
-            // Return either one or the other
-            return lowValueTarget ?? highValueTarget;
+            EntityCache LowOrHighValueTarget = null;
+                
+            try
+            {
+                LowOrHighValueTarget = lowValueTarget ?? highValueTarget;
+                // Return either one or the other
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "]", Logging.Debug);
+            }
+            catch (Exception exception)
+            {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget exception [" + exception + "]", Logging.Debug);
+            }
+            
+            return LowOrHighValueTarget;
         }
 
         private void EWarEffectsOnMe()

@@ -90,7 +90,7 @@ namespace Questor.Modules.Lookup
         public bool DebugFleetSupportSlave { get; set; }
 
         public bool DebugFleetSupportMaster { get; set; }
-
+        public bool DebugGetBestTarget { get; set; }
         public bool DebugGotobase { get; set; }
         public bool DebugGreyList { get; set; }
         public bool DebugHangars { get; set; }
@@ -645,6 +645,7 @@ namespace Questor.Modules.Lookup
                 DebugFittingMgr = false;
                 DebugFleetSupportSlave = false;
                 DebugFleetSupportMaster = false;
+                DebugGetBestTarget = false;
                 DebugGotobase = false;
                 DebugGreyList = false;
                 DebugHangars = false;
@@ -1112,6 +1113,7 @@ namespace Questor.Modules.Lookup
                     DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
                     DebugFleetSupportSlave = (bool?)CharacterSettingsXml.Element("debugFleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportSlave") ?? false;
                     DebugFleetSupportMaster = (bool?)CharacterSettingsXml.Element("debugFleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportMaster") ?? false;
+                    DebugGetBestTarget = (bool?)CharacterSettingsXml.Element("debugGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugGetBestTarget") ?? false;
                     DebugGotobase = (bool?)CharacterSettingsXml.Element("debugGotobase") ?? (bool?)CommonSettingsXml.Element("debugGotobase") ?? false;
                     DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
                     DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;

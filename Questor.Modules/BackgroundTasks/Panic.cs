@@ -198,6 +198,9 @@ namespace Questor.Modules.BackgroundTasks
                         if (EntityIsWarpScramblingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWarpScramblingMe.Name))
                         {
                             //
+                            // Warp Scrambling targets
+                            //
+                            //
                             // This is here just for consistency, commented out for now as I can think of no reason to ever allow us to NOT add warp scramblers to the drone priority target list
                             //
 
@@ -221,6 +224,9 @@ namespace Questor.Modules.BackgroundTasks
                             EntityCache EntityIsWebbingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWebbingMe);
                             if (EntityIsWebbingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWebbingMe.Name))
                             {
+                                //
+                                // Webbing targets
+                                //
                                 if (EntityIsWebbingMe.IsFrigate && Settings.Instance.AddWebifiersToDronePriorityTargetList)
                                 {
                                     Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), DronePriority.PriorityKillTarget, "Panic");
@@ -236,6 +242,9 @@ namespace Questor.Modules.BackgroundTasks
                             EntityCache EntityIsTargetPaintingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTargetPaintingMe);
                             if (EntityIsTargetPaintingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsTargetPaintingMe.Name))
                             {
+                                //
+                                // Target Painting targets
+                                //
                                 if (EntityIsTargetPaintingMe.IsFrigate && Settings.Instance.AddTargetPaintersToDronePriorityTargetList)
                                 {
                                     Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), DronePriority.PriorityKillTarget, "Panic");
@@ -248,11 +257,12 @@ namespace Questor.Modules.BackgroundTasks
                             }    
                         }
 
-                        //TODO:  extend this section to: foreach target in Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe Add target to prioritytarget list
-
                         EntityCache EntityIsNeutralizingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsNeutralizingMe);
                         if (EntityIsNeutralizingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsNeutralizingMe.Name))
                         {
+                            //
+                            // Neutralizing targets
+                            //
                             if (EntityIsNeutralizingMe.IsFrigate && Settings.Instance.AddNeutralizersToDronePriorityTargetList)
                             {
                                 Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), DronePriority.PriorityKillTarget, "Panic");
@@ -267,6 +277,9 @@ namespace Questor.Modules.BackgroundTasks
                         EntityCache EntityIsJammingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsJammingMe);
                         if (EntityIsJammingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsJammingMe.Name))
                         {
+                            //
+                            // ECM targets
+                            //
                             if (EntityIsJammingMe.IsFrigate && Settings.Instance.AddNeutralizersToDronePriorityTargetList)
                             {
                                 Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), DronePriority.PriorityKillTarget, "Panic");
@@ -281,6 +294,9 @@ namespace Questor.Modules.BackgroundTasks
                         EntityCache EntityIsSensorDampeningMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsSensorDampeningMe);
                         if (EntityIsSensorDampeningMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsSensorDampeningMe.Name))
                         {
+                            //
+                            // Sensor Dampening targets
+                            //
                             if (EntityIsSensorDampeningMe.IsFrigate && Settings.Instance.AddDampenersToDronePriorityTargetList)
                             {
                                 Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), DronePriority.PriorityKillTarget, "Panic");
@@ -294,6 +310,9 @@ namespace Questor.Modules.BackgroundTasks
                         
                         if (Cache.Instance.Modules.Any(m => m.IsTurret))
                         {
+                            //
+                            // tracking disrupting targets
+                            //
                             EntityCache EntityIsTrackingDisruptingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
                             if (EntityIsTrackingDisruptingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsTrackingDisruptingMe.Name))
                             {

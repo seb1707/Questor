@@ -147,6 +147,14 @@ namespace Questor
             {
                 if (Cache.Instance.DirectEve == null)
                 {
+                    //
+                    // if using isxstealth
+                    //
+                    //Cache.Instance.DirectEve = new DirectEve(null, false);
+                    
+                    //
+                    // if using directeves built in cloaking
+                    //
                     Cache.Instance.DirectEve = new DirectEve();
                 }
             }

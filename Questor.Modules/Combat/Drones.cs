@@ -42,7 +42,7 @@ namespace Questor.Modules.Combat
         private double _structurePctTotal;
         public bool Recall; //false
         public bool WarpScrambled; //false
-        private DateTime _nextDroneAction;
+        private DateTime _nextDroneAction = DateTime.UtcNow;
         private DateTime _nextWarpScrambledWarning = DateTime.MinValue;
 
         private void GetDamagedDrones()
@@ -143,7 +143,7 @@ namespace Questor.Modules.Combat
 
         public void ProcessState()
         {
-            if (_nextDroneAction < DateTime.UtcNow) return;
+            if (_nextDroneAction > DateTime.UtcNow) return;
             
             _nextDroneAction = DateTime.UtcNow.AddMilliseconds(400);
 
@@ -478,7 +478,7 @@ namespace Questor.Modules.Combat
                         _lastRecall = DateTime.UtcNow;
                         Recall = false;
                         TargetingCache.CurrentDronesTarget = null;
-                        _nextDroneAction = DateTime.UtcNow.AddSeconds(4);
+                        _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
                     }

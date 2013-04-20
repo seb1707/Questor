@@ -2609,12 +2609,22 @@ namespace Questor.Modules.Caching
 
                 for (int i = currentPath.Count - 1; i >= 0; i--)
                 {
-                    DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
-                    if (solarSystemInRoute.Security < 0.45)
+                    if (currentPath[i] < 6000000) // not a station
                     {
-                        //Bad bad bad
-                        Cache.Instance.RouteIsAllHighSecBool = false;
-                        return true;
+                        DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
+                        if (solarSystemInRoute.Security < 0.45)
+                        {
+                            //Bad bad bad
+                            Cache.Instance.RouteIsAllHighSecBool = false;
+                            return true;
+                        }    
+                    }
+                    if (currentPath[i] > 6000000) //this is a station
+                    {
+                        //
+                        // a station will only be at the end of a route
+                        //
+                        return false;
                     }
                 }    
             }

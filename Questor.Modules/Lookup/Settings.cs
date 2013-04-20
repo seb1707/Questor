@@ -380,8 +380,24 @@ namespace Questor.Modules.Lookup
 
         public int DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
         public int SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
-        public bool ShootWarpScramblersWithPrimaryWeapons { get; set; }
+        
+        public bool AddWarpScramblersToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddWebifiersToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddDampenersToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddNeutralizersToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddTargetPaintersToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddECMsToPrimaryWeaponsPriorityTargetList { get; set; }
+        public bool AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList { get; set; }
 
+        public bool AddWarpScramblersToDronePriorityTargetList { get; set; }
+        public bool AddWebifiersToDronePriorityTargetList { get; set; }
+        public bool AddDampenersToDronePriorityTargetList { get; set; }
+        public bool AddNeutralizersToDronePriorityTargetList { get; set; }
+        public bool AddTargetPaintersToDronePriorityTargetList { get; set; }
+        public bool AddECMsToDroneTargetList { get; set; }
+        public bool AddTrackingDisruptorsToDronePriorityTargetList { get; set; }
+
+        public double InsideThisRangeIsHardToTrack { get; set; }
         //
         // Script Settings - TypeIDs for the scripts you would like to use in these modules
         //
@@ -864,8 +880,24 @@ namespace Questor.Modules.Lookup
                 DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = 60;
                 DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                 SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
-                ShootWarpScramblersWithPrimaryWeapons = true;
 
+                AddDampenersToPrimaryWeaponsPriorityTargetList = true;
+                AddNeutralizersToPrimaryWeaponsPriorityTargetList = true;
+                AddWarpScramblersToPrimaryWeaponsPriorityTargetList = true;
+                AddWebifiersToPrimaryWeaponsPriorityTargetList = true;
+                AddTargetPaintersToPrimaryWeaponsPriorityTargetList = true;
+                AddECMsToPrimaryWeaponsPriorityTargetList = true;
+                AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList = true;
+
+                AddDampenersToDronePriorityTargetList = true;
+                AddNeutralizersToDronePriorityTargetList = true;
+                AddWarpScramblersToDronePriorityTargetList = true;
+                AddWebifiersToDronePriorityTargetList = true;
+                AddTargetPaintersToDronePriorityTargetList = true;
+                AddECMsToDroneTargetList = true;
+                AddTrackingDisruptorsToDronePriorityTargetList = true;
+
+                InsideThisRangeIsHardToTrack = 15000;
                 //
                 // Script Settings - TypeIDs for the scripts you would like to use in these modules
                 //
@@ -1448,7 +1480,24 @@ namespace Questor.Modules.Lookup
                     DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)CharacterSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? (int?)CommonSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
                     DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                     SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
-                    ShootWarpScramblersWithPrimaryWeapons = (bool?)CharacterSettingsXml.Element("shootWarpScramblersWithPrimaryWeapons") ?? (bool?)CommonSettingsXml.Element("shootWarpScramblersWithPrimaryWeapons") ?? true;
+
+                    AddDampenersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? true;
+                    AddECMsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? true;
+                    AddNeutralizersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? true;
+                    AddTargetPaintersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? true;
+                    AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? true; 
+                    AddWarpScramblersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? true;
+                    AddWebifiersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? true;
+
+                    AddDampenersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? true;
+                    AddECMsToDroneTargetList = (bool?)CharacterSettingsXml.Element("addECMsToDroneTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToDroneTargetList") ?? true;
+                    AddNeutralizersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? true;
+                    AddTargetPaintersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? true;
+                    AddTrackingDisruptorsToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? true;
+                    AddWarpScramblersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? true;
+                    AddWebifiersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? true;
+
+                    InsideThisRangeIsHardToTrack = (double?)CharacterSettingsXml.Element("insideThisRangeIsHardToTrack") ?? (double?)CommonSettingsXml.Element("insideThisRangeIsHardToTrack") ?? 15000;
 
                     //
                     // Script Settings - TypeIDs for the scripts you would like to use in these modules

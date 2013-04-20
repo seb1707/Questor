@@ -2707,7 +2707,7 @@ namespace Questor.Modules.Caching
             }
 
 
-            if (currentTarget != null && (callingroutine == "Drones" || Settings.Instance.ShootWarpScramblersWithPrimaryWeapons && callingroutine == "Combat" ))
+            if (currentTarget != null && (callingroutine == "Drones" || Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList && callingroutine == "Combat" ))
             {
                 // Is our current target a warp scrambling priority target?
                 if (PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget) ||

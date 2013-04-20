@@ -2802,7 +2802,8 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.PrimaryWeaponPriority)
+                primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.Entity.IsInOptimalRange)
+                                                       .ThenBy(pt => pt.PrimaryWeaponPriority)
                                                        .ThenBy(pt => pt.Entity.Distance)
                                                        .Select(pt => pt.Entity).FirstOrDefault();
             }
@@ -2848,7 +2849,7 @@ namespace Questor.Modules.Caching
                                                           .ToList();
 
             // Get the closest high value target
-            EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+            EntityCache highValueTarget = targets.Where(t => t.TargetValue.HasValue && t.Distance < distance).OrderBy(t => !t.IsNPCFrigate).ThenBy(t => t.IsInOptimalRange).ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
             // Get the closest low value target
             EntityCache lowValueTarget = targets.Where(t => !t.TargetValue.HasValue && t.Distance < distance).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();

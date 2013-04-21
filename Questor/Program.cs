@@ -148,12 +148,12 @@ namespace Questor
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // if using isxstealth
+                    // if using isxstealth (old method to disable DE cloaking)
                     //
                     //Cache.Instance.DirectEve = new DirectEve(null, false);
                     
                     //
-                    // if using directeves built in cloaking
+                    // DE now has all cloaking disabled, you should use isxstealth!
                     //
                     Cache.Instance.DirectEve = new DirectEve();
                 }

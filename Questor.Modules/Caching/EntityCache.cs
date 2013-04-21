@@ -180,6 +180,93 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsInOptimalRange
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                    {
+                        double optimal = 0;
+                        
+                        if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0)
+                        {
+                            optimal = Cache.Instance.OptimalRange;
+                        }
+                        else if (Settings.Instance.OptimalRange != 0)
+                        {
+                            optimal = Settings.Instance.OptimalRange;
+                        }
+                        
+                        if (!Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //if we do not have turrets mounted then optimal range is whatever is less weapons range or targeting range.
+                        {
+                            //
+                            // missile boats
+                            //
+                            optimal = Cache.Instance.MaxRange;
+                            if (_directEntity.Distance < optimal)
+                            {
+                                return true;
+                            }
+                        }
+                        else //Lasers, Projectile, and Hybrids
+                        {
+                            if (_directEntity.Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
+                            {
+                                if (_directEntity.Distance < (optimal * 1.5))
+                                {
+                                    return true;
+                                }
+                            }    
+                        }
+                        
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsDronePriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsPrimaryWeaponPriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         public bool IsTargeting
         {
             get

@@ -21,6 +21,7 @@
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>
   <debugFittingMgr>false</debugFittingMgr>
+  <debugGetBestTarget>false</debugGetBestTarget>
   <debugGotobase>false</debugGotobase>
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>

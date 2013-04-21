@@ -2624,9 +2624,10 @@ namespace Questor.Modules.Caching
                     if (currentPath[i] > 6000000) //this is a station
                     {
                         //
-                        // a station will only be at the end of a route
+                        // a station will only be at the end of a route, assume if we got this far that we are golden.
                         //
-                        return false;
+                        Cache.Instance.RouteIsAllHighSecBool = true;
+                        return true;
                     }
                 }    
             }

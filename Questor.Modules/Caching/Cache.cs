@@ -270,7 +270,7 @@ namespace Questor.Modules.Caching
             if (path != null)
             {
                 string UnloadLootTheseItemsAreLootItemsXmlFile = System.IO.Path.Combine(path, "UnloadLootTheseItemsAreLootItems.xml");
-                UnloadLootTheseItemsAreLootById = new Dictionary<int, InvType>();
+                UnloadLootTheseItemsAreLootById = new Dictionary<int, string>();
 
                 if (!File.Exists(UnloadLootTheseItemsAreLootItemsXmlFile))
                 {
@@ -282,11 +282,12 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log(module, "IterateUnloadLootTheseItemsAreLootItems - Loading [" + UnloadLootTheseItemsAreLootItemsXmlFile + "]", Logging.White);
                     Cache.Instance.UnloadLootTheseItemsAreLootItems = XDocument.Load(UnloadLootTheseItemsAreLootItemsXmlFile);
+
                     if (UnloadLootTheseItemsAreLootItems.Root != null)
                     {
                         foreach (XElement element in UnloadLootTheseItemsAreLootItems.Root.Elements("invtype"))
                         {
-                            UnloadLootTheseItemsAreLootById.Add((int)element.Attribute("id"), new InvType(element));
+                            UnloadLootTheseItemsAreLootById.Add((int)element.Attribute("id"), (string)element.Attribute("name"));
                         }
                     }
                 }
@@ -486,7 +487,8 @@ namespace Questor.Modules.Caching
 
         public Dictionary<int, InvType> InvTypesById { get; private set; }
 
-        public Dictionary<int, InvType> UnloadLootTheseItemsAreLootById { get; private set; }
+        public Dictionary<int, String> UnloadLootTheseItemsAreLootById { get; private set; }
+
 
         /// <summary>
         ///   List of ship target values, higher target value = higher kill priority

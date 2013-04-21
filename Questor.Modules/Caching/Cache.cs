@@ -5623,6 +5623,14 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        public List<DirectBookmark> SafeSpotBookmarks
+        {
+            get
+            {
+                return Cache.Instance.BookmarksByLabel(Settings.Instance.SafeSpotBookmarkPrefix + " ").ToList();
+            }
+        }
+
         public List<DirectBookmark> AfterMissionSalvageBookmarks
         {
             get
@@ -5743,14 +5751,14 @@ namespace Questor.Modules.Caching
             if (onGridBookmark != null)
             {
                 _bookmarkDeletionAttempt++;
-                if (_bookmarkDeletionAttempt <= 5)
+                if (_bookmarkDeletionAttempt <= bookmarksInLocal.Count() + 60)
                 {
                     Logging.Log(module, "removing salvage bookmark:" + onGridBookmark.Title, Logging.White);
                     onGridBookmark.Delete();
                     return false;
                 }
 
-                if (_bookmarkDeletionAttempt > 5)
+                if (_bookmarkDeletionAttempt > bookmarksInLocal.Count() + 60)
                 {
                     Logging.Log(module, "error removing bookmark!" + onGridBookmark.Title, Logging.White);
                     _States.CurrentQuestorState = QuestorState.Error;

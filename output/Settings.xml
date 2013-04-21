@@ -21,6 +21,7 @@
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>
   <debugFittingMgr>false</debugFittingMgr>
+  <debugGetBestTarget>false</debugGetBestTarget>
   <debugGotobase>false</debugGotobase>
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>
@@ -468,7 +469,9 @@
   <safeArmorPct>0</safeArmorPct>
   <!-- Amount of capacitor that is seen as "safe" to return to the mission -->
   <safeCapacitorPct>65</safeCapacitorPct>
-
+  <!-- All safespot bookmarks will be prefixed by this string, default: safespot: -->
+  <safeSpotBookmarkPrefix>safespot</safeSpotBookmarkPrefix><!-- default is safespot: -->
+  
   <!--                                                -->
   <!--        DRONE SETTINGS          -->
   <!--                                                -->

@@ -190,7 +190,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.OptimalRange == 0)
                         {
-                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance;
+                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
                         }
                     }
 

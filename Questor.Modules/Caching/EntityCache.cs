@@ -186,6 +186,14 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
+                    if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0 )
+                    {
+                        if (Settings.Instance.OptimalRange == 0)
+                        {
+                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance;
+                        }
+                    }
+
                     if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
                     {
                         double optimal = 0;

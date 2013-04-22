@@ -478,8 +478,8 @@
   
   <!-- Use drones, disable on ships without a drone bay! -->
   <useDrones>true</useDrones>
-  <!-- Drone type id to load (set to 0 to not reload drones) -->
-  <droneTypeId>2488</droneTypeId>
+  <!-- Drone type id to load (has to be set if using drones) -->
+  <droneTypeId>2488</droneTypeId> 
   <!-- Maximum drone control range -->
   <droneControlRange>50000</droneControlRange>
   <!-- Do not launch drones if below this shield percentage -->

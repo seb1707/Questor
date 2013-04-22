@@ -840,8 +840,8 @@ namespace Questor.Modules.Combat
             //
 
             // Get a list of current high and low value targets
-            List<EntityCache> highValueTargets = combatTargets.Where(t => t.TargetValue.HasValue || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)).ToList();
-            List<EntityCache> lowValueTargets = combatTargets.Where(t => !t.TargetValue.HasValue && Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)).ToList();
+            List<EntityCache> highValueTargets = combatTargets.Where(t => t.TargetValue.HasValue || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)).OrderBy(t => t.IsNPCBattleship).ToList();
+            List<EntityCache> lowValueTargets = combatTargets.Where(t => !t.TargetValue.HasValue && Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)).OrderBy(t => t.IsNPCFrigate).ToList();
 
             // Build a list of things targeting me
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();

@@ -1023,7 +1023,7 @@ namespace Questor.Modules.Caching
                 double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
-                    Logging.Log("EntityCache", "LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                    Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance /1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
                     return false;
                 }
             }

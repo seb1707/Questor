@@ -922,8 +922,8 @@ namespace Questor.Modules.Combat
             //
             // Do we have prioritytargets that can't be targeted?
             //
-            while (Cache.Instance.Targets.Count() >= Settings.Instance.MaximumWreckTargets + Settings.Instance.MaximumHighValueTargets + Settings.Instance.MaximumLowValueTargets 
-                && (Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)))
+            while (Cache.Instance.Targets.Count() >= Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+                && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)) || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe))))
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = targets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
@@ -949,8 +949,9 @@ namespace Questor.Modules.Combat
             //
             // Do we have enough targets targeted?
             //
-            if ((highValueTargets.Count >= maxHighValueTarget && lowValueTargets.Count >= maxLowValueTarget) ||
-                ((highValueTargets.Count + lowValueTargets.Count) >= (maxHighValueTarget + maxLowValueTarget)))
+            if ((highValueTargets.Count >= maxHighValueTarget && lowValueTargets.Count >= maxLowValueTarget) 
+                || ((highValueTargets.Count + lowValueTargets.Count) >= (maxHighValueTarget + maxLowValueTarget))
+                || Cache.Instance.DirectEve.Me.MaxLockedTargets < Cache.Instance.Targets.Count())
             {
                 return;
             }

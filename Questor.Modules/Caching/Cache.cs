@@ -1571,21 +1571,56 @@ namespace Questor.Modules.Caching
 
         public bool IsOrbiting
         {
-            get { return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4; }
+            get
+            {
+                if (Cache.Instance.Approaching != null)
+                {
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
         }
 
         public bool IsApproaching
         {
             get
             {
-                //Logging.Log("Cache.IsApproaching: " + DirectEve.ActiveShip.Entity.Mode.ToString(CultureInfo.InvariantCulture));
-                return DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1;
+                if (Cache.Instance.Approaching != null)
+                {
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                return false;
             }
         }
 
         public bool IsApproachingOrOrbiting
         {
-            get { return DirectEve.ActiveShip.Entity != null && (DirectEve.ActiveShip.Entity.Mode == 1 || DirectEve.ActiveShip.Entity.Mode == 4); }
+            get
+            {
+                if (IsApproaching)
+                {
+                    return true;
+                }
+
+                if (IsOrbiting)
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         public IEnumerable<EntityCache> ActiveDrones

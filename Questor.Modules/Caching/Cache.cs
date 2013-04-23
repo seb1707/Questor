@@ -2593,9 +2593,28 @@ namespace Questor.Modules.Caching
 
         public DirectItem CheckCargoForItem(int typeIdToFind, int quantityToFind)
         {
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-            DirectItem item = cargo.Items.FirstOrDefault(i => i.TypeId == typeIdToFind && i.Quantity >= quantityToFind);
-            return item;
+            try
+            {
+                if (Cache.Instance.DirectEve.GetShipsCargo() != null)
+                {
+                    DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    if (cargo.Items.Any())
+                    {
+                        DirectItem item = cargo.Items.FirstOrDefault(i => i.TypeId == typeIdToFind && i.Quantity >= quantityToFind);
+                        return item;    
+                    }
+
+                    return null; // no items found
+                }
+
+                return null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.CheckCargoForItem", "Exception [" + exception + "]", Logging.Debug);
+            }
+
+            return null;
         }
 
         public bool CheckifRouteIsAllHighSec()

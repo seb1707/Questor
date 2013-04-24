@@ -414,9 +414,19 @@ namespace Questor.Modules.Combat
                     break;
                 }
             }
+            EntityCache _bestTarget = null;
 
-            // Return best possible target
-            return Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
+            if (Cache.Instance.OngridKillableNPCs.Any())
+            {
+                _bestTarget = Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
+                if (_bestTarget != null)
+                {
+                    // Return best possible target
+                    return _bestTarget;
+                }
+            }
+            
+            return null;
         }
 
         private void TargetInfo()
@@ -840,8 +850,8 @@ namespace Questor.Modules.Combat
             //
 
             // Get a list of current high and low value targets
-            List<EntityCache> highValueTargets = combatTargets.Where(t => t.TargetValue.HasValue || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)).ToList();
-            List<EntityCache> lowValueTargets = combatTargets.Where(t => !t.TargetValue.HasValue && Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)).ToList();
+            List<EntityCache> highValueTargets = combatTargets.Where(t => t.TargetValue.HasValue || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)).OrderBy(t => t.IsNPCBattleship).ToList();
+            List<EntityCache> lowValueTargets = combatTargets.Where(t => !t.TargetValue.HasValue && Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)).OrderBy(t => t.IsNPCFrigate).ToList();
 
             // Build a list of things targeting me
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
@@ -922,8 +932,8 @@ namespace Questor.Modules.Combat
             //
             // Do we have prioritytargets that can't be targeted?
             //
-            while (Cache.Instance.Targets.Count() >= Settings.Instance.MaximumWreckTargets + Settings.Instance.MaximumHighValueTargets + Settings.Instance.MaximumLowValueTargets 
-                && (Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)))
+            while (Cache.Instance.Targets.Count() >= Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+                && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)) || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe))))
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = targets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
@@ -949,8 +959,9 @@ namespace Questor.Modules.Combat
             //
             // Do we have enough targets targeted?
             //
-            if ((highValueTargets.Count >= maxHighValueTarget && lowValueTargets.Count >= maxLowValueTarget) ||
-                ((highValueTargets.Count + lowValueTargets.Count) >= (maxHighValueTarget + maxLowValueTarget)))
+            if ((highValueTargets.Count >= maxHighValueTarget && lowValueTargets.Count >= maxLowValueTarget) 
+                || ((highValueTargets.Count + lowValueTargets.Count) >= (maxHighValueTarget + maxLowValueTarget))
+                || Cache.Instance.DirectEve.Me.MaxLockedTargets < Cache.Instance.Targets.Count())
             {
                 return;
             }
@@ -986,8 +997,8 @@ namespace Questor.Modules.Combat
             //
             // Do we have any primary weapon priority targets not yet targeted?
             //
-            IEnumerable<EntityCache> primaryweaponpriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
-            foreach (EntityCache entity in primaryweaponpriority)
+            IEnumerable<EntityCache> primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
+            foreach (EntityCache entity in primaryWeaponPriority)
             {
                 // Have we reached the limit of high value targets?
                 if (highValueTargets.Count >= maxHighValueTarget)
@@ -1104,21 +1115,12 @@ namespace Questor.Modules.Combat
                 switch (_States.CurrentCombatState)
                 {
                     case CombatState.CheckTargets:
-                        _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() of the combat state will potentially get reset (important for the outofammo state)
+                        _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the outofammo state)
                         TargetCombatants();
                         break;
 
                     case CombatState.KillTargets:
 
-                        //
-                        // iterate through priority targets here !!!!!!!!
-                        //
-                        //Cache.Instance._priorityTargets_text = "";
-                        //for (int i = 0; i < Cache.Instance._priorityTargets.Count; i++) // Loop through List with for
-                        //{
-                        //    Cache.Instance._priorityTargets_text = Cache.Instance._priorityTargets_text + "[ " + i + " ][ " + Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "k away][" + Cache.Instance._priorityTargets[i].Entity.Health + "TH][" + Cache.Instance._priorityTargets[i].Entity.ShieldPct + "S][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.ArmorPct, 0) + "A][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.StructurePct, 0) + "H][" + NPCValue.Value.ToString() + "isk],";
-                        //newlblPriorityTargetstext = newlblPriorityTargetstext + "[ " + i + " ][ "; //+ Cache.Instance._priorityTargets[i].Entity.Name + " ][" + Math.Round(Cache.Instance._priorityTargets[i].Entity.Distance / 1000, 0) + "],";
-                        //}
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
                         TargetingCache.CurrentWeaponsTarget = GetTarget();

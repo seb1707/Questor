@@ -542,6 +542,12 @@ namespace Questor.Modules.Lookup
         public string UserDefinedLavishScriptScript4 { get; set; }
         public string UserDefinedLavishScriptScript4Description { get; set; }
 
+        public float StandingsNeededToAccessLevel1Agent { get; set; }
+        public float StandingsNeededToAccessLevel2Agent { get; set; }
+        public float StandingsNeededToAccessLevel3Agent { get; set; }
+        public float StandingsNeededToAccessLevel4Agent { get; set; }
+        public float StandingsNeededToAccessLevel5Agent { get; set; }
+
         //
         // path information - used to load the XML and used in other modules
         //
@@ -1027,6 +1033,11 @@ namespace Questor.Modules.Lookup
                 UserDefinedLavishScriptScript4 = "";
                 UserDefinedLavishScriptScript4Description = "";
 
+                StandingsNeededToAccessLevel1Agent = -11;
+                StandingsNeededToAccessLevel2Agent = 1;
+                StandingsNeededToAccessLevel3Agent = 3;
+                StandingsNeededToAccessLevel4Agent = 5;
+                StandingsNeededToAccessLevel5Agent = 7;
                 //
                 // Clear various lists
                 //
@@ -1624,6 +1635,15 @@ namespace Questor.Modules.Lookup
                     UserDefinedLavishScriptScript3Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? "";
                     UserDefinedLavishScriptScript4 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4") ?? "";
                     UserDefinedLavishScriptScript4Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? "";
+
+                    //
+                    // agent standing requirements
+                    //
+                    StandingsNeededToAccessLevel1Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? -11;
+                    StandingsNeededToAccessLevel2Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? 1;
+                    StandingsNeededToAccessLevel3Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? 3;
+                    StandingsNeededToAccessLevel4Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? 5;
+                    StandingsNeededToAccessLevel5Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? 7;
 
                     //
                     // number of days of console logs to keep (anything older will be deleted on startup)

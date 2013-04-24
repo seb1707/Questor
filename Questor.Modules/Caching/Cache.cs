@@ -1626,7 +1626,9 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.Approaching != null)
                 {
-                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4)
+                    bool _followIDIsOnGrid = Cache.Instance.Entities.Where(i => i.Distance < (double)Distance.OnGridWithMe).Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
                     {
                         return true;
                     }
@@ -1644,7 +1646,9 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.Approaching != null)
                 {
-                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1)
+                    bool _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
                     {
                         return true;
                     }

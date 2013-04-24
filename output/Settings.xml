@@ -514,6 +514,13 @@
   <emailAddressToSendAlerts></emailAddressToSendAlerts>
   <emailEnableSSL>false</emailEnableSSL>
   
+  
+  <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>
+  <standingsNeededToAccessLevel2Agent>1</standingsNeededToAccessLevel2Agent>
+  <standingsNeededToAccessLevel3Agent>3</standingsNeededToAccessLevel3Agent>
+  <standingsNeededToAccessLevel4Agent>5</standingsNeededToAccessLevel4Agent>
+  <standingsNeededToAccessLevel5Agent>7</standingsNeededToAccessLevel5Agent>
+  
   <!--                                                        -->
   <!-- SKILL TRAINING SETTINGS       -->
   <!--                                                        -->

@@ -174,7 +174,12 @@ namespace Questor.Modules.Caching
             get
             {
                 if (_directEntity != null)
-                    return _directEntity.IsActiveTarget;
+                {
+                    if (_directEntity.IsTarget)
+                    {
+                        return _directEntity.IsActiveTarget;        
+                    }
+                }
 
                 return false;
             }
@@ -1158,7 +1163,16 @@ namespace Questor.Modules.Caching
         public void MakeActiveTarget()
         {
             if (_directEntity != null)
-                _directEntity.MakeActiveTarget();
+            {
+                if (_directEntity.IsTarget)
+                {
+                    _directEntity.MakeActiveTarget();    
+                }
+
+                return;
+            }
+
+            return;
         }
     }
 }

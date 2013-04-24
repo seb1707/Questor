@@ -416,7 +416,7 @@ namespace Questor.Modules.Combat
             }
             EntityCache _bestTarget = null;
 
-            if (Cache.Instance.OngridKillableNPCs.Any())
+            if (Cache.Instance.OngridKillableNPCs.Any() || (Cache.Instance._primaryWeaponPriorityTargets.Any()))
             {
                 _bestTarget = Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
                 if (_bestTarget != null)
@@ -945,7 +945,7 @@ namespace Questor.Modules.Combat
                         lowValueTargets.Remove(target);
                         highValueTargets.Remove(target);
                     }
-                    catch (Exception exception)
+                    catch (Exception)
                     {
                         //
                         // no need to do anything here

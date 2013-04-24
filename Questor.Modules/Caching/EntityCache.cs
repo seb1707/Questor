@@ -174,7 +174,107 @@ namespace Questor.Modules.Caching
             get
             {
                 if (_directEntity != null)
-                    return _directEntity.IsActiveTarget;
+                {
+                    if (_directEntity.IsTarget)
+                    {
+                        return _directEntity.IsActiveTarget;        
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsInOptimalRange
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0 )
+                    {
+                        if (Settings.Instance.OptimalRange == 0)
+                        {
+                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
+                        }
+                    }
+
+                    if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                    {
+                        double optimal = 0;
+                        
+                        if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0)
+                        {
+                            optimal = Cache.Instance.OptimalRange;
+                        }
+                        else if (Settings.Instance.OptimalRange != 0)
+                        {
+                            optimal = Settings.Instance.OptimalRange;
+                        }
+                        
+                        if (!Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //if we do not have turrets mounted then optimal range is whatever is less weapons range or targeting range.
+                        {
+                            //
+                            // missile boats
+                            //
+                            optimal = Cache.Instance.MaxRange;
+                            if (_directEntity.Distance < optimal)
+                            {
+                                return true;
+                            }
+                        }
+                        else //Lasers, Projectile, and Hybrids
+                        {
+                            if (_directEntity.Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
+                            {
+                                if (_directEntity.Distance < (optimal * 1.5))
+                                {
+                                    return true;
+                                }
+                            }    
+                        }
+                        
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsDronePriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsPrimaryWeaponPriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
 
                 return false;
             }
@@ -936,7 +1036,7 @@ namespace Questor.Modules.Caching
                 double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
-                    Logging.Log("EntityCache", "LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                    Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance /1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
                     return false;
                 }
             }
@@ -1063,7 +1163,16 @@ namespace Questor.Modules.Caching
         public void MakeActiveTarget()
         {
             if (_directEntity != null)
-                _directEntity.MakeActiveTarget();
+            {
+                if (_directEntity.IsTarget)
+                {
+                    _directEntity.MakeActiveTarget();    
+                }
+
+                return;
+            }
+
+            return;
         }
     }
 }

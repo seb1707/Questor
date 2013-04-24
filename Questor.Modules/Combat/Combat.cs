@@ -945,7 +945,7 @@ namespace Questor.Modules.Combat
                         lowValueTargets.Remove(target);
                         highValueTargets.Remove(target);
                     }
-                    catch (Exception exception)
+                    catch (Exception)
                     {
                         //
                         // no need to do anything here

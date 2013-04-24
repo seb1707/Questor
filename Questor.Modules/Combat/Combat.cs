@@ -414,9 +414,19 @@ namespace Questor.Modules.Combat
                     break;
                 }
             }
+            EntityCache _bestTarget = null;
 
-            // Return best possible target
-            return Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
+            if (Cache.Instance.OngridKillableNPCs.Any())
+            {
+                _bestTarget = Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
+                if (_bestTarget != null)
+                {
+                    // Return best possible target
+                    return _bestTarget;
+                }
+            }
+            
+            return null;
         }
 
         private void TargetInfo()

@@ -11,7 +11,7 @@
 namespace Questor.Modules.Caching
 {
     using System;
-    using System.Collections.Generic;
+    //using System.Collections.Generic;
     using DirectEve;
     using Questor.Modules.Lookup;
 
@@ -56,6 +56,66 @@ namespace Questor.Modules.Caching
         public int GroupId
         {
             get { return _module.GroupId; }
+        }
+
+        public double Damage
+        {
+            get { return _module.Damage; }
+        }
+
+        public bool ActivatePlex //do we need to make sure this is ONLY valid on a PLEX?
+        {
+            get { return _module.ActivatePLEX(); }
+        }
+
+        public bool AssembleShip // do we need to make sure this is ONLY valid on a packaged ship?
+        {
+            get { return _module.AssembleShip(); }
+        }
+
+        //public double Attributes
+        //{
+        //    get { return _module.Attributes; }
+        //}
+
+        public double AveragePrice
+        {
+            get { return _module.AveragePrice(); }
+        }
+
+        public double Duration
+        {
+            get { return _module.Duration ?? 0; }
+        }
+
+        public double FallOff
+        {
+            get { return _module.FallOff ?? 0; }
+        }
+
+        public double Hp
+        {
+            get { return _module.Hp; }
+        }
+
+        public bool IsOverloaded
+        {
+            get { return _module.IsOverloaded; }
+        }
+
+        public bool IsPendingOverloading
+        {
+            get { return _module.IsPendingOverloading; }
+        }
+
+        public bool IsPendingStopOverloading
+        {
+            get { return _module.IsPendingStopOverloading; }
+        }
+
+        public bool ToggleOverload
+        {
+            get { return _module.ToggleOverload(); }
         }
 
         public bool IsActivatable

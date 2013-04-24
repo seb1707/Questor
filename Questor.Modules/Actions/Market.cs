@@ -418,10 +418,10 @@ namespace Questor.Modules.Actions
 
             try
             {
-                // Do not sell items in invignore.xml
-                if (Cache.Instance.invIgnore.Root != null)
+                // Do not sell items in InvIgnore.xml
+                if (Cache.Instance.InvIgnore.Root != null)
                 {
-                    foreach (XElement element in Cache.Instance.invIgnore.Root.Elements("invtype"))
+                    foreach (XElement element in Cache.Instance.InvIgnore.Root.Elements("invtype"))
                     {
                         if (_currentItem.TypeId == (int)element.Attribute("id"))
                         {
@@ -433,9 +433,44 @@ namespace Questor.Modules.Actions
             }
             catch (Exception exception)
             {
-                if (Settings.Instance.DebugValuedump) Logging.Log(module, "invIgnore processing caused an exception [" + exception + "]", Logging.Debug);
+                if (Settings.Instance.DebugValuedump) Logging.Log(module, "InvIgnore processing caused an exception [" + exception + "]", Logging.Debug);
             }
 
+            return true;
+        }
+
+        public static bool CreateSellOrder(string module, int duration, bool corp)
+        {
+            if (DateTime.UtcNow.Subtract(_lastExecute).TotalSeconds < Time.Instance.Marketsellorderdelay_seconds)
+                return false;
+            _lastExecute = DateTime.UtcNow;
+
+            DirectItem directItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.ItemId == _currentItem.Id);
+            if (directItem == null)
+            {
+                Logging.Log(module, "Item " + _currentItem.Name + " no longer exists in the hanger", Logging.White);
+                return false;
+            }
+
+            DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            if (marketWindow == null)
+            {
+                Cache.Instance.OpenMarket(module);
+                return false;
+            }
+
+            if (!marketWindow.IsReady) return false;
+
+            if (marketWindow.DetailTypeId != directItem.TypeId)
+            {
+                marketWindow.LoadTypeId(directItem.TypeId);
+                return false;
+            }
+
+            DirectOrder competitor = marketWindow.SellOrders.Where(i => i.StationId == Cache.Instance.DirectEve.Session.StationId).OrderBy(i => i.Price).FirstOrDefault();
+            double newprice = competitor.Price - 0.01;
+
+            Cache.Instance.DirectEve.Sell(directItem, (int)Cache.Instance.DirectEve.Session.StationId, directItem.Quantity,newprice, duration, corp);
             return true;
         }
 

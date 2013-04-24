@@ -68,7 +68,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 // Spread the salvagers around
-                EntityCache wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).First();
+                EntityCache wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).FirstOrDefault();
                 if (wreck == null)
                     return;
 
@@ -103,7 +103,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (Cache.Instance.IgnoreTargets.Contains(wreck.Name))
                 {
                     Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] on the ignore list, ignoring.", Logging.White);
-                    wreck.UnlockTarget();
+                    //wreck.UnlockTarget();
                     continue;
                 }
 
@@ -336,7 +336,7 @@ namespace Questor.Modules.BackgroundTasks
             // Open a container in range
             foreach (EntityCache containerEntity in Cache.Instance.UnlootedWrecksAndSecureCans.Where(e => e.Distance <= (int)Distance.SafeScoopRange))
             {
-                // Emptry wreck, ignore
+                // Empty wreck, ignore
                 if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
                     continue;
 
@@ -433,7 +433,8 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case ScoopState.Error:
-                    // Wait indefinately...
+
+                    // Wait indefinitely
                     break;
 
                 default:

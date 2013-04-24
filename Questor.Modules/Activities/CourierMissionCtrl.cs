@@ -13,10 +13,10 @@ namespace Questor.Modules.Activities
     public class CourierMissionCtrl
     {
         //private DateTime _nextCourierAction;
-        private readonly Traveler _traveler;
+        //private readonly Traveler _traveler;
         private readonly AgentInteraction _agentInteraction;
         private int moveItemRetryCounter;
-
+        private DateTime _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddDays(-30);
         /// <summary>
         ///   Arm does nothing but get into a (assembled) shuttle
         /// </summary>
@@ -24,7 +24,7 @@ namespace Questor.Modules.Activities
         ///
         public CourierMissionCtrl()
         {
-            _traveler = new Traveler();
+            //_traveler = new Traveler();
             _agentInteraction = new AgentInteraction();
         }
 
@@ -77,6 +77,10 @@ namespace Questor.Modules.Activities
                     missionItem = "Large EMP Smartbomb I";
                     break;
 
+                case "Pot and Kettle - Making Amends (5 of 5)":       //lvl4 courier
+                    missionItem = "Mexallon";
+                    break;
+
                 case "Technological Secrets (2 of 3)":               //lvl4 courier
                     missionItem = "DNA Sample"; //typeid: 13288	 groupID: 314
                     break;
@@ -105,37 +109,52 @@ namespace Questor.Modules.Activities
 
             if (_States.CurrentCourierMissionCtrlState == CourierMissionCtrlState.PickupItem || pickup)
             {
-                //
-                // be flexible on the "from" as we might have the item needed in the ammohangar or loothangar if it is not available in the itemhangar
-                //
-                from = Cache.Instance.ItemHangar;
-                if (Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                try
                 {
-                    from = Cache.Instance.ItemHangar;
-                }
-                else if (Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
-                {
-                    from = Cache.Instance.AmmoHangar;
-                }
-                else if (Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
-                {
-                    from = Cache.Instance.LootHangar;
-                }
-                else
-                {
-                    from = Cache.Instance.ItemHangar;
+                    // We moved the item
+                    if (Cache.Instance.CargoHold.Items.Any(i => i.TypeName == missionItem))
+                    {
+                        moveItemRetryCounter = 0;
+                        _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(3);
+                        return true;
+                    }
+
                     //
-                    // we cant do the below because we run this routine multiple times after asking the items to move... maybe we need to track that
+                    // be flexible on the "from" as we might have the item needed in the ammohangar or loothangar if it is not available in the itemhangar
                     //
-                    //Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
-                    //Cache.Instance.Paused = true;
+                    //from = Cache.Instance.ItemHangar;
+                    if (Cache.Instance.ItemHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    {
+                        from = Cache.Instance.ItemHangar;
+                    }
+                    else if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    {
+                        from = Cache.Instance.AmmoHangar;
+                    }
+                    else if (!string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    {
+                        from = Cache.Instance.LootHangar;
+                    }
+                    else
+                    {
+                        from = Cache.Instance.ItemHangar;
+                        //
+                        // we cant do the below because we run this routine multiple times after asking the items to move... maybe we need to track that
+                        //
+                        //Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
+                        //Cache.Instance.Paused = true;
+                    }
+                    to = Cache.Instance.CargoHold;
                 }
-                to = Cache.Instance.CargoHold;
+                catch (Exception exception)
+                {
+                    Logging.Log("CourierMissionCtrl", "MoveItem: exception [" + exception + "]", Logging.Red);
+                    return false;
+                }
             }
 
             if (_States.CurrentCourierMissionCtrlState == CourierMissionCtrlState.DropOffItem || !pickup)
             {
-
                 from = Cache.Instance.CargoHold;
                 to = Cache.Instance.ItemHangar;
             }
@@ -144,12 +163,14 @@ namespace Questor.Modules.Activities
             if (to.Items.Any(i => i.TypeName == missionItem))
             {
                 moveItemRetryCounter = 0;
+                _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(3);
                 return true;
             }
 
             if (directEve.GetLockedItems().Count != 0)
             {
                 moveItemRetryCounter++;
+                _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(3);
                 return false;
             }
 
@@ -158,8 +179,10 @@ namespace Questor.Modules.Activities
             {
                 Logging.Log("CourierMissionCtrl", "Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"), Logging.White);
                 to.Add(item);
+                _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(7);
                 continue;
             }
+
             //_nextCourierAction = DateTime.UtcNow.AddSeconds(8);
             moveItemRetryCounter++;
             return false;
@@ -176,6 +199,11 @@ namespace Questor.Modules.Activities
         /// <returns></returns>
         public void ProcessState()
         {
+            if (DateTime.UtcNow < _nextCourierMissionCtrlPulse)
+                return;
+
+            if (Settings.Instance.DebugCourierMissions) Logging.Log("CourierMissionCtrl","CourierMissionCtrlState: [" + _States.CurrentCourierMissionCtrlState.ToString() + "]",Logging.Debug);
+
             switch (_States.CurrentCourierMissionCtrlState)
             {
                 case CourierMissionCtrlState.Idle:
@@ -190,6 +218,8 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CourierMissionCtrlState.PickupItem:
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) return;
+
                     if (moveItemRetryCounter > 20)
                     {
                         Cache.Instance.Paused = true;

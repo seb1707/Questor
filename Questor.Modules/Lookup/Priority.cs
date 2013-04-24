@@ -9,15 +9,25 @@
 // -------------------------------------------------------------------------------
 namespace Questor.Modules.Lookup
 {
-    public enum Priority
+    public enum PrimaryWeaponPriority
+    {
+        WarpScrambler = 0,
+        Jamming = 1,
+        TrackingDisrupting = 2,
+        Neutralizing = 3,
+        TargetPainting = 4,
+        Dampening = 5,
+        Webbing = 6,
+        PriorityKillTarget = 7,
+        NotUsed = 99,
+    }
+
+    public enum DronePriority
     {
         WarpScrambler = 0,
         Webbing = 1,
         PriorityKillTarget = 2,
-        Jamming = 3,
-        TargetPainting = 4,
-        Neutralizing = 5,
-        Dampening = 6,
-        TrackingDisrupting = 7
+        LowPriorityTarget = 3,
+        NotUsed = 99
     }
 }

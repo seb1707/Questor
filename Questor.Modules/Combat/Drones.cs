@@ -42,7 +42,7 @@ namespace Questor.Modules.Combat
         private double _structurePctTotal;
         public bool Recall; //false
         public bool WarpScrambled; //false
-        private DateTime _lastDronesProcessState;
+        private DateTime _nextDroneAction = DateTime.UtcNow;
         private DateTime _nextWarpScrambledWarning = DateTime.MinValue;
 
         private void GetDamagedDrones()
@@ -94,11 +94,9 @@ namespace Questor.Modules.Combat
                 // Return best possible high value target
                 return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, false, "Drones");
             }
-            else
-            {
-                // Return best possible low value target
-                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true, "Drones");
-            }
+            
+            // Return best possible low value target
+            return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true, "Drones");
         }
 
         /// <summary>
@@ -109,24 +107,21 @@ namespace Questor.Modules.Combat
             EntityCache target = GetTarget();
 
             // Nothing to engage yet, probably retargeting
-            if (target == null)
-                return;
-
-            if (target.IsBadIdea)
-                return;
+            if (target == null) return;
+            
+            if (target.IsBadIdea) return;
 
             // Is our current target still the same and is the last Engage command no longer then 15s ago?
-            if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
-            {
-                return;
-            }
+            if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15) return;
 
             // Are we still actively shooting at the target?
             bool mustEngage = false;
             foreach (EntityCache drone in Cache.Instance.ActiveDrones)
+            {
                 mustEngage |= drone.FollowId != target.Id;
-            if (!mustEngage)
-                return;
+            }
+
+            if (!mustEngage) return;
 
             // Is the last target our current active target?
             if (target.IsActiveTarget)
@@ -148,16 +143,15 @@ namespace Questor.Modules.Combat
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow < _lastDronesProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
-                return;
-
-            _lastDronesProcessState = DateTime.UtcNow;
+            if (_nextDroneAction > DateTime.UtcNow) return;
+            
+            _nextDroneAction = DateTime.UtcNow.AddMilliseconds(400);
 
             if (Cache.Instance.InStation ||                             // There is really no combat in stations (yet)
                 !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
                 Cache.Instance.DirectEve.ActiveShip.Entity == null ||   // What? No ship entity?
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
-                !Cache.Instance.UseDrones                            //if UseDrones is false
+                !Cache.Instance.UseDrones                               // if UseDrones is false
                 )
             {
                 _States.CurrentDroneState = DroneState.Idle;
@@ -166,6 +160,7 @@ namespace Questor.Modules.Combat
 
             if (!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp)
             {
+                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);            
                 _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
@@ -186,7 +181,7 @@ namespace Questor.Modules.Combat
                     bool launch = true;
 
                     // Always launch if we're scrambled
-                    if (!Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                    if (!Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                     {
                         launch &= Cache.Instance.UseDrones;
 
@@ -199,11 +194,11 @@ namespace Questor.Modules.Combat
                         launch &= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
 
                         // yes if there are targets to kill
-                        launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
+                        launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeColidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
 
                         if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                         {
-                            launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeCollidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
+                            launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeColidableStructure && e.Distance < Settings.Instance.DroneControlRange) > 0;
                         }
 
                         // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
@@ -306,7 +301,7 @@ namespace Questor.Modules.Combat
                     }
                     else
                     {
-                        if (Cache.Instance.PriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
                             EntityCache WarpScrambledBy = Cache.Instance.Targets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
                             if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
@@ -483,6 +478,7 @@ namespace Questor.Modules.Combat
                         _lastRecall = DateTime.UtcNow;
                         Recall = false;
                         TargetingCache.CurrentDronesTarget = null;
+                        _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
                     }

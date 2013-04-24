@@ -460,14 +460,14 @@ namespace Questor.Behaviors
                         if (_States.CurrentDebugHangarBehaviorState == DebugHangarsBehaviorState.Traveler) _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                         return;
                     }
-                    else if (destination.Count == 1 && destination.First() == 0)
+                    else if (destination.Count == 1 && destination.FirstOrDefault() == 0)
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.Last())
                     {
                         IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
                         if (bookmarks != null && bookmarks.Any())
-                            Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).First());
+                            Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
                         else
                         {
                             Logging.Log("DebugHangarsBehavior.Traveler", "Destination: [" + Cache.Instance.DirectEve.Navigation.GetLocation(destination.Last()).Name + "]", Logging.White);
@@ -623,6 +623,29 @@ namespace Questor.Behaviors
                     Logging.Log("DebugHangars", "DebugHangarsState.OpenCorpAmmoHangar:", Logging.White);
                     if (!Cache.Instance.ReadyCorpAmmoHangar("DebugHangars")) return;
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    Logging.Log("OpenCorpAmmoHangar", "AmmoHangar Contains [" + Cache.Instance.AmmoHangar.Items.Count() + "] Items", Logging.Debug);
+                    
+                    try
+                    {
+                        int icount = 0;
+                        foreach (DirectItem itemfound in Cache.Instance.AmmoHangar.Items)
+                        {
+                            icount++;
+                            Logging.Log("Arm.MoveItems", "Found: Name [" + itemfound.TypeName + "] Quantity [" + itemfound.Quantity + "] in the AmmoHangar", Logging.Red);
+                            if (icount > 20)
+                            {
+                                Logging.Log("Arm.MoveItems", "max items to log reached (over 20). there are probably more items but we only log 20 of em.", Logging.Red);
+                                break;
+                            }
+
+                            continue;
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log("OpenCorpLootHangar", "Exception was: [" + exception + "]", Logging.Debug);
+                    }
+
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;
                     break;
@@ -647,6 +670,29 @@ namespace Questor.Behaviors
                     Logging.Log("DebugHangars", "DebugHangarsState.OpenCorpLootHangar:", Logging.White);
                     if (!Cache.Instance.ReadyCorpLootHangar("DebugHangars")) return;
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
+                    Logging.Log("OpenCorpLootHangar", "LootHangar Contains [" + Cache.Instance.LootHangar.Items.Count() + "] Items", Logging.Debug);
+
+                    try
+                    {
+                        int icount2 = 0;
+                        foreach (DirectItem itemfound in Cache.Instance.LootHangar.Items)
+                        {
+                            icount2++;
+                            Logging.Log("Arm.MoveItems", "Found: Name [" + itemfound.TypeName + "] Quantity [" + itemfound.Quantity + "] in the LootHangar", Logging.Red);
+                            if (icount2 > 20)
+                            {
+                                Logging.Log("Arm.MoveItems", "max items to log reached (over 20). there are probably more items but we only log 20 of em.", Logging.Red);
+                                break;
+                            }
+
+                            continue;
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log("OpenCorpLootHangar", "Exception was: [" +  exception+ "]", Logging.Debug);
+                    }
+                    
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;
                     break;

@@ -13,7 +13,7 @@ namespace Questor.Modules.Caching
     using System;
     using System.Linq;
     using DirectEve;
-    using System.Collections.Generic;
+    //using System.Collections.Generic;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
 
@@ -174,7 +174,107 @@ namespace Questor.Modules.Caching
             get
             {
                 if (_directEntity != null)
-                    return _directEntity.IsActiveTarget;
+                {
+                    if (_directEntity.IsTarget)
+                    {
+                        return _directEntity.IsActiveTarget;        
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsInOptimalRange
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0 )
+                    {
+                        if (Settings.Instance.OptimalRange == 0)
+                        {
+                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
+                        }
+                    }
+
+                    if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                    {
+                        double optimal = 0;
+                        
+                        if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0)
+                        {
+                            optimal = Cache.Instance.OptimalRange;
+                        }
+                        else if (Settings.Instance.OptimalRange != 0)
+                        {
+                            optimal = Settings.Instance.OptimalRange;
+                        }
+                        
+                        if (!Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //if we do not have turrets mounted then optimal range is whatever is less weapons range or targeting range.
+                        {
+                            //
+                            // missile boats
+                            //
+                            optimal = Cache.Instance.MaxRange;
+                            if (_directEntity.Distance < optimal)
+                            {
+                                return true;
+                            }
+                        }
+                        else //Lasers, Projectile, and Hybrids
+                        {
+                            if (_directEntity.Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
+                            {
+                                if (_directEntity.Distance < (optimal * 1.5))
+                                {
+                                    return true;
+                                }
+                            }    
+                        }
+                        
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsDronePriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsPrimaryWeaponPriorityTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
 
                 return false;
             }
@@ -367,6 +467,10 @@ namespace Questor.Modules.Caching
                     {
                         haveLootRights |= _directEntity.CorpId == Cache.Instance.DirectEve.ActiveShip.Entity.CorpId;
                         haveLootRights |= _directEntity.OwnerId == Cache.Instance.DirectEve.ActiveShip.Entity.CharId;
+                        //
+                        // It would be nice if this were eventually extended to detect and include 'abandoned' wrecks (blue ones). 
+                        // I do not yet know what attributed actually change when that happens. We should collect some data. 
+                        //
                     }
 
                     return haveLootRights;
@@ -380,9 +484,26 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                ShipTargetValue value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                ShipTargetValue value = null;
+
+                try
+                {
+                    value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                }
+                catch (Exception exception)
+                {
+                    if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
+                }
+
                 if (value == null)
-                    return null;
+                {
+
+                    if (IsNPCBattleship) return 4;
+                    if (IsNPCBattlecruiser) return 3;
+                    if (IsNPCCruiser) return 2;
+                    if (IsNPCFrigate) return 0;
+                    return 2;
+                }
 
                 return value.TargetValue;
             }
@@ -719,6 +840,158 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsNpcByGroupID
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.Storyline_Battleship;
+                result |= GroupId == (int)Group.Storyline_Mission_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
+                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
+                result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
+                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
+                result |= GroupId == (int)Group.Mission_Khanid_Battleship;
+                result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
+                result |= GroupId == (int)Group.Mission_Mordu_Battleship;
+                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
+                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
+                result |= GroupId == (int)Group.Mission_Generic_Battleships;
+                result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
+                result |= GroupId == (int)Group.Mission_Thukker_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
+                result |= GroupId == (int)Group.Mission_Faction_Battleship;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
+                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
+                result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
+                result |= GroupId == (int)Group.Storyline_Cruiser;
+                result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
+                result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
+                result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
+                result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
+                result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
+                result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
+                result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
+                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
+                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
+                result |= GroupId == (int)Group.Mission_Generic_Cruisers;
+                result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
+                result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
+                result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
+                result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
+                result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
+                result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
+                result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
+                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
+                result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
+                result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
+                result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
+                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
+                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
+                result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
+                result |= GroupId == (int)Group.Mission_Generic_Destroyers;
+                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
+                result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
+                result |= GroupId == (int)Group.asteroid_guristas_frigate;
+                result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
+                result |= GroupId == (int)Group.asteroid_serpentis_frigate;
+                result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
+                result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
+                result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
+                result |= GroupId == (int)Group.deadspace_serpentis_frigate;
+                result |= GroupId == (int)Group.mission_amarr_empire_frigate;
+                result |= GroupId == (int)Group.mission_caldari_state_frigate;
+                result |= GroupId == (int)Group.mission_gallente_federation_frigate;
+                result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
+                result |= GroupId == (int)Group.mission_khanid_frigate;
+                result |= GroupId == (int)Group.mission_concord_frigate;
+                result |= GroupId == (int)Group.mission_mordu_frigate;
+                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
+                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate2;
+                result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
+                result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
+                result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
+                result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
+                result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
+                result |= GroupId == (int)Group.mission_generic_frigates;
+                result |= GroupId == (int)Group.mission_thukker_frigate;
+                result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                return result;
+            }
+        }
+
         public bool IsEntityIShouldLeaveAlone
         {
             get
@@ -763,7 +1036,7 @@ namespace Questor.Modules.Caching
                 double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
-                    Logging.Log("EntityCache", "LockTarget is ignored for [" + Name + "][" + Id + "], can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                    Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance /1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
                     return false;
                 }
             }
@@ -777,10 +1050,15 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public void UnlockTarget()
+        public bool UnlockTarget(string module)
         {
             if (_directEntity != null)
+            {
+                Cache.Instance.TargetingIDs.Remove(Id);
                 _directEntity.UnlockTarget();
+                return true;
+            }
+            return false;
         }
 
         public void Jump()
@@ -885,7 +1163,16 @@ namespace Questor.Modules.Caching
         public void MakeActiveTarget()
         {
             if (_directEntity != null)
-                _directEntity.MakeActiveTarget();
+            {
+                if (_directEntity.IsTarget)
+                {
+                    _directEntity.MakeActiveTarget();    
+                }
+
+                return;
+            }
+
+            return;
         }
     }
 }

@@ -66,7 +66,7 @@ namespace Questor.Modules.Logging
 
         public static bool WreckStatistics(IEnumerable<ItemCache> items, EntityCache containerEntity)
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.Instance.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -167,6 +167,8 @@ namespace Questor.Modules.Logging
             string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";
             Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.White);
 
+            things = things.ToList();
+
             if (!things.Any()) //if their are no entries, return
             {
                 Logging.Log("Statistics", "EntityStatistics: No entries to log", Logging.White);
@@ -218,7 +220,7 @@ namespace Questor.Modules.Logging
 
         public static bool WriteDroneStatsLog()
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.Instance.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -457,9 +459,26 @@ namespace Questor.Modules.Logging
             Cache.Instance.OrbitEntityNamed = null;
         }
 
+        public static void SaveMissionHTMLDetails(string MissionDetailsHtml, string missionName)
+        {
+            DateTimeForLogs = DateTime.Now;
+
+            string missionDetailsHtmlFile = Path.Combine(Settings.Instance.MissionDetailsHtmlPath, missionName + " - " + "mission-description-html.txt");
+            
+            if (!Directory.Exists(Settings.Instance.MissionDetailsHtmlPath))
+                Directory.CreateDirectory(Settings.Instance.MissionDetailsHtmlPath);
+
+            // Write the file
+            if (!File.Exists(missionDetailsHtmlFile))
+            {
+                Logging.Log("Statistics: SaveMissionHTMLDetails", "Writing mission details HTML [ " + missionDetailsHtmlFile + " ]", Logging.White);
+                File.AppendAllText(missionDetailsHtmlFile, MissionDetailsHtml);    
+            }
+        }
+
         public static void WriteMissionStatistics(long statisticsForThisAgent)
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.Instance.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}

@@ -14,6 +14,8 @@
 
         public int Unit { get; set; }
 
+        public bool useOrders { get; set; }
+
         private DateTime _lastAction;
 
         private bool _returnBuy;
@@ -71,9 +73,42 @@
                     if (marketWindow != null && marketWindow.DetailTypeId != Item)
                     {
                         marketWindow.LoadTypeId(Item);
-                        _States.CurrentBuyState = BuyState.BuyItem;
+                        if (useOrders)
+                        {
+                            _States.CurrentBuyState = BuyState.CreateOrder;
+                        }
+                        else
+                        {
+                            _States.CurrentBuyState = BuyState.BuyItem;
+                        }
 
                         break;
+                    }
+
+                    break;
+
+                case BuyState.CreateOrder:
+
+                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 5)
+                        break;
+
+                    _lastAction = DateTime.UtcNow;
+
+                    if (marketWindow != null)
+                    {
+                        IEnumerable<DirectOrder> orders = marketWindow.BuyOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId);
+
+                        DirectOrder order = orders.OrderByDescending(o => o.Price).FirstOrDefault();
+                        if (order != null)
+                        {
+                            double price = order.Price + 0.01;
+                            if (Cache.Instance.DirectEve.Session.StationId != null)
+                            {
+                                Cache.Instance.DirectEve.Buy((int)Cache.Instance.DirectEve.Session.StationId , Item, price, Unit, DirectOrderRange.Station, 1, 30);
+                            }
+                        }
+                        useOrders = false;
+                        _States.CurrentBuyState = BuyState.Done;
                     }
 
                     break;

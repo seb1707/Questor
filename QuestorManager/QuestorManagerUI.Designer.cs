@@ -32,6 +32,7 @@
             this.UpdateSearchResults = new System.Windows.Forms.Timer(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button4 = new System.Windows.Forms.Button();
             this.cmbXML = new System.Windows.Forms.ComboBox();
             this.bttnSaveTask = new System.Windows.Forms.Button();
             this.chkPause = new System.Windows.Forms.CheckBox();
@@ -127,6 +128,8 @@
             this.bttnTaskLineCmd = new System.Windows.Forms.Button();
             this.label17 = new System.Windows.Forms.Label();
             this.txtCmdLine = new System.Windows.Forms.TextBox();
+            this.cbxSellOrder = new System.Windows.Forms.CheckBox();
+            this.cbxCorpOrder = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -163,6 +166,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.button4);
             this.tabPage1.Controls.Add(this.cmbXML);
             this.tabPage1.Controls.Add(this.bttnSaveTask);
             this.tabPage1.Controls.Add(this.chkPause);
@@ -180,6 +184,16 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(144, 216);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(108, 23);
+            this.button4.TabIndex = 30;
+            this.button4.Text = "Load Shopping List";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // cmbXML
             // 
@@ -257,9 +271,9 @@
             // 
             // LstTask
             // 
-            this.LstTask.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.LstTask.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.LstTask.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.JobHeader1,
             this.DescriptionHeader1,
@@ -305,8 +319,8 @@
             // 
             // LblStatus
             // 
-            this.LblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.LblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.LblStatus.AutoEllipsis = true;
             this.LblStatus.Location = new System.Drawing.Point(67, 4);
             this.LblStatus.Name = "LblStatus";
@@ -382,8 +396,8 @@
             // 
             // SearchTextBox
             // 
-            this.SearchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.SearchTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SearchTextBox.Location = new System.Drawing.Point(94, 9);
             this.SearchTextBox.Name = "SearchTextBox";
             this.SearchTextBox.Size = new System.Drawing.Size(543, 20);
@@ -612,7 +626,8 @@
             "Drop",
             "Grab",
             "Buy",
-            "Sell"});
+            "Sell",
+            "BuyOrder"});
             this.cmbMode.Location = new System.Drawing.Point(333, 43);
             this.cmbMode.Name = "cmbMode";
             this.cmbMode.Size = new System.Drawing.Size(119, 21);
@@ -673,6 +688,8 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.cbxCorpOrder);
+            this.tabPage4.Controls.Add(this.cbxSellOrder);
             this.tabPage4.Controls.Add(this.chkUpdateMineral);
             this.tabPage4.Controls.Add(this.label8);
             this.tabPage4.Controls.Add(this.RefineEfficiencyInput);
@@ -797,9 +814,9 @@
             // 
             // lvItems
             // 
-            this.lvItems.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvItems.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lvItems.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chName,
             this.chQuantity,
@@ -807,9 +824,9 @@
             this.chMedianBuy,
             this.chStationBuy,
             this.chTotalBuy});
-            this.lvItems.Location = new System.Drawing.Point(7, 57);
+            this.lvItems.Location = new System.Drawing.Point(7, 82);
             this.lvItems.Name = "lvItems";
-            this.lvItems.Size = new System.Drawing.Size(630, 179);
+            this.lvItems.Size = new System.Drawing.Size(630, 154);
             this.lvItems.TabIndex = 15;
             this.lvItems.UseCompatibleStateImageBehavior = false;
             this.lvItems.View = System.Windows.Forms.View.Details;
@@ -1110,6 +1127,26 @@
             this.txtCmdLine.Size = new System.Drawing.Size(468, 20);
             this.txtCmdLine.TabIndex = 0;
             // 
+            // cbxSellOrder
+            // 
+            this.cbxSellOrder.AutoSize = true;
+            this.cbxSellOrder.Location = new System.Drawing.Point(7, 57);
+            this.cbxSellOrder.Name = "cbxSellOrder";
+            this.cbxSellOrder.Size = new System.Drawing.Size(74, 17);
+            this.cbxSellOrder.TabIndex = 27;
+            this.cbxSellOrder.Text = "Use Order";
+            this.cbxSellOrder.UseVisualStyleBackColor = true;
+            // 
+            // cbxCorpOrder
+            // 
+            this.cbxCorpOrder.AutoSize = true;
+            this.cbxCorpOrder.Location = new System.Drawing.Point(83, 57);
+            this.cbxCorpOrder.Name = "cbxCorpOrder";
+            this.cbxCorpOrder.Size = new System.Drawing.Size(77, 17);
+            this.cbxCorpOrder.TabIndex = 28;
+            this.cbxCorpOrder.Text = "Corp Order";
+            this.cbxCorpOrder.UseVisualStyleBackColor = true;
+            // 
             // QuestorManagerUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1245,8 +1282,8 @@
         private System.Windows.Forms.Button bttnTaskLineCmd;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox txtCmdLine;
-
-
+        private System.Windows.Forms.Button button4;
+        public System.Windows.Forms.CheckBox cbxCorpOrder;
+        public System.Windows.Forms.CheckBox cbxSellOrder;
     }
 }
-

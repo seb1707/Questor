@@ -807,6 +807,21 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>
+        public bool IsLargeCollidable
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.LargeColidableObject;
+                result |= GroupId == (int)Group.LargeColidableShip;
+                result |= GroupId == (int)Group.LargeColidableStructure;
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// A bad idea to attack these targets
+        /// </summary>
         public bool IsBadIdea
         {
             get

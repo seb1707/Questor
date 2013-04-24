@@ -416,7 +416,7 @@ namespace Questor.Modules.Combat
             }
             EntityCache _bestTarget = null;
 
-            if (Cache.Instance.OngridKillableNPCs.Any() || (Cache.Instance._primaryWeaponPriorityTargets.Any()))
+            if (Cache.Instance.Targets.Any())
             {
                 _bestTarget = Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
                 if (_bestTarget != null)

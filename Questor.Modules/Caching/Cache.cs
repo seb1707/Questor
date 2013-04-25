@@ -3119,9 +3119,11 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget)  Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "]", Logging.Debug);
                     return LowOrHighValueTarget;
                 }
-                else
+                
+                
+                if (Settings.Instance.DebugGetBestTarget)
                 {
-                    if (Settings.Instance.DebugGetBestTarget)
+                    if (Cache.Instance.Targets.Any())
                     {
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
@@ -3131,18 +3133,23 @@ namespace Questor.Modules.Caching
                             Logging.Log("GetBestTarget: none", "Debug targets: [" + __targets.Name + "][" + Math.Round(__targets.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__targets.Id) + "][isTarget: " + __entity.IsTarget + "]", Logging.Debug);
                         }
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
+                    }
+                    
+                    if (Cache.Instance.Entities.Any(i => !i.IsBadIdea && !i.IsLargeCollidable))
+                    {
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", "ALL ENTITIES LISTED BELOW", Logging.Debug);
                         foreach (EntityCache __entity in Cache.Instance.Entities.Where(i => !i.IsBadIdea && !i.IsLargeCollidable))
                         {
-                            Logging.Log("GetBestTarget: none","Debug entities: [" + __entity.Name + "][" + Math.Round(__entity.Distance / 1000,2) + "k][" + Cache.Instance.MaskedID(__entity.Id) + "][isTarget: " + __entity.IsTarget + "]" ,Logging.Debug);
+                            Logging.Log("GetBestTarget: none", "Debug entities: [" + __entity.Name + "][" + Math.Round(__entity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__entity.Id) + "][isTarget: " + __entity.IsTarget + "]", Logging.Debug);
                         }
                         Logging.Log("GetBestTarget: none", "ALL ENTITIES LISTED ABOVE", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
                     }
                 }
+
                 return null;
             }
             catch (Exception exception)

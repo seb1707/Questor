@@ -3130,7 +3130,7 @@ namespace Questor.Modules.Caching
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED BELOW", Logging.Debug);
                         foreach (EntityCache __targets in Cache.Instance.Targets)
                         {
-                            Logging.Log("GetBestTarget: none", "Debug targets: [" + __targets.Name + "][" + Math.Round(__targets.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__targets.Id) + "][isTarget: " + __entity.IsTarget + "]", Logging.Debug);
+                            Logging.Log("GetBestTarget: none", "Debug targets: [" + __targets.Name + "][" + Math.Round(__targets.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__targets.Id) + "][isTarget: " + __targets.IsTarget + "]", Logging.Debug);
                         }
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);    

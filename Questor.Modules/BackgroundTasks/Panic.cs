@@ -484,37 +484,39 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log("Panic", "No station found in local?", Logging.Red);
                         }
 
-                        List<DirectBookmark> SafeSpotBookmarksInLocal = new List<DirectBookmark>(Cache.Instance.SafeSpotBookmarks
-                                                                        .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
-                                                                        .OrderBy(b => b.CreatedOn));
-
-                        
-                        DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distance.OnGridWithMe);
-                        if (offridSafeSpotBookmark != null)
+                        if (Cache.Instance.SafeSpotBookmarks.Any(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId))
                         {
-                            if (Cache.Instance.InWarp) return;
+                            List<DirectBookmark> SafeSpotBookmarksInLocal = new List<DirectBookmark>(Cache.Instance.SafeSpotBookmarks
+                                                                            .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
+                                                                            .OrderBy(b => b.CreatedOn));
 
-                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                            DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distance.OnGridWithMe);
+                            if (offridSafeSpotBookmark != null)
                             {
-                                Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
-                                //This runs every 'tick' so we should see it every 1.5 seconds or so
-                                _lastWarpScrambled = DateTime.UtcNow;
+                                if (Cache.Instance.InWarp) return;
+
+                                if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                                {
+                                    Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
+                                    //This runs every 'tick' so we should see it every 1.5 seconds or so
+                                    _lastWarpScrambled = DateTime.UtcNow;
+                                    return;
+                                }
+
+                                if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                                {
+                                    double distancetobm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
+                                                                                        offridSafeSpotBookmark.Y ?? 0,
+                                                                                        offridSafeSpotBookmark.Z ?? 0);
+                                    Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((distancetobm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                    offridSafeSpotBookmark.WarpTo();
+                                    return;
+                                }
+
+                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 return;
                             }
-
-                            if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
-                            //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
-                            {
-                                double distancetobm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
-                                                                                    offridSafeSpotBookmark.Y ?? 0,
-                                                                                    offridSafeSpotBookmark.Z ?? 0);
-                                Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((distancetobm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
-                                offridSafeSpotBookmark.WarpTo();
-                                return;
-                            }
-
-                            Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
-                            return;
                         }
 
                         // What is this you say?  No star?

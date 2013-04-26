@@ -2940,7 +2940,7 @@ namespace Questor.Modules.Caching
             //
             
             currentTargetPriority = PrimaryWeaponPriority.NotUsed;
-            if (currentTarget != null && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
+            if (currentTarget != null && callingroutine == "Combat" && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
             {
                 currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.EntityID == currentTarget.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
             }
@@ -2953,7 +2953,7 @@ namespace Questor.Modules.Caching
             DronePriority currentTargetDronePriority = DronePriority.NotUsed;
             currentTargetDronePriority = DronePriority.NotUsed;
 
-            if (currentTarget != null && _dronePriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
+            if (currentTarget != null && callingroutine == "Drones" && _dronePriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
             {
                 currentTargetDronePriority = _dronePriorityTargets.Where(t => t.EntityID == currentTarget.Id).Select(pt => pt.DronePriority).FirstOrDefault();
             }

@@ -208,13 +208,21 @@ namespace Questor.Modules.Logging
 
             IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
             IEnumerable<DirectItem> ammoCargo = Cache.Instance.CargoHold.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
-            foreach (DirectItem item in ammoCargo)
+            try
             {
-                Ammo ammo1 = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == item.TypeId);
-                InvType ammoType = Cache.Instance.InvTypesById[item.TypeId];
-                if (ammo1 != null) Statistics.Instance.AmmoConsumption = (ammo1.Quantity - item.Quantity);
-                Statistics.Instance.AmmoValue = ((int?)ammoType.MedianSell ?? 0) * Statistics.Instance.AmmoConsumption;
+                foreach (DirectItem item in ammoCargo)
+                {
+                    Ammo ammo1 = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == item.TypeId);
+                    InvType ammoType = Cache.Instance.InvTypesById[item.TypeId];
+                    if (ammo1 != null) Statistics.Instance.AmmoConsumption = (ammo1.Quantity - item.Quantity);
+                    Statistics.Instance.AmmoValue = ((int?)ammoType.MedianSell ?? 0) * Statistics.Instance.AmmoConsumption;
+                }
             }
+            catch (Exception exception)
+            {
+                Logging.Log("Statistics.AmmoConsumptionStatistics","Exception: " + exception,Logging.Debug);
+            }
+            
             return true;
         }
 

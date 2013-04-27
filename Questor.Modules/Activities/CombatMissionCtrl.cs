@@ -505,6 +505,18 @@ namespace Questor.Modules.Activities
                                                          .OrderBy(t => t.Distance)
                                                          .FirstOrDefault();
 
+            // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
+            target = target ?? Cache.Instance.Entities.Where(t =>
+                                                            (!t.IsSentry || Settings.Instance.KillSentries)
+                                                         && !t.IsEntityIShouldLeaveAlone
+                                                         && !t.IsContainer
+                                                         && t.IsNpc
+                                                         && t.CategoryId == (int)CategoryID.Entity
+                                                         && t.GroupId != (int)Group.LargeColidableStructure
+                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                         .OrderBy(t => t.Distance)
+                                                         .FirstOrDefault();
+
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
@@ -611,6 +623,18 @@ namespace Questor.Modules.Activities
                                                             .OrderBy(t => t.Distance)
                                                             .FirstOrDefault();
 
+            // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
+            target = target ?? Cache.Instance.Entities.Where(t =>
+                                                            (!t.IsSentry || Settings.Instance.KillSentries)
+                                                         && !t.IsEntityIShouldLeaveAlone
+                                                         && !t.IsContainer
+                                                         && t.IsNpc
+                                                         && t.CategoryId == (int)CategoryID.Entity
+                                                         && t.GroupId != (int)Group.LargeColidableStructure
+                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                         .OrderBy(t => t.Distance)
+                                                         .FirstOrDefault();
+
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
@@ -676,6 +700,20 @@ namespace Questor.Modules.Activities
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                             .OrderBy(t => t.Distance)
                                                             .FirstOrDefault();
+
+            // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
+            target = target ?? Cache.Instance.Entities.Where(t =>
+                                                             t.Distance < DistanceToConsiderTargets
+                                                         && !t.IsNPCFrigate
+                                                         && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                         && !t.IsEntityIShouldLeaveAlone
+                                                         && !t.IsContainer
+                                                         && t.IsNpc
+                                                         && t.CategoryId == (int)CategoryID.Entity
+                                                         && t.GroupId != (int)Group.LargeColidableStructure
+                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                         .OrderBy(t => t.Distance)
+                                                         .FirstOrDefault();
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
@@ -1342,7 +1380,9 @@ namespace Questor.Modules.Activities
 
             int quantity;
             if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
+            {
                 quantity = 1;
+            }
 
             bool done = items.Count == 0;
 

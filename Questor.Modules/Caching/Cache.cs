@@ -1520,7 +1520,7 @@ namespace Questor.Modules.Caching
                     {
                         var targets = new List<EntityCache>();
                         targets.AddRange(Cache.Instance.Targets);
-                        targets.AddRange(Cache.Instance.Targeting);
+                        //targets.AddRange(Cache.Instance.Targeting);
 
                         _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)

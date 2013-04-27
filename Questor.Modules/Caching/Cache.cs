@@ -5911,14 +5911,14 @@ namespace Questor.Modules.Caching
                         return _safeSpotBookmarks;
                     }
 
-                    return null;
+                    return new List<DirectBookmark>();
                 }
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.SafeSpotBookmarks", "Exception [" + exception + "]", Logging.Debug);    
                 }
 
-                return null;
+                return new List<DirectBookmark>();
             }
         }
 

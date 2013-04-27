@@ -93,6 +93,11 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _entities;
 
         /// <summary>
+        ///   _CombatTarget Entities cache - list of things we can kill
+        /// </summary>
+        private List<EntityCache> _combatTargets;
+
+        /// <summary>
         ///   _target Entities cache (all on grid entities that we can kill without penalty)
         /// </summary>
         private IEnumerable<EntityCache> _ongridKillableNPCs;
@@ -1504,6 +1509,39 @@ namespace Questor.Modules.Caching
             get { return _aggressed ?? (_aggressed = Entities.Where(e => e.IsTargetedBy && e.IsAttacking).ToList()); }
         }
 
+        public IEnumerable<EntityCache> combatTargets
+        {
+            get
+            {
+                //List<EntityCache>
+                if (!InSpace)
+                {
+                    if (_combatTargets == null)
+                    {
+                        var targets = new List<EntityCache>();
+                        targets.AddRange(Cache.Instance.Targets);
+                        targets.AddRange(Cache.Instance.Targeting);
+
+                        _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && (e.IsNpc || e.IsNpcByGroupID)
+                                                            && !e.IsContainer
+                                                            && !e.IsFactionWarfareNPC
+                                                            && !e.IsEntityIShouldLeaveAlone
+                                                            && !e.IsBadIdea
+                                                            && e.GroupId != (int)Group.LargeColidableStructure)
+                                                            .ToList();
+
+                        return _combatTargets;
+                    }
+
+                    return _combatTargets;
+                }
+
+                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
+            }
+        }
+
+
         public IEnumerable<EntityCache> Entities
         {
             get
@@ -2149,6 +2187,7 @@ namespace Questor.Modules.Caching
                 _activeDrones = null;
                 _bigObjects = null;
                 _bigObjectsAndGates = null;
+                _combatTargets = null;
                 _containers = null;
                 _entities = null;
                 _entitiesById.Clear();
@@ -2902,7 +2941,7 @@ namespace Questor.Modules.Caching
                 }
             }
 
-            #region Is our current target any other primary weapon priority target? AND if our target is an E-war priority target stay on it.
+            #region Is our current target any other primary weapon priority target? If so stay on the current target
             if (currentTarget != null
              && callingroutine == "Combat"
              && currentTarget.IsTarget
@@ -2912,7 +2951,7 @@ namespace Questor.Modules.Caching
             {
                 if (!currentTarget.IsTooCloseTooFastTooSmallToHit || callingroutine == "drones")
                 {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Is our current target any other primary weapon priority target? AND if our target is an E-war priority target stay on it.", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Is our current target any other primary weapon priority target? If so stay on the CurrentTarget", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "]", Logging.Debug);
                     return currentTarget;
                 }
@@ -3107,14 +3146,16 @@ namespace Questor.Modules.Caching
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
             EntityCache lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue 
                                                           && t.Distance < distance 
-                                                          && callingroutine == "combat"
                                                           && t.IsTarget
                                                           && !t.IsTooCloseTooFastTooSmallToHit).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
-            lowValueTarget = lowValueTarget ?? OngridKillableNPCs.Where(t => !t.TargetValue.HasValue
+            if (callingroutine == "drones") //do not exclude anything in range if drones are looking for a target
+            {
+                lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue
                                                           && t.Distance < distance
                                                           && t.IsTarget).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
-            
+            }
+
             if (lowValueFirst && lowValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "]", Logging.Debug);

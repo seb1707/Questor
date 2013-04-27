@@ -484,7 +484,7 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log("Panic", "No station found in local?", Logging.Red);
                         }
 
-                        if (Cache.Instance.SafeSpotBookmarks.Any(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId))
+                        if (Cache.Instance.SafeSpotBookmarks.Any() && Cache.Instance.SafeSpotBookmarks.Any(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId))
                         {
                             List<DirectBookmark> SafeSpotBookmarksInLocal = new List<DirectBookmark>(Cache.Instance.SafeSpotBookmarks
                                                                             .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)

@@ -1524,6 +1524,7 @@ namespace Questor.Modules.Caching
 
                         _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)
+                                                            && e.Distance < Cache.Instance.MaxRange
                                                             && !e.IsContainer
                                                             && !e.IsFactionWarfareNPC
                                                             && !e.IsEntityIShouldLeaveAlone

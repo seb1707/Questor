@@ -241,29 +241,18 @@ namespace Questor.Modules.Logging
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
                      Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Freighter)
                 {
-                    if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
+                    if (!File.Exists(Settings.Instance.DroneStatslogFile))
                     {
-                        if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return false;
-                        if (!Cache.Instance.DroneBay.IsValid) return true; //if the dronebay does not exist, assume we cant log any drone stats
-
-                        InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
-                        Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
-                        Logging.Log("Statistics: WriteDroneStatsLog", "Logging the number of lost drones: " + Statistics.Instance.LostDrones.ToString(CultureInfo.InvariantCulture), Logging.White);
-
-                        if (!File.Exists(Settings.Instance.DroneStatslogFile))
-                            File.AppendAllText(Settings.Instance.DroneStatslogFile, "Date;Mission;Number of lost drones;# of Recalls\r\n");
-                        string droneline = DateTimeForLogs.ToShortDateString() + ";";
-                        droneline += DateTimeForLogs.ToShortTimeString() + ";";
-                        droneline += Cache.Instance.MissionName + ";";
-                        droneline += Statistics.Instance.LostDrones + ";";
-                        droneline += +Statistics.Instance.DroneRecalls + ";\r\n";
-                        File.AppendAllText(Settings.Instance.DroneStatslogFile, droneline);
-                        Statistics.Instance.DroneLoggingCompleted = true;
+                        File.AppendAllText(Settings.Instance.DroneStatslogFile, "Date;Mission;Number of lost drones;# of Recalls\r\n");
                     }
-                    else
-                    {
-                        Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
-                    }
+
+                    string droneline = DateTimeForLogs.ToShortDateString() + ";";
+                    droneline += DateTimeForLogs.ToShortTimeString() + ";";
+                    droneline += Cache.Instance.MissionName + ";";
+                    droneline += Statistics.Instance.LostDrones + ";";
+                    droneline += +Statistics.Instance.DroneRecalls + ";\r\n";
+                    File.AppendAllText(Settings.Instance.DroneStatslogFile, droneline);
+                    Statistics.Instance.DroneLoggingCompleted = true;
                 }
                 else
                 {

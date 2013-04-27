@@ -37,6 +37,7 @@ namespace Questor.Modules.Activities
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
+        private int openCargoRetryNumber;
 
         //private bool _targetNull;
 
@@ -1393,6 +1394,7 @@ namespace Questor.Modules.Activities
 
                 // now that we have completed this action revert OpenWrecks to false
                 Cache.Instance.DropMode = false;
+                openCargoRetryNumber = 0;
                 Nextaction();
                 return;
             }
@@ -1416,10 +1418,17 @@ namespace Questor.Modules.Activities
                 {
                     if (DateTime.UtcNow > Cache.Instance.NextOpenContainerInSpaceAction)
                     {
+                        if (openCargoRetryNumber > 5)
+                        {
+                            Logging.Log("CombatMissionCtrl", "Drop: if (openCargoRetryNumber > 5) - error", Logging.Debug);
+                            return;
+                        }
+
                         DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
-                        if (closest.CargoWindow == null)
+                        if (closest != null && closest.CargoWindow == null)
                         {
+                            openCargoRetryNumber++;
                             Logging.Log("MissionController.DropItem", "Open Cargo", Logging.White);
                             closest.OpenCargo();
                             Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
@@ -1453,6 +1462,7 @@ namespace Questor.Modules.Activities
 
                     // now that we've completed this action revert OpenWrecks to false
                     Cache.Instance.DropMode = false;
+                    openCargoRetryNumber = 0;
                     Nextaction();
                     return;
                 }

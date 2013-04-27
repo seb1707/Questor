@@ -858,6 +858,7 @@ namespace Questor.Modules.Combat
                                                             && t.CategoryId == (int)CategoryID.Entity 
                                                             && !t.IsContainer 
                                                             && t.Distance < Cache.Instance.MaxRange 
+                                                            && (Cache.Instance.InMission && !t.IsBadIdea && !t.IsEntityIShouldLeaveAlone)
                                                             && targets.All(c => c.Id != t.Id) 
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
 
@@ -865,6 +866,7 @@ namespace Questor.Modules.Combat
                                                                        && (!t.IsSentry && Settings.Instance.KillSentries))
                                                                        .OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                        .ThenBy(t => t.Distance).ToList();
+
             List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => !t.TargetValue.HasValue
                                                                        && (!t.IsSentry && Settings.Instance.KillSentries))
                                                                        .OrderBy(t => t.Distance).ToList();
@@ -997,7 +999,13 @@ namespace Questor.Modules.Combat
             //
             // Do we have any drone priority targets not yet targeted?
             //
-            IEnumerable<EntityCache> dronepriority = Cache.Instance.DronePriorityTargets.Where(t => t.Distance < Settings.Instance.DroneControlRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).Where(c => c.IsWarpScramblingMe).OrderBy(c => c.Distance);
+            IEnumerable<EntityCache> dronepriority = Cache.Instance.DronePriorityTargets.Where(t => 
+                                                                                               t.Distance < Settings.Instance.DroneControlRange
+                                                                                               && t.Distance < Cache.Instance.MaxRange
+                                                                                               && targets.All(c => c.Id != t.Id) 
+                                                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                                                               .Where(c => c.IsWarpScramblingMe)
+                                                                                               .OrderBy(c => c.Distance);
             foreach (EntityCache entity in dronepriority)
             {
                 // Have we reached the limit of high value targets?
@@ -1028,7 +1036,12 @@ namespace Questor.Modules.Combat
             //
             // Do we have any primary weapon priority targets not yet targeted?
             //
-            IEnumerable<EntityCache> primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange && targets.All(c => c.Id != t.Id) && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).OrderBy(c => c.IsInOptimalRange).ThenBy(c => c.Distance);
+            IEnumerable<EntityCache> primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => 
+                                                                                                               t.Distance < Cache.Instance.MaxRange 
+                                                                                                               && targets.All(c => c.Id != t.Id) 
+                                                                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                                                                               .OrderBy(c => c.IsInOptimalRange)
+                                                                                                               .ThenBy(c => c.Distance);
             foreach (EntityCache entity in primaryWeaponPriority)
             {
                 // Have we reached the limit of high value targets?
@@ -1115,6 +1128,7 @@ namespace Questor.Modules.Combat
                                                                 && t.Distance < Cache.Instance.MaxRange
                                                                 && targets.All(c => c.Id != t.Id)
                                                                 && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
+                                                                && Cache.Instance.InMission 
                                                                 && !t.IsBadIdea
                                                                 && !t.IsEntityIShouldLeaveAlone
                                                                 && !t.IsFactionWarfareNPC

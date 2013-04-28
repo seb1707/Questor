@@ -1130,14 +1130,54 @@ namespace Questor.Modules.Caching
                                                             && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
                                                             )
                                                             .ToList();
-                                                                 
+
+                        if (!_potentialCombatTargets.Any())
+                        {
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found try #2", Logging.Debug);
+                            _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && !e.IsTarget
+                                                            && e.Distance < Cache.Instance.MaxRange
+                                                            && !e.IsContainer
+                                                            && !e.IsFactionWarfareNPC
+                                                            && !e.IsEntityIShouldLeaveAlone
+                                                            && !e.IsBadIdea
+                                                            && !e.IsCelestial
+                                                            && !e.IsAsteroid
+                                                            && !e.IsLargeCollidable
+                                                            && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                            )
+                                                            .ToList();
+                            if (!_potentialCombatTargets.Any())
+                            {
+                                if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[2]: no targets found try #3", Logging.Debug);
+                                _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && !e.IsTarget
+                                                            && e.Distance < Cache.Instance.MaxRange
+                                                            && !e.IsContainer
+                                                            && !e.IsFactionWarfareNPC
+                                                            && !e.IsEntityIShouldLeaveAlone
+                                                            && !e.IsBadIdea
+                                                            && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                            )
+                                                            .ToList();
+                                if (!_potentialCombatTargets.Any())
+                                {
+                                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[3]: no targets found: wtf", Logging.Debug);
+                                }
+
+                                return _potentialCombatTargets;
+                            }
+
+                            return _potentialCombatTargets;
+                        }
+
                         return _potentialCombatTargets;
                     }
 
                     return _potentialCombatTargets;
                 }
 
-                return Cache.Instance.Targets.ToList();
+                return Cache.Instance.EntitiesNotSelf.ToList();
             }
         }
 
@@ -1196,7 +1236,7 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                return Cache.Instance.Entities.Where(e => e.IsValid && e.Id != DirectEve.ActiveShip.ItemId).ToList();
+                return Cache.Instance.Entities.Where(e => e.IsValid && e.Id != DirectEve.ActiveShip.ItemId && e.Distance < Cache.Instance.MaxRange).ToList();
             }
         }
 

@@ -1171,6 +1171,8 @@ namespace Questor.Modules.Combat
                     }    
                 }
             }
+
+            return;
         }
 
         public void ProcessState()

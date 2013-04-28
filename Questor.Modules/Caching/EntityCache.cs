@@ -1059,6 +1059,16 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsCelestial
+        {
+            get
+            {
+                bool result = false;
+                result |= CategoryId == (int) CategoryID.Celestial;
+                return result;
+            }
+        }
+
         public bool LockTarget()
         {
             // If the bad idea is attacking, attack back

@@ -818,7 +818,7 @@ namespace Questor.Modules.Combat
             //
             // Remove any target that is too far out of range (Weapon Range * 1.5)
             //
-            foreach (EntityCache target in Cache.Instance.combatTargets.Where(t => t.IsTarget))
+            foreach (EntityCache target in Cache.Instance.combatTargets.Where(t => t.IsTarget && t.Distance < (double)Distance.OnGridWithMe))
             {
                 if (target.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
                 {
@@ -917,7 +917,7 @@ namespace Questor.Modules.Combat
             while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
                 // Unlock any target
-                EntityCache target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
+                EntityCache target = highValueTargets.Where(t => t.IsTarget).OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
                 if (target == null)
                 {
                     target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => highValueTargets.Any(p => !p.IsWarpScramblingMe));

@@ -1084,6 +1084,7 @@ namespace Questor.Modules.Caching
                                                             && !e.IsFactionWarfareNPC
                                                             && !e.IsEntityIShouldLeaveAlone
                                                             && !e.IsBadIdea
+                                                            && !e.IsCelestial
                                                             && e.GroupId != (int)Group.LargeColidableStructure)
                                                             .ToList();
 

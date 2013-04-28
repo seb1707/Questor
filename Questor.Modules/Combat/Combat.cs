@@ -796,7 +796,7 @@ namespace Questor.Modules.Combat
 
             // What is the range that we can target at
 
-            var targets = new List<EntityCache>();
+            List<EntityCache> targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             //targets.AddRange(Cache.Instance.Targeting);
 
@@ -818,22 +818,27 @@ namespace Questor.Modules.Combat
             //
             // Remove any target that is too far out of range (Weapon Range * 1.5)
             //
-            foreach (EntityCache target in targets)
+            if (Cache.Instance.Targets.Any())
             {
-                if (target.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
+                foreach (EntityCache target in Cache.Instance.Targets)
                 {
-                    Logging.Log("Combat", "Unlocking Target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] out of range [" + Math.Round(target.Distance / 1000, 0) + "k away] It will be relocked when it comes back into range. [" + Math.Round(Cache.Instance.MaxRange * 1.5d/1000,2) + "]", Logging.Teal);
-                }
-                else if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
-                {
-                    Logging.Log("Combat", "Unlocking Target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] on ignore list [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                }
-                else continue;
+                    Logging.Log("Combat.Target","Name [" + target.Name + "][" + Math.Round(target.Distance /1000,2) + "][ID:" + Cache.Instance.MaskedID(target.Id) + "][" + target.GroupId + "][isTarget:" + target.IsTarget + "]",Logging.Debug);
+                    
+                    if (target.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
+                    {
+                        Logging.Log("Combat", "Unlocking Target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] out of range [" + Math.Round(target.Distance / 1000, 0) + "k away] It will be relocked when it comes back into range. [" + Math.Round(Cache.Instance.MaxRange * 1.5d / 1000, 2) + "]", Logging.Teal);
+                    }
+                    else if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()))
+                    {
+                        Logging.Log("Combat", "Unlocking Target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "] on ignore list [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    }
+                    else continue;
 
-                if (target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
-                {
-                    // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
-                    return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    if (target.UnlockTarget("Combat.TargetCombatants"))
+                    {
+                        // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
+                        return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    }
                 }
             }
             #endregion Remove any target that is too far out of range (Weapon Range * 1.5)
@@ -930,7 +935,7 @@ namespace Questor.Modules.Combat
                     break;
                 }
 
-                if (target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
+                if (target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     highValueTargets.Remove(target);
@@ -945,8 +950,8 @@ namespace Questor.Modules.Combat
             while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.DronePriorityTargets.Count(dt => !dt.IsTarget), 0))
             {
                 // Unlock any target that is not warp scrambling me
-                EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => t.Distance).FirstOrDefault();
-                if ((target !=null) && target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
+                EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => t.Distance).FirstOrDefault();
+                if ((target !=null) && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking low  value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     lowValueTargets.Remove(target);
@@ -964,8 +969,8 @@ namespace Questor.Modules.Combat
                 && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)) || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe))))
             {
                 // Unlock any target that is not warp scrambling me
-                EntityCache target = targets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
-                if ((target != null) && target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
+                EntityCache target = targets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
+                if ((target != null) && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     try

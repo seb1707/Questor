@@ -1028,7 +1028,10 @@ namespace Questor.Modules.Caching
                 {
                     _targets = Entities.Where(e => e.IsTarget).ToList();
                 }
-
+                
+                //DE bug?
+                _targets = _targets.Where(e => e.Distance < (double) Distance.OnGridWithMe).ToList();
+                
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
                 foreach (EntityCache target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
                 {

@@ -2560,6 +2560,7 @@ namespace Questor.Modules.Caching
             }
             #endregion Is our current target any other primary weapon priority target?
 
+            #region Is our current target any other primary weapon priority target?
             //
             // Is our current target any other primary weapon priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
             //
@@ -2587,10 +2588,12 @@ namespace Questor.Modules.Caching
                 }
             }
 
+            #endregion Is our current target any other primary weapon priority target?
+
+            #region Is our current target any other drone priority target?
             //
             // Is our current target any other drone priority target?
             //
-            #region Is our current target any other drone priority target?
 
             DronePriority currentTargetDronePriority = DronePriority.NotUsed;
             currentTargetDronePriority = DronePriority.NotUsed;
@@ -2618,6 +2621,10 @@ namespace Questor.Modules.Caching
             }
             #endregion Is our current target any other drone priority target?
 
+            #region Current Target Health Logging
+            //
+            // Current Target Health Logging
+            //
             bool currentTargetHealthLogNow = true;
             if (Settings.Instance.DetailedCurrentTargetHealthLogging)
             {
@@ -2658,8 +2665,12 @@ namespace Questor.Modules.Caching
                 }
             }
 
-            // Is our current target already in armor? keep shooting the same target if so...
+            #endregion Current Target Health Logging
+         
             #region Is our current target already in armor? keep shooting the same target if so...
+            //
+            // Is our current target already in armor? keep shooting the same target if so...
+            //
             if (currentTarget != null 
              && currentTarget.IsInOptimalRange
              && ((!currentTarget.IsFrigate && callingroutine == "Combat") || (currentTarget.IsFrigate && callingroutine == "Drones"))
@@ -2677,13 +2688,10 @@ namespace Questor.Modules.Caching
             }
             #endregion Is our current target already in armor? keep shooting the same target if so...
 
-            // process prioritytargets in the following order
-            // w.IsWarpScramblingMe || w.IsTrackingDisruptingMe || w.IsJammingMe || w.IsWebbingMe || w.IsNeutralizingMe || w.IsSensorDampeningMe)));
-
+            #region Get the closest primary weapon priority target
             //
             // Get the closest primary weapon priority target
             //
-            #region Get the closest primary weapon priority target
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
@@ -2710,10 +2718,10 @@ namespace Questor.Modules.Caching
             }
             #endregion Get the closest primary weapon priority target
 
+            #region Get the closest drone priority target
             //
             // Get the closest drone priority target
             //
-            #region Get the closest drone priority target
             EntityCache dronePriorityTarget = null;
             try
             {
@@ -2742,9 +2750,9 @@ namespace Questor.Modules.Caching
             // Do we have a target?
             if (currentTarget != null)
             {
-                if (!currentTarget.IsTooCloseTooFastTooSmallToHit 
-                  || callingroutine == "drones" && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
-                  || callingroutine == "combat" && (currentTarget.IsNPCBattleship || currentTarget.IsNPCBattlecruiser))
+                if ((!currentTarget.IsTooCloseTooFastTooSmallToHit && currentTarget.IsInOptimalRange)
+                  || (callingroutine == "drones" && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate))
+                  || (callingroutine == "combat" && (currentTarget.IsNPCBattleship || currentTarget.IsNPCBattlecruiser)))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
@@ -2755,19 +2763,33 @@ namespace Questor.Modules.Caching
             // Get the closest high value target
             EntityCache highValueTarget = OngridKillableNPCs.Where(t => t.TargetValue.HasValue 
                                                           && t.Distance < distance 
-                                                          && t.IsTarget).OrderBy(t => !t.IsNPCFrigate).ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit).ThenBy(t => t.IsInOptimalRange).ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+                                                          && t.IsTarget)
+                                                          .OrderBy(t => !t.IsNPCFrigate)
+                                                          .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                          .ThenBy(t => t.IsInOptimalRange)
+                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                          .ThenBy(OrderByLowestHealth())
+                                                          .ThenBy(t => t.Distance)
+                                                          .FirstOrDefault();
 
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
             EntityCache lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue 
                                                           && t.Distance < distance 
                                                           && t.IsTarget
-                                                          && !t.IsTooCloseTooFastTooSmallToHit).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+                                                          && !t.IsTooCloseTooFastTooSmallToHit)
+                                                          .OrderBy(t => t.IsNPCFrigate)
+                                                          .ThenBy(OrderByLowestHealth())
+                                                          .ThenBy(t => t.Distance)
+                                                          .FirstOrDefault();
 
             if (callingroutine == "drones") //do not exclude anything in range if drones are looking for a target
             {
                 lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue
                                                           && t.Distance < distance
-                                                          && t.IsTarget).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+                                                          && t.IsTarget).OrderBy(t => t.IsNPCFrigate)
+                                                          .ThenBy(OrderByLowestHealth())
+                                                          .ThenBy(t => t.Distance)
+                                                          .FirstOrDefault();
             }
 
             if (lowValueFirst && lowValueTarget != null)

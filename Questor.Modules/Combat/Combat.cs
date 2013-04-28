@@ -885,7 +885,6 @@ namespace Questor.Modules.Combat
             #region Build a list of things targeting me
             // Build a list of things targeting me
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc
-                                                            && t.TargetValue.HasValue
                                                             && (!t.IsSentry && Settings.Instance.KillSentries)
                                                             && t.Distance < Cache.Instance.MaxRange 
                                                             && t.CategoryId == (int)CategoryID.Entity 
@@ -1091,8 +1090,11 @@ namespace Questor.Modules.Combat
 
             #endregion Do we have any primary weapon priority targets not yet targeted?
 
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);
+
             foreach (EntityCache entity in highValueTargetingMe)
             {
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 2) + "k][groupID" + entity.GroupId + "]", Logging.Debug);
                 // Have we reached the limit of high value targets?
                 if (highValueTargets.Count >= maxHighValueTarget)
                 {
@@ -1115,8 +1117,12 @@ namespace Questor.Modules.Combat
                 continue;
             }
 
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in lowValueTargetingMe)", Logging.Debug);
+            
             foreach (EntityCache entity in lowValueTargetingMe)
             {
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants","DebugTargetCombatants: [" + entity.Name + "][" + Math.Round(entity.Distance/1000,2) + "k][groupID" + entity.GroupId + "]", Logging.Debug);
+
                 // Have we reached the limit of low value targets?
                 if (lowValueTargets.Count >= maxLowValueTarget)
                 {

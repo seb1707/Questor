@@ -924,15 +924,12 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if ((Cache.Instance.InSpace && Cache.Instance.LastInStation.AddSeconds(5) > DateTime.UtcNow) || DirectEve.Modules.Select(m => new ModuleCache(m)).ToList().Any())
+                    if (_modules == null || !_modules.Any())
                     {
-                        if (_modules == null || !_modules.Any())
-                        {
-                            _modules = DirectEve.Modules.Select(m => new ModuleCache(m)).ToList();
-                        }
-
-                        return _modules;
+                        _modules = DirectEve.Modules.Select(m => new ModuleCache(m)).ToList();
                     }
+
+                    return _modules;
                 }
                 catch (Exception exception)
                 {

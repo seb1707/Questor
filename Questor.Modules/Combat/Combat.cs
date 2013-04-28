@@ -830,7 +830,7 @@ namespace Questor.Modules.Combat
                 }
                 else continue;
 
-                if (target.UnlockTarget("Combat.TargetCombatants"))
+                if (target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
                     return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
@@ -930,7 +930,7 @@ namespace Questor.Modules.Combat
                     break;
                 }
 
-                if (target.UnlockTarget("Combat.TargetCombatants"))
+                if (target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     highValueTargets.Remove(target);
@@ -946,7 +946,7 @@ namespace Questor.Modules.Combat
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => t.Distance).FirstOrDefault();
-                if ((target !=null) && target.UnlockTarget("Combat.TargetCombatants"))
+                if ((target !=null) && target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking low  value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     lowValueTargets.Remove(target);
@@ -965,7 +965,7 @@ namespace Questor.Modules.Combat
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = targets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
-                if ((target != null) && target.UnlockTarget("Combat.TargetCombatants"))
+                if ((target != null) && target.IsTarget && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     try

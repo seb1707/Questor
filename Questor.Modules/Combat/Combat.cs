@@ -798,7 +798,7 @@ namespace Questor.Modules.Combat
 
             var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
-            targets.AddRange(Cache.Instance.Targeting);
+            //targets.AddRange(Cache.Instance.Targeting);
 
             if (Settings.Instance.DebugTargetCombatants)
             {

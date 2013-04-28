@@ -655,6 +655,7 @@ namespace Questor.Modules.Caching
                 result |= GroupId == (int)Group.mission_generic_frigates;
                 result |= GroupId == (int)Group.mission_thukker_frigate;
                 result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one. 
                 return result;
             }
         }

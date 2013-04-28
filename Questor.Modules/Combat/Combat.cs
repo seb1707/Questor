@@ -798,14 +798,14 @@ namespace Questor.Modules.Combat
 
             List<EntityCache> targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
-            //targets.AddRange(Cache.Instance.Targeting);
+            targets.AddRange(Cache.Instance.Targeting);
 
             if (Settings.Instance.DebugTargetCombatants)
             {
                 int i = 0;
                 Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider combatTargets below", Logging.Debug);
                     
-                foreach (EntityCache t in Cache.Instance.combatTargets)
+                foreach (EntityCache t in Cache.Instance.potentialCombatTargets)
                 {
                     i++;
                     Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
@@ -820,7 +820,7 @@ namespace Questor.Modules.Combat
             //
             if (Cache.Instance.Targets.Any())
             {
-                foreach (EntityCache target in Cache.Instance.Targets)
+                foreach (EntityCache target in Cache.Instance.combatTargets)
                 {
                     Logging.Log("Combat.Target","Name [" + target.Name + "][" + Math.Round(target.Distance /1000,2) + "][ID:" + Cache.Instance.MaskedID(target.Id) + "][" + target.GroupId + "][isTarget:" + target.IsTarget + "]",Logging.Debug);
                     
@@ -847,11 +847,11 @@ namespace Questor.Modules.Combat
             //
             // Get a list of current high and low value targets
             //
-            List<EntityCache> highValueTargets = Cache.Instance.combatTargets.Where(t => t.TargetValue.HasValue 
+            List<EntityCache> highValueTargets = Cache.Instance.potentialCombatTargets.Where(t => t.TargetValue.HasValue 
                                                                                && (!t.IsSentry && Settings.Instance.KillSentries) 
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
-            List<EntityCache> lowValueTargets = Cache.Instance.combatTargets.Where(t => !t.TargetValue.HasValue 
+            List<EntityCache> lowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => !t.TargetValue.HasValue 
                                                                               && (!t.IsSentry && Settings.Instance.KillSentries) 
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
                                                                               .OrderBy(t => t.IsNPCFrigate).ToList();
@@ -887,18 +887,10 @@ namespace Questor.Modules.Combat
             {
                 if (!TargetingMe.Any())
                 {
-                    
-                    TargetingMe = Cache.Instance.Entities.Where(t => t.IsNpc 
-                                                                 && !t.IsBadIdea 
-                                                                 && t.GroupId != (int)Group.LargeColidableStructure 
-                                                                 && t.CategoryId == (int)CategoryID.Entity 
-                                                                 && !t.IsContainer 
-                                                                 && t.Distance < Cache.Instance.MaxRange 
-                                                                 && targets.All(c => c.Id != t.Id) 
-                                                                 && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
+                    NotYetTargetingMe = Cache.Instance.potentialCombatTargets.ToList();
 
-                    highValueTargetingMe = TargetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(t => t.Distance).ToList();
-                    lowValueTargetingMe = TargetingMe.Where(t => !t.TargetValue.HasValue).OrderBy(t => t.Distance).ToList();
+                    highValueTargetingMe = NotYetTargetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(t => t.Distance).ToList();
+                    lowValueTargetingMe = NotYetTargetingMe.Where(t => !t.TargetValue.HasValue).OrderBy(t => t.Distance).ToList();
                 }
             }
             #endregion if nothing is targeting me and I am not currently configured for missions assume pew is the objective... and shoot NPCs (NOT players!) even though they are not targeting us.

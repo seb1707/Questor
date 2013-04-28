@@ -1065,6 +1065,39 @@ namespace Questor.Modules.Caching
             {
                 bool result = false;
                 result |= CategoryId == (int) CategoryID.Celestial;
+                result |= CategoryId == (int) CategoryID.Station;
+                result |= GroupId == (int) Group.Moon;
+                result |= GroupId == (int) Group.AsteroidBelt;
+                return result;
+            }
+        }
+
+        public bool IsAsteroidBelt
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.AsteroidBelt;
+                return result;
+            }
+        }
+
+        public bool IsPlanet
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.Planet;
+                return result;
+            }
+        }
+
+        public bool IsMoon
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.Moon;
                 return result;
             }
         }

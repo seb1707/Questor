@@ -12,9 +12,11 @@ namespace Questor.Modules.Lookup
     public enum Group
     {
         Star = 6,
-        Station = 15,
-        Stargate = 10,
+        Planet = 7,
+        Moon = 8,
         AsteroidBelt = 9,
+        Stargate = 10,
+        Station = 15,
         AccelerationGate = 366,
         JumpBridge = 707,
 

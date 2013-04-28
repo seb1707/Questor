@@ -95,9 +95,14 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _entities;
 
         /// <summary>
-        ///   _CombatTarget Entities cache - list of things we can kill //cleared in InvalidateCache 
+        ///   _CombatTarget Entities cache - list of things we have targeted to kill //cleared in InvalidateCache 
         /// </summary>
         private List<EntityCache> _combatTargets;
+
+        /// <summary>
+        ///   _PotentialCombatTarget Entities cache - list of things we can kill //cleared in InvalidateCache 
+        /// </summary>
+        private List<EntityCache> _potentialCombatTargets;
 
         /// <summary>
         ///   _target Entities cache (all on grid entities that we can kill without penalty) //cleared in InvalidateCache 
@@ -1075,9 +1080,9 @@ namespace Questor.Modules.Caching
                 {
                     if (_combatTargets == null)
                     {
-                        var targets = new List<EntityCache>();
+                        List<EntityCache> targets = new List<EntityCache>();
                         targets.AddRange(Cache.Instance.Targets);
-                        //targets.AddRange(Cache.Instance.Targeting);
+                        targets.AddRange(Cache.Instance.Targeting);
 
                         _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)
@@ -1088,8 +1093,7 @@ namespace Questor.Modules.Caching
                                                             && !e.IsEntityIShouldLeaveAlone
                                                             && !e.IsBadIdea
                                                             && !e.IsCelestial
-                                                            && !e.IsAsteroid
-                                                            && e.GroupId != (int)Group.LargeColidableStructure)
+                                                            && !e.IsAsteroid)
                                                             .ToList();
 
                         return _combatTargets;
@@ -1098,10 +1102,43 @@ namespace Questor.Modules.Caching
                     return _combatTargets;
                 }
 
-                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
+                return Cache.Instance.Targets.ToList();
             }
         }
 
+        public IEnumerable<EntityCache> potentialCombatTargets
+        {
+            get
+            {
+                //List<EntityCache>
+                if (!InSpace)
+                {
+                    if (_potentialCombatTargets == null)
+                    {
+                        _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && (e.IsNpc || e.IsNpcByGroupID)
+                                                            && e.Distance < Cache.Instance.MaxRange
+                                                            && e.Distance < (double)Distance.OnGridWithMe
+                                                            && !e.IsContainer
+                                                            && !e.IsFactionWarfareNPC
+                                                            && !e.IsEntityIShouldLeaveAlone
+                                                            && !e.IsBadIdea
+                                                            && !e.IsCelestial
+                                                            && !e.IsAsteroid
+                                                            && !e.IsLargeCollidable
+                                                            && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                            )
+                                                            .ToList();
+                                                                 
+                        return _potentialCombatTargets;
+                    }
+
+                    return _potentialCombatTargets;
+                }
+
+                return Cache.Instance.Targets.ToList();
+            }
+        }
 
         public IEnumerable<EntityCache> Entities
         {

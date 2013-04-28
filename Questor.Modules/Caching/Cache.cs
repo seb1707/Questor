@@ -2688,7 +2688,9 @@ namespace Questor.Modules.Caching
             // Do we have a target?
             if (currentTarget != null)
             {
-                if (!currentTarget.IsTooCloseTooFastTooSmallToHit || callingroutine == "drones")
+                if (!currentTarget.IsTooCloseTooFastTooSmallToHit 
+                  || callingroutine == "drones" && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
+                  || callingroutine == "combat" && (currentTarget.IsNPCBattleship || currentTarget.IsNPCBattlecruiser))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (currentTarget != null) return currentTarget;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "]", Logging.Debug);

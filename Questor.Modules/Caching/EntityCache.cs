@@ -1068,6 +1068,12 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
+            if (Distance >= 250001) //250k is the MAX targeting range in eve. 
+            {
+                Logging.Log("EntityCache", "We tried to lock [" + Name + "] which is [" + Math.Round(Distance / 1000,2) + "k] away. Do not try to lock things that you cant possibly target", Logging.Debug);
+                return false;
+            }
+
             // Remove the target info (its been targeted)
             foreach (EntityCache target in Cache.Instance.Entities.Where(e => e.IsTarget).Where(t => Cache.Instance.TargetingIDs.ContainsKey(t.Id)))
             {

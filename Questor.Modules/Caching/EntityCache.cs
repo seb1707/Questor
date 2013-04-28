@@ -1104,12 +1104,18 @@ namespace Questor.Modules.Caching
 
         public bool UnlockTarget(string module)
         {
-            if (_directEntity != null && Distance < 250001)
+            if (_directEntity != null)
             {
+                if (Distance > 250001)
+                {
+                    return false;
+                }
+
                 Cache.Instance.TargetingIDs.Remove(Id);
                 _directEntity.UnlockTarget();
                 return true;
             }
+
             return false;
         }
 

@@ -818,7 +818,7 @@ namespace Questor.Modules.Combat
             //
             // Remove any target that is too far out of range (Weapon Range * 1.5)
             //
-            foreach (EntityCache target in Cache.Instance.combatTargets.Where(t => t.IsTarget && t.Distance < (double)Distance.OnGridWithMe))
+            foreach (EntityCache target in targets)
             {
                 if (target.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
                 {

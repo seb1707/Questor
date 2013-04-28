@@ -1069,6 +1069,16 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsAsteroid
+        {
+            get
+            {
+                bool result = false;
+                result |= CategoryId == (int)CategoryID.Asteroid;
+                return result;
+            }
+        }
+
         public bool LockTarget()
         {
             // If the bad idea is attacking, attack back

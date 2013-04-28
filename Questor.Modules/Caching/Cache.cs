@@ -1085,6 +1085,7 @@ namespace Questor.Modules.Caching
                                                             && !e.IsEntityIShouldLeaveAlone
                                                             && !e.IsBadIdea
                                                             && !e.IsCelestial
+                                                            && !e.IsAsteroid
                                                             && e.GroupId != (int)Group.LargeColidableStructure)
                                                             .ToList();
 

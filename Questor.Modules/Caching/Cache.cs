@@ -134,11 +134,6 @@ namespace Questor.Modules.Caching
         /// </summary>
         public List<PriorityTarget> _dronePriorityTargets;
 
-        /// <summary>
-        ///   Primary Weapon Priority targets (e.g. warp scramblers or webbing frigates)
-        /// </summary>
-        public String _PrimaryWeaponPriorityTargets_text;
-
         public String OrbitEntityNamed;
 
         public DirectLocation MissionSolarSystem;
@@ -2174,20 +2169,15 @@ namespace Questor.Modules.Caching
                     if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons
                         || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
                     {
-                        Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                        Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
                         _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                     }
                 }
                 else
                 {
-                    Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance, 2) / 1000 + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                    Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance /1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
                     _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
                 }
-
-                //
-                // Drones
-                //
-                //Cache.Instance.AddDronePriorityTargets(targets, DronePriority.PriorityKillTarget, module);
 
                 continue;
             }

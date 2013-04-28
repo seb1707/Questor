@@ -1076,7 +1076,7 @@ namespace Questor.Modules.Caching
             get
             {
                 //List<EntityCache>
-                if (!InSpace)
+                if (Cache.Instance.InSpace)
                 {
                     if (_combatTargets == null)
                     {
@@ -1111,12 +1111,13 @@ namespace Questor.Modules.Caching
             get
             {
                 //List<EntityCache>
-                if (!InSpace)
+                if (Cache.Instance.InSpace)
                 {
                     if (_potentialCombatTargets == null)
                     {
                         _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)
+                                                            && !e.IsTarget
                                                             && e.Distance < Cache.Instance.MaxRange
                                                             && e.Distance < (double)Distance.OnGridWithMe
                                                             && !e.IsContainer

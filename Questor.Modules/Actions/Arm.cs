@@ -55,6 +55,7 @@ namespace Questor.Modules.Actions
         private bool capsMoved = false;
         //private bool ammoMoved = false;
         private int retryCount = 0;
+        private int ItemHangarRetries = 0;
 
         public void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
         {
@@ -191,6 +192,7 @@ namespace Questor.Modules.Actions
                     capsMoved = false;
                     //ammoMoved = false;
                     retryCount = 0;
+                    ItemHangarRetries = 0;
 
                     if (Cache.Instance.MissionAmmo.Any())
                     {
@@ -1064,7 +1066,14 @@ namespace Questor.Modules.Actions
                                     {
                                         Logging.Log("Arm", "Itemhangar was empty! Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
                                     }
-                                    
+
+                                    if (ItemHangarRetries > 5)
+                                    {
+                                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                                        return;
+                                    }
+                                    ItemHangarRetries++;
+
                                     return;
                                 }
                             }

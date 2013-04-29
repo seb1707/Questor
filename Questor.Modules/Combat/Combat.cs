@@ -888,19 +888,34 @@ namespace Questor.Modules.Combat
             //
             // Get a list of current high and low value targets
             //
-            List<EntityCache> highValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (t.TargetValue.HasValue 
+            List<EntityCache> potentialHighValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (t.TargetValue.HasValue 
                                                                                && (!t.IsSentry && Settings.Instance.KillSentries)
                                                                                && !t.IsTarget
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
-            List<EntityCache> lowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (!t.TargetValue.HasValue 
+            List<EntityCache> potentialLowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (!t.TargetValue.HasValue 
                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
                                                                               && !t.IsTarget
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
                                                                               || t.IsAttacking)
                                                                               .OrderBy(t => t.IsNPCFrigate).ToList();
+
+            List<EntityCache> highValueTargets = Cache.Instance.combatTargets.Where(t => (t.TargetValue.HasValue
+                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                               && t.IsTarget
+                                                                               || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
+                                                                               || t.IsAttacking)
+                                                                               .OrderBy(t => t.IsNPCBattleship).ToList();
+
+            List<EntityCache> lowValueTargets = Cache.Instance.combatTargets.Where(t => (!t.TargetValue.HasValue
+                                                                              && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                              && t.IsTarget
+                                                                              && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
+                                                                              || t.IsAttacking)
+                                                                              .OrderBy(t => t.IsNPCFrigate).ToList();
+
             #endregion Get a list of current high and low value targets
 
             #region Build a list of things targeting me
@@ -960,12 +975,12 @@ namespace Questor.Modules.Combat
             while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
                 // Unlock any target
-                EntityCache target = highValueTargets.Where(t => t.IsTarget).OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
-                if (target == null)
+                EntityCache unlockThisTarget = targets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
+                if (unlockThisTarget == null)
                 {
-                    target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => highValueTargets.Any(p => !p.IsWarpScramblingMe));
+                    unlockThisTarget = targets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => highValueTargets.Any(p => !p.IsWarpScramblingMe));
                 }
-                if (target == null)
+                if (unlockThisTarget == null)
                 {
                     //
                     // you should never get here unless you have LOTS of NPCs pointing you
@@ -973,10 +988,10 @@ namespace Questor.Modules.Combat
                     break;
                 }
 
-                if (target.UnlockTarget("Combat.TargetCombatants"))
+                if (unlockThisTarget.UnlockTarget("Combat.TargetCombatants"))
                 {
-                    Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    highValueTargets.Remove(target);
+                    Logging.Log("Combat", "unlocking high value target [" + unlockThisTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisTarget.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(unlockThisTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    highValueTargets.Remove(unlockThisTarget);
                 }
             }
             #endregion Do we have too many high value (non-priority) targets targeted?
@@ -1072,7 +1087,7 @@ namespace Questor.Modules.Combat
 
                     if (entity.LockTarget())
                     {
-                        Logging.Log("Combat", "Targeting drone priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
+                        Logging.Log("Combat", "Targeting drone priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] potentialLowValueTargets.Count [" + potentialLowValueTargets.Count + "]", Logging.Teal);
                         highValueTargets.Add(entity);
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                         return;
@@ -1118,7 +1133,7 @@ namespace Questor.Modules.Combat
 
                     if (entity.LockTarget())
                     {
-                        Logging.Log("Combat", "Targeting primary weapon priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
+                        Logging.Log("Combat", "Targeting primary weapon priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] potentialHighValueTargets.Count [" + potentialHighValueTargets.Count + "]", Logging.Teal);
                         highValueTargets.Add(entity);
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                         return;
@@ -1219,7 +1234,6 @@ namespace Questor.Modules.Combat
                                                                 && t.CategoryId == (int)CategoryID.Entity
                                                                 && !t.IsContainer
                                                                 && t.Distance < Cache.Instance.MaxRange
-                                                                && targets.All(c => c.Id != t.Id)
                                                                 && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
                                                                 && Cache.Instance.InMission 
                                                                 && !t.IsBadIdea
@@ -1236,7 +1250,7 @@ namespace Questor.Modules.Combat
                     EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
                     if (TargetThisNotYetAggressiveNPC != null && TargetThisNotYetAggressiveNPC.LockTarget())
                     {
-                        Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away] lowValueTargets.Count [" + lowValueTargets.Count + "]", Logging.Teal);
+                        Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away] potentiallowValueTargets.Count [" + potentialLowValueTargets.Count + "] lowValueTargets.Count [" + lowValueTargets.Count + "]", Logging.Teal);
                         lowValueTargets.Add(TargetThisNotYetAggressiveNPC);
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000); //this is extra long so we wait for more NPCs to be aggressed before continuing
                         return;

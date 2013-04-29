@@ -915,7 +915,7 @@ namespace Questor.Modules.Combat
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
 
             List<EntityCache> highValueTargetingMe = TargetingMe.OrderBy(t => !t.IsNPCFrigate)
-                                                                .ThenBy(t => t.IsFrigate)
+                                                                .ThenBy(t => !t.IsFrigate)
                                                                 .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                 .ThenBy(t => t.Distance).ToList();
 

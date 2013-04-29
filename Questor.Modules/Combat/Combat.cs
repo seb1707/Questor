@@ -909,7 +909,7 @@ namespace Questor.Modules.Combat
                                                             && t.CategoryId == (int)CategoryID.Entity 
                                                             && !t.IsContainer
                                                             && (Cache.Instance.InMission && !t.IsBadIdea && !t.IsEntityIShouldLeaveAlone)
-                                                            && targets.All(c => c.Id != t.Id) 
+                                                            //&& targets.All(c => c.Id != t.Id) 
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
 
             List<EntityCache> highValueTargetingMe = TargetingMe.OrderBy(t => !t.IsFrigate)

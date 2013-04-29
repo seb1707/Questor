@@ -908,9 +908,8 @@ namespace Questor.Modules.Combat
             TargetingMe = Cache.Instance.TargetedBy.Where(t => (t.IsNpc || t.IsAttacking)
                                                             && (!t.IsSentry && Settings.Instance.KillSentries)
                                                             && t.Distance < Cache.Instance.MaxRange 
-                                                            && t.CategoryId == (int)CategoryID.Entity 
-                                                            && !t.IsContainer
-                                                            && (Cache.Instance.InMission && !t.IsBadIdea && !t.IsEntityIShouldLeaveAlone)
+                                                            && (!t.IsBadIdea || t.IsAttacking)
+                                                            && !t.IsEntityIShouldLeaveAlone
                                                             //&& targets.All(c => c.Id != t.Id) 
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
 

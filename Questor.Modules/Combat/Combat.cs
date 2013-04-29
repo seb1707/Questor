@@ -888,22 +888,24 @@ namespace Questor.Modules.Combat
             //
             // Get a list of current high and low value targets
             //
-            List<EntityCache> highValueTargets = Cache.Instance.potentialCombatTargets.Where(t => t.TargetValue.HasValue 
+            List<EntityCache> highValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (t.TargetValue.HasValue 
                                                                                && (!t.IsSentry && Settings.Instance.KillSentries)
                                                                                && !t.IsTarget
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
+                                                                               || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
-            List<EntityCache> lowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => !t.TargetValue.HasValue 
+            List<EntityCache> lowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (!t.TargetValue.HasValue 
                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
                                                                               && !t.IsTarget
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
+                                                                              || t.IsAttacking)
                                                                               .OrderBy(t => t.IsNPCFrigate).ToList();
             #endregion Get a list of current high and low value targets
 
             #region Build a list of things targeting me
             // Build a list of things targeting me
-            TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsNpc
+            TargetingMe = Cache.Instance.TargetedBy.Where(t => (t.IsNpc || t.IsAttacking)
                                                             && (!t.IsSentry && Settings.Instance.KillSentries)
                                                             && t.Distance < Cache.Instance.MaxRange 
                                                             && t.CategoryId == (int)CategoryID.Entity 
@@ -912,11 +914,13 @@ namespace Questor.Modules.Combat
                                                             //&& targets.All(c => c.Id != t.Id) 
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
 
-            List<EntityCache> highValueTargetingMe = TargetingMe.OrderBy(t => !t.IsFrigate)
+            List<EntityCache> highValueTargetingMe = TargetingMe.OrderBy(t => !t.IsNPCFrigate)
+                                                                .ThenBy(t => t.IsFrigate)
                                                                 .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                 .ThenBy(t => t.Distance).ToList();
 
-            List<EntityCache> lowValueTargetingMe = TargetingMe.OrderBy(t => t.IsFrigate)
+            List<EntityCache> lowValueTargetingMe = TargetingMe.OrderBy(t => t.IsNPCFrigate)
+                                                               .ThenBy(t => t.IsFrigate)
                                                                .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                .ThenBy(t => t.Distance).ToList();
 
@@ -1208,8 +1212,6 @@ namespace Questor.Modules.Combat
 
             if (!highValueTargetingMe.Any() && !lowValueTargetingMe.Any())
             {
-                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (!highValueTargetingMe.Any() && !lowValueTargetingMe.Any())", Logging.Debug);
-
                 // Build a list of things not yet targeting me
                 NotYetTargetingMe = Cache.Instance.Entities.Where(t => t.IsNpc
                                                                 && t.TargetValue.HasValue
@@ -1230,6 +1232,8 @@ namespace Questor.Modules.Combat
                                                                 .ToList();
                 if (NotYetTargetingMe.Any())
                 {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
+
                     EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
                     if (TargetThisNotYetAggressiveNPC != null && TargetThisNotYetAggressiveNPC.LockTarget())
                     {
@@ -1238,6 +1242,10 @@ namespace Questor.Modules.Combat
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000); //this is extra long so we wait for more NPCs to be aggressed before continuing
                         return;
                     }    
+                }
+                else
+                {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: 0 NotYetTargetingMe targets", Logging.Debug);
                 }
             }
 

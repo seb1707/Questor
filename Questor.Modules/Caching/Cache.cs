@@ -1115,7 +1115,7 @@ namespace Questor.Modules.Caching
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                         && (e.IsNpc || e.IsNpcByGroupID)
-                                                        && !e.IsTarget
+                                                        //&& !e.IsTarget
                                                         && e.Distance < Cache.Instance.MaxRange
                                                         && e.Distance < (double)Distance.OnGridWithMe
                                                         && !e.IsContainer

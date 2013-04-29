@@ -889,12 +889,14 @@ namespace Questor.Modules.Combat
             // Get a list of current high and low value targets
             //
             List<EntityCache> highValueTargets = Cache.Instance.potentialCombatTargets.Where(t => t.TargetValue.HasValue 
-                                                                               && (!t.IsSentry && Settings.Instance.KillSentries) 
+                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                               && !t.IsTarget
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
             List<EntityCache> lowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => !t.TargetValue.HasValue 
-                                                                              && (!t.IsSentry && Settings.Instance.KillSentries) 
+                                                                              && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                              && !t.IsTarget
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
                                                                               .OrderBy(t => t.IsNPCFrigate).ToList();
             #endregion Get a list of current high and low value targets
@@ -928,7 +930,7 @@ namespace Questor.Modules.Combat
             {
                 if (!TargetingMe.Any())
                 {
-                    NotYetTargetingMe = Cache.Instance.potentialCombatTargets.ToList();
+                    NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(t => !t.IsTarget).ToList();
 
                     highValueTargetingMe = NotYetTargetingMe.Where(t => t.TargetValue.HasValue).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(t => t.Distance).ToList();
                     lowValueTargetingMe = NotYetTargetingMe.Where(t => !t.TargetValue.HasValue).OrderBy(t => t.Distance).ToList();

@@ -974,24 +974,21 @@ namespace Questor.Modules.Combat
             //
             while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
-                // Unlock any target
-                EntityCache unlockThisTarget = targets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
-                if (unlockThisTarget == null)
-                {
-                    unlockThisTarget = targets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => highValueTargets.Any(p => !p.IsWarpScramblingMe));
-                }
-                if (unlockThisTarget == null)
+                // Unlock any high value target
+                EntityCache unlockThisHighValueTarget = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
+                if (unlockThisHighValueTarget == null)
                 {
                     //
-                    // you should never get here unless you have LOTS of NPCs pointing you
+                    // Assume that if we have no non-scrambling high value targets that we will have low value targets we can untarget elsewhere
                     //
-                    break;
                 }
 
-                if (unlockThisTarget.UnlockTarget("Combat.TargetCombatants"))
+                if (unlockThisHighValueTarget != null && unlockThisHighValueTarget.UnlockTarget("Combat.TargetCombatants"))
                 {
-                    Logging.Log("Combat", "unlocking high value target [" + unlockThisTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisTarget.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(unlockThisTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    highValueTargets.Remove(unlockThisTarget);
+                    Logging.Log("Combat", "unlocking high value target [" + unlockThisHighValueTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisHighValueTarget.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(unlockThisHighValueTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    highValueTargets.Remove(unlockThisHighValueTarget);
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    return;
                 }
             }
             #endregion Do we have too many high value (non-priority) targets targeted?
@@ -1003,11 +1000,18 @@ namespace Questor.Modules.Combat
             while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.DronePriorityTargets.Count(dt => !dt.IsTarget), 0))
             {
                 // Unlock any target that is not warp scrambling me
-                EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => t.Distance).FirstOrDefault();
-                if ((target !=null) && target.UnlockTarget("Combat.TargetCombatants"))
+                EntityCache unlockThisLowValueTarget = lowValueTargets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => t.Distance).FirstOrDefault();
+                if (unlockThisLowValueTarget == null)
                 {
-                    Logging.Log("Combat", "unlocking low  value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    lowValueTargets.Remove(target);
+                    //
+                    // Assume that if we have no non-scrambling low value targets that we will have high value targets we can untarget elsewhere
+                    //
+                }
+                
+                if ((unlockThisLowValueTarget !=null) && unlockThisLowValueTarget.UnlockTarget("Combat.TargetCombatants"))
+                {
+                    Logging.Log("Combat", "unlocking low  value target [" + unlockThisLowValueTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisLowValueTarget.Id) + "]{" + lowValueTargets.Count + "} [" + Math.Round(unlockThisLowValueTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    lowValueTargets.Remove(unlockThisLowValueTarget);
                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     return;
                 }
@@ -1027,14 +1031,21 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have prioritytargets that can't be targeted: targets [" + targets.Count() + "] warp scramblers [" + Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe).ToString() + "]", Logging.Debug);
 
                 // Unlock any target that is not warp scrambling me
-                EntityCache target = targets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
-                if ((target != null) && target.UnlockTarget("Combat.TargetCombatants"))
+                EntityCache unlockAnyNonWarpScramblingTarget = targets.Where(t => !t.IsWarpScramblingMe && t.IsTarget).OrderByDescending(t => !t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault();
+                if (unlockAnyNonWarpScramblingTarget == null)
                 {
-                    Logging.Log("Combat", "unlocking target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    //
+                    // Assume that if we have no non-scrambling targets that we will have to kill some of them as we have run out of slots (all slots should have warp scramblers targeted if this is null)
+                    //
+                }
+
+                if ((unlockAnyNonWarpScramblingTarget != null) && unlockAnyNonWarpScramblingTarget.UnlockTarget("Combat.TargetCombatants"))
+                {
+                    Logging.Log("Combat", "unlocking target [" + unlockAnyNonWarpScramblingTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockAnyNonWarpScramblingTarget.Id) + "][" + Math.Round(unlockAnyNonWarpScramblingTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
                     try
                     {
-                        lowValueTargets.Remove(target);
-                        highValueTargets.Remove(target);
+                        lowValueTargets.Remove(unlockAnyNonWarpScramblingTarget);
+                        highValueTargets.Remove(unlockAnyNonWarpScramblingTarget);
                     }
                     catch (Exception)
                     {

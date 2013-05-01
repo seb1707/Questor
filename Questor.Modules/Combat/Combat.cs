@@ -886,28 +886,28 @@ namespace Questor.Modules.Combat
             // Get a list of current high and low value targets
             //
             List<EntityCache> potentialHighValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (t.TargetValue.HasValue 
-                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                               && (!t.IsSentry || Settings.Instance.KillSentries)
                                                                                && !t.IsTarget
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
             List<EntityCache> potentialLowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (!t.TargetValue.HasValue 
-                                                                              && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                              && (!t.IsSentry || Settings.Instance.KillSentries)
                                                                               && !t.IsTarget
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
                                                                               || t.IsAttacking)
                                                                               .OrderBy(t => t.IsNPCFrigate).ToList();
 
             List<EntityCache> highValueTargets = Cache.Instance.combatTargets.Where(t => (t.TargetValue.HasValue
-                                                                               && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                               && (!t.IsSentry || Settings.Instance.KillSentries)
                                                                                && t.IsTarget
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
             List<EntityCache> lowValueTargets = Cache.Instance.combatTargets.Where(t => (!t.TargetValue.HasValue
-                                                                              && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                              && (!t.IsSentry || Settings.Instance.KillSentries)
                                                                               && t.IsTarget
                                                                               && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
                                                                               || t.IsAttacking)
@@ -918,7 +918,7 @@ namespace Questor.Modules.Combat
             #region Build a list of things targeting me
             // Build a list of things targeting me
             TargetingMe = Cache.Instance.TargetedBy.Where(t => (t.IsNpc || t.IsAttacking)
-                                                            && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                            && (!t.IsSentry || Settings.Instance.KillSentries)
                                                             && t.Distance < Cache.Instance.MaxRange 
                                                             && (!t.IsBadIdea || t.IsAttacking)
                                                             && !t.IsEntityIShouldLeaveAlone
@@ -1232,7 +1232,7 @@ namespace Questor.Modules.Combat
                 // Build a list of things not yet targeting me
                 NotYetTargetingMe = Cache.Instance.Entities.Where(t => t.IsNpc
                                                                 && t.TargetValue.HasValue
-                                                                && (!t.IsSentry && Settings.Instance.KillSentries)
+                                                                && (!t.IsSentry || Settings.Instance.KillSentries)
                                                                 && (!t.IsTargeting || !t.IsTarget)
                                                                 && t.CategoryId == (int)CategoryID.Entity
                                                                 && !t.IsContainer

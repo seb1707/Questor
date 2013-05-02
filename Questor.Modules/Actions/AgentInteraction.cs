@@ -111,6 +111,26 @@ namespace Questor.Modules.Actions
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe,Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe,Cache.Instance.AgentFactionEffectiveStandingtoMe));
             AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
+            Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
+
+            //
+            // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
+            //
+            if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
+            {
+                if (((int)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
+                {
+                    if (!_agentStandingsCheckFlag)
+                    {
+                        _agentStandingsCheckTimeOut = DateTime.UtcNow.AddSeconds(15);
+                        _agentStandingsCheckFlag = true;
+                    }
+                    _nextAgentAction = DateTime.UtcNow.AddSeconds(5);
+                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).Seconds, 0) + " sec]", Logging.Yellow);
+                    return;
+                }
+            }
+
             switch (Agent.Level)
             {
                 //
@@ -160,26 +180,6 @@ namespace Questor.Modules.Actions
                         return;
                     }
                     break;
-            }
-
-            Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
-
-            //
-            // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
-            //
-            if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
-            {
-                if (((int)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
-                {
-                    if (!_agentStandingsCheckFlag)
-                    {
-                        _agentStandingsCheckTimeOut = DateTime.UtcNow.AddSeconds(15);
-                        _agentStandingsCheckFlag = true;
-                    }
-                    _nextAgentAction = DateTime.UtcNow.AddSeconds(5);
-                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).Seconds, 0) + " sec]", Logging.Yellow);
-                    return;
-                }
             }
 
             if (!Cache.Instance.OpenAgentWindow(module)) return;

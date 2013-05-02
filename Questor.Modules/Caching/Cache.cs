@@ -1129,33 +1129,36 @@ namespace Questor.Modules.Caching
                                                         )
                                                         .ToList();
 
-                    if (!_potentialCombatTargets.Any())
+                    if (Settings.Instance.DebugTargetCombatants)
                     {
-                        
-                        List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && (e.IsNpc || e.IsNpcByGroupID)
-                                                        && !e.IsTarget
-                                                        && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
-                                                        )
-                                                        .ToList();
-                        
-                        int _entitiescount = 0;
-
-                        if (__entities.Any())
+                        if (!_potentialCombatTargets.Any())
                         {
-                            _entitiescount = __entities.Count();
-                            Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
-                            int i = 0;
-                            foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
-                            {
-                                i++;
-                                Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                                continue;
-                            }
-                            Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities above", Logging.Debug);
-                        }
 
-                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
+                            List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && (e.IsNpc || e.IsNpcByGroupID)
+                                                            && !e.IsTarget
+                                                            && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                            )
+                                                            .ToList();
+
+                            int _entitiescount = 0;
+
+                            if (__entities.Any())
+                            {
+                                _entitiescount = __entities.Count();
+                                Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
+                                int i = 0;
+                                foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
+                                {
+                                    i++;
+                                    Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
+                                    continue;
+                                }
+                                Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities above", Logging.Debug);
+                            }
+
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
+                        }    
                     }
 
                     return _potentialCombatTargets;

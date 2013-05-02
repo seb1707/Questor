@@ -1147,11 +1147,18 @@ namespace Questor.Modules.Caching
             }
 
             // Only add targeting id's when its actually being targeted
-            if (_directEntity != null && _directEntity.LockTarget())
+            if (_directEntity != null)
             {
-                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
-                return true;
+                if(!_directEntity.IsTarget && _directEntity.LockTarget())
+                {
+                    Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
+                    return true;
+                }
+
+                if (_directEntity.IsTarget) Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
+                return false;
             }
+
             return false;
         }
 
@@ -1165,8 +1172,14 @@ namespace Questor.Modules.Caching
                 //}
 
                 Cache.Instance.TargetingIDs.Remove(Id);
-                _directEntity.UnlockTarget();
-                return true;
+
+                if (_directEntity.IsTarget)
+                {
+                    _directEntity.UnlockTarget();
+                    return true;
+                }
+                
+                return false;
             }
 
             return false;

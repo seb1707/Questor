@@ -2826,7 +2826,7 @@ namespace Questor.Modules.Caching
             // Do we have a target?
             if (currentTarget != null)
             {
-                if (!currentTarget.IsTooCloseTooFastTooSmallToHit
+                if (currentTarget.IsTarget && !currentTarget.IsTooCloseTooFastTooSmallToHit
                   || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)
                       && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
                   || string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) 

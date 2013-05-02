@@ -1133,7 +1133,7 @@ namespace Questor.Modules.Caching
                     {
                         if (!_potentialCombatTargets.Any())
                         {
-
+                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                             List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)
                                                             && !e.IsTarget
@@ -1154,6 +1154,7 @@ namespace Questor.Modules.Caching
                                     Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
                                     continue;
                                 }
+
                                 Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities above", Logging.Debug);
                             }
 

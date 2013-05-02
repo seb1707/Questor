@@ -2929,7 +2929,6 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.Targets.Any())
                     {
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED BELOW", Logging.Debug);
                         foreach (EntityCache __target in Targets)
                         {
@@ -2942,13 +2941,12 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                     {
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", "ALL ENTITIES LISTED BELOW", Logging.Debug);
-                        foreach (EntityCache __entity in Cache.Instance.Entities.Where(i => !i.IsBadIdea && !i.IsLargeCollidable))
+                        Logging.Log("GetBestTarget: none", "ALL potentialCombatTargets LISTED BELOW", Logging.Debug);
+                        foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
                         {
-                            Logging.Log("GetBestTarget: none", "Debug entities: [" + __entity.Name + "][" + Math.Round(__entity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__entity.Id) + "][isTarget: " + __entity.IsTarget + "] GroupID [" + __entity.GroupId + "]", Logging.Debug);
+                            Logging.Log("GetBestTarget: none", "Debug entities: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
                         }
-                        Logging.Log("GetBestTarget: none", "ALL ENTITIES LISTED ABOVE", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", "ALL potentialCombatTargets LISTED ABOVE", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
                     }
                 }

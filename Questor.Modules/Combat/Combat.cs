@@ -886,7 +886,7 @@ namespace Questor.Modules.Combat
             List<EntityCache> potentialHighValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (t.TargetValue.HasValue
                                                                                && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                                                && !t.IsTarget
-                                                                               || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
+                                                                               || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => !pt.IsTarget && !pt.IsTargeting && pt.Id == t.Id))
                                                                                || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
@@ -899,17 +899,18 @@ namespace Questor.Modules.Combat
 
             List<EntityCache> highValueTargets = Cache.Instance.combatTargets.Where(t => (t.TargetValue.HasValue
                                                                                && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                                               && t.IsTarget
+                                                                               && (t.IsTarget || t.IsTargeting)
                                                                                || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id))
                                                                                || t.IsAttacking)
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
-            List<EntityCache> lowValueTargets = Cache.Instance.combatTargets.Where(t => (!t.TargetValue.HasValue
-                                                                              && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                                              && t.IsTarget
-                                                                              && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
-                                                                              || t.IsAttacking)
-                                                                              .OrderBy(t => t.IsNPCFrigate).ToList();
+            List<EntityCache> lowValueTargets = Cache.Instance.combatTargets.Where(t => ((!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                                                                                        && (t.IsTarget || t.IsTargeting)
+                                                                                        && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id))
+                                                                                        || t.IsAttacking)
+                                                                                        .OrderBy(t => t.IsNPCFrigate)
+                                                                                        .ThenBy(t => !t.TargetValue.HasValue)
+                                                                              .ToList();
 
             #endregion Get a list of current high and low value targets
 
@@ -925,10 +926,13 @@ namespace Questor.Modules.Combat
                                                             
 
             List<EntityCache> highValueTargetingMe;
-            highValueTargetingMe = TargetingMe.OrderBy(t => !t.IsNPCFrigate)
-                                                                .ThenBy(t => !t.IsFrigate)
-                                                                .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                                                                .ThenBy(t => t.Distance).ToList();
+            highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue
+                                                      && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                                                       && (t.IsTarget || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)) || t.IsAttacking))
+                                                           .OrderBy(t => !t.IsNPCFrigate)
+                                                          .ThenBy(t => !t.IsFrigate)
+                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                          .ThenBy(t => t.Distance).ToList();
 
             List<EntityCache> lowValueTargetingMe;
             lowValueTargetingMe = TargetingMe.OrderBy(t => t.IsNPCFrigate)
@@ -1067,7 +1071,7 @@ namespace Questor.Modules.Combat
                                                                                                  && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
                                                                                                  && t.IsWarpScramblingMe)
                                                                                                  .OrderBy(c => c.Distance);
-            if (dronepriority.Any())
+            if (dronepriority.Any(t => !t.IsTarget && !t.IsTargeting))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + dronepriority.Count() + "] dronePriority targets", Logging.Debug);
 
@@ -1107,7 +1111,7 @@ namespace Questor.Modules.Combat
                                                                                                                  .OrderBy(c => c.IsInOptimalRange)
                                                                                                                  .ThenBy(c => c.Distance);
 
-            if (primaryWeaponPriority.Any())
+            if (primaryWeaponPriority.Any(t => !t.IsTarget && !t.IsTargeting))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + primaryWeaponPriority.Count() + "] primaryWeaponPriority targets", Logging.Debug);
 

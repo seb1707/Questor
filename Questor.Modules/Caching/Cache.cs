@@ -2545,9 +2545,12 @@ namespace Questor.Modules.Caching
                     || (Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)))
                 {
                     // Is our current target a warp scrambling priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.Id == currentTarget.Id && pt.IsWarpScramblingMe) 
-                             || DronePriorityTargets.Any(pt => pt.IsTarget && pt.Id == currentTarget.Id && pt.IsWarpScramblingMe)
-                        )
+                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget 
+                                                            && pt.Id == currentTarget.Id 
+                                                            && pt.IsWarpScramblingMe) 
+                             || DronePriorityTargets.Any(pt => pt.IsTarget 
+                                                            && pt.Id == currentTarget.Id 
+                                                            && pt.IsWarpScramblingMe))
                     {
                         if (!currentTarget.IsTooCloseTooFastTooSmallToHit || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                         {
@@ -2560,10 +2563,11 @@ namespace Questor.Modules.Caching
                     EntityCache WarpScramblingDronePriorityTarget = null;
                     try
                     {
-                        WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
-                                                       .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                       .ThenBy(pt => pt.Entity.Distance)
-                                                       .Select(pt => pt.Entity).FirstOrDefault();
+                        WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget 
+                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
+                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenBy(pt => pt.Entity.Distance)
+                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
@@ -2580,10 +2584,7 @@ namespace Questor.Modules.Caching
                         if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) 
                            && (!currentTarget.IsTooCloseTooFastTooSmallToHit || (currentTarget.IsNPCBattleship 
                                 || currentTarget.IsNPCBattlecruiser 
-                                || Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList)
-                              )
-                           ) 
-
+                                || Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList))) 
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (WarpScramblingDronePriorityTarget != null)", Logging.Debug);
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingDronePriorityTarget.Name + "][" + Math.Round(WarpScramblingDronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingDronePriorityTarget.Id) + "] GroupID [" + WarpScramblingDronePriorityTarget.GroupId + "]", Logging.Debug);
@@ -2602,9 +2603,10 @@ namespace Questor.Modules.Caching
                     if ((!currentTarget.IsTooCloseTooFastTooSmallToHit && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                         || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                     {
-                        currentTargetPriority =_primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget && t.EntityID == currentTarget.Id)
-                                                                                        .Select(pt => pt.PrimaryWeaponPriority)
-                                                                                        .FirstOrDefault();
+                        currentTargetPriority =_primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget 
+                                                                                     && t.EntityID == currentTarget.Id)
+                                                                            .Select(pt => pt.PrimaryWeaponPriority)
+                                                                            .FirstOrDefault();
                         
                         if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                         {
@@ -2643,7 +2645,10 @@ namespace Questor.Modules.Caching
                 {
                     if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
                     {
-                        currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget && t.EntityID == currentTarget.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
+                        currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget 
+                                                                                      && t.EntityID == currentTarget.Id)
+                                                                             .Select(pt => pt.PrimaryWeaponPriority)
+                                                                             .FirstOrDefault();
 
                         if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                         {
@@ -2685,7 +2690,9 @@ namespace Questor.Modules.Caching
                 {
                     if (_dronePriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
                     {
-                        currentTargetDronePriority = _dronePriorityTargets.Where(t => t.EntityID == currentTarget.Id).Select(pt => pt.DronePriority).FirstOrDefault();
+                        currentTargetDronePriority = _dronePriorityTargets.Where(t => t.EntityID == currentTarget.Id)
+                                                                          .Select(pt => pt.DronePriority)
+                                                                          .FirstOrDefault();
 
                         if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                         {

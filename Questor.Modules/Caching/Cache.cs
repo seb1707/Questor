@@ -2931,15 +2931,15 @@ namespace Questor.Modules.Caching
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED BELOW", Logging.Debug);
-                        foreach (EntityCache __targets in Cache.Instance.Targets)
+                        foreach (EntityCache __target in Targets)
                         {
-                            Logging.Log("GetBestTarget: none", "Debug targets: [" + __targets.Name + "][" + Math.Round(__targets.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__targets.Id) + "][isTarget: " + __targets.IsTarget + "] GroupID [" + __targets.GroupId + "]", Logging.Debug);
+                            Logging.Log("GetBestTarget: none", "Debug targets: [" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
                         }
                         Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
                     }
                     
-                    if (Cache.Instance.Entities.Any(i => !i.IsBadIdea && !i.IsLargeCollidable))
+                    if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                     {
                         Logging.Log("GetBestTarget: none", ".", Logging.Debug);
                         Logging.Log("GetBestTarget: none", "ALL ENTITIES LISTED BELOW", Logging.Debug);

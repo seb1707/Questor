@@ -867,6 +867,7 @@ namespace Questor.Modules.Caching
                 result |= GroupId == (int)Group.Capsule;
                 result |= GroupId == (int)Group.MissionContainer;
                 result |= GroupId == (int)Group.CustomsOffice;
+                result |= GroupId == (int)Group.GasCloud;
                 result |= IsFrigate;
                 result |= IsCruiser;
                 result |= IsBattlecruiser;

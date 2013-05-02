@@ -2528,6 +2528,8 @@ namespace Questor.Modules.Caching
         {
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
+            // Do we have a 'current target' and if so, is it an actual target?
+            // If not, clear current target
             if (currentTarget != null && !currentTarget.IsTarget)
             {
                 //
@@ -2536,9 +2538,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
                 currentTarget = null;
             }
-
-            // Do we have a 'current target' and if so, is it an actual target?
-            // If not, clear current target
+            
             if (currentTarget != null)
             {
                 if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase) 
@@ -2782,10 +2782,11 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget).OrderBy(pt => pt.Entity.IsInOptimalRange)
-                                                       .ThenBy(pt => pt.PrimaryWeaponPriority)
-                                                       .ThenBy(pt => pt.Entity.Distance)
-                                                       .Select(pt => pt.Entity).FirstOrDefault();
+                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget)
+                                                                            .OrderBy(pt => pt.Entity.IsInOptimalRange)
+                                                                            .ThenBy(pt => pt.PrimaryWeaponPriority)
+                                                                            .ThenBy(pt => pt.Entity.Distance)
+                                                                            .Select(pt => pt.Entity).FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
             
@@ -2796,8 +2797,8 @@ namespace Questor.Modules.Caching
                     if (!Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
                     {
                         if ((!Cache.Instance.UseDrones && primaryWeaponPriorityTarget.IsNPCFrigate)
-                                        || !primaryWeaponPriorityTarget.IsNPCFrigate
-                                        || (primaryWeaponPriorityTarget.IsNPCFrigate && !primaryWeaponPriorityTarget.IsTooCloseTooFastTooSmallToHit))
+                          || !primaryWeaponPriorityTarget.IsNPCFrigate
+                          || (primaryWeaponPriorityTarget.IsNPCFrigate && !primaryWeaponPriorityTarget.IsTooCloseTooFastTooSmallToHit))
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
@@ -2816,9 +2817,10 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget).OrderBy(pt => pt.DronePriority)
-                                                   .ThenBy(pt => pt.Entity.Distance)
-                                                   .Select(pt => pt.Entity).FirstOrDefault();
+                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget)
+                                                           .OrderBy(pt => pt.DronePriority)
+                                                           .ThenBy(pt => pt.Entity.Distance)
+                                                           .Select(pt => pt.Entity).FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 

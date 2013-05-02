@@ -2528,19 +2528,19 @@ namespace Questor.Modules.Caching
         {
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
+            if (currentTarget != null && !currentTarget.IsTarget)
+            {
+                //
+                // if we somehow have currentTarget set to something that is not locked assume we nee dto assign a new target
+                //
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
+                currentTarget = null;
+            }
+
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
             if (currentTarget != null)
             {
-                if (!currentTarget.IsTarget)
-                {
-                    //
-                    // if we somehow have currentTarget set to something that is not locked assume we nee dto assign a new target
-                    //
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
-                    currentTarget = null;    
-                }
-
                 if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase) 
                     || Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList 
                         && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))

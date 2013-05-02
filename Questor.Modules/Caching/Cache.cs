@@ -2546,8 +2546,8 @@ namespace Questor.Modules.Caching
                         && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                 {
                     // Is our current target a warp scrambling priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget) 
-                            || DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget)
+                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.Id == currentTarget.Id && pt.IsWarpScramblingMe) 
+                            || DronePriorityTargets.Any(pt => pt.IsTarget && pt.Id == currentTarget.Id && pt.IsWarpScramblingMe)
                         )
                     {
                         if (!currentTarget.IsTooCloseTooFastTooSmallToHit || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
@@ -2561,7 +2561,7 @@ namespace Questor.Modules.Caching
                     EntityCache WarpScramblingDronePriorityTarget = null;
                     try
                     {
-                        WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
+                        WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
                                                        .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
                                                        .ThenBy(pt => pt.Entity.Distance)
                                                        .Select(pt => pt.Entity).FirstOrDefault();
@@ -2589,7 +2589,7 @@ namespace Questor.Modules.Caching
                 // Is our current target any non PriorityKilltarget E-war priority target?
                 //
                 PrimaryWeaponPriority currentTargetPriority = PrimaryWeaponPriority.NotUsed;
-                if (_primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
+                if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
                 {
                     if (!currentTarget.IsTooCloseTooFastTooSmallToHit || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                     {
@@ -2624,7 +2624,7 @@ namespace Questor.Modules.Caching
 
                 currentTargetPriority = PrimaryWeaponPriority.NotUsed;
                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) 
-                    && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id)
+                    && _primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id)
                     )
                 {
                     currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.EntityID == currentTarget.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
@@ -2656,7 +2656,7 @@ namespace Questor.Modules.Caching
                 currentTargetDronePriority = DronePriority.NotUsed;
 
                 if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase) 
-                    && _dronePriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))
+                    && _dronePriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
                 {
                     currentTargetDronePriority = _dronePriorityTargets.Where(t => t.EntityID == currentTarget.Id).Select(pt => pt.DronePriority).FirstOrDefault();
 
@@ -2759,7 +2759,7 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.OrderBy(pt => pt.Entity.IsInOptimalRange)
+                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget).OrderBy(pt => pt.Entity.IsInOptimalRange)
                                                        .ThenBy(pt => pt.PrimaryWeaponPriority)
                                                        .ThenBy(pt => pt.Entity.Distance)
                                                        .Select(pt => pt.Entity).FirstOrDefault();
@@ -2785,7 +2785,7 @@ namespace Questor.Modules.Caching
                     }
                 }
             }
-            
+
             #endregion Get the closest primary weapon priority target
 
             #region Get the closest drone priority target
@@ -2795,7 +2795,7 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = _dronePriorityTargets.OrderBy(pt => pt.DronePriority)
+                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget).OrderBy(pt => pt.DronePriority)
                                                    .ThenBy(pt => pt.Entity.Distance)
                                                    .Select(pt => pt.Entity).FirstOrDefault();
             }
@@ -2818,9 +2818,9 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
                         return dronePriorityTarget;
                     }
-                }    
+                }
             }
-            
+
             #endregion Get the closest drone priority target
 
             // Do we have a target?
@@ -2840,9 +2840,9 @@ namespace Questor.Modules.Caching
             }
 
             // Get the closest high value target
-            EntityCache highValueTarget = OngridKillableNPCs.Where(t => t.TargetValue.HasValue 
-                                                          && t.Distance < distance 
-                                                          && t.IsTarget)
+            EntityCache highValueTarget = OngridKillableNPCs.Where(t => t.IsTarget 
+                                                          && t.TargetValue.HasValue 
+                                                          && t.Distance < distance)
                                                           .OrderBy(t => !t.IsNPCFrigate)
                                                           .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.IsInOptimalRange)
@@ -2852,9 +2852,9 @@ namespace Questor.Modules.Caching
                                                           .FirstOrDefault();
 
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
-            EntityCache lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue 
+            EntityCache lowValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
+                                                          && !t.TargetValue.HasValue 
                                                           && t.Distance < distance 
-                                                          && t.IsTarget
                                                           && !t.IsTooCloseTooFastTooSmallToHit)
                                                           .OrderBy(t => t.IsNPCFrigate)
                                                           .ThenBy(OrderByLowestHealth())
@@ -2863,9 +2863,10 @@ namespace Questor.Modules.Caching
 
             if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) //do not exclude anything in range if drones are looking for a target
             {
-                lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue
-                                                          && t.Distance < distance
-                                                          && t.IsTarget).OrderBy(t => t.IsNPCFrigate)
+                lowValueTarget = OngridKillableNPCs.Where(t =>  t.IsTarget 
+                                                          && !t.TargetValue.HasValue
+                                                          && t.Distance < distance)
+                                                          .OrderBy(t => t.IsNPCFrigate)
                                                           .ThenBy(OrderByLowestHealth())
                                                           .ThenBy(t => t.Distance)
                                                           .FirstOrDefault();

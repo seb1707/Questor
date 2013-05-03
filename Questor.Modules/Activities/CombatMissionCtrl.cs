@@ -128,7 +128,7 @@ namespace Questor.Modules.Activities
                 Cache.Instance.GetBestTarget(targets, range, false, "Combat");
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
                     {
                         if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)
                         {
@@ -151,7 +151,7 @@ namespace Questor.Modules.Activities
                     Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), range, false, "Drones");
                     if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                     {
-                        if (Cache.Instance.PreferredDroneTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                        if (Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
                         {
                             if (Settings.Instance.DronesKillHighValueTargets || Cache.Instance.PreferredDroneTarget.IsNPCFrigate)
                             {

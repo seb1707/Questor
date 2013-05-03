@@ -297,7 +297,7 @@ namespace Questor.Modules.Combat
                     {
                         if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
-                            EntityCache WarpScrambledBy = Cache.Instance.Targets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).FirstOrDefault(pt => pt.IsWarpScramblingMe);
                             if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
                             {
                                 _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
@@ -318,8 +318,9 @@ namespace Questor.Modules.Combat
                     {
                         // Are we done (for now) ?
                         if (
-                            Cache.Instance.TargetedBy.Count(
-                                e => !e.IsSentry && e.IsNpc && e.Distance < Settings.Instance.DroneControlRange) == 0)
+                            Cache.Instance.TargetedBy.Count(e => !e.IsSentry 
+                                                               && e.IsNpc 
+                                                               && e.Distance < Settings.Instance.DroneControlRange) == 0)
                         {
                             Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within dronerange", Logging.Magenta);
                             Recall = true;

@@ -130,29 +130,46 @@ namespace Questor.Modules.Activities
                     if (!target.IsNPCFrigate)
                     {
                         Cache.Instance.GetBestTarget(targets, range, false, "Combat");
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                         {
-                            Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                            {
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                            }    
                         }
                     }
 
                     if (Cache.Instance.UseDrones) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
                     {
                         Cache.Instance.GetBestTarget(targets, range, false, "Drones");
-                        if (Cache.Instance.PreferredDroneTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                         {
-                            if (Settings.Instance.DronesKillHighValueTargets || Cache.Instance.PreferredDroneTarget.IsNPCFrigate)
+                            if (Cache.Instance.PreferredDroneTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
                             {
-                                Cache.Instance.AddDronePriorityTargets(new[] { Cache.Instance.PreferredDroneTarget }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                            }    
+                                if (Settings.Instance.DronesKillHighValueTargets || Cache.Instance.PreferredDroneTarget.IsNPCFrigate)
+                                {
+                                    Cache.Instance.AddDronePriorityTargets(new[] {Cache.Instance.PreferredDroneTarget}, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                                }
+                            }
                         }
-                        
                     }
                 }
 
                 if (MoveShip)
                 {
-                    NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+                    else if (TargetingCache.CurrentWeaponsTarget != null && TargetingCache.CurrentWeaponsTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+                    else
+                    {
+                        //NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+                    
                 }
 
                 if (target.Distance > range) //target is not in range...

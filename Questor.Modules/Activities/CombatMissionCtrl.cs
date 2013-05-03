@@ -114,42 +114,48 @@ namespace Questor.Modules.Activities
 
             if (target != null)
             {
+                //panic handles adding any priority targets and combat will prefer to kill any priority targets
+                if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
+                {
+                    if (!Combat.ReloadAll(target)) return;
+                }
+
                 // Reset timeout
                 _clearPocketTimeout = null;
-                
-                // Combat.cs will Lock target if it is within weapons range (especially after we make it a PrimaryWeapons or Drone prioritytarget!)
-                if (target.Distance < range)
-                {
-                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
-                    if (targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
-                    {
-                        if (!Combat.ReloadAll(target)) return;
-                    }
 
-                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                    if (!target.IsNPCFrigate)
+                //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                
+                Cache.Instance.GetBestTarget(targets, range, false, "Combat");
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                {
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
                     {
-                        Cache.Instance.GetBestTarget(targets, range, false, "Combat");
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)
                         {
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
-                            {
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                            }    
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                         }
                     }
 
-                    if (Cache.Instance.UseDrones) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > range) //target is not in range...
                     {
-                        Cache.Instance.GetBestTarget(targets, range, false, "Drones");
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        if (DateTime.UtcNow > Cache.Instance.NextReload)
                         {
-                            if (Cache.Instance.PreferredDroneTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                            //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
+                            if (!Combat.ReloadAll(target)) return;
+                        }
+                    }
+                }
+                
+                if (Cache.Instance.UseDrones) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
+                {
+                    Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), range, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                    {
+                        if (Cache.Instance.PreferredDroneTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                        {
+                            if (Settings.Instance.DronesKillHighValueTargets || Cache.Instance.PreferredDroneTarget.IsNPCFrigate)
                             {
-                                if (Settings.Instance.DronesKillHighValueTargets || Cache.Instance.PreferredDroneTarget.IsNPCFrigate)
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(new[] {Cache.Instance.PreferredDroneTarget}, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                                }
+                                Cache.Instance.AddDronePriorityTargets(new[] { Cache.Instance.PreferredDroneTarget }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                             }
                         }
                     }
@@ -160,24 +166,6 @@ namespace Questor.Modules.Activities
                     if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
                     {
                         NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
-                    else if (TargetingCache.CurrentWeaponsTarget != null && TargetingCache.CurrentWeaponsTarget.Distance < (double)Distance.OnGridWithMe)
-                    {
-                        NavigateOnGrid.NavigateIntoRange(TargetingCache.CurrentWeaponsTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
-                    else
-                    {
-                        //NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
-                    
-                }
-
-                if (target.Distance > range) //target is not in range...
-                {
-                    if (DateTime.UtcNow > Cache.Instance.NextReload)
-                    {
-                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
-                        if (!Combat.ReloadAll(target)) return;
                     }
                 }
             }

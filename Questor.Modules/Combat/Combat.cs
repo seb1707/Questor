@@ -399,42 +399,6 @@ namespace Questor.Modules.Combat
         public List<EntityCache> TargetingMe { get; set; }
         public List<EntityCache> NotYetTargetingMe { get; set; }
 
-        /// <summary> Returns the target we need to activate everything on
-        /// </summary>
-        /// <returns></returns>
-        private EntityCache GetTarget()
-        {
-            if (Cache.Instance.Targets.Any()) //weapontarget can be null, we might not yet be shooting anything. 
-            {
-                if (Cache.Instance.InMission)
-                {
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                    {
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid
-                            && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < Cache.Instance.WeaponRange
-                            && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
-                        {
-                            return Cache.Instance.PreferredPrimaryWeaponTarget;
-                        }    
-                    }
-                    
-                    return null;
-                }
-                
-                if (!Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.WeaponRange, false, "Combat")) return null;
-
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                {
-                    // Return best possible target
-                    return Cache.Instance.PreferredPrimaryWeaponTarget;
-                }
-
-                return null;
-            }
-
-            return null;
-        }
-
         private void TargetInfo()
         {
             // Find the first active weapon's target
@@ -1294,27 +1258,32 @@ namespace Questor.Modules.Combat
 
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
-                        TargetingCache.CurrentWeaponsTarget = GetTarget();
-
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                            && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe
-                            && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
-                        {
-                            ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
-                        } 
-                        else if (TargetingCache.CurrentWeaponsTarget != null
-                            && TargetingCache.CurrentWeaponsTarget.Distance < (double)Distance.OnGridWithMe
-                            && TargetingCache.CurrentWeaponsTarget.IsTarget) 
-                        {
-                            ActivateTargetPainters(TargetingCache.CurrentWeaponsTarget);
-                            ActivateStasisWeb(TargetingCache.CurrentWeaponsTarget);
-                            ActivateNos(TargetingCache.CurrentWeaponsTarget);
-                            ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
-                        }
                         
+                        //
+                        // Cache.Instance.PreferredPrimaryWeaponTarget is set by GetBestTarget()
+                        //
+                        if (Cache.Instance.Targets.Any()) //weapontarget can be null, we might not yet be shooting anything. 
+                        {
+                            //
+                            // run GetBestTarget here (every x seconds), GetBestTarget also runs in CombatMissionCtrl (but only once per tick, total)
+                            //
+                            if (!Cache.Instance.InMission) Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.WeaponRange, false, "Combat");
+                            //
+                            // GetBestTarget sets Cache.Instance.PreferredPrimaryWeaponTarget (or for drones in drone.cs: Cache.Instance.PreferredPrimaryWeaponTarget) 
+                            //
+                            
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+                                && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double) Distance.OnGridWithMe
+                                && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
+                            {
+                                ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                return;
+                            }
+                        }
+
                         break;
 
                     case CombatState.OutOfAmmo:

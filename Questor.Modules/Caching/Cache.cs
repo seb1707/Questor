@@ -700,7 +700,8 @@ namespace Questor.Modules.Caching
         public DateTime NextRepairItemsAction { get; set; }
         public DateTime NextRepairDronesAction { get; set; }
         public DateTime NextEVEMemoryManagerAction { get; set; }
-        public DateTime NextGetBestTarget { get; set; }
+        public DateTime NextGetBestCombatTarget { get; set; }
+        public DateTime NextGetBestDroneTarget { get; set; }
 
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;
@@ -2565,7 +2566,7 @@ namespace Questor.Modules.Caching
             }
             catch (Exception exception)
             {
-                Logging.Log("GetTarget", "exception [" + exception + "]", Logging.Debug);
+                Logging.Log("GetCurrentWeaponTarget", "exception [" + exception + "]", Logging.Debug);
             }
 
             return null;
@@ -2581,10 +2582,21 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public bool GetBestTarget(List<EntityCache> _potentialTargets, double distance, bool lowValueFirst, string callingroutine)
         {
-            if (DateTime.UtcNow < NextGetBestTarget)
-                return false;
+            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (DateTime.UtcNow < NextGetBestCombatTarget)
+                    return false;
 
-            NextGetBestTarget = DateTime.UtcNow.AddMilliseconds(800);
+                NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+            }
+
+            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (DateTime.UtcNow < NextGetBestDroneTarget)
+                    return false;
+
+                NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
+            }
 
             EntityCache currentTarget = null;
             if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) && Cache.Instance.CurrentWeaponTarget() != null)
@@ -3132,13 +3144,17 @@ namespace Questor.Modules.Caching
                     }
                 }
 
+                NextGetBestCombatTarget = DateTime.UtcNow;
+                NextGetBestDroneTarget = DateTime.UtcNow;
                 return false;
             }
             catch (Exception exception)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget exception [" + exception + "]", Logging.Debug);
             }
-            
+
+            NextGetBestCombatTarget = DateTime.UtcNow;
+            NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
         }
 

@@ -1258,10 +1258,12 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            List<EntityCache> targets = new List<EntityCache>
+            List<EntityCache> targets = new List<EntityCache>();
+
+            if(Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name)) != null)
             {
-                Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name))
-            };
+                targets.Add(Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name)));
+            }
 
             if (targets.Count() == numberToIgnore)
             {
@@ -1352,10 +1354,12 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            List<EntityCache> targets = new List<EntityCache>
+            List<EntityCache> targets = new List<EntityCache>();
+
+            if (Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault() != null)
             {
-                Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
-            };
+                targets.Add(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault());
+            }
 
             if (targets.Count() == numberToIgnore)
             {
@@ -1451,10 +1455,12 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            List<EntityCache> targets = new List<EntityCache>
+            List<EntityCache> targets = new List<EntityCache>();
+
+            if(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault() != null)
             {
-                Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
-            };
+                targets.Add(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault());
+            }
 
             if (targets.Count() == numberToIgnore)
             {
@@ -1552,11 +1558,13 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
-            List<EntityCache> targets = new List<EntityCache>
-            {
-                Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
-            };
+            List<EntityCache> targets = new List<EntityCache>();
 
+            if (Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault() != null)
+            {
+                targets.Add(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault());
+            }
+            
             if (notTheClosest) targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).ToList();
 
             if (!targets.Any())
@@ -1602,10 +1610,12 @@ namespace Questor.Modules.Activities
                 notTheClosest = false;
             }
 
-            List<EntityCache> targets = new List<EntityCache>
+            List<EntityCache> targets = new List<EntityCache>();
+
+            if (Cache.Instance.Entities.OrderBy(t => t.Distance).FirstOrDefault() != null)
             {
-                Cache.Instance.Entities.OrderBy(t => t.Distance).FirstOrDefault()
-            };
+                targets.Add(Cache.Instance.Entities.OrderBy(t => t.Distance).FirstOrDefault());
+            }
 
             if (notTheClosest) targets = Cache.Instance.Entities.OrderByDescending(t => t.Distance).ToList();
 

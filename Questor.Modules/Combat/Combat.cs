@@ -1295,13 +1295,26 @@ namespace Questor.Modules.Combat
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
                         TargetingCache.CurrentWeaponsTarget = GetTarget();
-                        if (TargetingCache.CurrentWeaponsTarget != null)
+
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+                            && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe
+                            && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
+                        {
+                            ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
+                        } 
+                        else if (TargetingCache.CurrentWeaponsTarget != null
+                            && TargetingCache.CurrentWeaponsTarget.Distance < (double)Distance.OnGridWithMe
+                            && TargetingCache.CurrentWeaponsTarget.IsTarget) 
                         {
                             ActivateTargetPainters(TargetingCache.CurrentWeaponsTarget);
                             ActivateStasisWeb(TargetingCache.CurrentWeaponsTarget);
                             ActivateNos(TargetingCache.CurrentWeaponsTarget);
                             ActivateWeapons(TargetingCache.CurrentWeaponsTarget);
                         }
+                        
                         break;
 
                     case CombatState.OutOfAmmo:

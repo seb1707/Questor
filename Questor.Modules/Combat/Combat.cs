@@ -409,12 +409,12 @@ namespace Questor.Modules.Combat
                 if (Cache.Instance.InMission)
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid 
-                        && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe
+                        && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < Cache.Instance.WeaponRange
                         && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
                     {
                         return Cache.Instance.PreferredPrimaryWeaponTarget;
                     }
-
+                    
                     return null;
                 }
                 

@@ -79,73 +79,53 @@ namespace Questor.Modules.Combat
         }
 
         /// <summary>
-        ///   Return the best possible target
-        /// </summary>
-        /// <remarks>
-        ///   Note this GetTarget works differently then the one from Combat
-        /// </remarks>
-        /// <returns></returns>
-        private EntityCache GetTarget()
-        {
-            // Find the first active weapon's target
-            TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
-            if (Cache.Instance.DronesKillHighValueTargets)
-            {
-                // Return best possible high value target
-                if (Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Settings.Instance.DroneControlRange, false, "Drones"))
-                {
-                    return Cache.Instance.PreferredDroneTarget;
-                }
-            }
-            
-            // Return best possible low value target
-            if (Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Settings.Instance.DroneControlRange, true, "Drones"))
-            {
-                return Cache.Instance.PreferredDroneTarget;
-            }
-
-            return null;
-        }
-
-        /// <summary>
         ///   Engage the target
         /// </summary>
         private void EngageTarget()
         {
-            EntityCache target = GetTarget();
-
-            // Nothing to engage yet, probably retargeting
-            if (target == null) return;
+            // Find the first active weapon's target
+            TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
             
-            if (target.IsBadIdea) return;
+            // Return best possible low value target
+            Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones");
 
-            // Is our current target still the same and is the last Engage command no longer then 15s ago?
-            if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15) return;
-
-            // Are we still actively shooting at the target?
-            bool mustEngage = false;
-            foreach (EntityCache drone in Cache.Instance.ActiveDrones)
+            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
             {
-                mustEngage |= drone.FollowId != target.Id;
-            }
+                EntityCache target = Cache.Instance.PreferredDroneTarget;
 
-            if (!mustEngage) return;
+                // Nothing to engage yet, probably retargeting
+                if (target == null) return;
 
-            // Is the last target our current active target?
-            if (target.IsActiveTarget)
-            {
-                // Save target id (so we do not constantly switch)
-                _lastTarget = target.Id;
+                if (target.IsBadIdea && !target.IsAttacking) return;
 
-                // Engage target
-                Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Magenta);
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
-                _lastEngageCommand = DateTime.UtcNow;
-            }
-            else // Make the target active
-            {
-                target.MakeActiveTarget();
-                Logging.Log("Drones", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones", Logging.Magenta);
+                // Is our current target still the same and is the last Engage command no longer then 15s ago?
+                if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15) return;
+
+                // Are we still actively shooting at the target?
+                bool mustEngage = false;
+                foreach (EntityCache drone in Cache.Instance.ActiveDrones)
+                {
+                    mustEngage |= drone.FollowId != target.Id;
+                }
+
+                if (!mustEngage) return;
+
+                // Is the last target our current active target?
+                if (target.IsActiveTarget)
+                {
+                    // Save target id (so we do not constantly switch)
+                    _lastTarget = target.Id;
+
+                    // Engage target
+                    Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Magenta);
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
+                    _lastEngageCommand = DateTime.UtcNow;
+                }
+                else // Make the target active
+                {
+                    target.MakeActiveTarget();
+                    Logging.Log("Drones", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones", Logging.Magenta);
+                }    
             }
         }
 

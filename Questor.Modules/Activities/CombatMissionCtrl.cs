@@ -163,7 +163,7 @@ namespace Questor.Modules.Activities
                     }
                     else if (TargetingCache.CurrentWeaponsTarget != null && TargetingCache.CurrentWeaponsTarget.Distance < (double)Distance.OnGridWithMe)
                     {
-                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                        NavigateOnGrid.NavigateIntoRange(TargetingCache.CurrentWeaponsTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                     else
                     {

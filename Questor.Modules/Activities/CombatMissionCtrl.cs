@@ -1189,7 +1189,11 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
+            List<EntityCache> targets = new List<EntityCache>
+            {
+                Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name))
+            };
+
             if (targets.Count() == numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets gone " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
@@ -1279,7 +1283,11 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
+            List<EntityCache> targets = new List<EntityCache>
+            {
+                Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
+            };
+
             if (targets.Count() == numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
@@ -1374,7 +1382,11 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
+            List<EntityCache> targets = new List<EntityCache>
+                {
+                    Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
+                };
+
             if (targets.Count() == numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
@@ -1472,7 +1484,11 @@ namespace Questor.Modules.Activities
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             //IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            List<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
+            List<EntityCache> targets = new List<EntityCache>
+                {
+                    Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault()
+                };
+
             if (notTheClosest) targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).ToList();
 
             if (!targets.Any())

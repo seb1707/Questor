@@ -2584,7 +2584,7 @@ namespace Questor.Modules.Caching
             if (DateTime.UtcNow < NextGetBestTarget)
                 return false;
 
-            NextGetBestTarget = DateTime.UtcNow.AddMilliseconds(300);
+            NextGetBestTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             EntityCache currentTarget = null;
             if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) && Cache.Instance.CurrentWeaponTarget() != null)

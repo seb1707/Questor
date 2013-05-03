@@ -139,6 +139,16 @@ namespace Questor.Modules.Caching
         /// </summary>
         public List<PriorityTarget> _dronePriorityTargets;
 
+        /// <summary>
+        ///  Primary Weapon target chosen by GetBest Target
+        /// </summary>
+        public EntityCache PreferredPrimaryWeaponTarget;
+
+        /// <summary>
+        ///   Drone target chosen by GetBest Target
+        /// </summary>
+        public EntityCache PreferredDroneTarget;
+
         public String OrbitEntityNamed;
 
         public DirectLocation MissionSolarSystem;
@@ -690,6 +700,7 @@ namespace Questor.Modules.Caching
         public DateTime NextRepairItemsAction { get; set; }
         public DateTime NextRepairDronesAction { get; set; }
         public DateTime NextEVEMemoryManagerAction { get; set; }
+        public DateTime NextGetBestTarget { get; set; }
 
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;
@@ -1181,7 +1192,7 @@ namespace Questor.Modules.Caching
                     return _potentialCombatTargets;
                 }
 
-                return Cache.Instance.EntitiesNotSelf.ToList();
+                return new List<EntityCache>();
             }
         }
 
@@ -2516,16 +2527,75 @@ namespace Questor.Modules.Caching
             return false;
         }
 
+        public EntityCache CurrentWeaponTarget()
+        {
+            // Find the first active weapon's target
+            EntityCache _currentWeaponTarget = null;
+            double OptimalOfWeapon = 0;
+            double FallOffOfWeapon = 0;
+
+            try
+            {
+                // Find the target associated with the weapon
+                ModuleCache weapon = Cache.Instance.Weapons.FirstOrDefault(m => m.IsOnline
+                                                                                    && !m.IsReloadingAmmo
+                                                                                    && !m.IsChangingAmmo
+                                                                                    && m.IsActive);
+                if (weapon != null)
+                {
+                    _currentWeaponTarget = Cache.Instance.EntityById(weapon.TargetId);
+
+                    //
+                    // in a perfect world we'd always use the same guns / missiles across the board, for those that dont this will at least come up with sane numbers
+                    //
+                    if (OptimalOfWeapon <= 1)
+                    {
+                        OptimalOfWeapon = Math.Min(OptimalOfWeapon, weapon.OptimalRange);
+                    }
+
+                    if (FallOffOfWeapon <= 1)
+                    {
+                        FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
+                    }
+                    
+                    return _currentWeaponTarget;
+                }
+
+                return null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("GetTarget", "exception [" + exception + "]", Logging.Debug);
+            }
+
+            return null;
+        }
+
         /// <summary>
         ///   Return the best possible target (based on current target, distance and low value first)
         /// </summary>
-        /// <param name="currentTarget"></param>
+        /// <param name="_potentialTargets"></param>
         /// <param name="distance"></param>
         /// <param name="lowValueFirst"></param>
         /// <param name="callingroutine"> </param>
         /// <returns></returns>
-        public EntityCache GetBestTarget(EntityCache currentTarget, double distance, bool lowValueFirst, string callingroutine)
+        public bool GetBestTarget(List<EntityCache> _potentialTargets, double distance, bool lowValueFirst, string callingroutine)
         {
+            if (DateTime.UtcNow < NextGetBestTarget)
+                return false;
+
+            NextGetBestTarget = DateTime.UtcNow.AddMilliseconds(300);
+
+            EntityCache currentTarget = null;
+            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) && Cache.Instance.CurrentWeaponTarget() != null)
+            {
+                currentTarget = Cache.Instance.CurrentWeaponTarget();
+            }
+            else if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) && TargetingCache.CurrentDronesTarget != null)
+            {
+                currentTarget = TargetingCache.CurrentDronesTarget;
+            }
+
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
             // Do we have a 'current target' and if so, is it an actual target?
@@ -2555,30 +2625,49 @@ namespace Questor.Modules.Caching
                         if (!currentTarget.IsTooCloseTooFastTooSmallToHit || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget) || DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget)", Logging.Debug);
-                            return currentTarget;
+                            
+                            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
+                                Cache.Instance.PreferredDroneTarget = currentTarget;
+                            
+                            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)))
+                                Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+
+                            return true;
                         }
                     }
 
                     // Choose any WarpScrambling targets first
-                    EntityCache WarpScramblingDronePriorityTarget = null;
+                    EntityCache WarpScramblingPriorityTarget = null;
                     try
                     {
-                        WarpScramblingDronePriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget 
+                        if (Cache.Instance._dronePriorityTargets.Any(pt => pt.Entity.IsTarget && pt.DronePriority == DronePriority.WarpScrambler))
+                        {
+                            WarpScramblingPriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget 
+                                                                                                 && pt.DronePriority == DronePriority.WarpScrambler)
+                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenBy(pt => pt.Entity.Distance)
+                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                        }
+                        else if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler))
+                        {
+                            WarpScramblingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget 
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
+                        }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
-                    if (WarpScramblingDronePriorityTarget != null)
+                    if (WarpScramblingPriorityTarget != null)
                     {
                         if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)
                            && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate))
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (WarpScramblingDronePriorityTarget != null)", Logging.Debug);
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingDronePriorityTarget.Name + "][" + Math.Round(WarpScramblingDronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingDronePriorityTarget.Id) + "] GroupID [" + WarpScramblingDronePriorityTarget.GroupId + "]", Logging.Debug);
-                            return WarpScramblingDronePriorityTarget;
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingPriorityTarget.Name + "][" + Math.Round(WarpScramblingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingPriorityTarget.Id) + "] GroupID [" + WarpScramblingPriorityTarget.GroupId + "]", Logging.Debug);
+                            Cache.Instance.PreferredDroneTarget = WarpScramblingPriorityTarget;
+                            return true;
                         }
 
                         if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) 
@@ -2587,8 +2676,9 @@ namespace Questor.Modules.Caching
                                 || Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList))) 
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (WarpScramblingDronePriorityTarget != null)", Logging.Debug);
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingDronePriorityTarget.Name + "][" + Math.Round(WarpScramblingDronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingDronePriorityTarget.Id) + "] GroupID [" + WarpScramblingDronePriorityTarget.GroupId + "]", Logging.Debug);
-                            return WarpScramblingDronePriorityTarget;
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingPriorityTarget.Name + "][" + Math.Round(WarpScramblingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingPriorityTarget.Id) + "] GroupID [" + WarpScramblingPriorityTarget.GroupId + "]", Logging.Debug);
+                            Cache.Instance.PreferredPrimaryWeaponTarget =  WarpScramblingPriorityTarget;
+                            return true;
                         }
                     }
                 }
@@ -2604,7 +2694,7 @@ namespace Questor.Modules.Caching
                         || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                     {
                         currentTargetPriority =_primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget 
-                                                                                     && t.EntityID == currentTarget.Id)
+                                                                                && t.EntityID == currentTarget.Id)
                                                                             .Select(pt => pt.PrimaryWeaponPriority)
                                                                             .FirstOrDefault();
                         
@@ -2617,7 +2707,8 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Is our current target any other primary weapon priority target? If so stay on the CurrentTarget", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                    return currentTarget;
+                                    Cache.Instance.PreferredDroneTarget = currentTarget;
+                                    return true;
                                 }
 
                                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) && ((!Cache.Instance.UseDrones && currentTarget.IsNPCFrigate)
@@ -2626,7 +2717,8 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Is our current target any other primary weapon priority target? If so stay on the CurrentTarget", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                    return currentTarget;
+                                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                                    return true;
                                 }    
                             }
                         }
@@ -2659,7 +2751,8 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                    return currentTarget;
+                                    Cache.Instance.PreferredDroneTarget = currentTarget;
+                                    return true;
                                 }
 
                                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) 
@@ -2669,7 +2762,8 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                    return currentTarget;
+                                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                                    return true;
                                 }    
                             }
                         }
@@ -2702,7 +2796,8 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Drones && currentTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id))", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                    return currentTarget;
+                                    Cache.Instance.PreferredDroneTarget = currentTarget;
+                                    return true;
                                 }    
                             }
                         }    
@@ -2775,7 +2870,14 @@ namespace Questor.Modules.Caching
                           && (Cache.Instance.UseDrones && (currentTarget.IsNPCBattleship || currentTarget.IsNPCBattlecruiser))))
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
-                        return currentTarget;
+                        
+                        if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                        
+                        if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredDroneTarget = currentTarget;
+                        
+                        return true;
                     }
                 }
 
@@ -2809,7 +2911,11 @@ namespace Questor.Modules.Caching
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
-                            return primaryWeaponPriorityTarget;
+                            
+                            if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                                Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                            
+                            return true;
                         }    
                     }
                 }
@@ -2842,7 +2948,11 @@ namespace Questor.Modules.Caching
                         {
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (dronePriorityTarget != null && callingroutine == Drones && dronePriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(dronePriorityTarget.Name.Trim()))", Logging.Debug);
                             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
-                            return dronePriorityTarget;
+                            
+                            if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                                Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                            return true;
                         }    
                     }
                 }
@@ -2859,7 +2969,11 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                    return currentTarget;
+                    
+                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                    return true;
                 }
 
                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)
@@ -2869,14 +2983,22 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                    return currentTarget;
+                    
+                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                    
+                    return true;
                   
                 }
             }
 
             // Get the closest high value target
-            EntityCache highValueTarget = OngridKillableNPCs.Where(t => t.IsTarget 
-                                                          && t.TargetValue.HasValue 
+            EntityCache highValueTarget = null;
+            
+            if (!_potentialTargets.Any())
+            {
+                highValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
+                                                          && t.TargetValue.HasValue
                                                           && t.Distance < distance)
                                                           .OrderBy(t => !t.IsNPCFrigate)
                                                           .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
@@ -2885,9 +3007,26 @@ namespace Questor.Modules.Caching
                                                           .ThenBy(OrderByLowestHealth())
                                                           .ThenBy(t => t.Distance)
                                                           .FirstOrDefault();
-
+            }
+            else
+            {
+                highValueTarget = _potentialCombatTargets.Where(t => t.IsTarget
+                                                          && t.TargetValue.HasValue
+                                                          && t.Distance < distance)
+                                                          .OrderBy(t => !t.IsNPCFrigate)
+                                                          .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                          .ThenBy(t => t.IsInOptimalRange)
+                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                          .ThenBy(OrderByLowestHealth())
+                                                          .ThenBy(t => t.Distance)
+                                                          .FirstOrDefault();
+            }
+            
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
-            EntityCache lowValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
+            EntityCache lowValueTarget = null;
+            if (!_potentialTargets.Any())
+            {
+                lowValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
                                                           && !t.TargetValue.HasValue 
                                                           && t.Distance < distance 
                                                           && !t.IsTooCloseTooFastTooSmallToHit)
@@ -2895,6 +3034,19 @@ namespace Questor.Modules.Caching
                                                           .ThenBy(OrderByLowestHealth())
                                                           .ThenBy(t => t.Distance)
                                                           .FirstOrDefault();
+            }
+            else
+            {
+                lowValueTarget = _potentialTargets.Where(t => t.IsTarget
+                                                          && !t.TargetValue.HasValue 
+                                                          && t.Distance < distance 
+                                                          && !t.IsTooCloseTooFastTooSmallToHit)
+                                                          .OrderBy(t => t.IsNPCFrigate)
+                                                          .ThenBy(OrderByLowestHealth())
+                                                          .ThenBy(t => t.Distance)
+                                                          .FirstOrDefault();
+            }
+            
 
             if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) //do not exclude anything in range if drones are looking for a target
             {
@@ -2910,13 +3062,27 @@ namespace Questor.Modules.Caching
             if (lowValueFirst && lowValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-                return lowValueTarget;
+                
+                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+
+                return true;
             }
 
             if (!lowValueFirst && highValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
-                return highValueTarget;
+                
+                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+
+                return true;
             }
 
             EntityCache LowOrHighValueTarget = null;
@@ -2929,7 +3095,14 @@ namespace Questor.Modules.Caching
                 if (LowOrHighValueTarget != null)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "] GroupID [" + LowOrHighValueTarget.GroupId + "]", Logging.Debug);
-                    return LowOrHighValueTarget;
+                    
+                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+
+                    return true;
                 }
                 
                 
@@ -2960,14 +3133,14 @@ namespace Questor.Modules.Caching
                     }
                 }
 
-                return null;
+                return false;
             }
             catch (Exception exception)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget exception [" + exception + "]", Logging.Debug);
             }
             
-            return null;
+            return false;
         }
 
         private void EWarEffectsOnMe()

@@ -130,7 +130,7 @@ namespace Questor.Modules.Activities
                         Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] {target}, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
 
-                    if (Settings.Instance.DronesKillHighValueTargets || target.IsNPCFrigate) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
+                    if (Cache.Instance.UseDrones && (Settings.Instance.DronesKillHighValueTargets || target.IsNPCFrigate)) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
                     {
                         Cache.Instance.AddDronePriorityTargets(new[] {target}, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
@@ -364,7 +364,7 @@ namespace Questor.Modules.Activities
             }
 
             // Is there a priority target out of range?
-            EntityCache target = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).FirstOrDefault(t => !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe)));
+            List<EntityCache> targets = Cache.Instance.PrimaryWeaponPriorityTargets.OrderBy(t => t.Distance).Where(t => !(Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()) && !Cache.Instance.TargetedBy.Any(w => w.IsWarpScramblingMe || w.IsNeutralizingMe || w.IsWebbingMe))).ToList();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t =>
                                                                (!t.IsSentry || Settings.Instance.KillSentries)
@@ -376,36 +376,60 @@ namespace Questor.Modules.Activities
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             // Or is there a target out of range that is targeting us?
-            target = target ?? Cache.Instance.TargetedBy.Where(t => 
-                                                               !t.IsNPCFrigate
-                                                            && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                            && !t.IsEntityIShouldLeaveAlone 
-                                                            && !t.IsContainer 
-                                                            && t.IsNpc 
-                                                            && t.CategoryId == (int)CategoryID.Entity 
-                                                            && t.GroupId != (int)Group.LargeColidableStructure
-                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                            .OrderBy(t => t.Distance)
-                                                            .FirstOrDefault();
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => !t.IsNPCFrigate
+                                                               && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                               && !t.IsEntityIShouldLeaveAlone
+                                                               && !t.IsContainer
+                                                               && t.IsNpc
+                                                               && t.CategoryId == (int)CategoryID.Entity
+                                                               && t.GroupId != (int)Group.LargeColidableStructure
+                                                               && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                               .OrderBy(t => t.Distance)
+                                                               .ToList();
+                
+            }
             
             // Or is there a target out of range that is targeting us? (and has to be a frigate at this point!!!)
-            target = target ?? Cache.Instance.TargetedBy.Where(t =>
-                                                              (!t.IsSentry || Settings.Instance.KillSentries)
-                                                            && !t.IsEntityIShouldLeaveAlone
-                                                            && !t.IsContainer
-                                                            && t.IsNpc
-                                                            && t.CategoryId == (int)CategoryID.Entity
-                                                            && t.GroupId != (int)Group.LargeColidableStructure
-                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                            .OrderBy(t => t.Distance)
-                                                            .FirstOrDefault();
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
+                                                               && !t.IsEntityIShouldLeaveAlone
+                                                               && !t.IsContainer
+                                                               && t.IsNpc
+                                                               && t.CategoryId == (int)CategoryID.Entity
+                                                               && t.GroupId != (int)Group.LargeColidableStructure
+                                                               && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                               .OrderBy(t => t.Distance)
+                                                               .ToList();    
+            }
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, range, targetedby, true);
+            if (targets.Any())
+            {
+                
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Drones"); 
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, range, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Combat"); 
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, range, targetedby, true);
+                    }    
+                }
+            }
             
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
@@ -442,7 +466,7 @@ namespace Questor.Modules.Activities
 
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
-            EntityCache target = null;
+            List<EntityCache> targets = new List<EntityCache>();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone 
@@ -453,75 +477,103 @@ namespace Questor.Modules.Activities
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             // Or is there a non-frigate target that is targeting us?
-            target = target ?? Cache.Instance.TargetedBy.Where(t => 
-                                                             !t.IsNPCFrigate
-                                                           && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                           && !t.IsEntityIShouldLeaveAlone 
-                                                           && !t.IsContainer 
-                                                           && t.IsNpc 
-                                                           && t.CategoryId == (int)CategoryID.Entity 
-                                                           && t.GroupId != (int)Group.LargeColidableStructure
-                                                           && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                           && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => !t.IsNPCFrigate
+                                                            && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                            && !t.IsEntityIShouldLeaveAlone
+                                                            && !t.IsContainer
+                                                            && t.IsNpc
+                                                            && t.CategoryId == (int) CategoryID.Entity
+                                                            && t.GroupId != (int) Group.LargeColidableStructure
+                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                            .OrderBy(t => t.Distance)
-                                                           .FirstOrDefault();
+                                                           .ToList();
+            }
 
             // Or is there any non-frigate target?
-            target = target ?? Cache.Instance.Entities.Where(t => 
-                                                            !t.IsNPCFrigate
-                                                         && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                         && !t.IsEntityIShouldLeaveAlone 
-                                                         && !t.IsContainer 
-                                                         && t.IsNpc 
-                                                         && t.CategoryId == (int)CategoryID.Entity 
-                                                         && t.GroupId != (int)Group.LargeColidableStructure
-                                                         && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                         .OrderBy(t => t.Distance)
-                                                         .FirstOrDefault();
-            
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t => !t.IsNPCFrigate
+                                                          && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                          && !t.IsEntityIShouldLeaveAlone
+                                                          && !t.IsContainer
+                                                          && t.IsNpc
+                                                          && t.CategoryId == (int) CategoryID.Entity
+                                                          && t.GroupId != (int) Group.LargeColidableStructure
+                                                          && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                          && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                          .OrderBy(t => t.Distance)
+                                                          .ToList();
+            }
             // Or is there a target that is targeting us? has to be a frigate at this point !!!
-            target = target ?? Cache.Instance.TargetedBy.Where(t =>
-                                                              (!t.IsSentry || Settings.Instance.KillSentries)
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
+                                                              && !t.IsEntityIShouldLeaveAlone
+                                                              && !t.IsContainer
+                                                              && t.IsNpc
+                                                              && t.CategoryId == (int) CategoryID.Entity
+                                                              && t.GroupId != (int) Group.LargeColidableStructure
+                                                              && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                              && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                              .OrderBy(t => t.Distance)
+                                                              .ToList();
+            }
+
+            // Or is there any target? has to be a frigate at this point !!!
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                            && !t.IsEntityIShouldLeaveAlone
                                                            && !t.IsContainer
                                                            && t.IsNpc
-                                                           && t.CategoryId == (int)CategoryID.Entity
-                                                           && t.GroupId != (int)Group.LargeColidableStructure
+                                                           && t.CategoryId == (int) CategoryID.Entity
+                                                           && t.GroupId != (int) Group.LargeColidableStructure
                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                            .OrderBy(t => t.Distance)
-                                                           .FirstOrDefault();
-
-            // Or is there any target? has to be a frigate at this point !!!
-            target = target ?? Cache.Instance.Entities.Where(t =>
-                                                            (!t.IsSentry || Settings.Instance.KillSentries)
-                                                         && !t.IsEntityIShouldLeaveAlone
-                                                         && !t.IsContainer
-                                                         && t.IsNpc
-                                                         && t.CategoryId == (int)CategoryID.Entity
-                                                         && t.GroupId != (int)Group.LargeColidableStructure
-                                                         && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                         .OrderBy(t => t.Distance)
-                                                         .FirstOrDefault();
+                                                           .ToList();
+            }
 
             // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
-            target = target ?? Cache.Instance.Entities.Where(t =>
-                                                            (!t.IsSentry || Settings.Instance.KillSentries)
-                                                         && !t.IsEntityIShouldLeaveAlone
-                                                         && !t.IsContainer
-                                                         && t.IsNpc
-                                                         && t.CategoryId == (int)CategoryID.Entity
-                                                         && t.GroupId != (int)Group.LargeColidableStructure
-                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                         .OrderBy(t => t.Distance)
-                                                         .FirstOrDefault();
-
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t =>
+                                                        (!t.IsSentry || Settings.Instance.KillSentries)
+                                                        && !t.IsEntityIShouldLeaveAlone
+                                                        && !t.IsContainer
+                                                        && t.IsNpc
+                                                        && t.CategoryId == (int) CategoryID.Entity
+                                                        && t.GroupId != (int) Group.LargeColidableStructure
+                                                        && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                        .OrderBy(t => t.Distance)
+                                                        .ToList();
+            }
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target,range,targetedby,true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, range, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, range, targetedby, true);
+                    }
+                }
+            }
             
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
@@ -552,7 +604,7 @@ namespace Questor.Modules.Activities
                 range = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
             }
 
-            EntityCache target = null;
+            List<EntityCache> targets = new List<EntityCache>();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone 
@@ -565,40 +617,47 @@ namespace Questor.Modules.Activities
             //
             // if we have no target yet is there a non-frigate target within DistanceToConsiderTargets that is targeting us?
             //
-            target = target ?? Cache.Instance.TargetedBy.Where(t => 
-                                                               t.Distance < range 
-                                                            && !t.IsNPCFrigate
-                                                            && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                            && !t.IsEntityIShouldLeaveAlone 
-                                                            && !t.IsContainer 
-                                                            && t.IsNpc 
-                                                            && t.CategoryId == (int)CategoryID.Entity 
-                                                            && t.GroupId != (int)Group.LargeColidableStructure
-                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
-                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                           .OrderBy(t => t.Distance)
-                                                           .FirstOrDefault();
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => t.Distance < range
+                                                                && !t.IsNPCFrigate
+                                                                && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                                && !t.IsEntityIShouldLeaveAlone
+                                                                && !t.IsContainer
+                                                                && t.IsNpc
+                                                                && t.CategoryId == (int)CategoryID.Entity
+                                                                && t.GroupId != (int)Group.LargeColidableStructure
+                                                                && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                               .OrderBy(t => t.Distance)
+                                                               .ToList();    
+            }
+            
 
             // Or is there any non-frigate target within DistanceToConsiderTargets?
-            target = target ?? Cache.Instance.Entities.Where(t => 
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t =>
                                                                t.Distance < range
                                                             && !t.IsNPCFrigate
                                                             && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                            && !t.IsEntityIShouldLeaveAlone 
-                                                            && !t.IsContainer 
-                                                            && t.IsNpc 
-                                                            && t.CategoryId == (int)CategoryID.Entity 
+                                                            && !t.IsEntityIShouldLeaveAlone
+                                                            && !t.IsContainer
+                                                            && t.IsNpc
+                                                            && t.CategoryId == (int)CategoryID.Entity
                                                             && t.GroupId != (int)Group.LargeColidableStructure
                                                             && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                             .OrderBy(t => t.Distance)
-                                                            .FirstOrDefault();
-
+                                                            .ToList();
+            }
+            
             //
             // if we have no target yet is there a target within DistanceToConsiderTargets that is targeting us? has to be a frigate at this point!
             //
-            target = target ?? Cache.Instance.TargetedBy.Where(t =>
-                                                               t.Distance < range
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => t.Distance < range
                                                             && (!t.IsSentry || Settings.Instance.KillSentries)
                                                             && !t.IsEntityIShouldLeaveAlone
                                                             && !t.IsContainer
@@ -608,11 +667,14 @@ namespace Questor.Modules.Activities
                                                             && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                            .OrderBy(t => t.Distance)
-                                                           .FirstOrDefault();
+                                                           .ToList();
+            }
+            
 
             // Or is there any target within DistanceToConsiderTargets? has to be a frigate at this point!
-            target = target ?? Cache.Instance.Entities.Where(t =>
-                                                               t.Distance < range
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t => t.Distance < range
                                                             && (!t.IsSentry || Settings.Instance.KillSentries)
                                                             && !t.IsEntityIShouldLeaveAlone
                                                             && !t.IsContainer
@@ -622,11 +684,14 @@ namespace Questor.Modules.Activities
                                                             && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                             .OrderBy(t => t.Distance)
-                                                            .FirstOrDefault();
+                                                            .ToList();
+            }
+            
 
             // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
-            target = target ?? Cache.Instance.Entities.Where(t =>
-                                                            (!t.IsSentry || Settings.Instance.KillSentries)
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                          && !t.IsEntityIShouldLeaveAlone
                                                          && !t.IsContainer
                                                          && t.IsNpc
@@ -634,12 +699,33 @@ namespace Questor.Modules.Activities
                                                          && t.GroupId != (int)Group.LargeColidableStructure
                                                          && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                          .OrderBy(t => t.Distance)
-                                                         .FirstOrDefault();
+                                                         .ToList();
+            }
+            
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, range, targetedby, false);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, range, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets, range, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, range, targetedby, true);
+                    }
+                }
+            }
             
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
@@ -677,7 +763,7 @@ namespace Questor.Modules.Activities
                 DistanceToConsiderTargets = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
             }
 
-            EntityCache target = null;
+            List<EntityCache> targets = new List<EntityCache>();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone 
@@ -688,38 +774,64 @@ namespace Questor.Modules.Activities
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             // Is there a target within DistanceToConsiderTargets that is targeting us?
-            target = target ?? Cache.Instance.TargetedBy.Where(t => 
-                                                               t.Distance < DistanceToConsiderTargets
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.TargetedBy.Where(t => t.Distance < DistanceToConsiderTargets
                                                             && !t.IsNPCFrigate
                                                             && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                            && !t.IsEntityIShouldLeaveAlone 
-                                                            && !t.IsContainer 
-                                                            && t.IsNpc 
-                                                            && t.CategoryId == (int)CategoryID.Entity 
+                                                            && !t.IsEntityIShouldLeaveAlone
+                                                            && !t.IsContainer
+                                                            && t.IsNpc
+                                                            && t.CategoryId == (int)CategoryID.Entity
                                                             && t.GroupId != (int)Group.LargeColidableStructure
                                                             && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                             .OrderBy(t => t.Distance)
-                                                            .FirstOrDefault();
+                                                            .ToList();
+            }
+            
 
             // Any priority targets that we should wait on are accounted for here...(this will include any priority targets from the drone or primary weapons lists if we have nothing else left)
-            target = target ?? Cache.Instance.Entities.Where(t =>
-                                                             t.Distance < DistanceToConsiderTargets
-                                                         && !t.IsNPCFrigate
-                                                         && (!t.IsSentry || Settings.Instance.KillSentries)
-                                                         && !t.IsEntityIShouldLeaveAlone
-                                                         && !t.IsContainer
-                                                         && t.IsNpc
-                                                         && t.CategoryId == (int)CategoryID.Entity
-                                                         && t.GroupId != (int)Group.LargeColidableStructure
-                                                         && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                         .OrderBy(t => t.Distance)
-                                                         .FirstOrDefault();
+            if (!targets.Any())
+            {
+                targets = Cache.Instance.Entities.Where(t => t.Distance < DistanceToConsiderTargets
+                                                             && !t.IsNPCFrigate
+                                                             && (!t.IsSentry || Settings.Instance.KillSentries)
+                                                             && !t.IsEntityIShouldLeaveAlone
+                                                             && !t.IsContainer
+                                                             && t.IsNpc
+                                                             && t.CategoryId == (int)CategoryID.Entity
+                                                             && t.GroupId != (int)Group.LargeColidableStructure
+                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
+                                                             .OrderBy(t => t.Distance)
+                                                             .ToList();
+            }
+
+            
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, DistanceToConsiderTargets, targetedby, true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets, DistanceToConsiderTargets, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, DistanceToConsiderTargets, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets, DistanceToConsiderTargets, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, DistanceToConsiderTargets, targetedby, true);
+                    }
+                }
+            }
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
@@ -1167,7 +1279,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
             if (targets.Count() == numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
@@ -1182,7 +1294,7 @@ namespace Questor.Modules.Activities
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(targets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
 
-                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => targets.Any(t => t.Id == e.Id)))
+                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => e.IsTarget || e.IsTargeting))
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
                     entity.UnlockTarget("CombatMissionCtrl");
@@ -1199,7 +1311,6 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            EntityCache target = targets.OrderBy(t => t.Distance).FirstOrDefault();
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone 
                                                                && !t.IsContainer 
@@ -1208,12 +1319,32 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure 
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
-            if (notTheClosest) target = targets.OrderByDescending(t => t.Distance).FirstOrDefault();
+            if (notTheClosest) targets = targets.OrderByDescending(t => t.Distance).ToList();
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, (double)Distance.OnGridWithMe, targetedby, true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -1243,7 +1374,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
             if (targets.Count() == numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
@@ -1253,7 +1384,6 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            EntityCache target = targets.OrderBy(t => t.Distance).FirstOrDefault();
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone
                                                                && !t.IsContainer
@@ -1262,12 +1392,32 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
-            if (notTheClosest) target = targets.OrderByDescending(t => t.Distance).FirstOrDefault();
+            if (notTheClosest) targets = targets.OrderByDescending(t => t.Distance).ToList();
 
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, (double)Distance.OnGridWithMe, targetedby, true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -1322,10 +1472,10 @@ namespace Questor.Modules.Activities
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             //IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            EntityCache target = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault();
-            if (notTheClosest) target = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).FirstOrDefault();
+            List<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
+            if (notTheClosest) targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).ToList();
 
-            if (target == null)
+            if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed, not valid anymore ", Logging.Teal);
 
@@ -1334,7 +1484,27 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, (double)Distance.OnGridWithMe, targetedby, true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -1349,8 +1519,8 @@ namespace Questor.Modules.Activities
             }
 
             //IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name));
-            EntityCache target = Cache.Instance.Entities.OrderBy(t => t.Distance).FirstOrDefault();
-            if (notTheClosest) target = Cache.Instance.Entities.OrderByDescending(t => t.Distance).FirstOrDefault();
+            List<EntityCache> targets = Cache.Instance.Entities.OrderBy(t => t.Distance).ToList();
+            if (notTheClosest) targets = Cache.Instance.Entities.OrderByDescending(t => t.Distance).ToList();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries)
                                                                && !t.IsEntityIShouldLeaveAlone
@@ -1360,7 +1530,7 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
-            if (target == null)
+            if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed, not valid anymore [1]", Logging.Teal);
 
@@ -1369,7 +1539,27 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(target, (double)Distance.OnGridWithMe, targetedby, true);
+            if (targets.Any())
+            {
+
+                if (Cache.Instance.UseDrones && Settings.Instance.DronesKillHighValueTargets)
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Drones");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredDroneTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredDroneTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(targets.ToList(), Cache.Instance.MaxRange, false, "Combat");
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.PreferredPrimaryWeaponTarget, (double)Distance.OnGridWithMe, targetedby, true);
+                    }
+                }
+            }
+
             return;
         }
 

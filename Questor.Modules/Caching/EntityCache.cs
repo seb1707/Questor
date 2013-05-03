@@ -1113,6 +1113,17 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsShipWithNoDroneBay
+        {
+            get
+            {
+                bool result = false;
+                result |= TypeId == (int)TypeID.Tengu;
+                result |= GroupId == (int)Group.Shuttle;
+                return result;
+            }
+        }
+
         public bool LockTarget()
         {
             // If the bad idea is attacking, attack back

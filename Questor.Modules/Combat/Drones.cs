@@ -92,11 +92,19 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.DronesKillHighValueTargets)
             {
                 // Return best possible high value target
-                return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, false, "Drones");
+                if (Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Settings.Instance.DroneControlRange, false, "Drones"))
+                {
+                    return Cache.Instance.PreferredDroneTarget;
+                }
             }
             
             // Return best possible low value target
-            return Cache.Instance.GetBestTarget(TargetingCache.CurrentDronesTarget, Settings.Instance.DroneControlRange, true, "Drones");
+            if (Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Settings.Instance.DroneControlRange, true, "Drones"))
+            {
+                return Cache.Instance.PreferredDroneTarget;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -153,6 +161,12 @@ namespace Questor.Modules.Combat
                 Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
                 !Cache.Instance.UseDrones                               // if UseDrones is false
                 )
+            {
+                _States.CurrentDroneState = DroneState.Idle;
+                return;
+            }
+
+            if (Cache.Instance.MyShipEntity.IsShipWithNoDroneBay)
             {
                 _States.CurrentDroneState = DroneState.Idle;
                 return;

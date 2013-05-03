@@ -404,51 +404,27 @@ namespace Questor.Modules.Combat
         /// <returns></returns>
         private EntityCache GetTarget()
         {
-            // Find the first active weapon's target
-            EntityCache weaponTarget = null;
-            double OptimalOfWeapon = 0;
-            double FallOffOfWeapon = 0;
-
-            try
-            {
-                // Find the target associated with the weapon
-                ModuleCache weapon = Cache.Instance.Weapons.FirstOrDefault(m => m.IsOnline
-                                                                                    && !m.IsReloadingAmmo
-                                                                                    && !m.IsChangingAmmo
-                                                                                    && m.IsActive);
-                if (weapon != null)
-                {
-                    weaponTarget = Cache.Instance.EntityById(weapon.TargetId);
-
-                    //
-                    // in a perfect world we'd always use the same guns / missiles across the board, for those that dont this will at least come up with sane numbers
-                    //
-                    if (OptimalOfWeapon <= 1)
-                    {
-                        OptimalOfWeapon = Math.Min(OptimalOfWeapon, weapon.OptimalRange);
-                    }
-
-                    if (FallOffOfWeapon <= 1)
-                    {
-                        FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("GetTarget", "exception [" + exception + "]", Logging.Debug);
-            }
-
-            EntityCache _bestTarget = null;
-
             if (Cache.Instance.Targets.Any()) //weapontarget can be null, we might not yet be shooting anything. 
             {
-                _bestTarget = Cache.Instance.GetBestTarget(weaponTarget, Cache.Instance.WeaponRange, false, "Combat");
-                if (_bestTarget != null)
+                if (Cache.Instance.InMission)
+                {
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsValid && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
+                    {
+                        return Cache.Instance.PreferredPrimaryWeaponTarget;
+                    }
+
+                    return null;
+                }
+                
+                if (!Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.WeaponRange, false, "Combat")) return null;
+
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     // Return best possible target
-                    return _bestTarget;
+                    return Cache.Instance.PreferredPrimaryWeaponTarget;
                 }
+
+                return null;
             }
 
             return null;
@@ -860,7 +836,7 @@ namespace Questor.Modules.Combat
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.Target", "Name [" + combatTargetEntity.Name + "][" + Math.Round(combatTargetEntity.Distance / 1000, 2) + "][ID:" + Cache.Instance.MaskedID(combatTargetEntity.Id) + "][" + combatTargetEntity.GroupId + "][isTarget:" + combatTargetEntity.IsTarget + "]", Logging.Debug);
 
-                    if (combatTargetEntity.Distance > Math.Max(Cache.Instance.MaxRange * 1.5d, 20000))
+                    if (combatTargetEntity.Distance > Math.Min(Math.Max(Cache.Instance.MaxRange * 1.5d, 20000), Cache.Instance.DirectEve.ActiveShip.MaxTargetRange))
                     {
                         Logging.Log("Combat", "Unlocking Target [" + combatTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(combatTargetEntity.Id) + "] out of range [" + Math.Round(combatTargetEntity.Distance / 1000, 0) + "k away] It will be relocked when it comes back into range. [" + Math.Round(Cache.Instance.MaxRange * 1.5d / 1000, 2) + "]", Logging.Teal);
                     }
@@ -870,7 +846,7 @@ namespace Questor.Modules.Combat
                     }
                     else continue;
 
-                    if (combatTargetEntity.UnlockTarget("Combat.TargetCombatants"))
+                    if (combatTargetEntity.IsTarget && combatTargetEntity.UnlockTarget("Combat.TargetCombatants"))
                     {
                         // do not remove this target from the PrimaryWeaponsPriorityTargetList or the DronePriorityTargetList so that it will be re-targeted when they come back into range
                         return; //this does kind of negates the 'for' loop, but we want the pause between commands sent to the server    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);

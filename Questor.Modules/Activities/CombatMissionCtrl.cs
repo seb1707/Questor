@@ -117,12 +117,6 @@ namespace Questor.Modules.Activities
                 // Reset timeout
                 _clearPocketTimeout = null;
 
-                //panic handles adding any priority targets and combat will prefer to kill any priority targets
-                if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
-                {
-                    if (!Combat.ReloadAll(target)) return;
-                }
-
                 //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
                 
                 Cache.Instance.GetBestTarget(targets, range, false, "Combat");
@@ -130,18 +124,12 @@ namespace Questor.Modules.Activities
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
                     {
+                        if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)", Logging.Debug);
+                            
                         if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)
                         {
+                            if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)", Logging.Debug);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                        }
-                    }
-
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > range) //target is not in range...
-                    {
-                        if (DateTime.UtcNow > Cache.Instance.NextReload)
-                        {
-                            //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
-                            if (!Combat.ReloadAll(target)) return;
                         }
                     }
                 }
@@ -163,13 +151,39 @@ namespace Questor.Modules.Activities
 
                 if (MoveShip)
                 {
+                    if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (MoveShip)", Logging.Debug);
+
                     if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)
                     {
+                        if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)", Logging.Debug);
                         NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+                }
+
+                //panic handles adding any priority targets and combat will prefer to kill any priority targets
+                if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
+                {
+                    if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)", Logging.Debug);
+                    if (!Combat.ReloadAll(target)) return;
+                }
+
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                {
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > range) //target is not in range...
+                    {
+                        if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > range)", Logging.Debug);
+                        
+                        if (DateTime.UtcNow > Cache.Instance.NextReload)
+                        {
+                            if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (DateTime.UtcNow > Cache.Instance.NextReload)", Logging.Debug);
+                            //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
+                            if (!Combat.ReloadAll(target)) return;
+                        }
                     }
                 }
             }
 
+            if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "return", Logging.Debug);
             return;
         }
 

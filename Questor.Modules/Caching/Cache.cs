@@ -3010,23 +3010,14 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => !t.IsTooCloseTooFastTooSmallToHit)
+                lowValueTarget = potentialCombatTargets
                     .OrderBy(t => t.IsNPCFrigate)
+                    .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();
-
-
-                //do not exclude anything in range if drones are looking for a target
-                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) 
-                {
-                    lowValueTarget = potentialCombatTargets.OrderBy(t => t.IsNPCFrigate)
-                        .ThenBy(OrderByLowestHealth())
-                        .ThenBy(t => t.Distance)
-                        .FirstOrDefault();
-                }
-
+                
                 if (lowValueFirst && lowValueTarget != null)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
@@ -3073,7 +3064,6 @@ namespace Questor.Modules.Caching
 
                     return true;
                 }
-                
                 
                 if (Settings.Instance.DebugGetBestTarget)
                 {

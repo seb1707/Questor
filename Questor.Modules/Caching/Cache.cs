@@ -220,6 +220,11 @@ namespace Questor.Modules.Caching
         /// </summary>
         private List<DirectWindow> _windows;
 
+        /// <summary>
+        ///   Returns maxLockedTargets, the minimum between the character and the ship //cleared in InvalidateCache
+        /// </summary>
+        private int _maxLockedTargets = 0;
+
         public void DirecteveDispose()
         {
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
@@ -996,6 +1001,20 @@ namespace Questor.Modules.Caching
                 //m.GroupId == (int)Group.AssaultMissilelaunchers ||
                 //m.GroupId == (int)Group.HeavyMissilelaunchers ||
                 //m.GroupId == (int)Group.DefenderMissilelaunchers);
+            }
+        }
+
+        public int MaxLockedTargets
+        {
+            get
+            {
+                if (_maxLockedTargets == 0)
+                {
+                    _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                    return _maxLockedTargets;
+                }
+
+                return _maxLockedTargets;
             }
         }
 
@@ -1814,6 +1833,7 @@ namespace Questor.Modules.Caching
                 _gates = null;
                 _IDsinInventoryTree = null;
                 _jumpBridges = null;
+                _maxLockedTargets = 0;
                 _modules = null;
                 _objects = null;
                 _ongridKillableNPCs = null;

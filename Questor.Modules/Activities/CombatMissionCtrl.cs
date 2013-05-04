@@ -502,7 +502,7 @@ namespace Questor.Modules.Activities
             // Or is there any target?
             if (!targets.Any())
             {
-                EntityCache target = Cache.Instance.potentialCombatTargets.Where(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                EntityCache target = Cache.Instance.Entities.Where(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                           && t.CategoryId == (int)CategoryID.Entity
                                                           && (t.IsNpc || t.IsNpcByGroupID)
                                                           && !t.IsContainer

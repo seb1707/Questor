@@ -379,7 +379,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                range = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
+                DistanceToClear = (int)Distance.OnGridWithMe;
             }
 
             // Is there a priority target out of range?
@@ -578,7 +578,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                range = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
+                DistanceToClear = (int)Distance.OnGridWithMe;
             }
 
             List<EntityCache> targets = new List<EntityCache>();
@@ -710,7 +710,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToConsiderTargets = Math.Min(Cache.Instance.MaxRange, DistanceToClear);
+                DistanceToClear = (int)Distance.OnGridWithMe;
             }
 
             List<EntityCache> targets = new List<EntityCache>();

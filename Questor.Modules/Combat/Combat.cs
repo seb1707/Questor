@@ -823,7 +823,7 @@ namespace Questor.Modules.Combat
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.Target", "Name [" + combatTargetEntity.Name + "][" + Math.Round(combatTargetEntity.Distance / 1000, 2) + "][ID:" + Cache.Instance.MaskedID(combatTargetEntity.Id) + "][" + combatTargetEntity.GroupId + "][isTarget:" + combatTargetEntity.IsTarget + "]", Logging.Debug);
 
-                    if (combatTargetEntity.Distance > Math.Min(Math.Max(Cache.Instance.MaxRange * 1.5d, 20000), Cache.Instance.DirectEve.ActiveShip.MaxTargetRange))
+                    if (combatTargetEntity.Distance > Cache.Instance.WeaponRange * 1.5d)
                     {
                         Logging.Log("Combat", "Unlocking Target [" + combatTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(combatTargetEntity.Id) + "] out of range [" + Math.Round(combatTargetEntity.Distance / 1000, 0) + "k away] It will be relocked when it comes back into range. [" + Math.Round(Cache.Instance.MaxRange * 1.5d / 1000, 2) + "]", Logging.Teal);
                     }

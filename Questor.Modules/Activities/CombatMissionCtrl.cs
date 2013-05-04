@@ -118,8 +118,8 @@ namespace Questor.Modules.Activities
                 _clearPocketTimeout = null;
 
                 //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                
-                Cache.Instance.GetBestTarget(targets, range, false, "Combat");
+
+                Cache.Instance.GetBestTarget(targets, (double)Distance.OnGridWithMe, false, "Combat");
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)

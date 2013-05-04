@@ -374,6 +374,10 @@ namespace Questor.Modules.Combat
             if (isWeapon && !entity.IsTarget)
                 return false;
 
+            if (isWeapon && entity.Distance > Cache.Instance.WeaponRange)
+                return false;
+
+
             // We have changed target, allow activation
             if (entity.Id != module.LastTargetId)
                 return true;
@@ -552,7 +556,7 @@ namespace Questor.Modules.Combat
                 if (weapon.IsActive)
                 {
                     if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is active already", Logging.Teal);
-                    if (weapon.TargetId != target.Id)
+                    if (weapon.TargetId != target.Id || !target.IsTarget)
                     {
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is shooting at the wrong target: deactivating", Logging.Teal);
                         weapon.Click();
@@ -779,12 +783,26 @@ namespace Questor.Modules.Combat
                     }
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
                 }
-                else
+                else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
+                                                                 && (e.IsNpc || e.IsNpcByGroupID)
+                                                                 && !e.IsContainer
+                                                                 && !e.IsFactionWarfareNPC
+                                                                 && !e.IsEntityIShouldLeaveAlone
+                                                                 && (!e.IsBadIdea || e.IsAttacking)
+                                                                 && !e.IsLargeCollidable
+                                                                 && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())))
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);
 
-                    foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
+                    foreach (EntityCache t in Cache.Instance.EntitiesNotSelf.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                 && (e.IsNpc || e.IsNpcByGroupID)
+                                                                 && !e.IsContainer
+                                                                 && !e.IsFactionWarfareNPC
+                                                                 && !e.IsEntityIShouldLeaveAlone
+                                                                 && (!e.IsBadIdea || e.IsAttacking)
+                                                                 && !e.IsLargeCollidable
+                                                                 && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())))
                     {
                         i++;
                         Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
@@ -863,7 +881,7 @@ namespace Questor.Modules.Combat
             // Build a list of things targeting me
             TargetingMe = Cache.Instance.TargetedBy.Where(t => (t.IsNpc || t.IsAttacking)
                                                             && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                            && t.Distance < Cache.Instance.MaxRange
+                                                            && t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                                                             && (!t.IsBadIdea || t.IsAttacking)
                                                             && !t.IsEntityIShouldLeaveAlone
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
@@ -872,7 +890,7 @@ namespace Questor.Modules.Combat
 
             List<EntityCache> highValueTargetingMe;
             highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue
-                                                      && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                                                       && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                        && (t.IsTarget || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)) || t.IsAttacking))
                                                .OrderBy(t => !t.IsNPCFrigate)
                                                .ThenBy(t => !t.IsFrigate)
@@ -1027,7 +1045,6 @@ namespace Questor.Modules.Combat
             // Do we have any drone priority targets not yet targeted?
             //
             IEnumerable<EntityCache> dronepriority = Cache.Instance.DronePriorityTargets.Where(t => t.Distance < Settings.Instance.DroneControlRange
-                                                                                                 && t.Distance < Cache.Instance.MaxRange
                                                                                                  && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
                                                                                                  && t.IsWarpScramblingMe)
                                                                                                  .OrderBy(c => c.Distance);
@@ -1035,7 +1052,7 @@ namespace Questor.Modules.Combat
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + dronepriority.Count() + "] dronePriority targets", Logging.Debug);
 
-                foreach (EntityCache dronePriorityEntity in dronepriority.Where(t => !t.IsTarget && !t.IsTargeting))
+                foreach (EntityCache dronePriorityEntity in dronepriority.Where(t => !t.IsTarget))
                 {
                     // Have we reached the limit of high value targets?
                     if (highValueTargets.Count >= maxHighValueTarget)
@@ -1052,7 +1069,7 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    break;
+                    continue;
                 }
             }
             else
@@ -1066,16 +1083,18 @@ namespace Questor.Modules.Combat
             //
             // Do we have any primary weapon priority targets not yet targeted?
             //
-            IEnumerable<EntityCache> primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.MaxRange
+            IEnumerable<EntityCache> primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                                                                                                                 && !t.IsTarget 
+                                                                                                                 && !t.IsTargeting
                                                                                                                  && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                                                                                  .OrderBy(c => c.IsInOptimalRange)
                                                                                                                  .ThenBy(c => c.Distance);
 
-            if (primaryWeaponPriority.Any(t => !t.IsTarget && !t.IsTargeting))
+            if (primaryWeaponPriority.Any())
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + primaryWeaponPriority.Count() + "] primaryWeaponPriority targets", Logging.Debug);
 
-                foreach (EntityCache primaryWeaponPriorityEntity in primaryWeaponPriority.Where(t => !t.IsTarget && !t.IsTargeting))
+                foreach (EntityCache primaryWeaponPriorityEntity in primaryWeaponPriority)
                 {
                     // Have we reached the limit of high value targets?
                     if (highValueTargets.Count >= maxHighValueTarget)
@@ -1083,7 +1102,7 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    if (primaryWeaponPriorityEntity.LockTarget())
+                    if (primaryWeaponPriorityEntity.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange && primaryWeaponPriorityEntity.LockTarget())
                     {
                         Logging.Log("Combat", "Targeting primary weapon priority target [" + primaryWeaponPriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away] potentialHighValueTargets.Count [" + potentialHighValueTargets.Count + "]", Logging.Teal);
                         //highValueTargets.Add(primaryWeaponPriorityEntity);
@@ -1091,7 +1110,7 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    break;
+                    continue;
                 }
             }
             else
@@ -1103,11 +1122,11 @@ namespace Questor.Modules.Combat
 
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);
 
-            if (highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting))
+            if (highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + highValueTargetingMe.Count() + "] highValueTargetingMe targets", Logging.Debug);
 
-                foreach (EntityCache highValueTargetingMeEntity in highValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting))
+                foreach (EntityCache highValueTargetingMeEntity in highValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting && t.Distance < Settings.Instance.DroneControlRange))
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + highValueTargetingMeEntity.Name + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + highValueTargetingMeEntity.GroupId + "]", Logging.Debug);
                     // Have we reached the limit of high value targets?
@@ -1134,11 +1153,11 @@ namespace Questor.Modules.Combat
 
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in lowValueTargetingMe)", Logging.Debug);
 
-            if (lowValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting))
+            if (lowValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Distance < Settings.Instance.DroneControlRange))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + highValueTargetingMe.Count() + "] lowValueTargetingMe targets", Logging.Debug);
 
-                foreach (EntityCache lowValueTargetingMeEntity in lowValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting))
+                foreach (EntityCache lowValueTargetingMeEntity in lowValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting && t.Distance < Settings.Instance.DroneControlRange))
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + lowValueTargetingMeEntity.Name + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + lowValueTargetingMeEntity.GroupId + "]", Logging.Debug);
 
@@ -1165,7 +1184,7 @@ namespace Questor.Modules.Combat
             }
 
 
-            if (!highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting) && !lowValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting))
+            if (!highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange) && !lowValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange))
             {
                 // Build a list of things not yet targeting me
                 NotYetTargetingMe = Cache.Instance.Entities.Where(t => t.IsNpc
@@ -1174,7 +1193,7 @@ namespace Questor.Modules.Combat
                                                                 && (!t.IsTargeting && !t.IsTarget)
                                                                 && t.CategoryId == (int)CategoryID.Entity
                                                                 && !t.IsContainer
-                                                                && t.Distance < Cache.Instance.MaxRange
+                                                                && t.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                                                                 && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
                                                                 && Cache.Instance.InMission
                                                                 && !t.IsBadIdea
@@ -1184,6 +1203,7 @@ namespace Questor.Modules.Combat
                                                                 && !t.IsStation)
                                                                 .OrderBy(t => t.Distance)
                                                                 .ToList();
+
                 if (NotYetTargetingMe.Any())
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
@@ -1273,7 +1293,7 @@ namespace Questor.Modules.Combat
                             //
                             
                             if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                                && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double) Distance.OnGridWithMe
+                                && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < Cache.Instance.MaxRange
                                 && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
                             {
                                 ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);

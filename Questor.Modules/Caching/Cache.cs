@@ -1144,14 +1144,10 @@ namespace Questor.Modules.Caching
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                         //&& !e.IsTarget
-                                                        && e.Distance < Cache.Instance.MaxRange
-                                                        && e.Distance < (double)Distance.OnGridWithMe
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC
                                                         && !e.IsEntityIShouldLeaveAlone
-                                                        && !e.IsBadIdea
-                                                        && !e.IsCelestial
-                                                        && !e.IsAsteroid
+                                                        && (!e.IsBadIdea || e.IsAttacking)
                                                         && !e.IsLargeCollidable
                                                         && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
                                                         )
@@ -1207,39 +1203,6 @@ namespace Questor.Modules.Caching
                 }
 
                 return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
-            }
-        }
-
-        public IEnumerable<EntityCache> OngridKillableNPCs
-        {
-            get
-            {
-                if (!InSpace)
-                {
-                    return new List<EntityCache>();
-                }
-
-                if (_ongridKillableNPCs == null)
-                {
-                    _ongridKillableNPCs = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e =>
-                                                              e.IsTarget
-                                                          &&  e.IsValid
-                                                          &&  e.CategoryId == (int)CategoryID.Entity
-                                                          && (e.IsNpc || e.IsNpcByGroupID)
-                                                          && !e.IsContainer
-                                                          && !e.IsFactionWarfareNPC
-                                                          && !e.IsEntityIShouldLeaveAlone
-                                                          && !e.IsBadIdea
-                                                          && e.GroupId != (int)Group.LargeColidableStructure)
-                                                          .ToList();
-                }
-
-                if (_ongridKillableNPCs != null)
-                {
-                    return _ongridKillableNPCs;
-                }
-
-                return null;
             }
         }
 
@@ -2700,7 +2663,7 @@ namespace Questor.Modules.Caching
                 // Is our current target any non PriorityKilltarget E-war priority target?
                 //
                 PrimaryWeaponPriority currentTargetPriority = PrimaryWeaponPriority.NotUsed;
-                if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
+                if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.Entity.Distance < Cache.Instance.MaxRange && pt.EntityID == currentTarget.Id))
                 {
                     if ((!currentTarget.IsTooCloseTooFastTooSmallToHit && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                         || string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
@@ -2746,7 +2709,7 @@ namespace Questor.Modules.Caching
                 currentTargetPriority = PrimaryWeaponPriority.NotUsed;
                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase) || (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase) && Settings.Instance.DronesKillHighValueTargets))
                 {
-                    if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
+                    if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.Entity.Distance < Cache.Instance.MaxRange && pt.EntityID == currentTarget.Id))
                     {
                         currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget 
                                                                                       && t.EntityID == currentTarget.Id)
@@ -2793,7 +2756,7 @@ namespace Questor.Modules.Caching
 
                 if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (_dronePriorityTargets.Any(pt => pt.Entity.IsTarget && pt.EntityID == currentTarget.Id))
+                    if (_dronePriorityTargets.Any(pt => pt.Entity.IsTarget && pt.Entity.Distance < Settings.Instance.DroneControlRange && pt.EntityID == currentTarget.Id))
                     {
                         currentTargetDronePriority = _dronePriorityTargets.Where(t => t.EntityID == currentTarget.Id)
                                                                           .Select(pt => pt.DronePriority)
@@ -2902,7 +2865,7 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget)
+                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget && p.Entity.Distance < Cache.Instance.MaxRange)
                                                                             .OrderBy(pt => pt.Entity.IsInOptimalRange)
                                                                             .ThenBy(pt => pt.PrimaryWeaponPriority)
                                                                             .ThenBy(pt => pt.Entity.Distance)
@@ -2941,7 +2904,7 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget)
+                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget && d.Entity.Distance < Settings.Instance.DroneControlRange)
                                                            .OrderBy(pt => pt.DronePriority)
                                                            .ThenBy(pt => pt.Entity.Distance)
                                                            .Select(pt => pt.Entity).FirstOrDefault();
@@ -2976,7 +2939,8 @@ namespace Questor.Modules.Caching
             {
                 if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)
                   && currentTarget.IsTarget 
-                  && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate))
+                  && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
+                  && currentTarget.Distance < Settings.Instance.DroneControlRange)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
@@ -2989,8 +2953,8 @@ namespace Questor.Modules.Caching
 
                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)
                                     && ((!Cache.Instance.UseDrones && currentTarget.IsNPCFrigate)
-                                        || !currentTarget.IsNPCFrigate
-                                        || (currentTarget.IsNPCFrigate && !currentTarget.IsTooCloseTooFastTooSmallToHit)))
+                                        || (!currentTarget.IsNPCFrigate &&currentTarget.Distance < Cache.Instance.MaxRange)
+                                        || (currentTarget.IsNPCFrigate && !currentTarget.IsTooCloseTooFastTooSmallToHit && currentTarget.Distance < Cache.Instance.MaxRange)))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
@@ -3003,56 +2967,32 @@ namespace Questor.Modules.Caching
                 }
             }
 
+            //
             // Get the closest high value target
+            //
             EntityCache highValueTarget = null;
-            
-            if (!_potentialTargets.Any())
+
+            if (potentialCombatTargets.Any())
             {
-                highValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
-                                                          && t.TargetValue.HasValue
-                                                          && t.Distance < distance)
-                                                          .OrderBy(t => !t.IsNPCFrigate)
-                                                          .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                          .ThenBy(t => t.IsInOptimalRange)
-                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                                                          .ThenBy(OrderByLowestHealth())
-                                                          .ThenBy(t => t.Distance)
-                                                          .FirstOrDefault();
-            }
-            else
-            {
-                highValueTarget = _potentialCombatTargets.Where(t => t.IsTarget
-                                                          && t.TargetValue.HasValue
-                                                          && t.Distance < distance)
-                                                          .OrderBy(t => !t.IsNPCFrigate)
-                                                          .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                          .ThenBy(t => t.IsInOptimalRange)
-                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                                                          .ThenBy(OrderByLowestHealth())
-                                                          .ThenBy(t => t.Distance)
-                                                          .FirstOrDefault();
+                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue)
+                                                        .OrderBy(t => !t.IsNPCFrigate)
+                                                        .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                        .ThenBy(t => t.IsInOptimalRange)
+                                                        .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                        .ThenBy(OrderByLowestHealth())
+                                                        .ThenBy(t => t.Distance)
+                                                        .FirstOrDefault();
             }
             
+            //
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
+            //
             EntityCache lowValueTarget = null;
-            if (!_potentialTargets.Any())
+            if (potentialCombatTargets.Any())
             {
-                lowValueTarget = OngridKillableNPCs.Where(t => t.IsTarget
-                                                          && !t.TargetValue.HasValue 
-                                                          && t.Distance < distance 
-                                                          && !t.IsTooCloseTooFastTooSmallToHit)
+                lowValueTarget = potentialCombatTargets.Where(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                           .OrderBy(t => t.IsNPCFrigate)
-                                                          .ThenBy(OrderByLowestHealth())
-                                                          .ThenBy(t => t.Distance)
-                                                          .FirstOrDefault();
-            }
-            else
-            {
-                lowValueTarget = _potentialTargets.Where(t => t.IsTarget
-                                                          && !t.TargetValue.HasValue 
-                                                          && t.Distance < distance 
-                                                          && !t.IsTooCloseTooFastTooSmallToHit)
-                                                          .OrderBy(t => t.IsNPCFrigate)
+                                                          .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                           .ThenBy(OrderByLowestHealth())
                                                           .ThenBy(t => t.Distance)
                                                           .FirstOrDefault();
@@ -3061,13 +3001,10 @@ namespace Questor.Modules.Caching
 
             if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) //do not exclude anything in range if drones are looking for a target
             {
-                lowValueTarget = OngridKillableNPCs.Where(t =>  t.IsTarget 
-                                                          && !t.TargetValue.HasValue
-                                                          && t.Distance < distance)
-                                                          .OrderBy(t => t.IsNPCFrigate)
-                                                          .ThenBy(OrderByLowestHealth())
-                                                          .ThenBy(t => t.Distance)
-                                                          .FirstOrDefault();
+                lowValueTarget = potentialCombatTargets.OrderBy(t => t.IsNPCFrigate)
+                                                       .ThenBy(OrderByLowestHealth())
+                                                       .ThenBy(t => t.Distance)
+                                                       .FirstOrDefault();
             }
 
             if (lowValueFirst && lowValueTarget != null)
@@ -3078,7 +3015,7 @@ namespace Questor.Modules.Caching
                         Cache.Instance.PreferredDroneTarget = lowValueTarget;
 
                 if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
+                        Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
 
                 return true;
             }

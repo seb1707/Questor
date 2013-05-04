@@ -2975,13 +2975,13 @@ namespace Questor.Modules.Caching
             if (potentialCombatTargets.Any())
             {
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue)
-                                                        .OrderBy(t => !t.IsNPCFrigate)
-                                                        .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                        .ThenBy(t => t.IsInOptimalRange)
-                                                        .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                                                        .ThenBy(OrderByLowestHealth())
-                                                        .ThenBy(t => t.Distance)
-                                                        .FirstOrDefault();
+                    .OrderBy(t => !t.IsNPCFrigate)
+                    .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
+                    .ThenBy(t => t.IsInOptimalRange)
+                    .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                    .ThenBy(OrderByLowestHealth())
+                    .ThenBy(t => t.Distance)
+                    .FirstOrDefault();
             }
             
             //
@@ -2991,46 +2991,47 @@ namespace Questor.Modules.Caching
             if (potentialCombatTargets.Any())
             {
                 lowValueTarget = potentialCombatTargets.Where(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                          .OrderBy(t => t.IsNPCFrigate)
-                                                          .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                                                          .ThenBy(OrderByLowestHealth())
-                                                          .ThenBy(t => t.Distance)
-                                                          .FirstOrDefault();
-            }
-            
+                    .OrderBy(t => t.IsNPCFrigate)
+                    .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                    .ThenBy(OrderByLowestHealth())
+                    .ThenBy(t => t.Distance)
+                    .FirstOrDefault();
 
-            if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) //do not exclude anything in range if drones are looking for a target
-            {
-                lowValueTarget = potentialCombatTargets.OrderBy(t => t.IsNPCFrigate)
-                                                       .ThenBy(OrderByLowestHealth())
-                                                       .ThenBy(t => t.Distance)
-                                                       .FirstOrDefault();
-            }
 
-            if (lowValueFirst && lowValueTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-                
-                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                //do not exclude anything in range if drones are looking for a target
+                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) 
+                {
+                    lowValueTarget = potentialCombatTargets.OrderBy(t => t.IsNPCFrigate)
+                        .ThenBy(OrderByLowestHealth())
+                        .ThenBy(t => t.Distance)
+                        .FirstOrDefault();
+                }
+
+                if (lowValueFirst && lowValueTarget != null)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
+
+                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                         Cache.Instance.PreferredDroneTarget = lowValueTarget;
 
-                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                         Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
 
-                return true;
-            }
+                    return true;
+                }
 
-            if (!lowValueFirst && highValueTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
-                
-                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                if (!lowValueFirst && highValueTarget != null)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
+
+                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
                         Cache.Instance.PreferredDroneTarget = lowValueTarget;
 
-                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                         Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
 
-                return true;
+                    return true;
+                }
             }
 
             EntityCache LowOrHighValueTarget = null;

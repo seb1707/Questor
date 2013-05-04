@@ -1287,7 +1287,7 @@ namespace Questor.Modules.Combat
                             //
                             // run GetBestTarget here (every x seconds), GetBestTarget also runs in CombatMissionCtrl (but only once per tick, total)
                             //
-                            if (!Cache.Instance.InMission) Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.WeaponRange, false, "Combat");
+                            if (!Cache.Instance.InMission) Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.MaxRange, false, "Combat");
                             //
                             // GetBestTarget sets Cache.Instance.PreferredPrimaryWeaponTarget (or for drones in drone.cs: Cache.Instance.PreferredPrimaryWeaponTarget) 
                             //

@@ -114,14 +114,14 @@ namespace Questor.Modules.Activities
 
             if (target != null)
             {
+                // Reset timeout
+                _clearPocketTimeout = null;
+
                 //panic handles adding any priority targets and combat will prefer to kill any priority targets
                 if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
                 {
                     if (!Combat.ReloadAll(target)) return;
                 }
-
-                // Reset timeout
-                _clearPocketTimeout = null;
 
                 //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
                 
@@ -488,7 +488,7 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure 
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
-            // Or is there a non-frigate target that is targeting us?
+            // Or is there a target that is targeting us?
             if (!targets.Any())
             {
                 EntityCache target = Cache.Instance.TargetedBy.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
@@ -499,7 +499,7 @@ namespace Questor.Modules.Activities
                                                             && !t.IsEntityIShouldLeaveAlone
                                                             && (!t.IsBadIdea || t.IsAttacking)
                                                             && t.GroupId != (int) Group.LargeColidableStructure
-                                                            && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                            && !(t.IsDronePriorityTarget) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())
                                                             && t.Distance < (double)Distance.OnGridWithMe)
                                                            .OrderBy(t => !t.IsNPCFrigate)
@@ -515,7 +515,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            // Or is there any non-frigate target?
+            // Or is there any target?
             if (!targets.Any())
             {
                 EntityCache target = Cache.Instance.Entities.Where(t => (!t.IsSentry || Settings.Instance.KillSentries)
@@ -525,7 +525,7 @@ namespace Questor.Modules.Activities
                                                           && (t.IsNpc || t.IsNpcByGroupID)
                                                           && t.CategoryId == (int) CategoryID.Entity
                                                           && t.GroupId != (int) Group.LargeColidableStructure
-                                                          && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
+                                                          && !(t.IsDronePriorityTarget) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                           && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
                                                           .OrderBy(t => !t.IsNPCFrigate)
                                                           .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)

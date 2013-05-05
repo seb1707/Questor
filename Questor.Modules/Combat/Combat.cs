@@ -1293,9 +1293,13 @@ namespace Questor.Modules.Combat
                                 && Cache.Instance.PreferredPrimaryWeaponTarget.Distance < Cache.Instance.MaxRange
                                 && Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
                             {
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
                                 ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
                                 ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
                                 ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
                                 ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
                                 return;
                             }

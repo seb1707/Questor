@@ -882,7 +882,7 @@ namespace Questor.Modules.Combat
             {
                 if (!TargetingMe.Any())
                 {
-                    NotYetTargetingMe = Cache.Instance.potentialCombatTargets.OrderBy(t => t.IsTargetedBy).ToList();
+                    NotYetTargetingMe = Cache.Instance.potentialCombatTargets.OrderBy(t => !t.IsTargetedBy).ToList();
 
                     //uhm, wtf! the below is very misleading #fixme
                     highValueTargetingMe = NotYetTargetingMe.Where(t => t.TargetValue.HasValue)

@@ -853,30 +853,20 @@ namespace Questor.Modules.Combat
 
             #region Build a list of things targeting me
             // Build a list of things targeting me
-            TargetingMe = Cache.Instance.TargetedBy.Where(t => (t.IsNpc || t.IsAttacking)
-                                                            && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                            && t.Distance < Cache.Instance.MaxLockedTargets
-                                                            && (!t.IsBadIdea || t.IsAttacking)
-                                                            && !t.IsEntityIShouldLeaveAlone
-                                                            && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
-                                                            //&& targets.All(c => c.Id != t.Id) 
+            TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsInMissionTargetingMeAndNotYetTargeted
+                                                            && t.Distance < Cache.Instance.MaxRange)
+                                                            .ToList();
                                                             
 
             List<EntityCache> highValueTargetingMe;
-            highValueTargetingMe = TargetingMe.Where(t => !t.IsTarget 
-                                                       && !t.IsTargeting
-                                                       && (t.TargetValue.HasValue
-                                                       && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                       && (t.IsTarget || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == t.Id)) || t.IsAttacking))
+            highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue))
                                                .OrderBy(t => !t.IsNPCFrigate)
                                                .ThenBy(t => !t.IsFrigate)
                                                .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                .ThenBy(t => t.Distance).ToList();
 
             List<EntityCache> lowValueTargetingMe;
-            lowValueTargetingMe = TargetingMe.Where(t => !t.IsTarget 
-                                                      && !t.IsTargeting)
-                                             .OrderBy(t => t.IsNPCFrigate)
+            lowValueTargetingMe = TargetingMe.OrderBy(t => t.IsNPCFrigate)
                                              .ThenBy(t => t.IsFrigate)
                                              .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                              .ThenBy(t => t.Distance).ToList();

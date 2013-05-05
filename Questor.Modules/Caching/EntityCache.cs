@@ -583,13 +583,34 @@ namespace Questor.Modules.Caching
             get { return _directEntity.IsPc; }
         }
 
+        public bool IsInMissionTargetingMeAndNotYetTargeted
+        {
+            get
+            {
+                bool result = false;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && (!IsTargeting && !IsTarget && IsTargetedBy)
+                           && !IsContainer
+                           && CategoryId == (int)CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                    //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           && !IsLargeCollidable
+                           && !IsStation);
+                return result;
+            }
+        }
+
         public bool IsInMissionNotYetTargetingMeAndNotYetTargeted
         {
             get
             {
                 bool result = false;
                 result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
-                           && TargetValue.HasValue
                            && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                            && (!IsTargeting && !IsTarget && !IsTargetedBy)
                            && !IsContainer

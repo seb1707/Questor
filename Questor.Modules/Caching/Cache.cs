@@ -105,11 +105,6 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _potentialCombatTargets;
 
         /// <summary>
-        ///   _target Entities cache (all on grid entities that we can kill without penalty) //cleared in InvalidateCache 
-        /// </summary>
-        private IEnumerable<EntityCache> _ongridKillableNPCs;
-
-        /// <summary>
         ///   Safespot Bookmark cache (all bookmarks that start with the defined safespot prefix) //cleared in InvalidateCache 
         /// </summary>
         private List<DirectBookmark> _safeSpotBookmarks;
@@ -1836,7 +1831,6 @@ namespace Questor.Modules.Caching
                 _maxLockedTargets = 0;
                 _modules = null;
                 _objects = null;
-                _ongridKillableNPCs = null;
                 _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
                 _dronePriorityTargets.ForEach(pt => pt.ClearCache());
                 _safeSpotBookmarks = null;

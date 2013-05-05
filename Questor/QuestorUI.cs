@@ -295,6 +295,9 @@ namespace Questor
                         PrimaryWeaponsPriorityTargetListBox.DataSource = Cache.Instance._primaryWeaponPriorityTargets;
                         DronePriorityTargetListBox.DataSource = null;
                         DronePriorityTargetListBox.DataSource = Cache.Instance._dronePriorityTargets;
+                        lvlCurrentPrimaryWeaponsTarget.Text = Cache.Instance.PreferredPrimaryWeaponTarget.ToString();
+                        lblCurrentDroneTarget.Text = Cache.Instance.PreferredDroneTarget.ToString();
+
                     }
                 }
                 catch (Exception ex)

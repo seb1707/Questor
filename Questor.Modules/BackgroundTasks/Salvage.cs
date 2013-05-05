@@ -411,7 +411,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 Logging.Log("Salvage", "Locking [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "][" + Math.Round(wreck.Distance / 1000, 0) + "k away]", Logging.White);
 
-                wreck.LockTarget();
+                wreck.LockTarget("Salvage");
                 wreckTargets.Add(wreck);
                 wrecksProcessedThisTick++;
                 if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.Teal);

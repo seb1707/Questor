@@ -2872,8 +2872,8 @@ namespace Questor.Modules.Caching
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if (currentTarget.IsInOptimalRange
-                 && ((!currentTarget.IsFrigate && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) 
-                   || (currentTarget.IsFrigate && string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
+                 && (((!currentTarget.IsFrigate && !currentTarget.IsNPCFrigate) && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                   || ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) && string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
                  && currentTarget.IsTarget
                  && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage
                  && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))

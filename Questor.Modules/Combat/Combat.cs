@@ -845,7 +845,6 @@ namespace Questor.Modules.Combat
                                                                                         && (t.IsNPCFrigate || t.IsFrigate)))
                                                                                         .OrderBy(t => t.IsNPCFrigate)
                                                                                         .ThenBy(t => t.Distance)
-                                                                                        .ThenBy(t => t.Distance)
                                                                               .ToList();
 
             #endregion Get a list of current high and low value targets
@@ -862,6 +861,7 @@ namespace Questor.Modules.Combat
                                                 && (!t.IsNPCFrigate || !t.IsFrigate))
                                                .OrderBy(t => !t.IsNPCFrigate)
                                                .ThenBy(t => !t.IsFrigate)
+                                               .ThenBy(t => !t.IsNPCFrigate)
                                                //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                .ThenBy(t => t.Distance).ToList();
 
@@ -869,6 +869,7 @@ namespace Questor.Modules.Combat
             lowValueTargetingMe = TargetingMe.Where(t => (t.IsNPCFrigate || t.IsFrigate))
                                              .OrderBy(t => t.IsNPCFrigate)
                                              .ThenBy(t => t.IsFrigate)
+                                             .ThenBy(t => t.IsNPCFrigate)
                                              .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                              .ThenBy(t => t.Distance).ToList();
 
@@ -1143,7 +1144,11 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    if (highValueTargetingMeEntity != null && highValueTargetingMeEntity.Distance < Cache.Instance.WeaponRange && highValueTargetingMeEntity.LockTarget("TargetCombatants.HighValueTargetingMeEntity"))
+                    if (highValueTargetingMeEntity != null 
+                        && !highValueTargetingMeEntity.IsTarget 
+                        && !highValueTargetingMeEntity.IsTargeting 
+                        && highValueTargetingMeEntity.Distance < Cache.Instance.WeaponRange 
+                        && highValueTargetingMeEntity.LockTarget("TargetCombatants.HighValueTargetingMeEntity"))
                     {
                         Logging.Log("Combat", "Targeting high value target [" + highValueTargetingMeEntity.Name + "][ID: " + Cache.Instance.MaskedID(highValueTargetingMeEntity.Id) + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargetsTargeted.Count + "]", Logging.Teal);
                         //highValueTargets.Add(highValueTargetingMeEntity);
@@ -1177,7 +1182,11 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    if (lowValueTargetingMeEntity != null && lowValueTargetingMeEntity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
+                    if (lowValueTargetingMeEntity != null 
+                        && !lowValueTargetingMeEntity.IsTarget 
+                        && !lowValueTargetingMeEntity.IsTargeting
+                        && lowValueTargetingMeEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance 
+                        && lowValueTargetingMeEntity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
                     {
                         Logging.Log("Combat", "Targeting low  value target [" + lowValueTargetingMeEntity.Name + "][ID: " + Cache.Instance.MaskedID(lowValueTargetingMeEntity.Id) + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 0) + "k away] lowValueTargets.Count [" + lowValueTargetsTargeted.Count + "]", Logging.Teal);
                         //lowValueTargets.Add(lowValueTargetingMeEntity);
@@ -1206,7 +1215,11 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
 
                     EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
-                    if (TargetThisNotYetAggressiveNPC != null && !TargetThisNotYetAggressiveNPC.IsTarget && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
+                    if (TargetThisNotYetAggressiveNPC != null 
+                        && !TargetThisNotYetAggressiveNPC.IsTarget
+                        && !TargetThisNotYetAggressiveNPC.IsTargeting
+                        && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.WeaponRange
+                        && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
                     {
                         Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away] potentiallowValueTargets.Count [" + potentialLowValueTargets.Count + "] lowValueTargets.Count [" + lowValueTargetsTargeted.Count + "]", Logging.Teal);
                         //lowValueTargets.Add(TargetThisNotYetAggressiveNPC);

@@ -216,7 +216,7 @@ namespace Questor.Modules.BackgroundTasks
                             //
                             // if we have AddWarpScramblersToPrimaryWeaponsPriorityTargetList set to true then only use primary weapons onwarp scramblers if the scrambler is not a frigate (rare)
                             //
-                            if ((Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList) || !EntityIsWarpScramblingMe.IsFrigate || !Cache.Instance.UseDrones)
+                            if ((Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList) || !EntityIsWarpScramblingMe.IsNPCFrigate || !Cache.Instance.UseDrones)
                             {
                                 //Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");

@@ -826,7 +826,7 @@ namespace Questor.Modules.Combat
             List<EntityCache> potentialHighValueTargets = Cache.Instance.potentialCombatTargets.Where(t => 
                                                                                (t.TargetValue.HasValue && (!t.IsTarget || !t.IsTargeting))
                                                                                && Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => !pt.IsTarget && !pt.IsTargeting && pt.Id == t.Id)
-                                                                               && (!t.IsNPCFrigate || !t.IsFrigate))
+                                                                               && (!t.IsNPCFrigate && !t.IsFrigate))
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
             List<EntityCache> potentialLowValueTargets = Cache.Instance.potentialCombatTargets.Where(t => (!t.IsTarget || !t.IsTargeting)
@@ -837,7 +837,7 @@ namespace Questor.Modules.Combat
             List<EntityCache> highValueTargetsTargeted = Cache.Instance.combatTargets.Where(t => (t.TargetValue.HasValue
                                                                                && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                                                && (t.IsTarget || t.IsTargeting)
-                                                                               && (!t.IsNPCFrigate || !t.IsFrigate)))
+                                                                               && (!t.IsNPCFrigate && !t.IsFrigate)))
                                                                                .OrderBy(t => t.IsNPCBattleship).ToList();
 
             List<EntityCache> lowValueTargetsTargeted = Cache.Instance.combatTargets.Where(t => ((!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
@@ -858,7 +858,7 @@ namespace Questor.Modules.Combat
 
             List<EntityCache> highValueTargetingMe;
             highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue)
-                                                && (!t.IsNPCFrigate || !t.IsFrigate))
+                                                && (!t.IsNPCFrigate && !t.IsFrigate))
                                                .OrderBy(t => !t.IsNPCFrigate)
                                                .ThenBy(t => !t.IsFrigate)
                                                .ThenBy(t => !t.IsNPCFrigate)
@@ -888,7 +888,7 @@ namespace Questor.Modules.Combat
 
                     //uhm, wtf! the below is very misleading #fixme
                     highValueTargetingMe = NotYetTargetingMe.Where(t => t.TargetValue.HasValue
-                                                                   && (!t.IsNPCFrigate || !t.IsFrigate))
+                                                                   && (!t.IsNPCFrigate && !t.IsFrigate))
                                                             .OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                             .ThenBy(t => t.Distance)
                                                             .ToList();

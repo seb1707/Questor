@@ -526,7 +526,7 @@ namespace Questor.Modules.Activities
                                                           && t.GroupId != (int) Group.LargeColidableStructure
                                                           //&& !(t.IsDronePriorityTarget) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                           && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                          .OrderBy(t => !t.IsNPCFrigate || !t.IsFrigate)
+                                                          .OrderBy(t => !t.IsNPCFrigate && !t.IsFrigate)
                                                           .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.IsInOptimalRange)
                                                           //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)

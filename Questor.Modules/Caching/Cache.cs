@@ -3015,7 +3015,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate || !t.IsFrigate))
+                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate))
                     .OrderBy(t => !t.IsNPCFrigate)
                     .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenBy(t => t.IsInOptimalRange)
@@ -3056,8 +3056,16 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
 
-                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredDroneTarget = lowValueTarget;
+                    if (lowValueTarget != null)
+                    {
+                        if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredDroneTarget = lowValueTarget;
+                    }
+                    else
+                    {
+                        if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredDroneTarget = highValueTarget;
+                    }
 
                     if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                         Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
@@ -3067,21 +3075,30 @@ namespace Questor.Modules.Caching
             }
 
             EntityCache LowOrHighValueTarget = null;
+            EntityCache HighOrLowValueTarget = null;
                 
             try
             {
                 LowOrHighValueTarget = lowValueTarget ?? highValueTarget;
+                HighOrLowValueTarget = highValueTarget ?? lowValueTarget;
                 // Return either one or the other
                 
-                if (LowOrHighValueTarget != null)
+                if (LowOrHighValueTarget != null && Cache.Instance.UseDrones)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "] GroupID [" + LowOrHighValueTarget.GroupId + "]", Logging.Debug);
                     
                     if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredDroneTarget = lowValueTarget;
+                        Cache.Instance.PreferredDroneTarget = LowOrHighValueTarget;
+                    
+                    return true;
+                }
+
+                if (HighOrLowValueTarget != null)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "HighOrLowValueTarget is [" + HighOrLowValueTarget.Name + "][" + Math.Round(HighOrLowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(HighOrLowValueTarget.Id) + "] GroupID [" + HighOrLowValueTarget.GroupId + "]", Logging.Debug);
 
                     if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
+                        Cache.Instance.PreferredPrimaryWeaponTarget = HighOrLowValueTarget;
 
                     return true;
                 }

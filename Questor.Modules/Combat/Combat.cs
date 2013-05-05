@@ -123,7 +123,7 @@ namespace Questor.Modules.Combat
             {
                 if (ammo != null && entity != null)
                 {
-                    ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();    
+                    ammo = correctAmmoIncargo.Where(a => a.Range > entity.Distance).OrderBy(a => a.Range).FirstOrDefault();
                 }
             }
             catch (Exception exception)
@@ -372,7 +372,16 @@ namespace Questor.Modules.Combat
         public bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
         {
             if (isWeapon && !entity.IsTarget)
+            {
+                Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance/1000, 2) + "] which is currently not locked!", Logging.Debug);
                 return false;
+            }
+
+            if (isWeapon && entity.Distance > Cache.Instance.WeaponRange)
+            {
+                Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 2) + "] which is out of weapons range!", Logging.Debug);
+                return false;
+            }
 
             // We have changed target, allow activation
             if (entity.Id != module.LastTargetId)
@@ -447,9 +456,6 @@ namespace Questor.Modules.Combat
                 Logging.Log("TargetInfo", "          Distance: " + weaponTarget.Distance, Logging.Teal);
                 Logging.Log("TargetInfo", "           GroupID: " + weaponTarget.GroupId, Logging.Teal);
                 Logging.Log("TargetInfo", "          Velocity: " + weaponTarget.Velocity, Logging.Teal);
-                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
-                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
-                Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
                 Logging.Log("TargetInfo", "      IsNPCFrigate: " + weaponTarget.IsNPCFrigate, Logging.Teal);
                 Logging.Log("TargetInfo", "      IsNPCCruiser: " + weaponTarget.IsNPCCruiser, Logging.Teal);
                 Logging.Log("TargetInfo", "IsNPCBattlecruiser: " + weaponTarget.IsNPCBattlecruiser, Logging.Teal);
@@ -575,7 +581,7 @@ namespace Questor.Modules.Combat
                 _weaponNumber++;
 
                 // Are we reloading, deactivating or changing ammo?
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || !target.IsTarget)
                 {
                     if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is reloading, deactivating or changing ammo", Logging.Teal);
                     continue;
@@ -585,7 +591,7 @@ namespace Questor.Modules.Combat
                 if (weapon.IsActive)
                 {
                     if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is active already", Logging.Teal);
-                    if (weapon.TargetId != target.Id)
+                    if (weapon.TargetId != target.Id && target.IsTarget)
                     {
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is shooting at the wrong target: deactivating", Logging.Teal);
                         weapon.Click();
@@ -759,9 +765,6 @@ namespace Questor.Modules.Combat
 
         /// <summary> Target combatants
         /// </summary>
-        /// <remarks>
-        ///   This only targets ships that are targeting you
-        /// </remarks>
         private void TargetCombatants()
         {
             // When in warp we should not try to target anything
@@ -789,10 +792,12 @@ namespace Questor.Modules.Combat
                 Cache.Instance.TargetingIDs.Clear();
                 Logging.Log("Combat", "We are no longer jammed, retargeting", Logging.Teal);
             }
+
             _isJammed = false;
 
             if (!Cache.Instance.OpenCargoHold("Combat.TargetCombatants")) return;
 
+            //
             // What is the range that we can target at
 
             // Get a list of combat targets (combine targets + targeting)
@@ -983,7 +988,7 @@ namespace Questor.Modules.Combat
                     continue;
                 }
 
-                if (entity.LockTarget())
+                if (entity.LockTarget("TargetCombatants.DronePriorityEntity"))
                 {
                     Logging.Log("Combat", "Targeting drone priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
                     highValueTargets.Add(entity);
@@ -1011,7 +1016,7 @@ namespace Questor.Modules.Combat
                     continue;
                 }
 
-                if (entity.LockTarget())
+                if (entity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
                 {
                     Logging.Log("Combat", "Targeting primary weapon priority target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
                     highValueTargets.Add(entity);
@@ -1035,7 +1040,7 @@ namespace Questor.Modules.Combat
                     continue;
                 }
 
-                if (entity.LockTarget())
+                if (entity.LockTarget("TargetCombatants.highValueTargetingMeEntity"))
                 {
                     Logging.Log("Combat", "Targeting high value target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargets.Count + "]", Logging.Teal);
                     highValueTargets.Add(entity);
@@ -1059,7 +1064,7 @@ namespace Questor.Modules.Combat
                     continue;
                 }
 
-                if (entity.LockTarget())
+                if (entity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
                 {
                     Logging.Log("Combat", "Targeting low  value target [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] lowValueTargets.Count [" + lowValueTargets.Count + "]", Logging.Teal);
                     lowValueTargets.Add(entity);

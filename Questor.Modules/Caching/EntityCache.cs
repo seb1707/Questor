@@ -1118,6 +1118,16 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsCustomsOffice
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.CustomsOffice;
+                return result;
+            }
+        }
+
         public bool IsCelestial
         {
             get

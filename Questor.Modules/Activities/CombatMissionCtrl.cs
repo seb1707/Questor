@@ -126,7 +126,7 @@ namespace Questor.Modules.Activities
                     {
                         if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distance.OnGridWithMe)", Logging.Debug);
                             
-                        if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)
+                        if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate || !Cache.Instance.UseDrones)
                         {
                             if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsNPCFrigate)", Logging.Debug);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] { Cache.Instance.PreferredPrimaryWeaponTarget }, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);

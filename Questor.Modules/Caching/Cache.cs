@@ -590,6 +590,23 @@ namespace Questor.Modules.Caching
             get { return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange); }
         }
 
+        public double LowValueTargetsHaveToBeWithinDistance
+        {
+            get
+            {
+                if (Cache.Instance.UseDrones && Settings.Instance.DroneControlRange != 0)
+                {
+                    return Settings.Instance.DroneControlRange;
+                }
+                
+                //
+                // if we are not using drones return min range (Weapons or targeting range whatever is lower)
+                //
+                return Cache.Instance.MaxRange;
+                
+            }
+        }
+
         /// <summary>
         ///   Returns the maximum weapon distance
         /// </summary>
@@ -1161,7 +1178,8 @@ namespace Questor.Modules.Caching
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC
                                                         && !e.IsEntityIShouldLeaveAlone
-                                                        && (!e.IsBadIdea || e.IsAttacking)
+                                                        && (!e.IsBadIdea || e.IsBadIdea && e.IsAttacking)
+                                                        && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                         && !e.IsLargeCollidable
                                                         && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
                                                         )
@@ -1175,6 +1193,13 @@ namespace Questor.Modules.Caching
                             List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && (e.IsNpc || e.IsNpcByGroupID)
                                                             && !e.IsTarget
+                                                            && (!e.IsBadIdea || e.IsBadIdea && e.IsAttacking)
+                                                            && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
+                                                            && !e.IsCelestial
+                                                            && !e.IsStation
+                                                            && !e.IsCustomsOffice
+                                                            && !e.IsAsteroid
+                                                            && !e.IsAsteroidBelt
                                                             && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
                                                             )
                                                             .ToList();
@@ -1199,7 +1224,7 @@ namespace Questor.Modules.Caching
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
                         }    
                     }
-
+                    
                     return _potentialCombatTargets;
                 }
 

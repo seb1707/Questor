@@ -862,7 +862,7 @@ namespace Questor.Modules.Combat
                                                 && (!t.IsNPCFrigate || !t.IsFrigate))
                                                .OrderBy(t => !t.IsNPCFrigate)
                                                .ThenBy(t => !t.IsFrigate)
-                                               .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                               //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                .ThenBy(t => t.Distance).ToList();
 
             List<EntityCache> lowValueTargetingMe;

@@ -421,7 +421,7 @@ namespace Questor.Modules.Activities
                                                                .OrderBy(t => !t.IsNPCFrigate)
                                                                .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                                .ThenBy(t => t.IsInOptimalRange)
-                                                               .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                               //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                .ThenBy(t => t.Distance)
                                                                .FirstOrDefault();
 
@@ -637,7 +637,7 @@ namespace Questor.Modules.Activities
                                                                .OrderBy(t => !t.IsNPCFrigate)
                                                                .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                                .ThenBy(t => t.IsInOptimalRange)
-                                                               .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                               //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                .ThenBy(t => t.Distance)
                                                                .FirstOrDefault();
 
@@ -664,7 +664,7 @@ namespace Questor.Modules.Activities
                                                             .OrderBy(t => !t.IsNPCFrigate)
                                                             .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                             .ThenBy(t => t.IsInOptimalRange)
-                                                            .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                            //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                             .ThenBy(t => t.Distance)
                                                             .FirstOrDefault();
 
@@ -687,7 +687,7 @@ namespace Questor.Modules.Activities
                                                          .OrderBy(t => !t.IsNPCFrigate)
                                                          .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                          .ThenBy(t => t.IsInOptimalRange)
-                                                         .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                         //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                          .ThenBy(t => t.Distance)
                                                          .FirstOrDefault();
 

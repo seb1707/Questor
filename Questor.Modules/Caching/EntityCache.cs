@@ -588,20 +588,20 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
-                result |= (IsNpc || IsNpcByGroupID) || IsAttacking;
-                result |= TargetValue.HasValue;
-                result |= !IsSentry || (IsSentry && Settings.Instance.KillSentries);
-                result |= (!IsTargeting && !IsTarget && !IsTargetedBy);
-                result |= !IsContainer;
-                result |= CategoryId == (int)CategoryID.Entity;
-                result |= Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange;
-                result |= !Cache.Instance.IgnoreTargets.Contains(Name.Trim());
-                //result |= Cache.Instance.InMission;
-                result |= (!IsBadIdea || IsAttacking);
-                result |= !IsEntityIShouldLeaveAlone;
-                result |= !IsFactionWarfareNPC;
-                result |= !IsLargeCollidable;
-                result |= !IsStation;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && TargetValue.HasValue
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && (!IsTargeting && !IsTarget && !IsTargetedBy)
+                           && !IsContainer
+                           && CategoryId == (int) CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           && !IsLargeCollidable
+                           && !IsStation);
                 return result;
             }
         }
@@ -611,20 +611,20 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
-                result |= (IsNpc || IsNpcByGroupID) || IsAttacking;
-                result |= !IsTarget;
-                result |= !IsTargeting;
-                result |= !IsSentry || (IsSentry && Settings.Instance.KillSentries);
-                result |= !IsContainer;
-                result |= CategoryId == (int)CategoryID.Entity;
-                result |= Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange;
-                result |= !Cache.Instance.IgnoreTargets.Contains(Name.Trim());
-                //result |= Cache.Instance.InMission;
-                result |= (!IsBadIdea || IsAttacking);
-                result |= !IsEntityIShouldLeaveAlone;
-                result |= !IsFactionWarfareNPC;
-                //result |= !IsLargeCollidable;
-                result |= !IsStation;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && !IsTarget
+                           && !IsTargeting
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && !IsContainer
+                           && CategoryId == (int) CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           //&& !IsLargeCollidable
+                           && !IsStation);
                 return result;
             }
         }

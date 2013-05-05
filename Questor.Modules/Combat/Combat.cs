@@ -870,7 +870,7 @@ namespace Questor.Modules.Combat
                                              .OrderBy(t => t.IsNPCFrigate)
                                              .ThenBy(t => t.IsFrigate)
                                              .ThenBy(t => t.IsNPCFrigate)
-                                             .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                             //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                              .ThenBy(t => t.Distance).ToList();
 
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] highValueTargetingMe [" + highValueTargetingMe.Count() + "]", Logging.Debug);

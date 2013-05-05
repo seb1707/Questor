@@ -3015,7 +3015,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue)
+                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate || !t.IsFrigate))
                     .OrderBy(t => !t.IsNPCFrigate)
                     .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenBy(t => t.IsInOptimalRange)
@@ -3031,10 +3031,10 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets
+                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate))
                     .OrderBy(t => t.IsNPCFrigate)
                     .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                    .ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                    //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();

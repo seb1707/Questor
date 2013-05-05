@@ -494,14 +494,14 @@ namespace Questor.Modules.Activities
                                                             && !t.IsContainer
                                                             && !t.IsFactionWarfareNPC
                                                             && !t.IsEntityIShouldLeaveAlone
-                                                            && (!t.IsBadIdea || t.IsAttacking)
+                                                            && (!t.IsBadIdea || t.IsBadIdea && t.IsAttacking)
                                                             && t.GroupId != (int) Group.LargeColidableStructure
                                                             //&& !(t.IsDronePriorityTarget) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                           .OrderBy(t => !t.IsNPCFrigate)
+                                                           .OrderBy(t => !t.IsNPCFrigate || t.IsFrigate)
                                                            .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                            .ThenBy(t => t.IsInOptimalRange)
-                                                           .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                           //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                            .ThenBy(t => t.Distance)
                                                            .FirstOrDefault();
 
@@ -522,14 +522,14 @@ namespace Questor.Modules.Activities
                                                           && !t.IsContainer
                                                           && !t.IsFactionWarfareNPC
                                                           && !t.IsEntityIShouldLeaveAlone
-                                                          && (!t.IsBadIdea || t.IsAttacking)
+                                                          && (!t.IsBadIdea || t.IsBadIdea && t.IsAttacking)
                                                           && t.GroupId != (int) Group.LargeColidableStructure
                                                           //&& !(t.IsDronePriorityTarget) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                           && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                          .OrderBy(t => !t.IsNPCFrigate)
+                                                          .OrderBy(t => !t.IsNPCFrigate || !t.IsFrigate)
                                                           .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.IsInOptimalRange)
-                                                          .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                          //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                           .ThenBy(t => t.Distance)
                                                           .FirstOrDefault();
 
@@ -551,7 +551,7 @@ namespace Questor.Modules.Activities
                                                         && !t.IsContainer
                                                         && !t.IsFactionWarfareNPC
                                                         && !t.IsEntityIShouldLeaveAlone
-                                                        && (!t.IsBadIdea || t.IsAttacking)
+                                                        && (!t.IsBadIdea || t.IsBadIdea && t.IsAttacking)
                                                         && !t.IsCelestial
                                                         && !t.IsAsteroid
                                                         && !t.IsLargeCollidable
@@ -560,7 +560,7 @@ namespace Questor.Modules.Activities
                                                         .OrderBy(t => !t.IsNPCFrigate)
                                                         .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                         .ThenBy(t => t.IsInOptimalRange)
-                                                        .ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                                                        //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                         .ThenBy(t => t.Distance)
                                                         .FirstOrDefault();
 

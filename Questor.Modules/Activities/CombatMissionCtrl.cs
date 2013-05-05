@@ -365,7 +365,7 @@ namespace Questor.Modules.Activities
                 if (target.Distance < range)
                 {
                     //panic handles adding any priority targets and combat will prefer to kill any priority targets
-                    if (_targetNull && targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
+                    if (targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
                     {
                         if (!Combat.ReloadAll(target)) return;
                     }
@@ -1182,7 +1182,7 @@ namespace Questor.Modules.Activities
                         Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                     
-                    if (_targetNull && targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
+                    if (targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
                     {
                         //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"Reload if [" + _targetNull + "] && [" + targetedby + "] == 0 AND [" + Math.Round(target.Distance, 0) + "] < [" + Cache.Instance.MaxRange + "]", Logging.teal);
                         if (!Combat.ReloadAll(target)) return;

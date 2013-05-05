@@ -2825,12 +2825,12 @@ namespace Questor.Modules.Caching
             }
 
             // Get the closest high value target
-            EntityCache highValueTarget = OngridKillableNPCs.Where(t => t.TargetValue.HasValue 
+            EntityCache highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue 
                                                           && t.Distance < distance 
                                                           && t.IsTarget).OrderBy(t => !t.IsNPCFrigate).ThenBy(t => t.IsInOptimalRange).ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
             // Get the closest low value target
-            EntityCache lowValueTarget = OngridKillableNPCs.Where(t => !t.TargetValue.HasValue 
+            EntityCache lowValueTarget = potentialCombatTargets.Where(t => !t.TargetValue.HasValue 
                                                           && t.Distance < distance 
                                                           && t.IsTarget).OrderBy(t => t.IsNPCFrigate).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 

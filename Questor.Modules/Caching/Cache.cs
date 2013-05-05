@@ -2583,10 +2583,39 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public EntityCache GetBestTarget(EntityCache currentTarget, double distance, bool lowValueFirst, string callingroutine)
         {
+            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (DateTime.UtcNow < NextGetBestCombatTarget)
+                    return null; //false;
+
+                NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+            }
+
+            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (DateTime.UtcNow < NextGetBestDroneTarget)
+                    return null; //false;
+
+                NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
+            }
+
+            //EntityCache currentTarget = null;
+            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) && Cache.Instance.CurrentWeaponTarget() != null)
+            {
+                currentTarget = Cache.Instance.CurrentWeaponTarget();
+            }
+            else if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) && TargetingCache.CurrentDronesTarget != null)
+            {
+                currentTarget = TargetingCache.CurrentDronesTarget;
+            }
+            
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
             if (currentTarget != null && !currentTarget.IsTarget)
             {
+                //
+                // if we somehow have currentTarget set to something that is not locked assume we need to assign a new target
+                //
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
                 currentTarget = null;
             }
@@ -2847,19 +2876,73 @@ namespace Questor.Modules.Caching
             }
 
             EntityCache LowOrHighValueTarget = null;
+            EntityCache HighOrLowValueTarget = null;
                 
             try
             {
                 LowOrHighValueTarget = lowValueTarget ?? highValueTarget;
+                HighOrLowValueTarget = highValueTarget ?? lowValueTarget;
                 // Return either one or the other
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "]", Logging.Debug);
+                
+                if (LowOrHighValueTarget != null && Cache.Instance.UseDrones)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "] GroupID [" + LowOrHighValueTarget.GroupId + "]", Logging.Debug);
+                    
+                    if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredDroneTarget = LowOrHighValueTarget;
+
+                    return null; //true;
+                }
+
+                if (HighOrLowValueTarget != null)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "HighOrLowValueTarget is [" + HighOrLowValueTarget.Name + "][" + Math.Round(HighOrLowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(HighOrLowValueTarget.Id) + "] GroupID [" + HighOrLowValueTarget.GroupId + "]", Logging.Debug);
+
+                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                        Cache.Instance.PreferredPrimaryWeaponTarget = HighOrLowValueTarget;
+
+                    return null; //true;
+                }
+                
+                if (Settings.Instance.DebugGetBestTarget)
+                {
+                    if (Cache.Instance.Targets.Any())
+                    {
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED BELOW", Logging.Debug);
+                        foreach (EntityCache __target in Targets)
+                        {
+                            Logging.Log("GetBestTarget: none", "Debug targets: [" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
+                        }
+                        Logging.Log("GetBestTarget: none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
+                    }
+                    
+                    if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
+                    {
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", "ALL potentialCombatTargets LISTED BELOW", Logging.Debug);
+                        foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
+                        {
+                            Logging.Log("GetBestTarget: none", "Debug entities: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
+                        }
+                        Logging.Log("GetBestTarget: none", "ALL potentialCombatTargets LISTED ABOVE", Logging.Debug);
+                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
+                    }
+                }
+
+                NextGetBestCombatTarget = DateTime.UtcNow;
+                NextGetBestDroneTarget = DateTime.UtcNow;
+                return null; //false;
             }
             catch (Exception exception)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "LowOrHighValueTarget exception [" + exception + "]", Logging.Debug);
             }
-            
-            return LowOrHighValueTarget;
+
+            NextGetBestCombatTarget = DateTime.UtcNow;
+            NextGetBestDroneTarget = DateTime.UtcNow;
+            return null; //false;
         }
 
         private void EWarEffectsOnMe()

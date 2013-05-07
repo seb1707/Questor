@@ -80,9 +80,11 @@ namespace Questor.Modules.Lookup
         public bool DebugCargoHold { get; set; }
         public bool DebugChat { get; set; }
         public bool DebugCleanup { get; set; }
+        public bool DebugClearPocket { get; set; }
         public bool DebugCourierMissions { get; set; }
         public bool DebugDecline { get; set; }
         public bool DebugDefense { get; set; }
+        public bool DebugDrones { get; set; }
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
         public bool DebugFittingMgr { get; set; }
@@ -96,6 +98,7 @@ namespace Questor.Modules.Lookup
         public bool DebugHangars { get; set; }
         public bool DebugIdle { get; set; }
         public bool DebugItemHangar { get; set; }
+        public bool DebugKillTargets { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
@@ -644,9 +647,11 @@ namespace Questor.Modules.Lookup
                 DebugCargoHold = false;
                 DebugChat = false;
                 DebugCleanup = false;
+                DebugClearPocket = false;
                 DebugCourierMissions = false;
                 DebugDecline = false;
                 DebugDefense = false;
+                DebugDrones = false;
                 DebugDroneHealth = false;
                 DebugExceptions = false;
                 DebugFittingMgr = false;
@@ -658,6 +663,7 @@ namespace Questor.Modules.Lookup
                 DebugHangars = false;
                 DebugIdle = false;
                 DebugItemHangar = false;
+                DebugKillTargets = false;
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
@@ -1118,9 +1124,11 @@ namespace Questor.Modules.Lookup
                     DebugCargoHold = (bool?)CharacterSettingsXml.Element("debugCargoHold") ?? (bool?)CommonSettingsXml.Element("debugCargoHold") ?? false;
                     DebugChat = (bool?)CharacterSettingsXml.Element("debugChat") ?? (bool?)CommonSettingsXml.Element("debugChat") ?? false;
                     DebugCleanup = (bool?)CharacterSettingsXml.Element("debugCleanup") ?? (bool?)CommonSettingsXml.Element("debugCleanup") ?? false;
+                    DebugClearPocket = (bool?)CharacterSettingsXml.Element("debugClearPocket") ?? (bool?)CommonSettingsXml.Element("debugClearPocket") ?? false;
                     DebugCourierMissions = (bool?)CharacterSettingsXml.Element("debugCourierMissions") ?? (bool?)CommonSettingsXml.Element("debugCourierMissions") ?? false;
                     DebugDecline = (bool?)CharacterSettingsXml.Element("debugDecline") ?? (bool?)CommonSettingsXml.Element("debugDecline") ?? false;
                     DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
+                    DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
                     DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
                     DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;
                     DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
@@ -1132,6 +1140,7 @@ namespace Questor.Modules.Lookup
                     DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
                     DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
                     DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
+                    DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
                     DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
                     DebugLogging = (bool?)CharacterSettingsXml.Element("debugLogging") ?? (bool?)CommonSettingsXml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;

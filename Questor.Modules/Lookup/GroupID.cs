@@ -117,6 +117,7 @@ namespace Questor.Modules.Lookup
         Merchant = 297,
         Mission_Merchant = 1006, //dread pirate scarlet
         FactionWarfareNPC = 288,
+        GasCloud = 227,
 
         Shuttle = 31,
         Industrial = 28,

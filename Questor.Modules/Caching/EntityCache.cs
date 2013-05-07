@@ -97,7 +97,19 @@ namespace Questor.Modules.Caching
             get
             {
                 if (_directEntity != null)
-                    return _directEntity.Distance;
+                {
+                    if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                    {
+                        //
+                        // if we use the formatted value everywhere we need to change ALL distances to kilometers instead of meters (which would take some time and effort)
+                        //
+                        //Double DistanceFormatted = Math.Round(_directEntity.Distance / 1000, 2);
+                        //return DistanceFormatted;
+                        return _directEntity.Distance;
+                    }
+
+                    return 0;
+                }
 
                 return 0;
             }
@@ -571,6 +583,73 @@ namespace Questor.Modules.Caching
             get { return _directEntity.IsPc; }
         }
 
+        public bool IsInMissionTargetingMeAndNotYetTargeted
+        {
+            get
+            {
+                bool result = false;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && (!IsTargeting && !IsTarget && IsTargetedBy)
+                           && !IsContainer
+                           && CategoryId == (int)CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                    //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           && !IsLargeCollidable
+                           && !IsStation);
+                return result;
+            }
+        }
+
+        public bool IsInMissionNotYetTargetingMeAndNotYetTargeted
+        {
+            get
+            {
+                bool result = false;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && (!IsTargeting && !IsTarget && !IsTargetedBy)
+                           && !IsContainer
+                           && CategoryId == (int) CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           && !IsLargeCollidable
+                           && !IsStation);
+                return result;
+            }
+        }
+
+        public bool IsTargetWeCanShootButHaveNotYetTargeted
+        {
+            get
+            {
+                bool result = false;
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                           && !IsTarget
+                           && !IsTargeting
+                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           && !IsContainer
+                           && CategoryId == (int) CategoryID.Entity
+                           && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           //&& Cache.Instance.InMission
+                           && (!IsBadIdea || IsAttacking)
+                           && !IsEntityIShouldLeaveAlone
+                           && !IsFactionWarfareNPC
+                           //&& !IsLargeCollidable
+                           && !IsStation);
+                return result;
+            }
+        }
+
         /// <summary>
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
@@ -867,6 +946,7 @@ namespace Questor.Modules.Caching
                 result |= GroupId == (int)Group.Capsule;
                 result |= GroupId == (int)Group.MissionContainer;
                 result |= GroupId == (int)Group.CustomsOffice;
+                result |= GroupId == (int)Group.GasCloud;
                 result |= IsFrigate;
                 result |= IsCruiser;
                 result |= IsBattlecruiser;
@@ -1059,6 +1139,16 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsCustomsOffice
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.CustomsOffice;
+                return result;
+            }
+        }
+
         public bool IsCelestial
         {
             get
@@ -1112,23 +1202,34 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool LockTarget()
+        public bool IsShipWithNoDroneBay
+        {
+            get
+            {
+                bool result = false;
+                result |= TypeId == (int)TypeID.Tengu;
+                result |= GroupId == (int)Group.Shuttle;
+                return result;
+            }
+        }
+
+        public bool LockTarget(string module)
         {
             // If the bad idea is attacking, attack back
             if (IsBadIdea && !IsAttacking)
             {
-                Logging.Log("EntityCache", "Attempting to target a player or concord entity! [" + Name + "]", Logging.White);
+                Logging.Log("EntityCache.LockTarget", "[" + module + "] Attempted to target a player or concord entity! [" + Name + "] - aborting", Logging.White);
                 return false;
             }
 
-            if (Distance >= 250001) //250k is the MAX targeting range in eve. 
+            if (Distance >= 250001 || Distance > Cache.Instance.DirectEve.ActiveShip.MaxTargetRange) //250k is the MAX targeting range in eve. 
             {
-                Logging.Log("EntityCache", "We tried to lock [" + Name + "] which is [" + Math.Round(Distance / 1000,2) + "k] away. Do not try to lock things that you cant possibly target", Logging.Debug);
+                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "] which is [" + Math.Round(Distance / 1000, 2) + "k] away. Do not try to lock things that you cant possibly target", Logging.Debug);
                 return false;
             }
 
             // Remove the target info (its been targeted)
-            foreach (EntityCache target in Cache.Instance.Entities.Where(e => e.IsTarget).Where(t => Cache.Instance.TargetingIDs.ContainsKey(t.Id)))
+            foreach (EntityCache target in Cache.Instance.Entities.Where(e => e.IsTarget && Cache.Instance.TargetingIDs.ContainsKey(e.Id)))
             {
                 Cache.Instance.TargetingIDs.Remove(target.Id);
             }
@@ -1141,17 +1242,46 @@ namespace Questor.Modules.Caching
                 double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                 if (seconds < 20)
                 {
-                    Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance /1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
                     return false;
                 }
             }
 
             // Only add targeting id's when its actually being targeted
-            if (_directEntity != null && _directEntity.LockTarget())
+            if (_directEntity != null)
             {
-                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
-                return true;
+                if (!_directEntity.IsTarget)
+                {
+                    if (_directEntity.Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange )
+                    {
+                        if (Cache.Instance.Targets.Count() < Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+                        {
+                            if (_directEntity.LockTarget())
+                            {
+                                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
+                                return true;
+                            }
+
+                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed (unknown reason)", Logging.White);
+                        }
+                        else
+                        {
+                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we are out of targeting slots!", Logging.White);
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is out of range!", Logging.White);
+                    }
+                }
+                else
+                {
+                    Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
+                }
+
+                return false;
             }
+            
             return false;
         }
 
@@ -1165,8 +1295,14 @@ namespace Questor.Modules.Caching
                 //}
 
                 Cache.Instance.TargetingIDs.Remove(Id);
-                _directEntity.UnlockTarget();
-                return true;
+
+                if (_directEntity.IsTarget)
+                {
+                    _directEntity.UnlockTarget();
+                    return true;
+                }
+                
+                return false;
             }
 
             return false;

@@ -108,7 +108,7 @@ namespace Questor.Modules.Activities
             return;
         }
 
-        private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(List<EntityCache> targets, double range, int targetedby, bool MoveShip)
+        private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(IEnumerable<EntityCache> targets, double range, int targetedby, bool MoveShip)
         {
             EntityCache target = targets.OrderBy(t => t.Distance).FirstOrDefault();
 

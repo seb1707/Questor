@@ -136,7 +136,7 @@ namespace Questor.Modules.Activities
                 
                 if (Cache.Instance.UseDrones) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
                 {
-                    Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), range, false, "Drones");
+                    Cache.Instance.GetBestDroneTarget(Cache.Instance.potentialCombatTargets.ToList(), range, false, "Drones");
                     if (Cache.Instance.PreferredDroneTarget != null)
                     {
                         if (Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)

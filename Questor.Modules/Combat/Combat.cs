@@ -952,7 +952,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have too many high value (non-priority) targets targeted?
             //
-            while ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && highValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))) 
+            if ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && highValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))) 
                 || highValueTargetsTargeted.Count() > maxHighValueTarget)
             {
                 // Unlock any high value target
@@ -965,7 +965,7 @@ namespace Questor.Modules.Combat
                     //
                     // Assume that if we have no non-scrambling high value targets that we will have low value targets we can untarget elsewhere
                     //
-                    break;
+                    //break;
                 }
 
                 if (unlockThisHighValueTarget.IsTarget && unlockThisHighValueTarget.UnlockTarget("Combat.TargetCombatants"))
@@ -982,7 +982,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have too many low value targets targeted?
             //
-            while ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && lowValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))
+            if ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && lowValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))
                 || lowValueTargetsTargeted.Count() > maxLowValueTarget))
             {
                 // Unlock any target that is not warp scrambling me
@@ -995,7 +995,7 @@ namespace Questor.Modules.Combat
                     //
                     // Assume that if we have no non-scrambling low value targets that we will have high value targets we can untarget elsewhere
                     //
-                    break;
+                    //break;
                 }
 
                 if (unlockThisLowValueTarget.IsTarget && unlockThisLowValueTarget.UnlockTarget("Combat.TargetCombatants"))
@@ -1012,7 +1012,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have prioritytargets that can't be targeted?
             //
-            while (targets.Count() >= Cache.Instance.MaxLockedTargets
+            if (targets.Count() >= Cache.Instance.MaxLockedTargets
                 && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
                          || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))))
             {
@@ -1029,7 +1029,7 @@ namespace Questor.Modules.Combat
                     //
                     // Assume that if we have no non-scrambling targets that we will have to kill some of them as we have run out of slots (all slots should have warp scramblers targeted if this is null)
                     //
-                    break;
+                    //break;
                 }
 
                 if (unlockAnyNonWarpScramblingTarget.IsTarget && unlockAnyNonWarpScramblingTarget.UnlockTarget("Combat.TargetCombatants"))

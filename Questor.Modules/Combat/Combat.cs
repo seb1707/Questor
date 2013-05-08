@@ -1003,7 +1003,7 @@ namespace Questor.Modules.Combat
                     //break;
                 }
 
-                if (unlockThisLowValueTarget == null && unlockThisLowValueTarget.IsTarget && unlockThisLowValueTarget.UnlockTarget("Combat.TargetCombatants"))
+                if (unlockThisLowValueTarget != null && unlockThisLowValueTarget.IsTarget && unlockThisLowValueTarget.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking low  value target [" + unlockThisLowValueTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisLowValueTarget.Id) + "]{" + lowValueTargetsTargeted.Count + "} [" + Math.Round(unlockThisLowValueTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
                     //lowValueTargets.Remove(unlockThisLowValueTarget);
@@ -1316,7 +1316,7 @@ namespace Questor.Modules.Combat
                             // run GetBestTarget here (every x seconds), GetBestTarget also runs in CombatMissionCtrl (but only once per tick, total)
                             //
                            
-                            if (!Cache.Instance.InMission) Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.MaxRange, false, "Combat");
+                            if (!Cache.Instance.InMission || Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded) Cache.Instance.GetBestTarget(Cache.Instance.potentialCombatTargets.ToList(), Cache.Instance.MaxRange, false, "Combat");
                             //
                             // GetBestTarget sets Cache.Instance.PreferredPrimaryWeaponTarget (or for drones in drone.cs: Cache.Instance.PreferredPrimaryWeaponTarget) 
                             //

@@ -1261,7 +1261,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
+            IEnumerable<EntityCache> targets = Cache.Instance.Entities.Where(e => !e.HasExploded && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
 
             if (targets.Count() == numberToIgnore)
             {
@@ -1277,14 +1277,18 @@ namespace Questor.Modules.Activities
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(targets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
 
-                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => e.IsTarget || e.IsTargeting))
+                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
                     entity.UnlockTarget("CombatMissionCtrl");
                 }
+                return;
             }
 
-            if (!ignoreAttackers || breakOnAttackers)
+            #region Do we really need this?
+            //Does this block really apply? We are already going to prioritize any EWAR that we have enabled on Primary Weapons 
+            //So do we even need this? Whats the point of the kill action if we want to bypass it if targetted?
+            /*if (!ignoreAttackers || breakOnAttackers)
             {
                 // Apparently we are busy, wait for combat to clear attackers first
                 IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
@@ -1292,7 +1296,8 @@ namespace Questor.Modules.Activities
                 {
                     return;
                 }
-            }
+            }*/
+            #endregion
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                                && !t.IsEntityIShouldLeaveAlone 
@@ -2098,6 +2103,7 @@ namespace Questor.Modules.Activities
                         {
                             action = _pocketActions[_currentAction];
                             Logging.Log("CombatMissionCtrl", "Starting Action." + action, Logging.Yellow);
+                            
                         }
                     }
 

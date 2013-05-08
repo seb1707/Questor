@@ -110,6 +110,7 @@ namespace Questor.Modules.Activities
 
         private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(IEnumerable<EntityCache> targets, double range, int targetedby, bool MoveShip)
         {
+            targets = targets.ToList();
             EntityCache target = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
             if (target != null)
@@ -1253,6 +1254,14 @@ namespace Questor.Modules.Activities
 
             List<string> targetNames = action.GetParameterValues("target");
 
+            int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                                                               && !t.IsEntityIShouldLeaveAlone
+                                                               && !t.IsContainer
+                                                               && t.IsNpc
+                                                               && t.CategoryId == (int)CategoryID.Entity
+                                                               && t.GroupId != (int)Group.LargeColidableStructure
+                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
+
             // No parameter? Ignore kill action
             if (targetNames.Count == 0)
             {
@@ -1277,35 +1286,15 @@ namespace Questor.Modules.Activities
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(targets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
 
-                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
+                foreach (EntityCache KillTargetEntity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
                 {
-                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + entity.Name + "][ID: " + Cache.Instance.MaskedID(entity.Id) + "][" + Math.Round(entity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
-                    entity.UnlockTarget("CombatMissionCtrl");
+                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + KillTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(KillTargetEntity.Id) + "][" + Math.Round(KillTargetEntity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
+                    KillTargetEntity.UnlockTarget("CombatMissionCtrl");
                 }
+
+                AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.potentialCombatTargets, (double)Distance.OnGridWithMe, targetedby, true);
                 return;
             }
-
-            #region Do we really need this?
-            //Does this block really apply? We are already going to prioritize any EWAR that we have enabled on Primary Weapons 
-            //So do we even need this? Whats the point of the kill action if we want to bypass it if targetted?
-            /*if (!ignoreAttackers || breakOnAttackers)
-            {
-                // Apparently we are busy, wait for combat to clear attackers first
-                IEnumerable<EntityCache> targetedBy = Cache.Instance.TargetedBy;
-                if (targetedBy != null && targetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.MaxRange) > 0)
-                {
-                    return;
-                }
-            }*/
-            #endregion
-
-            int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                               && !t.IsEntityIShouldLeaveAlone 
-                                                               && !t.IsContainer 
-                                                               && t.IsNpc 
-                                                               && t.CategoryId == (int)CategoryID.Entity 
-                                                               && t.GroupId != (int)Group.LargeColidableStructure 
-                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
 
             if (notTheClosest) targets = targets.OrderByDescending(t => t.Distance).ToList();
 

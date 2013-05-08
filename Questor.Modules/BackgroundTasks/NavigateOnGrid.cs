@@ -183,6 +183,13 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Settings.Instance.SpeedTank)
             {
+                /*if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                {
+                    target.Approach((int)(Cache.Instance.MaxRange));
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into max range before initiating orbit", Logging.Teal);
+                    return;
+                }*/ //Well this didnt work the way i wanted it to will try again tomorrow
+
                 if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
                 OrbitGateorTarget(target, module);
                 return;

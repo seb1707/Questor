@@ -59,6 +59,8 @@
             this.label25 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
             this.tabMiscInfo = new System.Windows.Forms.TabPage();
+            this.DataCurrentDroneTarget = new System.Windows.Forms.Label();
+            this.DataCurrentCombatTarget = new System.Windows.Forms.Label();
             this.lblCurrentDroneTarget = new System.Windows.Forms.Label();
             this.lvlCurrentPrimaryWeaponsTarget = new System.Windows.Forms.Label();
             this.DronePriorityTargetListBox = new System.Windows.Forms.ListBox();
@@ -576,8 +578,6 @@
             this.bttnUserDefinedScript3 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript2 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript1 = new System.Windows.Forms.Button();
-            this.DataCurrentCombatTarget = new System.Windows.Forms.Label();
-            this.DataCurrentDroneTarget = new System.Windows.Forms.Label();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -891,6 +891,24 @@
             this.tabMiscInfo.TabIndex = 7;
             this.tabMiscInfo.Text = "MiscInfo";
             this.tabMiscInfo.UseVisualStyleBackColor = true;
+            // 
+            // DataCurrentDroneTarget
+            // 
+            this.DataCurrentDroneTarget.AutoSize = true;
+            this.DataCurrentDroneTarget.Location = new System.Drawing.Point(425, 33);
+            this.DataCurrentDroneTarget.Name = "DataCurrentDroneTarget";
+            this.DataCurrentDroneTarget.Size = new System.Drawing.Size(24, 13);
+            this.DataCurrentDroneTarget.TabIndex = 232;
+            this.DataCurrentDroneTarget.Text = "n/a";
+            // 
+            // DataCurrentCombatTarget
+            // 
+            this.DataCurrentCombatTarget.AutoSize = true;
+            this.DataCurrentCombatTarget.Location = new System.Drawing.Point(191, 33);
+            this.DataCurrentCombatTarget.Name = "DataCurrentCombatTarget";
+            this.DataCurrentCombatTarget.Size = new System.Drawing.Size(24, 13);
+            this.DataCurrentCombatTarget.TabIndex = 231;
+            this.DataCurrentCombatTarget.Text = "n/a";
             // 
             // lblCurrentDroneTarget
             // 
@@ -2394,7 +2412,7 @@
             this.label27.Size = new System.Drawing.Size(460, 13);
             this.label27.TabIndex = 169;
             this.label27.Text = "These values are used this session only and will be overwritten if questor restar" +
-                "ts for ANY reason";
+    "ts for ANY reason";
             // 
             // ScheduleWarninglabel1
             // 
@@ -2404,7 +2422,7 @@
             this.ScheduleWarninglabel1.Size = new System.Drawing.Size(460, 13);
             this.ScheduleWarninglabel1.TabIndex = 168;
             this.ScheduleWarninglabel1.Text = "These values are used this session only and will be overwritten if questor restar" +
-                "ts for ANY reason";
+    "ts for ANY reason";
             // 
             // ExitWhenIdleCheckBox
             // 
@@ -2517,7 +2535,7 @@
             this.label19.Size = new System.Drawing.Size(400, 13);
             this.label19.TabIndex = 168;
             this.label19.Text = "it is a very bad idea to change these states unless you understand what will happ" +
-                "en";
+    "en";
             // 
             // label11
             // 
@@ -2527,7 +2545,7 @@
             this.label11.Size = new System.Drawing.Size(400, 13);
             this.label11.TabIndex = 167;
             this.label11.Text = "it is a very bad idea to change these states unless you understand what will happ" +
-                "en";
+    "en";
             // 
             // panel2
             // 
@@ -6121,30 +6139,12 @@
             this.bttnUserDefinedScript1.UseVisualStyleBackColor = true;
             this.bttnUserDefinedScript1.Click += new System.EventHandler(this.bttnUserDefinedScript1_Click);
             // 
-            // DataCurrentCombatTarget
-            // 
-            this.DataCurrentCombatTarget.AutoSize = true;
-            this.DataCurrentCombatTarget.Location = new System.Drawing.Point(191, 33);
-            this.DataCurrentCombatTarget.Name = "DataCurrentCombatTarget";
-            this.DataCurrentCombatTarget.Size = new System.Drawing.Size(24, 13);
-            this.DataCurrentCombatTarget.TabIndex = 231;
-            this.DataCurrentCombatTarget.Text = "n/a";
-            // 
-            // DataCurrentDroneTarget
-            // 
-            this.DataCurrentDroneTarget.AutoSize = true;
-            this.DataCurrentDroneTarget.Location = new System.Drawing.Point(425, 33);
-            this.DataCurrentDroneTarget.Name = "DataCurrentDroneTarget";
-            this.DataCurrentDroneTarget.Size = new System.Drawing.Size(24, 13);
-            this.DataCurrentDroneTarget.TabIndex = 232;
-            this.DataCurrentDroneTarget.Text = "n/a";
-            // 
             // QuestorfrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(356, 96);
+            this.ClientSize = new System.Drawing.Size(360, 97);
             this.Controls.Add(this.label26);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.buttonQuestormanager);

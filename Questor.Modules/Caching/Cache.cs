@@ -3067,6 +3067,33 @@ namespace Questor.Modules.Caching
                 }
                 #endregion
             }
+            
+            #region did our calling routine pass us targets to shoot?
+            EntityCache callingTarget = null;
+            try
+            {
+                callingTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
+            }
+            catch (NullReferenceException) { }
+
+            if (callingTarget != null)
+            {
+                if (!Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))
+                {
+                    if (!callingTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (callingTarget != null && !Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))", Logging.Debug);
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
+
+                        if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
+
+                        return true;
+                    } 
+                }
+            }
+
+            #endregion
 
             #region Get the closest primary weapon priority target
             //
@@ -3085,21 +3112,18 @@ namespace Questor.Modules.Caching
             
             if (primaryWeaponPriorityTarget != null)
             {
-                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                if (!Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
                 {
-                    if (!Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
+                    if (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))
                     {
-                        if (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))
-                        {
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
                             
-                            if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                                Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
+                        if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                            Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
                             
-                            return true;
-                        }    
-                    }
+                        return true;
+                    }    
                 }
             }
 

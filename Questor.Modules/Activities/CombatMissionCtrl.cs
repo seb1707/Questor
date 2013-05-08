@@ -1312,7 +1312,10 @@ namespace Questor.Modules.Activities
                 AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(targets, (double)Distance.OnGridWithMe, targetedby, true);
             }
 
-            Nextaction();
+            //
+            // we CANNOT proceed to the next action until the target is actually dead. DO NOT do a Nextaction() here.
+            //
+            //Nextaction();
 
             return;
         }
@@ -1377,7 +1380,10 @@ namespace Questor.Modules.Activities
                 AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(targets, (double)Distance.OnGridWithMe, targetedby, true);
             }
 
-            Nextaction();
+            //
+            // we CANNOT proceed to the next action until the target is actually dead. DO NOT do a Nextaction() here.
+            //
+            //Nextaction();
 
             return;
         }

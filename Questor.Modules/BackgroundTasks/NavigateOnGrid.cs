@@ -183,16 +183,18 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Settings.Instance.SpeedTank)
             {
-                /*if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                if (target.Distance > Cache.Instance.WeaponRange && !Cache.Instance.IsApproachingOrOrbiting)
                 {
-                    target.Approach((int)(Cache.Instance.MaxRange));
-                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into max range before initiating orbit", Logging.Teal);
+                    target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into weapons range before initiating orbit", Logging.Teal);
                     return;
-                }*/ //Well this didnt work the way i wanted it to will try again tomorrow
-
-                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
-                OrbitGateorTarget(target, module);
-                return;
+                }
+                if (!Cache.Instance.IsOrbiting)
+                {
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
+                    OrbitGateorTarget(target, module);
+                    return;
+                }
             }
             else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
             {

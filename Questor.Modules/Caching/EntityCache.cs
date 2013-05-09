@@ -181,6 +181,38 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsPrimaryWeaponKillPriority
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public bool IsDroneKillPriority
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance._dronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
         public bool IsTooCloseTooFastTooSmallToHit
         {
             get

@@ -385,6 +385,7 @@ namespace Questor
                 _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
             {
+                if (Settings.Instance.DebugWalletBalance) Logging.Log("Questor.WalletCheck", "QuestorState is [" + _States.CurrentQuestorState.ToString() + "] which does not use WalletCheck", Logging.White);
                 return;
             }
 

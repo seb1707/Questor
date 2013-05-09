@@ -88,9 +88,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
         public bool DebugFittingMgr { get; set; }
-
         public bool DebugFleetSupportSlave { get; set; }
-
         public bool DebugFleetSupportMaster { get; set; }
         public bool DebugGetBestTarget { get; set; }
         public bool DebugGotobase { get; set; }
@@ -102,19 +100,14 @@ namespace Questor.Modules.Lookup
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
-
         public bool DebugLootValue { get; set; }
-
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMaintainConsoleLogs { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
-
         public bool DebugOverLoadWeapons { get; set; }
-
         public bool DebugPerformance { get; set; }
-
         public bool DebugQuestorManager { get; set; }
         public bool DebugReloadAll { get; set; }
         public bool DebugReloadorChangeAmmo { get; set; }
@@ -123,12 +116,10 @@ namespace Questor.Modules.Lookup
         public bool DebugSettings { get; set; }
         public bool DebugShipTargetValues { get; set; }
         public bool DebugSkillTraining { get; set; }
-
         public bool DebugStatistics { get; set; }
         public bool DebugStorylineMissions { get; set; }
         public bool DebugTargetCombatants { get; set; }
         public bool DebugTargetWrecks { get; set; }
-
         public bool DebugTractorBeams { get; set; }
         public bool DebugTraveler { get; set; }
         public bool DebugUI { get; set; }
@@ -501,32 +492,21 @@ namespace Questor.Modules.Lookup
         // Questor GUI location settings
         //
         public int? WindowXPosition { get; set; }
-
         public int? WindowYPosition { get; set; }
-
         public int? EVEWindowXPosition { get; set; }
-
         public int? EVEWindowYPosition { get; set; }
-
         public int? EVEWindowXSize { get; set; }
-
         public int? EVEWindowYSize { get; set; }
 
         //
         // Email SMTP settings
         //
         public bool EmailSupport { get; set; }
-
         public string EmailAddress { get; set; }
-
         public string EmailPassword { get; set; }
-
         public string EmailSMTPServer { get; set; }
-
         public int EmailSMTPPort { get; set; }
-
         public string EmailAddressToSendAlerts { get; set; }
-
         public bool? EmailEnableSSL { get; set; }
 
         //

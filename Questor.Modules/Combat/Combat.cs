@@ -1020,7 +1020,7 @@ namespace Questor.Modules.Combat
             if (targets.Count() >= Cache.Instance.MaxLockedTargets
                 && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
                          || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
-                         || (Cache.Instance._primaryWeaponPriorityTargets.Where(pt => !pt.Entity.IsTarget && !pt.Entity.IsTargeting).Any(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.PriorityKillTarget)))
+                         || (Cache.Instance._primaryWeaponPriorityTargets.Where(pt => !pt.Entity.IsTarget && !pt.Entity.IsTargeting).Any(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.PriorityKillTarget))))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have prioritytargets that can't be targeted: targets [" + targets.Count() + "] warp scramblers [" + Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe).ToString() + "]", Logging.Debug);
 

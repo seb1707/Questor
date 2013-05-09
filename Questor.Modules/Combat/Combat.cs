@@ -438,7 +438,7 @@ namespace Questor.Modules.Combat
         private void ActivateWeapons(EntityCache target)
         {
             // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp)
+            if (Cache.Instance.InSpace && Cache.Instance.InWarp)
             {
                 Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
                 Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
@@ -743,7 +743,7 @@ namespace Questor.Modules.Combat
         private void TargetCombatants()
         {
             // When in warp we should not try to target anything
-            if (Cache.Instance.InWarp)
+            if ((Cache.Instance.InSpace && Cache.Instance.InWarp) || Cache.Instance.InStation)
                 return;
 
             if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
@@ -1371,10 +1371,10 @@ namespace Questor.Modules.Combat
                         //Logging.Log("Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower(): " + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower());
                         //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
                         if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
-                            Cache.Instance.DirectEve.ActiveShip.Entity != null &&  // we are in a ship!
+                            (Cache.Instance.DirectEve.ActiveShip.Entity != null &&  // we are in a ship!
                             !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
                             Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
-                            !Cache.Instance.InWarp) // no longer in warp
+                            !Cache.Instance.InWarp)) // no longer in warp
                         {
                             _States.CurrentCombatState = CombatState.CheckTargets;
                             return;

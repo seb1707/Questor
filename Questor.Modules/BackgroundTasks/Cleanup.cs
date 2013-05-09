@@ -385,14 +385,6 @@
 
             _lastCleanupProcessState = DateTime.UtcNow;
 
-            // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp)
-            {
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
-                _States.CurrentSalvageState = SalvageState.Idle;
-                return;
-            }
-
             if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Cache.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
@@ -401,6 +393,14 @@
 
             if (Cache.Instance.InSpace)
             {
+                // When in warp there's nothing we can do, so ignore everything
+                if (Cache.Instance.InWarp)
+                {
+                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
+                    _States.CurrentSalvageState = SalvageState.Idle;
+                    return;
+                }
+
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
                 if (DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(10))
                 {

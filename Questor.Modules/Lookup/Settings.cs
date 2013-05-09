@@ -95,6 +95,7 @@ namespace Questor.Modules.Lookup
         public bool DebugGreyList { get; set; }
         public bool DebugHangars { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugInWarp { get; set; }
         public bool DebugItemHangar { get; set; }
         public bool DebugKillTargets { get; set; }
         public bool DebugLoadScripts { get; set; }
@@ -642,6 +643,7 @@ namespace Questor.Modules.Lookup
                 DebugGreyList = false;
                 DebugHangars = false;
                 DebugIdle = false;
+                DebugInWarp = false;
                 DebugItemHangar = false;
                 DebugKillTargets = false;
                 DebugLoadScripts = false;
@@ -1120,6 +1122,7 @@ namespace Questor.Modules.Lookup
                     DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
                     DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
                     DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
+                    DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
                     DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
                     DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
                     DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;

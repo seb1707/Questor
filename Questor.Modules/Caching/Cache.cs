@@ -1318,7 +1318,6 @@ namespace Questor.Modules.Caching
 
         public bool InWarp
         {
-            
             get
             {
                 try

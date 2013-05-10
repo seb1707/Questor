@@ -1018,14 +1018,15 @@ namespace Questor.Modules.Combat
             // Do we have prioritytargets that can't be targeted?
             //
             if (targets.Count() >= Cache.Instance.MaxLockedTargets
-                && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
+                && (Cache.Instance.PreferredPrimaryWeaponTarget != null && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
+                         || ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
                          || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget && !pt.IsTargeting).Any(pt => pt.IsWarpScramblingMe))
                          || (Cache.Instance._primaryWeaponPriorityTargets.Where(pt => !pt.Entity.IsTarget && !pt.Entity.IsTargeting).Any(pt => pt.PrimaryWeaponPriority == PrimaryWeaponPriority.PriorityKillTarget))))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have prioritytargets that can't be targeted: targets [" + targets.Count() + "] warp scramblers [" + Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe).ToString() + "]", Logging.Debug);
 
                 // Unlock any target that is not warp scrambling me
-                EntityCache unlockAnyNonWarpScramblingTarget = targets.Where(t => t.IsTarget && (!t.IsWarpScramblingMe || (!t.IsWarpScramblingMe && !t.IsPrimaryWeaponKillPriority)))
+                EntityCache unlockAnyNonWarpScramblingTarget = targets.Where(t => t.IsTarget && !t.IsWarpScramblingMe && !t.IsPrimaryWeaponKillPriority && t.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                       .OrderByDescending(t => !t.IsInOptimalRange)
                                                                       .ThenByDescending(t => t.Distance)
                                                                       .FirstOrDefault();
@@ -1059,6 +1060,30 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
                 return;
             }
+
+            #region Do we need to target our Preferred Primary Weapon Target?
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+            {
+                if (targets.Count() >= Cache.Instance.MaxLockedTargets)
+                {
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    return;
+                }
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+                    && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded
+                    && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget
+                    && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting
+                    && Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange
+                    && Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
+                {
+                    Logging.Log("Combat", "Targeting preferred primary weapon target [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k away] potentialHighValueTargets.Count [" + potentialHighValueTargets.Count + "]", Logging.Teal);
+                    //highValueTargets.Add(primaryWeaponPriorityEntity);
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                    return;
+                }
+
+            }
+            #endregion
 
             #region Do we have any drone priority targets not yet targeted?
             //

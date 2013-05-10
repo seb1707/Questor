@@ -385,6 +385,7 @@ namespace Questor
                 _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
             {
+                if (Settings.Instance.DebugWalletBalance) Logging.Log("Questor.WalletCheck", "QuestorState is [" + _States.CurrentQuestorState.ToString() + "] which does not use WalletCheck", Logging.White);
                 return;
             }
 
@@ -394,10 +395,13 @@ namespace Questor
             //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.UtcNow - LastKnownGoodConnectedTime = " + DateTime.UtcNow.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);
             if (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
             {
-                Logging.Log("Questor", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.",
-                                          Math.Round(
-                                              DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).
-                                                  TotalMinutes, 0)), Logging.White);
+                Logging.Log("Questor.WalletCheck", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
+            }
+
+            if (Settings.Instance.DebugWalletBalance)
+            {
+                Logging.Log("Questor.WalletCheck", String.Format("DEBUG: Wallet Balance [ {0} ] has been checked.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.Yellow);
+
             }
 
             //Settings.Instance.WalletBalanceChangeLogOffDelay = 2;  //used for debugging purposes
@@ -577,10 +581,7 @@ namespace Questor
             }
 
             // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp)
-            {
-                return;
-            }
+            if (Cache.Instance.InSpace && Cache.Instance.InWarp) return;
 
             switch (_States.CurrentQuestorState)
             {

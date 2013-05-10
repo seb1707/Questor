@@ -645,7 +645,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case TravelerState.Traveling:
-                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
+                    if ((!Cache.Instance.InSpace && !Cache.Instance.InStation) || Cache.Instance.InWarp) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
                         return;
 
                     if (Destination == null)

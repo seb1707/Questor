@@ -1318,7 +1318,51 @@ namespace Questor.Modules.Caching
 
         public bool InWarp
         {
-            get { return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3); }
+            get
+            {
+                try
+                {
+                    if (Cache.Instance.InSpace && !Cache.Instance.InStation)
+                    {
+                        if (DirectEve.ActiveShip != null)
+                        {
+                            if (DirectEve.ActiveShip.Entity != null)
+                            {
+                                if (DirectEve.ActiveShip.Entity.Mode == 3)
+                                {
+                                    return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3);
+                                }
+                                else
+                                {
+                                    if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.DirectEve.ActiveShip.Entity.Mode  is [" + DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip is Null? (session change?)", Logging.Teal);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp while docked or between session changes?", Logging.Teal);
+                        return false;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.InWarp", "InWarp check failed, exception [" + exception + "]", Logging.Teal);
+                }
+
+                return false;
+            }
         }
 
         public bool IsOrbiting

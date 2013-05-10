@@ -1399,7 +1399,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.GotoNearestStation:
-                    if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
+                    if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp)) return;
                     var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {

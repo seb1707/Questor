@@ -88,33 +88,27 @@ namespace Questor.Modules.Lookup
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
         public bool DebugFittingMgr { get; set; }
-
         public bool DebugFleetSupportSlave { get; set; }
-
         public bool DebugFleetSupportMaster { get; set; }
         public bool DebugGetBestTarget { get; set; }
         public bool DebugGotobase { get; set; }
         public bool DebugGreyList { get; set; }
         public bool DebugHangars { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugInWarp { get; set; }
         public bool DebugItemHangar { get; set; }
         public bool DebugKillTargets { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
-
         public bool DebugLootValue { get; set; }
-
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMaintainConsoleLogs { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
-
         public bool DebugOverLoadWeapons { get; set; }
-
         public bool DebugPerformance { get; set; }
-
         public bool DebugQuestorManager { get; set; }
         public bool DebugReloadAll { get; set; }
         public bool DebugReloadorChangeAmmo { get; set; }
@@ -123,22 +117,20 @@ namespace Questor.Modules.Lookup
         public bool DebugSettings { get; set; }
         public bool DebugShipTargetValues { get; set; }
         public bool DebugSkillTraining { get; set; }
-
         public bool DebugStatistics { get; set; }
         public bool DebugStorylineMissions { get; set; }
         public bool DebugTargetCombatants { get; set; }
         public bool DebugTargetWrecks { get; set; }
-
         public bool DebugTractorBeams { get; set; }
         public bool DebugTraveler { get; set; }
         public bool DebugUI { get; set; }
         public bool DebugUnloadLoot { get; set; }
         public bool DebugValuedump { get; set; }
+        public bool DebugWalletBalance { get; set; }
+        public bool DebugWatchForActiveWars { get; set; }
+        
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
-
-        public bool DebugWatchForActiveWars { get; set; }
-
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
@@ -501,32 +493,21 @@ namespace Questor.Modules.Lookup
         // Questor GUI location settings
         //
         public int? WindowXPosition { get; set; }
-
         public int? WindowYPosition { get; set; }
-
         public int? EVEWindowXPosition { get; set; }
-
         public int? EVEWindowYPosition { get; set; }
-
         public int? EVEWindowXSize { get; set; }
-
         public int? EVEWindowYSize { get; set; }
 
         //
         // Email SMTP settings
         //
         public bool EmailSupport { get; set; }
-
         public string EmailAddress { get; set; }
-
         public string EmailPassword { get; set; }
-
         public string EmailSMTPServer { get; set; }
-
         public int EmailSMTPPort { get; set; }
-
         public string EmailAddressToSendAlerts { get; set; }
-
         public bool? EmailEnableSSL { get; set; }
 
         //
@@ -662,6 +643,7 @@ namespace Questor.Modules.Lookup
                 DebugGreyList = false;
                 DebugHangars = false;
                 DebugIdle = false;
+                DebugInWarp = false;
                 DebugItemHangar = false;
                 DebugKillTargets = false;
                 DebugLoadScripts = false;
@@ -693,6 +675,7 @@ namespace Questor.Modules.Lookup
                 DebugUI = false;
                 DebugUnloadLoot = false;
                 DebugValuedump = false;
+                DebugWalletBalance = false;
                 DebugWatchForActiveWars = true;
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
@@ -1139,6 +1122,7 @@ namespace Questor.Modules.Lookup
                     DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
                     DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
                     DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
+                    DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
                     DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
                     DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
                     DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
@@ -1170,6 +1154,7 @@ namespace Questor.Modules.Lookup
                     DebugUI = (bool?)CharacterSettingsXml.Element("debugUI") ?? (bool?)CommonSettingsXml.Element("debugUI") ?? false;
                     DebugUnloadLoot = (bool?)CharacterSettingsXml.Element("debugUnloadLoot") ?? (bool?)CommonSettingsXml.Element("debugUnloadLoot") ?? false;
                     DebugValuedump = (bool?)CharacterSettingsXml.Element("debugValuedump") ?? (bool?)CommonSettingsXml.Element("debugValuedump") ?? false;
+                    DebugWalletBalance = (bool?)CharacterSettingsXml.Element("debugWalletBalance") ?? (bool?)CommonSettingsXml.Element("debugWalletBalance") ?? false;
                     DebugWatchForActiveWars = (bool?)CharacterSettingsXml.Element("debugWatchForActiveWars") ?? (bool?)CommonSettingsXml.Element("debugWatchForActiveWars") ?? false;
                     DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;

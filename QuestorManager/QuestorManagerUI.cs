@@ -263,7 +263,7 @@ namespace QuestorManager
             // Cleanup State: ProcessState
 
             // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp) return;
+            if (Cache.Instance.InSpace && Cache.Instance.InWarp) return;
 
             InitializeTraveler();
 

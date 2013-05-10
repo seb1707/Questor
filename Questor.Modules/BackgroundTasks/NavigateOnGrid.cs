@@ -159,7 +159,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void NavigateIntoRange(EntityCache target, string module)
         {
-            if (Cache.Instance.InWarp || Cache.Instance.InStation)
+            if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp))
                 return;
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);

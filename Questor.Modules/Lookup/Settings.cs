@@ -572,12 +572,14 @@ namespace Questor.Modules.Lookup
             {
                 if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30))
                 {
+                    Cache.Instance.ReasonToStopQuestor =
+                        "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                     Cache.Instance.SessionState = "Quitting";
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
-                    Cleanup.CloseQuestor();
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                     return;
                 }
 

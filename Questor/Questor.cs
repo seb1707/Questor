@@ -134,7 +134,7 @@ namespace Questor
                 Settings.Instance.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe lic server is down";
                 Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor();
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
             }
         }
 
@@ -696,7 +696,12 @@ namespace Questor
                     break;
 
                 case QuestorState.CloseQuestor:
-                    Cleanup.CloseQuestor();
+                    if (Cache.Instance.ReasonToStopQuestor == string.Empty)
+                    {
+                        Cache.Instance.ReasonToStopQuestor = "case QuestorState.CloseQuestor:";
+                    }
+
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                     return;
 
                 case QuestorState.DebugCloseQuestor:

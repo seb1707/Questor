@@ -1058,21 +1058,15 @@ namespace Questor.Modules.Combat
                 || targets.Count() >= Cache.Instance.MaxLockedTargets)
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
+                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                 return;
             }
 
             #region Do we need to target our Preferred Primary Weapon Target?
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
             {
-                if (targets.Count() >= Cache.Instance.MaxLockedTargets)
-                {
-                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                    return;
-                }
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                    && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded
-                    && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget
-                    && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting
+                if ((!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting)
+                    && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                     && Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange
                     && Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
                 {

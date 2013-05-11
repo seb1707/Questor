@@ -115,6 +115,25 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public double Nearest5kDistance
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                    {
+                        double _nearest5kDistance = Math.Round((_directEntity.Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                        return _nearest5kDistance;
+                    }
+
+                    return 0;
+                }
+
+                return 0;
+            }
+        }
+
         public double ShieldPct
         {
             get

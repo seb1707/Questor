@@ -1186,6 +1186,16 @@ namespace Questor.Modules.Caching
                 return result;
             }
         }
+        
+        public bool IsOnGridWithMe
+        {
+            get
+            {
+                bool result = false;
+                result |= Distance < (double) Distances.OnGridWithMe;
+                return result;
+            }
+        }
 
         public bool IsStation
         {

@@ -1108,7 +1108,20 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Targeting
         {
-            get { return _targeting ?? (_targeting = Entities.Where(e => e.IsTargeting).ToList()); }
+            get
+            {
+                if (_targeting == null)
+                {
+                    _targeting = Entities.Where(e => e.IsTargeting).ToList();
+                }
+
+                if (_targeting.Any())
+                {
+                    return _targeting;
+                }
+
+                return new List<EntityCache>();
+            }
         }
 
         public List<long> IDsinInventoryTree
@@ -1224,7 +1237,7 @@ namespace Questor.Modules.Caching
                             }
 
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
-                        }    
+                        }
                     }
                     
                     return _potentialCombatTargets;
@@ -1243,7 +1256,36 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
+                if (!_entities.Any())
+                {
+                    _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
+                }
+
+                if (_entities.Any())
+                {
+                    return _entities;
+                }
+
+                return new List<EntityCache>();
+            }
+        }
+
+        public IEnumerable<EntityCache> EntitiesActivelyBeingLocked
+        {
+            get
+            {
+                if (!InSpace)
+                {
+                    return new List<EntityCache>();
+                }
+
+                IEnumerable<EntityCache> _entitiesActivelyBeingLocked = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.IsTargeting).ToList();
+                if (_entitiesActivelyBeingLocked.Any())
+                {
+                    return _entitiesActivelyBeingLocked;
+                }
+
+                return new List<EntityCache>();
             }
         }
 
@@ -1255,8 +1297,14 @@ namespace Questor.Modules.Caching
                 {
                     return new List<EntityCache>();
                 }
+                
+                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.Id != DirectEve.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
+                if (_entitiesNotSelf.Any())
+                {
+                    return _entitiesNotSelf;
+                }
 
-                return Cache.Instance.Entities.Where(e => e.IsValid && e.Id != DirectEve.ActiveShip.ItemId && e.Distance < Cache.Instance.MaxRange).ToList();
+                return new List<EntityCache>();
             }
         }
 

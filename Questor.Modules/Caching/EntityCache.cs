@@ -194,7 +194,14 @@ namespace Questor.Modules.Caching
             get
             {
                 if (_directEntity != null)
-                    return _directEntity.IsTarget;
+                {
+                    if (!_directEntity.HasExploded)
+                    {
+                        return _directEntity.IsTarget;    
+                    }
+
+                    return false;
+                }                    
 
                 return false;
             }

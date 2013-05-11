@@ -100,7 +100,7 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (entity.Distance < (int)Distances.DockingRange)
+            if (entity.Distance < (int)Distance.DockingRange)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
@@ -110,7 +110,7 @@ namespace Questor.Modules.Actions
                     return false;
                 }
             }
-            else if (entity.Distance < (int)Distances.WarptoDistance)
+            else if (entity.Distance < (int)Distance.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {

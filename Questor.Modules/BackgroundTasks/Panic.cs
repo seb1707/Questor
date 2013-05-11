@@ -397,7 +397,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // Once we have warped off 500km, assume we are "safer"
-                    if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distances.PanicDistanceToConsiderSafelyWarpedOff)
+                    if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distance.PanicDistanceToConsiderSafelyWarpedOff)
                     {
                         Logging.Log("Panic", "We have warped off:  My ShipType: [" + Cache.Instance.DirectEve.ActiveShip.TypeName + "] My ShipName [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.White);
                         _States.CurrentPanicState = PanicState.Panicking;
@@ -414,7 +414,7 @@ namespace Questor.Modules.BackgroundTasks
                             break;
                         }
 
-                        if (station.Distance > (int)Distances.WarptoDistance)
+                        if (station.Distance > (int)Distance.WarptoDistance)
                         {
                             NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(),"Panic");
                             if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe) || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsWarpScramblingMe))
@@ -443,7 +443,7 @@ namespace Questor.Modules.BackgroundTasks
                             return;
                         }
 
-                        if (station.Distance < (int)Distances.DockingRange)
+                        if (station.Distance < (int)Distance.DockingRange)
                         {
                             if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                             {
@@ -490,7 +490,7 @@ namespace Questor.Modules.BackgroundTasks
                                                                             .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
                                                                             .OrderBy(b => b.CreatedOn));
 
-                            DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distances.OnGridWithMe);
+                            DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distance.OnGridWithMe);
                             if (offridSafeSpotBookmark != null)
                             {
                                 if (Cache.Instance.InWarp) return;
@@ -522,7 +522,7 @@ namespace Questor.Modules.BackgroundTasks
                         // What is this you say?  No star?
                         if (Cache.Instance.Star == null) return;
 
-                        if (Cache.Instance.Star.Distance > (int) Distances.WeCanWarpToStarFromHere)
+                        if (Cache.Instance.Star.Distance > (int) Distance.WeCanWarpToStarFromHere)
                         {
                             if (Cache.Instance.InWarp) return;
 

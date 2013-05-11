@@ -159,7 +159,7 @@ namespace Questor.Behaviors
                 EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
                 if (thisBigObject != null)
                 {
-                    if (thisBigObject.Distance >= (int)Distances.TooCloseToStructure)
+                    if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
                     {
                         //we are no longer "too close" and can proceed.
                     }
@@ -167,10 +167,10 @@ namespace Questor.Behaviors
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                         {
-                            thisBigObject.Orbit((int)Distances.SafeDistancefromStructure);
+                            thisBigObject.Orbit((int)Distance.SafeDistancefromStructure);
                             Logging.Log("DebugBehavior", _States.CurrentDebugBehaviorState +
                                         ": initiating Orbit of [" + thisBigObject.Name +
-                                        "] orbiting at [" + Distances.SafeDistancefromStructure + "]", Logging.White);
+                                        "] orbiting at [" + Distance.SafeDistancefromStructure + "]", Logging.White);
                             Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         }
                         return;
@@ -519,7 +519,7 @@ namespace Questor.Behaviors
                     var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
-                        if (station.Distance > (int)Distances.WarptoDistance)
+                        if (station.Distance > (int)Distance.WarptoDistance)
                         {
                             Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                             station.WarpToAndDock();

@@ -1221,7 +1221,7 @@ namespace Questor.Modules.Caching
 
                             int _entitiescount = 0;
 
-                            if (__entities.Any())
+                            if (__entities.Count > 0)
                             {
                                 _entitiescount = __entities.Count();
                                 Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
@@ -1256,12 +1256,12 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                if (!_entities.Any())
+                if (_entities.Count == 0)
                 {
                     _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
                 }
 
-                if (_entities.Any())
+                if (_entities.Count > 0)
                 {
                     return _entities;
                 }

@@ -609,7 +609,7 @@ namespace Questor.Modules.Lookup
             Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
             Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
 
-            if (!File.Exists(Settings.Instance.CharacterSettingsPath) && !DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
+            if (!File.Exists(Settings.Instance.CharacterSettingsPath) && !Settings.Instance.DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
                 Settings.Instance.CharacterXMLExists = false;
                 DefaultSettingsLoaded = true;
@@ -1909,7 +1909,7 @@ namespace Questor.Modules.Lookup
             Directory.CreateDirectory(MissionDungeonIdLogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
             Directory.CreateDirectory(PocketObjectStatisticsPath);
-            if (!DefaultSettingsLoaded)
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
                 if (SettingsLoaded != null)
                 {

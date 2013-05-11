@@ -647,7 +647,7 @@ namespace Questor
                     break;
 
                 case QuestorState.DebugReloadAll:
-                    if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return;
+                    if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distances.OnGridWithMe))) return;
                     _States.CurrentQuestorState = QuestorState.Start;
                     break;
 

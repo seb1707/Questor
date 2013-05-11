@@ -397,7 +397,7 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
                     EntityCache stuffThatMayDecloakMe = Cache.Instance.Entities.Where(t => t.Name != Cache.Instance.DirectEve.Me.Name || t.IsBadIdea || t.IsContainer || t.IsNpc || t.IsPlayer).OrderBy(t => t.Distance).FirstOrDefault();
-                    if (stuffThatMayDecloakMe != null && (stuffThatMayDecloakMe.Distance <= (int)Distance.SafeToCloakDistance)) //if their is anything within 2300m do not attempt to cloak
+                    if (stuffThatMayDecloakMe != null && (stuffThatMayDecloakMe.Distance <= (int)Distances.SafeToCloakDistance)) //if their is anything within 2300m do not attempt to cloak
                     {
                         if ((int)stuffThatMayDecloakMe.Distance != 0)
                         {
@@ -505,8 +505,8 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
                         Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
-                        int aggressiveEntities = Cache.Instance.Entities.Count(e => e.Distance < (int)Distance.OnGridWithMe && e.IsAttacking && e.IsPlayer);
-                        if (aggressiveEntities == 0 && Cache.Instance.Entities.Count(e => e.Distance < (int)Distance.OnGridWithMe && e.IsStation) == 1)
+                        int aggressiveEntities = Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsAttacking && e.IsPlayer);
+                        if (aggressiveEntities == 0 && Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsStation) == 1)
                         {
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
                             Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds", Logging.White);

@@ -1091,7 +1091,7 @@ namespace Questor.Behaviors
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distance.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
                     if (deadlyNPC != null)
                     {
                         // found NPCs that will likely kill out fragile salvage boat!
@@ -1208,7 +1208,7 @@ namespace Questor.Behaviors
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
                     EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).FirstOrDefault();
-                    if (closest.Distance < (int)Distance.DecloakRange)
+                    if (closest.Distance < (int)Distances.DecloakRange)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - GroupID=" + closest.GroupId, Logging.White);
 
@@ -1223,7 +1223,7 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    if (closest.Distance < (int)Distance.WarptoDistance)
+                    if (closest.Distance < (int)Distances.WarptoDistance)
                     {
                         // Move to the target
                         if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
@@ -1247,7 +1247,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.SalvageNextPocket:
                     Cache.Instance.OpenWrecks = true;
                     double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
-                    if (distance > (int)Distance.NextPocketDistance)
+                    if (distance > (int)Distances.NextPocketDistance)
                     {
                         //we know we are connected here...
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
@@ -1403,7 +1403,7 @@ namespace Questor.Behaviors
                     var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
-                        if (station.Distance > (int)Distance.WarptoDistance)
+                        if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                             station.WarpToAndDock();

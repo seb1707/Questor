@@ -98,7 +98,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                    if (_directEntity.Distance != 0)
                     {
                         //
                         // if we use the formatted value everywhere we need to change ALL distances to kilometers instead of meters (which would take some time and effort)

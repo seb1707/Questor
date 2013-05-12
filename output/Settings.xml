@@ -199,7 +199,7 @@
   <unloadLootAtStation>false</unloadLootAtStation><!-- default is false -->
   <!-- Amount of cargo capacity to reserve, should be at least 80m3 if you are salvaging -->
   <reserveCargoCapacity>100</reserveCargoCapacity>
-  <!-- maximum number of wreck targets, at least 1 is required for salvager or tractor beam to work -->
+  <!-- maximum number of wreck targets, at least 1 is required for salvager or tractor beam to work, this will work better set to 3 but you need multitasking trained and enough targeting slots to accomidate this plus the high and low value slots all at once -->
   <maximumWreckTargets>2</maximumWreckTargets>
   <!-- if the mission does not despawn (ninja looters?) and the accel gates are still present: use gates! -->
   <useGatesInSalvage>true</useGatesInSalvage><!-- default is true -->
@@ -385,9 +385,9 @@
   <!-- MaxRange we should use NOS / Neuts -->
   <NosDistance>38000</NosDistance>
   
-  <!-- Maximum number of targets per value -->
-  <maximumHighValueTargets>4</maximumHighValueTargets><!-- default is 4 -->
-  <maximumLowValueTargets>3</maximumLowValueTargets><!-- default is 3 -->
+  <!-- Maximum number of targets per value, these will work better set to a higher number but you need multitasking trained and enough targeting slots to accomidate these high and low value slots plus the maximumWreckTarget slots  all at once -->
+  <maximumHighValueTargets>3</maximumHighValueTargets><!-- default is 3 -->
+  <maximumLowValueTargets>2</maximumLowValueTargets><!-- default is 2 -->
 
   <!--                                                -->
   <!--      SCRIPT SETTINGS         -->

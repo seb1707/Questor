@@ -466,6 +466,9 @@ namespace Questor.Modules.Caching
 
         public bool InMission { get; set; }
 
+        public bool normalNav = true;  //Do we want to bypass normal navigation for some reason?
+        public bool onlyKillAggro { get; set; }
+
         public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
 
         public DateTime NextSalvageTrip = DateTime.UtcNow;

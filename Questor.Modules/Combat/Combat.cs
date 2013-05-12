@@ -1132,7 +1132,7 @@ namespace Questor.Modules.Combat
 
                     if (_dronePriorityTargets.Any())
                     {
-                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + _dronePriorityTargets.Count() + "] primaryWeaponPriority targets", Logging.Debug);
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + _dronePriorityTargets.Count() + "] dronePriority targets", Logging.Debug);
 
                         foreach (EntityCache dronePriorityEntity in _dronePriorityTargets)
                         {

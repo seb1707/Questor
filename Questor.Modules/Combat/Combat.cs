@@ -1391,18 +1391,23 @@ namespace Questor.Modules.Combat
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToShoot)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToNavigateToward)
                         {
                             NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat", Cache.Instance.normalNav);
-                                        
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
-                            ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
-                            ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
-                            ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
-                            ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
+
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToShoot)
+                            {
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
+                                ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
+                                ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
+                                ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
+                                ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
+                                return;    
+                            }
+
                             return;
                         }
                         

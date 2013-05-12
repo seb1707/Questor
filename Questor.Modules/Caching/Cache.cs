@@ -3189,30 +3189,35 @@ namespace Questor.Modules.Caching
             }
             
             #region did our calling routine pass us targets to shoot?
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Calling Target", Logging.Teal);
-            EntityCache callingTarget = null;
-            try
-            {
-                callingTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
-            }
-            catch (NullReferenceException) { }
 
-            if (callingTarget != null)
+            if (_potentialTargets != null && _potentialTargets.Any())
             {
-                if (!Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Calling Target", Logging.Teal);
+                EntityCache callingTarget = null;
+                try
                 {
-                    if (!callingTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))
+                    callingTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
+                }
+                catch (NullReferenceException) { }
+
+                if (callingTarget != null)
+                {
+                    if (!Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))
                     {
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (callingTarget != null && !Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))", Logging.Debug);
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
+                        if (!callingTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))
+                        {
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (callingTarget != null && !Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))", Logging.Debug);
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
 
-                        if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                            Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
+                            if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
+                                Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
 
-                        return true;
-                    } 
+                            return true;
+                        }
+                    }
                 }
             }
+            
 
             #endregion
 

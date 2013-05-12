@@ -278,10 +278,7 @@ namespace Questor.Modules.Combat
             // We do not have any ammo left that can hit targets at that range!
             if (charge == null)
             {
-                if (Settings.Instance.DebugReloadorChangeAmmo)
-                    Logging.Log("Combat",
-                                "ReloadEnergyWeaponAmmo: We do not have any ammo left that can hit targets at that range!",
-                                Logging.Orange);
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: We do not have any ammo left that can hit targets at that range!", Logging.Orange);
                 return false;
             }
 
@@ -813,7 +810,7 @@ namespace Questor.Modules.Combat
                                                                 && !h.IsWarpScramblingMe
                                                                 && (lowValueTargetsTargeted.Count() >= maxLowValueTarget))
                                                                 .OrderBy(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)
-                                                                .ThenByDescending(t => t.Distance)
+                                                                .ThenByDescending(t => t.Nearest5kDistance)
                                                                 .FirstOrDefault();
             }
             else
@@ -823,7 +820,7 @@ namespace Questor.Modules.Combat
                                                                 || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
                                                                 && !h.IsWarpScramblingMe)
                                                                 .OrderBy(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)
-                                                                .ThenByDescending(t => t.Distance)
+                                                                .ThenByDescending(t => t.Nearest5kDistance)
                                                                 .FirstOrDefault();
             }
                     
@@ -1164,7 +1161,7 @@ namespace Questor.Modules.Combat
             // High Value
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);
 
-            if (highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Nearest5kDistance < Cache.Instance.MaxRange))
+            if (highValueTargetingMe.Any(t => !t.IsTarget && !t.IsTargeting && t.Distance < Cache.Instance.MaxRange))
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + highValueTargetingMe.Count() + "] highValueTargetingMe targets", Logging.Debug);
 
@@ -1386,46 +1383,24 @@ namespace Questor.Modules.Combat
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToShoot)
                         {
-                            if (!Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
-                            {
-                                if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < Cache.Instance.MaxRange)
-                                {
-                                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
-                                    {
-                                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat", Cache.Instance.normalNav);
+                            NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat", Cache.Instance.normalNav);
                                         
-                                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
-                                        ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
-                                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
-                                        ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
-                                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
-                                        ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
-                                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
-                                        ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
-                                        return;
-                                    }
-
-                                    if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Kill Target is not currently targeted", Logging.Debug);
-                                }
-                                else
-                                {
-                                    if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Kill Target not in range [" + Cache.Instance.PreferredPrimaryWeaponTarget.Distance + "]/[" + Cache.Instance.MaxRange + "]", Logging.Debug);
-                                }
-                            }
-                            else
-                            {
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Kill Target is already dead, re-running get best target", Logging.Debug);
-                                Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
-                            }
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
+                            ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
+                            ActivateStasisWeb(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
+                            ActivateNos(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
+                            ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
+                            return;
                         }
-                        else
-                        {
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target, how can this be?", Logging.Debug);
-                            Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
-                        }
-
+                        
+                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
+                        Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
+                        
                         #region original code dont delete yet
                         /*
                         //

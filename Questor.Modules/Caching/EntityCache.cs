@@ -268,6 +268,29 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsReadyToShoot
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (!_directEntity.HasExploded && _directEntity.IsTarget)
+                    {
+                        if (_directEntity.Distance < Cache.Instance.MaxRange)
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+        }
+
         public bool IsHigherPriorityPresent
         {
             get

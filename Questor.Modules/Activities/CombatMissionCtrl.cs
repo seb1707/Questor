@@ -61,6 +61,8 @@ namespace Questor.Modules.Activities
             // now that we have completed this action revert OpenWrecks to false
             Cache.Instance.OpenWrecks = false;
             Cache.Instance.MissionLoot = false;
+            Cache.Instance.normalNav = true;
+            Cache.Instance.onlyKillAggro = false;
             _currentAction++;
             return;
         }
@@ -149,7 +151,8 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-
+                //Gonna handle this in a central location now
+                /*
                 if (MoveShip)
                 {
                     if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (MoveShip)", Logging.Debug);
@@ -160,7 +163,7 @@ namespace Questor.Modules.Activities
                         NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                 }
-
+                */
                 //panic handles adding any priority targets and combat will prefer to kill any priority targets
                 if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
                 {
@@ -383,6 +386,8 @@ namespace Questor.Modules.Activities
         private void ClearAggroAction(Actions.Action action)
         {
             if (!Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = true;
+
+            Cache.Instance.onlyKillAggro = true;
 
             // Get lowest range
             double range = Cache.Instance.MaxRange;
@@ -736,6 +741,8 @@ namespace Questor.Modules.Activities
             // Get lowest range
             double DistanceToConsiderTargets = Cache.Instance.MaxRange;
 
+            Cache.Instance.onlyKillAggro = true;
+
             int DistanceToClear;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToClear))
             {
@@ -838,6 +845,8 @@ namespace Questor.Modules.Activities
                 Cache.Instance.NormalApproach = false;
             }
 
+            Cache.Instance.normalNav = false;
+
             string target = action.GetParameterValue("target");
 
             bool notTheClosest;
@@ -890,6 +899,8 @@ namespace Questor.Modules.Activities
                 Cache.Instance.NormalApproach = false;
             }
 
+            Cache.Instance.normalNav = false;
+
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
             {
@@ -935,6 +946,8 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.NormalApproach = false;
             }
+
+            Cache.Instance.normalNav = false;
 
             string target = action.GetParameterValue("target");
 
@@ -1132,6 +1145,8 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.NormalApproach = false;
             }
+
+            Cache.Instance.onlyKillAggro = true;
 
             bool ignoreAttackers;
             if (!bool.TryParse(action.GetParameterValue("ignoreattackers"), out ignoreAttackers))
@@ -2007,6 +2022,10 @@ namespace Questor.Modules.Activities
 
                     // Reload the items needed for this mission from the XML file
                     Cache.Instance.RefreshMissionItems(AgentId);
+
+                    // Reset notNormalNav and onlyKillAggro to false
+                    Cache.Instance.normalNav = true;
+                    Cache.Instance.onlyKillAggro = false;
 
                     // Update x/y/z so that NextPocket wont think we are there yet because its checking (very) old x/y/z cords
                     _lastX = Cache.Instance.DirectEve.ActiveShip.Entity.X;

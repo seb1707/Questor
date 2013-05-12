@@ -506,13 +506,13 @@
   <!--                                                        -->
   <!-- EMAIL SETTINGS                         -->
   <!--                                                        -->
-  <emailSupport>false</emailSupport> <!-- Questor Email Support:  on or off -->
-  <emailAddress></emailAddress> <!-- your email account name, used to authenticate to send email mail: i.e. EmailAddressTheseEmailsAreFrom@myEmailServerDomain.org -->
-  <emailPassword></emailPassword> <!-- your email accounts password, used to authenticate to send email mail -->
-  <emailSMTPServer></emailSMTPServer> <!--  ex: mail.myEmailServerDomain.com-->
-  <emailSMTPPort>25</emailSMTPPort> <!-- port to use for outgoing mail (smtp) -->
-  <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
-  <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
+  <emailSupport>false</emailSupport>
+  <emailAddress></emailAddress>
+  <emailPassword></emailPassword>
+  <emailSMTPServer></emailSMTPServer> <!--  ex: mail.myEmailProvider.com-->
+  <emailSMTPPort>25</emailSMTPPort>
+  <emailAddressToSendAlerts></emailAddressToSendAlerts>
+  <emailEnableSSL>false</emailEnableSSL>
   
   
   <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>

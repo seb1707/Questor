@@ -1394,9 +1394,8 @@ namespace Questor.Modules.Combat
                                 {
                                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
                                     {
-                                        if(Cache.Instance.normalNav == true)
-                                            NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat");
-
+                                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat", Cache.Instance.normalNav);
+                                        
                                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
                                         ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
                                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
@@ -1407,6 +1406,7 @@ namespace Questor.Modules.Combat
                                         ActivateWeapons(Cache.Instance.PreferredPrimaryWeaponTarget);
                                         return;
                                     }
+
                                     if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Kill Target is not currently targeted", Logging.Debug);
                                 }
                                 else
@@ -1422,7 +1422,7 @@ namespace Questor.Modules.Combat
                         }
                         else
                         {
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We dont currently havea kill target, how can this be?", Logging.Debug);
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target, how can this be?", Logging.Debug);
                             Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
                         }
 

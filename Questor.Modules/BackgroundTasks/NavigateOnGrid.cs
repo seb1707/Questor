@@ -157,9 +157,9 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        public static void NavigateIntoRange(EntityCache target, string module)
+        public static void NavigateIntoRange(EntityCache target, string module, bool moveMyShip)
         {
-            if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp))
+            if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp) || !moveMyShip)
                 return;
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);

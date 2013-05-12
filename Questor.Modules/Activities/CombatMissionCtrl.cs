@@ -120,7 +120,7 @@ namespace Questor.Modules.Activities
 
                 //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
 
-                Cache.Instance.GetBestTarget(targets, (double)Distances.OnGridWithMe, false, "Combat");
+                Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "Combat", targets);
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance < (double)Distances.OnGridWithMe)
@@ -475,7 +475,8 @@ namespace Questor.Modules.Activities
 
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
-            List<EntityCache> targets = new List<EntityCache>();
+            #region Original Coding for clear pocket, dont get rid of it yet, but its getting commented out for now
+            /*List<EntityCache> targets = new List<EntityCache>();
             targets.Clear();
 
             int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
@@ -580,8 +581,11 @@ namespace Questor.Modules.Activities
                 if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl.ClearPocket", "the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)",Logging.Debug);
                 if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl.ClearPocket", "AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(targets, DistanceToClear, targetedby, true);", Logging.Debug);
                 AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(targets, DistanceToClear, targetedby, true);
-            }
-            
+            }*/
+            #endregion
+            if(Cache.Instance.GetBestTarget(DistanceToClear, false, "combat"))
+                _clearPocketTimeout = null;
+
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
 

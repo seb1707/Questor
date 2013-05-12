@@ -2676,7 +2676,7 @@ namespace Questor.Modules.Caching
         /// <param name="lowValueFirst"></param>
         /// <param name="callingroutine"> </param>
         /// <returns></returns>
-        public bool GetBestTarget(IEnumerable<EntityCache> _potentialTargets, double distance, bool lowValueFirst, string callingroutine)
+        public bool GetBestTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
         {
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Attempting to get Best Target", Logging.Teal);
             if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))

@@ -1391,7 +1391,7 @@ namespace Questor.Modules.Combat
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToShoot)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToShoot)
                         {
                             NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat", Cache.Instance.normalNav);
                                         

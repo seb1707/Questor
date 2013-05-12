@@ -1257,20 +1257,25 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (!InSpace)
+                try
                 {
-                    return new List<EntityCache>();
-                }
+                    if (!InSpace)
+                    {
+                        return new List<EntityCache>();
+                    }
 
-                if (_entities.Count == 0)
-                {
-                    _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
-                }
+                    if (_entities.Count == 0)
+                    {
+                        _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
+                    }
 
-                if (_entities.Count > 0)
-                {
-                    return _entities;
+                    if (_entities.Count > 0)
+                    {
+                        return _entities;
+                    }
                 }
+                catch (NullReferenceException) { }  // this can happen during session changes
+                
 
                 return new List<EntityCache>();
             }

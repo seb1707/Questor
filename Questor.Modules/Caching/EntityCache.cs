@@ -283,7 +283,7 @@ namespace Questor.Modules.Caching
                             {
                                 PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
 
-                                if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority < _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.WeaponRange))
+                                if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority < _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.MaxRange))
                                 {
                                     return true;
                                 }
@@ -291,7 +291,7 @@ namespace Questor.Modules.Caching
                                 return false;
                             }
 
-                            if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.WeaponRange))
+                            if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.MaxRange))
                             {
                                 return true;
                             }

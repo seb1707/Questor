@@ -1338,7 +1338,7 @@ namespace Questor
                 {
                     Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
-                    Cache.Instance.ReasonToStopQuestor = "Stating QuestorManager: closing questor"
+                    Cache.Instance.ReasonToStopQuestor = "Stating QuestorManager: closing questor";
                     Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                 }
                 else

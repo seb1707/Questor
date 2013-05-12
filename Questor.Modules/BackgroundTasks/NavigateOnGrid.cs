@@ -183,9 +183,9 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Settings.Instance.SpeedTank)
             {
-                if (target.Distance > Cache.Instance.WeaponRange && !Cache.Instance.IsApproachingOrOrbiting)
+                if (target.Distance > Cache.Instance.MaxRange && !Cache.Instance.IsApproachingOrOrbiting)
                 {
-                    target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
+                    target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into weapons range before initiating orbit", Logging.Teal);
                     return;
                 }
@@ -254,8 +254,8 @@ namespace Questor.Modules.BackgroundTasks
                                 OrbitGateorTarget(target, module);
                                 return;
                             }
-                            target.Approach((int)(Cache.Instance.WeaponRange * 0.8d));
-                            Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.WeaponRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
+                            Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.MaxRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                             return;
                         }
 

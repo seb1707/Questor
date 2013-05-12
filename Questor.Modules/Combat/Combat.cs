@@ -377,7 +377,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            if (isWeapon && entity.Distance > Cache.Instance.WeaponRange)
+            if (isWeapon && entity.Distance > Cache.Instance.MaxRange)
             {
                 Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 2) + "] which is out of weapons range!", Logging.Debug);
                 return false;
@@ -1088,7 +1088,7 @@ namespace Questor.Modules.Combat
                     if (highValueTargetingMeEntity != null
                         && !highValueTargetingMeEntity.IsTarget
                         && !highValueTargetingMeEntity.IsTargeting
-                        && highValueTargetingMeEntity.Distance < Cache.Instance.WeaponRange
+                        && highValueTargetingMeEntity.Distance < Cache.Instance.MaxRange
                         && highValueTargetingMeEntity.LockTarget("TargetCombatants.HighValueTargetingMeEntity"))
                     {
                         Logging.Log("Combat", "Targeting high value target [" + highValueTargetingMeEntity.Name + "][ID: " + Cache.Instance.MaskedID(highValueTargetingMeEntity.Id) + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargetsTargeted.Count + "]", Logging.Teal);
@@ -1161,7 +1161,7 @@ namespace Questor.Modules.Combat
                     if (TargetThisNotYetAggressiveNPC != null
                         && !TargetThisNotYetAggressiveNPC.IsTarget
                         && !TargetThisNotYetAggressiveNPC.IsTargeting
-                        && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.WeaponRange
+                        && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.MaxRange
                         && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
                     {
                         Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);

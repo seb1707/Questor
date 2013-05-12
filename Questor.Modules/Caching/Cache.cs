@@ -590,7 +590,10 @@ namespace Questor.Modules.Caching
 
         public double MaxRange
         {
-            get { return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange); }
+            get
+            {
+                return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+            }
         }
 
         public double LowValueTargetsHaveToBeWithinDistance

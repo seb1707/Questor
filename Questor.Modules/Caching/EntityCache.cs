@@ -641,7 +641,7 @@ namespace Questor.Modules.Caching
             get { return _directEntity.IsPc; }
         }
 
-        public bool IsInMissionTargetingMeAndNotYetTargeted
+        public bool IsTargetingMeAndNotYetTargeted
         {
             get
             {
@@ -653,7 +653,6 @@ namespace Questor.Modules.Caching
                            && CategoryId == (int)CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                            && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
-                    //&& Cache.Instance.InMission
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC
@@ -663,7 +662,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool IsInMissionNotYetTargetingMeAndNotYetTargeted
+        public bool IsNotYetTargetingMeAndNotYetTargeted
         {
             get
             {
@@ -675,7 +674,6 @@ namespace Questor.Modules.Caching
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                            && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
-                           //&& Cache.Instance.InMission
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC
@@ -698,11 +696,9 @@ namespace Questor.Modules.Caching
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                            && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
-                           //&& Cache.Instance.InMission
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC
-                           //&& !IsLargeCollidable
                            && !IsStation);
                 return result;
             }

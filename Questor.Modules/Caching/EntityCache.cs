@@ -268,6 +268,64 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsHigherPriorityPresent
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance._primaryWeaponPriorityTargets.Any() || Cache.Instance._dronePriorityTargets.Any())
+                    {
+
+                        if (Cache.Instance._primaryWeaponPriorityTargets.Any()) 
+                        {
+                            if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                            {
+                                PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
+
+                                if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority < _currentPrimaryWeaponPriority))
+                                {
+                                    return true;
+                                }
+
+                                if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.WeaponRange))
+                                {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+
+                            return false;
+                        }
+                        
+                        if (Cache.Instance._dronePriorityTargets.Any())
+                        {
+                            if (Cache.Instance._dronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                            {
+                                DronePriority _currentEntityDronePriority = Cache.Instance._dronePriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.DronePriority).FirstOrDefault();
+
+                                if (!Cache.Instance._dronePriorityTargets.All(pt => pt.DronePriority < _currentEntityDronePriority))
+                                {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+
+                            return true;
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+        }
+
         public bool IsActiveTarget
         {
             get

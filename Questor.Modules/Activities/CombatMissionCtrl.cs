@@ -151,7 +151,8 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-
+                //Gonna handle this in a central location now
+                /*
                 if (MoveShip)
                 {
                     if (Settings.Instance.DebugClearPocket) Logging.Log("AddPriorityKillTargetsAndMoveIntoRangeAsNeeded", "if (MoveShip)", Logging.Debug);
@@ -162,7 +163,7 @@ namespace Questor.Modules.Activities
                         NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
                     }
                 }
-
+                */
                 //panic handles adding any priority targets and combat will prefer to kill any priority targets
                 if (!Cache.Instance.TargetedBy.Any() && DateTime.UtcNow > Cache.Instance.NextReload)
                 {

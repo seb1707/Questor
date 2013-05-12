@@ -455,6 +455,7 @@ namespace Questor.Modules.Combat
             //
             // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
             // If you are not in a mission by all means let combat actions move you around as needed
+            /*
             if (!Cache.Instance.InMission)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.Teal);
@@ -465,7 +466,7 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: We are Speed Tanking: navigateintorange", Logging.Teal);
                 NavigateOnGrid.NavigateIntoRange(target, "Combat");
             }
-
+            */
             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: after navigate into range...", Logging.Teal);
 
             // Get the weapons
@@ -1299,6 +1300,9 @@ namespace Questor.Modules.Combat
                                 {
                                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)
                                     {
+                                        if(Cache.Instance.normalNav == true)
+                                            NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "Combat");
+
                                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
                                         ActivateTargetPainters(Cache.Instance.PreferredPrimaryWeaponTarget);
                                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);

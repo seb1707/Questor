@@ -283,17 +283,17 @@ namespace Questor.Modules.Caching
                             {
                                 PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
 
-                                if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority < _currentPrimaryWeaponPriority))
-                                {
-                                    return true;
-                                }
-
-                                if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.WeaponRange))
+                                if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority < _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.WeaponRange))
                                 {
                                     return true;
                                 }
 
                                 return false;
+                            }
+
+                            if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.WeaponRange))
+                            {
+                                return true;
                             }
 
                             return false;
@@ -305,7 +305,7 @@ namespace Questor.Modules.Caching
                             {
                                 DronePriority _currentEntityDronePriority = Cache.Instance._dronePriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.DronePriority).FirstOrDefault();
 
-                                if (!Cache.Instance._dronePriorityTargets.All(pt => pt.DronePriority < _currentEntityDronePriority))
+                                if (!Cache.Instance._dronePriorityTargets.All(pt => pt.DronePriority < _currentEntityDronePriority && pt.Entity.Distance < Settings.Instance.DroneControlRange))
                                 {
                                     return true;
                                 }
@@ -313,10 +313,15 @@ namespace Questor.Modules.Caching
                                 return false;
                             }
 
-                            return true;
+                            if (Cache.Instance._dronePriorityTargets.Any(e => e.Entity.Distance < Settings.Instance.DroneControlRange))
+                            {
+                                return true;
+                            }
+
+                            return false;
                         }
 
-                        return true;
+                        return false;
                     }
 
                     return false;

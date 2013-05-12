@@ -15,6 +15,7 @@
   <debugBlackList>false</debugBlackList>
   <debugCargoHold>false</debugCargoHold>
   <debugCleanup>false</debugCleanup>
+  <debugClearPocket>false</debugClearPocket>
   <debugCourierMissions>false</debugCourierMissions>
   <debugDecline>false</debugDecline>
   <debugDefense>false</debugDefense>
@@ -27,6 +28,7 @@
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
   <debugItemHangar>false</debugItemHangar>
+  <debugKillTargets>true</debugKillTargets>
   <debugLoadScripts>false</debugLoadScripts>
   <debugLogging>false</debugLogging>
   <debugLootWrecks>false</debugLootWrecks>
@@ -45,6 +47,7 @@
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
+  <debugTargetCombatants>true</debugTargetCombatants>
   <debugTargetWrecks>false</debugTargetWrecks>
   <debugTraveler>false</debugTraveler>
   <debugTractorBeams>false</debugTractorBeams>
@@ -506,13 +509,13 @@
   <!--                                                        -->
   <!-- EMAIL SETTINGS                         -->
   <!--                                                        -->
-  <emailSupport>false</emailSupport>
-  <emailAddress></emailAddress>
-  <emailPassword></emailPassword>
-  <emailSMTPServer></emailSMTPServer> <!--  ex: mail.myEmailProvider.com-->
-  <emailSMTPPort>25</emailSMTPPort>
-  <emailAddressToSendAlerts></emailAddressToSendAlerts>
-  <emailEnableSSL>false</emailEnableSSL>
+  <emailSupport>false</emailSupport> <!-- Questor Email Support:  on or off -->
+  <emailAddress></emailAddress> <!-- your email account name, used to authenticate to send email mail: i.e. EmailAddressTheseEmailsAreFrom@myEmailServerDomain.org -->
+  <emailPassword></emailPassword> <!-- your email accounts password, used to authenticate to send email mail -->
+  <emailSMTPServer></emailSMTPServer> <!--  ex: mail.myEmailServerDomain.com-->
+  <emailSMTPPort>25</emailSMTPPort> <!-- port to use for outgoing mail (smtp) -->
+  <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
+  <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
   
   
   <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>

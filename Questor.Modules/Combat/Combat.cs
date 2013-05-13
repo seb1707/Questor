@@ -765,7 +765,7 @@ namespace Questor.Modules.Combat
                                                                             //this should keep targets that we know have scrambled us locked
                                                                             || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent
                                                                                     //unless we cant target one that is actually currently scrambling us
-                                                                                    || highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count() >= maxTotalTargets)) 
+                                                                                    || highValueTargetsTargeted.Count() >= maxHighValueTarget)) 
                                                                             && !h.IsWarpScramblingMe
                                                                             && (highValueTargetsTargeted.Count() >= maxHighValueTarget))
                                                                             .OrderBy(t => t.Distance > Cache.Instance.MaxRange)
@@ -823,7 +823,7 @@ namespace Questor.Modules.Combat
                                                                     //this should keep targets that we know have scrambled us locked
                                                                     || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent
                                                                             //unless we cant target one that is actually currently scrambling us
-                                                                            || highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count() >= maxTotalTargets)) 
+                                                                            || lowValueTargetsTargeted.Count() >= maxLowValueTarget)) 
                                                                     && !h.IsWarpScramblingMe
                                                                     && (lowValueTargetsTargeted.Count() >= maxLowValueTarget))
                                                                     .OrderBy(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)
@@ -973,7 +973,7 @@ namespace Questor.Modules.Combat
                                                                                    || t.IsWarpScramblingMe //which would make this target a warp scrambling drone priority target
                                                                                    || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                     //|| t.Id == Cache.Instance.PreferredDroneTarget.Id)
-                                                                                   .OrderBy(t => t.IsNPCBattleship)
+                                                                                   .OrderByDescending(t => t.IsNPCBattleship)
                                                                                    .ThenBy(t => t.Nearest5kDistance)
                                                                                    .ToList();
             }
@@ -985,7 +985,7 @@ namespace Questor.Modules.Combat
                                                                                             && (t.IsTarget || t.IsTargeting)
                                                                                             && (t.IsNPCFrigate || t.IsFrigate))
                                                                                             && (highValueTargetsTargeted.Any(e => e.Id != t.Id))) //if it is a high value target by definition it is NOT a low value target
-                                                                                            .OrderBy(t => t.IsNPCFrigate || t.IsFrigate)
+                                                                                            .OrderByDescending(t => t.IsNPCFrigate || t.IsFrigate)
                                                                                             .ThenBy(t => t.Nearest5kDistance)
                                                                                   .ToList();
             }
@@ -1001,7 +1001,7 @@ namespace Questor.Modules.Combat
                 //
                 // unlock low value targets that are out of range or ignored
                 //
-                if (!UnlockHighValueTarget("Combat.TargetCombatants", "OutOfRange or Ignored", true)) return;
+                if (!UnlockLowValueTarget("Combat.TargetCombatants", "OutOfRange or Ignored", true)) return;
                 //
                 // unlock high value targets that are out of range or ignored
                 //
@@ -1081,7 +1081,7 @@ namespace Questor.Modules.Combat
                     if (!UnlockHighValueTarget("Combat.TargetCombatants", "PrimaryWeaponPriorityTargets")) return;
 
                     IEnumerable<EntityCache> _primaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
-                                                                                                                     .OrderBy(c => c.IsInOptimalRange)
+                                                                                                                     .OrderByDescending(c => c.IsInOptimalRange)
                                                                                                                      .ThenBy(c => c.Distance);
 
                     if (_primaryWeaponPriority.Any())
@@ -1133,7 +1133,7 @@ namespace Questor.Modules.Combat
                     if (!UnlockLowValueTarget("Combat.TargetCombatants", "DronePriorityTargets")) return;
 
                     IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityTargets.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
-                                                                                                                         .OrderBy(c => c.IsInOptimalRange)
+                                                                                                                         .OrderByDescending(c => c.IsInOptimalRange)
                                                                                                                          .ThenBy(c => c.Distance);
 
                     if (_dronePriorityTargets.Any())

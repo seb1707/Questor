@@ -964,7 +964,7 @@ namespace Questor.Modules.Combat
                                                                                    && (!t.IsNPCFrigate && !t.IsFrigate))
                                                                                    || t.IsPrimaryWeaponPriorityTarget
                                                                                    || t.IsWarpScramblingMe //which would make this target a warp scrambling drone priority target
-                                                                                   || t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)
+                                                                                   || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                     //|| t.Id == Cache.Instance.PreferredDroneTarget.Id)
                                                                                    .OrderBy(t => t.IsNPCBattleship)
                                                                                    .ThenBy(t => t.Nearest5kDistance)

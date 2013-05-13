@@ -2765,6 +2765,7 @@ namespace Questor.Modules.Caching
                             WarpScramblingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget 
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -2813,6 +2814,7 @@ namespace Questor.Modules.Caching
                             JammingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Jamming)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -2861,6 +2863,7 @@ namespace Questor.Modules.Caching
                             TrackingDisruptionPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TrackingDisrupting)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -2909,6 +2912,7 @@ namespace Questor.Modules.Caching
                             NeutralizingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Neutralizing)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -2957,6 +2961,7 @@ namespace Questor.Modules.Caching
                             TargetPaintingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TargetPainting)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -3005,6 +3010,7 @@ namespace Questor.Modules.Caching
                             DampeningPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Dampening)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -3030,7 +3036,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Webbers", Logging.Teal);
-                    // Is our current target a Jamming priority target?
+                    // Is our current target a Webbing priority target?
                     if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
                                                             && pt.Id == currentTarget.Id
                                                             && pt.IsWebbingMe))
@@ -3053,6 +3059,7 @@ namespace Questor.Modules.Caching
                             WebbingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
                                                                                                  && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Webbing)
                                                                                                 .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                                                 .ThenBy(pt => pt.Entity.Distance)
                                                                                                 .Select(pt => pt.Entity).FirstOrDefault();
                         }
@@ -3243,6 +3250,7 @@ namespace Questor.Modules.Caching
                  primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget && p.Entity.Distance < Cache.Instance.MaxRange)
                                                                             .OrderByDescending(pt => pt.Entity.IsInOptimalRange)
                                                                             .ThenBy(pt => pt.PrimaryWeaponPriority)
+                                                                            .ThenByDescending(pt => pt.Entity.IsTarget)
                                                                             .ThenBy(pt => pt.Entity.Distance)
                                                                             .Select(pt => pt.Entity).FirstOrDefault();
             }

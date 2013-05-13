@@ -3297,7 +3297,7 @@ namespace Questor.Modules.Caching
             {
                 lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate))
                     .OrderBy(t => t.IsNPCFrigate)
-                    .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
+                    .ThenBy(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
                     //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
@@ -3678,7 +3678,7 @@ namespace Questor.Modules.Caching
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate))
                     .OrderBy(t => !t.IsNPCFrigate)
                     .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                    .ThenBy(t => t.IsInOptimalRange)
+                    .ThenByDescending(t => t.IsInOptimalRange) //.net sorts bools as false then true (wtf?!?! 0/1 is the only reason i can see)
                     //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)

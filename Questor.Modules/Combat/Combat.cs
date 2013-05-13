@@ -996,7 +996,6 @@ namespace Questor.Modules.Combat
             //
             // If it is currently out of our weapon range unlock it for now, unless it is one of our preferred targets which should technically only happen during kill type actions
             //
-            int icount = 0;
             if (Cache.Instance.Targets.Any())
             {
                 //

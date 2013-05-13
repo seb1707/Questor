@@ -210,7 +210,7 @@ namespace Questor.Modules.Activities
 
                 if (MyNextStargate.Distance < (int)Distances.WarptoDistance && MyNextStargate.Distance != 0)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching)
+                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching(MyNextStargate.Id))
                     {
                         if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
                         MyNextStargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)

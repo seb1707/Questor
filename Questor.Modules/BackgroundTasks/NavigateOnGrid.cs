@@ -91,7 +91,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)", Logging.White);
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
-                    if (!Cache.Instance.IsApproachingOrOrbiting)
+                    if (!Cache.Instance.IsApproachingOrOrbiting(target.Id))
                     {
                         if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("CombatMissionCtrl.NavigateIntoRange", "We are not approaching nor orbiting", Logging.Teal);
 
@@ -183,13 +183,13 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Settings.Instance.SpeedTank)
             {
-                if (target.Distance > Cache.Instance.MaxRange && !Cache.Instance.IsApproachingOrOrbiting)
+                if (target.Distance > Cache.Instance.MaxRange && !Cache.Instance.IsApproachingOrOrbiting(target.Id))
                 {
                     target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into weapons range before initiating orbit", Logging.Teal);
                     return;
                 }
-                if (!Cache.Instance.IsOrbiting)
+                if (!Cache.Instance.IsOrbiting(target.Id))
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
                     OrbitGateorTarget(target, module);
@@ -298,7 +298,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
                         Logging.Log(module, "StartOrbiting: Target in range", Logging.Teal);
-                        if (!Cache.Instance.IsApproachingOrOrbiting)
+                        if (!Cache.Instance.IsApproachingOrOrbiting(target.Id))
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject", "We are not approaching nor orbiting", Logging.Teal);
                             bool orbitStructure = Settings.Instance.OrbitStructure;

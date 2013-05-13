@@ -564,16 +564,16 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 // Should we activate the module
-                bool activate = Cache.Instance.IsApproachingOrOrbiting;
+                bool activate = Cache.Instance.IsApproachingOrOrbiting(0);
                 activate &= !module.IsActive;
 
                 // Should we deactivate the module?
-                bool deactivate = !Cache.Instance.IsApproaching;
+                bool deactivate = !Cache.Instance.IsApproaching(0);
                 deactivate &= module.IsActive;
                 deactivate &= ((!Cache.Instance.Entities.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60)) || !Settings.Instance.SpeedTank);
 
                 // This only applies when not speed tanking
-                if (!Settings.Instance.SpeedTank && Cache.Instance.IsApproachingOrOrbiting)
+                if (!Settings.Instance.SpeedTank && Cache.Instance.IsApproachingOrOrbiting(0))
                 {
                     // Activate if target is far enough
                     if (Cache.Instance.Approaching != null)

@@ -1426,62 +1426,73 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool IsOrbiting
+        public bool IsOrbiting(long EntityWeWantToBeOrbiting = 0)
         {
-            get
+            if (Cache.Instance.Approaching != null)
             {
-                if (Cache.Instance.Approaching != null)
+                bool _followIDIsOnGrid = false;
+
+                if (EntityWeWantToBeOrbiting != 0)
                 {
-                    bool _followIDIsOnGrid = Cache.Instance.Entities.Where(i => i.Distance < (double)Distances.OnGridWithMe).Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
-
-                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
-                    {
-                        return true;
-                    }
-
-                    return false;
+                    _followIDIsOnGrid = (EntityWeWantToBeOrbiting == DirectEve.ActiveShip.Entity.FollowId);
+                }
+                else
+                {
+                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
                 }
 
-                return false;
-            }
-        }
-
-        public bool IsApproaching
-        {
-            get
-            {
-                if (Cache.Instance.Approaching != null)
-                {
-                    bool _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
-
-                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                return false;
-            }
-        }
-
-        public bool IsApproachingOrOrbiting
-        {
-            get
-            {
-                if (IsApproaching)
-                {
-                    return true;
-                }
-
-                if (IsOrbiting)
+                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
                 {
                     return true;
                 }
 
                 return false;
             }
+
+            return false;
+        }
+
+        public bool IsApproaching(long EntityWeWantToBeApproaching = 0)
+        {
+            if (Cache.Instance.Approaching != null)
+            {
+                bool _followIDIsOnGrid = false;
+                
+                if (EntityWeWantToBeApproaching != 0)
+                {
+                    _followIDIsOnGrid = (EntityWeWantToBeApproaching == DirectEve.ActiveShip.Entity.FollowId);
+                }
+                else
+                {
+                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+                }
+
+                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
+                {
+                    return true;
+                }    
+                
+                
+
+                return false;
+            }
+
+            return false;
+        }
+
+        public bool IsApproachingOrOrbiting(long EntityWeWantToBeApproachingOrOrbiting = 0)
+        {   
+            if (IsApproaching(EntityWeWantToBeApproachingOrOrbiting))
+            {
+                return true;
+            }
+
+            if (IsOrbiting(EntityWeWantToBeApproachingOrOrbiting))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public IEnumerable<EntityCache> ActiveDrones

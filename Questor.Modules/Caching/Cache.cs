@@ -3322,7 +3322,7 @@ namespace Questor.Modules.Caching
             #region High Value - aggrod, or no low value aggrod
             if ((highValueTarget != null 
                     && (highValueTarget.IsTargetedBy 
-                    || (!Cache.Instance.UseDrones && (lowValueTarget == ull || (lowValueTarget != null && !lowValueTarget.IsTargetedBy))))))
+                    || (!Cache.Instance.UseDrones && (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy))))))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);

@@ -762,7 +762,7 @@ namespace Questor.Modules.Combat
                                                                             && (h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
                                                                             && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                             || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                            || (h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent)
+                                                                            || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent)
                                                                             && !h.IsWarpScramblingMe
                                                                             && (highValueTargetsTargeted.Count() >= maxHighValueTarget))
                                                                             .OrderBy(t => t.Distance > Cache.Instance.MaxRange)
@@ -770,6 +770,7 @@ namespace Questor.Modules.Combat
                                                                             .FirstOrDefault();
                 }
                 catch (NullReferenceException) { }
+
             }
             else
             {
@@ -816,7 +817,7 @@ namespace Questor.Modules.Combat
                                                                     && (h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
                                                                     && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                     || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                    || (h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent)
+                                                                    || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent)
                                                                     && !h.IsWarpScramblingMe
                                                                     && (lowValueTargetsTargeted.Count() >= maxLowValueTarget))
                                                                     .OrderBy(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)

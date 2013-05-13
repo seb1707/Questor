@@ -3294,8 +3294,10 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            #region If lowValueFirst && lowValueTarget != null
-            if (lowValueFirst && lowValueTarget != null)
+            #region If lowValueFirst && lowValue aggrod or no high value aggrod
+            if ((lowValueFirst && lowValueTarget != null)
+                    && (lowValueTarget.IsTargetedBy 
+                    || (highValueTarget != null && !highValueTarget.IsTargetedBy)))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Low Value First", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
@@ -3305,9 +3307,11 @@ namespace Questor.Modules.Caching
                 return true;
             }
             #endregion
-
-            #region If we have a high value target
-            if (highValueTarget != null)
+            
+            #region High Value - aggrod, or no low value aggrod
+            if ((highValueTarget != null 
+                    && (highValueTarget.IsTargetedBy 
+                    || (!Cache.Instance.UseDrones && (lowValueTarget != null && !lowValueTarget.IsTargetedBy)))))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
@@ -3324,7 +3328,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking use Low Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
 
-                Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
+                Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
 
                 return true;
             }

@@ -440,6 +440,9 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
+                    //
+                    // this returns true just because we are not in a mission? this is going to fubar all anomalies and any ratting in belts/gates
+                    //
                     return true;
                 }
 

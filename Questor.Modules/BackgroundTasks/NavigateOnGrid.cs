@@ -87,7 +87,7 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.OrbitDistance = 2000;
                 }
 
-                if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)
+                if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000 && Settings.Instance.SpeedTank)
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)", Logging.White);
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
@@ -120,30 +120,16 @@ namespace Questor.Modules.BackgroundTasks
                         //
                         // OrbitStructure is false
                         //
-                        if (Settings.Instance.SpeedTank)
-                        {
-                            target.Orbit(Cache.Instance.OrbitDistance);
-                            Logging.Log(module, "Initiating Orbit [" + target.Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance/1000,0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                            return;
-                        }
-
-                        //
-                        // OrbitStructure is false
-                        // Speedtank is false
-                        //
-                        if (Cache.Instance.MyShipEntity.Velocity < 300) //this will spam a bit until we know what "mode" our activeship is when aligning
-                        {
-                            if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                            {
-                                if (DateTime.UtcNow > Cache.Instance.NextAlign)
-                                {
-                                    Cache.Instance.Star.AlignTo();
-                                    Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][ActiveShip.Entity.Mode:[" + Cache.Instance.DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
-                                    return;
-                                }
-                            }
-                        }
+                        target.Orbit(Cache.Instance.OrbitDistance);
+                        Logging.Log(module, "Initiating Orbit [" + target.Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance/1000,0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                        return;
                     }
+                }
+                else if (!Settings.Instance.SpeedTank && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                {
+                    Logging.Log(module, "Not Speedtanking. Keeping target at Range to hit it.", Logging.Teal);
+                    target.Approach(Settings.Instance.OptimalRange);
+                    Logging.Log(module, "Initiating KeepAtRange [" + target.Name + "][at " + Math.Round((double)Settings.Instance.OptimalRange / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                 }
                 else
                 {

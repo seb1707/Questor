@@ -759,10 +759,13 @@ namespace Questor.Modules.Combat
                 try
                 {
                     unlockThisHighValueTarget = highValueTargetsTargeted.Where(h => h.IsTarget
-                                                                            && (h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
+                                                                            && ((h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
                                                                             && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                             || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                            || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent)
+                                                                            //this should keep targets that we know have scrambled us locked
+                                                                            || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent
+                                                                                    //unless we cant target one that is actually currently scrambling us
+                                                                                    || highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count() >= maxTotalTargets)) 
                                                                             && !h.IsWarpScramblingMe
                                                                             && (highValueTargetsTargeted.Count() >= maxHighValueTarget))
                                                                             .OrderBy(t => t.Distance > Cache.Instance.MaxRange)
@@ -814,10 +817,13 @@ namespace Questor.Modules.Combat
                 try
                 {
                     unlockThisLowValueTarget = lowValueTargetsTargeted.Where(h => h.IsTarget
-                                                                    && (h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
+                                                                    && ((h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
                                                                     && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                     || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                    || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent)
+                                                                    //this should keep targets that we know have scrambled us locked
+                                                                    || (!h.IsPrimaryWeaponPriorityTarget || h.IsHigherPriorityPresent
+                                                                            //unless we cant target one that is actually currently scrambling us
+                                                                            || highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count() >= maxTotalTargets)) 
                                                                     && !h.IsWarpScramblingMe
                                                                     && (lowValueTargetsTargeted.Count() >= maxLowValueTarget))
                                                                     .OrderBy(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)

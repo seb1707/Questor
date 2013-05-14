@@ -1009,11 +1009,11 @@ namespace Questor.Modules.Combat
             //
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
             {
-                //if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsValid || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
-                //{
-                //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                //    return;
-                //}
+                if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsLargeCollidable && !Cache.Instance.potentialCombatTargets.Any())
+                {
+                    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                    return;
+                }
 
                 if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                 {
@@ -1048,11 +1048,11 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTarget != null) 
             {
-                //if (!Cache.Instance.PreferredDroneTarget.IsValid || !Cache.Instance.PreferredDroneTarget.IsOnGridWithMe)
-                //{
-                //    Cache.Instance.PreferredDroneTarget = null;
-                //    return;
-                //}
+                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.potentialCombatTargets.Any())
+                {
+                    Cache.Instance.PreferredDroneTarget = null;
+                    return;
+                }
 
                 if (!Cache.Instance.PreferredDroneTarget.IsReadyToTarget)
                 {

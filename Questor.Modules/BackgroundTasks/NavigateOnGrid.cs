@@ -222,9 +222,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (target.Distance <= Cache.Instance.OptimalRange)
                         {
-                            long ApproachingId = Cache.Instance.Approaching != null ? Cache.Instance.Approaching.Id : -1;
-
-                            if ((target.IsNPCFrigate) && ApproachingId != target.Id && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            if ((target.IsNPCFrigate) && (Cache.Instance.Approaching != null && Cache.Instance.Approaching.Id != target.Id) && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                             {
                                 Logging.Log(module, "Target is NPC Frigate and we got Turrets. Keeping target at Range to hit it.", Logging.Teal);
                                 target.Approach(Settings.Instance.OptimalRange);

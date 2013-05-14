@@ -759,8 +759,8 @@ namespace Questor.Modules.Combat
                 try
                 {
                     unlockThisHighValueTarget = highValueTargetsTargeted.Where(h => h.IsTarget
-                                                                            && (((Cache.Instance.PreferredPrimaryWeaponTarget != null && h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
-                                                                            && (Cache.Instance.PreferredDroneTarget != null && h.Id != Cache.Instance.PreferredDroneTarget.Id))
+                                                                            && (((Cache.Instance.PreferredPrimaryWeaponTarget != null ? h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id : true)
+                                                                            && (Cache.Instance.PreferredDroneTarget != null ? h.Id != Cache.Instance.PreferredDroneTarget.Id : true))
                                                                             || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
                                                                             || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (highValueTargetsTargeted.Count() >= maxHighValueTarget && (!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget || !Cache.Instance.PreferredDroneTarget.IsTarget))))
                                                                             && !h.IsPriorityWarpScrambler
@@ -814,8 +814,8 @@ namespace Questor.Modules.Combat
                 try
                 {
                     unlockThisLowValueTarget = lowValueTargetsTargeted.Where(h => h.IsTarget
-                                                                    && (((Cache.Instance.PreferredPrimaryWeaponTarget != null && h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
-                                                                    && (Cache.Instance.PreferredDroneTarget != null && h.Id != Cache.Instance.PreferredDroneTarget.Id))
+                                                                    && (((Cache.Instance.PreferredPrimaryWeaponTarget != null ? h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id : true)
+                                                                    && (Cache.Instance.PreferredDroneTarget != null ? h.Id != Cache.Instance.PreferredDroneTarget.Id : true))
                                                                     || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
                                                                     || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (lowValueTargetsTargeted.Count() >= maxLowValueTarget && (!Cache.Instance.PreferredDroneTarget.IsTarget || !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget))))
                                                                     && !h.IsPriorityWarpScrambler

@@ -2714,6 +2714,8 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
+            if (Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
+                Cache.Instance.PreferredPrimaryWeaponTarget = null;
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
@@ -3387,7 +3389,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool GetBestDroneTarget(IEnumerable<EntityCache> _potentialTargets, double distance, bool lowValueFirst, string callingroutine)
+        public bool GetBestDroneTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
         {
             if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
             {
@@ -3405,6 +3407,8 @@ namespace Questor.Modules.Caching
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
+            if (Cache.Instance.PreferredDroneTarget.HasExploded)
+                Cache.Instance.PreferredDroneTarget = null;
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
             if (currentTarget != null && !currentTarget.IsTarget)

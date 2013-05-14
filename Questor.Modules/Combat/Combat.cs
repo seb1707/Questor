@@ -763,7 +763,7 @@ namespace Questor.Modules.Combat
                                                                             && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                             || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
                                                                             || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (highValueTargetsTargeted.Count() >= maxHighValueTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget)))
-                                                                            && !h.IsWarpScramblingMe
+                                                                            && !h.IsPriorityWarpScrambler
                                                                             && (highValueTargetsTargeted.Count() >= maxHighValueTarget))
                                                                             .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                             .ThenByDescending(t => t.Distance)
@@ -779,7 +779,7 @@ namespace Questor.Modules.Combat
                 unlockThisHighValueTarget = highValueTargetsTargeted.Where(h => h.IsTarget
                                                                         && (h.Distance > Cache.Instance.MaxRange
                                                                         || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim())))
-                                                                        && !h.IsWarpScramblingMe)
+                                                                        && !h.IsPriorityWarpScrambler)
                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                         .ThenByDescending(t => t.Distance)
                                                                         .FirstOrDefault();
@@ -817,8 +817,8 @@ namespace Questor.Modules.Combat
                                                                     && ((h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id
                                                                     && h.Id != Cache.Instance.PreferredDroneTarget.Id)
                                                                     || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                    || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (lowValueTargetsTargeted.Count() >= maxLowValueTarget && !Cache.Instance.PreferredDroneTarget.IsTarget))) 
-                                                                    && !h.IsWarpScramblingMe
+                                                                    || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (lowValueTargetsTargeted.Count() >= maxLowValueTarget && !Cache.Instance.PreferredDroneTarget.IsTarget)))
+                                                                    && !h.IsPriorityWarpScrambler
                                                                     && (lowValueTargetsTargeted.Count() >= maxLowValueTarget))
                                                                     .OrderByDescending(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)
                                                                     .ThenByDescending(t => t.Nearest5kDistance)
@@ -833,7 +833,7 @@ namespace Questor.Modules.Combat
                     unlockThisLowValueTarget = lowValueTargetsTargeted.Where(h => h.IsTarget
                                                                     && ((h.Distance > Cache.Instance.MaxRange)
                                                                     || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim())))
-                                                                    && !h.IsWarpScramblingMe)
+                                                                    && !h.IsPriorityWarpScrambler)
                                                                     .OrderByDescending(t => t.Distance < Settings.Instance.DroneControlRange) //replace with .IsInDroneRange (which can be set to weapons range if usedrones is falee)
                                                                     .ThenByDescending(t => t.Nearest5kDistance)
                                                                     .FirstOrDefault();
@@ -964,10 +964,10 @@ namespace Questor.Modules.Combat
                                                                                    && (t.IsTarget || t.IsTargeting)
                                                                                    && (!t.IsNPCFrigate && !t.IsFrigate))
                                                                                    || t.IsPrimaryWeaponPriorityTarget
-                                                                                   || t.IsWarpScramblingMe //which would make this target a warp scrambling drone priority target
+                                                                                   || t.IsPriorityWarpScrambler
                                                                                    || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
-                    //|| t.Id == Cache.Instance.PreferredDroneTarget.Id)
-                                                                                   .OrderByDescending(t => t.IsNPCBattleship)
+                                                                                   .OrderByDescending(t => t.IsPriorityWarpScrambler)
+                                                                                   .ThenByDescending(t => t.IsNPCBattleship)
                                                                                    .ThenBy(t => t.Nearest5kDistance)
                                                                                    .ToList();
             }

@@ -200,7 +200,7 @@ namespace Questor.Modules.Combat
                     bool launch = true;
 
                     // Always launch if we're scrambled
-                    if (!Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                    if (!Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe || pt.DronePriorityLevel == DronePriority.WarpScrambler))
                     {
                         launch &= Cache.Instance.UseDrones;
 
@@ -320,9 +320,9 @@ namespace Questor.Modules.Combat
                     }
                     else
                     {
-                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe || pt.DronePriorityLevel == DronePriority.WarpScrambler))
                         {
-                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).ThenBy(i => i.DronePriorityLevel == DronePriority.WarpScrambler).FirstOrDefault();
                             if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
                             {
                                 _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);

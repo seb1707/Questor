@@ -424,9 +424,9 @@ namespace Questor.Modules.Activities
                                                                && t.GroupId != (int)Group.LargeColidableStructure
                                                                && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                                && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                               .OrderBy(t => !t.IsNPCFrigate)
-                                                               .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                               .ThenBy(t => t.IsInOptimalRange)
+                                                               .OrderByDescending(t => !t.IsNPCFrigate)
+                                                               .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                               .ThenByDescending(t => t.IsInOptimalRange)
                                                                //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                .ThenBy(t => t.Distance)
                                                                .FirstOrDefault();
@@ -644,9 +644,9 @@ namespace Questor.Modules.Activities
                                                                 && t.GroupId != (int)Group.LargeColidableStructure
                                                                 && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                                 && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                               .OrderBy(t => !t.IsNPCFrigate)
-                                                               .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                               .ThenBy(t => t.IsInOptimalRange)
+                                                               .OrderByDescending(t => !t.IsNPCFrigate)
+                                                               .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                               .ThenByDescending(t => t.IsInOptimalRange)
                                                                //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                                .ThenBy(t => t.Distance)
                                                                .FirstOrDefault();
@@ -671,9 +671,9 @@ namespace Questor.Modules.Activities
                                                             && t.GroupId != (int)Group.LargeColidableStructure
                                                             && !(t.IsDronePriorityTarget && (!t.IsPrimaryWeaponPriorityTarget && t.IsNPCFrigate)) //if we have it in the drone prioritylist and not the primary weapon list let the drones handle it (do not try to process that target here)
                                                             && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                            .OrderBy(t => !t.IsNPCFrigate)
-                                                            .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                            .ThenBy(t => t.IsInOptimalRange)
+                                                            .OrderByDescending(t => !t.IsNPCFrigate)
+                                                            .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                            .ThenByDescending(t => t.IsInOptimalRange)
                                                             //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                             .ThenBy(t => t.Distance)
                                                             .FirstOrDefault();
@@ -694,9 +694,9 @@ namespace Questor.Modules.Activities
                                                          && t.CategoryId == (int)CategoryID.Entity
                                                          && t.GroupId != (int)Group.LargeColidableStructure
                                                          && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()))
-                                                         .OrderBy(t => !t.IsNPCFrigate)
-                                                         .ThenBy(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                         .ThenBy(t => t.IsInOptimalRange)
+                                                         .OrderByDescending(t => !t.IsNPCFrigate)
+                                                         .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                         .ThenByDescending(t => t.IsInOptimalRange)
                                                          //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                                                          .ThenBy(t => t.Distance)
                                                          .FirstOrDefault();

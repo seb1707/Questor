@@ -526,6 +526,38 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsPriorityWarpScrambler
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == _directEntity.Id))
+                    {
+                        EntityCache __entity = new EntityCache(_directEntity);
+                        if (__entity.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (Cache.Instance.DronePriorityTargets.Any(pt => pt.Id == _directEntity.Id))
+                    {
+                        EntityCache __entity = new EntityCache(_directEntity);
+                        if (__entity.DronePriorityLevel == DronePriority.WarpScrambler)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+        }
+
+
         public bool IsPrimaryWeaponPriorityTarget
         {
             get
@@ -541,6 +573,51 @@ namespace Questor.Modules.Caching
                 }
 
                 return false;
+            }
+        }
+
+        public PrimaryWeaponPriority PrimaryWeaponPriorityLevel
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == _directEntity.Id))
+                    {
+                        PrimaryWeaponPriority currentTargetPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget
+                                                                                                                           && t.EntityID == _directEntity.Id)
+                                                                                                                  .Select(pt => pt.PrimaryWeaponPriority)
+                                                                                                                  .FirstOrDefault();
+                        return currentTargetPriority;
+                    }
+
+                    return PrimaryWeaponPriority.NotUsed;
+                }
+
+                return PrimaryWeaponPriority.NotUsed;
+            }
+        }
+
+        public DronePriority DronePriorityLevel
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Cache.Instance._dronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                    {
+                        DronePriority currentTargetPriority = Cache.Instance._dronePriorityTargets.Where(t => t.Entity.IsTarget
+                                                                                                                  && t.EntityID == _directEntity.Id)
+                                                                                                                  .Select(pt => pt.DronePriority)
+                                                                                                                  .FirstOrDefault();
+
+                        return currentTargetPriority;
+                    }
+
+                    return DronePriority.NotUsed;
+                }
+
+                return DronePriority.NotUsed;
             }
         }
 

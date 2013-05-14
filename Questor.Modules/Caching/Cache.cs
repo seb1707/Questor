@@ -2714,7 +2714,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
-            if (Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
@@ -3407,7 +3407,7 @@ namespace Questor.Modules.Caching
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
-            if (Cache.Instance.PreferredDroneTarget.HasExploded)
+            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.HasExploded)
                 Cache.Instance.PreferredDroneTarget = null;
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target

@@ -1007,27 +1007,37 @@ namespace Questor.Modules.Combat
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
             {
-                //
-                // unlock a lower priority entity if needed
-                //
-                if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
-                {
-                    if (!UnlockHighValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")) return;
-                }
+                //if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsValid || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+                //{
+                //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                //    return;
+                //}
 
-                if ((!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting)
-                    && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
-                    && Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange
-                    && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded
-                    && Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
+                if (!Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                 {
-                    Logging.Log("Combat", "Targeting preferred primary weapon target [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    //highValueTargets.Add(primaryWeaponPriorityEntity);
-                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                    return;
+                    //
+                    // unlock a lower priority entity if needed
+                    //
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
+                    {
+                        if (!UnlockHighValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")) return;
+                    }
+
+                    if ((!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting)
+                        && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
+                        && Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange
+                        && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded
+                        && Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
+                    {
+                        Logging.Log("Combat", "Targeting preferred primary weapon target [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        //highValueTargets.Add(primaryWeaponPriorityEntity);
+                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                        return;
+                    }    
                 }
+                
             }
             #endregion
 
@@ -1035,26 +1045,36 @@ namespace Questor.Modules.Combat
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
-            if (Cache.Instance.PreferredDroneTarget != null && !Cache.Instance.PreferredDroneTarget.IsTarget)
-            {
-                //
-                // unlock a lower priority entity if needed
-                //
-                if (Cache.Instance.PreferredDroneTarget.Distance <= Cache.Instance.MaxRange)
-                {
-                    if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredDroneTarget")) return;
-                }
 
-                if ((!Cache.Instance.PreferredDroneTarget.IsTarget && !Cache.Instance.PreferredDroneTarget.IsTargeting)
-                    && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredDroneTarget.Id)
-                    && Cache.Instance.PreferredDroneTarget.Distance <= Cache.Instance.MaxRange
-                    && !Cache.Instance.PreferredDroneTarget.HasExploded
-                    && Cache.Instance.PreferredDroneTarget.LockTarget("TargetCombatants.PreferredDroneTarget"))
+            if (Cache.Instance.PreferredDroneTarget != null) 
+            {
+                //if (!Cache.Instance.PreferredDroneTarget.IsValid || !Cache.Instance.PreferredDroneTarget.IsOnGridWithMe)
+                //{
+                //    Cache.Instance.PreferredDroneTarget = null;
+                //    return;
+                //}
+
+                if (!Cache.Instance.PreferredDroneTarget.IsReadyToTarget)
                 {
-                    Logging.Log("Combat", "Targeting preferred drone target [" + Cache.Instance.PreferredDroneTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    //highValueTargets.Add(primaryWeaponPriorityEntity);
-                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                    return;
+                    //
+                    // unlock a lower priority entity if needed
+                    //
+                    if (Cache.Instance.PreferredDroneTarget.Distance <= Cache.Instance.MaxRange)
+                    {
+                        if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredDroneTarget")) return;
+                    }
+
+                    if ((!Cache.Instance.PreferredDroneTarget.IsTarget && !Cache.Instance.PreferredDroneTarget.IsTargeting)
+                        && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredDroneTarget.Id)
+                        && Cache.Instance.PreferredDroneTarget.Distance <= Cache.Instance.MaxRange
+                        && !Cache.Instance.PreferredDroneTarget.HasExploded
+                        && Cache.Instance.PreferredDroneTarget.LockTarget("TargetCombatants.PreferredDroneTarget"))
+                    {
+                        Logging.Log("Combat", "Targeting preferred drone target [" + Cache.Instance.PreferredDroneTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        //highValueTargets.Add(primaryWeaponPriorityEntity);
+                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                        return;
+                    }    
                 }
             }
             #endregion

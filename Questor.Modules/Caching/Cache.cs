@@ -3237,7 +3237,8 @@ namespace Questor.Modules.Caching
             try
             {
                  primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.IsTarget && p.Distance < Cache.Instance.MaxRange)
-                                                                            .OrderByDescending(pt => pt.IsInOptimalRange)
+                                                                            .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                            .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                             .ThenByDescending(pt => pt.PrimaryWeaponPriorityLevel)
                                                                             .ThenByDescending(pt => pt.IsTarget)
                                                                             .ThenBy(pt => pt.Distance)
@@ -3247,16 +3248,18 @@ namespace Questor.Modules.Caching
             
             if (primaryWeaponPriorityTarget != null)
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null)", Logging.Debug);
+
                 if (!Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
                 {
                     if (!primaryWeaponPriorityTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !primaryWeaponPriorityTarget.IsTooCloseTooFastTooSmallToHit))
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
-                            
+
                         if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                             Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
-                            
+
                         return true;
                     }    
                 }
@@ -3265,16 +3268,17 @@ namespace Questor.Modules.Caching
             #endregion Get the closest primary weapon priority target
 
             #region Get the closest High Value Target
-            //
-            // Get the closest high value target
-            //
+
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Closest High Value", Logging.Teal);
             EntityCache highValueTarget = null;
 
             if (potentialCombatTargets.Any())
             {
+                if (primaryWeaponPriorityTarget != null) Logging.Log(callingroutine + " Debug: GetBestTarget", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
+
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate))
                     .OrderByDescending(t => !t.IsNPCFrigate)
+                    .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsInOptimalRange)
                     //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
@@ -3294,6 +3298,7 @@ namespace Questor.Modules.Caching
             {
                 lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate))
                     .OrderByDescending(t => t.IsNPCFrigate)
+                    .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
                     //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
@@ -3318,8 +3323,7 @@ namespace Questor.Modules.Caching
             
             #region High Value - aggrod, or no low value aggrod
             if ((highValueTarget != null 
-                    && (highValueTarget.IsTargetedBy 
-                    || (!Cache.Instance.UseDrones && (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy))))))
+                    || (!Cache.Instance.UseDrones && (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy)))))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);

@@ -3463,7 +3463,7 @@ namespace Questor.Modules.Caching
                 #region return warp scrambling target
                 if (WarpScramblingPriorityTarget != null)
                 {
-                    if (currentTarget.IsFrigate || currentTarget.IsNPCFrigate || !currentTarget.IsWarpScramblingMe)
+                    if (!currentTarget.IsWarpScramblingMe)
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (WarpScramblingDronePriorityTarget != null)", Logging.Debug);
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "WarpScramblingDronePriorityTarget [" + WarpScramblingPriorityTarget.Name + "][" + Math.Round(WarpScramblingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(WarpScramblingPriorityTarget.Id) + "] GroupID [" + WarpScramblingPriorityTarget.GroupId + "]", Logging.Debug);

@@ -2720,7 +2720,7 @@ namespace Questor.Modules.Caching
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             EntityCache currentTarget = null;
-            currentTarget = Cache.Instance.CurrentWeaponTarget();
+            currentTarget = ((Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget : (Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : null)));
             if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
@@ -3393,7 +3393,7 @@ namespace Questor.Modules.Caching
             }
 
             EntityCache currentTarget = null;
-            currentTarget = TargetingCache.CurrentDronesTarget;
+            currentTarget = ((Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : (TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : null)));
             if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)

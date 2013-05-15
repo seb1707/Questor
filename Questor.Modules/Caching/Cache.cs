@@ -3391,10 +3391,7 @@ namespace Questor.Modules.Caching
             }
 
             EntityCache currentTarget = null;
-            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) && TargetingCache.CurrentDronesTarget != null)
-            {
-                currentTarget = TargetingCache.CurrentDronesTarget;
-            }
+            currentTarget = ((TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : (Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : null)));
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

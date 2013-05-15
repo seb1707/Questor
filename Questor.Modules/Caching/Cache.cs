@@ -2721,7 +2721,7 @@ namespace Questor.Modules.Caching
 
             EntityCache currentTarget = null;
 
-            currentTarget = ((Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : (Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget : null)));
+            currentTarget = ((Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : ((Cache.Instance.PreferredPrimaryWeaponTarget != null && !Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded) ? Cache.Instance.PreferredPrimaryWeaponTarget : null)));
             
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
@@ -3391,7 +3391,7 @@ namespace Questor.Modules.Caching
             }
 
             EntityCache currentTarget = null;
-            currentTarget = ((TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : (Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : null)));
+            currentTarget = ((TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : ((Cache.Instance.PreferredDroneTarget != null && !Cache.Instance.PreferredDroneTarget.HasExploded) ? Cache.Instance.PreferredDroneTarget : null)));
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

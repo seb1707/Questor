@@ -3283,6 +3283,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsInOptimalRange)
+                    .ThenByDescending(t => t.IsTarget)
                     //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
@@ -3303,6 +3304,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
                     //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                    .ThenByDescending(t => t.IsTarget)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();
@@ -3583,6 +3585,7 @@ namespace Questor.Modules.Caching
             {
                 dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget && d.Entity.Distance < Settings.Instance.DroneControlRange && d.Entity.IsTargetedBy)
                                                            .OrderByDescending(pt => pt.DronePriority)
+                                                           .ThenByDescending(pt => pt.Entity.IsTarget)
                                                            .ThenBy(pt => pt.Entity.Distance)
                                                            .Select(pt => pt.Entity).FirstOrDefault();
             }
@@ -3611,6 +3614,7 @@ namespace Questor.Modules.Caching
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate) && t.IsTargetedBy)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                    .ThenByDescending(t => t.IsTarget)
                     .ThenByDescending(t => t.IsInOptimalRange) //.net sorts bools as false then true (wtf?!?! 0/1 is the only reason i can see)
                     //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
@@ -3623,11 +3627,11 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate))
+                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsTargetedBy)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
+                    .ThenByDescending(t => t.IsTarget)
                     //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                    .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();

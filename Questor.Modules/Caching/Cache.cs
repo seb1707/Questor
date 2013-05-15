@@ -2721,7 +2721,7 @@ namespace Questor.Modules.Caching
 
             EntityCache currentTarget = null;
 
-            currentTarget = Cache.Instance.CurrentWeaponTarget();
+            currentTarget = ((Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : (Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget : null)));
             
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

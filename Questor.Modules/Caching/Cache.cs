@@ -3562,6 +3562,20 @@ namespace Questor.Modules.Caching
                 }
 
                 #endregion Is our current target already in armor? keep shooting the same target if so...
+
+                #region is the target a good drone target after all?
+                if (currentTarget.IsTarget
+                      && ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
+                      && currentTarget.Distance < Settings.Instance.DroneControlRange)
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
+
+                    Cache.Instance.PreferredDroneTarget = currentTarget;
+
+                    return true;
+                }
+                #endregion
             }
 
             #region Get the closest drone priority target
@@ -3590,25 +3604,6 @@ namespace Questor.Modules.Caching
             }
 
             #endregion Get the closest drone priority target
-
-            #region is our current target a good drone target?
-
-            if (currentTarget != null)
-            {
-                if (currentTarget.IsTarget
-                  && ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
-                  && currentTarget.Distance < Settings.Instance.DroneControlRange)
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-
-                    Cache.Instance.PreferredDroneTarget = currentTarget;
-
-                    return true;
-                }
-            }
-
-            #endregion
 
             #region get closest highvaluetarget
             EntityCache highValueTarget = null;

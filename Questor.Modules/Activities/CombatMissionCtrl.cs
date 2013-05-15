@@ -1315,7 +1315,7 @@ namespace Questor.Modules.Activities
                     KillTargetEntity.UnlockTarget("CombatMissionCtrl");
                 }
 
-                AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(Cache.Instance.potentialCombatTargets, (double)Distances.OnGridWithMe, targetedby, true);
+                AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(targets.Where(t => !targetNames.Contains(t.Name.Trim())), (double)Distances.OnGridWithMe, targetedby, true);
                 return;
             }
 

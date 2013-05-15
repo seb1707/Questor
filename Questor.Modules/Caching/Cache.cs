@@ -3672,7 +3672,7 @@ namespace Questor.Modules.Caching
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                     //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                    .ThenBy(t => t.IsTargeting)
+                    .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();

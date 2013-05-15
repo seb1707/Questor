@@ -2727,7 +2727,7 @@ namespace Questor.Modules.Caching
 
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
-            if (currentTarget != null && !currentTarget.IsTarget)
+            if (currentTarget != null && !currentTarget.IsTarget && !currentTarget.IsTargeting)
             {
                 //
                 // if we somehow have currentTarget set to something that is not locked assume we need to assign a new target
@@ -3398,11 +3398,9 @@ namespace Questor.Modules.Caching
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
-            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.HasExploded)
-                Cache.Instance.PreferredDroneTarget = null;
             // Do we have a 'current target' and if so, is it an actual target?
             // If not, clear current target
-            if (currentTarget != null && !currentTarget.IsTarget)
+            if (currentTarget != null && !currentTarget.IsTarget && !currentTarget.IsTargeting)
             {
                 //
                 // if we somehow have currentTarget set to something that is not locked assume we need to assign a new target

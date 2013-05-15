@@ -2720,9 +2720,9 @@ namespace Questor.Modules.Caching
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             EntityCache currentTarget = null;
-
             currentTarget = ((Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : (Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget : null)));
-            
+            if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
+
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
             // Do we have a 'current target' and if so, is it an actual target?
@@ -2735,6 +2735,11 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
                 currentTarget = null;
             }
+
+            #region delete ignored targets from list (this may have a bad runtime, test it)
+            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                _primaryWeaponPriorityTargets = _primaryWeaponPriorityTargets.Where(dt => !Cache.Instance.IgnoreTargets.Contains(dt.Entity.Name.Trim())).ToList();
+            #endregion
             
             if (currentTarget != null)
             {
@@ -2744,7 +2749,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Warp Scramblers", Logging.Teal);
                     // Is our current target a warp scrambling priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget 
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id 
                                                             && pt.IsWarpScramblingMe))
                     {
@@ -2794,7 +2799,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Jammers", Logging.Teal);
                     // Is our current target a Jamming priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming))
                     {
@@ -2843,7 +2848,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Disruptors", Logging.Teal);
                     // Is our current target a Jamming priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting))
                     {
@@ -2892,7 +2897,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Neuters", Logging.Teal);
                     // Is our current target a Jamming priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing))
                     {
@@ -2941,7 +2946,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Painters", Logging.Teal);
                     // Is our current target a Jamming priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting))
                     {
@@ -2990,7 +2995,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Dampeners", Logging.Teal);
                     // Is our current target a Jamming priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening))
                     {
@@ -3039,7 +3044,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Webbers", Logging.Teal);
                     // Is our current target a Webbing priority target?
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                             && pt.Id == currentTarget.Id
                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing))
                     {
@@ -3091,18 +3096,15 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Priority", Logging.Teal);
                     
-                    if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
+                    if (!PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel))
                     {
-                        if (!PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel))
+                        if (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))
                         {
-                            if (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))
-                            {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))", Logging.Debug);
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                                return true;
-                            }    
-                        }
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))", Logging.Debug);
+                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
+                            Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                            return true;
+                        }    
                     }
                 }
                 
@@ -3162,7 +3164,7 @@ namespace Questor.Modules.Caching
                 if (currentTarget.IsInOptimalRange
                  && (((!currentTarget.IsFrigate && !currentTarget.IsNPCFrigate) && string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
                    || ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) && string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
-                 && currentTarget.IsTarget
+                 && (currentTarget.IsTarget || currentTarget.IsTargeting)
                  && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage
                  && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                 {
@@ -3392,6 +3394,7 @@ namespace Questor.Modules.Caching
 
             EntityCache currentTarget = null;
             currentTarget = ((TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : (Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : null)));
+            if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
@@ -3416,7 +3419,7 @@ namespace Questor.Modules.Caching
             if (currentTarget != null)
             {
                 #region is our current target warp scrambling us?
-                if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget
+                if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
                                                         && pt.Id == currentTarget.Id
                                                         && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
                             || DronePriorityTargets.Any(pt => pt.IsTarget
@@ -3437,17 +3440,17 @@ namespace Questor.Modules.Caching
                 EntityCache WarpScramblingPriorityTarget = null;
                 try
                 {
-                    if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsTarget && pt.DronePriorityLevel == DronePriority.WarpScrambler))
+                    if (Cache.Instance.DronePriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.DronePriorityLevel == DronePriority.WarpScrambler))
                     {
-                        WarpScramblingPriorityTarget = Cache.Instance.DronePriorityTargets.Where(pt => pt.IsTarget
+                        WarpScramblingPriorityTarget = Cache.Instance.DronePriorityTargets.Where(pt => (pt.IsTarget || pt.IsTargeting)
                                                                                                     && pt.DronePriorityLevel == DronePriority.WarpScrambler)
                                                                                             .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
                                                                                             .ThenBy(pt => pt.Distance)
                                                                                             .FirstOrDefault();
                     }
-                    else if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
+                    else if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
                     {
-                        WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                        WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => (pt.IsTarget || pt.IsTargeting)
                                                                                                             && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
                                                                                             .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
                                                                                             .ThenBy(pt => pt.Distance)
@@ -3474,7 +3477,7 @@ namespace Questor.Modules.Caching
                 //
                 // Is our current target any non PriorityKilltarget priority target?
                 //
-                if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
+                if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
                 {
                     if (!PrimaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel)) //nothing avail of a higher priority on the field?
                     {
@@ -3497,7 +3500,7 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DronesKillHighValueTargets)
                 {
-                    if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
+                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
                     {
                         if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                         {
@@ -3520,7 +3523,7 @@ namespace Questor.Modules.Caching
 
                 #region Is our current target any other drone priority target?
 
-                if (DronePriorityTargets.Any(pt => pt.IsTarget && pt.IsTargetedBy && pt.Distance < Settings.Instance.DroneControlRange && pt.Id == currentTarget.Id))
+                if (DronePriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.IsTargetedBy && pt.Distance < Settings.Instance.DroneControlRange && pt.Id == currentTarget.Id))
                 {
                     if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                     {
@@ -3544,7 +3547,7 @@ namespace Questor.Modules.Caching
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
-                 && currentTarget.IsTarget
+                 && (currentTarget.IsTarget || currentTarget.IsTargeting)
                  && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage
                  && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                 {
@@ -3561,7 +3564,7 @@ namespace Questor.Modules.Caching
                 #endregion Is our current target already in armor? keep shooting the same target if so...
 
                 #region is the target a good drone target after all?
-                if (currentTarget.IsTarget
+                if ((currentTarget.IsTarget || currentTarget.IsTargeting)
                       && ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                       && currentTarget.Distance < Settings.Instance.DroneControlRange)
                 {

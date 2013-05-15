@@ -3564,44 +3564,6 @@ namespace Questor.Modules.Caching
                 #endregion Is our current target already in armor? keep shooting the same target if so...
             }
 
-            #region Get the closest primary weapon priority target
-            /*
-             * Why are we choosing a primaryweapontarget in getbestdronetarget?
-            EntityCache primaryWeaponPriorityTarget = null;
-            try
-            {
-                primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.IsTarget && p.Distance < Cache.Instance.MaxRange)
-                                                                           .OrderByDescending(pt => pt.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.PrimaryWeaponPriorityLevel)
-                                                                           .ThenBy(pt => pt.Distance)
-                                                                           .FirstOrDefault();
-            }
-            catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
-
-            if (primaryWeaponPriorityTarget != null)
-            {
-                if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (!Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))
-                    {
-                        if ((!Cache.Instance.UseDrones && primaryWeaponPriorityTarget.IsNPCFrigate)
-                          || !primaryWeaponPriorityTarget.IsNPCFrigate
-                          || (primaryWeaponPriorityTarget.IsNPCFrigate && !primaryWeaponPriorityTarget.IsTooCloseTooFastTooSmallToHit))
-                        {
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (primaryWeaponPriorityTarget != null && callingroutine == Combat && primaryWeaponPriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(primaryWeaponPriorityTarget.Name.Trim()))", Logging.Debug);
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
-
-                            if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                                Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
-
-                            return true;
-                        }
-                    }
-                }
-            }
-             */
-            #endregion Get the closest primary weapon priority target
-
             #region Get the closest drone priority target
 
             EntityCache dronePriorityTarget = null;

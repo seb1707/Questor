@@ -2373,7 +2373,7 @@ namespace Questor.Modules.Caching
         {
             foreach (EntityCache target in targets)
             {
-                if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || _primaryWeaponPriorityTargets.Any(p => p.EntityID == target.Id))
+                if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id))
                 {
                     continue;
                 }
@@ -2762,14 +2762,14 @@ namespace Questor.Modules.Caching
                     EntityCache WarpScramblingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
                         {
-                            WarpScramblingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget 
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget 
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -2811,14 +2811,14 @@ namespace Questor.Modules.Caching
                     EntityCache JammingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Jamming))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming))
                         {
-                            JammingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Jamming)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            JammingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -2860,14 +2860,14 @@ namespace Questor.Modules.Caching
                     EntityCache TrackingDisruptionPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TrackingDisrupting))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting))
                         {
-                            TrackingDisruptionPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TrackingDisrupting)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            TrackingDisruptionPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -2909,14 +2909,14 @@ namespace Questor.Modules.Caching
                     EntityCache NeutralizingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Neutralizing))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing))
                         {
-                            NeutralizingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Neutralizing)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            NeutralizingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -2958,14 +2958,14 @@ namespace Questor.Modules.Caching
                     EntityCache TargetPaintingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TargetPainting))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting))
                         {
-                            TargetPaintingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.TargetPainting)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            TargetPaintingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -3007,14 +3007,14 @@ namespace Questor.Modules.Caching
                     EntityCache DampeningPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Dampening))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening))
                         {
-                            DampeningPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Dampening)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            DampeningPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -3056,14 +3056,14 @@ namespace Questor.Modules.Caching
                     EntityCache WebbingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Webbing))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing))
                         {
-                            WebbingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.Webbing)
-                                                                                                .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                                .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                                                .ThenBy(pt => pt.Entity.Distance)
-                                                                                                .Select(pt => pt.Entity).FirstOrDefault();
+                            WebbingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing)
+                                                                                                .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                .ThenByDescending(pt => pt.IsTarget)
+                                                                                                .ThenBy(pt => pt.Distance)
+                                                                                                .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -3087,18 +3087,13 @@ namespace Questor.Modules.Caching
                 //
                 // Is our current target any other primary weapon priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
-                PrimaryWeaponPriority currentTargetPriority = PrimaryWeaponPriority.NotUsed;
-                if (_primaryWeaponPriorityTargets.Any(pt => pt.Entity.IsTarget && pt.Entity.Distance < Cache.Instance.MaxRange && pt.EntityID == currentTarget.Id))
+                if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Priority", Logging.Teal);
-                    currentTargetPriority = _primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget 
-                                                                                    && t.EntityID == currentTarget.Id)
-                                                                            .Select(pt => pt.PrimaryWeaponPriority)
-                                                                            .FirstOrDefault();
-
+                    
                     if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                     {
-                        if (!_primaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriority < currentTargetPriority))
+                        if (!PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel))
                         {
                             if (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))
                             {
@@ -3241,12 +3236,12 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                 primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget && p.Entity.Distance < Cache.Instance.MaxRange)
-                                                                            .OrderByDescending(pt => pt.Entity.IsInOptimalRange)
-                                                                            .ThenByDescending(pt => pt.PrimaryWeaponPriority)
-                                                                            .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                                            .ThenBy(pt => pt.Entity.Distance)
-                                                                            .Select(pt => pt.Entity).FirstOrDefault();
+                 primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.IsTarget && p.Distance < Cache.Instance.MaxRange)
+                                                                            .OrderByDescending(pt => pt.IsInOptimalRange)
+                                                                            .ThenByDescending(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                            .ThenByDescending(pt => pt.IsTarget)
+                                                                            .ThenBy(pt => pt.Distance)
+                                                                            .FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
             
@@ -3438,19 +3433,19 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsTarget && pt.DronePriorityLevel == DronePriority.WarpScrambler))
                     {
-                        WarpScramblingPriorityTarget = Cache.Instance._dronePriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                && pt.DronePriority == DronePriority.WarpScrambler)
-                                                                                            .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                            .ThenBy(pt => pt.Entity.Distance)
-                                                                                            .Select(pt => pt.Entity).FirstOrDefault();
+                        WarpScramblingPriorityTarget = Cache.Instance.DronePriorityTargets.Where(pt => pt.IsTarget
+                                                                                                    && pt.DronePriorityLevel == DronePriority.WarpScrambler)
+                                                                                            .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                            .ThenBy(pt => pt.Distance)
+                                                                                            .FirstOrDefault();
                     }
                     else if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
                     {
-                        WarpScramblingPriorityTarget = Cache.Instance._primaryWeaponPriorityTargets.Where(pt => pt.Entity.IsTarget
-                                                                                                && pt.PrimaryWeaponPriority == PrimaryWeaponPriority.WarpScrambler)
-                                                                                            .OrderBy(pt => (pt.Entity.ShieldPct + pt.Entity.ArmorPct + pt.Entity.StructurePct))
-                                                                                            .ThenBy(pt => pt.Entity.Distance)
-                                                                                            .Select(pt => pt.Entity).FirstOrDefault();
+                        WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
+                                                                                                            && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
+                                                                                            .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                            .ThenBy(pt => pt.Distance)
+                                                                                            .FirstOrDefault();
                     }
                 }
                 catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -3572,11 +3567,11 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                primaryWeaponPriorityTarget = _primaryWeaponPriorityTargets.Where(p => p.Entity.IsTarget && p.Entity.Distance < Cache.Instance.MaxRange)
-                                                                           .OrderByDescending(pt => pt.Entity.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.PrimaryWeaponPriority)
-                                                                           .ThenBy(pt => pt.Entity.Distance)
-                                                                           .Select(pt => pt.Entity).FirstOrDefault();
+                primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.IsTarget && p.Distance < Cache.Instance.MaxRange)
+                                                                           .OrderByDescending(pt => pt.IsInOptimalRange)
+                                                                           .ThenByDescending(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                           .ThenBy(pt => pt.Distance)
+                                                                           .FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 

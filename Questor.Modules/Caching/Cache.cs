@@ -3450,10 +3450,12 @@ namespace Questor.Modules.Caching
                 currentTarget = null;
             }
 
-            #region delete ignored targets from list (this may have a bad runtime, test it)
+            // delete ignored targets from list (this may have a bad runtime, test it)
             if (Cache.Instance.IgnoreTargets.Any())
                 _dronePriorityTargets = _dronePriorityTargets.Where(dt => !Cache.Instance.IgnoreTargets.Contains(dt.Entity.Name.Trim())).ToList();
-            #endregion
+
+            // delete targets which are not inside the range we are looking at
+            _dronePriorityTargets.RemoveAll(dt => dt.Entity.Distance > distance);
 
             if (currentTarget != null)
             {

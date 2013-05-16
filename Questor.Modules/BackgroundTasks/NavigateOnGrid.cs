@@ -208,16 +208,9 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
-                            if (Settings.Instance.SpeedTank || Settings.Instance.OrbitStructure)
-                            {
-                                OrbitGateorTarget(target, module);
-                            }
-                            else
-                            {
-                                target.Approach(Cache.Instance.OptimalRange);
-                                Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                                return;
-                            }
+                            target.Approach(Cache.Instance.OptimalRange);
+                            Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            return;
                         }
 
                         if (target.Distance <= Cache.Instance.OptimalRange)

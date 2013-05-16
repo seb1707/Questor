@@ -2134,6 +2134,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl", "We have moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]", Logging.Green);
 
                         // If we moved more then 100km, assume next Pocket
+                        Cache.Instance.ClearEWARCache();
                         Cache.Instance.PocketNumber++;
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                         Statistics.WritePocketStatistics();

@@ -220,6 +220,17 @@ namespace Questor.Modules.Caching
         /// </summary>
         private int _maxLockedTargets = 0;
 
+        /// <summary>
+        ///  Dictionary for cached EWAR target
+        /// </summary>
+        public HashSet<long> WarpScrambler = new HashSet<long>();
+        public HashSet<long> Jammer = new HashSet<long>();
+        public HashSet<long> TrackingDisrupter = new HashSet<long>();
+        public HashSet<long> Neuting = new HashSet<long>();
+        public HashSet<long> TargetPainting = new HashSet<long>();
+        public HashSet<long> Dampening = new HashSet<long>();
+        public HashSet<long> Webbing = new HashSet<long>();
+
         public void DirecteveDispose()
         {
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
@@ -2613,6 +2624,17 @@ namespace Questor.Modules.Caching
             string maskedID = ID.ToString(CultureInfo.InvariantCulture).Substring(numofCharacters - 5);
             maskedID = "[truncatedID]" + maskedID;
             return maskedID;
+        }
+
+        public void ClearEWARCache()
+        {
+            WarpScrambler.Clear();
+            Jammer.Clear();
+            TrackingDisrupter.Clear();
+            Neuting.Clear();
+            TargetPainting.Clear();
+            Dampening.Clear();
+            Webbing.Clear();
         }
 
         public bool DoWeCurrentlyHaveTurretsMounted()

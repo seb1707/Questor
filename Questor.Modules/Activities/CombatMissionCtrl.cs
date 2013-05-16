@@ -1316,8 +1316,8 @@ namespace Questor.Modules.Activities
             if (notTheClosest) targets = targets.OrderByDescending(t => t.Distance).ToList();
 
             // GetTargets
-            Cache.Instance.GetBestTarget(99999, false, "combat");
-            Cache.Instance.GetBestDroneTarget(99999, false, "Drones");
+            Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat");
+            Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones");
 
             // Don't use NextAction here, only if target is killed (checked further up)
             return;

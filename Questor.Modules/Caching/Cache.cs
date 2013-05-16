@@ -2724,13 +2724,6 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public bool GetBestTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            if (_potentialTargets != null)
-            {
-                _primaryWeaponPriorityTargets.Clear();
-                foreach (EntityCache target in _potentialTargets)
-                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = PrimaryWeaponPriority.NotUsed });
-            }
-
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Attempting to get Best Target", Logging.Teal);
             if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
             {
@@ -3424,13 +3417,6 @@ namespace Questor.Modules.Caching
                     return false;
 
                 NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
-            }
-
-            if (_potentialTargets != null)
-            {
-                _dronePriorityTargets.Clear();
-                foreach (EntityCache target in _potentialTargets)
-                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = DronePriority.NotUsed });
             }
 
             EntityCache currentTarget = null;

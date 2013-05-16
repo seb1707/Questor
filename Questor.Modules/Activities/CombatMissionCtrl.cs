@@ -995,8 +995,9 @@ namespace Questor.Modules.Activities
             }
 
             // GetTargets
-            Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat");
-            Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones");
+            Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", targets);
+            if (Cache.Instance.UseDrones)
+                Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", targets);
 
             // Don't use NextAction here, only if target is killed (checked further up)
             return;

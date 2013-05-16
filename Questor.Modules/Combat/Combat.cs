@@ -1048,7 +1048,7 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTarget != null && (Cache.Instance.UseDrones != null && Cache.Instance.UseDrones)) 
             {
-                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.DronePriorityTargets.Contains(Cache.Instance.PreferredDroneTarget))
+                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.potentialCombatTargets.Any())
                 {
                     Cache.Instance.PreferredDroneTarget = null;
                     return;
@@ -1066,7 +1066,7 @@ namespace Questor.Modules.Combat
 
                     if ((!Cache.Instance.PreferredDroneTarget.IsTarget && !Cache.Instance.PreferredDroneTarget.IsTargeting)
                         && Cache.Instance.EntitiesActivelyBeingLocked.All(i => i.Id != Cache.Instance.PreferredDroneTarget.Id)
-                        && Cache.Instance.PreferredDroneTarget.Distance <= Cache.Instance.MaxRange
+                        && Cache.Instance.PreferredDroneTarget.Distance <= Settings.Instance.DroneControlRange
                         && !Cache.Instance.PreferredDroneTarget.HasExploded
                         && Cache.Instance.PreferredDroneTarget.LockTarget("TargetCombatants.PreferredDroneTarget"))
                     {

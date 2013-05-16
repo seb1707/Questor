@@ -1048,7 +1048,7 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTarget != null && (Cache.Instance.UseDrones != null && Cache.Instance.UseDrones)) 
             {
-                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.potentialCombatTargets.Any())
+                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.DronePriorityTargets.Contains(Cache.Instance.PreferredDroneTarget))
                 {
                     Cache.Instance.PreferredDroneTarget = null;
                     return;
@@ -1142,7 +1142,7 @@ namespace Questor.Modules.Combat
             {
                 int DronesPriorityTargetTargeted = targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.DronePriorityTargets.Contains(t));
 
-                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.DronePriorityTargets.Contains(t));
+                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t));
 
                 if (DronesPriorityTargetUnTargeted > 0)
                 {

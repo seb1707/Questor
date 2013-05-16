@@ -1048,7 +1048,7 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTarget != null && (Cache.Instance.UseDrones != null && Cache.Instance.UseDrones)) 
             {
-                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.PreferredDroneTarget.IsValid)
+                if (!Cache.Instance.PreferredDroneTarget.IsLargeCollidable && !Cache.Instance.DronePriorityTargets.Contains(Cache.Instance.PreferredDroneTarget))
                 {
                     Cache.Instance.PreferredDroneTarget = null;
                     return;

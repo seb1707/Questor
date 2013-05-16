@@ -1142,7 +1142,7 @@ namespace Questor.Modules.Combat
             {
                 int DronesPriorityTargetTargeted = targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.DronePriorityTargets.Contains(t));
 
-                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.DronePriorityTargets.Contains(t));
+                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t));
 
                 if (DronesPriorityTargetUnTargeted > 0)
                 {

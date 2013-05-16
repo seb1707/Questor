@@ -2724,13 +2724,6 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public bool GetBestTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            if (_potentialTargets != null)
-            {
-                _primaryWeaponPriorityTargets.Clear();
-                foreach (EntityCache target in _potentialTargets)
-                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = PrimaryWeaponPriority.NotUsed });
-            }
-
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Attempting to get Best Target", Logging.Teal);
             if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
             {
@@ -3426,13 +3419,6 @@ namespace Questor.Modules.Caching
                 NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
             }
 
-            if (_potentialTargets != null)
-            {
-                _dronePriorityTargets.Clear();
-                foreach (EntityCache target in _potentialTargets)
-                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = DronePriority.NotUsed });
-            }
-
             EntityCache currentTarget = null;
             currentTarget = ((Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : (TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : null)));
             if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
@@ -3450,10 +3436,12 @@ namespace Questor.Modules.Caching
                 currentTarget = null;
             }
 
-            #region delete ignored targets from list (this may have a bad runtime, test it)
+            // delete ignored targets from list (this may have a bad runtime, test it)
             if (Cache.Instance.IgnoreTargets.Any())
                 _dronePriorityTargets = _dronePriorityTargets.Where(dt => !Cache.Instance.IgnoreTargets.Contains(dt.Entity.Name.Trim())).ToList();
-            #endregion
+
+            // delete targets which are not inside the range we are looking at
+            _dronePriorityTargets.RemoveAll(dt => dt.Entity.Distance > distance);
 
             if (currentTarget != null)
             {

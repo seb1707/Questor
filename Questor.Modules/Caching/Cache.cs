@@ -2758,10 +2758,12 @@ namespace Questor.Modules.Caching
                 currentTarget = null;
             }
 
-            #region delete ignored targets from list (this may have a bad runtime, test it)
+            // delete ignored targets from list (this may have a bad runtime, test it)
             if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
-                _primaryWeaponPriorityTargets = _primaryWeaponPriorityTargets.Where(dt => !Cache.Instance.IgnoreTargets.Contains(dt.Entity.Name.Trim())).ToList();
-            #endregion
+                _primaryWeaponPriorityTargets.RemoveAll(dt => !Cache.Instance.IgnoreTargets.Contains(dt.Entity.Name.Trim()));
+
+            // delete targets which are not inside the range we are looking at
+            _primaryWeaponPriorityTargets.RemoveAll(dt => dt.Entity.Distance > distance);
             
             if (currentTarget != null)
             {

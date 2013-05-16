@@ -1307,8 +1307,8 @@ namespace Questor.Modules.Activities
                 }
 
                 targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
-                Cache.Instance.GetBestTarget(99999, false, "combat");
-                Cache.Instance.GetBestDroneTarget(99999, false, "Drones");
+                Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "combat");
+                Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones");
                 return;
             }
             Cache.Instance.IgnoreTargets.RemoveWhere(t => targetNames.Contains(t));

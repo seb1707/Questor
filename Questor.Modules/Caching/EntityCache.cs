@@ -957,7 +957,8 @@ namespace Questor.Modules.Caching
                 if (_directEntity == null)
                     return false;
 
-                return _directEntity.IsValid;
+                if (!HasExploded)
+                    return _directEntity.IsValid;
             }
         }
 

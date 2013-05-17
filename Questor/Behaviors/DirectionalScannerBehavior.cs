@@ -477,8 +477,6 @@ namespace Questor.Behaviors
                     Cache.Instance.Paused = true;
                     break;
 
-
-
                 case DirectionalScannerBehaviorState.LogCombatTargets:
                     //combat targets
                     //List<EntityCache> combatentitiesInList =  Cache.Instance.Entities.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();

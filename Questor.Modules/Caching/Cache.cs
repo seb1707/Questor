@@ -2700,8 +2700,8 @@ namespace Questor.Modules.Caching
                     {
                         FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
                     }
-                    
-                    if (_currentWeaponTarget.IsValid)
+
+                    if (_currentWeaponTarget != null && _currentWeaponTarget.IsValid)
                     {
                         return _currentWeaponTarget;
                     }

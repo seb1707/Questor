@@ -959,7 +959,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => !e.HasExploded && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
+            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
 
             if (killTargets.Count() == numberToIgnore)
             {

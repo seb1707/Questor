@@ -173,6 +173,7 @@ namespace Questor.Behaviors
                                         "] orbiting at [" + Distances.SafeDistancefromStructure + "]", Logging.White);
                             Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
                         }
+
                         return;
                         //we are still too close, do not continue through the rest until we are not "too close" anymore
                     }

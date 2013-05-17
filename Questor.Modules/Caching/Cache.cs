@@ -3337,7 +3337,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                if (primaryWeaponPriorityTarget != null) Logging.Log(callingroutine + " Debug: GetBestTarget", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
+                Logging.Log(callingroutine + " Debug: GetBestTarget", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate))
                     .OrderByDescending(t => !t.IsNPCFrigate)

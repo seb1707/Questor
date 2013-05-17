@@ -127,6 +127,11 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
         /// </summary>
+        public List<EntityCache> _entitiesthatHaveExploded;
+
+        /// <summary>
+        ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
+        /// </summary>
         public List<PriorityTarget> _primaryWeaponPriorityTargets;
 
         /// <summary>
@@ -381,6 +386,7 @@ namespace Questor.Modules.Caching
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, line));
             //line = string.Empty;
 
+            _entitiesthatHaveExploded = new List<EntityCache>();
             _primaryWeaponPriorityTargets = new List<PriorityTarget>();
             _dronePriorityTargets = new List<PriorityTarget>();
             LastModuleTargetIDs = new Dictionary<long, long>();
@@ -1285,7 +1291,7 @@ namespace Questor.Modules.Caching
                     //    return _entities;
                     //}
 
-                    return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList()); 
+                    return _entities ?? (_entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid && EntitiesthatHaveExploded.Any(x => x.Id != e.Id)).ToList()); 
                 }
                 catch (NullReferenceException) { }  // this can happen during session changes
                 
@@ -1614,11 +1620,26 @@ namespace Questor.Modules.Caching
             get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
         }
 
+        public IEnumerable<EntityCache> EntitiesthatHaveExploded
+        {
+            get
+            {
+                if (Cache.Instance.InSpace && Cache.Instance.InWarp)
+                {
+                    _entitiesthatHaveExploded = new List<EntityCache>();
+                    return new List<EntityCache>();
+                }
+
+                _entitiesthatHaveExploded.RemoveAll(pt => DirectEve.Entities.All(e => e.Id != pt.Id));
+                return _entitiesthatHaveExploded;
+            }
+        }
+
         public IEnumerable<EntityCache> PrimaryWeaponPriorityTargets
         {
             get
             {
-                _primaryWeaponPriorityTargets.RemoveAll(pt => pt.Entity == null);
+                _primaryWeaponPriorityTargets.RemoveAll(pt => Cache.Instance.Entities.All(e => e.Id != pt.EntityID));
                 return _primaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
             }
         }
@@ -1627,7 +1648,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                _dronePriorityTargets.RemoveAll(pt => pt.Entity == null);
+                _dronePriorityTargets.RemoveAll(pt => Cache.Instance.Entities.All(e => e.Id != pt.EntityID));
                 return _dronePriorityTargets.OrderByDescending(pt => pt.DronePriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
             }
         }
@@ -2438,6 +2459,22 @@ namespace Questor.Modules.Caching
                     Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target [" + priority.ToString() + "]", Logging.Teal);
                     _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = priority });    
                 }
+            }
+
+            return;
+        }
+
+        public void AddEntitiesThatHaveExploded(string module)
+        {
+            foreach (EntityCache _entity in Cache.Instance.Entities)
+            {
+               if (_entity.HasExploded && _entitiesthatHaveExploded.Any(e => e.Id != _entity.Id))
+               {
+                   if (Settings.Instance.DebugHasExploded) Logging.Log(module, "Adding [" + _entity.Name + "] Distance [" + Math.Round(_entity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(_entity.Id) + "] to the EntitiesThatHaveExploded list", Logging.White);
+                   _entitiesthatHaveExploded.Add(_entity);
+               }
+
+               continue;
             }
 
             return;

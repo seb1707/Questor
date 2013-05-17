@@ -575,7 +575,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-
         public bool IsPrimaryWeaponPriorityTarget
         {
             get

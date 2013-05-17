@@ -2781,7 +2781,7 @@ namespace Questor.Modules.Caching
                     EntityCache WarpScramblingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
                         {
                             WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget 
                                                                                                  && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
@@ -2830,7 +2830,7 @@ namespace Questor.Modules.Caching
                     EntityCache JammingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming))
                         {
                             JammingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
                                                                                                  && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Jamming)
@@ -2879,7 +2879,7 @@ namespace Questor.Modules.Caching
                     EntityCache TrackingDisruptionPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting))
                         {
                             TrackingDisruptionPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
                                                                                                  && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TrackingDisrupting)
@@ -2928,7 +2928,7 @@ namespace Questor.Modules.Caching
                     EntityCache NeutralizingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing))
                         {
                             NeutralizingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
                                                                                                  && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Neutralizing)
@@ -2977,7 +2977,7 @@ namespace Questor.Modules.Caching
                     EntityCache TargetPaintingPriorityTarget = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting))
                         {
                             TargetPaintingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
                                                                                                  && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.TargetPainting)
@@ -3028,8 +3028,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening))
                         {
-                            DampeningPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening)
+                            DampeningPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Dampening)
                                                                                                 .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
                                                                                                 .ThenByDescending(pt => pt.IsTarget)
                                                                                                 .ThenBy(pt => pt.Distance)
@@ -3077,8 +3076,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsTarget && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing))
                         {
-                            WebbingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.IsTarget
-                                                                                                 && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing)
+                            WebbingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.Webbing)
                                                                                                 .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
                                                                                                 .ThenByDescending(pt => pt.IsTarget)
                                                                                                 .ThenBy(pt => pt.Distance)

@@ -2701,7 +2701,12 @@ namespace Questor.Modules.Caching
                         FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
                     }
                     
-                    return _currentWeaponTarget;
+                    if (_currentWeaponTarget.IsValid)
+                    {
+                        return _currentWeaponTarget;
+                    }
+
+                    return null;
                 }
 
                 return null;
@@ -3213,8 +3218,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
 
-                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
 
                     return true;
 
@@ -3355,16 +3359,17 @@ namespace Questor.Modules.Caching
             // high value if aggrod
             // if no high value aggrod, low value thats aggrod
             // if no high aggro, and no low aggro, shoot high value thats present
-            if ((highValueTarget != null 
-                    && (highValueTarget.IsTargetedBy //dont remove this, we are working aggro
-                    || (!Cache.Instance.UseDrones && (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy))))))
+            if (highValueTarget != null)
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
+                if (highValueTarget.IsTargetedBy || Cache.Instance.UseDrones || (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy)))
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
 
-                Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
+                    Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
 
-                return true;
+                    return true;
+                }
             }
             #endregion
 
@@ -3380,6 +3385,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
+            Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
             #region If we didnt find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestTarget)
             {

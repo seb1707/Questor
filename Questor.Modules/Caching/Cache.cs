@@ -2741,14 +2741,21 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && !DirectEve.Entities.Where(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && !t.HasExploded).Any())
+
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Where(t => Cache.Instance.PreferredPrimaryWeaponTarget.Id == t.Id).Any())
+            {
+                Cache.Instance.PreferredPrimaryWeaponTarget = Cache.Instance.Entities.Where(t => Cache.Instance.PreferredPrimaryWeaponTarget.Id == t.Id).FirstOrDefault();
+            }
+            else
+            {
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
+            }
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             EntityCache currentTarget = null;
             currentTarget = Cache.Instance.CurrentWeaponTarget();
-            if (currentTarget != null && !DirectEve.Entities.Where(t => t.Id == currentTarget.Id && !t.HasExploded).Any()) currentTarget = null;
+            if (currentTarget != null && !DirectEve.Entities.Where(t => t.Id == currentTarget.Id && t.IsValid).Any()) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

@@ -2736,27 +2736,16 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded)
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && !DirectEve.Entities.Where(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && !t.HasExploded).Any())
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             EntityCache currentTarget = null;
-            currentTarget = ((Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget : (Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget() : null)));
-            if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
+            currentTarget = Cache.Instance.CurrentWeaponTarget();
+            if (currentTarget != null && !DirectEve.Entities.Where(t => t.Id == currentTarget.Id && !t.HasExploded).Any()) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
-
-            // Do we have a 'current target' and if so, is it an actual target?
-            // If not, clear current target
-            if (currentTarget != null && !currentTarget.IsTarget && !currentTarget.IsTargeting)
-            {
-                //
-                // if we somehow have currentTarget set to something that is not locked assume we need to assign a new target
-                //
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
-                currentTarget = null;
-            }
 
             // delete ignored targets from list
             if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
@@ -2764,8 +2753,8 @@ namespace Questor.Modules.Caching
 
             // delete targets which are not inside the range we are looking at
             _primaryWeaponPriorityTargets.RemoveAll(dt => dt.Entity.Distance > distance);
-            
-            if (currentTarget != null)
+
+            if (currentTarget != null && DirectEve.Entities.Where(t => t.Id == currentTarget.Id && !t.HasExploded).Any())
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "We have a target, testing conditions", Logging.Teal);
                 
@@ -3213,8 +3202,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
 
-                    if (string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase))
-                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
+                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
 
                     return true;
 
@@ -3264,10 +3252,10 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                 primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.IsTarget && p.Distance < Cache.Instance.MaxRange)
+                 primaryWeaponPriorityTarget = PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange)
                                                                             .OrderByDescending(pt => pt.IsTargetedBy)
                                                                             .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                            .ThenByDescending(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
                                                                             .ThenByDescending(pt => pt.IsTarget)
                                                                             .ThenBy(pt => pt.Distance)
                                                                             .FirstOrDefault();
@@ -3380,6 +3368,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
+            Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
             #region If we didnt find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestTarget)
             {
@@ -3426,7 +3415,7 @@ namespace Questor.Modules.Caching
 
             EntityCache currentTarget = null;
             currentTarget = ((Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget : (TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget : null)));
-            if (currentTarget != null && !currentTarget.IsValid) currentTarget = null;
+            if (currentTarget != null && currentTarget.HasExploded) currentTarget = null;
 
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

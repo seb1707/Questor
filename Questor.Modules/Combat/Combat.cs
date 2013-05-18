@@ -869,7 +869,10 @@ namespace Questor.Modules.Combat
                     || DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
                     || !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
                 )
+            {
                 return;
+            }
+
             maxLowValueTarget = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTarget = Settings.Instance.MaximumHighValueTargets;
             maxTotalTargets = maxHighValueTarget + maxLowValueTarget;
@@ -1085,8 +1088,6 @@ namespace Questor.Modules.Combat
             //
             if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
             {
-                int PrimaryWeaponsPriorityTargetTargeted = targets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.Contains(t));
-
                 int PrimaryWeaponsPriorityTargetUnTargeted = Cache.Instance.PrimaryWeaponPriorityTargets.Count() - targets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.Contains(t));
 
                 if (PrimaryWeaponsPriorityTargetUnTargeted > 0)
@@ -1140,8 +1141,6 @@ namespace Questor.Modules.Combat
             //
             if (Cache.Instance.DronePriorityTargets.Any())
             {
-                int DronesPriorityTargetTargeted = targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t) && !Cache.Instance.DronePriorityTargets.Contains(t));
-
                 int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - targets.Count(t => Cache.Instance.DronePriorityTargets.Contains(t));
 
                 if (DronesPriorityTargetUnTargeted > 0)
@@ -1247,11 +1246,13 @@ namespace Questor.Modules.Combat
                         HighValueTargetsTargetedThisCycle++;
                         Logging.Log("Combat", "Targeting high value target [" + highValueTargetingMeEntity.Name + "][ID: " + Cache.Instance.MaskedID(highValueTargetingMeEntity.Id) + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 0) + "k away] highValueTargets.Count [" + highValueTargetsTargeted.Count() + "]", Logging.Teal);
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                        return;
+                        if (HighValueTargetsTargetedThisCycle > 2 ) return;
                     }
 
                     continue;
                 }
+
+                if (HighValueTargetsTargetedThisCycle > 1) return;
             }
             else
             {
@@ -1287,11 +1288,13 @@ namespace Questor.Modules.Combat
                         Logging.Log("Combat", "Targeting low  value target [" + lowValueTargetingMeEntity.Name + "][ID: " + Cache.Instance.MaskedID(lowValueTargetingMeEntity.Id) + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 0) + "k away] lowValueTargets.Count [" + lowValueTargetsTargeted.Count() + "]", Logging.Teal);
                         //lowValueTargets.Add(lowValueTargetingMeEntity);
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                        return;
+                        if (LowValueTargetsTargetedThisCycle > 2) return;
                     }
 
                     continue;
                 }
+
+                if (LowValueTargetsTargetedThisCycle > 1) return;
             }
             else
             {
@@ -1299,9 +1302,9 @@ namespace Questor.Modules.Combat
             }
             #endregion
 
-            #region All else fails grab an unlocked target that is not yet targetting me
+            #region All else fails grab an unlocked target that is not yet targeting me
             //
-            // Ok, now that thats all handled lets grab the closest non aggressed mob and pew
+            // Ok, now that that is all handled lets grab the closest non aggressed mob and pew
             // Build a list of things not yet targeting me and not yet targetted
             //
             if (!highValueTargetsTargeted.Any() && !lowValueTargetsTargeted.Any() && !highValueTargetingMe.Any() && !lowValueTargetingMe.Any())

@@ -704,6 +704,19 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsActiveEwar()
+        {
+            bool result = false;
+            result |= IsWarpScramblingMe;
+            result |= IsWebbingMe;
+            result |= IsNeutralizingMe;
+            result |= IsJammingMe;
+            result |= IsSensorDampeningMe;
+            result |= IsTargetPaintingMe;
+            result |= IsTrackingDisruptingMe;
+            return result;
+        }
+
         public bool IsWarpScramblingMe
         {
             get

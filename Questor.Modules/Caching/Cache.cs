@@ -3500,12 +3500,9 @@ namespace Questor.Modules.Caching
             if (currentTarget != null)
             {
                 #region is our current target warp scrambling us?
-                if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting)
-                                                        && pt.Id == currentTarget.Id
-                                                        && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
-                            || DronePriorityTargets.Any(pt => pt.IsTarget
-                                                        && pt.Id == currentTarget.Id
-                                                        && pt.DronePriorityLevel == DronePriority.WarpScrambler))
+                if (DronePriorityTargets.Any(pt => pt.IsTarget
+                                                && pt.Id == currentTarget.Id
+                                                && pt.DronePriorityLevel == DronePriority.WarpScrambler))
                 {
                     
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (PrimaryWeaponPriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget) || DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id && pt.IsWarpScramblingMe && pt.IsTarget)", Logging.Debug);
@@ -3529,14 +3526,6 @@ namespace Questor.Modules.Caching
                                                                                             .ThenBy(pt => pt.Distance)
                                                                                             .FirstOrDefault();
                     }
-                    else if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler))
-                    {
-                        WarpScramblingPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => (pt.IsTarget || pt.IsTargeting)
-                                                                                                            && pt.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
-                                                                                            .OrderBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                            .ThenBy(pt => pt.Distance)
-                                                                                            .FirstOrDefault();
-                    }
                 }
                 catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
                 #endregion
@@ -3554,13 +3543,13 @@ namespace Questor.Modules.Caching
                 }
                 #endregion
 
-                #region Is our current target any other ewar primary weapon priority target? If so stay on the current target
+                #region Is our current target any other ewar Drone priority target? If so stay on the current target
                 //
                 // Is our current target any non PriorityKilltarget priority target?
                 //
-                if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
+                if (DronePriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Settings.Instance.DroneControlRange && pt.Id == currentTarget.Id))
                 {
-                    if (!PrimaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel)) //nothing avail of a higher priority on the field?
+                    if (!DronePriorityTargets.All(pt => pt.DronePriorityLevel < currentTarget.DronePriorityLevel)) //nothing avail of a higher priority on the field?
                     {
                         if ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
                             || (Settings.Instance.DronesKillHighValueTargets))
@@ -3573,24 +3562,20 @@ namespace Questor.Modules.Caching
                     }
                 }
 
-                #endregion Is our current target any other primary weapon priority target?
+                #endregion Is our current target any other ewar Drone priority target? If so stay on the current target
 
-                #region Is our current target any other primary weapon priority target?
-                //
-                // Is our current target any other primary weapon priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
-                //
+                #region Is our current target any other Drone priority target?
+                
                 if (Settings.Instance.DronesKillHighValueTargets)
                 {
-                    if (PrimaryWeaponPriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Cache.Instance.MaxRange && pt.Id == currentTarget.Id))
+                    if (DronePriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.Distance < Settings.Instance.DroneControlRange && pt.Id == currentTarget.Id))
                     {
                         if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
                         {
-                            if (!PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel < currentTarget.PrimaryWeaponPriorityLevel))
+                            if (!DronePriorityTargets.Any(pt => pt.DronePriorityLevel < currentTarget.DronePriorityLevel))
                             {
-                                if (string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)
-                                    && (currentTarget.IsFrigate || currentTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
+                                if ((currentTarget.IsFrigate || currentTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                                 {
-                                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Combat && _primaryWeaponPriorityTargets.Any(pt => pt.EntityID == currentTarget.Id))", Logging.Debug);
                                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
                                     Cache.Instance.PreferredDroneTarget = currentTarget;
                                     return true;
@@ -3600,28 +3585,7 @@ namespace Questor.Modules.Caching
                     }
                 }
 
-                #endregion Is our current target any other primary weapon priority target?
-
-                #region Is our current target any other drone priority target?
-
-                if (DronePriorityTargets.Any(pt => (pt.IsTarget || pt.IsTargeting) && pt.IsTargetedBy && pt.Distance < Settings.Instance.DroneControlRange && pt.Id == currentTarget.Id))
-                {
-                    if (!Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()))
-                    {
-                        if (!DronePriorityTargets.Any(pt => pt.DronePriorityLevel < currentTarget.DronePriorityLevel))
-                        {
-                            if (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
-                            {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "if (currentTarget != null && callingroutine == Drones && currentTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(currentTarget.Name.Trim()) && DronePriorityTargets.Any(pt => pt.Id == currentTarget.Id))", Logging.Debug);
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                                Cache.Instance.PreferredDroneTarget = currentTarget;
-                                return true;
-                            }
-                        }
-                    }
-                }
-                
-                #endregion Is our current target any other drone priority target?
+                #endregion Is our current target any other Drone priority target?
 
                 #region Is our current target already in armor? keep shooting the same target if so...
                 //
@@ -3635,9 +3599,7 @@ namespace Questor.Modules.Caching
                     if (currentTarget.IsFrigate || currentTarget.IsNPCFrigate)
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
-
                         Cache.Instance.PreferredDroneTarget = currentTarget;
-
                         return true;
                     }
                 }
@@ -3678,9 +3640,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (dronePriorityTarget != null && callingroutine == Drones && dronePriorityTarget.IsTarget && !Cache.Instance.IgnoreTargets.Contains(dronePriorityTarget.Name.Trim()))", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
-
                     Cache.Instance.PreferredDroneTarget = dronePriorityTarget;
-
                     return true;
                 }
             }
@@ -3692,7 +3652,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate) && t.IsTargetedBy)
+                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate) && t.IsTarget && t.IsAttacking)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsTarget)
@@ -3708,11 +3668,9 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsTargetedBy)
+                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsTarget && t.IsAttacking)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
-                    .ThenByDescending(t => t.IsTarget)
-                    //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();
@@ -3720,9 +3678,7 @@ namespace Questor.Modules.Caching
                 if (lowValueFirst && lowValueTarget != null)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-
                     Cache.Instance.PreferredDroneTarget = lowValueTarget;
-
                     return true;
                 }
 

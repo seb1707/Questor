@@ -278,7 +278,12 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity.Distance < Cache.Instance.MaxRange)
                         {
-                            return true;
+                            if (Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                            {
+                                return true;
+                            }
+
+                            return false; 
                         }
 
                         return false;

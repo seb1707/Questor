@@ -91,7 +91,7 @@ namespace Questor.Modules.Combat
             // Return best possible low value target
             Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.potentialCombatTargets.ToList());
 
-            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.IsTarget && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
+            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.IsReadyToShoot && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
             {
                 if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)", Logging.Debug);
                 EntityCache target = Cache.Instance.PreferredDroneTarget;

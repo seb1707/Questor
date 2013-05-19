@@ -3370,11 +3370,13 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsTarget && d.Entity.Distance < Settings.Instance.DroneControlRange && d.Entity.IsTargetedBy)
-                                                           .OrderByDescending(pt => pt.DronePriority)
-                                                           .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                           .ThenBy(pt => pt.Entity.Distance)
-                                                           .Select(pt => pt.Entity).FirstOrDefault();
+                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsReadyToShoot 
+                                                            && d.Entity.Distance < Settings.Instance.DroneControlRange 
+                                                            && d.Entity.IsTargetedBy)
+                                                            .OrderByDescending(pt => pt.DronePriority)
+                                                            .ThenByDescending(pt => pt.Entity.IsTarget)
+                                                            .ThenBy(pt => pt.Entity.Distance)
+                                                            .Select(pt => pt.Entity).FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
@@ -3413,7 +3415,7 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsTarget && t.IsAttacking)
+                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsReadyToShoot && t.IsAttacking)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                     .ThenBy(OrderByLowestHealth())

@@ -840,8 +840,7 @@ namespace Questor.Modules.Combat
                 }
                 catch (NullReferenceException) { }
             }
-                    
-                
+
             if (unlockThisLowValueTarget != null)
             {
                 Logging.Log("Combat [TargetCombatants]" + module, "Unlocking " + unlockThisLowValueTarget.Name + " to make room for [" + reason + "]", Logging.Orange);
@@ -1036,7 +1035,7 @@ namespace Questor.Modules.Combat
                     //highValueTargets.Add(primaryWeaponPriorityEntity);
                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     return;
-                }    
+                }
             }
             #endregion
 
@@ -1072,11 +1071,10 @@ namespace Questor.Modules.Combat
                     //highValueTargets.Add(primaryWeaponPriorityEntity);
                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                     return;
-                }    
-               
+                }
             }
             #endregion
- 
+
             #region Priority Target Handling
             //
             // Now lets deal with the priority targets

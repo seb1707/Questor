@@ -382,7 +382,7 @@ namespace Questor.Modules.Caching
 
                             return false;
                         }
-                        
+
                         if (Cache.Instance.DronePriorityTargets.Any())
                         {
                             if (Cache.Instance.DronePriorityTargets.Any(pt => pt.Id == _directEntity.Id))
@@ -516,7 +516,7 @@ namespace Questor.Modules.Caching
                         {
                             optimal = Cache.Instance.OptimalRange;
                         }
-                        else /*if (Settings.Instance.OptimalRange != 0)*/ //do we really need this condition? we cant even get in here if one of them isnt != 0
+                        else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them isnt != 0, that is the idea, if its 0 we sure as hell dont want to use it as the optimal
                         {
                             optimal = Settings.Instance.OptimalRange;
                         }
@@ -543,8 +543,8 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    // If we cant determine optimal, how can we say that the entity is within it?
-                    return false;
+                    // If you have no optimal you have to assume the entity is within Optimal... (like missiles)
+                    return true;
                 }
 
                 return false;
@@ -882,8 +882,8 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-
                 }
+
                 return false;
             }
         }
@@ -904,8 +904,8 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-                    
                 }
+
                 return false;
             }
         }
@@ -926,8 +926,8 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-                    
                 }
+
                 return false;
             }
         }
@@ -948,8 +948,8 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-                    
                 }
+
                 return false;
             }
         }
@@ -970,8 +970,8 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-
                 }
+
                 return false;
             }
         }
@@ -1830,7 +1830,7 @@ namespace Questor.Modules.Caching
 
                 return false;
             }
-            
+
             return false;
         }
 

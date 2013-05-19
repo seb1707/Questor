@@ -1034,6 +1034,12 @@ namespace Questor.Modules.Activities
 
         private void KillClosestByNameAction(Actions.Action action)
         {
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+            {
+                notTheClosest = false;
+            }
+
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
 
             List<string> targetNames = action.GetParameterValues("target");
@@ -1074,6 +1080,11 @@ namespace Questor.Modules.Activities
         {
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
 
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+            {
+                notTheClosest = false;
+            }
             //
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given, in this everything on grid
             //
@@ -1690,7 +1701,6 @@ namespace Questor.Modules.Activities
                         {
                             action = _pocketActions[_currentAction];
                             Logging.Log("CombatMissionCtrl", "Starting Action." + action, Logging.Yellow);
-                            
                         }
                     }
 

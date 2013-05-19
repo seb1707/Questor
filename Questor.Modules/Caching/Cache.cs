@@ -1274,7 +1274,7 @@ namespace Questor.Modules.Caching
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
                         }
                     }
-                    
+
                     return _potentialCombatTargets;
                 }
 
@@ -1308,7 +1308,6 @@ namespace Questor.Modules.Caching
                                                                                                        .ToList()); 
                 }
                 catch (NullReferenceException) { }  // this can happen during session changes
-                
 
                 return new List<EntityCache>();
             }
@@ -1501,9 +1500,7 @@ namespace Questor.Modules.Caching
                 if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
                 {
                     return true;
-                }    
-                
-                
+                }
 
                 return false;
             }
@@ -2393,6 +2390,10 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        /// <summary>
+        ///   Remove targets from priority list
+        /// </summary>
+        /// <param name = "targets"></param>
         public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
         {
             int removed = 0;
@@ -3121,7 +3122,6 @@ namespace Questor.Modules.Caching
                     && (!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate) 
                         || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit)))
                 {
-                    
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if (callingTarget != null && !Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim()))", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;

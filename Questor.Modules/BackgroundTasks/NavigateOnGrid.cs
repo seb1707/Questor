@@ -90,6 +90,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)
                 {
                     if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange - 5000)", Logging.White);
+
                     //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"StartOrbiting: Target in range");
                     if (!Cache.Instance.IsApproachingOrOrbiting(target.Id))
                     {
@@ -157,7 +158,6 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-
         public static void NavigateIntoRange(EntityCache target, string module, bool moveMyShip)
         {
             if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp) || !moveMyShip)
@@ -209,6 +209,13 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
+                            if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
+                                OrbitGateorTarget(target, module);
+                                return;
+                            }
+
                             target.Approach(Cache.Instance.OptimalRange);
                             Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                             return;

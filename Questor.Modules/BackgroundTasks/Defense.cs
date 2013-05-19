@@ -635,7 +635,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 7)
+            if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 15)
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
                 return;

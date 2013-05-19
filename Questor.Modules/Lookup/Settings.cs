@@ -70,6 +70,8 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugAddDronePriorityTarget { get; set; }
+        public bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
         public bool DebugAllMissionsOnBlackList { get; set; }
         public bool DebugAllMissionsOnGreyList { get; set; }
@@ -621,6 +623,8 @@ namespace Questor.Modules.Lookup
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.CharacterSettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
                 DebugActivateGate = false;
                 DebugActivateWeapons = false;
+                DebugAddDronePriorityTarget = false;
+                DebugAddPrimaryWeaponPriorityTarget = false;
                 DebugAgentInteractionReplyToAgent = false;
                 DebugAllMissionsOnBlackList = false;
                 DebugAllMissionsOnGreyList = false;
@@ -1101,6 +1105,8 @@ namespace Questor.Modules.Lookup
                     //
                     DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
                     DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
+                    DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
+                    DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
                     DebugAgentInteractionReplyToAgent = (bool?)CharacterSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? (bool?)CommonSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? false;
                     DebugAllMissionsOnBlackList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnBlackList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnBlackList") ?? false;
                     DebugAllMissionsOnGreyList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnGreyList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnGreyList") ?? false;

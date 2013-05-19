@@ -454,10 +454,10 @@ namespace Questor
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
             
-            if (Cache.Instance.EntitiesthatHaveExploded.Any())
-            {
-                if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);
-            }
+            //if (Cache.Instance.EntitiesthatHaveExploded.Any())
+            //{
+            //    if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);
+            //}
 
             Cache.Instance.LastFrame = DateTime.UtcNow;
 

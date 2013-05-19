@@ -335,7 +335,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (!_directEntity.HasExploded && !_directEntity.IsTarget)
+                    if (!_directEntity.HasExploded && !_directEntity.IsTarget && !_directEntity.IsTargeting)
                     {
                         return true;
                     }
@@ -735,6 +735,86 @@ namespace Questor.Modules.Caching
             result |= IsTargetPaintingMe;
             result |= IsTrackingDisruptingMe;
             return result;
+        }
+
+        public DronePriority IsActiveDroneEwarType()
+        {
+            if (IsWarpScramblingMe)
+            {
+                return DronePriority.WarpScrambler;
+            }
+
+            if (IsWebbingMe)
+            {
+                return DronePriority.Webbing;
+            }
+
+            if (IsNeutralizingMe)
+            {
+                return DronePriority.PriorityKillTarget;
+            }
+
+            if (IsJammingMe)
+            {
+                return DronePriority.PriorityKillTarget;
+            }
+
+            if (IsSensorDampeningMe)
+            {
+                return DronePriority.PriorityKillTarget;
+            }
+
+            if (IsTargetPaintingMe)
+            {
+                return DronePriority.PriorityKillTarget;
+            }
+
+            if (IsTrackingDisruptingMe)
+            {
+                return DronePriority.PriorityKillTarget;
+            }
+            
+            return DronePriority.NotUsed;
+        }
+
+        public PrimaryWeaponPriority IsActivePrimaryWeaponEwarType()
+        {
+            if (IsWarpScramblingMe)
+            {
+                return PrimaryWeaponPriority.WarpScrambler;
+            }
+
+            if (IsWebbingMe)
+            {
+                return PrimaryWeaponPriority.Webbing;
+            }
+
+            if (IsNeutralizingMe)
+            {
+                return PrimaryWeaponPriority.Neutralizing;
+            }
+
+            if (IsJammingMe)
+            {
+                return PrimaryWeaponPriority.Jamming;
+            }
+
+            if (IsSensorDampeningMe)
+            {
+                return PrimaryWeaponPriority.Dampening;
+            }
+
+            if (IsTargetPaintingMe)
+            {
+                return PrimaryWeaponPriority.TargetPainting;
+            }
+
+            if (IsTrackingDisruptingMe)
+            {
+                return PrimaryWeaponPriority.TrackingDisrupting;
+            }
+
+            return PrimaryWeaponPriority.NotUsed;
         }
 
         public bool IsWarpScramblingMe

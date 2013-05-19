@@ -2919,7 +2919,7 @@ namespace Questor.Modules.Caching
 
             EntityCache currentTarget = null;
             if (Cache.Instance.CurrentWeaponTarget() != null 
-                && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.CurrentWeaponTarget().Id)
+                && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
                 && !Cache.Instance.IgnoreTargets.Contains(Cache.Instance.CurrentWeaponTarget().Name.Trim()))
             {
                 currentTarget = Cache.Instance.CurrentWeaponTarget();
@@ -2964,7 +2964,7 @@ namespace Questor.Modules.Caching
             //
             // if currentTarget set to something (not null) and it is actually an entity...
             //
-            if (currentTarget != null && Cache.Instance.Entities.Any(t => t.Id == currentTarget.Id))
+            if (currentTarget != null && currentTarget.IsReadyToShoot)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "We have a target, testing conditions", Logging.Teal);
 
@@ -3038,9 +3038,9 @@ namespace Questor.Modules.Caching
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Low Health", Logging.Teal);
-                if (currentTarget.IsInOptimalRange
+                if (currentTarget.IsReadyToShoot
+                    && currentTarget.IsInOptimalRange
                     && (((!currentTarget.IsFrigate && !currentTarget.IsNPCFrigate) || !currentTarget.IsTooCloseTooFastTooSmallToHit))
-                        && currentTarget.IsReadyToShoot
                         && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
@@ -3055,7 +3055,9 @@ namespace Questor.Modules.Caching
                 if (!currentTarget.IsHigherPriorityPresent)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget: currentTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
-                    if ((!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit)) && currentTarget.Distance < Cache.Instance.MaxRange)
+                    if (currentTarget.IsReadyToShoot
+                        && (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit)) 
+                        && currentTarget.Distance < Cache.Instance.MaxRange)
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
@@ -3179,7 +3181,9 @@ namespace Questor.Modules.Caching
             #region If lowValueFirst && lowValue aggrod or no high value aggrod
             if ((lowValueFirst && lowValueTarget != null)
                     && (lowValueTarget.IsTargetedBy 
-                    || (highValueTarget == null || (highValueTarget != null && !highValueTarget.IsTargetedBy))))
+                    || (highValueTarget == null 
+                        || (highValueTarget != null 
+                        && !highValueTarget.IsTargetedBy))))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Low Value First", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
@@ -3195,7 +3199,11 @@ namespace Questor.Modules.Caching
             // if no high aggro, and no low aggro, shoot high value thats present
             if (highValueTarget != null)
             {
-                if (highValueTarget.IsTargetedBy || Cache.Instance.UseDrones || (lowValueTarget == null || (lowValueTarget != null && !lowValueTarget.IsTargetedBy)))
+                if (highValueTarget.IsTargetedBy 
+                    || Cache.Instance.UseDrones
+                    || (lowValueTarget == null 
+                        || (lowValueTarget != null 
+                        && !lowValueTarget.IsTargetedBy)))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking Use High Value", Logging.Teal);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance/1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);

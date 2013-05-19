@@ -319,8 +319,8 @@ namespace Questor.Modules.Activities
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList())
-                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList()))
+            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -546,8 +546,8 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList())
-                    || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList()))
+            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+                    || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -895,8 +895,8 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList())
-                    || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => t.IsTargetedBy).ToList()))
+            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+                    || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -973,7 +973,13 @@ namespace Questor.Modules.Activities
             if (ignoreAttackers)
             {
                 foreach (EntityCache target in Cache.Instance.potentialCombatTargets)
-                    Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
+                {
+                    if (target.IsTargetedBy && target.IsAttacking)
+                    {
+                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
+                        Cache.Instance.IgnoreTargets.Add(target.Name.Trim());    
+                    }
+                }
             }
 
             if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => !t.IsSentry) > killTargets.Count())
@@ -997,7 +1003,9 @@ namespace Questor.Modules.Activities
             // GetTargets
             Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
             if (Cache.Instance.UseDrones)
+            {
                 Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
+            }
 
             // Don't use NextAction here, only if target is killed (checked further up)
             return;
@@ -1038,6 +1046,8 @@ namespace Questor.Modules.Activities
                 Nextaction();
                 return;
             }
+
+            Cache.Instance.AddPrimaryWeaponPriorityTarget(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).FirstOrDefault(),PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
 
             if (Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList())
                 || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList()))

@@ -1168,6 +1168,11 @@ namespace Questor.Modules.Caching
             get { return _aggressed ?? (_aggressed = Entities.Where(e => e.IsTargetedBy && e.IsAttacking).ToList()); }
         }
 
+        //
+        // entities that have been locked (or are being locked now)
+        // entities that are IN range
+        // entities that eventually we want to shoot (and now that they are locked that will happen shortly)
+        //
         public IEnumerable<EntityCache> combatTargets
         {
             get
@@ -1204,6 +1209,11 @@ namespace Questor.Modules.Caching
             }
         }
 
+        //
+        // entities that have potentially not been locked yet
+        // entities that may not be in range yet
+        // entities that eventually we want to shoot
+        //
         public IEnumerable<EntityCache> potentialCombatTargets
         {
             get
@@ -2395,11 +2405,11 @@ namespace Questor.Modules.Caching
             return removed > 0;
         }
 
-        public void AddPrimaryWeaponPriorityTarget(EntityCache target, PrimaryWeaponPriority priority, bool AddEwarTypeToPriorityTargetList, string module)
+        public void AddPrimaryWeaponPriorityTarget(EntityCache target, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id))
             {
-                if (Settings.Instance.DebugDrones) Logging.Log("AddPrimaryWeaponPriorityTargets", "if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
+                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if (Cache.Instance.IgnoreTargets.Contains(target.Name.Trim()) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
                 return;
             }
 
@@ -2428,35 +2438,35 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets, PrimaryWeaponPriority priority, bool AddEwarTypeToPriorityTargetList, string module)
+        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             targets = targets.ToList();
             if (targets.Any())
             {
                 foreach (EntityCache target in targets)
                 {
-                    AddPrimaryWeaponPriorityTarget(target, priority, AddEwarTypeToPriorityTargetList, module);
+                    AddPrimaryWeaponPriorityTarget(target, priority, module, AddEwarTypeToPriorityTargetList);
                 }    
             }
             
             return;
         }
 
-        public void AddDronePriorityTargets(IEnumerable<EntityCache> targets, DronePriority priority, bool AddEwarTypeToPriorityTargetList, string module)
+        public void AddDronePriorityTargets(IEnumerable<EntityCache> targets, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             targets = targets.ToList();
             if (targets.Any())
             {
                 foreach (EntityCache target in targets)
                 {
-                    AddDronePriorityTarget(target, priority, AddEwarTypeToPriorityTargetList, module);
+                    AddDronePriorityTarget(target, priority, module, AddEwarTypeToPriorityTargetList);
                 }
             }
 
             return;
         }
 
-        public void AddDronePriorityTarget(EntityCache target, DronePriority priority, bool AddEwarTypeToPriorityTargetList, string module)
+        public void AddDronePriorityTarget(EntityCache target, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             if (AddEwarTypeToPriorityTargetList && Cache.Instance.UseDrones)
             {
@@ -3116,7 +3126,8 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
-                return false;
+
+                //return false; //do not return here, continue to process targets, we did not find one yet
             }
             #endregion
 

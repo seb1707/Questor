@@ -199,7 +199,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            if (MyNextStargate != null && MyNextStargate.Distance < (int)Distance.WarptoDistance)
+            if (MyNextStargate != null && MyNextStargate.Distance < (int)Distance.WarptoDistance && MyNextStargate.Distance != 0)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching)
                 {

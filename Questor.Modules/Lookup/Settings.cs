@@ -131,7 +131,7 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DebugWalletBalance { get; set; }
         public bool DebugWatchForActiveWars { get; set; }
-        
+
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
@@ -575,8 +575,7 @@ namespace Questor.Modules.Lookup
             {
                 if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30))
                 {
-                    Cache.Instance.ReasonToStopQuestor =
-                        "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
+                    Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;

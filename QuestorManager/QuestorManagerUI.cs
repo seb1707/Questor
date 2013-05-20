@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Globalization;
+
 namespace QuestorManager
 {
     using System;
@@ -1434,8 +1436,8 @@ namespace QuestorManager
                                 {
                                     ListViewItem listItem = new ListViewItem("BuyOrder");
                                     listItem.SubItems.Add(item.Name);
-                                    listItem.Tag = item.Id.ToString();
-                                    listItem.SubItems.Add(surplus.ToString());
+                                    listItem.Tag = item.Id.ToString(CultureInfo.InvariantCulture);
+                                    listItem.SubItems.Add(surplus.ToString(CultureInfo.InvariantCulture));
                                     LstTask.Items.Add(listItem);
                                     count++;
                                 }

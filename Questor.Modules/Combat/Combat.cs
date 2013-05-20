@@ -895,7 +895,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have too many high value (non-priority) targets targeted?
             //
-            while (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
+            if (highValueTargets.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id)) > Math.Max(maxHighValueTarget - PrimaryWeaponsPTtargeted + DronesPTtargeted, 0))
             {
                 // Unlock any target
                 EntityCache target = highValueTargets.OrderByDescending(t => t.IsInOptimalRange).ThenBy(t => t.Distance).FirstOrDefault(t => Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.Id != t.Id) && Cache.Instance.DronePriorityTargets.All(pt => pt.Id != t.Id));
@@ -908,20 +908,21 @@ namespace Questor.Modules.Combat
                     //
                     // you should never get here unless you have LOTS of NPCs pointing you
                     //
-                    break;
+                    //break;
                 }
 
-                if (target.UnlockTarget("Combat.TargetCombatants"))
+                if (target != null && target.UnlockTarget("Combat.TargetCombatants"))
                 {
                     Logging.Log("Combat", "unlocking high value target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]{" + highValueTargets.Count + "} [" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     highValueTargets.Remove(target);
+                    return;
                 }
             }
 
             //
             // Do we have too many low value targets targeted?
             //
-            while (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.DronePriorityTargets.Count(dt => !dt.IsTarget), 0))
+            if (lowValueTargets.Count > Math.Max(maxLowValueTarget - Cache.Instance.DronePriorityTargets.Count(dt => !dt.IsTarget), 0))
             {
                 // Unlock any target that is not warp scrambling me
                 EntityCache target = lowValueTargets.Where(t => !t.IsWarpScramblingMe).OrderByDescending(t => t.Distance).FirstOrDefault();
@@ -937,7 +938,7 @@ namespace Questor.Modules.Combat
             //
             // Do we have prioritytargets that can't be targeted?
             //
-            while (Cache.Instance.Targets.Count() >= Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+            if (Cache.Instance.Targets.Count() >= Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
                 && ((Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe)) || (Cache.Instance.DronePriorityTargets.Where(pt => !pt.IsTarget).Any(pt => pt.IsWarpScramblingMe))))
             {
                 // Unlock any target that is not warp scrambling me

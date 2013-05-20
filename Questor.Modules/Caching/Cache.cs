@@ -2930,7 +2930,7 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
 
@@ -3284,7 +3284,7 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id))
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "We have a PreferredDroneTarget that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
 

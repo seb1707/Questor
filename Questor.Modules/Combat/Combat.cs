@@ -1459,8 +1459,8 @@ namespace Questor.Modules.Combat
 
                         if (killTarget != null)
                         {
-                            //we shouldnt need this anymore either, because to have a preferred target, it has to already be in range and targetted
-                            //NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);
+                            //ok we actually need this for now also unfortunately
+                            NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);
 
                             if (killTarget.IsReadyToShoot)
                             {

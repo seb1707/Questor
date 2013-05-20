@@ -1480,8 +1480,9 @@ namespace Questor.Modules.Combat
                         
                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
                         
-                        //we shouldnt need this anymore with the way we are now doing things.
-                        //Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
+                        //ok so we do need this, but only use it if we actually have some potential targets
+                        if (Cache.Instance.potentialCombatTargets.Any())
+                            Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
                         
                         #region original code dont delete yet
                         /*

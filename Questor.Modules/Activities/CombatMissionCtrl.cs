@@ -481,7 +481,8 @@ namespace Questor.Modules.Activities
                 else
                 {
                     Cache.Instance.GetBestTarget(DistanceToClear, false, "combat");
-                    Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
+                    if (Cache.Instance.UseDrones)
+                        Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 }
                 _clearPocketTimeout = null;
             }

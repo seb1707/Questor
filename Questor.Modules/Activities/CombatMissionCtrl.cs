@@ -465,12 +465,29 @@ namespace Questor.Modules.Activities
             }*/
             #endregion
 
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
+            //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
+            /*if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
+                _clearPocketTimeout = null;*/
+            if (Cache.Instance.potentialCombatTargets.Any(t => !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())))
+            {
+                //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
+                if (Cache.Instance.potentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Distance > Cache.Instance.MaxRange)
+                {
+                    if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.potentialCombatTargets.OrderBy(t => t.Distance).FirstOrDefault().Id))
+                    {
+                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.potentialCombatTargets.OrderBy(t => t.Distance).FirstOrDefault(), "combatMissionControl", true);
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestTarget(DistanceToClear, false, "combat");
+                    Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
+                }
                 _clearPocketTimeout = null;
-
+            }
             //Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
-
+            
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
 
@@ -999,6 +1016,15 @@ namespace Questor.Modules.Activities
 
             Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
+            //we may need to get closer so combat will take over
+            if (killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Distance > Cache.Instance.MaxRange)
+            {
+                if (!Cache.Instance.IsApproachingOrOrbiting(killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Id))
+                {
+                    NavigateOnGrid.NavigateIntoRange(killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(), "combatMissionControl", true);
+                }
+            }
+
             // GetTargets
             Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
             if (Cache.Instance.UseDrones)

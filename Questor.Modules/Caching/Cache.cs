@@ -2934,6 +2934,12 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+                && !Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid))
+            {
+                Cache.Instance.PreferredPrimaryWeaponTarget = null;
+            }
+
             // Do we have ANY warp scrambling entities targeted starting with currentTarget, add them to the PrimaryWeapons PriorityTarget list
             if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.WarpScrambler, Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;

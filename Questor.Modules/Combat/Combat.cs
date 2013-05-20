@@ -1455,7 +1455,7 @@ namespace Questor.Modules.Combat
                         //lets at the least make sure we have a fresh entity this frame to check against so we arent trying to navigate to things that no longer exist
                         EntityCache killTarget = null;
                         if(Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                            Cache.Instance.Entities.Where(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid).FirstOrDefault();
+                            killTarget = Cache.Instance.Entities.Where(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid).FirstOrDefault();
 
                         if (killTarget != null)
                         {

@@ -1170,23 +1170,26 @@ namespace Questor.Modules.Activities
                         }
 
                         // Get the container that is associated with the cargo container
-                        DirectContainer container = Cache.Instance.DirectEve.GetContainer(closest.Id);
-
-                        DirectItem itemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
-                        if (itemsToMove != null)
+                        if (closest != null)
                         {
-                            Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
-                            container.Add(itemsToMove, quantity);
+                            DirectContainer container = Cache.Instance.DirectEve.GetContainer(closest.Id);
 
-                            done = container.Items.Any(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower() && (i.Quantity >= quantity));
-                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
-                        }
-                        else
-                        {
-                            Logging.Log("MissionController.DropItem", "Error not found Items", Logging.White);
-                            Cache.Instance.DropMode = false;
-                            Nextaction();
-                            return;
+                            DirectItem itemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
+                            if (itemsToMove != null)
+                            {
+                                Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
+                                container.Add(itemsToMove, quantity);
+
+                                done = container.Items.Any(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower() && (i.Quantity >= quantity));
+                                Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                            }
+                            else
+                            {
+                                Logging.Log("MissionController.DropItem", "Error not found Items", Logging.White);
+                                Cache.Instance.DropMode = false;
+                                Nextaction();
+                                return;
+                            }
                         }
                     }
                 }

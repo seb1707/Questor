@@ -2934,6 +2934,9 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
+            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
+            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
+            //and there is nothing to replace it with.
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null
                 && !Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid))
             {

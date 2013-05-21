@@ -87,7 +87,7 @@ namespace Questor.Modules.Combat
                     
             // Find the first active weapon's target
             TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
-            
+
             // Return best possible low value target
             Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.potentialCombatTargets.ToList());
 
@@ -179,7 +179,7 @@ namespace Questor.Modules.Combat
 
             if (!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp)
             {
-                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);            
+                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
                 _States.CurrentDroneState = DroneState.Idle;
                 return;
             }
@@ -200,7 +200,7 @@ namespace Questor.Modules.Combat
                     bool launch = true;
 
                     // Always launch if we're scrambled
-                    if (!Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe || pt.DronePriorityLevel == DronePriority.WarpScrambler))
+                    if (!Cache.Instance.potentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
                     {
                         launch &= Cache.Instance.UseDrones;
 
@@ -320,9 +320,9 @@ namespace Questor.Modules.Combat
                     }
                     else
                     {
-                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe || pt.DronePriorityLevel == DronePriority.WarpScrambler))
+                        if (Cache.Instance.potentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
-                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).ThenBy(i => i.DronePriorityLevel == DronePriority.WarpScrambler).FirstOrDefault();
+                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
                             if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
                             {
                                 _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);

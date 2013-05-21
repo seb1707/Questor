@@ -1222,7 +1222,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InSpace)
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && (!e.IsSentry || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))                       
+                                                        && (!e.IsSentry || (e.IsSentry && e.IsEwarTarget()) || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
@@ -2760,7 +2760,7 @@ namespace Questor.Modules.Caching
                         FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
                     }
 
-                    if (_currentWeaponTarget != null && _currentWeaponTarget.IsValid && _currentWeaponTarget.IsTarget)
+                    if (_currentWeaponTarget != null && _currentWeaponTarget.IsReadyToShoot)
                     {
                         return _currentWeaponTarget;
                     }
@@ -2776,6 +2776,56 @@ namespace Questor.Modules.Caching
             }
 
             return null;
+        }
+
+        public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
+        {
+            IEnumerable<EntityCache> targets = _potentialTargets != null ? _potentialTargets : potentialCombatTargets;
+            long currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
+            long preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
+
+            targets = targets.Where(t => !Cache.Instance.IgnoreTargets.Contains(t.Name) && t.Distance < distance)
+                                                  .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid))
+                                                  .OrderByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
+                                                  .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                  .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
+                                                  .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
+                                                  .ThenByDescending(t => t.IsWebbingMe)
+                                                  .ThenByDescending(t => t.IsEwarTarget())                                  // Will return True if the target ever eward us (look at caching changes for ewar)
+                                                  .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
+                                                                                                                             * over currently targeting entities will make us switch targets more often what we dont want
+                                                                                                                             * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
+                                                  .ThenByDescending(t => t.Id == currentWeaponId)                           // Lets keep shooting
+                                                  .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
+                                                  .ThenByDescending(t => t.IsInOptimalRange)
+                                                  .ThenBy(t => t.Distance);
+
+            return targets;
+        }
+
+        public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
+        {
+            IEnumerable<EntityCache> targets = _potentialTargets ?? potentialCombatTargets;
+            long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
+            long preferredTargetId = Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget.Id : -1;
+
+            targets = targets.Where(t => !Cache.Instance.IgnoreTargets.Contains(t.Name) && t.Distance < distance)
+                                                          .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid))
+                                                          .Where(t => t.Distance < Settings.Instance.DroneControlRange)
+                                                          .OrderByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
+                                                          .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
+                                                          .ThenByDescending(t => t.IsWebbingMe)
+                                                          .ThenByDescending(t => t.IsEwarTarget())                                  // Will return True if the target ever eward us (look at caching changes for ewar)
+                                                          .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
+                                                          .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
+                                                                                                                                     * over currently targeting entities will make us switch targets more often what we dont want
+                                                                                                                                     * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
+                                                          .ThenByDescending(t => t.Id == currentDroneTargetId)                      // Keep current target
+                                                          .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
+                                                          .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
+                                                          .ThenBy(t => t.Distance);
+
+            return targets;
         }
 
         public EntityCache FindPrimaryWeaponPriorityTarget(EntityCache currentTarget, PrimaryWeaponPriority priorityType, bool AddECMTypeToPrimaryWeaponPriorityTargetList, double Distance, bool FindAUnTargetedEntity = true)
@@ -2889,6 +2939,77 @@ namespace Questor.Modules.Caching
             }
 
             return null;
+        }
+
+        public bool __GetBestTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
+        {
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Attempting to get Best Target", Logging.Teal);
+
+            if (DateTime.UtcNow < NextGetBestCombatTarget)
+            {
+                return (PreferredPrimaryWeaponTarget != null || PreferredDroneTarget != null);
+            }
+
+            NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+
+            PreferredPrimaryWeaponTarget = __GetBestWeaponTargets(distance, _potentialTargets).FirstOrDefault();
+
+            // Drone Target
+            if (Settings.Instance.UseDrones)
+            {
+                PreferredDroneTarget = __GetBestDroneTargets(distance, _potentialTargets).FirstOrDefault();
+            }
+
+            #region Current Target Health Logging
+                //
+                // Current Target Health Logging
+                //
+                bool currentTargetHealthLogNow = true;
+                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
+                {
+                    if ((int)PreferredPrimaryWeaponTarget.Id != (int)TargetingCache.CurrentTargetID)
+                    {
+                        if ((int)PreferredPrimaryWeaponTarget.ArmorPct == 0 && (int)PreferredPrimaryWeaponTarget.ShieldPct == 0 && (int)PreferredPrimaryWeaponTarget.StructurePct == 0)
+                        {
+                            //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
+                        }
+                        else
+                        {
+                            //
+                            // assign shields and armor to targetingcache variables - compare them to each other
+                            // to see if we need to send another log message to the console, if the values have not changed no need to log it.
+                            //
+                            if ((int)PreferredPrimaryWeaponTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
+                                (int)PreferredPrimaryWeaponTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
+                                (int)PreferredPrimaryWeaponTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
+                            {
+                                currentTargetHealthLogNow = false;
+                            }
+
+                            //
+                            // now that we are done comparing - assign new values for this tick
+                            //
+                            TargetingCache.CurrentTargetShieldPct = (int)PreferredPrimaryWeaponTarget.ShieldPct;
+                            TargetingCache.CurrentTargetArmorPct = (int)PreferredPrimaryWeaponTarget.ArmorPct;
+                            TargetingCache.CurrentTargetStructurePct = (int)PreferredPrimaryWeaponTarget.StructurePct;
+                            if (currentTargetHealthLogNow)
+                            {
+                                Logging.Log(callingroutine, ".GetBestTarget: CurrentTarget is [" + PreferredPrimaryWeaponTarget.Name +                              //name
+                                            "][" + (Math.Round(PreferredPrimaryWeaponTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
+                                            "k][Shield%:[" + Math.Round(PreferredPrimaryWeaponTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
+                                            "][Armor%:[" + Math.Round(PreferredPrimaryWeaponTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
+                                            , Logging.White);
+                            }
+                        }
+                    }
+                }
+                #endregion Current Target Health Logging
+
+            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
+
+            NextGetBestCombatTarget = DateTime.UtcNow;
+
+            return (PreferredPrimaryWeaponTarget != null || PreferredDroneTarget != null);
         }
 
         /// <summary>
@@ -3092,7 +3213,7 @@ namespace Questor.Modules.Caching
                                                                             && ((!p.IsNPCFrigate && !p.IsFrigate ) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                            .OrderByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.IsActiveEwar())
+                                                                           .ThenByDescending(pt => pt.IsEwarTarget())
                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
                                                                            .ThenBy(pt => pt.Distance)
                                                                            .FirstOrDefault();

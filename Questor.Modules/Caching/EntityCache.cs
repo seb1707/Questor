@@ -197,7 +197,7 @@ namespace Questor.Modules.Caching
                 {
                     if (!_directEntity.HasExploded && Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
                     {
-                        return _directEntity.IsTarget;    
+                        return _directEntity.IsTarget;
                     }
 
                     return false;
@@ -729,7 +729,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool IsActiveEwar()
+        public bool IsEwarTarget()
         {
             bool result = false;
             result |= IsWarpScramblingMe;
@@ -833,13 +833,12 @@ namespace Questor.Modules.Caching
                         if (!Cache.Instance.WarpScrambler.Contains(_directEntity.Id)) Cache.Instance.WarpScrambler.Add(_directEntity.Id);
                         return true;
                     }
-                    else
+                    if (Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
                     {
-                        if (Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
-                            return true;
-                        return false;
+                        return true;
                     }
                 }
+
                 return false;
             }
         }
@@ -860,7 +859,6 @@ namespace Questor.Modules.Caching
                     {
                         return true;
                     }
-                    
                 }
                 return false;
             }

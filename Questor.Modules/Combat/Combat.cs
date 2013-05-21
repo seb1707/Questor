@@ -41,15 +41,15 @@ namespace Questor.Modules.Combat
 
         private IEnumerable<EntityCache> highValueTargetsTargeted;
         private IEnumerable<EntityCache> lowValueTargetsTargeted;
-        private int maxHighValueTarget;
-        private int maxLowValueTarget;
+        private int maxHighValueTargets;
+        private int maxLowValueTargets;
         private int maxTotalTargets;
 
         public Combat()
         {
-            maxLowValueTarget = Settings.Instance.MaximumLowValueTargets;
-            maxHighValueTarget = Settings.Instance.MaximumHighValueTargets;
-            maxTotalTargets = maxHighValueTarget + maxLowValueTarget;
+            maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
+            maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
+            maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
         }
 
 
@@ -453,6 +453,7 @@ namespace Questor.Modules.Combat
             {
                 Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
                 Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                Cache.Instance.ClearEWARCache();
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.Teal);
                 return;
             }
@@ -762,9 +763,9 @@ namespace Questor.Modules.Combat
                                                                                                                                             && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                                                                                                  && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
                                                                                                                                                 || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                                                                                                || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (highValueTargetsTargeted.Count() >= maxHighValueTarget && (!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget || !Cache.Instance.PreferredDroneTarget.IsTarget))))
+                                                                                                                                                || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (highValueTargetsTargeted.Count() >= maxHighValueTargets && (!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget || !Cache.Instance.PreferredDroneTarget.IsTarget))))
                                                                                                                                             && !h.IsPriorityWarpScrambler
-                                                                                                                                            && (highValueTargetsTargeted.Count() >= maxHighValueTarget)))
+                                                                                                                                            && (highValueTargetsTargeted.Count() >= maxHighValueTargets)))
                                                                             .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                             .ThenByDescending(t => t.Distance)
                                                                             .FirstOrDefault();
@@ -807,7 +808,6 @@ namespace Questor.Modules.Combat
 
         public bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
-            
             EntityCache unlockThisLowValueTarget = null;
             if (!OutOfRangeOnly)
             {
@@ -817,9 +817,9 @@ namespace Questor.Modules.Combat
                                                                                                                                           && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                                                                                                && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
                                                                                                                                               || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
-                                                                                                                                              || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (lowValueTargetsTargeted.Count() >= maxLowValueTarget && (!Cache.Instance.PreferredDroneTarget.IsTarget || !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget))))
+                                                                                                                                              || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (lowValueTargetsTargeted.Count() >= maxLowValueTargets && (!Cache.Instance.PreferredDroneTarget.IsTarget || !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget))))
                                                                                                                                           && !h.IsPriorityWarpScrambler
-                                                                                                                                          && (lowValueTargetsTargeted.Count() >= maxLowValueTarget)))
+                                                                                                                                          && (lowValueTargetsTargeted.Count() >= maxLowValueTargets)))
                                                                                                                                           .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
                                                                     .ThenByDescending(t => t.Nearest5kDistance)
                                                                     .FirstOrDefault();
@@ -872,9 +872,9 @@ namespace Questor.Modules.Combat
                 return;
             }
 
-            maxLowValueTarget = Settings.Instance.MaximumLowValueTargets;
-            maxHighValueTarget = Settings.Instance.MaximumHighValueTargets;
-            maxTotalTargets = maxHighValueTarget + maxLowValueTarget;
+            maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
+            maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
+            maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
 
             #region Debugging for listing possible targets
             if (Settings.Instance.DebugTargetCombatants)
@@ -1017,7 +1017,7 @@ namespace Questor.Modules.Combat
                 //
                 // unlock a lower priority entity if needed
                 //
-                if (highValueTargetsTargeted.Count() >= maxHighValueTarget)
+                if (highValueTargetsTargeted.Count() >= maxHighValueTargets)
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
                     if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")
@@ -1053,7 +1053,7 @@ namespace Questor.Modules.Combat
                 //
                 // unlock a lower priority entity if needed
                 //
-                if (lowValueTargetsTargeted.Count() >= maxLowValueTarget)
+                if (lowValueTargetsTargeted.Count() >= maxLowValueTargets)
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
                     if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")
@@ -1101,7 +1101,7 @@ namespace Questor.Modules.Combat
                         foreach (EntityCache primaryWeaponPriorityEntity in _primaryWeaponPriorityEntities)
                         {
                             // Have we reached the limit of high value targets?
-                            if (highValueTargetsTargeted.Count() >= maxHighValueTarget)
+                            if (highValueTargetsTargeted.Count() >= maxHighValueTargets)
                             {
                                 break;
                             }
@@ -1150,7 +1150,7 @@ namespace Questor.Modules.Combat
                         foreach (EntityCache dronePriorityEntity in _dronePriorityTargets)
                         {
                             // Have we reached the limit of high value targets?
-                            if (lowValueTargetsTargeted.Count() >= maxLowValueTarget)
+                            if (lowValueTargetsTargeted.Count() >= maxLowValueTargets)
                             {
                                 break;
                             }
@@ -1183,7 +1183,7 @@ namespace Questor.Modules.Combat
             // OK so now that we are done dealing with preferred and priorities for now, lets see if we can target anything else
             // First lets see if we have enough targets already
             //
-            if (highValueTargetsTargeted.Count() >= maxHighValueTarget && lowValueTargetsTargeted.Count() >= maxLowValueTarget)
+            if (highValueTargetsTargeted.Count() >= maxHighValueTargets && lowValueTargetsTargeted.Count() >= maxLowValueTargets)
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
@@ -1223,7 +1223,7 @@ namespace Questor.Modules.Combat
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + HighValueTargetsTargetedThisCycle + "][" + highValueTargetingMeEntity.Name + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + highValueTargetingMeEntity.GroupId + "]", Logging.Debug);
                     // Have we reached the limit of high value targets?
-                    if (highValueTargetsTargeted.Count() >= maxHighValueTarget || HighValueTargetsTargetedThisCycle >= 4)
+                    if (highValueTargetsTargeted.Count() >= maxHighValueTargets || HighValueTargetsTargetedThisCycle >= 4)
                     {
                         break;
                     }
@@ -1269,7 +1269,7 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: lowValueTargetingMe [" + LowValueTargetsTargetedThisCycle + "][" + lowValueTargetingMeEntity.Name + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + lowValueTargetingMeEntity.GroupId + "]", Logging.Debug);
 
                     // Have we reached the limit of low value targets?
-                    if (lowValueTargetsTargeted.Count() >= maxLowValueTarget || LowValueTargetsTargetedThisCycle >= 3)
+                    if (lowValueTargetsTargeted.Count() >= maxLowValueTargets || LowValueTargetsTargetedThisCycle >= 3)
                     {
                         break;
                     }
@@ -1479,7 +1479,7 @@ namespace Questor.Modules.Combat
                         }
                         
                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
-                        
+
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.potentialCombatTargets.Any())
                             Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");

@@ -1645,6 +1645,7 @@ namespace Questor.Modules.Caching
                 bool result = false;
                 result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
                 result |= GroupId == (int)Group.Mission_Merchant;    // Merchant, Convoy? - Dread Pirate Scarlet
+                result |= IsOreOrIce;
                 return result;
             }
         }
@@ -1742,6 +1743,32 @@ namespace Questor.Modules.Caching
                 return result;
             }
         }
+
+        public bool IsOreOrIce
+        {
+            get
+            {
+                bool result = false;
+                result |= GroupId == (int)Group.Plagioclase;
+                result |= GroupId == (int)Group.Spodumain;
+                result |= GroupId == (int)Group.Kernite;
+                result |= GroupId == (int)Group.Hedbergite;
+                result |= GroupId == (int)Group.Arkonor;
+                result |= GroupId == (int)Group.Bistot;
+                result |= GroupId == (int)Group.Pyroxeres;
+                result |= GroupId == (int)Group.Crokite;
+                result |= GroupId == (int)Group.Jaspet;
+                result |= GroupId == (int)Group.Omber;
+                result |= GroupId == (int)Group.Scordite;
+                result |= GroupId == (int)Group.Gneiss;
+                result |= GroupId == (int)Group.Veldspar;
+                result |= GroupId == (int)Group.Hemorphite;
+                result |= GroupId == (int)Group.DarkOchre;
+                result |= GroupId == (int)Group.Ice;
+                return result;
+            }
+        }
+        
 
         public bool LockTarget(string module)
         {

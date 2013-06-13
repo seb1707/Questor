@@ -3245,7 +3245,7 @@ namespace Questor.Modules.Caching
                 catch (NullReferenceException) { }
 
                 if (callingTarget != null
-                    && callingTarget.IsReadyToShoot
+                    && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable)
                     && (!Cache.Instance.IgnoreTargets.Contains(callingTarget.Name.Trim())
                     && (!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate) 
                         || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit)))

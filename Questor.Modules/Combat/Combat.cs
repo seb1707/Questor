@@ -754,12 +754,23 @@ namespace Questor.Modules.Combat
         public bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisHighValueTarget = null;
+            long preferredId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
                     
             if (!OutOfRangeOnly)
             {
+                if (__lowValueTargetsTargeted.Count() > maxLowValueTargets && maxTotalTargets <= __lowValueTargetsTargeted.Count() + __highValueTargetsTargeted.Count())
+                {
+                    return UnlockLowValueTarget(module, reason, OutOfRangeOnly);    // We are using highvalueslots for lowvaluetarget (which is ok)
+                                                                                    // but we now need 1 slot back to target our PreferredTarget
+                }
+
                 try
                 {
-                    unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
+                    if (__highValueTargetsTargeted.Count(t => t.Id != preferredId) >= maxHighValueTargets)
+                    {
+                        //unlockThisHighValueTarget = Cache.Instance.GetBestWeaponTargets((double)Distances.OnGridWithMe).Where(t => t.IsTarget && highValueTargetsTargeted.Any(e => t.Id == e.Id)).LastOrDefault();
+
+                        unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
                                                                                                                                             && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                                                                                                  && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
                                                                                                                                                 || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
@@ -769,7 +780,8 @@ namespace Questor.Modules.Combat
                                                                             .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                             .ThenByDescending(t => t.Distance)
                                                                             .FirstOrDefault();
-                }
+                    }
+                } 
                 catch (NullReferenceException) { }
 
             }
@@ -954,38 +966,24 @@ namespace Questor.Modules.Combat
             // What do we currently have targeted?
             // Get our current targets/targetting
             //
-            List<EntityCache> targets = new List<EntityCache>();
-            targets.AddRange(Cache.Instance.Targets);
-            targets.AddRange(Cache.Instance.Targeting);
+            //List<EntityCache> targets = new List<EntityCache>();
+            //targets.AddRange(Cache.Instance.Targets);
+            //targets.AddRange(Cache.Instance.Targeting);
 
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.combatTargets.Where(t => (t.TargetValue.HasValue
-                                                                                   && (!t.IsSentry || (t.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
-                                                                                   && (t.IsTarget || t.IsTargeting)
-                                                                                   && (!t.IsNPCFrigate && !t.IsFrigate))
-                                                                                   || t.IsPrimaryWeaponPriorityTarget
-                                                                                   || t.IsPriorityWarpScrambler
-                                                                                   || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
-                                                                                   .OrderByDescending(t => t.IsPriorityWarpScrambler)
-                                                                                   .ThenByDescending(t => t.IsNPCBattleship)
-                                                                                   .ThenBy(t => t.Nearest5kDistance)
-                                                                                   .ToList();
+                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (!t.IsNPCFrigate && !t.IsFrigate));
             }
             catch (NullReferenceException) { }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.combatTargets.Where(t => ((!t.IsSentry || (t.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
-                                                                                            && (t.IsTarget || t.IsTargeting)
-                                                                                            && (t.IsNPCFrigate || t.IsFrigate))
-                                                                                            && (__highValueTargetsTargeted.Any(e => e.Id != t.Id))) //if it is a high value target by definition it is NOT a low value target
-                                                                                            .OrderByDescending(t => t.IsNPCFrigate || t.IsFrigate)
-                                                                                            .ThenBy(t => t.Nearest5kDistance)
-                                                                                  .ToList();
+                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsNPCFrigate || t.IsFrigate));
             }
             catch (NullReferenceException) { }
+
+            int targetsTargeted = highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count();
             #endregion 
 
             #region Remove any target that is out of range (lower of Weapon Range or targeting range, definately matters if damped)
@@ -1174,8 +1172,6 @@ namespace Questor.Modules.Combat
                     }
                 }
             }
-
-            
             #endregion
            
             #region Do we have enough targets?
@@ -1335,68 +1331,8 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: 0 NotYetTargetingMe targets", Logging.Debug);
                 }
             }
-            #endregion
-
-            #region I dont think we need these anymore, but keeping them around for now just in case
-            /*
-            //
-            // Do we have too many high value (non-priority) targets targeted?
-            //
-            if ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && highValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))) 
-                || highValueTargetsTargeted.Count() > maxHighValueTarget)
-            {
-                // Unlock any high value target
-                EntityCache unlockThisHighValueTarget = highValueTargetsTargeted.Where(h => h.IsTarget && (!h.IsPrimaryWeaponPriorityTarget && !h.IsDronePriorityTarget))
-                                                                        .OrderBy(t => !t.IsInOptimalRange)
-                                                                        .ThenBy(t => t.Distance)
-                                                                        .FirstOrDefault();
-                if (unlockThisHighValueTarget == null)
-                {
-                    //
-                    // Assume that if we have no non-scrambling high value targets that we will have low value targets we can untarget elsewhere
-                    //
-                    //break;
-                }
-
-                if (unlockThisHighValueTarget != null && unlockThisHighValueTarget.IsTarget && unlockThisHighValueTarget.UnlockTarget("Combat.TargetCombatants"))
-                {
-                    Logging.Log("Combat", "unlocking high value target [" + unlockThisHighValueTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisHighValueTarget.Id) + "]{" + highValueTargetsTargeted.Count + "} [" + Math.Round(unlockThisHighValueTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    //highValueTargets.Remove(unlockThisHighValueTarget);
-                    
-                }
-            }
-
-            //
-            // Do we have too many low value targets targeted?
-            //
-            if ((PrimaryWeaponsPriorityTargetUnTargeted > 0 && lowValueTargetsTargeted.Any(i => (!i.IsPrimaryWeaponPriorityTarget && !i.IsDronePriorityTarget))
-                || lowValueTargetsTargeted.Count() > maxLowValueTarget))
-            {
-                // Unlock any target that is not warp scrambling me
-                EntityCache unlockThisLowValueTarget = lowValueTargetsTargeted.Where(t => !t.IsWarpScramblingMe && t.IsTarget)
-                                                                      .OrderByDescending(t => t.Distance)
-                                                                      .FirstOrDefault();
-
-                if (unlockThisLowValueTarget == null)
-                {
-                    //
-                    // Assume that if we have no non-scrambling low value targets that we will have high value targets we can untarget elsewhere
-                    //
-                    //break;
-                }
-
-                if (unlockThisLowValueTarget != null && unlockThisLowValueTarget.IsTarget && unlockThisLowValueTarget.UnlockTarget("Combat.TargetCombatants"))
-                {
-                    Logging.Log("Combat", "unlocking low  value target [" + unlockThisLowValueTarget.Name + "][ID: " + Cache.Instance.MaskedID(unlockThisLowValueTarget.Id) + "]{" + lowValueTargetsTargeted.Count + "} [" + Math.Round(unlockThisLowValueTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    //lowValueTargets.Remove(unlockThisLowValueTarget);
-                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                    return;
-                }
-            }
-            */
-            #endregion
-            
             return;
+            #endregion
         }
 
         public void ProcessState()
@@ -1472,7 +1408,7 @@ namespace Questor.Modules.Combat
                                 ActivateNos(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
                                 ActivateWeapons(killTarget);
-                                return;    
+                                return;
                             }
 
                             return;

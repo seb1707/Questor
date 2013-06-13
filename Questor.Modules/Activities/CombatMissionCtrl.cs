@@ -533,7 +533,7 @@ namespace Questor.Modules.Activities
                 _clearPocketTimeout = null;
             }
             //Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
-            
+
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
@@ -1027,6 +1027,7 @@ namespace Questor.Modules.Activities
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
 
                 // We killed it/them !?!?!? :)
+                Cache.Instance.IgnoreTargets.RemoveWhere(t => targetNames.Contains(t));
                 Nextaction();
                 return;
             }
@@ -1043,7 +1044,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => !t.IsSentry) > killTargets.Count())
+            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !Cache.Instance.IgnoreTargets.Contains(t.Name)) > killTargets.Count(e => e.IsTargetedBy))
             {
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
@@ -1055,6 +1056,7 @@ namespace Questor.Modules.Activities
                 }
 
                 targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
+                //Cache.Instance.__GetBestTarget((int)Distances.OnGridWithMe, false, "combat");
             }
             else
             {
@@ -1064,11 +1066,15 @@ namespace Questor.Modules.Activities
             Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
             //we may need to get closer so combat will take over
-            if (killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Distance > Cache.Instance.MaxRange)
+            EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+            if (currentKillTarget != null)
             {
-                if (!Cache.Instance.IsApproachingOrOrbiting(killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Id))
+                if (currentKillTarget.Distance > Cache.Instance.MaxRange)
                 {
-                    NavigateOnGrid.NavigateIntoRange(killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(), "combatMissionControl", true);
+                    if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                    {
+                        NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                    }
                 }
             }
 

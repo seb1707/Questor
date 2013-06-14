@@ -43,13 +43,13 @@ namespace Questor.Modules.Combat
         private IEnumerable<EntityCache> __lowValueTargetsTargeted;
         private int maxHighValueTargets;
         private int maxLowValueTargets;
-        //private int maxTotalTargets;
+        private int maxTotalTargets;
 
         public Combat()
         {
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
-            //maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
+            maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
         }
 
 
@@ -966,9 +966,9 @@ namespace Questor.Modules.Combat
             // What do we currently have targeted?
             // Get our current targets/targetting
             //
-            //List<EntityCache> targets = new List<EntityCache>();
-            //targets.AddRange(Cache.Instance.Targets);
-            //targets.AddRange(Cache.Instance.Targeting);
+            List<EntityCache> targets = new List<EntityCache>();
+            targets.AddRange(Cache.Instance.Targets);
+            targets.AddRange(Cache.Instance.Targeting);
 
             // Get lists of the current high and low value targets
             try
@@ -983,7 +983,7 @@ namespace Questor.Modules.Combat
             }
             catch (NullReferenceException) { }
 
-            int targetsTargeted = highValueTargetsTargeted.Count() + lowValueTargetsTargeted.Count();
+            int targetsTargeted = __highValueTargetsTargeted.Count() + __lowValueTargetsTargeted.Count();
             #endregion 
 
             #region Remove any target that is out of range (lower of Weapon Range or targeting range, definately matters if damped)
@@ -1197,12 +1197,11 @@ namespace Questor.Modules.Combat
 
 
             List<EntityCache> highValueTargetingMe;
-            highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue)
-                                                && (!t.IsNPCFrigate && !t.IsFrigate))
+            highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue && t.TargetValue.Value > 1))
                                                .OrderBy(t => t.Nearest5kDistance).ToList();
 
             List<EntityCache> lowValueTargetingMe;
-            lowValueTargetingMe = TargetingMe.Where(t => (t.IsNPCFrigate || t.IsFrigate))
+            lowValueTargetingMe = TargetingMe.Where(t => !t.TargetValue.HasValue ||  t.TargetValue.Value < 2)
                                              .OrderBy(t => t.Nearest5kDistance).ToList();
 
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] highValueTargetingMe [" + highValueTargetingMe.Count() + "]", Logging.Debug);

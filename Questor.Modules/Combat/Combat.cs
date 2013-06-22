@@ -1185,6 +1185,7 @@ namespace Questor.Modules.Combat
                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                 return;
             }
+
             #endregion
 
             #region Aggro Handling
@@ -1296,6 +1297,16 @@ namespace Questor.Modules.Combat
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: 0 lowValueTargetingMe targets", Logging.Debug);
             }
+
+            //
+            // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
+            // or are in the middle of attempting to aggro something
+            // 
+            if (Cache.Instance.potentialCombatTargets.Any(i => i.IsTarget && !i.IsLargeCollidable))
+            {
+                return;
+            }
+
             #endregion
 
             #region All else fails grab an unlocked target that is not yet targeting me
@@ -1303,33 +1314,32 @@ namespace Questor.Modules.Combat
             // Ok, now that that is all handled lets grab the closest non aggressed mob and pew
             // Build a list of things not yet targeting me and not yet targetted
             //
-            if (!__highValueTargetsTargeted.Any() && !__lowValueTargetsTargeted.Any() && !highValueTargetingMe.Any() && !lowValueTargetingMe.Any())
+            
+            NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(t => t.IsNotYetTargetingMeAndNotYetTargeted)
+                                                            .OrderBy(t => t.Nearest5kDistance)
+                                                            .ToList();
+
+            if (NotYetTargetingMe.Any())
             {
-                NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(t => t.IsNotYetTargetingMeAndNotYetTargeted)
-                                                                .OrderBy(t => t.Nearest5kDistance)
-                                                                .ToList();
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
 
-                if (NotYetTargetingMe.Any())
+                EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
+                if (TargetThisNotYetAggressiveNPC != null
+                    && TargetThisNotYetAggressiveNPC.IsReadyToTarget
+                    && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.MaxRange
+                    && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
                 {
-                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
+                    Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);
 
-                    EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
-                    if (TargetThisNotYetAggressiveNPC != null
-                        && TargetThisNotYetAggressiveNPC.IsReadyToTarget
-                        && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.MaxRange
-                        && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
-                    {
-                        Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);
-
-                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000);
-                        return;
-                    }
-                }
-                else
-                {
-                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: 0 NotYetTargetingMe targets", Logging.Debug);
+                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000);
+                    return;
                 }
             }
+            else
+            {
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: 0 NotYetTargetingMe targets", Logging.Debug);
+            }
+            
             return;
             #endregion
         }

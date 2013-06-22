@@ -1128,9 +1128,9 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
-                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking || Cache.Instance.InMission)
                            && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
-                           && (!IsTargeting && !IsTarget && !IsTargetedBy)
+                           && (!IsTargeting && !IsTarget)
                            && !IsContainer
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange

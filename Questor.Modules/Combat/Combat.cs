@@ -1305,7 +1305,7 @@ namespace Questor.Modules.Combat
             //
             if (!__highValueTargetsTargeted.Any() && !__lowValueTargetsTargeted.Any() && !highValueTargetingMe.Any() && !lowValueTargetingMe.Any())
             {
-                NotYetTargetingMe = Cache.Instance.Entities.Where(t => t.IsNotYetTargetingMeAndNotYetTargeted)
+                NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(t => t.IsNotYetTargetingMeAndNotYetTargeted)
                                                                 .OrderBy(t => t.Nearest5kDistance)
                                                                 .ToList();
 

@@ -2861,7 +2861,7 @@ namespace Questor.Modules.Caching
             // Get the closest low value target
             EntityCache lowValueTarget = potentialCombatTargets.Where(t =>
                                                           t.Distance < distance 
-                                                          && t.IsTarget).OrderByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
+                                                          && t.IsTarget).OrderBy(t => t.TargetValue != null ? t.TargetValue.Value : 0).ThenBy(OrderByLowestHealth()).ThenBy(t => t.Distance).FirstOrDefault();
 
             if (lowValueFirst && lowValueTarget != null)
             {

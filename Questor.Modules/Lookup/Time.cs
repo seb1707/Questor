@@ -73,5 +73,7 @@ namespace Questor.Modules.Lookup
         public int Marketbuyorderdelay_seconds = 2;
         public int QuestorScheduleNotUsed_Hours = 10;
         public int SkillTrainerPulse_milliseconds = 800;
+        public int LoginDelayMinimum_seconds = 20;
+        public int LoginDelayMaximum_seconds = 30;
     }
 }

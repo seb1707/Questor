@@ -698,7 +698,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 20)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -722,6 +722,12 @@ namespace Questor
             Logging.Log("Startup", "Timer elapsed.  Starting now.", Logging.White);
             _readyToStart = true;
             _readyToStarta = true;
+        }
+
+        public static int RandomNumber(int min, int max)
+        {
+            var random = new Random();
+            return random.Next(min, max);
         }
     }
 }

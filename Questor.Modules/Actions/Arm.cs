@@ -977,7 +977,7 @@ namespace Questor.Modules.Actions
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;    
                     }
-                    
+
                     // We must create our own Cache, somehow after changing the fitting the cached data is wrong
                     if (!capsMoved)
                     {

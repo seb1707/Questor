@@ -1100,7 +1100,7 @@ namespace Questor.Modules.Activities
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
             }
 
-            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.Entities.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
             //we may need to get closer so combat will take over
             EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();

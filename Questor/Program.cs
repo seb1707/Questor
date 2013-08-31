@@ -174,7 +174,7 @@ namespace Questor
                 Settings.Instance.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor();
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
             }
             #endregion Load DirectEVE
 

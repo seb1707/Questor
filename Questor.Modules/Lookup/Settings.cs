@@ -70,6 +70,8 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugAddDronePriorityTarget { get; set; }
+        public bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
         public bool DebugAllMissionsOnBlackList { get; set; }
         public bool DebugAllMissionsOnGreyList { get; set; }
@@ -96,8 +98,11 @@ namespace Questor.Modules.Lookup
         public bool DebugGotobase { get; set; }
         public bool DebugGreyList { get; set; }
         public bool DebugHangars { get; set; }
+        public bool DebugHasExploded { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugInWarp { get; set; }
         public bool DebugItemHangar { get; set; }
+        public bool DebugKillTargets { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
@@ -133,11 +138,11 @@ namespace Questor.Modules.Lookup
         public bool DebugUI { get; set; }
         public bool DebugUnloadLoot { get; set; }
         public bool DebugValuedump { get; set; }
-        public bool DetailedCurrentTargetHealthLogging { get; set; }
-        public bool DebugStates { get; set; }
-
+        public bool DebugWalletBalance { get; set; }
         public bool DebugWatchForActiveWars { get; set; }
 
+        public bool DetailedCurrentTargetHealthLogging { get; set; }
+        public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
@@ -590,12 +595,13 @@ namespace Questor.Modules.Lookup
             {
                 if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30))
                 {
+                    Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                     Cache.Instance.SessionState = "Quitting";
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
-                    Cleanup.CloseQuestor();
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                     return;
                 }
 
@@ -627,7 +633,7 @@ namespace Questor.Modules.Lookup
             Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
             Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
 
-            if (!File.Exists(Settings.Instance.CharacterSettingsPath) && !DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
+            if (!File.Exists(Settings.Instance.CharacterSettingsPath) && !Settings.Instance.DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
                 Settings.Instance.CharacterXMLExists = false;
                 DefaultSettingsLoaded = true;
@@ -636,6 +642,8 @@ namespace Questor.Modules.Lookup
                 Logging.Log("Settings", "WARNING! unable to find [" + Settings.Instance.CharacterSettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
                 DebugActivateGate = false;
                 DebugActivateWeapons = false;
+                DebugAddDronePriorityTarget = false;
+                DebugAddPrimaryWeaponPriorityTarget = false;
                 DebugAgentInteractionReplyToAgent = false;
                 DebugAllMissionsOnBlackList = false;
                 DebugAllMissionsOnGreyList = false;
@@ -660,8 +668,11 @@ namespace Questor.Modules.Lookup
                 DebugGotobase = false;
                 DebugGreyList = false;
                 DebugHangars = false;
+                DebugHasExploded = false;
                 DebugIdle = false;
+                DebugInWarp = false;
                 DebugItemHangar = false;
+                DebugKillTargets = false;
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
@@ -691,6 +702,7 @@ namespace Questor.Modules.Lookup
                 DebugUI = false;
                 DebugUnloadLoot = false;
                 DebugValuedump = false;
+                DebugWalletBalance = false;
                 DebugWatchForActiveWars = true;
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
@@ -1112,6 +1124,8 @@ namespace Questor.Modules.Lookup
                     //
                     DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
                     DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
+                    DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
+                    DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
                     DebugAgentInteractionReplyToAgent = (bool?)CharacterSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? (bool?)CommonSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? false;
                     DebugAllMissionsOnBlackList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnBlackList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnBlackList") ?? false;
                     DebugAllMissionsOnGreyList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnGreyList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnGreyList") ?? false;
@@ -1136,8 +1150,11 @@ namespace Questor.Modules.Lookup
                     DebugGotobase = (bool?)CharacterSettingsXml.Element("debugGotobase") ?? (bool?)CommonSettingsXml.Element("debugGotobase") ?? false;
                     DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
                     DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
+                    DebugHasExploded = (bool?)CharacterSettingsXml.Element("debugHasExploded") ?? (bool?)CommonSettingsXml.Element("debugHasExploded") ?? false;
                     DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
+                    DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
                     DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
+                    DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
                     DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
                     DebugLogging = (bool?)CharacterSettingsXml.Element("debugLogging") ?? (bool?)CommonSettingsXml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
@@ -1167,6 +1184,7 @@ namespace Questor.Modules.Lookup
                     DebugUI = (bool?)CharacterSettingsXml.Element("debugUI") ?? (bool?)CommonSettingsXml.Element("debugUI") ?? false;
                     DebugUnloadLoot = (bool?)CharacterSettingsXml.Element("debugUnloadLoot") ?? (bool?)CommonSettingsXml.Element("debugUnloadLoot") ?? false;
                     DebugValuedump = (bool?)CharacterSettingsXml.Element("debugValuedump") ?? (bool?)CommonSettingsXml.Element("debugValuedump") ?? false;
+                    DebugWalletBalance = (bool?)CharacterSettingsXml.Element("debugWalletBalance") ?? (bool?)CommonSettingsXml.Element("debugWalletBalance") ?? false;
                     DebugWatchForActiveWars = (bool?)CharacterSettingsXml.Element("debugWatchForActiveWars") ?? (bool?)CommonSettingsXml.Element("debugWatchForActiveWars") ?? false;
                     DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
                     DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
@@ -1921,7 +1939,7 @@ namespace Questor.Modules.Lookup
             Directory.CreateDirectory(MissionDungeonIdLogPath);
             Directory.CreateDirectory(PocketStatisticsPath);
             Directory.CreateDirectory(PocketObjectStatisticsPath);
-            if (!DefaultSettingsLoaded)
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
                 if (SettingsLoaded != null)
                 {

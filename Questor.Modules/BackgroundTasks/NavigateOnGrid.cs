@@ -29,7 +29,7 @@ namespace Questor.Modules.BackgroundTasks
                     //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
                     if (thisBigObject != null)
                     {
-                        if (thisBigObject.Distance >= (int)Distance.TooCloseToStructure)
+                        if (thisBigObject.Distance >= (int)Distances.TooCloseToStructure)
                         {
                             //we are no longer "too close" and can proceed.
                             AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
@@ -66,8 +66,8 @@ namespace Questor.Modules.BackgroundTasks
                                         Cache.Instance.SessionState = "Quitting";
                                     }
                                 }
-                                thisBigObject.Orbit((int)Distance.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier);
-                                Logging.Log(module, ": initiating Orbit of [" + thisBigObject.Name + "] orbiting at [" + ((int)Distance.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.White);
+                                thisBigObject.Orbit((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier);
+                                Logging.Log(module, ": initiating Orbit of [" + thisBigObject.Name + "] orbiting at [" + ((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.White);
                             }
                             return;
                             //we are still too close, do not continue through the rest until we are not "too close" anymore
@@ -196,7 +196,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: OptimalRange [ " + Cache.Instance.OptimalRange + "] Current Distance to [" + target.Name + "] is [" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
 
-                        if (target.Distance > Cache.Instance.OptimalRange + (int)Distance.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                        if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
                             if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                             {
@@ -327,7 +327,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                     {
-                        target.Approach((int)(Distance.SafeDistancefromStructure));
+                        target.Approach((int)(Distances.SafeDistancefromStructure));
                         Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     }
                     return;

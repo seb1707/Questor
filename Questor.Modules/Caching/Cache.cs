@@ -1144,7 +1144,7 @@ namespace Questor.Modules.Caching
                                                             && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                             && (e.IsNpc || e.IsNpcByGroupID)
                                                             && e.Distance < Cache.Instance.MaxRange
-                                                            && e.Distance < (double)Distance.OnGridWithMe
+                                                            && e.Distance < (double)Distances.OnGridWithMe
                                                             && !e.IsContainer
                                                             && !e.IsFactionWarfareNPC
                                                             && !e.IsEntityIShouldLeaveAlone
@@ -1324,7 +1324,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.Approaching != null)
                 {
-                    bool _followIDIsOnGrid = Cache.Instance.Entities.Where(i => i.Distance < (double)Distance.OnGridWithMe).Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+                    bool _followIDIsOnGrid = Cache.Instance.Entities.Where(i => i.Distance < (double)Distances.OnGridWithMe).Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
 
                     if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
                     {
@@ -1438,7 +1438,7 @@ namespace Questor.Modules.Caching
                        e.GroupId == (int)Group.LargeColidableShip ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1448,7 +1448,7 @@ namespace Questor.Modules.Caching
             {
                 return _gates ?? (_gates = Entities.Where(e =>
                        e.GroupId == (int)Group.AccelerationGate &&
-                       e.Distance < (double)Distance.OnGridWithMe).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distances.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1463,7 +1463,7 @@ namespace Questor.Modules.Caching
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccelerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -5624,7 +5624,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (Cache.Instance.InSpace && containerToOpen.Distance <= (int)Distance.ScoopRange)
+            if (Cache.Instance.InSpace && containerToOpen.Distance <= (int)Distances.ScoopRange)
             {
                 Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerToOpen.Id);
 
@@ -5803,7 +5803,7 @@ namespace Questor.Modules.Caching
 
             var bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
-            DirectBookmark onGridBookmark = bookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
+            DirectBookmark onGridBookmark = bookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
             if (onGridBookmark != null)
             {
                 _bookmarkDeletionAttempt++;

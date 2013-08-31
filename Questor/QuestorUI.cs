@@ -42,15 +42,15 @@ namespace Questor
             Show();
             if (Settings.Instance.DebugAttachVSDebugger)
             {
-                if (!System.Diagnostics.Debugger.IsAttached)
-                {
+                //if (!System.Diagnostics.Debugger.IsAttached)
+                //{
                     //
                     // this is temporarily disabled as CCP is crazy and is now detecting that a debugger is attached (thinking it is a way to catch bots? no idea but odd)
                     //
 
                     //Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.Teal);
                     //System.Diagnostics.Debugger.Launch();
-                }
+                //}
             }
         }
 
@@ -688,7 +688,7 @@ namespace Questor
             {
                 if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
-                    Cleanup.CloseQuestor();
+                    Cleanup.CloseQuestor("Quitting");
                 }
             }
 
@@ -1038,7 +1038,7 @@ namespace Questor
                     //
                     // closing eve would be a very good idea here
                     //
-                    Cleanup.CloseQuestor();
+                    Cleanup.CloseQuestor("The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago!");
 
                     //Application.Exit();
                 }
@@ -1050,7 +1050,7 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
                     Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cleanup.CloseQuestor();
+                    Cleanup.CloseQuestor("The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago!");
 
                     //Application.Exit();
                 }

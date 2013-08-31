@@ -481,7 +481,7 @@ namespace Questor.Behaviors
                             return;
 
                             //Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvager", "There is a gate on grid with us: deferring processing any bookmarks within CloseRangeScan because those are likely behind this gate and might have NPCs still there", Logging.White);
-                            //_afterMissionSalvageBookmarks = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distance.DirectionalScannerCloseRange)).OrderBy(b => b.CreatedOn).ToList();
+                            //_afterMissionSalvageBookmarks = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distances.DirectionalScannerCloseRange)).OrderBy(b => b.CreatedOn).ToList();
 
                             //int i = 1;
                             //Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvager", "Listing bookmarks in: _afterMissionSalvageBookmarks, they should be all more than CloseRangeScan [" + Distance.DirectionalScannerCloseRange + "] away.", Logging.Red);
@@ -575,7 +575,7 @@ namespace Questor.Behaviors
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    const int distanceToCheck = (int)Distance.OnGridWithMe;
+                    const int distanceToCheck = (int)Distances.OnGridWithMe;
 
                     // is there any NPCs within distanceToCheck?
                     EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < distanceToCheck && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();

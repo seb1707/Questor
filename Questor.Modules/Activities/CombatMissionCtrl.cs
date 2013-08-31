@@ -91,7 +91,7 @@ namespace Questor.Modules.Activities
             {
                 // Do we already have a bookmark?
                 List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distance.OnGridWithMe);
+                DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                 if (bookmark != null)
                 {
                     Logging.Log("CombatMissionCtrl", "Pocket already bookmarked for salvaging [" + bookmark.Title + "]", Logging.Teal);
@@ -181,14 +181,14 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
+            //if (closest.Distance <= (int)Distances.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
             
             if (closest != null)
             {
-                if (closest.Distance <= (int)Distance.GateActivationRange)
+                if (closest.Distance <= (int)Distances.GateActivationRange)
                 {
-                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance [" + closest.Distance + "] <= (int)Distance.GateActivationRange [" + (int)Distance.GateActivationRange + "])", Logging.Green);
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance [" + closest.Distance + "] <= (int)Distances.GateActivationRange [" + (int)Distances.GateActivationRange + "])", Logging.Green);
 
                     // Tell the drones module to retract drones
                     Cache.Instance.IsMissionPocketDone = true;
@@ -246,9 +246,9 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (closest.Distance < (int)Distance.WarptoDistance) //else if (closest.Distance < (int)Distance.WarptoDistance) //if we are inside warpto distance then approach
+                if (closest.Distance < (int)Distances.WarptoDistance) //else if (closest.Distance < (int)Distances.WarptoDistance) //if we are inside warpto distance then approach
                 {
-                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < (int)Distance.WarptoDistance)", Logging.Green);
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < (int)Distances.WarptoDistance)", Logging.Green);
 
                     // Move to the target
                     if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
@@ -276,7 +276,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (closest.Distance > (int)Distance.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
+                if (closest.Distance > (int)Distances.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
                 {
                     // We cant warp if we have drones out - but we are aligning not warping so we do not care
                     //if (Cache.Instance.ActiveDrones.Count() > 0)
@@ -285,7 +285,7 @@ namespace Questor.Modules.Activities
                     if (DateTime.UtcNow > Cache.Instance.NextAlign)
                     {
                         // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
-                        Logging.Log("CombatMissionCtrl", "Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distance.CloseToGateActivationRange + "]", Logging.Teal);
+                        Logging.Log("CombatMissionCtrl", "Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distances.CloseToGateActivationRange + "]", Logging.Teal);
                         closest.AlignTo();
                         return;
                     }
@@ -314,7 +314,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToClear = (int)Distance.OnGridWithMe;
+                DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
             // Is there a priority target out of range?
@@ -421,7 +421,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToClear = (int)Distance.OnGridWithMe;
+                DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
@@ -521,7 +521,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToClear = (int)Distance.OnGridWithMe;
+                DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
             EntityCache target = null;
@@ -614,7 +614,7 @@ namespace Questor.Modules.Activities
 
             if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
             {
-                DistanceToClear = (int)Distance.OnGridWithMe;
+                DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
             EntityCache target = null;
@@ -734,7 +734,7 @@ namespace Questor.Modules.Activities
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
             {
-                DistanceToApproach = (int)Distance.GateActivationRange;
+                DistanceToApproach = (int)Distances.GateActivationRange;
             }
 
             string target = action.GetParameterValue("target");
@@ -788,7 +788,7 @@ namespace Questor.Modules.Activities
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
             {
-                DistanceToApproach = (int)Distance.GateActivationRange;
+                DistanceToApproach = (int)Distances.GateActivationRange;
             }
 
             bool stopWhenTargeted;
@@ -862,9 +862,9 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (closest.Distance < (int)Distance.WarptoDistance) // if we are inside warpto range you need to approach (you cant warp from here)
+                if (closest.Distance < (int)Distances.WarptoDistance) // if we are inside warpto range you need to approach (you cant warp from here)
                 {
-                    if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distance.WarptoDistance)] -  NextApproachAction [" + Cache.Instance.NextApproachAction + "]", Logging.Teal);
+                    if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distances.WarptoDistance)] -  NextApproachAction [" + Cache.Instance.NextApproachAction + "]", Logging.Teal);
 
                     // Move to the target
 
@@ -1433,7 +1433,7 @@ namespace Questor.Modules.Activities
 
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
-            if (closest != null && closest.Distance > (int)Distance.SafeScoopRange)
+            if (closest != null && closest.Distance > (int)Distances.SafeScoopRange)
             {
                 if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                 {
@@ -1562,7 +1562,7 @@ namespace Questor.Modules.Activities
                 }
 
                 EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-                if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
+                if (container != null && (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
                 {
                     if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id))
                     {
@@ -1626,7 +1626,7 @@ namespace Questor.Modules.Activities
                     }
 
                     EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-                    if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
+                    if (closest != null && (closest.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                         {
@@ -1692,7 +1692,7 @@ namespace Questor.Modules.Activities
             }
 
             EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-            if (container != null && (container.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
+            if (container != null && (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
@@ -2004,7 +2004,7 @@ namespace Questor.Modules.Activities
 
                 case CombatMissionCtrlState.NextPocket:
                     double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
-                    if (distance > (int)Distance.NextPocketDistance)
+                    if (distance > (int)Distances.NextPocketDistance)
                     {
                         Logging.Log("CombatMissionCtrl", "We have moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]", Logging.Green);
 

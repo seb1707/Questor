@@ -189,7 +189,7 @@ namespace Questor.Modules.Activities
 
             // Warp to, approach or jump the stargate
             EntityCache MyNextStargate = Cache.Instance.Stargates.FirstOrDefault(e => e.Name == _locationName);
-            if (MyNextStargate != null && (MyNextStargate.Distance < (int)Distance.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))
+            if (MyNextStargate != null && (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))
             {
                 Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
                 MyNextStargate.Jump();
@@ -199,7 +199,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            if (MyNextStargate != null && MyNextStargate.Distance < (int)Distance.WarptoDistance && MyNextStargate.Distance != 0)
+            if (MyNextStargate != null && MyNextStargate.Distance < (int)Distances.WarptoDistance && MyNextStargate.Distance != 0)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching)
                 {

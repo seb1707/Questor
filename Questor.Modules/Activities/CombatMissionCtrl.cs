@@ -67,47 +67,83 @@ namespace Questor.Modules.Activities
             return;
         }
 
-        private void BookmarkPocketForSalvaging()
+        private bool BookmarkPocketForSalvaging()
         {
-            // Nothing to loot
-            if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+            if (Settings.Instance.LootEverything && Cache.Instance.UnlootedContainers.Count() > Settings.Instance.MinimumWreckCount)
             {
-                // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
-                // This scenario only happens when all wrecks are within tractor range and you have a salvager
-                // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
-                // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
-                if (DateTime.UtcNow > Cache.Instance.NextBookmarkPocketAttempt)
+                List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
+                double RangeToConsiderWrecksDuringLootAll = 0;
+
+                if (tractorBeams.Count > 0)
                 {
-                    Cache.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
-                    if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
-                    {
-                        Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
-                    }
-                    else if (Settings.Instance.LootEverything)
-                    {
-                        Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
-                    }
+                    RangeToConsiderWrecksDuringLootAll = tractorBeams.Min(t => t.OptimalRange);
                 }
+                else
+                {
+                    RangeToConsiderWrecksDuringLootAll = 20000;
+                }
+
+                if (Cache.Instance.UnlootedContainers.Count(w => w.Distance <= RangeToConsiderWrecksDuringLootAll) > 0)
+                {
+                    //
+                    // we probably ought to add some debug spew here 
+                    //
+                    return false;    
+                }
+
+                //
+                // if you have loot everything set to on we cant have any need for the pocket bookmarks... can we?!
+                //
+                return true;
             }
-            else
+
+            if (Settings.Instance.CreateSalvageBookmarks)
             {
+                // Nothing to loot
+                if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+                {
+                    // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
+                    // This scenario only happens when all wrecks are within tractor range and you have a salvager
+                    // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
+                    // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
+                    if (DateTime.UtcNow > Cache.Instance.NextBookmarkPocketAttempt)
+                    {
+                        Cache.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
+                        if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
+                        {
+                            Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
+                            return true;
+                        }
+                    
+                        if (Settings.Instance.LootEverything)
+                        {
+                            Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+
                 // Do we already have a bookmark?
                 List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                 DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                 if (bookmark != null)
                 {
-                    Logging.Log("CombatMissionCtrl", "Pocket already bookmarked for salvaging [" + bookmark.Title + "]", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl", "salvaging bookmark forthis pocket is done [" + bookmark.Title + "]", Logging.Teal);
+                    return true;
                 }
-                else
-                {
-                    // No, create a bookmark
-                    string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
-                    Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
-                    Cache.Instance.CreateBookmark(label);
-                }
+
+                // No, create a bookmark
+                string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
+                Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
+                Cache.Instance.CreateBookmark(label);
+                return false;
             }
 
-            return;
+            return true;
         }
 
         private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(EntityCache target, double range, int targetedby, bool MoveShip)
@@ -163,13 +199,17 @@ namespace Questor.Modules.Activities
             Cache.Instance.UseDrones = Settings.Instance.UseDrones;
 
             // We do not switch to "done" status if we still have drones out
-            if (Cache.Instance.ActiveDrones.Any())
-                return;
+            if (Cache.Instance.ActiveDrones.Any()) return;
 
             // Add bookmark (before we're done)
             if (Settings.Instance.CreateSalvageBookmarks)
-                BookmarkPocketForSalvaging();
+            {
+                if (!BookmarkPocketForSalvaging()) return;
+            }
 
+            //
+            // we are ready and can set the "done" State. 
+            //
             Cache.Instance.CurrentlyShouldBeSalvaging = false;
             _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
             return;
@@ -270,10 +310,7 @@ namespace Questor.Modules.Activities
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance >= -10100)", Logging.Green);
 
                         // Add bookmark (before we activate)
-                        if (Settings.Instance.CreateSalvageBookmarks)
-                        {
-                            BookmarkPocketForSalvaging();
-                        }
+                        if (!BookmarkPocketForSalvaging()) return;
 
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
                         if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;

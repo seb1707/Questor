@@ -1195,6 +1195,14 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
+                if (IsPlayer)
+                {
+                    //
+                    // if it is a player it is by definition not an NPC
+                    //
+                    return false;
+                }
+                result |= GroupId == (int)Group.Frigate;
                 result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
                 result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
                 result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;

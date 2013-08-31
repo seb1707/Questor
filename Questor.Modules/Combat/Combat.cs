@@ -1330,6 +1330,27 @@ namespace Questor.Modules.Combat
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();
 
+
+            if (!NotYetTargetingMe.Any())
+            {
+                //
+                // include sentries if nothing else is available
+                //
+                NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                        && (e.IsNpc || e.IsNpcByGroupID)
+                                                                       //&& !e.IsTarget
+                                                                        && !e.IsContainer
+                                                                        && !e.IsFactionWarfareNPC
+                                                                        && !e.IsEntityIShouldLeaveAlone
+                                                                        && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
+                                                                        && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
+                                                                        && !e.IsLargeCollidable
+                                                                        && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                                        && e.IsNotYetTargetingMeAndNotYetTargeted)
+                                                                        .OrderBy(t => t.Nearest5kDistance)
+                                                                        .ToList();
+            }
+
             if (NotYetTargetingMe.Any())
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);

@@ -2865,12 +2865,15 @@ namespace Questor.Modules.Caching
 
                     if (target != null)
                     {
-
+                        if (!FindAUnTargetedEntity)
+                        {
                             //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
                             Cache.Instance.PreferredPrimaryWeaponTarget = target;
                             Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                             return target;
+                        }
 
+                        return target;
                     }
 
                     return null;

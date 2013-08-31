@@ -43,7 +43,7 @@ namespace Questor
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
-        public string ScheduleCharacterName = Program._character;
+        public string ScheduleCharacterName = Logging._character;
         public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;
@@ -67,7 +67,7 @@ namespace Questor
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
 
-            ScheduleCharacterName = Program._character;
+            ScheduleCharacterName = Logging._character;
             Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
             Cache.Instance.NextStartupAction = DateTime.UtcNow;
             // State fixed on ExecuteMission

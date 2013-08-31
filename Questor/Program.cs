@@ -36,9 +36,6 @@ namespace Questor
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.UtcNow;
-        private static string _username;
-        private static string _password;
-        public static string _character;
         private static string _scriptFile;
         private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
@@ -81,9 +78,9 @@ namespace Questor
                 "Run missions and make uber ISK.",
                 "",
                 "Options:",
-                {"u|user=", "the {USER} we are logging in as.", v => _username = v},
-                {"p|password=", "the user's {PASSWORD}.", v => _password = v},
-                {"c|character=", "the {CHARACTER} to use.", v => _character = v},
+                {"u|user=", "the {USER} we are logging in as.", v => Logging._username = v},
+                {"p|password=", "the user's {PASSWORD}.", v => Logging._password = v},
+                {"c|character=", "the {CHARACTER} to use.", v => Logging._character = v},
                 {"s|script=", "a {SCRIPT} file to execute before login.", v => _scriptFile = v},
                 {"t|scriptAfterLogin=", "a {SCRIPT} file to execute after login.", v => _scriptAfterLoginFile = v},
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
@@ -121,7 +118,7 @@ namespace Questor
                 _chantlingScheduler = true;
             }
 
-            if (_chantlingScheduler && string.IsNullOrEmpty(_character))
+            if (_chantlingScheduler && string.IsNullOrEmpty(Logging._character))
             {
                 Logging.Log("Startup", "Error: to use chantling's scheduler, you also need to provide a character name!", Logging.Red);
                 return;
@@ -130,7 +127,7 @@ namespace Questor
             //
             // login using info from schedules.xml
             //
-            if (_chantlingScheduler && !string.IsNullOrEmpty(_character))
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character))
             {
                 LoginUsingScheduler();
             }
@@ -138,7 +135,7 @@ namespace Questor
             //
             // direct login, no schedules.xml
             //
-            if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password) && !string.IsNullOrEmpty(_character))
+            if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
                 _readyToStart = true;
             }
@@ -262,7 +259,7 @@ namespace Questor
         private static void LoginUsingScheduler()
         {
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _character = _character.Replace("\"", "");  // strip quotation marks if any are present
+            Logging._character = Logging._character.Replace("\"", "");  // strip quotation marks if any are present
 
             CharSchedules = new List<CharSchedule>();
             if (path != null)
@@ -280,7 +277,7 @@ namespace Questor
             //
             // chantling scheduler
             //
-            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == _character);
+            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == Logging._character);
             if (schedule == null)
             {
                 Logging.Log("Startup", "Error - character not found!", Logging.Red);
@@ -293,8 +290,8 @@ namespace Questor
                 return;
             }
 
-            _username = schedule.LoginUserName;
-            _password = schedule.LoginPassWord;
+            Logging._username = schedule.LoginUserName;
+            Logging._password = schedule.LoginPassWord;
             Logging.Log("Startup", "User: " + schedule.LoginUserName + " Name: " + schedule.ScheduleCharacterName, Logging.White);
 
             if (schedule.StartTimeSpecified)
@@ -428,7 +425,7 @@ namespace Questor
                 return;
             }
 
-            if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta)
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_readyToStarta)
             {
                 //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
                 return;
@@ -537,6 +534,8 @@ namespace Questor
                             //
                             // Modal Dialogs the need "yes" pressed
                             //
+                            //sayYes |= window.Html.Contains("There is a new build available. Would you like to download it now");
+                            //sayOk |= window.Html.Contains("The update has been downloaded. The client will now close and the update process begin");
                             sayOk |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");
 
                             //Logging.Log("[Startup] (2) close is: " + close);
@@ -689,8 +688,8 @@ namespace Questor
 
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)
                 {
-                    Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);
-                    Cache.Instance.DirectEve.Login.Login(_username, _password);
+                    Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
+                    Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
@@ -703,7 +702,7 @@ namespace Questor
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
-                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && System.String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
+                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != Logging._character && System.String.Compare(slot.CharName, Logging._character, System.StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             continue;
                         }
@@ -712,7 +711,7 @@ namespace Questor
                         slot.Activate();
                         return;
                     }
-                    Logging.Log("Startup", "Character id/name [" + _character + "] not found, retrying in 10 seconds", Logging.White);
+                    Logging.Log("Startup", "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds", Logging.White);
                 }
             }
         }

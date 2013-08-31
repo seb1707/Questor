@@ -446,15 +446,18 @@ namespace Questor.Modules.Actions
                 case ArmState.RepairShop:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
 
-                    if (Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
+                    if (Settings.Instance.UseStationRepair)
                     {
-                        if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return; //attempt to use repair facilities if avail in station
+                        if (Cache.Instance.RepairAll && Cache.Instance.NeedRepair)
+                        {
+                            if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return; //attempt to use repair facilities if avail in station
+                        }
+                        else if (Settings.Instance.UseDrones)
+                        {
+                            if (!Cache.Instance.RepairDrones("Arm.RepairShop [Drones]")) return; //attempt to use repair facilities if avail in station
+                        }
                     }
-                    else if (Settings.Instance.UseStationRepair && Settings.Instance.UseDrones)
-                    {
-                        if (!Cache.Instance.RepairDrones("Arm.RepairShop [Drones]")) return; //attempt to use repair facilities if avail in station
-                    }
-
+                    
                     _States.CurrentArmState = ArmState.LoadSavedFitting;
                     break;
 

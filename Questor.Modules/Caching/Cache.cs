@@ -424,6 +424,7 @@ namespace Questor.Modules.Caching
         public bool SalvageAll = false;
         public bool RouteIsAllHighSecBool = false;
         public bool CurrentlyShouldBeSalvaging = false;
+        public bool NeedRepair = false;
 
         public double Wealth { get; set; }
 

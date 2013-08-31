@@ -75,5 +75,7 @@ namespace Questor.Modules.Lookup
         public int SkillTrainerPulse_milliseconds = 800;
         public int LoginDelayMinimum_seconds = 20;
         public int LoginDelayMaximum_seconds = 30;
+        public int ReLogDelayMinimum_seconds = 35;                    //DO NOT set this lower than 20 or so seconds!
+        public int ReLogDelayMaximum_seconds = 60;                    
     }
 }

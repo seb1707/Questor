@@ -61,47 +61,131 @@ namespace Questor.Modules.Activities
             // now that we have completed this action revert OpenWrecks to false
             Cache.Instance.OpenWrecks = false;
             Cache.Instance.MissionLoot = false;
+            Cache.Instance.normalNav = true;
+            Cache.Instance.onlyKillAggro = false;
             _currentAction++;
             return;
         }
 
-        private void BookmarkPocketForSalvaging()
+        private bool BookmarkPocketForSalvaging()
         {
-            // Nothing to loot
-            if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+            if (Settings.Instance.LootEverything && Cache.Instance.UnlootedContainers.Count() > Settings.Instance.MinimumWreckCount)
             {
-                // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
-                // This scenario only happens when all wrecks are within tractor range and you have a salvager
-                // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
-                // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
-                if (DateTime.UtcNow > Cache.Instance.NextBookmarkPocketAttempt)
+                List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
+                double RangeToConsiderWrecksDuringLootAll = 0;
+
+                if (tractorBeams.Count > 0)
                 {
-                    Cache.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
-                    if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
-                    {
-                        Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
-                    }
-                    else if (Settings.Instance.LootEverything)
-                    {
-                        Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
-                    }
+                    RangeToConsiderWrecksDuringLootAll = tractorBeams.Min(t => t.OptimalRange);
                 }
+                else
+                {
+                    RangeToConsiderWrecksDuringLootAll = 20000;
+                }
+
+                if (Cache.Instance.UnlootedContainers.Count(w => w.Distance <= RangeToConsiderWrecksDuringLootAll) > 0)
+                {
+                    //
+                    // we probably ought to add some debug spew here 
+                    //
+                    return false;    
+                }
+
+                //
+                // if you have loot everything set to on we cant have any need for the pocket bookmarks... can we?!
+                //
+                return true;
             }
-            else
+
+            if (Settings.Instance.CreateSalvageBookmarks)
             {
+                // Nothing to loot
+                if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
+                {
+                    // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
+                    // This scenario only happens when all wrecks are within tractor range and you have a salvager
+                    // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
+                    // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
+                    if (DateTime.UtcNow > Cache.Instance.NextBookmarkPocketAttempt)
+                    {
+                        Cache.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
+                        if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
+                        {
+                            Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
+                            return true;
+                        }
+
+                        if (Settings.Instance.LootEverything)
+                        {
+                            Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+
                 // Do we already have a bookmark?
                 List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                 DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                 if (bookmark != null)
                 {
-                    Logging.Log("CombatMissionCtrl", "Pocket already bookmarked for salvaging [" + bookmark.Title + "]", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl", "salvaging bookmark forthis pocket is done [" + bookmark.Title + "]", Logging.Teal);
+                    return true;
                 }
-                else
+
+                // No, create a bookmark
+                string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
+                Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
+                Cache.Instance.CreateBookmark(label);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(EntityCache target, double range, int targetedby, bool MoveShip)
+        {
+            if (target != null)
+            {
+                // Reset timeout
+                _clearPocketTimeout = null;
+                
+                // Combat.cs will Lock target if it is within weapons range (especially after we make it a PrimaryWeapons or Drone prioritytarget!)
+                if (target.Distance < range)
                 {
-                    // No, create a bookmark
-                    string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
-                    Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
-                    Cache.Instance.CreateBookmark(label);
+                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
+                    if (targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
+                    {
+                        if (!Combat.ReloadAll(target)) return;
+                    }
+
+                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
+                    if (!target.IsNPCFrigate)
+                    {
+                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] {target}, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+
+                    if (Settings.Instance.DronesKillHighValueTargets || target.IsNPCFrigate) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
+                    {
+                        Cache.Instance.AddDronePriorityTargets(new[] {target}, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                    }
+                }
+
+                if (MoveShip)
+                {
+                    NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
+                }
+
+                if (target.Distance > range) //target is not in range...
+                {
+                    if (DateTime.UtcNow > Cache.Instance.NextReload)
+                    {
+                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
+                        if (!Combat.ReloadAll(target)) return;
+                    }
                 }
             }
 
@@ -115,13 +199,17 @@ namespace Questor.Modules.Activities
             Cache.Instance.UseDrones = Settings.Instance.UseDrones;
 
             // We do not switch to "done" status if we still have drones out
-            if (Cache.Instance.ActiveDrones.Any())
-                return;
+            if (Cache.Instance.ActiveDrones.Any()) return;
 
             // Add bookmark (before we're done)
             if (Settings.Instance.CreateSalvageBookmarks)
-                BookmarkPocketForSalvaging();
+            {
+                if (!BookmarkPocketForSalvaging()) return;
+            }
 
+            //
+            // we are ready and can set the "done" State. 
+            //
             Cache.Instance.CurrentlyShouldBeSalvaging = false;
             _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
             return;
@@ -222,10 +310,7 @@ namespace Questor.Modules.Activities
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance >= -10100)", Logging.Green);
 
                         // Add bookmark (before we activate)
-                        if (Settings.Instance.CreateSalvageBookmarks)
-                        {
-                            BookmarkPocketForSalvaging();
-                        }
+                        if (!BookmarkPocketForSalvaging()) return;
 
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
                         if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
@@ -253,20 +338,20 @@ namespace Questor.Modules.Activities
                     // Move to the target
                     if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
-                        if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 100)
+                        if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 100)
                         {
                             Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][ID: " + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                             closest.Approach();
                             return;
                         }
 
-                        if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Cache.Instance.IsOrbiting [" + Cache.Instance.IsOrbiting + "] Cache.Instance.MyShip.Velocity [" + Cache.Instance.MyShipEntity.Velocity + "]", Logging.Green);
+                        if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Cache.Instance.IsOrbiting [" + Cache.Instance.IsOrbiting(closest.Id) + "] Cache.Instance.MyShip.Velocity [" + Cache.Instance.MyShipEntity.Velocity + "]", Logging.Green);
                         if (Settings.Instance.DebugActivateGate) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl", "Cache.Instance.Approaching.Id [" + Cache.Instance.Approaching.Id + "][closest.Id: " + closest.Id + "]", Logging.Green);
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
                         return;
                     }
 
-                    if (Cache.Instance.IsOrbiting || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                    if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                     {
                         Logging.Log("CombatMissionCtrl", "Activate: Delaying approach for: [" + Math.Round(Cache.Instance.NextApproachAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.Teal);
                         return;
@@ -378,7 +463,8 @@ namespace Questor.Modules.Activities
                         Cache.Instance.AddDronePriorityTargets(new[] { target }, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);    
                     }
                 }
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
 
                 if (target.Distance > range) //target is not in range...
                 {
@@ -483,7 +569,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
 
                 if (target.Distance > range) //target is not in range...
                 {
@@ -679,6 +765,8 @@ namespace Questor.Modules.Activities
                 Cache.Instance.NormalApproach = false;
             }
 
+            Cache.Instance.normalNav = false;
+
             string target = action.GetParameterValue("target");
 
             bool notTheClosest;
@@ -731,6 +819,8 @@ namespace Questor.Modules.Activities
                 Cache.Instance.NormalApproach = false;
             }
 
+            Cache.Instance.normalNav = false;
+
             int DistanceToApproach;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToApproach))
             {
@@ -776,6 +866,8 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.NormalApproach = false;
             }
+
+            Cache.Instance.normalNav = false;
 
             string target = action.GetParameterValue("target");
 
@@ -1192,7 +1284,8 @@ namespace Questor.Modules.Activities
                         if (!Combat.ReloadAll(target)) return;
                     }
                 }
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
                 if (target.Distance > Cache.Instance.MaxRange)
                 {
                     if (DateTime.UtcNow > Cache.Instance.NextReload)
@@ -1281,7 +1374,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
                 return;
             }
 
@@ -1347,7 +1440,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
                 return;
             }
             
@@ -1394,7 +1487,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction]);
+                NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl." + _pocketActions[_currentAction], true);
                 return;
             }
 
@@ -1904,6 +1997,10 @@ namespace Questor.Modules.Activities
                     // Reload the items needed for this mission from the XML file
                     Cache.Instance.RefreshMissionItems(AgentId);
 
+                    // Reset notNormalNav and onlyKillAggro to false
+                    Cache.Instance.normalNav = true;
+                    Cache.Instance.onlyKillAggro = false;
+
                     // Update x/y/z so that NextPocket wont think we are there yet because its checking (very) old x/y/z cords
                     _lastX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
                     _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
@@ -2009,6 +2106,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl", "We have moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]", Logging.Green);
 
                         // If we moved more then 100km, assume next Pocket
+                        Cache.Instance.ClearEWARCache();
                         Cache.Instance.PocketNumber++;
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                         Statistics.WritePocketStatistics();

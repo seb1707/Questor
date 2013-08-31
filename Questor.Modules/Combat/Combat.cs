@@ -488,7 +488,7 @@ namespace Questor.Modules.Combat
             if (!Cache.Instance.InMission || Settings.Instance.SpeedTank)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: navigateintorange", Logging.Teal);
-                NavigateOnGrid.NavigateIntoRange(target, "Combat");
+                NavigateOnGrid.NavigateIntoRange(target, "Combat", true);
             }
 
             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: after navigate into range...", Logging.Teal);

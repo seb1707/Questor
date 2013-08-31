@@ -443,6 +443,7 @@ namespace Questor.Modules.Caching
         public bool SalvageAll = false;
         public bool RouteIsAllHighSecBool = false;
         public bool CurrentlyShouldBeSalvaging = false;
+        public bool NeedRepair = false;
 
         public double Wealth { get; set; }
 
@@ -609,10 +610,7 @@ namespace Questor.Modules.Caching
 
         public double MaxRange
         {
-            get
-            {
-                return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
-            }
+            get { return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange); }
         }
 
         public double LowValueTargetsHaveToBeWithinDistance
@@ -1119,7 +1117,7 @@ namespace Questor.Modules.Caching
                 }
                 
                 //DE bug?
-                _targets = _targets.Where(e => e.Distance < (double) Distances.OnGridWithMe).ToList();
+                //_targets = _targets.Where(e => e.Distance < (double) Distances.OnGridWithMe).ToList();
                 
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
                 foreach (EntityCache target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
@@ -1222,8 +1220,11 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InSpace)
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && (!e.IsSentry || (e.IsSentry && e.IsEwarTarget()) || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
-                                                        && (e.IsNpc || e.IsNpcByGroupID)
+                                                        && (!e.IsSentry 
+                                                           || (e.IsSentry && e.IsEwarTarget()) 
+                                                           || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)))
+                                                           )
+                                                        &&  (e.IsNpcByGroupID) //|| e.IsNpc)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC
@@ -1256,7 +1257,7 @@ namespace Questor.Modules.Caching
 
                             int _entitiescount = 0;
 
-                            if (__entities.Count > 0)
+                            if (__entities.Any())
                             {
                                 _entitiescount = __entities.Count();
                                 Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);

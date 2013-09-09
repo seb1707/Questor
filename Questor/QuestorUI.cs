@@ -688,7 +688,12 @@ namespace Questor
             {
                 if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
-                    Cleanup.CloseQuestor("Quitting");
+                    if (Cache.Instance.ReasonToStopQuestor == string.Empty)
+                    {
+                        Cache.Instance.ReasonToStopQuestor = "Cache.Instance.SessionState == Quitting";
+                    }
+
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                 }
             }
 
@@ -1034,11 +1039,11 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 30)
                 {
                     Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-
+                    Cache.Instance.ReasonToStopQuestor = "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
                     //
                     // closing eve would be a very good idea here
                     //
-                    Cleanup.CloseQuestor("The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago!");
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
 
                     //Application.Exit();
                 }
@@ -1050,7 +1055,8 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLogMessage).TotalSeconds > 60)
                 {
                     Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cleanup.CloseQuestor("The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago!");
+                    Cache.Instance.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
 
                     //Application.Exit();
                 }
@@ -1325,6 +1331,8 @@ namespace Questor
                 {
                     Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
+                    Cache.Instance.ReasonToStopQuestor = "Stating QuestorManager: closing questor";
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                 }
                 else
                 {

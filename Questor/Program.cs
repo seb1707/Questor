@@ -151,7 +151,8 @@ namespace Questor
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has all cloaking disabled, you should use isxstealth!
+                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
                     //while (Cache.Instance.DirectEve == null)
@@ -172,6 +173,7 @@ namespace Questor
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
             }
             #endregion Load DirectEVE
 

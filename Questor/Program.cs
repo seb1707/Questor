@@ -535,6 +535,8 @@ namespace Questor
                             //
                             // Modal Dialogs the need "yes" pressed
                             //
+                            //sayYes |= window.Html.Contains("There is a new build available. Would you like to download it now");
+                            //sayOk |= window.Html.Contains("The update has been downloaded. The client will now close and the update process begin");
                             sayOk |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");
 
                             //Logging.Log("[Startup] (2) close is: " + close);
@@ -697,7 +699,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 20)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -721,6 +723,12 @@ namespace Questor
             Logging.Log("Startup", "Timer elapsed.  Starting now.", Logging.White);
             _readyToStart = true;
             _readyToStarta = true;
+        }
+
+        public static int RandomNumber(int min, int max)
+        {
+            var random = new Random();
+            return random.Next(min, max);
         }
     }
 }

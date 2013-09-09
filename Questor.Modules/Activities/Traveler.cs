@@ -77,14 +77,14 @@ namespace Questor.Modules.Activities
                 }
                 catch (Exception)
                 {
-                    Logging.Log("Traveler", "NavigateToBookmarkSystem: set destination to [" + _location.ToString() + "] failed ", Logging.Debug);
+                    Logging.Log("Traveler", "SetStationDestination: set destination to [" + _location.ToString() + "] failed ", Logging.Debug);
                 }
                 return true;
             }
 
-            Logging.Log("Traveler", "Error setting solar system destination [" + Logging.Yellow + stationId + Logging.Green + "]", Logging.Green);
+            Logging.Log("Traveler", "Error setting station destination [" + Logging.Yellow + stationId + Logging.Green + "]", Logging.Green);
             _locationErrors++;
-            if (_locationErrors > 100)
+            if (_locationErrors > 20)
             {
                 return false;
             }
@@ -149,7 +149,7 @@ namespace Questor.Modules.Activities
 
                 Logging.Log("Traveler", "Error setting solar system destination [" + Logging.Yellow + solarSystemId + Logging.Green + "]", Logging.Green);
                 _locationErrors++;
-                if (_locationErrors > 100)
+                if (_locationErrors > 20)
                 {
                     _States.CurrentTravelerState = TravelerState.Error;
                     return;

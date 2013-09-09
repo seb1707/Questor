@@ -73,6 +73,19 @@ namespace Questor
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
 
+            if (Cache.Instance.DirectEve == null)
+            {
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
+            }
+
             try
             {
                 if (Cache.Instance.DirectEve.HasSupportInstances())

@@ -38,6 +38,8 @@ namespace Questor.Modules.Activities
         private DateTime _moveToNextPocket = DateTime.MaxValue;
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
         private int openCargoRetryNumber;
+        private int AttemptsToActivateGateTimer;
+        private int AttemptsToGetAwayFromGate;
 
         //private bool _targetNull;
 
@@ -209,42 +211,48 @@ namespace Questor.Modules.Activities
                     {
                         if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < -10100)", Logging.Green);
 
-                        if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                        AttemptsToGetAwayFromGate++;
+                        if (AttemptsToGetAwayFromGate > 30)
                         {
-                            closest.Orbit(1000);
-                            Logging.Log("CombatMissionCtrl", "Activate: We are too close to [" + closest.Name + "] Initiating orbit", Logging.Orange);
+                            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                            {
+                                closest.Orbit(1000);
+                                Logging.Log("CombatMissionCtrl", "Activate: We are too close to [" + closest.Name + "] Initiating orbit", Logging.Orange);
+                            }
+
+                            return;    
                         }
-                        return;
                     }
 
-                    if (closest.Distance >= -10100)
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance >= -10100)", Logging.Green);
+
+                    // Add bookmark (before we activate)
+                    if (Settings.Instance.CreateSalvageBookmarks)
                     {
-                        if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance >= -10100)", Logging.Green);
-
-                        // Add bookmark (before we activate)
-                        if (Settings.Instance.CreateSalvageBookmarks)
-                        {
-                            BookmarkPocketForSalvaging();
-                        }
-
-                        if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
-                        if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
-                        if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Done reloading", Logging.Teal);
-
-                        if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
-                        {
-                            Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.Green);
-                            closest.Activate();
-
-                            // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
-                            _moveToNextPocket = DateTime.UtcNow;
-                            _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
-                        }
-                        return;
+                        BookmarkPocketForSalvaging();
                     }
+
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
+                    if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
+                    if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Done reloading", Logging.Teal);
+                    AttemptsToActivateGateTimer++;
+
+                    if (DateTime.UtcNow > Cache.Instance.NextActivateAction || AttemptsToActivateGateTimer > 30)
+                    {
+                        Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.Green);
+                        closest.Activate();
+                        AttemptsToActivateGateTimer = 0;
+                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
+                        _moveToNextPocket = DateTime.UtcNow;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
+                    }
+
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
                     return;
                 }
+
+                AttemptsToActivateGateTimer = 0;
+                AttemptsToGetAwayFromGate = 0;
 
                 if (closest.Distance < (int)Distances.WarptoDistance) //else if (closest.Distance < (int)Distances.WarptoDistance) //if we are inside warpto distance then approach
                 {

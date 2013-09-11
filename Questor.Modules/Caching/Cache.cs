@@ -127,11 +127,6 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
         /// </summary>
-        public List<EntityCache> _entitiesthatHaveExploded;
-
-        /// <summary>
-        ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
-        /// </summary>
         public List<PriorityTarget> _primaryWeaponPriorityTargets;
 
         /// <summary>
@@ -143,13 +138,11 @@ namespace Questor.Modules.Caching
         ///  Primary Weapon target chosen by GetBest Target
         /// </summary>
         public EntityCache PreferredPrimaryWeaponTarget;
-        public DateTime LastPreferredPrimaryWeaponTargetDateTime;
 
         /// <summary>
         ///   Drone target chosen by GetBest Target
         /// </summary>
         public EntityCache PreferredDroneTarget;
-        public DateTime LastPreferredDroneTargetDateTime;
 
         public String OrbitEntityNamed;
 
@@ -226,17 +219,6 @@ namespace Questor.Modules.Caching
         ///   Returns maxLockedTargets, the minimum between the character and the ship //cleared in InvalidateCache
         /// </summary>
         private int _maxLockedTargets = 0;
-
-        /// <summary>
-        ///  Dictionary for cached EWAR target
-        /// </summary>
-        public HashSet<long> WarpScrambler = new HashSet<long>();
-        public HashSet<long> Jammer = new HashSet<long>();
-        public HashSet<long> TrackingDisrupter = new HashSet<long>();
-        public HashSet<long> Neuting = new HashSet<long>();
-        public HashSet<long> TargetPainting = new HashSet<long>();
-        public HashSet<long> Dampening = new HashSet<long>();
-        public HashSet<long> Webbing = new HashSet<long>();
 
         public void DirecteveDispose()
         {
@@ -388,7 +370,6 @@ namespace Questor.Modules.Caching
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, line));
             //line = string.Empty;
 
-            _entitiesthatHaveExploded = new List<EntityCache>();
             _primaryWeaponPriorityTargets = new List<PriorityTarget>();
             _dronePriorityTargets = new List<PriorityTarget>();
             LastModuleTargetIDs = new Dictionary<long, long>();
@@ -486,10 +467,8 @@ namespace Questor.Modules.Caching
 
         public bool InMission { get; set; }
 
-        public bool normalNav = true;  //Do we want to bypass normal navigation for some reason?
-        public bool onlyKillAggro { get; set; }
-
         public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
+
         public DateTime NextSalvageTrip = DateTime.UtcNow;
         public DateTime LastStackAmmoHangar = DateTime.UtcNow;
         public DateTime LastStackLootHangar = DateTime.UtcNow;
@@ -1114,10 +1093,7 @@ namespace Questor.Modules.Caching
                 {
                     _targets = Entities.Where(e => e.IsTarget).ToList();
                 }
-                
-                //DE bug?
-                //_targets = _targets.Where(e => e.Distance < (double) Distances.OnGridWithMe).ToList();
-                
+
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
                 foreach (EntityCache target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
                 {
@@ -1130,20 +1106,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Targeting
         {
-            get
-            {
-                if (_targeting == null)
-                {
-                    _targeting = Entities.Where(e => e.IsTargeting).ToList();
-                }
-
-                if (_targeting.Any())
-                {
-                    return _targeting;
-                }
-
-                return new List<EntityCache>();
-            }
+            get { return _targeting ?? (_targeting = Entities.Where(e => e.IsTargeting).ToList()); }
         }
 
         public List<long> IDsinInventoryTree
@@ -1165,11 +1128,6 @@ namespace Questor.Modules.Caching
             get { return _aggressed ?? (_aggressed = Entities.Where(e => e.IsTargetedBy && e.IsAttacking).ToList()); }
         }
 
-        //
-        // entities that have been locked (or are being locked now)
-        // entities that are IN range
-        // entities that eventually we want to shoot (and now that they are locked that will happen shortly)
-        //
         public IEnumerable<EntityCache> combatTargets
         {
             get
@@ -1206,11 +1164,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        //
-        // entities that have potentially not been locked yet
-        // entities that may not be in range yet
-        // entities that eventually we want to shoot
-        //
         public IEnumerable<EntityCache> potentialCombatTargets
         {
             get
@@ -1219,7 +1172,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InSpace)
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
+                                                        && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))                       
                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
@@ -1269,9 +1222,9 @@ namespace Questor.Modules.Caching
                             }
 
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
-                        }
+                        }    
                     }
-
+                    
                     return _potentialCombatTargets;
                 }
 
@@ -1283,49 +1236,12 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                try
-                {
-                    if (!InSpace)
-                    {
-                        return new List<EntityCache>();
-                    }
-
-                    //if (_entities.Count == 0)
-                    //{
-                    //    _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
-                    //}
-
-                    //if (_entities.Count > 0)
-                    // {
-                    //    return _entities;
-                    //}
-
-                    return _entities ?? (_entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid 
-                                                                                                       /*&& EntitiesthatHaveExploded.Any(x => x.Id != e.Id)*/)
-                                                                                                       .ToList()); 
-                }
-                catch (NullReferenceException) { }  // this can happen during session changes
-
-                return new List<EntityCache>();
-            }
-        }
-
-        public IEnumerable<EntityCache> EntitiesActivelyBeingLocked
-        {
-            get
-            {
                 if (!InSpace)
                 {
                     return new List<EntityCache>();
                 }
 
-                IEnumerable<EntityCache> _entitiesActivelyBeingLocked = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.IsTargeting).ToList();
-                if (_entitiesActivelyBeingLocked.Any())
-                {
-                    return _entitiesActivelyBeingLocked;
-                }
-
-                return new List<EntityCache>();
+                return _entities ?? (_entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList());
             }
         }
 
@@ -1337,14 +1253,8 @@ namespace Questor.Modules.Caching
                 {
                     return new List<EntityCache>();
                 }
-                
-                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.Id != DirectEve.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
-                if (_entitiesNotSelf.Any())
-                {
-                    return _entitiesNotSelf;
-                }
 
-                return new List<EntityCache>();
+                return Cache.Instance.Entities.Where(e => e.IsValid && e.Id != DirectEve.ActiveShip.ItemId && e.Distance < Cache.Instance.MaxRange).ToList();
             }
         }
 
@@ -1406,118 +1316,65 @@ namespace Questor.Modules.Caching
 
         public bool InWarp
         {
+            get { return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3); }
+        }
+
+        public bool IsOrbiting
+        {
             get
             {
-                try
+                if (Cache.Instance.Approaching != null)
                 {
-                    if (Cache.Instance.InSpace && !Cache.Instance.InStation)
+                    bool _followIDIsOnGrid = Cache.Instance.Entities.Where(i => i.Distance < (double)Distances.OnGridWithMe).Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
                     {
-                        if (DirectEve.ActiveShip != null)
-                        {
-                            if (DirectEve.ActiveShip.Entity != null)
-                            {
-                                if (DirectEve.ActiveShip.Entity.Mode == 3)
-                                {
-                                    return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3);
-                                }
-                                else
-                                {
-                                    if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.DirectEve.ActiveShip.Entity.Mode  is [" + DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
-                                    return false;
-                                }
-                            }
-                            else
-                            {
-                                if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip is Null? (session change?)", Logging.Teal);
-                            return false;
-                        }
+                        return true;
                     }
-                    else
-                    {
-                        if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp while docked or between session changes?", Logging.Teal);
-                        return false;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.InWarp", "InWarp check failed, exception [" + exception + "]", Logging.Teal);
+
+                    return false;
                 }
 
                 return false;
             }
         }
 
-        public bool IsOrbiting(long EntityWeWantToBeOrbiting = 0)
+        public bool IsApproaching
         {
-            if (Cache.Instance.Approaching != null)
+            get
             {
-                bool _followIDIsOnGrid = false;
-
-                if (EntityWeWantToBeOrbiting != 0)
+                if (Cache.Instance.Approaching != null)
                 {
-                    _followIDIsOnGrid = (EntityWeWantToBeOrbiting == DirectEve.ActiveShip.Entity.FollowId);
-                }
-                else
-                {
-                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+                    bool _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
+
+                    if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
 
-                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
+                return false;
+            }
+        }
+
+        public bool IsApproachingOrOrbiting
+        {
+            get
+            {
+                if (IsApproaching)
+                {
+                    return true;
+                }
+
+                if (IsOrbiting)
                 {
                     return true;
                 }
 
                 return false;
             }
-
-            return false;
-        }
-
-        public bool IsApproaching(long EntityWeWantToBeApproaching = 0)
-        {
-            if (Cache.Instance.Approaching != null)
-            {
-                bool _followIDIsOnGrid = false;
-                
-                if (EntityWeWantToBeApproaching != 0)
-                {
-                    _followIDIsOnGrid = (EntityWeWantToBeApproaching == DirectEve.ActiveShip.Entity.FollowId);
-                }
-                else
-                {
-                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
-                }
-
-                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            return false;
-        }
-
-        public bool IsApproachingOrOrbiting(long EntityWeWantToBeApproachingOrOrbiting = 0)
-        {   
-            if (IsApproaching(EntityWeWantToBeApproachingOrOrbiting))
-            {
-                return true;
-            }
-
-            if (IsOrbiting(EntityWeWantToBeApproachingOrOrbiting))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         public IEnumerable<EntityCache> ActiveDrones
@@ -1626,21 +1483,6 @@ namespace Questor.Modules.Caching
         public EntityCache Star
         {
             get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
-        }
-
-        public IEnumerable<EntityCache> EntitiesthatHaveExploded
-        {
-            get
-            {
-                if (Cache.Instance.InSpace && Cache.Instance.InWarp)
-                {
-                    _entitiesthatHaveExploded = new List<EntityCache>();
-                    return new List<EntityCache>();
-                }
-
-                _entitiesthatHaveExploded.RemoveAll(pt => DirectEve.Entities.All(e => e.Id != pt.Id));
-                return _entitiesthatHaveExploded;
-            }
         }
 
         public IEnumerable<EntityCache> PrimaryWeaponPriorityTargets
@@ -2403,6 +2245,12 @@ namespace Questor.Modules.Caching
             return removed > 0;
         }
 
+        /// <summary>
+        ///   Add PrimaryWeapon priority targets
+        /// </summary>
+        /// <param name = "targets"></param>
+        /// <param name = "priority"></param>
+        /// <param name="module"> </param>
         public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets, PrimaryWeaponPriority priority, string module)
         {
             foreach (EntityCache target in targets)
@@ -2436,6 +2284,12 @@ namespace Questor.Modules.Caching
             return;
         }
 
+        /// <summary>
+        ///   Add Drone priority targets
+        /// </summary>
+        /// <param name = "targets"></param>
+        /// <param name = "priority"></param>
+        /// <param name = "module"></param>
         public void AddDronePriorityTargets(IEnumerable<EntityCache> targets, DronePriority priority, string module)
         {
             foreach (EntityCache target in targets)
@@ -2643,17 +2497,6 @@ namespace Questor.Modules.Caching
             return maskedID;
         }
 
-        public void ClearEWARCache()
-        {
-            WarpScrambler.Clear();
-            Jammer.Clear();
-            TrackingDisrupter.Clear();
-            Neuting.Clear();
-            TargetPainting.Clear();
-            Dampening.Clear();
-            Webbing.Clear();
-        }
-
         public bool DoWeCurrentlyHaveTurretsMounted()
         {
             try
@@ -2717,13 +2560,8 @@ namespace Questor.Modules.Caching
                     {
                         FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
                     }
-
-                    if (_currentWeaponTarget != null && _currentWeaponTarget.IsReadyToShoot)
-                    {
-                        return _currentWeaponTarget;
-                    }
-
-                    return null;
+                    
+                    return _currentWeaponTarget;
                 }
 
                 return null;

@@ -103,14 +103,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
-            {
-                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "We just session changed less than 10 sec go, wait.", Logging.Teal);
-                _nextTravelerAction = Cache.Instance.LastSessionChange.AddSeconds(12);
-                return;
-            }
-
-            Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(2);
+            Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(1);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem - Iterating- next iteration should be in no less than [1] second ", Logging.Teal);
 
             _destinationRoute = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
@@ -195,46 +188,44 @@ namespace Questor.Modules.Activities
             }
 
             // Warp to, approach or jump the stargate
-            EntityCache MyNextStargate = Cache.Instance.StargateByName(_locationName);
-            if (MyNextStargate != null)
+            EntityCache MyNextStargate = Cache.Instance.Stargates.FirstOrDefault(e => e.Name == _locationName);
+            if (MyNextStargate != null && (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))
             {
-                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
-                {
-                    Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
-                    MyNextStargate.Jump();
-                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
-                    _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                    return;
-                }
-
-                if (MyNextStargate.Distance < (int)Distances.WarptoDistance && MyNextStargate.Distance != 0)
-                {
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching(MyNextStargate.Id))
-                    {
-                        if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
-                        MyNextStargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
-                        return;
-                    }
-
-                    if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
-                    return;
-                }
-
-                if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
-                {
-                    if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-                    {
-                        Logging.Log("Traveler", "Warping to [" + Logging.Yellow + _locationName + Logging.Green + "][" + Logging.Yellow + Math.Round((MyNextStargate.Distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
-                        MyNextStargate.WarpTo();
-                        return;
-                    }
-
-                    return;
-                }
+                Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
+                MyNextStargate.Jump();
+                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
+                _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                return;
             }
 
-            _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds); //this should probably use a different Time definition, but this works for now. (5 seconds)
+            if (MyNextStargate != null && MyNextStargate.Distance < (int)Distances.WarptoDistance && MyNextStargate.Distance != 0)
+            {
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching)
+                {
+                    if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
+                    MyNextStargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
+                    return;
+                }
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
+                return;
+            }
+
+            if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+            {
+                if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                {
+                    if (MyNextStargate != null)
+                    {
+                        Logging.Log("Traveler",
+                                    "Warping to [" + Logging.Yellow + _locationName + Logging.Green + "][" + Logging.Yellow +
+                                    Math.Round((MyNextStargate.Distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
+                        MyNextStargate.WarpTo();
+                    }
+                    return;
+                }
+                return;
+            }
             if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
             return;
         }
@@ -645,7 +636,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case TravelerState.Traveling:
-                    if ((!Cache.Instance.InSpace && !Cache.Instance.InStation) || Cache.Instance.InWarp) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
+                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
                         return;
 
                     if (Destination == null)

@@ -1098,7 +1098,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !Cache.Instance.IgnoreTargets.Contains(t.Name)) > killTargets.Count(e => e.IsTargetedBy))
+            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !t.IsIgnored) > killTargets.Count(e => e.IsTargetedBy))
             {
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);

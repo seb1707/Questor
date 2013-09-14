@@ -773,7 +773,7 @@ namespace Questor.Modules.Combat
                         unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
                                                                                                                                             && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                                                                                                  && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
-                                                                                                                                                || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
+                                                                                                                                                || (h.IsIgnored)
                                                                                                                                                 || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (__highValueTargetsTargeted.Count() >= maxHighValueTargets && (!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget || !Cache.Instance.PreferredDroneTarget.IsTarget))))
                                                                                                                                             && !h.IsPriorityWarpScrambler
                                                                                                                                             && (__highValueTargetsTargeted.Count() >= maxHighValueTargets)))
@@ -791,7 +791,7 @@ namespace Questor.Modules.Combat
                 {
                 unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget
                                                                         && (h.Distance > Cache.Instance.MaxRange
-                                                                        || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim())))
+                                                                        || h.IsIgnored)
                                                                         && !h.IsPriorityWarpScrambler)
                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                         .ThenByDescending(t => t.Distance)
@@ -828,7 +828,7 @@ namespace Questor.Modules.Combat
                     unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
                                                                                                                                           && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                                                                                                                                                && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
-                                                                                                                                              || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim()))
+                                                                                                                                              || (h.IsIgnored)
                                                                                                                                               || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (__lowValueTargetsTargeted.Count() >= maxLowValueTargets && (!Cache.Instance.PreferredDroneTarget.IsTarget || !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget))))
                                                                                                                                           && !h.IsPriorityWarpScrambler
                                                                                                                                           && (__lowValueTargetsTargeted.Count() >= maxLowValueTargets)))
@@ -844,7 +844,7 @@ namespace Questor.Modules.Combat
                 {
                     unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => h.IsTarget
                                                                     && ((h.Distance > Cache.Instance.MaxRange)
-                                                                    || (Cache.Instance.IgnoreTargets.Contains(h.Name.Trim())))
+                                                                    || (h.IsIgnored))
                                                                     && !h.IsPriorityWarpScrambler)
                                                                     .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
                                                                     .ThenByDescending(t => t.Nearest5kDistance)
@@ -911,7 +911,7 @@ namespace Questor.Modules.Combat
                                                                  && !e.IsEntityIShouldLeaveAlone
                                                                  && (!e.IsBadIdea || e.IsAttacking)
                                                                  && !e.IsLargeCollidable
-                                                                 && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())))
+                                                                 && !e.IsIgnored))
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);
@@ -923,7 +923,7 @@ namespace Questor.Modules.Combat
                                                                  && !e.IsEntityIShouldLeaveAlone
                                                                  && (!e.IsBadIdea || e.IsAttacking)
                                                                  && !e.IsLargeCollidable
-                                                                 && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())))
+                                                                 && !e.IsIgnored))
                     {
                         i++;
                         Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
@@ -1349,7 +1349,7 @@ namespace Questor.Modules.Combat
                                                                         && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                                         && !e.IsLargeCollidable
-                                                                        && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                                        && !e.IsIgnored
                                                                         && e.IsNotYetTargetingMeAndNotYetTargeted)
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();
@@ -1370,7 +1370,7 @@ namespace Questor.Modules.Combat
                                                                         && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                                         && !e.IsLargeCollidable
-                                                                        && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
+                                                                        && !e.IsIgnored
                                                                         && e.IsNotYetTargetingMeAndNotYetTargeted)
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();

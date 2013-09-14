@@ -304,7 +304,7 @@ namespace Questor.Modules.Caching
                 {
                     if ((IsTarget)
                       && _directEntity.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage
-                      && !Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim()))
+                      && !IsIgnored)
                     {
                         return true;
                     }
@@ -1128,7 +1128,7 @@ namespace Questor.Modules.Caching
                            && !IsContainer
                            && CategoryId == (int)CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
-                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           && !IsIgnored
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC
@@ -1149,7 +1149,7 @@ namespace Questor.Modules.Caching
                            && !IsContainer
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
-                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           && !IsIgnored
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC
@@ -1171,7 +1171,7 @@ namespace Questor.Modules.Caching
                            && !IsContainer
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
-                           && !Cache.Instance.IgnoreTargets.Contains(Name.Trim())
+                           && !IsIgnored
                            && (!IsBadIdea || IsAttacking)
                            && !IsEntityIShouldLeaveAlone
                            && !IsFactionWarfareNPC

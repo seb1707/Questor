@@ -285,7 +285,7 @@ namespace Questor.Modules.BackgroundTasks
             // Check for cargo containers
             foreach (EntityCache wreck in wreckTargets)
             {
-                if (Cache.Instance.IgnoreTargets.Contains(wreck.Name))
+                if (wreck.IsIgnored)
                 {
                     Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] on the ignore list, ignoring.", Logging.White);
                     wreck.UnlockTarget("Salvage");
@@ -342,7 +342,7 @@ namespace Questor.Modules.BackgroundTasks
 
             int wrecksProcessedThisTick = 0;
             IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
-            foreach (EntityCache wreck in wrecks.Where(w => !Cache.Instance.IgnoreTargets.Contains(w.Name.Trim())))
+            foreach (EntityCache wreck in wrecks.Where(w => !w.IsIgnored))
             {
                 // Its already a target, ignore it
                 if (wreck.IsTarget || wreck.IsTargeting)

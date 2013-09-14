@@ -1007,6 +1007,11 @@ namespace Questor.Modules.Combat
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
+            if (Cache.Instance.PreferredPrimaryWeaponTarget.IsIgnored)
+            {
+                Cache.Instance.PreferredPrimaryWeaponTarget = null;
+            }
+
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null 
                 && Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                 && Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget
@@ -1041,6 +1046,11 @@ namespace Questor.Modules.Combat
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
+
+            if (Cache.Instance.PreferredDroneTarget.IsIgnored)
+            {
+                Cache.Instance.PreferredDroneTarget = null;
+            }
 
             if (Cache.Instance.PreferredDroneTarget != null 
                 && Cache.Instance.Entities.Any(I => I.Id == Cache.Instance.PreferredDroneTarget.Id) 
@@ -1107,6 +1117,7 @@ namespace Questor.Modules.Combat
                             if (primaryWeaponPriorityEntity.Distance < Cache.Instance.MaxRange
                                 && primaryWeaponPriorityEntity.IsReadyToTarget
                                 && primaryWeaponPriorityEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                                && !primaryWeaponPriorityEntity.IsIgnored
                                 && primaryWeaponPriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
                             {
                                 Logging.Log("Combat", "Targeting primary weapon priority target [" + primaryWeaponPriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -1156,6 +1167,7 @@ namespace Questor.Modules.Combat
                             if (dronePriorityEntity.Distance < Settings.Instance.DroneControlRange
                                 && dronePriorityEntity.IsReadyToTarget
                                 && dronePriorityEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                                && !dronePriorityEntity.IsIgnored
                                 && dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
                             {
                                 Logging.Log("Combat", "Targeting primary weapon priority target [" + dronePriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(dronePriorityEntity.Id) + "][" + Math.Round(dronePriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -1233,6 +1245,7 @@ namespace Questor.Modules.Combat
                     if (highValueTargetingMeEntity != null
                         && highValueTargetingMeEntity.IsReadyToTarget
                         && highValueTargetingMeEntity.Distance < Cache.Instance.MaxRange
+                        && !highValueTargetingMeEntity.IsIgnored
                         && highValueTargetingMeEntity.LockTarget("TargetCombatants.HighValueTargetingMeEntity"))
                     {
                         HighValueTargetsTargetedThisCycle++;
@@ -1279,6 +1292,7 @@ namespace Questor.Modules.Combat
                     if (lowValueTargetingMeEntity != null
                         && lowValueTargetingMeEntity.IsReadyToTarget
                         && lowValueTargetingMeEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                        && !lowValueTargetingMeEntity.IsIgnored
                         && lowValueTargetingMeEntity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
                     {
                         LowValueTargetsTargetedThisCycle++;
@@ -1319,6 +1333,7 @@ namespace Questor.Modules.Combat
                                                                         && (!e.IsSentry || (e.IsSentry && e.IsEwarTarget()) || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                                         //&& !e.IsTarget
+                                                                        && !e.IsIgnored
                                                                         && !e.IsContainer
                                                                         && !e.IsFactionWarfareNPC
                                                                         && !e.IsEntityIShouldLeaveAlone
@@ -1339,6 +1354,7 @@ namespace Questor.Modules.Combat
                 NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                                        //&& !e.IsTarget
+                                                                        && !e.IsIgnored
                                                                         && !e.IsContainer
                                                                         && !e.IsFactionWarfareNPC
                                                                         && !e.IsEntityIShouldLeaveAlone
@@ -1359,6 +1375,7 @@ namespace Questor.Modules.Combat
                 if (TargetThisNotYetAggressiveNPC != null
                     && TargetThisNotYetAggressiveNPC.IsReadyToTarget
                     && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.MaxRange
+                    && !TargetThisNotYetAggressiveNPC.IsIgnored
                     && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
                 {
                     Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][GroupID: " + TargetThisNotYetAggressiveNPC.GroupId + "][TypeID: " + TargetThisNotYetAggressiveNPC.TypeId + "][ID: " + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);

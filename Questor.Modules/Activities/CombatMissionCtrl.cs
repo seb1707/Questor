@@ -412,8 +412,8 @@ namespace Questor.Modules.Activities
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
-                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
+            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored ).ToList())
+                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -562,7 +562,7 @@ namespace Questor.Modules.Activities
             //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
             /*if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
                 _clearPocketTimeout = null;*/
-            if (Cache.Instance.potentialCombatTargets.Any(t => !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())))
+            if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsIgnored))
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
                 EntityCache ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
@@ -1081,7 +1081,7 @@ namespace Questor.Modules.Activities
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
 
                 // We killed it/them !?!?!? :)
-                Cache.Instance.IgnoreTargets.RemoveWhere(t => targetNames.Contains(t));
+                Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
                 Nextaction();
                 return;
             }

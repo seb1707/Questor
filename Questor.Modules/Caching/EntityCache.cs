@@ -1006,6 +1006,21 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsIgnored
+        {
+            get
+            {
+                if (Cache.Instance.Entities.Any(t => t.Id != Id))
+                {
+                    return false;
+                }
+
+                bool result = false;
+                result |= Cache.Instance.IgnoreTargets.Contains(Name.Trim());
+                return result;
+            }
+        }
+
         public bool HaveLootRights
         {
             get
@@ -1108,7 +1123,7 @@ namespace Questor.Modules.Caching
             {
                 bool result = false;
                 result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
-                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                            && (!IsTargeting && !IsTarget && IsTargetedBy)
                            && !IsContainer
                            && CategoryId == (int)CategoryID.Entity
@@ -1129,7 +1144,7 @@ namespace Questor.Modules.Caching
             {
                 bool result = false;
                 result |= (((IsNpc || IsNpcByGroupID) || IsAttacking || Cache.Instance.InMission)
-                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                            && (!IsTargeting && !IsTarget)
                            && !IsContainer
                            && CategoryId == (int) CategoryID.Entity
@@ -1152,7 +1167,7 @@ namespace Questor.Modules.Caching
                 result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
                            && !IsTarget
                            && !IsTargeting
-                           && (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
+                           //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                            && !IsContainer
                            && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
@@ -1470,6 +1485,7 @@ namespace Questor.Modules.Caching
                 return result;
             }
         }
+
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>

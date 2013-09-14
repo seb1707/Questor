@@ -106,6 +106,8 @@ namespace Questor.Modules.Lookup
 
         Wreck = 186,
 
+        PlayerDrone = 100,
+        
         Livestock = 283, //this includes most CommonMissionCompletionitems like Militants and Marines
         MiscSpecialMissionItems = 314, //Misc special mission items that should not be on the market and not available from random missions.
 

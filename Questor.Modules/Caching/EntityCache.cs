@@ -1450,7 +1450,26 @@ namespace Questor.Modules.Caching
                 return result;
             }
         }
+        /// <summary>
+        /// A bad idea to attack these targets
+        /// </summary>
+        public bool IsMiscJunk
+        {
+            get
+            {
+                if (Cache.Instance.Entities.Any(t => t.Id != Id))
+                {
+                    return false;
+                }
 
+                bool result = false;
+                result |= GroupId == (int)Group.PlayerDrone;
+                result |= GroupId == (int)Group.Wreck;
+                result |= GroupId == (int)Group.AccelerationGate;
+                result |= GroupId == (int)Group.GasCloud;
+                return result;
+            }
+        }
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>

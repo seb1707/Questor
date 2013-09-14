@@ -1231,6 +1231,7 @@ namespace Questor.Modules.Caching
                                                         && !e.IsEntityIShouldLeaveAlone
                                                         && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
+                                                        && !e.IsMiscJunk
                                                         && !e.IsLargeCollidable
                                                         && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
                                                         )
@@ -1246,6 +1247,7 @@ namespace Questor.Modules.Caching
                                                             && !e.IsTarget
                                                             && (!e.IsBadIdea || e.IsBadIdea && e.IsAttacking)
                                                             && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
+                                                            && !e.IsMiscJunk
                                                             && !e.IsCelestial
                                                             && !e.IsStation
                                                             && !e.IsCustomsOffice
@@ -1265,7 +1267,7 @@ namespace Questor.Modules.Caching
                                 foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
                                 {
                                     i++;
-                                    Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
+                                    Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "] IsNPC [" + t.IsNpc +  "] IsNPCByGroupID [" + t.IsNpcByGroupID +  "]", Logging.Debug);
                                     continue;
                                 }
 

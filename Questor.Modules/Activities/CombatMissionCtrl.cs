@@ -565,11 +565,17 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.potentialCombatTargets.Any(t => !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())))
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
-                if (Cache.Instance.potentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Distance > Cache.Instance.MaxRange)
+                EntityCache ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                if (ClosestPotentialCombatTarget == null)
                 {
-                    if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.potentialCombatTargets.OrderBy(t => t.Distance).FirstOrDefault().Id))
+                    ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.FirstOrDefault();
+                }
+
+                if (ClosestPotentialCombatTarget != null && ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange)
+                {
+                    if (!Cache.Instance.IsApproachingOrOrbiting(ClosestPotentialCombatTarget.Id))
                     {
-                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.potentialCombatTargets.OrderBy(t => t.Distance).FirstOrDefault(), "combatMissionControl", true);
+                        NavigateOnGrid.NavigateIntoRange(ClosestPotentialCombatTarget, "combatMissionControl", true);
                     }
                 }
                 else

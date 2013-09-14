@@ -1224,7 +1224,8 @@ namespace Questor.Modules.Caching
                                                            || (e.IsSentry && e.IsEwarTarget()) 
                                                            || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)))
                                                            )
-                                                        &&  (e.IsNpcByGroupID) //|| e.IsNpc)
+                                                        && e.Distance < (int)Distances.OnGridWithMe
+                                                        && (e.IsNpcByGroupID) //|| e.IsNpc)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC
@@ -1240,15 +1241,17 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugTargetCombatants)
                     {
                         if (!_potentialCombatTargets.Any())
+                        
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                             List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            && (e.IsNpc || e.IsNpcByGroupID)
-                                                            && !e.IsTarget
-                                                            && (!e.IsBadIdea || e.IsBadIdea && e.IsAttacking)
+                                                            //&& (e.IsNpc || e.IsNpcByGroupID)
+                                                            //&& !e.IsTarget
+                                                            && e.Distance < (int)Distances.OnGridWithMe
+                                                            && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
                                                             && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                             && !e.IsMiscJunk
-                                                            && !e.IsCelestial
+                                                            && !e.IsCelestial   
                                                             && !e.IsStation
                                                             && !e.IsCustomsOffice
                                                             && !e.IsAsteroid
@@ -1264,7 +1267,7 @@ namespace Questor.Modules.Caching
                                 _entitiescount = __entities.Count();
                                 Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
                                 int i = 0;
-                                foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
+                                foreach (EntityCache t in __entities)
                                 {
                                     i++;
                                     Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "] IsNPC [" + t.IsNpc +  "] IsNPCByGroupID [" + t.IsNpcByGroupID +  "]", Logging.Debug);

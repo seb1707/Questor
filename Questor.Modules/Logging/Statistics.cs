@@ -162,7 +162,7 @@ namespace Questor.Modules.Logging
 
         public static bool EntityStatistics(IEnumerable<EntityCache> things)
         {
-            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";
+            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsNPCByGroupID;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";
             Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.White);
 
             things = things.ToList();
@@ -181,6 +181,7 @@ namespace Questor.Modules.Logging
                 objectline += thing.GroupId + ";";
                 objectline += thing.CategoryId + ";";
                 objectline += thing.IsNpc + ";";
+                objectline += thing.IsNpcByGroupID + ";";
                 objectline += thing.IsPlayer + ";";
                 objectline += thing.TargetValue + ";";
                 objectline += Math.Round(thing.Velocity, 0) + ";";

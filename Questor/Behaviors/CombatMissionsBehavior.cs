@@ -250,7 +250,7 @@ namespace Questor.Behaviors
                 _States.CurrentCombatMissionBehaviorState = _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Storyline ? CombatMissionsBehaviorState.StorylinePanic : CombatMissionsBehaviorState.Panic;
 
                 DebugCombatMissionsBehaviorStates();
-                if (PanicStateReset)
+                if (PanicStateReset && (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30 + Cache.Instance.RandomNumber(1,15))))
                 {
                     _States.CurrentPanicState = PanicState.Normal;
                     PanicStateReset = false;
@@ -258,26 +258,33 @@ namespace Questor.Behaviors
             }
             else if (_States.CurrentPanicState == PanicState.Resume)
             {
-                // Reset panic state
-                _States.CurrentPanicState = PanicState.Normal;
+                if (Cache.Instance.InSpace || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30 + Cache.Instance.RandomNumber(1, 15))))
+                {
+                    // Reset panic state
+                    _States.CurrentPanicState = PanicState.Normal;
 
-                // Ugly storyline resume hack
-                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.StorylinePanic)
-                {
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Storyline;
-                    if (_storyline.StorylineHandler is GenericCombatStoryline)
+                    // Ugly storyline resume hack
+                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.StorylinePanic)
                     {
-                        (_storyline.StorylineHandler as GenericCombatStoryline).State = GenericCombatStorylineState.GotoMission;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Storyline;
+                        if (_storyline.StorylineHandler is GenericCombatStoryline)
+                        {
+                            (_storyline.StorylineHandler as GenericCombatStoryline).State = GenericCombatStorylineState.GotoMission;
+                        }
                     }
+                    else
+                    {
+                        // Head back to the mission
+                        _States.CurrentTravelerState = TravelerState.Idle;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                    }
+
+                    return;
                 }
-                else
-                {
-                    // Head back to the mission
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                }
+    
                 DebugCombatMissionsBehaviorStates();
             }
+
             DebugPanicstates();
 
             switch (_States.CurrentCombatMissionBehaviorState)
@@ -1106,91 +1113,86 @@ namespace Questor.Behaviors
                             Traveler.Destination = new BookmarkDestination(bookmark);
                             break;
                         }
-                        else
+                        
+                        Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted", Logging.Orange);
+                        Cache.Instance.SalvageAll = false;
+                        Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        return;
+                    }
+                    
+                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
+
+                    if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.IsValid && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
+                    {
+                        Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        break;
+                    }
+
+                    if (!Cache.Instance.UnlootedContainers.Any())
+                    {
+                        Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.White);
+                        if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
+                        Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
+
+                        if (!Cache.Instance.AfterMissionSalvageBookmarks.Any() && !Cache.Instance.GateInGrid())
                         {
-                            Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted", Logging.Orange);
+                            Logging.Log("CombatMissionsBehavior.Salvage", "We have salvaged all bookmarks, go to base", Logging.White);
                             Cache.Instance.SalvageAll = false;
                             Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                             return;
                         }
-                    }
-                    else
-                    {
-                        if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
-                        if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.IsValid && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
+                        if (!Cache.Instance.GateInGrid()) //no acceleration gate found
                         {
-                            Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                            break;
-                        }
-
-                        if (!Cache.Instance.UnlootedContainers.Any())
-                        {
-                            Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.White);
-                            if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
-                            Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
-
-                            if (!Cache.Instance.AfterMissionSalvageBookmarks.Any() && !Cache.Instance.GateInGrid())
+                            Logging.Log("CombatMissionsBehavior.Salvage", "Go to the next salvage bookmark", Logging.White);
+                            DirectBookmark bookmark;
+                            if (Settings.Instance.FirstSalvageBookmarksInSystem)
                             {
-                                Logging.Log("CombatMissionsBehavior.Salvage", "We have salvaged all bookmarks, go to base", Logging.White);
-                                Cache.Instance.SalvageAll = false;
-                                Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                                return;
+                                bookmark = Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ?? Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault();
                             }
                             else
                             {
-                                if (!Cache.Instance.GateInGrid()) //no acceleration gate found
-                                {
-                                    Logging.Log("CombatMissionsBehavior.Salvage", "Go to the next salvage bookmark", Logging.White);
-                                    DirectBookmark bookmark;
-                                    if (Settings.Instance.FirstSalvageBookmarksInSystem)
-                                    {
-                                        bookmark = Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ?? Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault();
-                                    }
-                                    else
-                                    {
-                                        bookmark = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(i => i.CreatedOn).FirstOrDefault() ?? Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault();
-                                    }
-                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoSalvageBookmark;
-                                    Traveler.Destination = new BookmarkDestination(bookmark);
-                                }
-                                else if (Settings.Instance.UseGatesInSalvage) // acceleration gate found, are we configured to use it or not?
-                                {
-                                    Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - moving to next pocket", Logging.White);
-                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageUseGate;
-                                }
-                                else //acceleration gate found but we are configured to not use it, gotobase instead
-                                {
-                                    Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found, useGatesInSalvage set to false - Returning to base", Logging.White);
-                                    Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
-                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                                    Traveler.Destination = null;
-                                }
+                                bookmark = Cache.Instance.AfterMissionSalvageBookmarks.OrderBy(i => i.CreatedOn).FirstOrDefault() ?? Cache.Instance.AfterMissionSalvageBookmarks.FirstOrDefault();
                             }
-                            break;
-                        }
 
-                        //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
-                        Salvage.MoveIntoRangeOfWrecks();
-                        try
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoSalvageBookmark;
+                            Traveler.Destination = new BookmarkDestination(bookmark);
+                        }
+                        else if (Settings.Instance.UseGatesInSalvage) // acceleration gate found, are we configured to use it or not?
                         {
-                            // Overwrite settings, as the 'normal' settings do not apply
-                            _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                            _salvage.ReserveCargoCapacity = 80;
-                            _salvage.LootEverything = true;
-                            _salvage.ProcessState();
+                            Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - moving to next pocket", Logging.White);
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageUseGate;
+                        }
+                        else //acceleration gate found but we are configured to not use it, gotobase instead
+                        {
+                            Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found, useGatesInSalvage set to false - Returning to base", Logging.White);
+                            Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                            Traveler.Destination = null;
+                        }
+                        break;
+                    }
 
-                            //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
-                            //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                            //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
-                        }
-                        finally
-                        {
-                            ApplySalvageSettings();
-                        }
+                    //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
+                    Salvage.MoveIntoRangeOfWrecks();
+                    try
+                    {
+                        // Overwrite settings, as the 'normal' settings do not apply
+                        _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
+                        _salvage.ReserveCargoCapacity = 80;
+                        _salvage.LootEverything = true;
+                        _salvage.ProcessState();
+
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
+                        //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
+                    }
+                    finally
+                    {
+                        ApplySalvageSettings();
                     }
                     break;
 
@@ -1208,7 +1210,7 @@ namespace Questor.Behaviors
                     _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
 
                     EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).FirstOrDefault();
-                    if (closest.Distance < (int)Distances.DecloakRange)
+                    if (closest != null && closest.Distance < (int)Distances.DecloakRange)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - GroupID=" + closest.GroupId, Logging.White);
 
@@ -1223,7 +1225,7 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    if (closest.Distance < (int)Distances.WarptoDistance)
+                    if (closest != null && closest.Distance < (int)Distances.WarptoDistance)
                     {
                         // Move to the target
                         if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))

@@ -1798,7 +1798,7 @@ namespace Questor.Modules.Activities
                     Logging.Log("-", "-----------------------------------------------------------------", Logging.Teal);
                     Logging.Log("-", "-----------------------------------------------------------------", Logging.Teal);
                     Logging.Log("CombatMissionCtrl", "Pocket [" + Cache.Instance.PocketNumber + "] loaded, executing the following actions", Logging.Orange);
-                    var pocketActionCount = 1;
+                    int pocketActionCount = 1;
                     foreach (Actions.Action a in _pocketActions)
                     {
                         Logging.Log("CombatMissionCtrl", "Action [ " + pocketActionCount + " ] " + a, Logging.Teal);

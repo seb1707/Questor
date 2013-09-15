@@ -14,8 +14,8 @@ namespace Questor.Modules.BackgroundTasks
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
-    using global::Questor.Modules.Actions;
-    using global::Questor.Modules.Activities;
+    //using global::Questor.Modules.Actions;
+    //using global::Questor.Modules.Activities;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
@@ -204,6 +204,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWarpScramblingMe, PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
                         }
+
                         EntitiesThatAreWarpScramblingMe = null;
 
                         if (Settings.Instance.SpeedTank)
@@ -214,6 +215,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList);
                             }
+
                             EntitiesThatAreWebbingMe = null;
 
                             List<EntityCache> EntitiesThatAreTargetPaintingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe).ToList();
@@ -222,6 +224,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTargetPaintingMe, PrimaryWeaponPriority.TargetPainting, "Panic", Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList);
                             }
+
                             EntitiesThatAreTargetPaintingMe = null;
                         }
 
@@ -231,6 +234,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
                         }
+
                         EntitiesThatAreNeutralizingMe = null;
 
                         List<EntityCache> EntitiesThatAreJammingMe = Cache.Instance.TargetedBy.Where(t => t.IsJammingMe).ToList();
@@ -239,6 +243,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList);
                         }
+
                         EntitiesThatAreJammingMe = null;
 
                         List<EntityCache> EntitiesThatAreSensorDampeningMe = Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe).ToList();
@@ -247,6 +252,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreSensorDampeningMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList);
                         }
+
                         EntitiesThatAreSensorDampeningMe = null;
 
                         if (Cache.Instance.Modules.Any(m => m.IsTurret))
@@ -260,6 +266,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTrackingDisruptingMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList);
                             }
+
                             EntitiesThatAreTrackingDisruptingMe = null;
                         }
 

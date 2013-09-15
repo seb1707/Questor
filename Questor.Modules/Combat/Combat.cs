@@ -1214,6 +1214,7 @@ namespace Questor.Modules.Combat
             // OHHHH We are still here? OK Cool lets deal with things that are already targetting me
             //
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetingMeAndNotYetTargeted
+                                                            && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                             && t.Distance < Cache.Instance.MaxRange)
                                                             .ToList();
 
@@ -1325,7 +1326,10 @@ namespace Questor.Modules.Combat
             // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
             // or are in the middle of attempting to aggro something
             // 
-            if (Cache.Instance.potentialCombatTargets.Any(i => i.IsTarget && !i.IsLargeCollidable))
+            if (Cache.Instance.potentialCombatTargets.Any(i => i.IsTarget 
+                                                           && !i.IsLargeCollidable
+                                                           && (!i.IsSentry || (i.IsSentry && Settings.Instance.KillSentries))
+                                                           ))
             {
                 return;
             }
@@ -1339,7 +1343,7 @@ namespace Questor.Modules.Combat
             //
             
             NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                                        && (!e.IsSentry || (e.IsSentry && e.IsEwarTarget()) || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))))
+                                                                        && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                                         //&& !e.IsTarget
                                                                         && !e.IsIgnored

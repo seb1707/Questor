@@ -1185,7 +1185,6 @@ namespace Questor.Modules.Caching
                         targets.AddRange(Cache.Instance.Targeting);
 
                         _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                             && (e.IsNpc || e.IsNpcByGroupID)
                                                             && e.Distance < Cache.Instance.MaxRange
                                                             && e.Distance < (double)Distances.OnGridWithMe
@@ -1220,10 +1219,6 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InSpace)
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && (!e.IsSentry 
-                                                           || (e.IsSentry && e.IsEwarTarget()) 
-                                                           || (e.IsSentry && (Settings.Instance.KillSentries || (Cache.Instance.PreferredPrimaryWeaponTarget != null && e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)))
-                                                           )
                                                         && e.Distance < (int)Distances.OnGridWithMe
                                                         && (e.IsNpcByGroupID) //|| e.IsNpc)
                                                         //&& !e.IsTarget

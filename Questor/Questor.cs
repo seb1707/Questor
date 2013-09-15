@@ -44,7 +44,7 @@ namespace Questor
 
         public DateTime LastAction;
         public string ScheduleCharacterName = Logging._character;
-        public bool PanicStateReset = false;
+        //public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;
 

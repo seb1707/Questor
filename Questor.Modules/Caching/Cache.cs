@@ -1988,7 +1988,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public List<DirectBookmark> BookmarksThatContain(string label)
         {
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().Contains(label.ToLower())).ToList();
+            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().Contains(label.ToLower())).OrderBy(f => f.LocationId).ToList();
         }
 
         /// <summary>

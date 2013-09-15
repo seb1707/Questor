@@ -562,10 +562,10 @@ namespace Questor.Modules.Activities
             //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
             /*if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
                 _clearPocketTimeout = null;*/
-            if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsIgnored))
+            if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)))
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
-                EntityCache ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                EntityCache ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 if (ClosestPotentialCombatTarget == null)
                 {
                     ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.FirstOrDefault();

@@ -1534,6 +1534,7 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
+                result |= IsSentry;
                 result |= GroupId == (int)Group.Storyline_Battleship;
                 result |= GroupId == (int)Group.Storyline_Mission_Battleship;
                 result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;

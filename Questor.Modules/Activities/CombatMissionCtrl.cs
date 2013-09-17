@@ -1080,7 +1080,7 @@ namespace Questor.Modules.Activities
 
             IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
 
-            if (killTargets.Count() == numberToIgnore)
+            if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
 
@@ -1121,7 +1121,7 @@ namespace Questor.Modules.Activities
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
             }
 
-            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.Entities.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
             //we may need to get closer so combat will take over
             EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();

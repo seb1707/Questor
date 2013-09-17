@@ -274,7 +274,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (!HasExploded && IsTarget)
+                    if (!HasExploded && IsTarget && !IsIgnored)
                     {
                         if (_directEntity.Distance < Cache.Instance.MaxRange)
                         {

@@ -3260,10 +3260,8 @@ namespace Questor.Modules.Caching
                 }
                 catch (NullReferenceException) { }
 
-                if (callingTarget != null
-                    && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable)
-                    && (!callingTarget.IsIgnored
-                    && (!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate) 
+                if (callingTarget != null && callingTarget.IsReadyToShoot 
+                        && ((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate) 
                         || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit)))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "if (callingTarget != null && !callingTarget.IsIgnored)", Logging.Debug);

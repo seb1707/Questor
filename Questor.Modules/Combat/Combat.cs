@@ -1459,10 +1459,12 @@ namespace Questor.Modules.Combat
                         if (!Cache.Instance.OpenCargoHold("Combat")) break;
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
-                        //lets at the least make sure we have a fresh entity this frame to check against so we arent trying to navigate to things that no longer exist
+                        //lets at the least make sure we have a fresh entity this frame to check against so we are not trying to navigate to things that no longer exist
                         EntityCache killTarget = null;
-                        if(Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                            killTarget = Cache.Instance.Entities.FirstOrDefault(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid);
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        {
+                            killTarget = Cache.Instance.Entities.Where(i => i.Distance < (int) Distances.OnGridWithMe).FirstOrDefault(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid);
+                        }
 
                         if (killTarget != null)
                         {
@@ -1489,7 +1491,9 @@ namespace Questor.Modules.Combat
 
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.potentialCombatTargets.Any())
+                        {
                             Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
+                        }
                         
                         #region original code dont delete yet
                         /*

@@ -3260,12 +3260,14 @@ namespace Questor.Modules.Caching
                 }
                 catch (NullReferenceException) { }
 
-                if (callingTarget != null && callingTarget.IsReadyToShoot 
-                        && ((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate) 
-                        || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit)))
+                if (callingTarget != null && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable) //an LCO wont be locked yet!
+                        && ((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate)                      
+                        || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))   
+                   )
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "if (callingTarget != null && !callingTarget.IsIgnored)", Logging.Debug);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
+                    AddPrimaryWeaponPriorityTarget(callingTarget,PrimaryWeaponPriority.PriorityKillTarget, "GetBestTarget: callingTarget");
                     Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
                     Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
@@ -3282,7 +3284,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
                 highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue 
                     && t.IsReadyToShoot

@@ -1090,17 +1090,20 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            //if (ignoreAttackers)
-            //{
-            //    foreach (EntityCache target in Cache.Instance.potentialCombatTargets)
-            //    {
-            //        if (target.IsTargetedBy && target.IsAttacking)
-            //        {
-            //            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
-            //            Cache.Instance.IgnoreTargets.Add(target.Name.Trim());    
-            //        }
-            //    }
-            //}
+            if (ignoreAttackers)
+            {
+                foreach (EntityCache target in Cache.Instance.potentialCombatTargets)
+                {
+                    if (!targetNames.Contains(target.Name))
+                    {
+                        if (target.IsTargetedBy && target.IsAttacking)
+                        {
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
+                            Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
+                        }    
+                    }
+                }
+            }
 
             if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !t.IsIgnored) > killTargets.Count(e => e.IsTargetedBy))
             {

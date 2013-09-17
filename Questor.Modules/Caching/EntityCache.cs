@@ -991,7 +991,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (GroupId == (int)Group.SentryGun) return true;
+                //if (GroupId == (int)Group.SentryGun) return true;
                 if (GroupId == (int)Group.ProtectiveSentryGun) return true;
                 if (GroupId == (int)Group.MobileSentryGun) return true;
                 if (GroupId == (int)Group.DestructibleSentryGun) return true;

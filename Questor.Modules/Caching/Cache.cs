@@ -3374,24 +3374,33 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.Targets.Any())
                 {
                     Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
-                    Logging.Log("GetBestTarget (Weapons): none", "ALL TARGETS LISTED BELOW", Logging.Debug);
+                    Logging.Log("GetBestTarget (Weapons): none", "*** ALL LOCKED/LOCKING TARGETS LISTED BELOW", Logging.Debug);
+                    int LockedTargetNumber = 0; 
                     foreach (EntityCache __target in Targets)
                     {
-                        Logging.Log("GetBestTarget (Weapons): none", "Debug targets: [" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
+                        LockedTargetNumber++;
+                        Logging.Log("GetBestTarget (Weapons): none", "*** Target: [" + LockedTargetNumber + "][" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
                     }
-                    Logging.Log("GetBestTarget (Weapons): none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
+                    Logging.Log("GetBestTarget (Weapons): none", "*** ALL LOCKED/LOCKING TARGETS LISTED ABOVE", Logging.Debug);
                     Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
                 }
 
                 if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                 {
-                    Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
-                    Logging.Log("GetBestTarget (Weapons): none", "ALL potentialCombatTargets LISTED BELOW", Logging.Debug);
+                    if (Cache.Instance.IgnoreTargets.Any())
+                    {
+                        int IgnoreCount = Cache.Instance.IgnoreTargets.Count;
+                        Logging.Log("GetBestTarget (Weapons): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
+                    }
+
+                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
+                    int potentialCombatTargetNumber = 0;
                     foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
                     {
-                        Logging.Log("GetBestTarget (Weapons): none", "Debug entities: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
+                        potentialCombatTargetNumber++;
+                        Logging.Log("GetBestTarget (Weapons): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
                     }
-                    Logging.Log("GetBestTarget (Weapons): none", "ALL potentialCombatTargets LISTED ABOVE", Logging.Debug);
+                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
                     Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
                 }
             }

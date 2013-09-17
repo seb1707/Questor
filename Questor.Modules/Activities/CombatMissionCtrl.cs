@@ -1109,41 +1109,53 @@ namespace Questor.Modules.Activities
             {
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
+                targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
 
+                foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
+                {
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                    {
+                        if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+                        {
+                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                        }    
+                    }
+                        
+                }    
+                
                 foreach (EntityCache KillTargetEntity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + KillTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(KillTargetEntity.Id) + "][" + Math.Round(KillTargetEntity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
                     KillTargetEntity.UnlockTarget("CombatMissionCtrl");
                 }
 
-                targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
+                
                 //Cache.Instance.__GetBestTarget((int)Distances.OnGridWithMe, false, "combat");
             }
-            else
+            else //Do not break aggression on attackers (attack normally)
             {
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
-            }
-
-            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
-            
-            //we may need to get closer so combat will take over
-            EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
-            if (currentKillTarget != null)
-            {
-                if (currentKillTarget.Distance > Cache.Instance.MaxRange)
+                Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+                
+                //we may need to get closer so combat will take over
+                EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                if (currentKillTarget != null)
                 {
-                    if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                    if (currentKillTarget.Distance > Cache.Instance.MaxRange)
                     {
-                        NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                        if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                        {
+                            NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                        }
                     }
                 }
-            }
 
-            // GetTargets
-            Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
-            if (Cache.Instance.UseDrones)
-            {
-                Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
+                // GetTargets
+                Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
+                if (Cache.Instance.UseDrones)
+                {
+                    Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
+                }
             }
 
             // Don't use NextAction here, only if target is killed (checked further up)

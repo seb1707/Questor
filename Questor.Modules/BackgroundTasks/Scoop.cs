@@ -90,7 +90,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
                 return;
 
-            List<EntityCache> targets = new List<EntityCache>();
+            var targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
 
@@ -205,7 +205,7 @@ namespace Questor.Modules.BackgroundTasks
                 IEnumerable<ItemCache> items = container.Items.Select(i => new ItemCache(i));
 
                 // Build a list of items to loot
-                List<ItemCache> lootItems = new List<ItemCache>();
+                var lootItems = new List<ItemCache>();
 
                 //can we loot all items in one go here?
                 //
@@ -274,7 +274,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
 
                         // Start clearing out items that are worth less
-                        List<DirectItem> moveTheseItems = new List<DirectItem>();
+                        var moveTheseItems = new List<DirectItem>();
                         foreach (ItemCache wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
                         {
                             // Mark this item as moved

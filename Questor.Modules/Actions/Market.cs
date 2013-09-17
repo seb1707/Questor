@@ -236,7 +236,7 @@ namespace Questor.Modules.Actions
                 {
                     if (i.Reprocess[m].HasValue && i.Reprocess[m] > 0)
                     {
-                        double? d = i.Reprocess[m];
+                        var d = i.Reprocess[m];
                         if (d != null)
                         {
                             temp += d.Value * mineralPrices[m];

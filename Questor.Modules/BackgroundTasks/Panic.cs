@@ -79,7 +79,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
                         return;
 
-                    if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(20))
+                    if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
                         return;
 
                     if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.

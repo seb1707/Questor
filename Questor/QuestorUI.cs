@@ -1100,7 +1100,7 @@ namespace Questor
 
         private void ChkShowConsoleCheckedChanged(object sender, EventArgs e)
         {
-            Form frmMain = new Form();
+            var frmMain = new Form();
             Size = chkShowDetails.Checked ? new System.Drawing.Size(707, 434) : new System.Drawing.Size(362, 124);
         }
 

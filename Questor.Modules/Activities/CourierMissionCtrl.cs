@@ -30,7 +30,7 @@ namespace Questor.Modules.Activities
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
+            var destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 

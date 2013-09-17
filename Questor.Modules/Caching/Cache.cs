@@ -545,7 +545,7 @@ namespace Questor.Modules.Caching
         public bool LocalSafe(int maxBad, double stand)
         {
             int number = 0;
-            DirectChatWindow local = (DirectChatWindow)GetWindowByName("Local");
+            var local = (DirectChatWindow)GetWindowByName("Local");
 
             try
             {
@@ -852,7 +852,7 @@ namespace Questor.Modules.Caching
 
         private string SelectNearestAgent()
         {
-            DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
+            var mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
             if (mission == null)
             {
                 Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
@@ -1549,7 +1549,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                List<DirectSolarSystem> solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                var solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
                 return solarSystems;
             }
         }
@@ -2156,13 +2156,13 @@ namespace Questor.Modules.Caching
                                     //Logging.Log(string.Format("Cache: Using Character Setting DroneKillHighValueTargets  {0}", DronesKillHighValueTargets));
                                 }
 
-                                List<Actions.Action> actions = new List<Actions.Action>();
+                                var actions = new List<Actions.Action>();
                                 XElement elements = pocket.Element("actions");
                                 if (elements != null)
                                 {
                                     foreach (XElement element in elements.Elements("action"))
                                     {
-                                        Actions.Action action = new Actions.Action
+                                        var action = new Actions.Action
                                             {
                                                 State = (ActionState)Enum.Parse(typeof(ActionState), (string)element.Attribute("name"), true)
                                             };
@@ -2295,8 +2295,8 @@ namespace Questor.Modules.Caching
 
                     if (missionFitting != null)
                     {
-                        string missionFit = missionFitting.Fitting;
-                        string missionShip = missionFitting.Ship;
+                        var missionFit = missionFitting.Fitting;
+                        var missionShip = missionFitting.Ship;
                         if (!(missionFit == "" && missionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
                         {
                             ChangeMissionShipFittings = true;
@@ -3754,7 +3754,7 @@ namespace Questor.Modules.Caching
 
         public int RandomNumber(int min, int max)
         {
-            Random random = new Random();
+            var random = new Random();
             return random.Next(min, max);
         }
 
@@ -5172,7 +5172,7 @@ namespace Questor.Modules.Caching
                     }
 
                     Logging.Log(module, "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.Orange);
-                    DirectItem firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
+                    var firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
 
                     if (firstOtherContainer != null)
                     {
@@ -5232,7 +5232,7 @@ namespace Questor.Modules.Caching
                     }
 
                     Logging.Log(module, "unable to find HighTierLootContainer named [ " + Settings.Instance.HighTierLootContainer.ToLower() + " ]", Logging.Orange);
-                    DirectItem firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
+                    var firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
 
                     if (firstOtherContainer != null)
                     {
@@ -5267,7 +5267,7 @@ namespace Questor.Modules.Caching
                 Cache.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (HighTierLootContainer.Window == null)
                 {
-                    DirectItem firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
+                    var firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
                     if (firstLootContainer != null)
                     {
                         long highTierLootContainerID = firstLootContainer.ItemId;
@@ -5440,7 +5440,7 @@ namespace Questor.Modules.Caching
                 Cache.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (LootHangar.Window == null)
                 {
-                    DirectItem firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    var firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
                     if (firstLootContainer != null)
                     {
                         long lootContainerID = firstLootContainer.ItemId;
@@ -6474,37 +6474,6 @@ namespace Questor.Modules.Caching
         private int _bookmarkDeletionAttempt;
         public DateTime NextBookmarkDeletionAttempt = DateTime.UtcNow;
 
-        public bool DeleteCorpAssistBookmarks(string module)
-        {
-            try
-            {
-                DateTime bmExpirationDate = DateTime.UtcNow.AddSeconds(10);
-                List<DirectBookmark> oldCorpAssistBookmarks = new List<DirectBookmark>(CorpAssistBookmarks.Where(e => e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
-                if (oldCorpAssistBookmarks.Any())
-                {
-                    DirectBookmark oldCorpAssistBookmark = oldCorpAssistBookmarks.FirstOrDefault();
-                    if (oldCorpAssistBookmark != null)
-                    {
-                        oldCorpAssistBookmark.Delete();
-                        return false;
-                    }
-                }
-
-                //
-                // no bookmarks to delete
-                //
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Pluckyduck logging", " around 5987 cache.cs deleteing old corp assist bookmarks generated exception generated:" + ex.Message, Logging.White);
-            }
-
-            return true;
-
-        }
-
-
         public bool DeleteBookmarksOnGrid(string module)
         {
             if (DateTime.UtcNow < NextBookmarkDeletionAttempt)
@@ -6521,7 +6490,7 @@ namespace Questor.Modules.Caching
             {
                 //Delete bookmarks older than 2 hours.
                 DateTime bmExpirationDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofSalvageBookmarksToExpire);
-                List<DirectBookmark> uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
+                var uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
 
                 DirectBookmark uselessSalvageBookmark = uselessSalvageBookmarks.FirstOrDefault();
                 if (uselessSalvageBookmark != null)
@@ -6549,7 +6518,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("Cache.DeleteBookmarksOnGrid", "Delete old unprocessed salvage bookmarks: exception generated:" + ex.Message, Logging.White);
             }
 
-            List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+            var bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
             DirectBookmark onGridBookmark = bookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
             if (onGridBookmark != null)

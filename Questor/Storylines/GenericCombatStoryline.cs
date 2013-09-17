@@ -239,7 +239,7 @@
                     break;
 
                 case GenericCombatStorylineState.GotoMission:
-                    MissionBookmarkDestination missionDestination = Traveler.Destination as MissionBookmarkDestination;
+                    var missionDestination = Traveler.Destination as MissionBookmarkDestination;
                     //
                     // if we have no destination yet... OR if missionDestination.AgentId != storyline.CurrentStorylineAgentId
                     //

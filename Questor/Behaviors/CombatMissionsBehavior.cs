@@ -195,7 +195,7 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -649,7 +649,7 @@ namespace Questor.Behaviors
                     Statistics.Instance.MissionLoggingCompleted = false;
                     Cache.Instance.IsMissionPocketDone = false;
 
-                    MissionBookmarkDestination missionDestination = Traveler.Destination as MissionBookmarkDestination;
+                    var missionDestination = Traveler.Destination as MissionBookmarkDestination;
 
                     if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
                     {
@@ -1402,7 +1402,7 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp)) return;
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)

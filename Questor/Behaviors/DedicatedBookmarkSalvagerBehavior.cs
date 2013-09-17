@@ -160,7 +160,7 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -512,7 +512,7 @@ namespace Questor.Behaviors
                         }
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvager", "Salvaging at first oldest bookmarks created on: " + bookmark.CreatedOn.ToString(), Logging.White);
 
-                        List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+                        var bookmarksInLocal = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                                OrderBy(b => b.CreatedOn));
                         DirectBookmark localBookmark = bookmarksInLocal.FirstOrDefault();
                         if (localBookmark != null)

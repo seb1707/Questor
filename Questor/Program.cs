@@ -450,7 +450,7 @@ namespace Questor
             // We should not get any windows
             if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
+                foreach (var window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -727,7 +727,7 @@ namespace Questor
 
         public static int RandomNumber(int min, int max)
         {
-            Random random = new Random();
+            var random = new Random();
             return random.Next(min, max);
         }
     }

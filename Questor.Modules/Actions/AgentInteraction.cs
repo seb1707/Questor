@@ -432,12 +432,12 @@ namespace Questor.Modules.Actions
         {
             Statistics.SaveMissionHTMLDetails(html, MissionName);
             // We are going to check damage types
-            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
-                string logo = logoMatch.Groups["factionlogo"].Value;
+                var logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
                 string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
@@ -527,12 +527,12 @@ namespace Questor.Modules.Actions
         private DamageType GetMissionDamageType(string html)
         {
             // We are going to check damage types
-            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
-                string logo = logoMatch.Groups["factionlogo"].Value;
+                var logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
                 XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
@@ -846,8 +846,8 @@ namespace Questor.Modules.Actions
                     Logging.Log("AgentInteraction", "Agent decline timer detected. Current standings: " + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + ". Minimum standings: " + Math.Round(Settings.Instance.MinAgentBlackListStandings, 2), Logging.Yellow);
                 }
 
-                Regex hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
-                Regex minuteRegex = new Regex("\\s(?<minute>\\d+)\\sminute");
+                var hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
+                var minuteRegex = new Regex("\\s(?<minute>\\d+)\\sminute");
                 Match hourMatch = hourRegex.Match(html);
                 Match minuteMatch = minuteRegex.Match(html);
                 int hours = 0;
@@ -967,7 +967,7 @@ namespace Questor.Modules.Actions
         {
             DirectAgentWindow agentWindow = Agent.Window;
             string html = agentWindow.Objective;
-            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
@@ -984,7 +984,7 @@ namespace Questor.Modules.Actions
                     Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
-                        string factionName = ((string)faction.Attribute("name"));
+                        var factionName = ((string)faction.Attribute("name"));
                         Cache.Instance.FactionName = factionName;
                         Logging.Log("AgentInteraction", "Mission enemy faction: " + factionName, Logging.Yellow);
                         if (Settings.Instance.FactionBlacklist.Any(m => m.ToLower() == factionName.ToLower()))

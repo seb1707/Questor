@@ -1135,12 +1135,18 @@ namespace Questor.Modules.Activities
             else //Do not break aggression on attackers (attack normally)
             {
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
-                Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
                 
-                //we may need to get closer so combat will take over
                 EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 if (currentKillTarget != null)
                 {
+                    if ((Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe) && currentKillTarget.IsOnGridWithMe)
+                    {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
+                        Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName"); 
+                        Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
+                    }
+                
+                    //we may need to get closer so combat will take over
                     if (currentKillTarget.Distance > Cache.Instance.MaxRange)
                     {
                         if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))

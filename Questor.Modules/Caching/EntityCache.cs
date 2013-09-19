@@ -1164,17 +1164,11 @@ namespace Questor.Modules.Caching
             get
             {
                 bool result = false;
-                result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                result |= (CategoryId == (int) CategoryID.Entity
                            && !IsTarget
                            && !IsTargeting
-                           //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
-                           && !IsContainer
-                           && CategoryId == (int) CategoryID.Entity
                            && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
                            && !IsIgnored
-                           && (!IsBadIdea || IsAttacking)
-                           && !IsEntityIShouldLeaveAlone
-                           && !IsFactionWarfareNPC
                            && !IsStation);
                 return result;
             }

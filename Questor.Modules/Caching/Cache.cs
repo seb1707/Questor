@@ -3260,9 +3260,9 @@ namespace Questor.Modules.Caching
                 }
                 catch (NullReferenceException) { }
 
-                if (callingTarget != null && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable) //an LCO wont be locked yet!
-                        && ((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate)                      
-                        || (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))   
+                if (callingTarget != null && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable)
+                        //((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate)                      
+                        //|| (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))   
                    )
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "if (callingTarget != null && !callingTarget.IsIgnored)", Logging.Debug);

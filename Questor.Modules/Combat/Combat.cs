@@ -1371,7 +1371,6 @@ namespace Questor.Modules.Combat
                                                                         && !e.IsContainer
                                                                         && !e.IsFactionWarfareNPC
                                                                         && !e.IsEntityIShouldLeaveAlone
-                                                                        && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                                         && !e.IsLargeCollidable
                                                                         && !e.IsIgnored

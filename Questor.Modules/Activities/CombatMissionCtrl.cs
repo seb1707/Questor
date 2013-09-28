@@ -1134,28 +1134,60 @@ namespace Questor.Modules.Activities
             }
             else //Do not break aggression on attackers (attack normally)
             {
-                Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
-                
-                EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
-                if (currentKillTarget != null)
+                //
+                // check to see if we have priority targets (ECM, warp scramblers, etc, and let combat process those first)
+                //
+                EntityCache primaryWeaponPriorityTarget = null;
+                try
                 {
-                    if ((Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe) && currentKillTarget.IsOnGridWithMe)
+                    primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange
+                                                                                && !p.IsIgnored
+                                                                                && p.IsReadyToShoot
+                                                                                && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
+                                                                               .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                               .ThenByDescending(pt => pt.IsInOptimalRange)
+                                                                               .ThenByDescending(pt => pt.IsEwarTarget())
+                                                                               .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                               .ThenBy(pt => pt.Distance)
+                                                                               .FirstOrDefault();
+                }
+                catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
+
+                if (primaryWeaponPriorityTarget != null)
+                {
+                    //
+                    // getbesttarget below will choose to assign prioritytargets over preferred targets, so we might as well wait... (and not approach the wrong target)
+                    //
+                }
+                else 
+                {
+                    //
+                    // then proceed to kill the target
+                    //
+
+                    Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
+
+                    EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                    if (currentKillTarget != null)
                     {
-                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName"); 
-                        Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
-                    }
-                
-                    //we may need to get closer so combat will take over
-                    if (currentKillTarget.Distance > Cache.Instance.MaxRange)
-                    {
-                        if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                        if ((Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe) && currentKillTarget.IsOnGridWithMe)
                         {
-                            NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+                            Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
+                        }
+
+                        //we may need to get closer so combat will take over
+                        if (currentKillTarget.Distance > Cache.Instance.MaxRange)
+                        {
+                            if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                            {
+                                NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                            }
                         }
                     }
                 }
-
+                
                 // GetTargets
                 Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
                 if (Cache.Instance.UseDrones)

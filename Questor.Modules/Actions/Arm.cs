@@ -158,6 +158,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.Done:
+                    if (!Cache.Instance.StackAmmoHangar("Arm")) break;
                     break;
 
                 case ArmState.NotEnoughDrones:

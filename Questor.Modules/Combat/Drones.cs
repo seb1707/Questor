@@ -156,7 +156,7 @@ namespace Questor.Modules.Combat
 
         public void ProcessState()
         {
-            if (_nextDroneAction > DateTime.UtcNow) return;
+            if (_nextDroneAction > DateTime.UtcNow || Settings.Instance.DebugDisableDrones) return;
             
             _nextDroneAction = DateTime.UtcNow.AddMilliseconds(400);
 

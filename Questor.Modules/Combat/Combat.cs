@@ -1411,7 +1411,7 @@ namespace Questor.Modules.Combat
         {
             try
             {
-                if (DateTime.UtcNow < _lastCombatProcessState.AddMilliseconds(500)) //if it has not been 500ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+                if (DateTime.UtcNow < _lastCombatProcessState.AddMilliseconds(500) || Settings.Instance.DebugDisableCombat) //if it has not been 500ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 {
                     return;
                 }
@@ -1491,7 +1491,7 @@ namespace Questor.Modules.Combat
                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
 
                         //ok so we do need this, but only use it if we actually have some potential targets
-                        if (Cache.Instance.potentialCombatTargets.Any())
+                        if (Cache.Instance.potentialCombatTargets.Any() && Cache.Instance.Targets.Any())
                         {
                             Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
                         }

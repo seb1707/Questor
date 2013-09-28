@@ -13,6 +13,7 @@ namespace Questor.Modules.BackgroundTasks
         public static DateTime AvoidBumpingThingsTimeStamp = Cache.Instance.StartTime;
         public static int SafeDistanceFromStructureMultiplier = 1;
         public static bool AvoidBumpingThingsWarningSent = false;
+        public static DateTime NextNavigateIntoRange = DateTime.UtcNow;
 
         public static void AvoidBumpingThings(EntityCache thisBigObject, string module)
         {
@@ -162,6 +163,11 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp) || !moveMyShip)
                 return;
+
+            if (DateTime.UtcNow < NextNavigateIntoRange)
+                return;
+
+            NextNavigateIntoRange = DateTime.UtcNow.AddSeconds(5);
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);
 

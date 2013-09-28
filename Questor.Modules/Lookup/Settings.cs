@@ -375,6 +375,9 @@ namespace Questor.Modules.Lookup
         public int MinimumAmmoCharges { get; set; }
         public List<Ammo> Ammo { get; private set; }
 
+        public int MinimumTargetValueToConsiderTargetAHighValueTarget { get; set; }
+        public int MaximumTargetValueToConsiderTargetALowValueTarget { get; set; }
+
         public int DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage { get; set; }
 
         public int DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
@@ -885,6 +888,14 @@ namespace Questor.Modules.Lookup
                 DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = 60;
                 DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                 SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+
+
+                // (IsNPCBattleship) return 4;
+                // (IsNPCBattlecruiser) return 3;
+                // (IsNPCCruiser) return 2;
+                // (IsNPCFrigate) return 0;
+                MinimumTargetValueToConsiderTargetAHighValueTarget = 2; 
+                MaximumTargetValueToConsiderTargetALowValueTarget = 1;
 
                 AddDampenersToPrimaryWeaponsPriorityTargetList = true;
                 AddNeutralizersToPrimaryWeaponsPriorityTargetList = true;
@@ -1500,6 +1511,9 @@ namespace Questor.Modules.Lookup
                     DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)CharacterSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? (int?)CommonSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
                     DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                     SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+
+                    MinimumTargetValueToConsiderTargetAHighValueTarget = (int?)CharacterSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? (int?)CommonSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? 2;
+                    MaximumTargetValueToConsiderTargetALowValueTarget = (int?)CharacterSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? (int?)CommonSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? 1;
 
                     AddDampenersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? true;
                     AddECMsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? true;

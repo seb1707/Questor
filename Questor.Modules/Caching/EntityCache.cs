@@ -557,7 +557,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != Id))
+                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
                     {
                         return false;
                     }
@@ -606,7 +606,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != Id))
+                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
                     {
                         return false;
                     }
@@ -1074,6 +1074,52 @@ namespace Questor.Modules.Caching
                 }
 
                 return value.TargetValue;
+            }
+        }
+
+        public bool IsHighValueTarget
+        {
+            get
+            {
+                if (_directEntity == null)
+                {
+                    return false;
+                }
+
+                if (TargetValue != null)
+                {
+                    if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
+                    {
+                        return true;
+                    }
+
+                    if (IsLargeCollidable)
+                    {
+                        return true;
+                    }
+                }
+
+
+
+                return false;
+            }
+        }
+
+        public bool IsLowValueTarget
+        {
+            get
+            {
+                if (_directEntity == null)
+                {
+                    return false;
+                }
+
+                if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -2023,7 +2069,7 @@ namespace Questor.Modules.Caching
         {
             if (_directEntity != null)
             {
-                if (IsTarget)
+                if (_directEntity.IsTarget)
                 {
                     _directEntity.MakeActiveTarget();    
                 }

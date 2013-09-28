@@ -3041,9 +3041,9 @@ namespace Questor.Modules.Caching
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
-            if (Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting + "] targets being locked atm", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
                 return false;
             }
 
@@ -3293,9 +3293,7 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
-                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue 
-                    && t.IsReadyToShoot
-                    && (!t.IsNPCFrigate && !t.IsFrigate))
+                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
@@ -3316,8 +3314,7 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate)
-                    && t.IsReadyToShoot)
+                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
@@ -3567,7 +3564,7 @@ namespace Questor.Modules.Caching
 
             if (potentialCombatTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.TargetValue.HasValue && (!t.IsNPCFrigate && !t.IsFrigate) && t.IsTarget && t.IsAttacking)
+                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot && t.IsAttacking)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsTarget)
@@ -3583,7 +3580,7 @@ namespace Questor.Modules.Caching
             EntityCache lowValueTarget = null;
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => (t.IsNPCFrigate || t.IsFrigate) && t.IsReadyToShoot && t.IsAttacking)
+                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot && t.IsAttacking)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                     .ThenBy(OrderByLowestHealth())

@@ -1218,16 +1218,17 @@ namespace Questor.Modules.Combat
                                                             && t.Distance < Cache.Instance.MaxRange)
                                                             .ToList();
 
+            List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => (t.IsHighValueTarget))
+                                                                .OrderBy(t => t.Nearest5kDistance).ToList();
 
-            List<EntityCache> highValueTargetingMe;
-            highValueTargetingMe = TargetingMe.Where(t => (t.TargetValue.HasValue && t.TargetValue.Value > 1))
-                                               .OrderBy(t => t.Nearest5kDistance).ToList();
+            int LockedTargetsThatHaveHighValue = Cache.Instance.Targets.Count(t => (t.IsHighValueTarget));
 
-            List<EntityCache> lowValueTargetingMe;
-            lowValueTargetingMe = TargetingMe.Where(t => !t.TargetValue.HasValue ||  t.TargetValue.Value < 2)
-                                             .OrderBy(t => t.Nearest5kDistance).ToList();
+            List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => !t.IsHighValueTarget)
+                                                               .OrderBy(t => t.Nearest5kDistance).ToList();
 
-            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] highValueTargetingMe [" + highValueTargetingMe.Count() + "]", Logging.Debug);
+            int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));
+
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveLowValue + "] :::  highValueTargetingMe [" + highValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveHighValue + "]", Logging.Debug);
 
             // High Value
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);

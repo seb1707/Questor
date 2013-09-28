@@ -22,6 +22,7 @@ namespace Questor.Modules.States
         MoveDrones,
         MoveItems,
         WaitForItems,
+        StackAmmoHangar,
         Done,
         ActivateNoobShip, 
         SwitchToSalvageShip,

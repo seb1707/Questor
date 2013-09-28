@@ -154,11 +154,15 @@ namespace Questor.Modules.Actions
                     }
 
                     if (!Cleanup.CloseInventoryWindows()) break;
+                    _States.CurrentArmState = ArmState.StackAmmoHangar;
+                    break;
+
+                case ArmState.StackAmmoHangar:
+                    if (!Cache.Instance.StackAmmoHangar("Arm")) return; 
                     _States.CurrentArmState = ArmState.Done;
                     break;
 
                 case ArmState.Done:
-                    if (!Cache.Instance.StackAmmoHangar("Arm")) break;
                     break;
 
                 case ArmState.NotEnoughDrones:

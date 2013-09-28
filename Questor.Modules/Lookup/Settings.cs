@@ -88,6 +88,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDefense { get; set; }
         public bool DebugDisableCleanup { get; set; }
         public bool DebugDisableCombatMissionsBehavior { get; set; }
+        public bool DebugDisableCombatMissionCtrl { get; set; }
         public bool DebugDisableCombat { get; set; }
         public bool DebugDisableDrones { get; set; }
         public bool DebugDisablePanic { get; set; }
@@ -653,6 +654,7 @@ namespace Questor.Modules.Lookup
                 DebugDefense = false;
                 DebugDisableCleanup = false;
                 DebugDisableCombatMissionsBehavior = false;
+                DebugDisableCombatMissionCtrl = false;
                 DebugDisableCombat = false;
                 DebugDisableDrones = false;
                 DebugDisablePanic = false;
@@ -1152,6 +1154,7 @@ namespace Questor.Modules.Lookup
                     DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
                     DebugDisableCleanup = (bool?)CharacterSettingsXml.Element("debugDisableCleanup") ?? (bool?)CommonSettingsXml.Element("debugDisableCleanup") ?? false;
                     DebugDisableCombatMissionsBehavior = (bool?)CharacterSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? (bool?)CommonSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? false;
+                    DebugDisableCombatMissionCtrl = (bool?)CharacterSettingsXml.Element("debugDisableCombatMissionCtrl") ?? (bool?)CommonSettingsXml.Element("debugDisableCombatMissionCtrl") ?? false;
                     DebugDisableCombat = (bool?)CharacterSettingsXml.Element("debugDisableCombat") ?? (bool?)CommonSettingsXml.Element("debugDisableCombat") ?? false;
                     DebugDisableDrones = (bool?)CharacterSettingsXml.Element("debugDisableDrones") ?? (bool?)CommonSettingsXml.Element("debugDisableDrones") ?? false;
                     DebugDisablePanic = (bool?)CharacterSettingsXml.Element("debugDisablePanic") ?? (bool?)CommonSettingsXml.Element("debugDisablePanic") ?? false;

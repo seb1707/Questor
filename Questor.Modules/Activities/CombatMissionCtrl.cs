@@ -1754,7 +1754,7 @@ namespace Questor.Modules.Activities
         public void ProcessState()
         {
             // There is really no combat in stations (yet)
-            if (Cache.Instance.InStation)
+            if (Cache.Instance.InStation || Settings.Instance.DebugDisableCombatMissionCtrl)
                 return;
 
             // if we are not in space yet, wait...

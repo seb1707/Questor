@@ -3041,6 +3041,13 @@ namespace Questor.Modules.Caching
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
+            if (Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting + "] targets being locked atm", Logging.Teal);
+                return false;
+            }
+
+
             EntityCache currentTarget = null;
             if (Cache.Instance.CurrentWeaponTarget() != null 
                 && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
@@ -3128,7 +3135,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
                     Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                    return true;    
+                    return true;
                 }
                 #endregion Is our current target any other primary weapon priority target?
 

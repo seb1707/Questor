@@ -88,6 +88,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDefense { get; set; }
         public bool DebugDisableTargetCombatants { get; set; }
         public bool DebugDisableGetBestTarget { get; set; }
+        public bool DebugDisableNavigateIntoRange { get; set; }
         public bool DebugDrones { get; set; }
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
@@ -646,6 +647,7 @@ namespace Questor.Modules.Lookup
                 DebugDefense = false;
                 DebugDisableGetBestTarget = false;
                 DebugDisableTargetCombatants = false;
+                DebugDisableNavigateIntoRange = false;
                 DebugDrones = false;
                 DebugDroneHealth = false;
                 DebugExceptions = false;
@@ -1138,6 +1140,7 @@ namespace Questor.Modules.Lookup
                     DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
                     DebugDisableGetBestTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false;
                     DebugDisableTargetCombatants = (bool?)CharacterSettingsXml.Element("debugDisableTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugDisableTargetCombatants") ?? false;
+                    DebugDisableNavigateIntoRange = (bool?)CharacterSettingsXml.Element("debugDisableNavigateIntoRange") ?? (bool?)CommonSettingsXml.Element("debugDisableNavigateIntoRange") ?? false;
                     DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
                     DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
                     DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;

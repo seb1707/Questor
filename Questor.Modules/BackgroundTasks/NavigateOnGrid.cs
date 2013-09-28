@@ -164,7 +164,7 @@ namespace Questor.Modules.BackgroundTasks
             if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp) || !moveMyShip)
                 return;
 
-            if (DateTime.UtcNow < NextNavigateIntoRange)
+            if (DateTime.UtcNow < NextNavigateIntoRange || Settings.Instance.DebugDisableNavigateIntoRange)
                 return;
 
             NextNavigateIntoRange = DateTime.UtcNow.AddSeconds(5);

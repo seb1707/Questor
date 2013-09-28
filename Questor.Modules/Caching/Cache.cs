@@ -3026,6 +3026,11 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public bool GetBestTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
         {
+            if (Settings.Instance.DebugDisableGetBestTarget)
+            {
+                return true;
+            }
+
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
             if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
             {

@@ -879,6 +879,7 @@ namespace Questor.Modules.Combat
                     || Cache.Instance.InStation //How can we target if we are in a station?
                     || DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
                     || !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
+                    || Settings.Instance.DebugDisableTargetCombatants
                 )
             {
                 return;

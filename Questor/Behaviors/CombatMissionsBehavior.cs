@@ -173,6 +173,11 @@ namespace Questor.Behaviors
 
         public void ProcessState()
         {
+            if (Settings.Instance.DebugDisableCombatMissionsBehavior)
+            {
+                return;
+            }
+
             // Only pulse state changes every 1.5s
             //if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
             //    return;

@@ -100,6 +100,18 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
 
+                    if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < 100)
+                    {
+                        Cache.Instance.NeedRepair = true;
+                        //
+                        // do not return here, we are just setting a flag for use by arm to repair or not repair...
+                        //
+                    }
+                    else if (Cache.Instance.InSpace)
+                    {
+                        Cache.Instance.NeedRepair = false;
+                    }
+
                     if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
                     {
                         // Only check for cap-panic while in a mission, not while doing anything else

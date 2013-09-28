@@ -380,7 +380,7 @@
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100) || Settings.Instance.DebugDisableCleanup) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
             _lastCleanupProcessState = DateTime.UtcNow;

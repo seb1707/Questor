@@ -86,9 +86,11 @@ namespace Questor.Modules.Lookup
         public bool DebugCourierMissions { get; set; }
         public bool DebugDecline { get; set; }
         public bool DebugDefense { get; set; }
+        public bool DebugDisableCleanup { get; set; }
         public bool DebugDisableCombatMissionsBehavior { get; set; }
         public bool DebugDisableCombat { get; set; }
         public bool DebugDisableDrones { get; set; }
+        public bool DebugDisablePanic { get; set; }
         public bool DebugDisableSalvage { get; set; }
         public bool DebugDisableTargetCombatants { get; set; }
         public bool DebugDisableGetBestTarget { get; set; }
@@ -649,9 +651,11 @@ namespace Questor.Modules.Lookup
                 DebugCourierMissions = false;
                 DebugDecline = false;
                 DebugDefense = false;
+                DebugDisableCleanup = false;
                 DebugDisableCombatMissionsBehavior = false;
                 DebugDisableCombat = false;
                 DebugDisableDrones = false;
+                DebugDisablePanic = false;
                 DebugDisableSalvage = false;
                 DebugDisableGetBestTarget = false;
                 DebugDisableTargetCombatants = false;
@@ -1146,9 +1150,11 @@ namespace Questor.Modules.Lookup
                     DebugCourierMissions = (bool?)CharacterSettingsXml.Element("debugCourierMissions") ?? (bool?)CommonSettingsXml.Element("debugCourierMissions") ?? false;
                     DebugDecline = (bool?)CharacterSettingsXml.Element("debugDecline") ?? (bool?)CommonSettingsXml.Element("debugDecline") ?? false;
                     DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
+                    DebugDisableCleanup = (bool?)CharacterSettingsXml.Element("debugDisableCleanup") ?? (bool?)CommonSettingsXml.Element("debugDisableCleanup") ?? false;
                     DebugDisableCombatMissionsBehavior = (bool?)CharacterSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? (bool?)CommonSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? false;
                     DebugDisableCombat = (bool?)CharacterSettingsXml.Element("debugDisableCombat") ?? (bool?)CommonSettingsXml.Element("debugDisableCombat") ?? false;
                     DebugDisableDrones = (bool?)CharacterSettingsXml.Element("debugDisableDrones") ?? (bool?)CommonSettingsXml.Element("debugDisableDrones") ?? false;
+                    DebugDisablePanic = (bool?)CharacterSettingsXml.Element("debugDisablePanic") ?? (bool?)CommonSettingsXml.Element("debugDisablePanic") ?? false;
                     DebugDisableSalvage = (bool?)CharacterSettingsXml.Element("debugDisableSalvage") ?? (bool?)CommonSettingsXml.Element("debugDisableSalvage") ?? false;
                     DebugDisableGetBestTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false;
                     DebugDisableTargetCombatants = (bool?)CharacterSettingsXml.Element("debugDisableTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugDisableTargetCombatants") ?? false;

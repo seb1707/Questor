@@ -45,7 +45,7 @@ namespace Questor.Modules.BackgroundTasks
         public void ProcessState()
         {
             // Only pulse state changes every 500ms
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 500) //default: 500ms
+            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 500 || Settings.Instance.DebugDisablePanic) //default: 500ms
                 return;
             _lastPulse = DateTime.UtcNow;
 

@@ -8,6 +8,8 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
+using Questor.Modules.BackgroundTasks;
+
 namespace ValueDump
 {
     using System;
@@ -33,12 +35,78 @@ namespace ValueDump
             Logging.Log("ValueDump","Starting ValueDump",Logging.Orange);
             InitializeComponent();
             _market = new Market();
-            _directEve = new DirectEve();
-            Cache.Instance.DirectEve = _directEve;
-            _directEve.OnFrame += OnFrame;
+
+            #region Load DirectEVE
+            //
+            // Load DirectEVE
+            //
+
+            try
+            {
+                if (Cache.Instance.DirectEve == null)
+                {
+                    //
+                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // 
+                    //
+                    //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
+                    //while (Cache.Instance.DirectEve == null)
+                    //{
+                    //    System.Threading.Thread.Sleep(50); //this pauses forever...
+                    //}   
+                    Cache.Instance.DirectEve = new DirectEve();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Valuedump", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("Valuedump", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
+            }
+            #endregion Load DirectEVE
+
+            #region Verify DirectEVE Support Instances
+            //
+            // Verify DirectEVE Support Instances
+            //
+
+            try
+            {
+                if (Cache.Instance.DirectEve != null && Cache.Instance.DirectEve.HasSupportInstances())
+                {
+                    Logging.Log("Valuedump", "You have a valid directeve.lic file and have instances available", Logging.Orange);
+                }
+                else
+                {
+                    Logging.Log("Valuedump", "You have 0 Support Instances available [ Cache.Instance.DirectEve.HasSupportInstances() is false ]", Logging.Orange);
+                }
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Valuedump", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+            }
+
+            #endregion Verify DirectEVE Support Instances
+
+            try
+            {
+                Cache.Instance.DirectEve.OnFrame += ValuedumpOnFrame;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Valuedump", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
+            }
         }
 
-        private void OnFrame(object sender, EventArgs e)
+        private void ValuedumpOnFrame(object sender, EventArgs e)
         {
             Cache.Instance.LastFrame = DateTime.UtcNow;
 

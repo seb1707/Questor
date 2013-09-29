@@ -1502,6 +1502,8 @@ namespace Questor.Modules.Caching
                 result |= GroupId == (int)Group.LargeColidableObject;
                 result |= GroupId == (int)Group.LargeColidableShip;
                 result |= GroupId == (int)Group.LargeColidableStructure;
+                result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
                 return result;
             }
         }
@@ -1575,6 +1577,8 @@ namespace Questor.Modules.Caching
             {
                 bool result = false;
                 result |= IsSentry;
+                result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
                 result |= GroupId == (int)Group.Storyline_Battleship;
                 result |= GroupId == (int)Group.Storyline_Mission_Battleship;
                 result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;

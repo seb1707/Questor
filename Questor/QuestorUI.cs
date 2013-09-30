@@ -36,8 +36,8 @@ namespace Questor
             PopulateStateComboBoxes();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
             PopulateBehaviorStateComboBox();
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.White);
-            CreateLavishCommands();
+            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.White);
+            //CreateLavishCommands();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
             Show();
             if (Settings.Instance.DebugAttachVSDebugger)
@@ -433,24 +433,6 @@ namespace Questor
             }
         }
 
-        private void CreateLavishCommands()
-        {
-            //if (Settings.Instance.UseInnerspace)
-            //{
-            LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);
-            LavishScript.Commands.AddCommand("SetDisable3D", SetDisable3D);
-            LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
-            LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
-            LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
-            LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
-            LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
-            LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
-            LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
-            LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
-            LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
-            //}
-        }
-
         private int SetAutoStart(string[] args)
         {
             bool value;
@@ -608,48 +590,6 @@ namespace Questor
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
 
             Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase is now: GotoBase ", Logging.White);
-            return 0;
-        }
-
-        private int ListQuestorCommands(string[] args)
-        {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor commands you can run from innerspace", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "SetAutoStart                                 - SetAutoStart true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetDisable3D                                 - SetDisable3D true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetExitWhenIdle                              - SetExitWhenIdle true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor                - SetQuestorStatetoCloseQuestor true", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoIdle                        - SetQuestorStatetoIdle true", Logging.White);
-            Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase     - SetCombatMissionsBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase     - SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCommands                              - (this command) ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            return 0;
-        }
-
-        private int ListQuestorEvents(string[] args)
-        {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor Events you can listen for from an innerspace script", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorState                                  - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
             return 0;
         }
 

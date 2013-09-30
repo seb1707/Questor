@@ -1046,13 +1046,13 @@ namespace Questor.Modules.Activities
                     //
                     // then proceed to kill the target
                     //
-
+                    
                     Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
 
                     EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
-                    if (currentKillTarget != null)
+                    if (currentKillTarget != null) //if it isnt null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
-                        if ((Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe) && currentKillTarget.IsOnGridWithMe)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
@@ -1060,11 +1060,11 @@ namespace Questor.Modules.Activities
                         }
 
                         //we may need to get closer so combat will take over
-                        if (currentKillTarget.Distance > Cache.Instance.MaxRange)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange)
                         {
-                            if (!Cache.Instance.IsApproachingOrOrbiting(currentKillTarget.Id))
+                            if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                             {
-                                NavigateOnGrid.NavigateIntoRange(currentKillTarget, "combatMissionControl", true);
+                                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
                             }
                         }
                     }

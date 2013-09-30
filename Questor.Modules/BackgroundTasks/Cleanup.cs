@@ -718,7 +718,7 @@
                     break;
 
                 case CleanupState.CleanupTasks:
-                    if (Settings.Instance.EVEMemoryManager)
+                    if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
                         {

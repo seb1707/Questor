@@ -143,9 +143,9 @@ namespace Questor.Modules.Caching
             {
                 if (GroupID == 313) return true; // Drugs
                 if (GroupID == 282) return true; // Toxic Waste
-                if (GroupID == 283) return true; // Slaves
-                if (GroupID == 280) return true; // Small Arms
-                if (GroupID == 284) return true; // Ectoplasm
+                if (TypeId == 3721) return true; // Slaves
+                if (TypeId == 9844) return true; // Small Arms
+                if (TypeId == 3771) return true; // Ectoplasm
                 return false;
             }
         }

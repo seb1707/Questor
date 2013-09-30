@@ -59,7 +59,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "weaponNumber"></param>
         /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        public static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        private static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             if (Settings.Instance.WeaponGroupId == 53) return true;
             if (entity == null) return false;
@@ -220,7 +220,7 @@ namespace Questor.Modules.Combat
             return true;
         }
 
-        public static bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        private static bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
 
@@ -323,7 +323,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "weaponNumber"></param>
         /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        public static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        private static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             // We need the cargo bay open for both reload actions
             if (!Cache.Instance.OpenCargoHold("Combat: ReloadAmmo")) return false;
@@ -380,7 +380,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "isWeapon"></param>
         /// <returns></returns>
-        public bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
+        private bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
         {
             if (isWeapon && !entity.IsTarget)
             {
@@ -612,7 +612,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate target painters
         /// </summary>
-        public void ActivateTargetPainters(EntityCache target)
+        private void ActivateTargetPainters(EntityCache target)
         {
             //if (DateTime.UtcNow < Cache.Instance.NextPainterAction) //if we just did something wait a fraction of a second
             //    return;
@@ -657,7 +657,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate Nos
         /// </summary>
-        public void ActivateNos(EntityCache target)
+        private void ActivateNos(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextNosAction) //if we just did something wait a fraction of a second
                 return;
@@ -707,7 +707,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate StasisWeb
         /// </summary>
-        public void ActivateStasisWeb(EntityCache target)
+        private void ActivateStasisWeb(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextWebAction) //if we just did something wait a fraction of a second
                 return;
@@ -751,7 +751,7 @@ namespace Questor.Modules.Combat
             }
         }
 
-        public bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
+        private bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisHighValueTarget = null;
             long preferredId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
@@ -818,7 +818,7 @@ namespace Questor.Modules.Combat
             
         }
 
-        public bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
+        private bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisLowValueTarget = null;
             if (!OutOfRangeOnly)
@@ -974,13 +974,13 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (!t.IsNPCFrigate && !t.IsFrigate));
+                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsNPCFrigate || t.IsFrigate));
+                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 

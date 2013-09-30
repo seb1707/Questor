@@ -971,16 +971,11 @@ namespace Questor.Modules.Actions
                     //
                     #region load ammo
 
-                    //Civilian Gatling Pulse Laser	3634
-                    //Civilian Gatling Autocannon	3636
-                    //Civilian Gatling Railgun	3638
-                    //Civilian Light Electron Blaster	3640
-
                     if (Cache.Instance.Modules.Count(i => i.IsTurret && i.MaxCharges == 0) > 0) //civilian guns of all types
                     {
                         Logging.Log("Arm.MoveItems","No ammo needed for civilian guns: done",Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;
-                        return;    
+                        return;
                     }
 
                     // We must create our own Cache, somehow after changing the fitting the cached data is wrong
@@ -1053,32 +1048,43 @@ namespace Questor.Modules.Actions
 
                     try
                     {
-                        IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
+                        IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
                         IEnumerable<DirectItem> AmmoItems = AmmoHangarItems;
 
                         if (Settings.Instance.DebugArm) Logging.Log("Arm", "Ammohangar has [" + AmmoHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use AmmoHangar", Logging.Debug);
                         if (!AmmoHangarItems.Any())
                         {
+                            ItemHangarRetries++;
+                            if (ItemHangarRetries < 10)
+                            {
+                                //just retry... after 10 tries try to use the itemhangar instead of ammohangar
+                                return;
+                            }
+
+                            foreach (Ammo ammo in AmmoToLoad)
+                            {
+                                Logging.Log("Arm", "Ammohangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "] trying item hangar next", Logging.Orange);
+                            }
+                            
                             try
                             {
-                                IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
+                                IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
                                 AmmoItems = ItemHangarItems;
                                 if (Settings.Instance.DebugArm) Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);
                                 if (!ItemHangarItems.Any())
                                 {
-                                    Logging.Log("Arm.MoveItems", "if (!ItemHangarItems.Any())", Logging.Debug);
+                                    ItemHangarRetries++;
+                                    if (ItemHangarRetries < 10)
+                                    {
+                                        //just retry... after 10 tries fail and let the user know we are out of ammo
+                                        return;    
+                                    }
+                                    
                                     foreach (Ammo ammo in AmmoToLoad)
                                     {
-                                        Logging.Log("Arm", "Itemhangar was empty! Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                                        Logging.Log("Arm", "Itemhangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
                                     }
-
-                                    if (ItemHangarRetries > 5)
-                                    {
-                                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                                        return;
-                                    }
-                                    ItemHangarRetries++;
-
+                                    _States.CurrentArmState = ArmState.NotEnoughAmmo;
                                     return;
                                 }
                             }

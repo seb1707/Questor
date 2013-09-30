@@ -931,8 +931,6 @@ namespace Questor.Modules.Activities
 
         private void KillAction(Actions.Action action)
         {
-            // TODO notTheClosest
-
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
 
             bool ignoreAttackers;
@@ -969,7 +967,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
+            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
 
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
@@ -983,16 +981,13 @@ namespace Questor.Modules.Activities
 
             if (ignoreAttackers)
             {
-                foreach (EntityCache target in Cache.Instance.potentialCombatTargets)
+                foreach (EntityCache target in Cache.Instance.potentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
                 {
-                    if (!targetNames.Contains(target.Name))
+                    if (target.IsTargetedBy && target.IsAttacking)
                     {
-                        if (target.IsTargetedBy && target.IsAttacking)
-                        {
-                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
-                            Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
-                        }    
-                    }
+                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
+                        Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
+                    }    
                 }
             }
 
@@ -1012,16 +1007,13 @@ namespace Questor.Modules.Activities
                         }    
                     }
                         
-                }    
+                }
                 
                 foreach (EntityCache KillTargetEntity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
                 {
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + KillTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(KillTargetEntity.Id) + "][" + Math.Round(KillTargetEntity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
                     KillTargetEntity.UnlockTarget("CombatMissionCtrl");
                 }
-
-                
-                //Cache.Instance.__GetBestTarget((int)Distances.OnGridWithMe, false, "combat");
             }
             else //Do not break aggression on attackers (attack normally)
             {
@@ -1032,7 +1024,6 @@ namespace Questor.Modules.Activities
                 try
                 {
                     primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange
-                                                                                && !p.IsIgnored
                                                                                 && p.IsReadyToShoot
                                                                                 && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                                .OrderByDescending(pt => pt.IsTargetedBy)

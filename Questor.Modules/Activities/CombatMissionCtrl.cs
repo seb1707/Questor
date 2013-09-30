@@ -451,8 +451,6 @@ namespace Questor.Modules.Activities
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
             //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
-            /*if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
-                _clearPocketTimeout = null;*/
             if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)))
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here

@@ -177,7 +177,6 @@ namespace Questor.Behaviors
             {
                 return;
             }
-
             // Only pulse state changes every 1.5s
             //if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
             //    return;
@@ -409,6 +408,17 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Start:
+                    if (Cache.Instance.InSpace)
+                    {
+                        if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "if (Cache.Instance.InSpace)", Logging.White);
+
+                        // Questor does not handle in space starts very well, head back to base to try again
+                        Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
+                        LastAction = DateTime.UtcNow;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
+                        break;
+                    }
+
                     if (_firstStart && Settings.Instance.MultiAgentSupport)
                     {
                         //if you are in wrong station and is not first agent

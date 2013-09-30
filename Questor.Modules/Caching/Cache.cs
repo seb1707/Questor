@@ -2869,6 +2869,7 @@ namespace Questor.Modules.Caching
                         if (!FindAUnTargetedEntity)
                         {
                             //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
+                            Logging.Log("FindPrimaryWeaponPriorityTarget", "if (!FindAUnTargetedEntity) Cache.Instance.PreferredPrimaryWeaponTarget = [ " + target.Name + "]", Logging.White);
                             Cache.Instance.PreferredPrimaryWeaponTarget = target;
                             Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                             return target;
@@ -3075,6 +3076,7 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null
                 && !Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid))
             {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
             }
 

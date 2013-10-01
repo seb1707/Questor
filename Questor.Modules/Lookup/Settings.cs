@@ -122,6 +122,7 @@ namespace Questor.Modules.Lookup
         public bool DebugOnframe { get; set; }
         public bool DebugOverLoadWeapons { get; set; }
         public bool DebugPerformance { get; set; }
+        public bool DebugPotentialCombatTargets { get; set; }
         public bool DebugQuestorManager { get; set; }
         public bool DebugReloadAll { get; set; }
         public bool DebugReloadorChangeAmmo { get; set; }
@@ -688,6 +689,7 @@ namespace Questor.Modules.Lookup
                 DebugOnframe = false;
                 DebugOverLoadWeapons = false;
                 DebugPerformance = false;
+                DebugPotentialCombatTargets = false;
                 DebugQuestorManager = false;
                 DebugReloadAll = false;
                 DebugReloadorChangeAmmo = false;
@@ -1188,6 +1190,7 @@ namespace Questor.Modules.Lookup
                     DebugOnframe = (bool?)CharacterSettingsXml.Element("debugOnframe") ?? (bool?)CommonSettingsXml.Element("debugOnframe") ?? false;
                     DebugOverLoadWeapons = (bool?)CharacterSettingsXml.Element("debugOverLoadWeapons") ?? (bool?)CommonSettingsXml.Element("debugOverLoadWeapons") ?? false;
                     DebugPerformance = (bool?)CharacterSettingsXml.Element("debugPerformance") ?? (bool?)CommonSettingsXml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
+                    DebugPotentialCombatTargets = (bool?)CharacterSettingsXml.Element("debugPotentialCombatTargets") ?? (bool?)CommonSettingsXml.Element("debugPotentialCombatTargets") ?? false;
                     DebugQuestorManager = (bool?)CharacterSettingsXml.Element("debugQuestorManager") ?? (bool?)CommonSettingsXml.Element("debugQuestorManager") ?? false;
                     DebugReloadAll = (bool?)CharacterSettingsXml.Element("debugReloadAll") ?? (bool?)CommonSettingsXml.Element("debugReloadAll") ?? false;
                     DebugReloadorChangeAmmo = (bool?)CharacterSettingsXml.Element("debugReloadOrChangeAmmo") ?? (bool?)CommonSettingsXml.Element("debugReloadOrChangeAmmo") ?? false;

@@ -1233,7 +1233,7 @@ namespace Questor.Modules.Caching
                                                         )
                                                         .ToList();
 
-                    if (Settings.Instance.DebugTargetCombatants)
+                    if (Settings.Instance.DebugPotentialCombatTargets)
                     {
                         if (!_potentialCombatTargets.Any())
                         
@@ -1272,7 +1272,7 @@ namespace Questor.Modules.Caching
                                 Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities above", Logging.Debug);
                             }
 
-                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
+                            if (Settings.Instance.DebugPotentialCombatTargets) Logging.Log("Cache.potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
                         }
                     }
 

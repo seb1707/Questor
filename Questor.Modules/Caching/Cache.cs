@@ -1228,7 +1228,7 @@ namespace Questor.Modules.Caching
                                                         && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                         && !e.IsMiscJunk
-                                                        && !e.IsLargeCollidable
+                                                        && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
                                                         && !e.IsIgnored
                                                         )
                                                         .ToList();

@@ -111,6 +111,7 @@ namespace Questor.Modules.Lookup
         public bool DebugInWarp { get; set; }
         public bool DebugItemHangar { get; set; }
         public bool DebugKillTargets { get; set; }
+        public bool DebugKillAction { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
@@ -678,6 +679,7 @@ namespace Questor.Modules.Lookup
                 DebugInWarp = false;
                 DebugItemHangar = false;
                 DebugKillTargets = false;
+                DebugKillAction = false;
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
@@ -1179,6 +1181,7 @@ namespace Questor.Modules.Lookup
                     DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
                     DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
                     DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
+                    DebugKillAction = (bool?)CharacterSettingsXml.Element("debugKillAction") ?? (bool?)CommonSettingsXml.Element("debugKillAction") ?? false;
                     DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
                     DebugLogging = (bool?)CharacterSettingsXml.Element("debugLogging") ?? (bool?)CommonSettingsXml.Element("debugLogging") ?? false;
                     DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;

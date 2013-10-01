@@ -1024,6 +1024,7 @@ namespace Questor.Modules.Activities
                 {
                     primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange
                                                                                 && p.IsReadyToShoot
+                                                                                && p.IsOnGridWithMe
                                                                                 && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                                .OrderByDescending(pt => pt.IsTargetedBy)
                                                                                .ThenByDescending(pt => pt.IsInOptimalRange)
@@ -1036,6 +1037,19 @@ namespace Questor.Modules.Activities
 
                 if (primaryWeaponPriorityTarget != null)
                 {
+                    if (Settings.Instance.DebugKillAction)
+                    {
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                        {
+                            int icount = 0;
+                            foreach (EntityCache primaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityTargets.Where(i => i.IsOnGridWithMe))
+                            {
+                                icount++;
+                                if (Settings.Instance.DebugKillAction) Logging.Log("Combat", "[" + icount + "] PrimaryWeaponPriorityTarget Named [" + primaryWeaponPriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                continue;
+                            }
+                        }
+                    }
                     //
                     // getbesttarget below will choose to assign prioritytargets over preferred targets, so we might as well wait... (and not approach the wrong target)
                     //
@@ -1045,15 +1059,15 @@ namespace Questor.Modules.Activities
                     //
                     // then proceed to kill the target
                     //
-                    
                     Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
 
                     EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                     if (currentKillTarget != null) //if it isnt null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
+                        Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], " proceeding to kill the target", Logging.White);
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
-                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }

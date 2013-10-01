@@ -911,7 +911,7 @@ namespace Questor.Modules.Combat
                                                                  && !e.IsFactionWarfareNPC
                                                                  && !e.IsEntityIShouldLeaveAlone
                                                                  && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && !e.IsLargeCollidable
+                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
                                                                  && !e.IsIgnored))
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
@@ -923,7 +923,7 @@ namespace Questor.Modules.Combat
                                                                  && !e.IsFactionWarfareNPC
                                                                  && !e.IsEntityIShouldLeaveAlone
                                                                  && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && !e.IsLargeCollidable
+                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
                                                                  && !e.IsIgnored))
                     {
                         i++;

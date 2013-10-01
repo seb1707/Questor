@@ -1469,8 +1469,10 @@ namespace Questor.Modules.Combat
 
                         if (killTarget != null)
                         {
-                            //ok we actually need this for now also unfortunately
-                            NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);
+                            if (!Cache.Instance.InMission)
+                            {
+                                NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);    
+                            }
 
                             if (killTarget.IsReadyToShoot)
                             {

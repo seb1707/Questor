@@ -66,6 +66,11 @@ popd
 
 :CopyQuestor
 @Echo.
+@Echo Starting to copy EasyHook files from [.\DirectEVE\easyhook*.*] to [.\output\]
+@Echo on
+copy /y ".\DirectEVE\easyhook*.*" ".\output\"
+
+@Echo.
 @Echo Starting to copy debug files from [.\output\*.pdb] to [%innerspacedotnetdirectory%]
 @Echo on
 copy /y ".\output\*.pdb" "%innerspacedotnetdirectory%"

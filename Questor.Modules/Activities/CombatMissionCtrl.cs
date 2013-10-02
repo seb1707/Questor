@@ -1064,13 +1064,30 @@ namespace Questor.Modules.Activities
                     EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                     if (currentKillTarget != null) //if it is not null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
-                        if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], " proceeding to kill the target", Logging.White);
+                        if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], " proceeding to kill the target (this is spammy, but useful debug info)", Logging.White);
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }
+                        else if (Settings.Instance.DebugKillAction)
+                        {
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction],"Cache.Instance.PreferredPrimaryWeaponTarget =[ " + Cache.Instance.PreferredPrimaryWeaponTarget.Name + " ][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]",Logging.Debug);
+
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                            {
+                                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "PrimaryWeaponPriorityTargets Below (if any)", Logging.Debug);
+                                int icount = 0;
+                                foreach (EntityCache PT in Cache.Instance.PrimaryWeaponPriorityTargets)
+                                {
+                                    icount++;
+                                    Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "PriorityTarget [" + icount + "] [ " + PT.Name + " ][" + Cache.Instance.MaskedID(PT.Id) + "] IsOnGridWithMe [" + PT.IsOnGridWithMe + "]", Logging.Debug);
+                                }
+                                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "PrimaryWeaponPriorityTargets Above (if any)", Logging.Debug);    
+                            }
+                        }
+
 
                         //we may need to get closer so combat will take over
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange)

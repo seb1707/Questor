@@ -603,8 +603,8 @@ namespace Questor.Modules.Combat
                     Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
 
                     //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
-                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                    //Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                    //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     continue;
                 }
             }
@@ -1119,34 +1119,44 @@ namespace Questor.Modules.Combat
                     Cache.Instance.PreferredPrimaryWeaponTarget = null;
                 }
 
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                    && Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)
-                    && Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget
-                    && Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
-                    //
-                    // unlock a lower priority entity if needed
-                    //
-                    if (__highValueTargetsTargeted.Count() >= maxHighValueTargets)
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget != null)", Logging.Debug);
+                    if (Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                     {
-                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
-                        if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")
-                            || !UnlockHighValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget"))
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))", Logging.Debug);
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                         {
-                            return;
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)", Logging.Debug);
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
+                            {
+                                if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)", Logging.Debug);
+                                //
+                                // unlock a lower priority entity if needed
+                                //
+                                if (__highValueTargetsTargeted.Count() >= maxHighValueTargets)
+                                {
+                                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + targets.Count() + "]", Logging.Debug);
+                                    if (!UnlockLowValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget")
+                                        || !UnlockHighValueTarget("Combat.TargetCombatants", "PreferredPrimaryWeaponTarget"))
+                                    {
+                                        return;
+                                    }
+
+                                    return;
+                                }
+
+                                if (Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
+                                {
+                                    Logging.Log("Combat", "Targeting preferred primary weapon target [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                    //highValueTargets.Add(primaryWeaponPriorityEntity);
+                                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                    return;
+                                }
+                            }
                         }
-
-                        return;
                     }
-
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget.LockTarget("TargetCombatants.PreferredPrimaryWeaponTarget"))
-                    {
-                        Logging.Log("Combat", "Targeting preferred primary weapon target [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k away]", Logging.Teal);
-                        //highValueTargets.Add(primaryWeaponPriorityEntity);
-                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                        return;
-                    }
-                }    
+                }
             }
 
             #endregion

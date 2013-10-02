@@ -33,7 +33,7 @@ namespace Questor.Modules.Actions
             //if (!Cache.Instance.InSpace)
             //    return;
 
-            var windows = new List<DirectWindow>();
+            List<DirectWindow> windows = new List<DirectWindow>();
 
             foreach (DirectWindow window in windows)
             {

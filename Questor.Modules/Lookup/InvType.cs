@@ -120,7 +120,7 @@ namespace Questor.Modules.Lookup
             foreach (string m in Minerals)
                 if (Reprocess[m].HasValue && Reprocess[m] > 0)
                 {
-                    var d = Reprocess[m];
+                    double? d = Reprocess[m];
                     if (d != null) element.SetAttributeValue(m, d.Value);
                 }
 

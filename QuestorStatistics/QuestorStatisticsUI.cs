@@ -34,7 +34,7 @@ namespace QuestorStatistics
             System.IO.DirectoryInfo o = new System.IO.DirectoryInfo(Localpath);
             //System.IO.FileInfo[] myfiles = null;
 
-            var logfilepattern = "*.CustomDatedStatistics.csv";
+            string logfilepattern = "*.CustomDatedStatistics.csv";
             IEnumerable<string> fileIter = Directory.EnumerateFiles(Localpath, logfilepattern, System.IO.SearchOption.AllDirectories);
 
             foreach (string file in fileIter)

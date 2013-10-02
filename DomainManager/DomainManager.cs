@@ -104,7 +104,7 @@ namespace Onyx.DomainManager
             try
             {
                 string appBase = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                var ads = new AppDomainSetup { ApplicationBase = appBase, PrivateBinPath = appBase };
+                AppDomainSetup ads = new AppDomainSetup { ApplicationBase = appBase, PrivateBinPath = appBase };
                 DomainManager.CurrentDomain = AppDomain.CreateDomain("OnyxDomain_Internal_" + _rand.Next(0, 100000),
                                                                      null, ads);
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;

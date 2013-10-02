@@ -320,7 +320,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject", "We are not approaching nor orbiting", Logging.Teal);
                             bool orbitStructure = Settings.Instance.OrbitStructure;
-                            var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeColidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
+                            EntityCache structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeColidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
 
                             if (orbitStructure && structure != null)
                             {

@@ -379,7 +379,7 @@
                 return;
             }
 
-            var baseDestination = Traveler.Destination as StationDestination;
+            StationDestination baseDestination = Traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
             {
                 Traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));

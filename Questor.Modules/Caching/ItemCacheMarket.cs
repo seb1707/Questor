@@ -36,7 +36,7 @@ namespace Questor.Modules.Caching
             RefineOutput = new List<ItemCacheMarket>();
             if (cacheRefineOutput)
             {
-                foreach (var i in item.Materials)
+                foreach (DirectItem i in item.Materials)
                     RefineOutput.Add(new ItemCacheMarket(i, false));
             }
         }

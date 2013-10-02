@@ -119,7 +119,7 @@ namespace Questor.Storylines
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
@@ -136,7 +136,7 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve.DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: MoveItem")) return false;
@@ -155,7 +155,7 @@ namespace Questor.Storylines
                 return false;
 
             // Move items
-            foreach (var item in from.Items.Where(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
+            foreach (DirectItem item in from.Items.Where(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
             {
                 Logging.Log("GenericCourier", "Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"), Logging.White);
                 to.Add(item, item.Stacksize);

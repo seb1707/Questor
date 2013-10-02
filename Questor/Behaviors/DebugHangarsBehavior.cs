@@ -148,7 +148,7 @@ namespace Questor.Behaviors
         {
             try
             {
-                var baseDestination = Traveler.Destination as StationDestination;
+                StationDestination baseDestination = Traveler.Destination as StationDestination;
                 if (baseDestination == null || baseDestination.StationId != Cache.Instance.Agent.StationId)
                     Traveler.Destination = new StationDestination(Cache.Instance.Agent.SolarSystemId,
                                                                    Cache.Instance.Agent.StationId,
@@ -511,7 +511,7 @@ namespace Questor.Behaviors
 
                 case DebugHangarsBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)

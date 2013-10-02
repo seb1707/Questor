@@ -1093,7 +1093,7 @@ namespace Questor.Modules.Lookup
             {
                 Settings.Instance.CharacterXMLExists = true;
                 XElement CharacterSettingsXml;
-                using (var reader = new XmlTextReader(Settings.Instance.CharacterSettingsPath))
+                using (XmlTextReader reader = new XmlTextReader(Settings.Instance.CharacterSettingsPath))
                 {
                     reader.EntityHandling = EntityHandling.ExpandEntities;
                     CharacterSettingsXml = XDocument.Load(reader).Root;
@@ -1279,7 +1279,7 @@ namespace Questor.Modules.Lookup
                     MinAgentGreyListStandings = (float?)CharacterSettingsXml.Element("minAgentGreyListStandings") ?? (float?)CommonSettingsXml.Element("minAgentGreyListStandings") ?? (float)5.0;
                     WaitDecline = (bool?)CharacterSettingsXml.Element("waitDecline") ?? (bool?)CommonSettingsXml.Element("waitDecline") ?? false;
 
-                    var relativeMissionsPath = (string)CharacterSettingsXml.Element("missionsPath") ?? (string)CommonSettingsXml.Element("missionsPath");
+                    string relativeMissionsPath = (string)CharacterSettingsXml.Element("missionsPath") ?? (string)CommonSettingsXml.Element("missionsPath");
                     MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                     Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.White);
 
@@ -1985,7 +1985,7 @@ namespace Questor.Modules.Lookup
 
         public int RandomNumber(int min, int max)
         {
-            var random = new Random();
+            Random random = new Random();
             return random.Next(min, max);
         }
     }

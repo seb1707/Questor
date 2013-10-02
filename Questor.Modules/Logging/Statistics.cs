@@ -304,7 +304,7 @@ namespace Questor.Modules.Logging
                     }
 
                     // Build the line
-                    var line = DateTimeForLogs + ";";                           //Date
+                    string line = DateTimeForLogs + ";";                           //Date
                     line += "0" + ";";                                          //RunningTime
                     line += Cache.Instance.SessionState + ";";                  //SessionState
                     line += "" + ";";                                           //LastMission
@@ -366,7 +366,7 @@ namespace Questor.Modules.Logging
                 }
 
                 // Build the line
-                var line = DateTimeForLogs + ";";                               // Date
+                string line = DateTimeForLogs + ";";                               // Date
                 line += Cache.Instance.SessionRunningTime + ";";                // RunningTime
                 line += Cache.Instance.SessionState + ";";                      // SessionState
                 line += Cache.Instance.MissionName + ";";                       // LastMission
@@ -596,7 +596,7 @@ namespace Questor.Modules.Logging
             Logging.Log("Statistics", "MissionXMLIsAvailable: [" + Cache.Instance.MissionXMLIsAvailable + "]", Logging.White);
             Logging.Log("Statistics", "MissionCompletionerrors: [" + Statistics.Instance.MissionCompletionErrors + "]", Logging.White);
             Logging.Log("Statistics", "the stats below may not yet be correct and need some TLC", Logging.White);
-            var weaponNumber = 0;
+            int weaponNumber = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weaponNumber++;

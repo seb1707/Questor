@@ -73,7 +73,7 @@ namespace Questor
         private static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
-            var p = new OptionSet {
+            OptionSet p = new OptionSet {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
@@ -450,7 +450,7 @@ namespace Questor
             // We should not get any windows
             if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (var window in Cache.Instance.DirectEve.Windows)
+                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -727,7 +727,7 @@ namespace Questor
 
         public static int RandomNumber(int min, int max)
         {
-            var random = new Random();
+            Random random = new Random();
             return random.Next(min, max);
         }
     }

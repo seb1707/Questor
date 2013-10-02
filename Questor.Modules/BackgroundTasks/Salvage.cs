@@ -275,7 +275,7 @@ namespace Questor.Modules.BackgroundTasks
 
             List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
 
-            var targets = new List<EntityCache>();
+            List<EntityCache> targets = new List<EntityCache>();
             targets.AddRange(Cache.Instance.Targets);
             targets.AddRange(Cache.Instance.Targeting);
 
@@ -530,7 +530,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Settings.Instance.DebugLootWrecks && items.Any()) Logging.Log("Salvage.LootWrecks", "Found [" + items.Count() + "] items in [" + Cache.Instance.ContainerInSpace.Window.ItemId + "]", Logging.Teal);
 
                     // Build a list of items to loot
-                    var lootItems = new List<ItemCache>();
+                    List<ItemCache> lootItems = new List<ItemCache>();
 
                     // log wreck contents to file
                     if (!Statistics.WreckStatistics(items, containerEntity)) break;
@@ -662,7 +662,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
 
                             // Start clearing out items that are worth less
-                            var moveTheseItems = new List<DirectItem>();
+                            List<DirectItem> moveTheseItems = new List<DirectItem>();
                             foreach (ItemCache wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
                             {
                                 // Mark this item as moved

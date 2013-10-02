@@ -291,8 +291,8 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        var belts = Cache.Instance.Entities.Where(i => i.GroupId == 9 && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
-                        var belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
+                        IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == 9 && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
+                        EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
                         _currentBelt = belt;
 
                         //Traveler.Destination = new MissionBookmarkDestination(belt);
@@ -324,7 +324,7 @@ namespace Questor.Behaviors
 
                 case MiningState.Mine:
 
-                    var asteroid =
+                    EntityCache asteroid =
                         Cache.Instance.Entities.Where(i =>
                             i.Distance < 65000
                             && (

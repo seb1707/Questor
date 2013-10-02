@@ -66,7 +66,7 @@ namespace Questor.Storylines
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 

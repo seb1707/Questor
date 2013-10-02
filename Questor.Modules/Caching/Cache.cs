@@ -2031,6 +2031,13 @@ namespace Questor.Modules.Caching
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
+                {
+                    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                }
+
+                
             }
             catch (Exception exception)
             {
@@ -3074,7 +3081,7 @@ namespace Questor.Modules.Caching
             //This happens when we have killed the last thing within our range (or the last thing in the pocket)
             //and there is nothing to replace it with.
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                && !Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id && t.IsValid))
+                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;

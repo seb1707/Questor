@@ -1035,7 +1035,7 @@ namespace Questor.Modules.Activities
                 }
                 catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
-                if (primaryWeaponPriorityTarget != null)
+                if (primaryWeaponPriorityTarget != null && primaryWeaponPriorityTarget.IsOnGridWithMe)
                 {
                     if (Settings.Instance.DebugKillAction)
                     {
@@ -1062,13 +1062,13 @@ namespace Questor.Modules.Activities
                     Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
 
                     EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
-                    if (currentKillTarget != null) //if it isnt null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
+                    if (currentKillTarget != null) //if it is not null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
                         Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], " proceeding to kill the target", Logging.White);
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
                             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
-                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }
 

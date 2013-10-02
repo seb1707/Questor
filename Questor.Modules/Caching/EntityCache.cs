@@ -40,18 +40,18 @@ namespace Questor.Modules.Caching
                 //
                 // thre are some attributes that will never change and can be cached across frames - some of those are not cleared here
                 //
-                //_GroupID = null;
-                //_CategoryId = null;
+                _GroupID = null;
+                _CategoryId = null;
                 _Id = null;
-                //_TypeId = null;
+                _TypeId = null;
                 _FollowId = null;
-                //_Name = null;
+                _Name = null;
                 _Distance = null;
                 _Nearest5kDistance = null;
                 _ShieldPct = null;
                 _ArmorPct = null;
                 _StructurePct = null;
-                //_IsNpc = null;
+                _IsNpc = null;
                 _Velocity = null;
                 _IsTarget = null;
                 _IsPrimaryWeaponKillPriority = null;
@@ -82,32 +82,32 @@ namespace Questor.Modules.Caching
                 _IsTargetPaintingMe = null;
                 _IsTrackingDisruptingMe = null;
                 _Health = null;
-                //_IsSentry = null;
+                _IsSentry = null;
                 _IsIgnored = null;
-                //_HaveLootRights = null;
-                //_TargetValue = null;
-                //_IsHighValueTarget = null;
-                //_IsLowValueTarget = null;
+                _HaveLootRights = null;
+                _TargetValue = null;
+                _IsHighValueTarget = null;
+                _IsLowValueTarget = null;
                 _IsValid = null;
-                //_IsContainer = null;
-                //_IsPlayer = null;
+                _IsContainer = null;
+                _IsPlayer = null;
                 _IsTargetingMeAndNotYetTargeted = null;
                 _IsNotYetTargetingMeAndNotYetTargeted = null;
                 _IsTargetWeCanShootButHaveNotYetTargeted = null;
-                //_IsFrigate = null;
-                //_IsNPCFrigate = null;
-                //_IsCruiser = null;
-                //_IsNPCCruiser = null;
-                //_IsBattlecruiser = null;
-                //_IsNPCBattlecruiser = null;
-                //_IsBattleship = null;
-                //_IsNPCBattleship = null;
-                //_IsLargeCollidable = null;
-                //_IsMiscJunk = null;
-                //_IsBadIdea = null;
-                //_IsFactionWarfareNPC = null;
-                //_IsNpcByGroupID = null;
-                //_IsEntityIShouldLeaveAlone = null;
+                _IsFrigate = null;
+                _IsNPCFrigate = null;
+                _IsCruiser = null;
+                _IsNPCCruiser = null;
+                _IsBattlecruiser = null;
+                _IsNPCBattlecruiser = null;
+                _IsBattleship = null;
+                _IsNPCBattleship = null;
+                _IsLargeCollidable = null;
+                _IsMiscJunk = null;
+                _IsBadIdea = null;
+                _IsFactionWarfareNPC = null;
+                _IsNpcByGroupID = null;
+                _IsEntityIShouldLeaveAlone = null;
                 _IsOnGridWithMe = null;
             }
             catch (Exception exception)

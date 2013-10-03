@@ -590,17 +590,6 @@ namespace Questor.Modules.BackgroundTasks
                             }
                         }
 
-                        // Do not pick up items that cannot enter in a freighter container (unless its the mission item)
-                        // Note: some mission items that are alive have been allowed to be
-                        //       scooped because UnloadLootState.MoveCommonMissionCompletionitems
-                        //       will move them into the hangar floor not the loot location
-                        if (!isMissionItem && item.IsAliveandWontFitInContainers)
-                        {
-                            if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and is Alive and Wont fit in Containers: ignore it", Logging.Teal);
-                            Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                            continue;
-                        }
-
                         // We are at our max, either make room or skip the item
 
                         if ((freeCargoCapacity - item.TotalVolume) <= (isMissionItem ? 0 : ReserveCargoCapacity))

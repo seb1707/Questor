@@ -2072,12 +2072,13 @@ namespace Questor.Modules.Caching
         public void MakeActiveTarget()
         {
             if (_directEntity != null)
-            {
+            {                
                 if (_directEntity.IsTarget)
                 {
-                    _directEntity.MakeActiveTarget();    
+                    _directEntity.MakeActiveTarget();
+                    Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
                 }
-
+                
                 return;
             }
 

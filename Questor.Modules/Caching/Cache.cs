@@ -710,6 +710,7 @@ namespace Questor.Modules.Caching
         public DateTime NextDroneBayAction { get; set; }
         public DateTime NextOpenHangarAction { get; set; }
         public DateTime NextOpenCargoAction { get; set; }
+        public DateTime NextMakeActiveTargetAction { get; set; }
         public DateTime NextArmAction { get; set; }
         public DateTime NextSalvageAction { get; set; }
         public DateTime NextTractorBeamAction { get; set; }

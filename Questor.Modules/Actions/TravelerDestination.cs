@@ -47,7 +47,7 @@ namespace Questor.Modules.Actions
             {
                 if (_nextSolarSystemAction < DateTime.UtcNow)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Logging.Log("TravelerDestination.SolarSystemDestination", "Exiting station", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
@@ -127,7 +127,7 @@ namespace Questor.Modules.Actions
                         Cache.Instance.SessionState = "Quitting"; //this will perform a graceful restart
                     }
 
-                    if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, undocking from [" + Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0) + "]", Logging.Green);
 
@@ -284,7 +284,7 @@ namespace Questor.Modules.Actions
                 if (bookmark.ItemId.HasValue && bookmark.ItemId == Cache.Instance.DirectEve.Session.StationId)
                     return true;
 
-                if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                 {
                     // We are apparently in a station that is incorrect
                     Logging.Log("TravelerDestination.BookmarkDestination", "This is not the destination station, undocking", Logging.Green);
@@ -329,7 +329,7 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (nextAction < DateTime.UtcNow)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Logging.Log("TravelerDestination.BookmarkDestination", "We're docked but our destination is in space, undocking", Logging.Green);
 

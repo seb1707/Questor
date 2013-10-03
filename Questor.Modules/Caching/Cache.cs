@@ -6404,7 +6404,7 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        public List<DirectBookmark> SafeSpotBookmarks
+        public IEnumerable<DirectBookmark> SafeSpotBookmarks
         {
             get
             {
@@ -6413,7 +6413,7 @@ namespace Questor.Modules.Caching
 
                     if (_safeSpotBookmarks == null)
                     {
-                        _safeSpotBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.SafeSpotBookmarkPrefix + " ").ToList();    
+                        _safeSpotBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.SafeSpotBookmarkPrefix).ToList();    
                     }
 
                     if (_safeSpotBookmarks != null && _safeSpotBookmarks.Any())
@@ -6432,7 +6432,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public List<DirectBookmark> AfterMissionSalvageBookmarks
+        public IEnumerable<DirectBookmark> AfterMissionSalvageBookmarks
         {
             get
             {

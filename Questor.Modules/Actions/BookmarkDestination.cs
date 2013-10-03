@@ -83,11 +83,16 @@ namespace Questor.Modules.Actions
                 if (location != null && location.ItemId == Cache.Instance.DirectEve.Session.StationId)
                     return true;
 
-                // We are apparently in a station that is incorrect
-                Logging.Log("QuestorManager.BookmarkDestination", "We're docked in the wrong station, undocking", Logging.White);
+                if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                {
+                    // We are apparently in a station that is incorrect
+                    Logging.Log("QuestorManager.BookmarkDestination", "We're docked in the wrong station, undocking", Logging.White);
 
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                nextAction = DateTime.UtcNow.AddSeconds(30);
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                    nextAction = DateTime.UtcNow.AddSeconds(30);
+                    return false;
+                }
+
                 return false;
             }
 
@@ -106,10 +111,12 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (nextAction < DateTime.UtcNow)
                 {
-                    Logging.Log("QuestorManager.BookmarkDestination", "We're docked but our destination is in space, undocking", Logging.White);
-
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    nextAction = DateTime.UtcNow.AddSeconds(30);
+                    if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Logging.Log("QuestorManager.BookmarkDestination", "We're docked but our destination is in space, undocking", Logging.White);
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        nextAction = DateTime.UtcNow.AddSeconds(30);
+                    }
                 }
 
                 // We are not there yet

@@ -829,26 +829,7 @@ namespace Questor.Behaviors
                         if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have ben docked for at least a few seconds
                             return;
 
-                        if (Settings.Instance.UseDrones)
-                        {
-                            if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
-                            {
-                                if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
-                                InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
-                                Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
-                                //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
-                                if (!Statistics.WriteDroneStatsLog()) break;
-                            }
-                            else
-                            {
-                                Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
-                            }
-                        }
-                        
-                        //Logging.Log("CombatMissionsBehavior: Starting: Statistics.AmmoConsumptionStatistics");
-                        if (!Statistics.AmmoConsumptionStatistics()) break;
-
-                        Logging.Log("AgentInteraction", "Start Conversation [Complete Mission]", Logging.White);
+                       Logging.Log("AgentInteraction", "Start Conversation [Complete Mission]", Logging.White);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
@@ -882,6 +863,25 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Statistics:
+
+                    if (Settings.Instance.UseDrones)
+                        {
+                            if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
+                            {
+                                if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
+                                InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
+                                Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
+                                //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
+                                if (!Statistics.WriteDroneStatsLog()) break;
+                            }
+                            else
+                            {
+                                Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
+                            }
+                        }
+                        
+                        //Logging.Log("CombatMissionsBehavior: Starting: Statistics.AmmoConsumptionStatistics");
+                        if (!Statistics.AmmoConsumptionStatistics()) break;
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)

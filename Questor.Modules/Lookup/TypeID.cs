@@ -57,5 +57,11 @@ namespace Questor.Modules.Lookup
         Megacyte = 40,
         Morphite = 11399,
         Chalcopyrite = 27029,
+
+        AIMEDs = 28870,
+        Toxic_Waste = 282,
+        Slaves = 3721,
+        Small_Arms = 9844,
+        Ectoplasm = 3771,
     }
 }

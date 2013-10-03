@@ -243,18 +243,22 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentArmState == ArmState.Done)
                     {
-                        //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDroneState = DroneState.WaitingForTargets;
+                        if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                        {
+                            //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
+                            Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                            Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                            _States.CurrentArmState = ArmState.Idle;
+                            _States.CurrentDroneState = DroneState.WaitingForTargets;
 
-                        //exit the station
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
 
-                        //set up a wait of 10 seconds so the undock can complete
-                        _lastPulse = DateTime.UtcNow.AddSeconds(10);
-                        _States.CurrentMiningState = MiningState.GotoBelt;
+                            //exit the station
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+
+                            //set up a wait of 10 seconds so the undock can complete
+                            _lastPulse = DateTime.UtcNow.AddSeconds(10);
+                            _States.CurrentMiningState = MiningState.GotoBelt;
+                        }
                     }
                     break;
 

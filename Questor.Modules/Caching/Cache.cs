@@ -2554,6 +2554,27 @@ namespace Questor.Modules.Caching
         }
 
         /// <summary>
+        ///   Calculate distance between 2 entities
+        /// </summary>
+        public double DistanceBetween2Entities(DirectEntity entity1, DirectEntity entity2)
+        {
+            if (entity1 == null || entity2 == null)
+            {
+                return double.MaxValue;
+            }
+
+            double entity1X = entity1.X;
+            double entity1Y = entity1.Y;
+            double entity1Z = entity1.Z;
+
+            double entity2X = entity2.X;
+            double entity2Y = entity2.Y;
+            double entity2Z = entity2.Z;
+
+            return Math.Sqrt((entity1X - entity2X) * (entity1X - entity2X) + (entity1Y - entity2Y) * (entity1Y - entity2Y) + (entity1Z - entity2Z) * (entity1Z - entity2Z));
+        }
+
+        /// <summary>
         ///   Create a bookmark
         /// </summary>
         /// <param name = "label"></param>

@@ -1075,7 +1075,7 @@ namespace Questor.Modules.Activities
                         if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], " proceeding to kill the target (this is spammy, but useful debug info)", Logging.White);
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
-                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + currentKillTarget.Distance / 1000 + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
+                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
                             Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }

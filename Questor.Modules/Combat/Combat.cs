@@ -1479,7 +1479,7 @@ namespace Questor.Modules.Combat
 
                         if (killTarget != null)
                         {
-                            if (!Cache.Instance.InMission)
+                            if (!Cache.Instance.InMission || Settings.Instance.SpeedTank)
                             {
                                 NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);    
                             }

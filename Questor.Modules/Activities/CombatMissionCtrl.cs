@@ -472,11 +472,6 @@ namespace Questor.Modules.Activities
                     Cache.Instance.GetBestTarget(DistanceToClear, false, "combat");
                     if (Cache.Instance.UseDrones)
                         Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
-
-                    if (Settings.Instance.SpeedTank)
-                    {
-                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-                    }
                 }
                 _clearPocketTimeout = null;
             }
@@ -518,11 +513,6 @@ namespace Questor.Modules.Activities
             // Target
             if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
                 _clearPocketTimeout = null;
-
-            if (Settings.Instance.SpeedTank)
-            {
-                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-            }
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
@@ -569,11 +559,6 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
                     || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
-
-            if (Settings.Instance.SpeedTank)
-            {
-                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-            }
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
@@ -1036,11 +1021,6 @@ namespace Questor.Modules.Activities
                     Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Unlocking [" + KillTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(KillTargetEntity.Id) + "][" + Math.Round(KillTargetEntity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);
                     KillTargetEntity.UnlockTarget("CombatMissionCtrl");
                 }
-
-                if (Settings.Instance.SpeedTank)
-                {
-                    NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-                }
             }
             else //Do not break aggression on attackers (attack normally)
             {
@@ -1065,11 +1045,6 @@ namespace Questor.Modules.Activities
 
                 if (primaryWeaponPriorityTarget != null && primaryWeaponPriorityTarget.IsOnGridWithMe)
                 {
-                    if (Settings.Instance.SpeedTank)
-                    {
-                        NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-                    }
-
                     if (Settings.Instance.DebugKillAction)
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
@@ -1199,11 +1174,6 @@ namespace Questor.Modules.Activities
                 || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
 
-            if (Settings.Instance.SpeedTank)
-            {
-                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-            }
-
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
 
@@ -1234,11 +1204,6 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList())
                 || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
-
-            if (Settings.Instance.SpeedTank)
-            {
-                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
-            }
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);

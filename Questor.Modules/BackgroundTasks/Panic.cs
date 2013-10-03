@@ -205,7 +205,7 @@ namespace Questor.Modules.BackgroundTasks
                                 _randomDelay += Settings.Instance.InvasionMinimumDelay;
                                 foreach (EntityCache enemy in Cache.Instance.EntitiesNotSelf.Where(e => e.IsPlayer))
                                 {
-                                    Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + enemy.Velocity + "]", Logging.Red);
+                                    Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + Math.Round(enemy.Velocity, 0) + "]", Logging.Red);
                                 }
                             }
                         }

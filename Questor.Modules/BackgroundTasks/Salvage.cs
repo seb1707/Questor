@@ -113,7 +113,7 @@ namespace Questor.Modules.BackgroundTasks
                 //for  Cache.Instance.UnlootedContainers.Contains()
                 bool currentWreckUnlooted = false;
 
-                if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams", "MyShip.Velocity [" + Cache.Instance.MyShipEntity.Velocity + "]", Logging.Teal);
+                if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams", "MyShip.Velocity [" + Math.Round(Cache.Instance.MyShipEntity.Velocity, 0) + "]", Logging.Teal);
                 if (Cache.Instance.MyShipEntity.Velocity > 300)
                 {
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams", "if (Cache.Instance.MyShip.Velocity > 300)", Logging.Teal);

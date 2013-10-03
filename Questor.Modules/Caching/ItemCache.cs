@@ -141,12 +141,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (GroupID == 313) return true; // Drugs
-                if (GroupID == 282) return true; // Toxic Waste
-                if (TypeId == 3721) return true; // Slaves
-                if (TypeId == 9844) return true; // Small Arms
-                if (TypeId == 3771) return true; // Ectoplasm
-                return false;
+                bool result = false;
+                result |= (GroupID == (int)Group.Drugs);
+                result |= (GroupID == (int)Group.ToxicWaste);
+                result |= (TypeId == (int)TypeID.Slaves);
+                result |= (TypeId == (int)TypeID.Small_Arms);
+                result |= (TypeId == (int)TypeID.Ectoplasm);
+                result |= (TypeId == (int)TypeID.AIMEDs);
+                return result;
             }
         }
 

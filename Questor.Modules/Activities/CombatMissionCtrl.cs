@@ -994,19 +994,23 @@ namespace Questor.Modules.Activities
                 // We are being attacked, break the kill order
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets)) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
                 targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
-
-                foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
+                
+                if (killTargets.Any())
                 {
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                    foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
                     {
-                        if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                         {
-                            Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction],"if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))",Logging.Red);
-                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                        }    
-                    }
-                        
+                            if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+                            {
+                                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))", Logging.Red);
+                                Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                            }
+                        }
+
+                    }    
                 }
+                
 
                 foreach (EntityCache KillTargetEntity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
                 {

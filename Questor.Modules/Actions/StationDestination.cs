@@ -73,11 +73,13 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (Cache.Instance.NextUndockAction < DateTime.UtcNow)
                 {
-                    Logging.Log("QuestorManager.StationDestination", "We're docked in the wrong station, undocking", Logging.White);
-
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
-                    return false;
+                    if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Logging.Log("QuestorManager.StationDestination", "We're docked in the wrong station, undocking", Logging.White);
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                        return false;
+                    }
                 }
 
                 // We are not there yet

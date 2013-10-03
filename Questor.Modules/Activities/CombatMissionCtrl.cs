@@ -1090,7 +1090,7 @@ namespace Questor.Modules.Activities
 
 
                         //we may need to get closer so combat will take over
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > (Cache.Instance.MaxRange * .80) || Settings.Instance.SpeedTank)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange || Settings.Instance.SpeedTank)
                         {
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange)", Logging.Debug);
                             //if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.PreferredPrimaryWeaponTarget.Id))

@@ -243,7 +243,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentArmState == ArmState.Done)
                     {
-                        if (Cache.Instance.LastInSpace.AddSeconds(45) > DateTime.UtcNow) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                        if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                         {
                             //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;

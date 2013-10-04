@@ -94,24 +94,23 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.IsReadyToShoot && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
             {
                 if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)", Logging.Debug);
-                EntityCache target = Cache.Instance.PreferredDroneTarget;
-
+                
                 // Nothing to engage yet, probably retargeting
-                if (target == null)
+                if (Cache.Instance.PreferredDroneTarget == null)
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (target == null)", Logging.Debug);
                     return;
                 }
 
-                
-                if (target.IsBadIdea && !target.IsAttacking)
+
+                if (Cache.Instance.PreferredDroneTarget.IsBadIdea && !Cache.Instance.PreferredDroneTarget.IsAttacking)
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (target.IsBadIdea && !target.IsAttacking) return;", Logging.Debug);
                     return;
                 }
 
                 // Is our current target still the same and is the last Engage command no longer then 15s ago?
-                if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
+                if (_lastTarget == Cache.Instance.PreferredDroneTarget.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)", Logging.Debug);
                     return;
@@ -121,7 +120,7 @@ namespace Questor.Modules.Combat
                 bool mustEngage = false;
                 foreach (EntityCache drone in Cache.Instance.ActiveDrones)
                 {
-                    mustEngage |= drone.FollowId != target.Id;
+                    mustEngage |= drone.FollowId != Cache.Instance.PreferredDroneTarget.Id;
                 }
 
                 if (!mustEngage)
@@ -131,20 +130,23 @@ namespace Questor.Modules.Combat
                 }
 
                 // Is the last target our current active target?
-                if (target.IsActiveTarget)
+                if (Cache.Instance.PreferredDroneTarget.IsActiveTarget)
                 {
                     // Save target id (so we do not constantly switch)
-                    _lastTarget = target.Id;
+                    _lastTarget = Cache.Instance.PreferredDroneTarget.Id;
 
                     // Engage target
-                    Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Magenta);
+                    Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + Cache.Instance.PreferredDroneTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "]" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k away]", Logging.Magenta);
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
                     _lastEngageCommand = DateTime.UtcNow;
                 }
                 else // Make the target active
                 {
-                    target.MakeActiveTarget();
-                    Logging.Log("Drones", "[" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] is now the target for drones", Logging.Magenta);
+                    if(Cache.Instance.NextMakeActiveTargetAction > DateTime.UtcNow)
+                    {
+                        Cache.Instance.PreferredDroneTarget.MakeActiveTarget();
+                        Logging.Log("Drones", "[" + Cache.Instance.PreferredDroneTarget.Name + "][ID: " + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k away] has been made the ActiveTarget (needed for drones)", Logging.Magenta);    
+                    }
                 }
 
                 return;

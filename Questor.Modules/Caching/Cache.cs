@@ -1108,6 +1108,22 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public IEnumerable<EntityCache> _TotalTargetsandTargeting;
+
+        public IEnumerable<EntityCache> TotalTargetsandTargeting
+        {
+            get
+            {
+                if (_TotalTargetsandTargeting == null)
+                {
+                    _TotalTargetsandTargeting = Targets.Where(i => i.IsOnGridWithMe).Concat(Targeting.Where(i => i.IsOnGridWithMe && !i.IsTarget));
+                    return _TotalTargetsandTargeting;
+                }
+
+                return _TotalTargetsandTargeting;
+            }
+        }
+
         public IEnumerable<EntityCache> Targets
         {
             get
@@ -1116,9 +1132,6 @@ namespace Questor.Modules.Caching
                 {
                     _targets = Entities.Where(e => e.IsTarget).ToList();
                 }
-                
-                //DE bug?
-                //_targets = _targets.Where(e => e.Distance < (double) Distances.OnGridWithMe).ToList();
                 
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
                 foreach (EntityCache target in _targets.Where(t => TargetingIDs.ContainsKey(t.Id)))
@@ -1136,7 +1149,7 @@ namespace Questor.Modules.Caching
             {
                 if (_targeting == null)
                 {
-                    _targeting = Entities.Where(e => e.IsTargeting).ToList();
+                    _targeting = Entities.Where(e => e.IsTargeting || Cache.Instance.TargetingIDs.ContainsKey(e.Id)).ToList();
                 }
 
                 if (_targeting.Any())
@@ -2029,6 +2042,7 @@ namespace Questor.Modules.Caching
                 _targets = null;
                 _targeting = null;
                 _targetedBy = null;
+                _TotalTargetsandTargeting = null;
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;

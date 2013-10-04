@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Misc;
+
 namespace Questor
 {
     using System;
@@ -39,6 +41,7 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
+        private readonly InnerspaceCommands _innerspaceCommands;
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
@@ -66,6 +69,7 @@ namespace Questor
             //_backgroundbehavior = new BackgroundBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
+            _innerspaceCommands = new InnerspaceCommands();
 
             ScheduleCharacterName = Logging._character;
             Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
@@ -172,6 +176,8 @@ namespace Questor
 
                     if (Settings.Instance.UseInnerspace)
                     {
+                        InnerspaceCommands.CreateLavishCommands();
+
                         Logging.Log("RunOnceAfterStartup", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
 

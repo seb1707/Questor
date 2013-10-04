@@ -14,7 +14,7 @@ namespace Questor.Modules.Misc
             CreateLavishCommands();
         }
         
-        private void CreateLavishCommands()
+        public static void CreateLavishCommands()
         {
             if (Settings.Instance.UseInnerspace)
             {
@@ -29,10 +29,23 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
+                LavishScript.Commands.AddCommand("LogAllEntities", LogAllEntities);
             }
         }
 
-        private int SetAutoStart(string[] args)
+        private static int LogAllEntities(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor - Changes the QuestorState to CloseQuestor which will GotoBase and then Exit", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.PocketLog;
+            return 0;
+        }
+
+        private static int SetAutoStart(string[] args)
         {
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
@@ -47,7 +60,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetDisable3D(string[] args)
+        private static int SetDisable3D(string[] args)
         {
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
@@ -62,7 +75,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetExitWhenIdle(string[] args)
+        private static int SetExitWhenIdle(string[] args)
         {
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
@@ -84,7 +97,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetQuestorStatetoCloseQuestor(string[] args)
+        private static int SetQuestorStatetoCloseQuestor(string[] args)
         {
             if (args.Length != 1)
             {
@@ -99,7 +112,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetQuestorStatetoIdle(string[] args)
+        private static int SetQuestorStatetoIdle(string[] args)
         {
             if (args.Length != 1)
             {
@@ -125,7 +138,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetDestToSystem(string[] args)
+        private static int SetDestToSystem(string[] args)
         {
             long value;
             if (args.Length != 2 || !long.TryParse(args[1], out value))
@@ -164,7 +177,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetCombatMissionsBehaviorStatetoGotoBase(string[] args)
+        private static int SetCombatMissionsBehaviorStatetoGotoBase(string[] args)
         {
             if (args.Length != 1)
             {
@@ -178,7 +191,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase(string[] args)
+        private static int SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase(string[] args)
         {
             if (args.Length != 1)
             {
@@ -192,7 +205,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int ListQuestorCommands(string[] args)
+        private static int ListQuestorCommands(string[] args)
         {
             Logging.Log("QuestorUI", " ", Logging.White);
             Logging.Log("QuestorUI", " ", Logging.White);
@@ -212,7 +225,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int ListQuestorEvents(string[] args)
+        private static int ListQuestorEvents(string[] args)
         {
             Logging.Log("QuestorUI", " ", Logging.White);
             Logging.Log("QuestorUI", " ", Logging.White);
@@ -234,7 +247,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private int IfInPodSwitchToNoobShiporShuttle(string[] args)
+        private static int IfInPodSwitchToNoobShiporShuttle(string[] args)
         {
             if (args.Length != 1)
             {

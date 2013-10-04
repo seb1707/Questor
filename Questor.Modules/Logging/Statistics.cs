@@ -795,6 +795,11 @@ namespace Questor.Modules.Logging
                     State = StatisticsState.Idle;
                     break;
 
+                case StatisticsState.PocketObjectStatistics:
+                    Statistics.PocketObjectStatistics(Cache.Instance.Entities.Where(I => I.IsOnGridWithMe).ToList());
+                    State = StatisticsState.Idle;
+                    break;
+
                 case StatisticsState.Done:
 
                     //_lastStatisticsAction = DateTime.UtcNow;

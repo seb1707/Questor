@@ -6,6 +6,7 @@
         SessionLog,
         MissionLog,
         PocketLog,
+        PocketObjectStatistics,
         //AnomolyLog,
         //GateCampLog,
         //HourlyGridReportLog,

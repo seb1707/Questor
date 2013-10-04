@@ -1296,6 +1296,7 @@ namespace Questor.Modules.Combat
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetsAreFullDelay_seconds);
                         }
+
                         if (HighValueTargetsTargetedThisCycle > 2 ) return;
                     }
 

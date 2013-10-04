@@ -63,8 +63,10 @@ namespace Questor.Modules.Caching
                 _IsLowerPriorityPresent = null;
                 _IsActiveTarget = null;
                 _IsInOptimalRange = null;
+                _isPreferredDroneTarget = null;
                 _IsDronePriorityTarget = null;
                 _IsPriorityWarpScrambler = null;
+                _isPreferredPrimaryWeaponTarget = null;
                 _IsPrimaryWeaponPriorityTarget = null;
                 _PrimaryWeaponPriorityLevel = null;
                 _DronePriorityLevel = null;
@@ -402,6 +404,29 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool? _isPreferredPrimaryWeaponTarget;
+
+        public bool isPreferredPrimaryWeaponTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (_isPreferredPrimaryWeaponTarget == null)
+                    {
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Id == _directEntity.Id)
+                        {
+                            _isPreferredPrimaryWeaponTarget = true;
+                        }
+                    }
+
+                    return _isPreferredPrimaryWeaponTarget ?? false;
+                }
+
+                return false;
+            }
+        }
+
         public bool? _IsPrimaryWeaponKillPriority;
         
         public bool IsPrimaryWeaponKillPriority
@@ -419,6 +444,29 @@ namespace Questor.Modules.Caching
                     }
 
                     return _IsPrimaryWeaponKillPriority ?? false;
+                }
+
+                return false;
+            }
+        }
+
+        public bool? _isPreferredDroneTarget;
+
+        public bool isPreferredDroneTarget
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (_isPreferredDroneTarget == null)
+                    {
+                        if (Cache.Instance.PreferredDroneTarget.Id == _directEntity.Id)
+                        {
+                            _isPreferredDroneTarget = true;
+                        }
+                    }
+
+                    return _isPreferredDroneTarget ?? false;
                 }
 
                 return false;

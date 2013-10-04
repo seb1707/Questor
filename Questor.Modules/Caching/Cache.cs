@@ -225,7 +225,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Returns maxLockedTargets, the minimum between the character and the ship //cleared in InvalidateCache
         /// </summary>
-        private int _maxLockedTargets = 0;
+        private int? _maxLockedTargets = null;
 
         /// <summary>
         ///  Dictionary for cached EWAR target
@@ -608,9 +608,37 @@ namespace Questor.Modules.Caching
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
 
+        private double? _maxrange;
+        
         public double MaxRange
         {
-            get { return Math.Min(Cache.Instance.WeaponRange, Cache.Instance.DirectEve.ActiveShip.MaxTargetRange); }
+            get
+            {
+                if (_maxrange == null)
+                {
+                    _maxrange = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.MaxTargetRange);
+                    return _maxrange ?? 0;
+                }
+
+                return _maxrange ?? 0;
+            }
+        }
+
+
+        private double? _maxTargetRange;
+
+        public double MaxTargetRange
+        {
+            get
+            {
+                if (_maxTargetRange == null)
+                {
+                    _maxTargetRange = Cache.Instance.DirectEve.ActiveShip.MaxTargetRange;
+                    return _maxTargetRange ?? 0;
+                }
+
+                return _maxTargetRange ?? 0;
+            }
         }
 
         public double LowValueTargetsHaveToBeWithinDistance
@@ -1044,13 +1072,13 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_maxLockedTargets == 0)
+                if (_maxLockedTargets == null)
                 {
                     _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
-                    return _maxLockedTargets;
+                    return _maxLockedTargets ?? 0;
                 }
 
-                return _maxLockedTargets;
+                return _maxLockedTargets ?? 0;
             }
         }
 
@@ -2025,7 +2053,9 @@ namespace Questor.Modules.Caching
                 _gates = null;
                 _IDsinInventoryTree = null;
                 _jumpBridges = null;
-                _maxLockedTargets = 0;
+                _maxLockedTargets = null;
+                _maxrange = null;
+                _maxTargetRange = null;
                 _modules = null;
                 _objects = null;
                 _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());

@@ -295,7 +295,7 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == 9 && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
+                        IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.AsteroidBelt && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
                         EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
                         _currentBelt = belt;
 

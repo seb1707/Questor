@@ -1113,7 +1113,7 @@ namespace Questor.Behaviors
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsLargeCollidable).OrderBy(t => t.Distance).FirstOrDefault();
                     if (deadlyNPC != null)
                     {
                         // found NPCs that will likely kill out fragile salvage boat!

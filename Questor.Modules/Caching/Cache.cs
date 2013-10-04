@@ -609,6 +609,24 @@ namespace Questor.Modules.Caching
         public bool AfterMissionSalvaging { get; set; }
 
 
+        //cargo = 
+
+        private DirectContainer _currentShipsCargo;
+
+        public DirectContainer CurrentShipsCargo
+        {
+            get
+            {
+                if (_currentShipsCargo == null)
+                {
+                    _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                    return _currentShipsCargo;
+                }
+
+                return _currentShipsCargo;
+            }
+        }
+
         private DirectActiveShip _activeship;
 
         public DirectActiveShip ActiveShip
@@ -2065,6 +2083,7 @@ namespace Questor.Modules.Caching
                 _bigObjects = null;
                 _bigObjectsAndGates = null;
                 _combatTargets = null;
+                _currentShipsCargo = null;
                 _containers = null;
                 _entities = null;
                 _entitiesById.Clear();
@@ -2696,19 +2715,13 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (Cache.Instance.DirectEve.GetShipsCargo() != null)
+                if (Cache.Instance.CurrentShipsCargo.Items.Any())
                 {
-                    DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-                    if (cargo.Items.Any())
-                    {
-                        DirectItem item = cargo.Items.FirstOrDefault(i => i.TypeId == typeIdToFind && i.Quantity >= quantityToFind);
-                        return item;    
-                    }
-
-                    return null; // no items found
+                    DirectItem item = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == typeIdToFind && i.Quantity >= quantityToFind);
+                    return item;    
                 }
 
-                return null;
+                return null; // no items found   
             }
             catch (Exception exception)
             {
@@ -4248,8 +4261,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public DirectContainer CargoHold { get; set; }
-
         public bool OpenCargoHold(String module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -4265,12 +4276,9 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Cache.Instance.CargoHold = null;
-                Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
-
                 if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
                 {
-                    if (Cache.Instance.CargoHold.Window == null)
+                    if (Cache.Instance.CurrentShipsCargo.Window == null)
                     {
                         // No, command it to open
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
@@ -4279,22 +4287,22 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (!Cache.Instance.CargoHold.Window.IsReady)
+                    if (!Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
                         //Logging.Log(module, "cargo window is not ready", Logging.White);
                         return false;
                     }
 
-                    if (!Cache.Instance.CargoHold.Window.IsPrimary())
+                    if (!Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
                     {
                         if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
                         return true;
                     }
 
-                    if (Cache.Instance.CargoHold.Window.IsPrimary())
+                    if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
                     {
                         if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
-                        Cache.Instance.CargoHold.Window.OpenAsSecondary();
+                        Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                         return false;
                     }
@@ -4326,8 +4334,6 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Cache.Instance.CargoHold = null;
-                Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
                 return true;
             }
             catch (Exception exception)
@@ -4372,12 +4378,12 @@ namespace Questor.Modules.Caching
                 }
 
                 Logging.Log(module, "Stacking CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                if (Cache.Instance.CargoHold != null)
+                if (Cache.Instance.CurrentShipsCargo != null)
                 {
                     try
                     {
                         Cache.Instance.LastStackCargohold = DateTime.UtcNow;
-                        Cache.Instance.CargoHold.StackAll();
+                        Cache.Instance.CurrentShipsCargo.StackAll();
                         return true;
                     }
                     catch (Exception exception)
@@ -4411,24 +4417,23 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
                 if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
                 {
-                    if (Cache.Instance.CargoHold.Window == null)
+                    if (Cache.Instance.CurrentShipsCargo.Window == null)
                     {
                         Logging.Log(module, "Cargohold is closed", Logging.White);
                         return true;
                     }
 
-                    if (!Cache.Instance.CargoHold.Window.IsReady)
+                    if (!Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
                         //Logging.Log(module, "cargo window is not ready", Logging.White);
                         return false;
                     }
 
-                    if (Cache.Instance.CargoHold.Window.IsReady)
+                    if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
-                        Cache.Instance.CargoHold.Window.Close();
+                        Cache.Instance.CurrentShipsCargo.Window.Close();
                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
                         return true;
                     }

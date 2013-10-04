@@ -57,7 +57,6 @@ namespace Questor.Modules.Actions
             //if (Cache.Instance.InStation)
             //    return;
 
-            //DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (_States.CurrentDebugModuleState)
             {
                 case DebugModuleState.DebugWindows:

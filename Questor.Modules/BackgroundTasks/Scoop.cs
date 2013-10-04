@@ -178,8 +178,8 @@ namespace Questor.Modules.BackgroundTasks
 
             if (!Cache.Instance.OpenCargoHold("Scoop")) return;
 
-            List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
-            double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
+            List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
+            double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
             IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_")).ToList();
             foreach (DirectContainerWindow window in lootWindows)
             {
@@ -301,7 +301,7 @@ namespace Questor.Modules.BackgroundTasks
                                 // Note: This could (in theory) fuck up with the bot jettison an item and
                                 // then picking it up again :/ (granted it should never happen unless
                                 // mission item volume > reserved volume
-                                Cache.Instance.CargoHold.Jettison(moveTheseItems.Select(i => i.ItemId));
+                                Cache.Instance.CurrentShipsCargo.Jettison(moveTheseItems.Select(i => i.ItemId));
                                 _lastJettison = DateTime.UtcNow;
                                 return;
                             }
@@ -326,7 +326,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Loot actual items
                 if (lootItems.Count != 0)
                 {
-                    Cache.Instance.CargoHold.Add(lootItems.Select(i => i.DirectItem));
+                    Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
                     //Logging.Log("Scoop: Looting container [" + containerEntity.Name + "][" + containerEntity.Id + "], [" + lootItems.Count + "] valuable items");
                 }
                 else
@@ -367,7 +367,6 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InStation)
                 return;
 
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (_States.CurrentScoopState)
             {
                 case ScoopState.TargetHostileWrecks:
@@ -402,8 +401,8 @@ namespace Questor.Modules.BackgroundTasks
                 case ScoopState.StackItemsWhileAggressed:
                     Logging.Log("Salvage", "Stacking items", Logging.White);
 
-                    if (cargo != null && (cargo.Window.IsReady))
-                        cargo.StackAll();
+                    if (Cache.Instance.CurrentShipsCargo != null && (Cache.Instance.CurrentShipsCargo.Window.IsReady))
+                        Cache.Instance.CurrentShipsCargo.StackAll();
 
                     _nextAction = DateTime.UtcNow.AddSeconds(5);
                     _States.CurrentScoopState = ScoopState.WaitForStackingWhileAggressed;

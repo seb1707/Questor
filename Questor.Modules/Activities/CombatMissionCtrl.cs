@@ -1274,8 +1274,6 @@ namespace Questor.Modules.Activities
                             return;
                         }
 
-                        DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-
                         if (closest != null && closest.CargoWindow == null)
                         {
                             openCargoRetryNumber++;
@@ -1290,7 +1288,7 @@ namespace Questor.Modules.Activities
                         {
                             DirectContainer container = Cache.Instance.DirectEve.GetContainer(closest.Id);
 
-                            DirectItem itemsToMove = cargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
+                            DirectItem itemsToMove = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
                             if (itemsToMove != null)
                             {
                                 Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
@@ -1347,9 +1345,9 @@ namespace Questor.Modules.Activities
                 if (!done)
                 {
                     if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
-                    if (Cache.Instance.CargoHold.Window.IsReady)
+                    if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
-                        if (Cache.Instance.CargoHold.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity))))
+                        if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity))))
                         {
                             done = true;
                         }
@@ -1420,11 +1418,9 @@ namespace Questor.Modules.Activities
                     bool done = items.Count == 0;
                     if (!done)
                     {
-                        DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-
                         // We assume that the ship's cargo will be opened somewhere else
-                        if (cargo.Window.IsReady)
-                            done |= cargo.Items.Any(i => (items.Contains(i.TypeName)));
+                        if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
+                            done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => (items.Contains(i.TypeName)));
                     }
                     if (done)
                     {
@@ -1473,11 +1469,9 @@ namespace Questor.Modules.Activities
                 bool done = items.Count == 0;
                 if (!done)
                 {
-                    DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-
                     // We assume that the ship's cargo will be opened somewhere else
-                    if (cargo.Window.IsReady)
-                        done |= cargo.Items.Any(i => items.Contains(i.TypeName));
+                    if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
+                        done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName));
                 }
 
                 if (done)

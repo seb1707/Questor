@@ -74,10 +74,8 @@ namespace Questor.Storylines
                 }
             }
 
-            Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
-
             int oreIncargo = 0;
-            foreach (DirectItem cargoItem in Cache.Instance.CargoHold.Items.ToList())
+            foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items.ToList())
             {
                 if (cargoItem.TypeId != Settings.Instance.MaterialsForWarOreID)
                     continue;
@@ -99,7 +97,7 @@ namespace Questor.Storylines
             if (item != null)
             {
                 int moveOreQuantity = Math.Min(item.Stacksize, oreToLoad);
-                Cache.Instance.CargoHold.Add(item, moveOreQuantity);
+                Cache.Instance.CurrentShipsCargo.Add(item, moveOreQuantity);
                 Logging.Log("StorylineState.Arm", "Moving [" + moveOreQuantity + "] units of Ore [" + item.TypeName + "] Stacksize: [" + item.Stacksize + "] from hangar to CargoHold", Logging.White);
                 _nextAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3,6));
                 return StorylineState.Arm;  // you can only move one set of items per frame
@@ -163,12 +161,12 @@ namespace Questor.Storylines
 
             if (!Cache.Instance.OpenCargoHold("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
 
-            if (Cache.Instance.CargoHold.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
+            if (Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
             {
-                DirectItem thisOreInhangar = Cache.Instance.CargoHold.Items.FirstOrDefault(i => i.TypeId == oreid);
+                DirectItem thisOreInhangar = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == oreid);
                 if (thisOreInhangar != null)
                 {
-                    Logging.Log("MaterialsForWarPreparation", "We have [" + Cache.Instance.CargoHold.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture) + "] " + thisOreInhangar.TypeName + " in the CargoHold accepting mission", Logging.White);
+                    Logging.Log("MaterialsForWarPreparation", "We have [" + Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture) + "] " + thisOreInhangar.TypeName + " in the CargoHold accepting mission", Logging.White);
                 }
 
                 // Close the market window if there is one

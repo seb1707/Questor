@@ -64,13 +64,11 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.WeaponGroupId == 53) return true;
             if (entity == null) return false;
 
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-
-            // Get ammo based on damage type
+           // Get ammo based on damage type
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            IEnumerable<Ammo> correctAmmoIncargo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            IEnumerable<Ammo> correctAmmoIncargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
@@ -79,7 +77,7 @@ namespace Questor.Modules.Combat
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmoIncargo = correctAmmoIncargo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            correctAmmoIncargo = correctAmmoIncargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
                 correctAmmoIncargo = Cache.Instance.MissionAmmo;
@@ -164,7 +162,7 @@ namespace Questor.Modules.Combat
             //    return true;
             //}
 
-            DirectItem charge = cargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges);
+            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges);
 
             // This should have shown up as "out of ammo"
             if (charge == null)
@@ -222,13 +220,11 @@ namespace Questor.Modules.Combat
 
         private static bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
-            DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
-
             // Get ammo based on damage type
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
+            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
@@ -237,7 +233,7 @@ namespace Questor.Modules.Combat
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmoInCargo = correctAmmoInCargo.Where(a => cargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
                 correctAmmoInCargo = Cache.Instance.MissionAmmo;
@@ -273,7 +269,7 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + ammo.TypeId + "][" + ammo.DamageType + "]", Logging.White);
             if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "]", Logging.White);
 
-            DirectItem charge = cargo.Items.OrderBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == ammo.TypeId);
+            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.OrderBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == ammo.TypeId);
 
             // We do not have any ammo left that can hit targets at that range!
             if (charge == null)

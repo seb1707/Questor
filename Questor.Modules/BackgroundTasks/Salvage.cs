@@ -590,7 +590,6 @@ namespace Questor.Modules.BackgroundTasks
                         }
 
                         // We are at our max, either make room or skip the item
-
                         if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
                         {
                             // We can't drop items in this container anyway, well get it after its salvaged
@@ -673,11 +672,6 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     return;
                                 }
-
-                                // why is this here? 
-                                // why would we EVER want to add the container with loot we want to the lootedcontainers 
-                                // list BEFORE we are done looting it? (we were out of space so we cant loot it atm)
-                                //Cache.Instance.LootedContainers.Add(containerEntity.Id); //new add
 
                                 Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.White);
 

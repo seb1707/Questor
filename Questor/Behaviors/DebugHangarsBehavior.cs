@@ -162,7 +162,7 @@ namespace Questor.Behaviors
             }
             if (Cache.Instance.InSpace)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     _combat.ProcessState();
                     _drones.ProcessState(); //do we really want to use drones here?
@@ -183,7 +183,7 @@ namespace Questor.Behaviors
         private void AvoidBumpingThings()
         {
             //if It has not been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                 return;
             //
             // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -388,7 +388,7 @@ namespace Questor.Behaviors
                         _salvage.ReserveCargoCapacity = 80;
                         _salvage.LootEverything = true;
                         _salvage.ProcessState();
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
                     }

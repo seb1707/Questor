@@ -536,7 +536,7 @@ namespace Questor
 
             if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation)
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                 {
                     Logging.Log("Panic", "We are in a pod. Don't wait for the session wait timer to expire!", Logging.Red);
                     Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;

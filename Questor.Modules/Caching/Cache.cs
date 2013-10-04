@@ -608,6 +608,23 @@ namespace Questor.Modules.Caching
         /// </summary>
         public bool AfterMissionSalvaging { get; set; }
 
+
+        private DirectActiveShip _activeship;
+
+        public DirectActiveShip ActiveShip
+        {
+            get
+            {
+                if (_activeship == null)
+                {
+                    _activeship = Cache.Instance.DirectEve.ActiveShip;
+                    return _activeship;
+                }
+
+                return _activeship;
+            }
+        }
+
         private double? _maxrange;
         
         public double MaxRange
@@ -633,7 +650,7 @@ namespace Questor.Modules.Caching
             {
                 if (_maxTargetRange == null)
                 {
-                    _maxTargetRange = Cache.Instance.DirectEve.ActiveShip.MaxTargetRange;
+                    _maxTargetRange = Cache.Instance.ActiveShip.MaxTargetRange;
                     return _maxTargetRange ?? 0;
                 }
 
@@ -693,7 +710,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugExceptions) Logging.Log("Cache.WeaponRange", "exception was:" + ex.Message, Logging.Teal);
 
                     // Return max range
-                    if (Cache.Instance.DirectEve.ActiveShip != null)
+                    if (Cache.Instance.ActiveShip != null)
                     {
                         return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
                     }
@@ -1074,7 +1091,7 @@ namespace Questor.Modules.Caching
             {
                 if (_maxLockedTargets == null)
                 {
-                    _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                    _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.ActiveShip.MaxLockedTargets);
                     return _maxLockedTargets ?? 0;
                 }
 
@@ -2040,6 +2057,7 @@ namespace Questor.Modules.Caching
                 // this list of variables is cleared every pulse.
                 //
                 _activeDrones = null;
+                _activeship = null;
                 _agent = null;
                 _aggressed = null;
                 _approaching = null;
@@ -6060,7 +6078,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                //if(Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == 31)
+                //if(Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == 31)
                 //{
                 //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
                 //    return false;

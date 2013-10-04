@@ -147,7 +147,7 @@ namespace Questor.Modules.Actions
 
                 case ArmState.Cleanup:
 
-                    if (Settings.Instance.UseDrones && (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip))
+                    if (Settings.Instance.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
                     {
                         // Close the drone bay, its not required in space.
                         Cache.Instance.CloseDroneBay("Arm.Cleanup");
@@ -257,8 +257,8 @@ namespace Questor.Modules.Actions
 
                     if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return;
 
-                    if (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.RookieShip && 
-                        Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle)
+                    if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip && 
+                        Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
                     {
                         if (!Cache.Instance.OpenShipsHangar("Arm")) return;
 
@@ -274,8 +274,8 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.RookieShip || 
-                        Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Shuttle)
+                    if (Cache.Instance.ActiveShip.GroupId == (int)Group.RookieShip || 
+                        Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle)
                     {
                         Logging.Log("Arm.ActivateNoobShip", "Done", Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;
@@ -296,7 +296,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                    if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                     {
                         if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
@@ -329,7 +329,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName.ToLower()))
+                    if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != salvageshipName.ToLower()))
                     {
                         if (!Cache.Instance.OpenShipsHangar("Arm")) break;
 
@@ -345,7 +345,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != salvageshipName)
+                    if (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != salvageshipName)
                     {
                         _States.CurrentArmState = ArmState.OpenShipHangar;
                         break;
@@ -393,9 +393,9 @@ namespace Questor.Modules.Actions
                     // if we have a ship to use defined and we are not currently in that defined ship. change to that ship
                     //
                     if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateCombatShip", "shipNameToUseNow = [" + shipNameToUseNow + "]", Logging.Teal);
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateCombatShip", "Cache.Instance.DirectEve.ActiveShip.GivenName   = [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.Teal);
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateCombatShip", "Cache.Instance.ActiveShip.GivenName   = [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.Teal);
 
-                    if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.DirectEve.ActiveShip.GivenName != shipNameToUseNow))
+                    if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.ActiveShip.GivenName != shipNameToUseNow))
                     {
                         if (!Cache.Instance.OpenShipsHangar("Arm.ActivateCombatShip")) break;
 
@@ -536,7 +536,7 @@ namespace Questor.Modules.Actions
                             foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
                             {
                                 //ok found it
-                                DirectActiveShip CurrentShip = Cache.Instance.DirectEve.ActiveShip;
+                                DirectActiveShip CurrentShip = Cache.Instance.ActiveShip;
                                 if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
                                 {
                                     Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
@@ -581,9 +581,9 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
 
                     if (!Settings.Instance.UseDrones || 
-                        (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Shuttle || 
-                         Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Industrial || 
-                         Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.TransportShip))
+                        (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle || 
+                         Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial || 
+                         Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip))
                     {
                         _States.CurrentArmState = ArmState.MoveItems;
                         return;

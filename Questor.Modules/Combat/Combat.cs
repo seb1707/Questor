@@ -536,7 +536,7 @@ namespace Questor.Modules.Combat
                 }
 
                 // If we have already activated warp, deactivate the weapons
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
+                if (!Cache.Instance.ActiveShip.Entity.IsWarping)
                 {
                     // Target is in range
                     if (target.Distance <= ammo.Range)
@@ -1463,8 +1463,8 @@ namespace Questor.Modules.Combat
                     _States.CurrentCombatState != CombatState.OutOfAmmo) &&
                     (Cache.Instance.InStation ||// There is really no combat in stations (yet)
                     !Cache.Instance.InSpace || // if we are not in space yet, wait...
-                    Cache.Instance.DirectEve.ActiveShip.Entity == null || // What? No ship entity?
-                    Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked))  // There is no combat when cloaked
+                    Cache.Instance.ActiveShip.Entity == null || // What? No ship entity?
+                    Cache.Instance.ActiveShip.Entity.IsCloaked))  // There is no combat when cloaked
                 {
                     _States.CurrentCombatState = CombatState.Idle;
                     return;
@@ -1478,7 +1478,7 @@ namespace Questor.Modules.Combat
 
                 try
                 {
-                    if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                    if (!Cache.Instance.Weapons.Any() && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
                     {
                         Logging.Log("Combat", "You are not in the CombatShipName [" + Settings.Instance.CombatShipName + "] and / or the combatship has no weapons!", Logging.Red);
                         _States.CurrentCombatState = CombatState.OutOfAmmo;
@@ -1486,7 +1486,7 @@ namespace Questor.Modules.Combat
                 }
                 catch (Exception exception)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.DirectEve.ActiveShip.GivenName == Settings.Instance.CombatShipName ) - exception [" + exception + "]", Logging.White);
+                    if (Settings.Instance.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName ) - exception [" + exception + "]", Logging.White);
                 }
 
                 switch (_States.CurrentCombatState)
@@ -1608,13 +1608,13 @@ namespace Questor.Modules.Combat
                         // below is the reasons we will start the combat state(s) - if the below is not met do nothing
                         //
                         //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
-                        //Logging.Log("Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked: " + Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked);
-                        //Logging.Log("Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower(): " + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower());
+                        //Logging.Log("Cache.Instance.ActiveShip.Entity.IsCloaked: " + Cache.Instance.ActiveShip.Entity.IsCloaked);
+                        //Logging.Log("Cache.Instance.ActiveShip.GivenName.ToLower(): " + Cache.Instance.ActiveShip.GivenName.ToLower());
                         //Logging.Log("Cache.Instance.InSpace: " + Cache.Instance.InSpace);
                         if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
-                            (Cache.Instance.DirectEve.ActiveShip.Entity != null &&  // we are in a ship!
-                            !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
-                            Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
+                            (Cache.Instance.ActiveShip.Entity != null &&  // we are in a ship!
+                            !Cache.Instance.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
+                            Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
                             !Cache.Instance.InWarp)) // no longer in warp
                         {
                             _States.CurrentCombatState = CombatState.CheckTargets;

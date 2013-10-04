@@ -437,14 +437,14 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.CapacitorInjector)
                 {
                     ModuleNumber++;
-                    perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                    cap = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                    perc = Cache.Instance.ActiveShip.ShieldPercentage;
+                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else if (module.GroupId == (int)Group.ArmorRepairer)
                 {
                     ModuleNumber++;
-                    perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                    cap = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                    perc = Cache.Instance.ActiveShip.ArmorPercentage;
+                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else
                     continue;
@@ -455,29 +455,29 @@ namespace Questor.Modules.BackgroundTasks
                 if (!module.IsActive && inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
                 {
                     module.Click();
-                    perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                    perc = Cache.Instance.ActiveShip.ShieldPercentage;
                     Logging.Log("Defense", "Cap: [" + Math.Round(cap, 0) + "%] Capacitor Booster: [" + ModuleNumber + "] activated", Logging.White);
                 }
 
                 // Shield/Armor recharging
                 else if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
                 {
-                    if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {
-                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
                     if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
@@ -498,12 +498,12 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        perc = Cache.Instance.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        perc = Cache.Instance.ActiveShip.ArmorPercentage;
                         Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
                         int aggressiveEntities = Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsAttacking && e.IsPlayer);
                         if (aggressiveEntities == 0 && Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsStation) == 1)
@@ -531,12 +531,12 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.CapacitorInjector)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        perc = Cache.Instance.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        perc = Cache.Instance.ActiveShip.ArmorPercentage;
                         Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                     }
 
@@ -586,9 +586,9 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // If we have less then x% cap, do not activate the module
-                //Logging.Log("Defense: Current Cap [" + Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
-                activate &= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.MinimumPropulsionModuleCapacitor;
-                deactivate |= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor;
+                //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
+                activate &= Cache.Instance.ActiveShip.CapacitorPercentage > Settings.Instance.MinimumPropulsionModuleCapacitor;
+                deactivate |= Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor;
 
                 if (activate && !module.IsActive)
                 {
@@ -629,7 +629,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+            if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
             {
                 _lastSessionChange = DateTime.UtcNow;
                 return;
@@ -642,11 +642,11 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // There is no better defense then being cloaked ;)
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+            if (Cache.Instance.ActiveShip.Entity.IsCloaked)
                 return;
 
             // Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow
-            if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
+            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
                 return;
 
             ActivateRepairModules();

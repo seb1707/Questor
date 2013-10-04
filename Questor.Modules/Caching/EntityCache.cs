@@ -1539,10 +1539,10 @@ namespace Questor.Modules.Caching
                         }
                         
                         bool result = false;
-                        if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
+                        if (Cache.Instance.ActiveShip.Entity != null)
                         {
-                            result |= _directEntity.CorpId == Cache.Instance.DirectEve.ActiveShip.Entity.CorpId;
-                            result |= _directEntity.OwnerId == Cache.Instance.DirectEve.ActiveShip.Entity.CharId;
+                            result |= _directEntity.CorpId == Cache.Instance.ActiveShip.Entity.CorpId;
+                            result |= _directEntity.OwnerId == Cache.Instance.ActiveShip.Entity.CharId;
                             //
                             // It would be nice if this were eventually extended to detect and include 'abandoned' wrecks (blue ones). 
                             // I do not yet know what attributed actually change when that happens. We should collect some data. 

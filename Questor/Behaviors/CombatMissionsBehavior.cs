@@ -888,7 +888,7 @@ namespace Questor.Behaviors
                     {
                         try
                         {
-                            //Logging.Log("CombatMissionsBehavior.Idle", "Cache.Instance.DirectEve.Activeship.Givenname.ToLower() [" + Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() + "]", Logging.Teal);
+                            //Logging.Log("CombatMissionsBehavior.Idle", "Cache.Instance.ActiveShip.Givenname.ToLower() [" + Cache.Instance.ActiveShip.GivenName.ToLower() + "]", Logging.Teal);
                             //Logging.Log("CombatMissionsBehavior.Idle", "Settings.Instance.CombatShipName.ToLower() [" + Settings.Instance.CombatShipName.ToLower() + "]", Logging.Teal);
                             if (!Statistics.Instance.MissionLoggingCompleted)
                             {
@@ -900,7 +900,7 @@ namespace Questor.Behaviors
                         }
                         catch
                         {
-                            Logging.Log("CombatMissionsBehavior.Idle", "if (Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())", Logging.Teal);
+                            Logging.Log("CombatMissionsBehavior.Idle", "if (Cache.Instance.ActiveShip != null && Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())", Logging.Teal);
                         }
                     }
 
@@ -1201,7 +1201,7 @@ namespace Questor.Behaviors
                         _salvage.LootEverything = true;
                         _salvage.ProcessState();
 
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
                     }
@@ -1220,9 +1220,9 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    _lastX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-                    _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-                    _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+                    _lastX = Cache.Instance.ActiveShip.Entity.X;
+                    _lastY = Cache.Instance.ActiveShip.Entity.Y;
+                    _lastZ = Cache.Instance.ActiveShip.Entity.Z;
 
                     EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).FirstOrDefault();
                     if (closest != null && closest.Distance < (int)Distances.DecloakRange)

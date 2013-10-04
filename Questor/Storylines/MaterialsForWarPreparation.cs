@@ -27,14 +27,14 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.DirectEve.ActiveShip == null)
+            if (Cache.Instance.ActiveShip == null)
             {
-                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.DirectEve.ActiveShip == null)", Logging.Debug);
+                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.ActiveShip == null)", Logging.Debug);
                 _nextAction = DateTime.UtcNow.AddSeconds(3);
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
             {
                 // Open the ship hangar
                 if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreparation")) return StorylineState.Arm;
@@ -48,7 +48,7 @@ namespace Questor.Storylines
                     return StorylineState.Arm;
                 }
 
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
                     Logging.Log("StorylineState.Arm", "Missing TransportShip named [" + Settings.Instance.TransportShipName + "]", Logging.Debug);
                     return StorylineState.GotoAgent;

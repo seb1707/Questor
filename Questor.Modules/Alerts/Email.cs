@@ -40,7 +40,7 @@ namespace Questor.Modules.Alerts
                 }
                 else
                 {
-                    long mySolarSystemlocation = Cache.Instance.DirectEve.ActiveShip.LocationId;
+                    long mySolarSystemlocation = Cache.Instance.ActiveShip.LocationId;
                     _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(mySolarSystemlocation);
                 }
                 

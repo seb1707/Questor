@@ -57,8 +57,8 @@ namespace Questor.Modules.BackgroundTasks
                     // below is the reasons we will start the panic state(s) - if the below is not met do nothing
                     //
                     if (Cache.Instance.InSpace &&
-                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&
-                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+                        Cache.Instance.ActiveShip.Entity != null &&
+                        !Cache.Instance.ActiveShip.Entity.IsCloaked)
                     {
                         _States.CurrentPanicState = PanicState.Normal;
                         return;
@@ -70,19 +70,19 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         _States.CurrentPanicState = PanicState.Idle;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
+                    if (Cache.Instance.ActiveShip.Entity != null)
                     {
-                        _lastNormalX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-                        _lastNormalY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-                        _lastNormalZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+                        _lastNormalX = Cache.Instance.ActiveShip.Entity.X;
+                        _lastNormalY = Cache.Instance.ActiveShip.Entity.Y;
+                        _lastNormalZ = Cache.Instance.ActiveShip.Entity.Z;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+                    if (Cache.Instance.ActiveShip.Entity == null)
                         return;
 
                     if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
                         return;
 
-                    if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
+                    if ((long)Cache.Instance.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
                         return;
 
                     if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
@@ -94,7 +94,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.InSpace)
                     {
-                        if (!Cache.Instance.InMission && Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                        if (!Cache.Instance.InMission && Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         {
                             Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
                             _States.CurrentPanicState = PanicState.BookmarkMyWreck;
@@ -102,7 +102,7 @@ namespace Questor.Modules.BackgroundTasks
                             return;
                         }
 
-                        if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < 100)
+                        if (Cache.Instance.ActiveShip.ArmorPercentage < 100)
                         {
                             Cache.Instance.NeedRepair = true;
                             //
@@ -114,10 +114,10 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.NeedRepair = false;
                         }
 
-                        if (Cache.Instance.InMission && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
+                        if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
                         {
                             // Only check for cap-panic while in a mission, not while doing anything else
-                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
 
                             //Questor.panic_attempts_this_mission;
                             Cache.Instance.PanicAttemptsThisMission++;
@@ -126,18 +126,18 @@ namespace Questor.Modules.BackgroundTasks
                             return;
                         }
 
-                        if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
+                        if (Cache.Instance.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                         {
-                            Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;
                             return;
                         }
 
-                        if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
+                        if (Cache.Instance.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                         {
-                            Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;
@@ -149,7 +149,7 @@ namespace Questor.Modules.BackgroundTasks
                         _delayedResume = false;
                         if (Cache.Instance.InMission)
                         {
-                            if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                             {
                                 Logging.Log("Panic", "You are in a Capsule, you must have died in a mission :(", Logging.Red);
                                 _States.CurrentPanicState = PanicState.BookmarkMyWreck;
@@ -331,7 +331,7 @@ namespace Questor.Modules.BackgroundTasks
                     // Once we have warped off 500km, assume we are "safer"
                     if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distances.PanicDistanceToConsiderSafelyWarpedOff)
                     {
-                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Cache.Instance.DirectEve.ActiveShip.TypeName + "] My ShipName [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.White);
+                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Cache.Instance.ActiveShip.TypeName + "] My ShipName [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.White);
                         _States.CurrentPanicState = PanicState.Panicking;
                     }
 
@@ -368,7 +368,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 
-                            //if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                            //if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                             //{
                             //    Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
                             //}
@@ -511,7 +511,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // Do not resume until you're no longer in a capsule
-                    if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                    if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         break;
 
                     if (Cache.Instance.InStation)
@@ -524,9 +524,9 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
-                    bool isSafe = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct;
-                    isSafe &= Cache.Instance.DirectEve.ActiveShip.ShieldPercentage > Settings.Instance.SafeShieldPct;
-                    isSafe &= Cache.Instance.DirectEve.ActiveShip.ArmorPercentage > Settings.Instance.SafeArmorPct;
+                    bool isSafe = Cache.Instance.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct;
+                    isSafe &= Cache.Instance.ActiveShip.ShieldPercentage > Settings.Instance.SafeShieldPct;
+                    isSafe &= Cache.Instance.ActiveShip.ArmorPercentage > Settings.Instance.SafeArmorPct;
                     if (isSafe)
                     {
                         if (Cache.Instance.InSpace)

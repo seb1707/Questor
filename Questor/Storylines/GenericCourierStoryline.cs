@@ -61,9 +61,9 @@ namespace Questor.Storylines
             try
             {
                 if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
                     if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; //no ships?!?
 
                     if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; done", Logging.White);
@@ -91,7 +91,7 @@ namespace Questor.Storylines
 
             if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 7 seconds
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.White);
                     _States.CurrentArmState = ArmState.Done;

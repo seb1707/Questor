@@ -166,7 +166,7 @@
                         {
                             foreach (DirectItem item in allItem)
                             {
-                                if (Cache.Instance.DirectEve.ActiveShip.ItemId == item.ItemId)
+                                if (Cache.Instance.ActiveShip.ItemId == item.ItemId)
                                 {
                                     allItem.Remove(item);
                                     continue;

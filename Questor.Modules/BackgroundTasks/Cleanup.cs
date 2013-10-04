@@ -696,9 +696,9 @@
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&
-                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
+                                   (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip &&
                                     _droneBayClosingAttempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.UtcNow;

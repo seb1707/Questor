@@ -491,10 +491,10 @@ namespace QuestorManager
 
                         if (!Cache.Instance.OpenShipsHangar("QuestorManager")) break;
 
-                        //Logging.Log("QuestorManager", "MakeShip: ShipName: [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.White);
+                        //Logging.Log("QuestorManager", "MakeShip: ShipName: [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.White);
                         //Logging.Log("QuestorManager", "MakeShip: ShipFind: [" + LstTask.Items[0].SubItems[1].Text + "]", Logging.White);
 
-                        if (Cache.Instance.DirectEve.ActiveShip.GivenName == LstTask.Items[0].SubItems[1].Text)
+                        if (Cache.Instance.ActiveShip.GivenName == LstTask.Items[0].SubItems[1].Text)
                         {
                             Logging.Log("QuestorManager", "MakeShip: Ship: [" + LstTask.Items[0].SubItems[1].Text + "] already active", Logging.White);
                             LstTask.Items.Remove(LstTask.Items[0]);
@@ -621,7 +621,7 @@ namespace QuestorManager
                     case QuestormanagerState.Traveler:
 
                         // We are warping
-                        if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.ActiveShip.Entity != null && Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
+                        if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.IsWarping)
                             return;
 
                         TravelerDestination travelerDestination = Traveler.Destination;

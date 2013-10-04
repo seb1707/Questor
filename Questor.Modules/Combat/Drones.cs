@@ -164,8 +164,8 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.InStation ||                             // There is really no combat in stations (yet)
                 !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
-                Cache.Instance.DirectEve.ActiveShip.Entity == null ||   // What? No ship entity?
-                Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
+                Cache.Instance.ActiveShip.Entity == null ||   // What? No ship entity?
+                Cache.Instance.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
                 !Cache.Instance.UseDrones                               // if UseDrones is false
                 )
             {
@@ -210,9 +210,9 @@ namespace Questor.Modules.Combat
                         launch &= !Cache.Instance.IsMissionPocketDone;
 
                         // If above minimums
-                        launch &= Cache.Instance.DirectEve.ActiveShip.ShieldPercentage >= Settings.Instance.DroneMinimumShieldPct;
-                        launch &= Cache.Instance.DirectEve.ActiveShip.ArmorPercentage >= Settings.Instance.DroneMinimumArmorPct;
-                        launch &= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
+                        launch &= Cache.Instance.ActiveShip.ShieldPercentage >= Settings.Instance.DroneMinimumShieldPct;
+                        launch &= Cache.Instance.ActiveShip.ArmorPercentage >= Settings.Instance.DroneMinimumArmorPct;
+                        launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
 
                         // yes if there are targets to kill
                         launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Settings.Instance.DroneControlRange) > 0;
@@ -258,7 +258,7 @@ namespace Questor.Modules.Combat
                     // Launch all drones
                     Recall = false;
                     _launchTimeout = DateTime.UtcNow;
-                    Cache.Instance.DirectEve.ActiveShip.LaunchAllDrones();
+                    Cache.Instance.ActiveShip.LaunchAllDrones();
                     _States.CurrentDroneState = DroneState.Launching;
                     break;
 
@@ -401,24 +401,24 @@ namespace Questor.Modules.Combat
                                 lowCapWarning = Settings.Instance.DroneRecallCapacitorPct;
                             }
 
-                            if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
+                            if (Cache.Instance.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to shield [" +
-                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] below [" +
+                                            Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" +
                                             lowShieldWarning + "%] minimum", Logging.Orange);
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
+                            else if (Cache.Instance.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to armor [" +
-                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" +
+                                            Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" +
                                             lowArmorWarning + "%] minimum", Logging.Orange);
                                 Recall = true;
                             }
-                            else if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
+                            else if (Cache.Instance.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones due to capacitor [" +
-                                            Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" +
+                                            Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" +
                                             lowCapWarning + "%] minimum", Logging.Orange);
                                 Recall = true;
                             }
@@ -522,9 +522,9 @@ namespace Questor.Modules.Combat
                     // below is the reasons we will start the combat state(s) - if the below is not met do nothing
                     //
                     if (Cache.Instance.InSpace &&
-                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&
-                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
-                        Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
+                        Cache.Instance.ActiveShip.Entity != null &&
+                        !Cache.Instance.ActiveShip.Entity.IsCloaked &&
+                        Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
                         Cache.Instance.UseDrones &&
                         !Cache.Instance.InWarp)
                     {

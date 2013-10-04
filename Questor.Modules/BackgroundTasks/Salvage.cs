@@ -90,9 +90,9 @@ namespace Questor.Modules.BackgroundTasks
             if (tractorBeams.Count == 0)
                 return;
 
-            if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.TractorBeamMinimumCapacitor)
+            if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.TractorBeamMinimumCapacitor)
             {
-                if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "Capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.TractorBeamMinimumCapacitor + "%] TractorBeamMinimumCapacitor", Logging.Red);
+                if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "Capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.TractorBeamMinimumCapacitor + "%] TractorBeamMinimumCapacitor", Logging.Red);
                 return;
             }
 
@@ -202,9 +202,9 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.TractorBeamMinimumCapacitor)
+            if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.TractorBeamMinimumCapacitor)
             {
-                if (Settings.Instance.DebugSalvage) Logging.Log("ActivateSalvagers", "Capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.SalvagerMinimumCapacitor + "%] SalvagerMinimumCapacitor", Logging.Red);
+                if (Settings.Instance.DebugSalvage) Logging.Log("ActivateSalvagers", "Capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.SalvagerMinimumCapacitor + "%] SalvagerMinimumCapacitor", Logging.Red);
                 return;
             }
 
@@ -740,7 +740,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            if (Cache.Instance.ActiveShip.Entity == null)
             {
                 _States.CurrentSalvageState = SalvageState.Idle;
                 return;
@@ -755,7 +755,7 @@ namespace Questor.Modules.BackgroundTasks
 
             // There is no salving when cloaked -
             // why not? seems like we might be able to ninja-salvage with a covert-ops hauler with some additional coding (someday?)
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+            if (Cache.Instance.ActiveShip.Entity.IsCloaked)
             {
                 _States.CurrentSalvageState = SalvageState.Idle;
                 return;
@@ -806,10 +806,10 @@ namespace Questor.Modules.BackgroundTasks
 
                 case SalvageState.Idle:
                     if (Cache.Instance.InSpace &&
-                        (Cache.Instance.DirectEve.ActiveShip.Entity != null &&
-                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
-                        (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower() ||
-                        Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
+                        (Cache.Instance.ActiveShip.Entity != null &&
+                        !Cache.Instance.ActiveShip.Entity.IsCloaked &&
+                        (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower() ||
+                        Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
                         !Cache.Instance.InWarp))
                     {
                         _States.CurrentSalvageState = SalvageState.TargetWrecks;

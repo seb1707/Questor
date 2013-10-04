@@ -1688,11 +1688,11 @@ namespace Questor.Modules.Activities
                 return;
 
             // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            if (Cache.Instance.ActiveShip.Entity == null)
                 return;
 
             // There is no combat when cloaked
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+            if (Cache.Instance.ActiveShip.Entity.IsCloaked)
                 return;
 
             switch (_States.CurrentCombatMissionCtrlState)
@@ -1730,9 +1730,9 @@ namespace Questor.Modules.Activities
                     Cache.Instance.onlyKillAggro = false;
 
                     // Update x/y/z so that NextPocket wont think we are there yet because its checking (very) old x/y/z cords
-                    _lastX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-                    _lastY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-                    _lastZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+                    _lastX = Cache.Instance.ActiveShip.Entity.X;
+                    _lastY = Cache.Instance.ActiveShip.Entity.Y;
+                    _lastZ = Cache.Instance.ActiveShip.Entity.Z;
 
                     _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                     break;
@@ -1849,9 +1849,9 @@ namespace Questor.Modules.Activities
                     break;
             }
 
-            double newX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-            double newY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-            double newZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+            double newX = Cache.Instance.ActiveShip.Entity.X;
+            double newY = Cache.Instance.ActiveShip.Entity.Y;
+            double newZ = Cache.Instance.ActiveShip.Entity.Z;
 
             // For some reason x/y/z returned 0 sometimes
             if (newX != 0 && newY != 0 && newZ != 0)

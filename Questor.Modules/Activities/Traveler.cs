@@ -175,7 +175,7 @@ namespace Questor.Modules.Activities
             }
 
             // We are apparently not really in space yet...
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            if (Cache.Instance.ActiveShip.Entity == null)
                 return;
 
             //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Destination is set: processing...", Logging.Teal);
@@ -201,7 +201,7 @@ namespace Questor.Modules.Activities
             EntityCache MyNextStargate = Cache.Instance.StargateByName(_locationName);
             if (MyNextStargate != null)
             {
-                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked)
                 {
                     Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
                     MyNextStargate.Jump();
@@ -249,7 +249,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: _combat.ProcessState()", Logging.White);
                     _combat.ProcessState();
@@ -384,7 +384,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     try
@@ -516,7 +516,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     _combat.ProcessState();

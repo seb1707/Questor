@@ -389,7 +389,7 @@ namespace Questor.Behaviors
                         _salvage.LootEverything = true;
                         _salvage.ProcessState();
 
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
                     }

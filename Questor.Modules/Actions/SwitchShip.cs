@@ -54,7 +54,7 @@ namespace Questor.Modules.Actions
                 case SwitchShipState.ActivateCombatShip:
                     string shipName = Settings.Instance.CombatShipName.ToLower();
 
-                    if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != shipName))
+                    if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != shipName))
                     {
                         if (DateTime.UtcNow.Subtract(_lastSwitchShipAction).TotalSeconds > Time.Instance.SwitchShipsDelay_seconds)
                         {
@@ -119,7 +119,7 @@ namespace Questor.Modules.Actions
                         foreach (DirectFitting fitting in fittingMgr.Fittings)
                         {
                             //ok found it
-                            DirectActiveShip ship = Cache.Instance.DirectEve.ActiveShip;
+                            DirectActiveShip ship = Cache.Instance.ActiveShip;
                             if (defaultFitting.ToLower().Equals(fitting.Name.ToLower()) &&
                                 fitting.ShipTypeId == ship.TypeId)
                             {

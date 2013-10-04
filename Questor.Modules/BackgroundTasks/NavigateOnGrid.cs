@@ -20,7 +20,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Settings.Instance.AvoidBumpingThings)
             {
                 //if It has not been at least 60 seconds since we last session changed do not do anything
-                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                     return;
                 //
                 // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -140,7 +140,7 @@ namespace Questor.Modules.BackgroundTasks
                                 if (DateTime.UtcNow > Cache.Instance.NextAlign)
                                 {
                                     Cache.Instance.Star.AlignTo();
-                                    Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][ActiveShip.Entity.Mode:[" + Cache.Instance.DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                                    Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][ActiveShip.Entity.Mode:[" + Cache.Instance.ActiveShip.Entity.Mode + "]", Logging.Teal);
                                     return;
                                 }
                             }

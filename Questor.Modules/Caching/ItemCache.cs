@@ -8,6 +8,9 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
+using System;
+using Questor.Modules.States;
+
 namespace Questor.Modules.Caching
 {
     using System.Collections.Generic;
@@ -225,9 +228,20 @@ namespace Questor.Modules.Caching
             get { return TypeId == 30497 || TypeId == 15331; }
         }
 
-        public bool IsMissionItem
+        public bool IsCommonMissionItem
         {   //Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810
             get { return TypeId == 28260 || TypeId == 3814 || TypeId == 2076 || TypeId == 25373 || TypeId == 3810; }
+        }
+
+        public bool IsMissionItem
+        {
+            get
+            {
+                bool result = false;
+                result |= _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior;
+                result |= Cache.Instance.MissionItems.Contains((Name ?? string.Empty).ToLower());
+                return result;
+            }
         }
 
         public bool IsLootForShipFitting

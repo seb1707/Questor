@@ -566,7 +566,7 @@ namespace Questor.Behaviors
 
                 case DebugBehaviorState.LogDroneTargets:
                     //drone targets
-                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && e.GroupId != (int)Group.LargeColidableStructure).ToList();
+                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && !e.IsLargeCollidable).ToList();
                     Statistics.EntityStatistics(droneentitiesInList);
                     Cache.Instance.Paused = true;
                     break;

@@ -1595,9 +1595,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjects ?? (_bigObjects = Entities.Where(e =>
-                       e.GroupId == (int)Group.LargeColidableStructure ||
-                       e.GroupId == (int)Group.LargeColidableObject ||
-                       e.GroupId == (int)Group.LargeColidableShip ||
+                       e.IsLargeCollidable ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.SpawnContainer &&
                        e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
@@ -1619,9 +1617,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
-                       e.GroupId == (int)Group.LargeColidableStructure ||
-                       e.GroupId == (int)Group.LargeColidableObject ||
-                       e.GroupId == (int)Group.LargeColidableShip ||
+                       e.IsLargeCollidable ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccelerationGate ||
                        e.GroupId == (int)Group.SpawnContainer &&
@@ -3730,7 +3726,7 @@ namespace Questor.Modules.Caching
         private void EWarEffectsOnMe()
         {
             // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && e.GroupId != (int)Group.LargeColidableStructure).ToList();
+            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable).ToList();
 
             //
             //Start of Current EWar Effects On Me (below)

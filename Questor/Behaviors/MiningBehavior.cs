@@ -538,7 +538,7 @@ namespace Questor.Behaviors
                             if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                                 return;
 
-                            if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
+                            if (Cache.Instance.MaxLockedTargets == 0)
                             {
                                 if (!_isJammed)
                                 {

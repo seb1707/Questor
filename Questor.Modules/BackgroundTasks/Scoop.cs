@@ -87,7 +87,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
 
             // We are jammed, we do not need to log (Combat does this already)
-            if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
+            if (Cache.Instance.MaxLockedTargets == 0)
                 return;
 
             List<EntityCache> targets = new List<EntityCache>();

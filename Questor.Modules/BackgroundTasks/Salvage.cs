@@ -267,9 +267,9 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // We are jammed, we do not need to log (Combat does this already)
-            if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
+            if (Cache.Instance.MaxLockedTargets == 0)
             {
-                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)", Logging.Teal);
+                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Cache.Instance.MaxLockedTargets == 0)", Logging.Teal);
                 return;
             }
 
@@ -322,13 +322,13 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Cache.Instance.MissionLoot)
             {
-                if (wreckTargets.Count >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets))
+                if (wreckTargets.Count >= Cache.Instance.MaxLockedTargets)
                 {
-                    if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (wreckTargets.Count >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets))", Logging.Teal);
+                    if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (wreckTargets.Count >= Cache.Instance.MaxLockedTargets)", Logging.Teal);
                     return;
                 }
             }
-            else if (wreckTargets.Count >= MaximumWreckTargets || Cache.Instance.Targets.Count() >= Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+            else if (wreckTargets.Count >= MaximumWreckTargets || Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
             {
                 if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: else if (wreckTargets.Count >= MaximumWreckTargets)", Logging.Teal);
                 return;
@@ -418,9 +418,9 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.MissionLoot)
                 {
-                    if (wreckTargets.Count >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets))
+                    if (wreckTargets.Count >= Cache.Instance.MaxLockedTargets)
                     {
-                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) [" + Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets) + "]", Logging.Teal);
+                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Cache.Instance.MaxLockedTargets) [" + Cache.Instance.MaxLockedTargets + "]", Logging.Teal);
                         return;
                     }
                 }

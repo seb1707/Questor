@@ -384,7 +384,7 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
+                        _salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
                         _salvage.ReserveCargoCapacity = 80;
                         _salvage.LootEverything = true;
                         _salvage.ProcessState();

@@ -2732,7 +2732,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange)
                         {
-                            if (Cache.Instance.Targets.Count() < Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets)
+                            if (Cache.Instance.Targets.Count() < Cache.Instance.MaxLockedTargets)
                             {
                                 if (!IsTargeting)
                                 {

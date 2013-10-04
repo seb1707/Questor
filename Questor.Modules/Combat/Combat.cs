@@ -942,7 +942,7 @@ namespace Questor.Modules.Combat
             // First, can we even target?
             // We are ECM'd / jammed, forget targeting anything...
             //
-            if (Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets == 0)
+            if (Cache.Instance.MaxLockedTargets == 0)
             {
                 if (!_isJammed)
                 {

@@ -1558,7 +1558,7 @@ namespace Questor.Modules.Activities
             }
             Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Updated ignore list", Logging.Teal);
             if (Cache.Instance.IgnoreTargets.Any())
-                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Currently ignoring: " + Cache.Instance.IgnoreTargets.Aggregate((current, next) => current + "[" + next + "]"), Logging.Teal);
+                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Currently ignoring: " + Cache.Instance.IgnoreTargets.Aggregate((current, next) => "[" + current + "][" + next + "]"), Logging.Teal);
             else
                 Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "Your ignore list is empty", Logging.Teal);
             _currentAction++;

@@ -1261,7 +1261,7 @@ namespace Questor.Modules.Caching
                             if (__entities.Any())
                             {
                                 _entitiescount = __entities.Count();
-                                Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
+                                Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities below", Logging.Debug);
                                 int i = 0;
                                 foreach (EntityCache t in __entities)
                                 {
@@ -1270,7 +1270,7 @@ namespace Questor.Modules.Caching
                                     continue;
                                 }
 
-                                Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities above", Logging.Debug);
+                                Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities above", Logging.Debug);
                             }
 
                             if (Settings.Instance.DebugPotentialCombatTargets) Logging.Log("Cache.potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);

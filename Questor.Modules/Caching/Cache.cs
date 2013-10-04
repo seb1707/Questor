@@ -677,13 +677,13 @@ namespace Questor.Modules.Caching
                     }
                     else
                     {
-                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
                     }
 
                     // Return ship range if there's no ammo left
                     if (!ammo.Any())
                     {
-                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
                     }
 
                     return ammo.Max(a => a.Range);
@@ -695,7 +695,7 @@ namespace Questor.Modules.Caching
                     // Return max range
                     if (Cache.Instance.DirectEve.ActiveShip != null)
                     {
-                        return System.Convert.ToInt32(Cache.Instance.DirectEve.ActiveShip.MaxTargetRange);
+                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
                     }
 
                     return 0;

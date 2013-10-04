@@ -1140,7 +1140,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                         {
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)", Logging.Debug);
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.DirectEve.ActiveShip.MaxTargetRange)
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxTargetRange)
                             {
                                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)", Logging.Debug);
                                 //

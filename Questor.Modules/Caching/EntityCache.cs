@@ -1772,7 +1772,7 @@ namespace Questor.Modules.Caching
                                    && (!IsTargeting && !IsTarget && IsTargetedBy)
                                    && !IsContainer
                                    && CategoryId == (int)CategoryID.Entity
-                                   && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                                   && Distance < Cache.Instance.MaxTargetRange
                                    && !IsIgnored
                                    && (!IsBadIdea || IsAttacking)
                                    && !IsEntityIShouldLeaveAlone
@@ -1806,7 +1806,7 @@ namespace Questor.Modules.Caching
                                    && (!IsTargeting && !IsTarget)
                                    && !IsContainer
                                    && CategoryId == (int)CategoryID.Entity
-                                   && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                                   && Distance < Cache.Instance.MaxTargetRange
                                    && !IsIgnored
                                    && (!IsBadIdea || IsAttacking)
                                    && !IsEntityIShouldLeaveAlone
@@ -1838,7 +1838,7 @@ namespace Questor.Modules.Caching
                         result |= (CategoryId == (int)CategoryID.Entity
                                    && !IsTarget
                                    && !IsTargeting
-                                   && Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange
+                                   && Distance < Cache.Instance.MaxTargetRange
                                    && !IsIgnored
                                    && !IsStation);
                         _IsTargetWeCanShootButHaveNotYetTargeted = result;
@@ -2698,7 +2698,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (Distance >= 250001 || Distance > Cache.Instance.DirectEve.ActiveShip.MaxTargetRange) //250k is the MAX targeting range in eve. 
+            if (Distance >= 250001 || Distance > Cache.Instance.MaxTargetRange) //250k is the MAX targeting range in eve. 
             {
                 Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "] which is [" + Math.Round(Distance / 1000, 2) + "k] away. Do not try to lock things that you cant possibly target", Logging.Debug);
                 return false;
@@ -2730,7 +2730,7 @@ namespace Questor.Modules.Caching
                 {
                     if (!HasExploded)
                     {
-                        if (Distance < Cache.Instance.DirectEve.ActiveShip.MaxTargetRange)
+                        if (Distance < Cache.Instance.MaxTargetRange)
                         {
                             if (Cache.Instance.Targets.Count() < Cache.Instance.MaxLockedTargets)
                             {

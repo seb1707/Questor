@@ -2032,13 +2032,15 @@ namespace Questor.Modules.Caching
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
                 {
                     Cache.Instance.PreferredPrimaryWeaponTarget = null;
                 }
 
-                
+                foreach (EntityCache EntityCacheEntity in Cache.Instance.Entities)
+                {
+                    EntityCacheEntity.InvalidateCache();
+                }
             }
             catch (Exception exception)
             {

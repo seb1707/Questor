@@ -706,9 +706,9 @@ namespace Questor.Modules.Caching
                 try
                 {
                     // Is our ship's cargo available?
-                    if ((Cache.Instance.CargoHold != null) && (Cache.Instance.CargoHold.IsValid))
+                    if ((Cache.Instance.CurrentShipsCargo != null) && (Cache.Instance.CurrentShipsCargo.IsValid))
                     {
-                        ammo = ammo.Where(a => Cache.Instance.CargoHold.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+                        ammo = ammo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
                     }
                     else
                     {

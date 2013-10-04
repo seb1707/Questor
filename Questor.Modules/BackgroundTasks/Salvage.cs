@@ -452,8 +452,8 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             if (!Cache.Instance.OpenCargoHold("Salvage")) return;
-            List<ItemCache> shipsCargo = Cache.Instance.CargoHold.Items.Select(i => new ItemCache(i)).ToList();
-            double freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
+            List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
+            double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
             
             // Open a container in range
             int containersProcessedThisTick = 0;
@@ -538,7 +538,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // when full return to base and unloadloot
                     //
-                    if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Capacity > 150 && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < 50)
+                    if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && Cache.Instance.CurrentShipsCargo.Capacity > 150 && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 50)
                     {
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
                         {
@@ -678,7 +678,7 @@ namespace Questor.Modules.BackgroundTasks
                                 // Note: This could (in theory) fuck up with the bot jettison an item and
                                 // then picking it up again :/ (granted it should never happen unless
                                 // mission item volume > reserved volume
-                                Cache.Instance.CargoHold.Jettison(moveTheseItems.Select(i => i.ItemId));
+                                Cache.Instance.CurrentShipsCargo.Jettison(moveTheseItems.Select(i => i.ItemId));
                                 Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                                 Cache.Instance.LastJettison = DateTime.UtcNow;
                                 return;
@@ -699,7 +699,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (lootItems.Count != 0)
                     {
                         Logging.Log("Salvage.LootWrecks", "Looting container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(containerEntity.Id) + "], [" + lootItems.Count + "] valuable items", Logging.White);
-                        Cache.Instance.CargoHold.Add(lootItems.Select(i => i.DirectItem));
+                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
                     }
                     else
                     {
@@ -787,10 +787,10 @@ namespace Questor.Modules.BackgroundTasks
 
                     // Default action
                     _States.CurrentSalvageState = SalvageState.TargetWrecks;
-                    if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any() && Cache.Instance.LastStackCargohold.AddMinutes(5) < DateTime.UtcNow)
+                    if (Cache.Instance.CurrentShipsCargo.IsValid && Cache.Instance.CurrentShipsCargo.Items.Any() && Cache.Instance.LastStackCargohold.AddMinutes(5) < DateTime.UtcNow)
                     {
                         // Check if there are actually duplicates
-                        bool duplicates = Cache.Instance.CargoHold.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
+                        bool duplicates = Cache.Instance.CurrentShipsCargo.Items.Where(i => i.Quantity > 0).GroupBy(i => i.TypeId).Any(t => t.Count() > 1);
                         if (duplicates)
                         {
                             _States.CurrentSalvageState = SalvageState.StackItems;

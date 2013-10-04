@@ -92,8 +92,8 @@ namespace Questor.Storylines
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;
-            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
-            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CurrentShipsCargo;
+            DirectContainer to = pickup ? Cache.Instance.CurrentShipsCargo : Cache.Instance.ItemHangar;
 
             // We moved the item
             if (to.Items.Any(i => i.GroupId == groupId))

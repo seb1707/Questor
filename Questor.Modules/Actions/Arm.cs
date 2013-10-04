@@ -790,7 +790,7 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
-                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
+                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
                         DirectItem hangarItem = null;
                         if (Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
@@ -845,7 +845,7 @@ namespace Questor.Modules.Actions
                             int moveBringItemQuantity = Math.Min(hangarItem.Stacksize, bringItemQuantity);
                             moveBringItemQuantity = Math.Max(moveBringItemQuantity, 1);
                             Logging.Log("Arm.MoveItems", "Moving Bring Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
-                            Cache.Instance.CargoHold.Add(hangarItem, moveBringItemQuantity);
+                            Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveBringItemQuantity);
 
                             bringItemQuantity = bringItemQuantity - moveBringItemQuantity;
                             if (bringItemQuantity <= 0)
@@ -895,7 +895,7 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
-                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CargoHold.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
 
                         DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
                                                 Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
@@ -940,7 +940,7 @@ namespace Questor.Modules.Actions
                             int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Stacksize, bringOptionalItemQuantity);
                             moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
                             Logging.Log("Arm.MoveItems", "Moving Bring Optional Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
-                            Cache.Instance.CargoHold.Add(hangarItem, moveOptionalMissionItemQuantity);
+                            Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveOptionalMissionItemQuantity);
 
                             bringOptionalItemQuantity -= moveOptionalMissionItemQuantity;
                             if (bringOptionalItemQuantity < 1)
@@ -987,7 +987,7 @@ namespace Questor.Modules.Actions
                             if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 
                             int capsIncargo = 0;
-                            foreach (DirectItem cargoItem in Cache.Instance.CargoHold.Items)
+                            foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items)
                             {
                                 if (cargoItem.TypeId != Settings.Instance.CapacitorInjectorScript)
                                     continue;
@@ -1015,7 +1015,7 @@ namespace Questor.Modules.Actions
                                         continue;
 
                                     int moveCapQuantity = Math.Min(item.Stacksize, capsToLoad);
-                                    Cache.Instance.CargoHold.Add(item, moveCapQuantity);
+                                    Cache.Instance.CurrentShipsCargo.Add(item, moveCapQuantity);
                                     Logging.Log("Arm.MoveItems", "Moving [" + moveCapQuantity + "] units of Cap  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
                                     return; // you can only move one set of items per frame
                                 }
@@ -1105,7 +1105,7 @@ namespace Questor.Modules.Actions
                                 //
                                 // move items to cargo
                                 //
-                                Cache.Instance.CargoHold.Add(item, moveAmmoQuantity);
+                                Cache.Instance.CurrentShipsCargo.Add(item, moveAmmoQuantity);
                                 //
                                 // subtract the moved items from the items that need to be moved
                                 //
@@ -1161,7 +1161,7 @@ namespace Questor.Modules.Actions
 
                     if (!Cache.Instance.OpenCargoHold("Arm.WaitForItems")) return;
 
-                    if (Cache.Instance.CargoHold.Items.Count == 0) return;
+                    if (Cache.Instance.CurrentShipsCargo.Items.Count == 0) return;
 
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {

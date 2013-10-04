@@ -143,8 +143,8 @@ namespace Questor.Storylines
 
             if (!Cache.Instance.OpenCargoHold("GenericCourierStoryline: MoveItem")) return false;
 
-            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
-            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CurrentShipsCargo;
+            DirectContainer to = pickup ? Cache.Instance.CurrentShipsCargo : Cache.Instance.ItemHangar;
 
             // We moved the item
 

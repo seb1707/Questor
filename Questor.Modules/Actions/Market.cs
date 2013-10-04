@@ -812,7 +812,7 @@ namespace Questor.Modules.Actions
                 {
                     Logging.Log("Arm", "Moving loot to refine to CargoHold", Logging.White);
 
-                    Cache.Instance.CargoHold.Add(refineItems);
+                    Cache.Instance.CurrentShipsCargo.Add(refineItems);
                     _lastExecute = DateTime.UtcNow;
                     return false;
                 }

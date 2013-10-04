@@ -82,7 +82,7 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.OpenCargoHold("UnloadLoot.MoveAmmo")) return false;
 
-            if (Cache.Instance.CargoHold.Window.IsReady)
+            if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
 
@@ -97,7 +97,7 @@ namespace Questor.Modules.Actions
                     //
                     try
                     {
-                        ammoToMove = Cache.Instance.CargoHold.Items.Where(i => Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId) || Settings.Instance.CapacitorInjectorScript == i.TypeId).ToList();
+                        ammoToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i => Settings.Instance.Ammo.Any(a => a.TypeId == i.TypeId) || Settings.Instance.CapacitorInjectorScript == i.TypeId).ToList();
                     }
                     catch (Exception exception)
                     {
@@ -126,7 +126,7 @@ namespace Questor.Modules.Actions
                     //
                     try
                     {
-                        missionGateKeysToMove = Cache.Instance.CargoHold.Items.Where(i => i.TypeId == (int)TypeID.AngelDiamondTag
+                        missionGateKeysToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == (int)TypeID.AngelDiamondTag
                                                                                        || i.TypeId == (int)TypeID.GuristasDiamondTag
                                                                                        || i.TypeId == (int)TypeID.ImperialNavyGatePermit
                                                                                        || i.GroupId == (int)Group.AccelerationGateKeys).ToList();
@@ -161,7 +161,7 @@ namespace Questor.Modules.Actions
                     {
 
                         //Cache.Instance.InvTypesById.ContainsKey(i.TypeId)
-                        commonMissionCompletionItemsToMove = Cache.Instance.CargoHold.Items.Where(i => i.GroupId == (int)Group.Livestock
+                        commonMissionCompletionItemsToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i => i.GroupId == (int)Group.Livestock
                                                                                                     || i.GroupId == (int)Group.MiscSpecialMissionItems
                                                                                                     || i.GroupId == (int)Group.Kernite
                                                                                                     || i.GroupId == (int)Group.Omber
@@ -201,7 +201,7 @@ namespace Questor.Modules.Actions
                         //
                         // items to move has to be cleared here before assigning but is currently not being cleared here
                         //
-                        scriptsToMove = Cache.Instance.CargoHold.Items.Where(i =>
+                        scriptsToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i =>
                             i.TypeId == (int)TypeID.AncillaryShieldBoosterScript ||
                             i.TypeId == (int)TypeID.CapacitorInjectorScript ||
                             i.TypeId == (int)TypeID.FocusedWarpDisruptionScript ||
@@ -294,10 +294,10 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return false;
 
-            if (Cache.Instance.CargoHold.IsValid)
+            if (Cache.Instance.CurrentShipsCargo.IsValid)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.CargoHold.IsValid)", Logging.White);
-                IEnumerable<DirectItem> lootToMove = Cache.Instance.CargoHold.Items.ToList();
+                IEnumerable<DirectItem> lootToMove = Cache.Instance.CurrentShipsCargo.Items.ToList();
 
                 //IEnumerable<DirectItem> somelootToMove = lootToMove;
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "foreach (DirectItem item in lootToMove) (start)", Logging.White);

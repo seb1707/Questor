@@ -474,7 +474,7 @@
                                                                                      || i.GroupId == (int)Group.MiscSpecialMissionItems
                                                                                      || i.GroupId == (int)Group.Livestock))
                 {
-                    if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
+                    if (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
                         Logging.Log("Storyline", "We are full, not moving anything else", Logging.Yellow);
                         _States.CurrentStorylineState = StorylineState.Done;
@@ -482,7 +482,7 @@
                     }
 
                     Logging.Log("Storyline", "Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo", Logging.Yellow);
-                    Cache.Instance.CargoHold.Add(item, item.Quantity);
+                    Cache.Instance.CurrentShipsCargo.Add(item, item.Quantity);
                     return false;
                 }
                 _nextAction = DateTime.UtcNow.AddSeconds(10);

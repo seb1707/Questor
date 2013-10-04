@@ -112,7 +112,7 @@ namespace Questor.Modules.Activities
                 try
                 {
                     // We moved the item
-                    if (Cache.Instance.CargoHold.Items.Any(i => i.TypeName == missionItem))
+                    if (Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeName == missionItem))
                     {
                         moveItemRetryCounter = 0;
                         _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(3);
@@ -144,7 +144,7 @@ namespace Questor.Modules.Activities
                         //Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
                         //Cache.Instance.Paused = true;
                     }
-                    to = Cache.Instance.CargoHold;
+                    to = Cache.Instance.CurrentShipsCargo;
                 }
                 catch (Exception exception)
                 {
@@ -155,7 +155,7 @@ namespace Questor.Modules.Activities
 
             if (_States.CurrentCourierMissionCtrlState == CourierMissionCtrlState.DropOffItem || !pickup)
             {
-                from = Cache.Instance.CargoHold;
+                from = Cache.Instance.CurrentShipsCargo;
                 to = Cache.Instance.ItemHangar;
             }
 

@@ -439,19 +439,19 @@ namespace Questor.Behaviors
                     //if (!Cache.Instance.OpenInventoryWindow("Salvage")) return;
 
                     //should I check Cache.Instance.ActiveDrones.Any() instead?
-                    if (Cache.Instance.CargoHold.IsValid
-                        && (Cache.Instance.CargoHold.UsedCapacity >= Cache.Instance.CargoHold.Capacity * .9)
-                        && Cache.Instance.CargoHold.Capacity > 0
+                    if (Cache.Instance.CurrentShipsCargo.IsValid
+                        && (Cache.Instance.CurrentShipsCargo.UsedCapacity >= Cache.Instance.CurrentShipsCargo.Capacity * .9)
+                        && Cache.Instance.CurrentShipsCargo.Capacity > 0
                         && _States.CurrentDroneState == DroneState.WaitingForTargets)
                     {
-                        Logging.Log("Miner:MineAsteroid", "We are full, go to base to unload. Capacity is: " + Cache.Instance.CargoHold.Capacity
-                            + ", Used: " + Cache.Instance.CargoHold.UsedCapacity, Logging.White);
+                        Logging.Log("Miner:MineAsteroid", "We are full, go to base to unload. Capacity is: " + Cache.Instance.CurrentShipsCargo.Capacity
+                            + ", Used: " + Cache.Instance.CurrentShipsCargo.UsedCapacity, Logging.White);
                         _States.CurrentMiningState = MiningState.GotoBase;
                         break;
                     }
-                    else if (Cache.Instance.CargoHold.IsValid
-                      && (Cache.Instance.CargoHold.UsedCapacity >= Cache.Instance.CargoHold.Capacity * .9)
-                      && Cache.Instance.CargoHold.Capacity > 0
+                    else if (Cache.Instance.CurrentShipsCargo.IsValid
+                      && (Cache.Instance.CurrentShipsCargo.UsedCapacity >= Cache.Instance.CurrentShipsCargo.Capacity * .9)
+                      && Cache.Instance.CurrentShipsCargo.Capacity > 0
                       && _States.CurrentDroneState != DroneState.WaitingForTargets)
                     {
                         Logging.Log("Miner:MineAsteroid", "We are full, but drones are busy. Drone state: " + _States.CurrentDroneState.ToString(), Logging.White);

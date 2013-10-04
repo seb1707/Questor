@@ -1366,24 +1366,17 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (!InSpace)
+                    if (_entities == null)
                     {
-                        return new List<EntityCache>();
+                        if (!InSpace)
+                        {
+                            return new List<EntityCache>();
+                        }
+                        _entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
+                        return _entities ?? null;
                     }
 
-                    //if (_entities.Count == 0)
-                    //{
-                    //    _entities = DirectEve.Entities.Select(e => new EntityCache(e)).Where(e => e.IsValid).ToList();
-                    //}
-
-                    //if (_entities.Count > 0)
-                    // {
-                    //    return _entities;
-                    //}
-
-                    return _entities ?? (_entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid 
-                                                                                                       /*&& EntitiesthatHaveExploded.Any(x => x.Id != e.Id)*/)
-                                                                                                       .ToList()); 
+                    return _entities;
                 }
                 catch (NullReferenceException) { }  // this can happen during session changes
 
@@ -1438,7 +1431,7 @@ namespace Questor.Modules.Caching
                     return null;
                 }
 
-                return DirectEve.Entities.Select(e => new EntityCache(e)).FirstOrDefault(e => e.IsValid && e.Id == DirectEve.ActiveShip.ItemId);
+                return Cache.Instance.Entities.FirstOrDefault(e => e.IsValid && e.Id == DirectEve.ActiveShip.ItemId);
             }
         }
 
@@ -1715,7 +1708,7 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                _entitiesthatHaveExploded.RemoveAll(pt => DirectEve.Entities.All(e => e.Id != pt.Id));
+                _entitiesthatHaveExploded.RemoveAll(pt => Cache.Instance.Entities.All(e => e.Id != pt.Id));
                 return _entitiesthatHaveExploded;
             }
         }

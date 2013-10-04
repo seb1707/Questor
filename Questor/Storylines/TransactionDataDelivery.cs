@@ -26,8 +26,7 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
 
             // Are we in a shuttle?  Yes, go to the agent
-            DirectEve directEve = Cache.Instance.DirectEve;
-            if (directEve.ActiveShip.GroupId == (int)Group.Shuttle)
+            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
@@ -83,8 +82,7 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            DirectEve directEve = Cache.Instance.DirectEve;
-
+            
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
 
@@ -99,7 +97,7 @@ namespace Questor.Storylines
             if (to.Items.Any(i => i.GroupId == groupId))
                 return true;
 
-            if (directEve.GetLockedItems().Count != 0)
+            if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 return false;
 
             // Move items

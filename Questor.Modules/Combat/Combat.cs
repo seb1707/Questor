@@ -1171,6 +1171,20 @@ namespace Questor.Modules.Combat
 
             #endregion
            
+
+            //if (Settings.Instance.DebugTargetCombatants)
+            //{
+            //    Logging.Log("Combat.TargetCombatants", "LCOs [" + Cache.Instance.Entities.Count(i => i.IsLargeCollidable) + "]", Logging.Debug);
+            //    if (Cache.Instance.Entities.Any(i => i.IsLargeCollidable))
+            //    {
+            //        foreach (EntityCache LCO in Cache.Instance.Entities.Where(i => i.IsLargeCollidable))
+            //        {
+            //            Logging.Log("Combat.TargetCombatants", "LCO name [" + LCO.Name + "] Distance [" + Math.Round(LCO.Distance /1000,2) + "] TypeID [" + LCO.TypeId + "] GroupID [" + LCO.GroupId + "]", Logging.Debug);
+            //        }
+            //    }
+            //}
+
+
             #region Preferred Drone target handling
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)

@@ -1756,7 +1756,7 @@ namespace Questor.Modules.Caching
             {
                 //if (_approaching == null)
                 //{
-                    DirectEntity ship = DirectEve.ActiveShip.Entity;
+                    DirectEntity ship = Cache.Instance.ActiveShip.Entity;
                     if (ship != null && ship.IsValid)
                     {
                         _approaching = EntityById(ship.FollowId);

@@ -171,7 +171,11 @@ namespace Questor.Modules.Combat
             // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                 return true;
+
             LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
+
+            if (weapon.IsReloadingAmmo)
+                return true;
 
             try
             {
@@ -294,6 +298,9 @@ namespace Questor.Modules.Combat
                 return false;
             }
             LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
+
+            if (weapon.IsReloadingAmmo)
+                return true;
 
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)

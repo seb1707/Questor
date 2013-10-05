@@ -3328,7 +3328,7 @@ namespace Questor.Modules.Caching
             //
             // Get the closest primary weapon priority target
             //
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Closest Primary", Logging.Teal);
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Closest PrimaryWeaponPriorityTarget", Logging.Teal);
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
@@ -3340,6 +3340,7 @@ namespace Questor.Modules.Caching
                                                                            .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                            .ThenByDescending(pt => pt.IsEwarTarget())
                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                           .ThenByDescending(pt => pt.TargetValue)
                                                                            .ThenBy(pt => pt.Distance)
                                                                            .FirstOrDefault();
             }
@@ -3400,8 +3401,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsInOptimalRange)
-                    .ThenByDescending(t => t.IsTarget)
-                    //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
+                    .ThenByDescending(pt => pt.TargetValue) //highest value first
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();
@@ -3420,8 +3420,7 @@ namespace Questor.Modules.Caching
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
-                    //.ThenBy(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                    .ThenByDescending(t => t.IsTarget)
+                    .ThenBy(pt => pt.TargetValue) //lowest value first
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();

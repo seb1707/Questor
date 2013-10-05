@@ -1055,7 +1055,7 @@ namespace Questor.Modules.Actions
                         if (!AmmoHangarItems.Any())
                         {
                             ItemHangarRetries++;
-                            if (ItemHangarRetries < 10)
+                            if (ItemHangarRetries < 20)
                             {
                                 //just retry... after 10 tries try to use the itemhangar instead of ammohangar
                                 return;
@@ -1074,7 +1074,7 @@ namespace Questor.Modules.Actions
                                 if (!ItemHangarItems.Any())
                                 {
                                     ItemHangarRetries++;
-                                    if (ItemHangarRetries < 10)
+                                    if (ItemHangarRetries < 20)
                                     {
                                         //just retry... after 10 tries fail and let the user know we are out of ammo
                                         return;    

@@ -118,7 +118,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int? _GroupID;
+        private int? _GroupID;
 
         public int GroupId
         {
@@ -138,7 +138,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int? _CategoryId;
+        private int? _CategoryId;
 
         public int CategoryId
         {
@@ -158,7 +158,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public long? _Id;
+        private long? _Id;
         
         public long Id
         {
@@ -178,7 +178,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int? _TypeId;
+        private int? _TypeId;
 
         public int TypeId
         {
@@ -198,7 +198,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public long? _FollowId;
+        private long? _FollowId;
 
         public long FollowId
         {
@@ -218,7 +218,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public string _Name;
+        private string _Name;
 
         public string Name
         {
@@ -238,7 +238,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _Distance;
+        private double? _Distance;
 
         public double Distance
         {
@@ -258,7 +258,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _Nearest5kDistance;
+        private double? _Nearest5kDistance;
 
         public double Nearest5kDistance
         {
@@ -281,7 +281,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _ShieldPct;
+        private double? _ShieldPct;
 
         public double ShieldPct
         {
@@ -301,7 +301,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _ArmorPct;
+        private double? _ArmorPct;
 
         public double ArmorPct
         {
@@ -321,7 +321,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _StructurePct;
+        private double? _StructurePct;
 
         public double StructurePct
         {
@@ -341,7 +341,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsNpc;
+        private bool? _IsNpc;
 
         public bool IsNpc
         {
@@ -361,7 +361,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double? _Velocity;
+        private double? _Velocity;
 
         public double Velocity
         {
@@ -381,7 +381,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTarget;
+        private bool? _IsTarget;
         
         public bool IsTarget
         {
@@ -404,7 +404,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _isPreferredPrimaryWeaponTarget;
+        private bool? _isPreferredPrimaryWeaponTarget;
 
         public bool isPreferredPrimaryWeaponTarget
         {
@@ -427,7 +427,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsPrimaryWeaponKillPriority;
+        private bool? _IsPrimaryWeaponKillPriority;
         
         public bool IsPrimaryWeaponKillPriority
         {
@@ -450,7 +450,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _isPreferredDroneTarget;
+        private bool? _isPreferredDroneTarget;
 
         public bool isPreferredDroneTarget
         {
@@ -473,7 +473,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsDroneKillPriority;
+        private bool? _IsDroneKillPriority;
 
         public bool IsDroneKillPriority
         {
@@ -496,7 +496,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTooCloseTooFastTooSmallToHit;
+        private bool? _IsTooCloseTooFastTooSmallToHit;
 
         public bool IsTooCloseTooFastTooSmallToHit
         {
@@ -541,7 +541,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsReadyToShoot;
+        private bool? _IsReadyToShoot;
 
         public bool IsReadyToShoot
         {
@@ -577,7 +577,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsReadyToTarget;
+        private bool? _IsReadyToTarget;
         
         public bool IsReadyToTarget
         {
@@ -601,7 +601,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsHigherPriorityPresent;
+        private bool? _IsHigherPriorityPresent;
 
         public bool IsHigherPriorityPresent
         {
@@ -678,7 +678,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsLowerPriorityPresent;
+        private bool? _IsLowerPriorityPresent;
 
         public bool IsLowerPriorityPresent
         {
@@ -754,7 +754,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsActiveTarget;
+        private bool? _IsActiveTarget;
 
         public bool IsActiveTarget
         {
@@ -778,7 +778,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsInOptimalRange;
+        private bool? _IsInOptimalRange;
 
         public bool IsInOptimalRange
         {
@@ -846,7 +846,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsDronePriorityTarget;
+        private bool? _IsDronePriorityTarget;
 
         public bool IsDronePriorityTarget
         {
@@ -873,7 +873,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsPriorityWarpScrambler;
+        private bool? _IsPriorityWarpScrambler;
 
         public bool IsPriorityWarpScrambler
         {
@@ -914,7 +914,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsPrimaryWeaponPriorityTarget;
+        private bool? _IsPrimaryWeaponPriorityTarget;
 
         public bool IsPrimaryWeaponPriorityTarget
         {
@@ -941,7 +941,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public PrimaryWeaponPriority? _PrimaryWeaponPriorityLevel;
+        private PrimaryWeaponPriority? _PrimaryWeaponPriorityLevel;
 
         public PrimaryWeaponPriority PrimaryWeaponPriorityLevel
         {
@@ -972,7 +972,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public DronePriority? _DronePriorityLevel;
+        private DronePriority? _DronePriorityLevel;
         
         public DronePriority DronePriorityLevel
         {
@@ -1003,7 +1003,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTargeting;
+        private bool? _IsTargeting;
 
         public bool IsTargeting
         {
@@ -1024,7 +1024,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTargetedBy;
+        private bool? _IsTargetedBy;
 
         public bool IsTargetedBy
         {
@@ -1045,7 +1045,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsAttacking;
+        private bool? _IsAttacking;
 
         public bool IsAttacking
         {
@@ -1067,7 +1067,7 @@ namespace Questor.Modules.Caching
         }
 
 
-        public bool? _IsWreckEmpty;
+        private bool? _IsWreckEmpty;
         
         public bool IsWreckEmpty
         {
@@ -1088,7 +1088,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _HasReleased;
+        private bool? _HasReleased;
         
         public bool HasReleased
         {
@@ -1109,7 +1109,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _HasExploded;
+        private bool? _HasExploded;
 
         public bool HasExploded
         {
@@ -1223,7 +1223,7 @@ namespace Questor.Modules.Caching
             return PrimaryWeaponPriority.NotUsed;
         }
 
-        public bool? _IsWarpScramblingMe;
+        private bool? _IsWarpScramblingMe;
 
         public bool IsWarpScramblingMe
         {
@@ -1253,7 +1253,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsWebbingMe;
+        private bool? _IsWebbingMe;
         
         public bool IsWebbingMe
         {
@@ -1284,7 +1284,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsNeutralizingMe;
+        private bool? _IsNeutralizingMe;
 
         public bool IsNeutralizingMe
         {
@@ -1315,7 +1315,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsJammingMe;
+        private bool? _IsJammingMe;
 
         public bool IsJammingMe
         {
@@ -1346,7 +1346,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsSensorDampeningMe;
+        private bool? _IsSensorDampeningMe;
 
         public bool IsSensorDampeningMe
         {
@@ -1377,7 +1377,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTargetPaintingMe;
+        private bool? _IsTargetPaintingMe;
 
         public bool IsTargetPaintingMe
         {
@@ -1408,7 +1408,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTrackingDisruptingMe;
+        private bool? _IsTrackingDisruptingMe;
 
         public bool IsTrackingDisruptingMe
         {
@@ -1439,7 +1439,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int? _Health;
+        private int? _Health;
 
         public int Health
         {
@@ -1460,7 +1460,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsSentry;
+        private bool? _IsSentry;
 
         public bool IsSentry
         {
@@ -1493,7 +1493,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsIgnored;
+        private bool? _IsIgnored;
 
         public bool IsIgnored
         {
@@ -1522,7 +1522,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _HaveLootRights;
+        private bool? _HaveLootRights;
 
         public bool HaveLootRights
         {
@@ -1560,7 +1560,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int? _TargetValue;
+        private int? _TargetValue;
 
         public int? TargetValue
         {
@@ -1615,7 +1615,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsHighValueTarget;
+        private bool? _IsHighValueTarget;
 
         public bool IsHighValueTarget
         {
@@ -1648,7 +1648,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsLowValueTarget;
+        private bool? _IsLowValueTarget;
 
         public bool IsLowValueTarget
         {
@@ -1680,7 +1680,7 @@ namespace Questor.Modules.Caching
             get { return Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.ItemId == Id); }
         }
 
-        public bool? _IsValid;
+        private bool? _IsValid;
 
         public bool IsValid
         {
@@ -1707,7 +1707,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsContainer;
+        private bool? _IsContainer;
 
         public bool IsContainer
         {
@@ -1735,7 +1735,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsPlayer;
+        private bool? _IsPlayer;
 
         public bool IsPlayer
         {
@@ -1756,7 +1756,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTargetingMeAndNotYetTargeted;
+        private bool? _IsTargetingMeAndNotYetTargeted;
 
         public bool IsTargetingMeAndNotYetTargeted
         {
@@ -1790,7 +1790,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsNotYetTargetingMeAndNotYetTargeted;
+        private bool? _IsNotYetTargetingMeAndNotYetTargeted;
 
         public bool IsNotYetTargetingMeAndNotYetTargeted
         {
@@ -1824,7 +1824,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsTargetWeCanShootButHaveNotYetTargeted;
+        private bool? _IsTargetWeCanShootButHaveNotYetTargeted;
 
         public bool IsTargetWeCanShootButHaveNotYetTargeted
         {
@@ -1856,7 +1856,7 @@ namespace Questor.Modules.Caching
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
         /// 
-        public bool? _IsFrigate;
+        private bool? _IsFrigate;
 
         public bool IsFrigate
         {
@@ -1980,7 +1980,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
-        public bool? _IsCruiser;
+        private bool? _IsCruiser;
         
         public bool IsCruiser
         {
@@ -2011,7 +2011,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
-        public bool? _IsNPCCruiser;
+        private bool? _IsNPCCruiser;
 
         public bool IsNPCCruiser
         {
@@ -2068,7 +2068,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
-        public bool? _IsBattlecruiser;
+        private bool? _IsBattlecruiser;
 
         public bool IsBattlecruiser
         {
@@ -2096,7 +2096,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
-        public bool? _IsNPCBattlecruiser;
+        private bool? _IsNPCBattlecruiser;
 
         public bool IsNPCBattlecruiser
         {
@@ -2147,7 +2147,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
-        public bool? _IsBattleship;
+        private bool? _IsBattleship;
 
         public bool IsBattleship
         {
@@ -2176,7 +2176,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
-        public bool? _IsNPCBattleship;
+        private bool? _IsNPCBattleship;
         
         public bool IsNPCBattleship
         {
@@ -2232,7 +2232,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>
-        public bool? _IsLargeCollidable;
+        private bool? _IsLargeCollidable;
         
         public bool IsLargeCollidable
         {
@@ -2262,7 +2262,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>
-        public bool? _IsMiscJunk;
+        private bool? _IsMiscJunk;
 
         public bool IsMiscJunk
         {
@@ -2296,7 +2296,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         /// A bad idea to attack these targets
         /// </summary>
-        public bool? _IsBadIdea;
+        private bool? _IsBadIdea;
 
         public bool IsBadIdea
         {
@@ -2339,7 +2339,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsFactionWarfareNPC;
+        private bool? _IsFactionWarfareNPC;
 
         public bool IsFactionWarfareNPC
         {
@@ -2363,7 +2363,7 @@ namespace Questor.Modules.Caching
         }
 
 
-        public bool? _IsNpcByGroupID;
+        private bool? _IsNpcByGroupID;
 
         public bool IsNpcByGroupID
         {
@@ -2531,7 +2531,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsEntityIShouldLeaveAlone;
+        private bool? _IsEntityIShouldLeaveAlone;
 
         public bool IsEntityIShouldLeaveAlone
         {
@@ -2556,7 +2556,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool? _IsOnGridWithMe;
+        private bool? _IsOnGridWithMe;
 
         public bool IsOnGridWithMe
         {

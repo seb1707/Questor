@@ -1031,7 +1031,7 @@ namespace Questor.Modules.Combat
 
                             if (primaryWeaponPriorityEntity.Distance < Cache.Instance.MaxRange
                                 && primaryWeaponPriorityEntity.IsReadyToTarget
-                                && primaryWeaponPriorityEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                                //&& primaryWeaponPriorityEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                                 && primaryWeaponPriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
                             {
                                 Logging.Log("Combat", "Targeting primary weapon priority target [" + primaryWeaponPriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);

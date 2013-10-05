@@ -965,9 +965,6 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
-
-            
             if (Settings.Instance.DebugKillAction)
             {
                 int targetNameCount = 0;
@@ -975,8 +972,11 @@ namespace Questor.Modules.Activities
                 {
                     targetNameCount++;
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "targetNames [" + targetNameCount + "][" + targetName + "]", Logging.Debug);
-                }    
+                }
             }
+
+            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
+            
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "] NumToIgnore [" + numberToIgnore + "]"), Logging.Teal);

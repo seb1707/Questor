@@ -2106,6 +2106,10 @@ namespace Questor.Modules.Caching
                 {
                     Cache.Instance.PreferredPrimaryWeaponTarget = null;
                 }
+                if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTarget.Id))
+                {
+                    Cache.Instance.PreferredDroneTarget = null;
+                }
 
                 foreach (EntityCache EntityCacheEntity in Cache.Instance.Entities)
                 {

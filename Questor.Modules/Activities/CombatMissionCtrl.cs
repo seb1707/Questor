@@ -958,15 +958,25 @@ namespace Questor.Modules.Activities
             List<string> targetNames = action.GetParameterValues("target");
 
             // No parameter? Ignore kill action
-            if (targetNames.Count == 0)
+            if (!targetNames.Any())
             {
-                Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction], "No targets defined in kill action!", Logging.Teal);
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "No targets defined in kill action!", Logging.Teal);
                 Nextaction();
                 return;
             }
 
             IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
 
+            
+            if (Settings.Instance.DebugKillAction)
+            {
+                int targetNameCount = 0;
+                foreach (string targetName in targetNames)
+                {
+                    targetNameCount++;
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "targetNames [" + targetNameCount + "][" + targetName + "]", Logging.Debug);
+                }    
+            }
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "] NumToIgnore [" + numberToIgnore + "]"), Logging.Teal);

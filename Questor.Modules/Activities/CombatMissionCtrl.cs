@@ -412,7 +412,7 @@ namespace Questor.Modules.Activities
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)).ToList())
+            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)).ToList())
                 || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)).ToList()))
                 _clearPocketTimeout = null;
 
@@ -469,7 +469,7 @@ namespace Questor.Modules.Activities
                 }
                 else
                 {
-                    Cache.Instance.GetBestTarget(DistanceToClear, false, "combat");
+                    Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
                     if (Cache.Instance.UseDrones)
                         Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 }
@@ -511,7 +511,7 @@ namespace Questor.Modules.Activities
             //
 
             // Target
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
+            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -556,7 +556,7 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
                     || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
@@ -903,7 +903,7 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            if (Cache.Instance.GetBestTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
                     || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
@@ -1115,7 +1115,7 @@ namespace Questor.Modules.Activities
                 }
                 
                 // GetTargets
-                Cache.Instance.GetBestTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
+                Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
                 if (Cache.Instance.UseDrones)
                 {
                     Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
@@ -1174,7 +1174,7 @@ namespace Questor.Modules.Activities
 
             Cache.Instance.AddPrimaryWeaponPriorityTarget(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).FirstOrDefault(),PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
-            if (Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList())
+            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList())
                 || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
 
@@ -1205,7 +1205,7 @@ namespace Questor.Modules.Activities
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given, in this everything on grid
             //
 
-            if (Cache.Instance.GetBestTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList())
+            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList())
                 || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
 

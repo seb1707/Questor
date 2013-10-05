@@ -1532,7 +1532,7 @@ namespace Questor.Modules.Combat
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.potentialCombatTargets.Any() && Cache.Instance.Targets.Any())
                         {
-                            Cache.Instance.GetBestTarget(Cache.Instance.MaxRange, false, "Combat");
+                            Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
                         }
                         
                         #region original code dont delete yet

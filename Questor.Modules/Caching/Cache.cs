@@ -3120,7 +3120,7 @@ namespace Questor.Modules.Caching
         /// <param name="lowValueFirst"></param>
         /// <param name="callingroutine"> </param>
         /// <returns></returns>
-        public bool GetBestTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
+        public bool GetBestPrimaryWeaponTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
         {
             if (Settings.Instance.DebugDisableGetBestTarget)
             {
@@ -3515,268 +3515,348 @@ namespace Questor.Modules.Caching
             #endregion
 
             NextGetBestCombatTarget = DateTime.UtcNow;
-            NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
         }
 
-        public bool GetBestDroneTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
+        public bool GetBestDroneTarget(double distance, bool highValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
         {
+            if (Settings.Instance.DebugDisableGetBestTarget)
+            {
+                return true;
+            }
+
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
+            
             if (DateTime.UtcNow < NextGetBestDroneTarget)
+            {
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
+            }
 
             NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
+
+            if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            {
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
+                return false;
+            }
             
             EntityCache currentDroneTarget = null;
             currentDroneTarget = ((Cache.Instance.PreferredDroneTarget ?? (TargetingCache.CurrentDronesTarget ?? null)));
             if (currentDroneTarget != null && Cache.Instance.Entities.All(i => i.Id != currentDroneTarget.Id)) currentDroneTarget = null;
-
+            
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 
-            if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id))
+            if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
             {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
 
-            // Do we have a 'current target' and if so, is it an actual target?
-            // If not, clear current target
-            if (currentDroneTarget != null && !currentDroneTarget.IsTarget && !currentDroneTarget.IsTargeting)
+            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
+            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
+            //and there is nothing to replace it with.
+            if (Cache.Instance.PreferredDroneTarget != null
+                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTarget.Id))
             {
-                //
-                // if we somehow have currentTarget set to something that is not locked assume we need to assign a new target
-                //
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "if (currentTarget != null && !currentTarget.IsTarget) currentTarget = null;", Logging.Debug);
-                currentDroneTarget = null;
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget", "PreferredDroneTarget is not valid, clearing it", Logging.White);
+                Cache.Instance.PreferredDroneTarget = null;
             }
 
-            // Do we have ANY warp scrambling entities targeted starting with currentTarget, add them to the PrimaryWeapons PriorityTarget list
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToDronePriorityTargetList, distance) != null)
+            //
+            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
+            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
+            //
+
+            // Do we have ANY warp scrambling entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY Webbing entities targeted starting with currentTarget, Assign it as the PreferredPrimaryWeaponTarget
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddWebifiersToDronePriorityTargetList, distance) != null)
+            // Do we have ANY ECM entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY ECM entities targeted, starting with the CurrentTarget? 
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddECMsToDroneTargetList, distance) != null)
+            // Do we have ANY tracking disrupting entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY Sensor Dampening entities targeted starting with currentTarget, Assign it as the PreferredPrimaryWeaponTarget
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToDronePriorityTargetList, distance) != null)
+            // Do we have ANY Neutralizing entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY tracking disrupting entities targeted starting with currentTarget, add them to the PrimaryWeapons PriorityTarget list
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
+            // Do we have ANY Target Painting entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY Neutralizing entities targeted starting with currentTarget, Assign it as the PreferredPrimaryWeaponTarget
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToDronePriorityTargetList, distance) != null)
+            // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            // Do we have ANY Target Painting entities targeted starting with currentTarget, Assign it as the PreferredPrimaryWeaponTarget
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToDronePriorityTargetList, distance) != null)
+            // Do we have ANY Webbing entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
 
-            if (currentDroneTarget != null)
+            //
+            // if currentTarget set to something (not null) and it is actually an entity...
+            //
+            if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot)
             {
-                #region Is our current target any other ewar DronePriorityTarget? If so stay on the current target
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "We have a target, testing conditions", Logging.Teal);
+
+                #region Is our current target any other drone priority target?
                 //
-                // Is our current target any other ewar DronePriorityTarget? If so stay on the current target
+                // Is our current target any other drone priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
                 if (DronePriorityTargets.Any(pt => pt.IsReadyToShoot 
-                    && pt.Distance < Settings.Instance.DroneControlRange
-                    && pt.Id == currentDroneTarget.Id
-                    && !pt.IsHigherPriorityPresent
-                    && ((currentDroneTarget.IsFrigate || currentDroneTarget.IsNPCFrigate)
-                        || (Settings.Instance.DronesKillHighValueTargets))))
+                                                        && pt.Distance < Cache.Instance.MaxRange 
+                                                        && pt.Id == currentDroneTarget.Id
+                                                        && !currentDroneTarget.IsHigherPriorityPresent
+                                                        && (!currentDroneTarget.IsNPCFrigate 
+                                                            || (!Cache.Instance.UseDrones && !currentDroneTarget.IsTooCloseTooFastTooSmallToHit))))
                 {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "Is our current target any other primary weapon priority target? If so stay on the CurrentTarget", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
                     Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
-                #endregion Is our current target any other ewar DronePriorityTarget? If so stay on the current target
+                #endregion Is our current target any other primary weapon priority target?
+
+                #region Current Target Health Logging
+                //
+                // Current Target Health Logging
+                //
+                bool currentTargetHealthLogNow = true;
+                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
+                {
+                    if ((int)currentDroneTarget.Id != (int)TargetingCache.CurrentTargetID)
+                    {
+                        if ((int)currentDroneTarget.ArmorPct == 0 && (int)currentDroneTarget.ShieldPct == 0 && (int)currentDroneTarget.StructurePct == 0)
+                        {
+                            //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
+                        }
+                        else
+                        {
+                            //
+                            // assign shields and armor to targetingcache variables - compare them to each other
+                            // to see if we need to send another log message to the console, if the values have not changed no need to log it.
+                            //
+                            if ((int)currentDroneTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
+                                (int)currentDroneTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
+                                (int)currentDroneTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
+                            {
+                                currentTargetHealthLogNow = false;
+                            }
+
+                            //
+                            // now that we are done comparing - assign new values for this tick
+                            //
+                            TargetingCache.CurrentTargetShieldPct = (int)currentDroneTarget.ShieldPct;
+                            TargetingCache.CurrentTargetArmorPct = (int)currentDroneTarget.ArmorPct;
+                            TargetingCache.CurrentTargetStructurePct = (int)currentDroneTarget.StructurePct;
+                            if (currentTargetHealthLogNow)
+                            {
+                                Logging.Log(callingroutine, ".GetBestDroneTarget: CurrentTarget is [" + currentDroneTarget.Name +                              //name
+                                            "][" + (Math.Round(currentDroneTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
+                                            "k][Shield%:[" + Math.Round(currentDroneTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
+                                            "][Armor%:[" + Math.Round(currentDroneTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
+                                            , Logging.White);
+                            }
+                        }
+                    }
+                }
+
+                #endregion Current Target Health Logging
 
                 #region Is our current target already in armor? keep shooting the same target if so...
                 //
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
-                if ((currentDroneTarget.IsFrigate || currentDroneTarget.IsNPCFrigate)
-                 && currentDroneTarget.IsReadyToShoot
-                 && currentDroneTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
+                if (currentDroneTarget.IsReadyToShoot
+                    && currentDroneTarget.Distance < Settings.Instance.DroneControlRange
+                    && currentDroneTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
                 {
-                    if (currentDroneTarget.IsFrigate || currentDroneTarget.IsNPCFrigate)
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                    Cache.Instance.PreferredDroneTarget = currentDroneTarget;
+                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                    return true;
+                }
+
+                #endregion Is our current target already in armor? keep shooting the same target if so...
+                
+                #region If none of the above matches, does our current target meet the conditions of being hittable and in range
+                if (!currentDroneTarget.IsHigherPriorityPresent)
+                {
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
+                    if (currentDroneTarget.IsReadyToShoot
+                        && currentDroneTarget.Distance < Settings.Instance.DroneControlRange)
                     {
-                        if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                        if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
+                        if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
+
                         Cache.Instance.PreferredDroneTarget = currentDroneTarget;
                         Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                         return true;
                     }
                 }
-                #endregion Is our current target already in armor? keep shooting the same target if so...
-
-                #region is the target a good drone target after all?
-                if ((currentDroneTarget.IsReadyToShoot)
-                      && ((currentDroneTarget.IsFrigate || currentDroneTarget.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
-                      && currentDroneTarget.Distance < Settings.Instance.DroneControlRange)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "currentTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
-
-                    Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-
-                    return true;
-                }
                 #endregion
             }
 
             #region Get the closest drone priority target
-
+            //
+            // Get the closest primary weapon priority target
+            //
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest Primary", Logging.Teal);
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = _dronePriorityTargets.Where(d => d.Entity.IsReadyToShoot 
-                                                            && d.Entity.Distance < Settings.Instance.DroneControlRange 
-                                                            && d.Entity.IsTargetedBy)
-                                                            .OrderByDescending(pt => pt.DronePriority)
-                                                            .ThenByDescending(pt => pt.Entity.IsTarget)
-                                                            .ThenBy(pt => pt.Entity.Distance)
-                                                            .Select(pt => pt.Entity).FirstOrDefault();
+                dronePriorityTarget = Cache.Instance.DronePriorityTargets.Where(p => p.Distance < Settings.Instance.DroneControlRange
+                                                                            && !p.IsIgnored
+                                                                            && p.IsReadyToShoot)
+                                                                           .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                           .ThenBy(pt => pt.DronePriorityLevel)
+                                                                           .ThenByDescending(pt => pt.IsEwarTarget())
+                                                                           .ThenBy(pt => pt.Distance)
+                                                                           .FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
             if (dronePriorityTarget != null)
             {
-                if (dronePriorityTarget.IsFrigate || dronePriorityTarget.IsNPCFrigate)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "if (dronePriorityTarget != null && callingroutine == Drones && dronePriorityTarget.IsTarget && !dronePriorityTarget.IsIgnored)", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredDroneTarget = dronePriorityTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
+                Cache.Instance.PreferredDroneTarget = dronePriorityTarget;
+                Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                return true;
             }
 
             #endregion Get the closest drone priority target
 
-            #region get closest highvaluetarget
-            EntityCache highValueTarget = null;
-
-            if (potentialCombatTargets.Any())
+            #region did our calling routine (CombatMissionCtrl?) pass us targets to shoot?
+            //
+            // This is where CombatMissionCtrl would pass targets to GetBestDroneTarget
+            //
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Calling Target", Logging.Teal);
+            if (_potentialTargets != null && _potentialTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot && t.IsAttacking)
-                    .OrderByDescending(t => !t.IsNPCFrigate)
-                    .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                    .ThenByDescending(t => t.IsTarget)
-                    .ThenByDescending(t => t.IsInOptimalRange) //.net sorts bools as false then true (wtf?!?! 0/1 is the only reason i can see)
-                    //.ThenByDescending(t => t.TargetValue != null ? t.TargetValue.Value : 0)
-                    .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Distance)
-                    .FirstOrDefault();
+                EntityCache callingDroneTarget = null;
+                try
+                {
+                    callingDroneTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
+                }
+                catch (NullReferenceException) { }
+
+                if (callingDroneTarget != null && callingDroneTarget.IsReadyToShoot)
+                {
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "if (callingDroneTarget != null && !callingDroneTarget.IsIgnored)", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "callingDroneTarget is [" + callingDroneTarget.Name + "][" + Math.Round(callingDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingDroneTarget.Id) + "] GroupID [" + callingDroneTarget.GroupId + "]", Logging.Debug);
+                    AddDronePriorityTarget(callingDroneTarget, DronePriority.PriorityKillTarget, " GetBestDroneTarget: callingDroneTarget");
+                    Cache.Instance.PreferredDroneTarget = callingDroneTarget;
+                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                    return true;
+                }
+
+                //return false; //do not return here, continue to process targets, we did not find one yet
             }
             #endregion
 
-            #region Get the closest low value target, targets too fast/close for guns first
+            #region Get the closest Low Value Target
+
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest Low Value", Logging.Teal);
             EntityCache lowValueTarget = null;
+
             if (potentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot && t.IsAttacking)
-                    .OrderByDescending(t => t.IsNPCFrigate)
-                    .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
+
+                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
+                    .OrderBy(t => t.IsEwarTarget())
+                    .ThenByDescending(t => t.IsNPCFrigate)
+                    .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Distance)
                     .FirstOrDefault();
+            }
+            #endregion
 
-                if (lowValueFirst && lowValueTarget != null)
+            #region Get the closest high value target 
+            //
+            // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
+            //
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking closest Low Value", Logging.Teal);
+            EntityCache highValueTarget = null;
+            if (potentialCombatTargets.Any())
+            {
+                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
+                    .OrderByDescending(t => !t.IsNPCFrigate)
+                    .ThenByDescending(t => t.IsTargetedBy)
+                    .ThenBy(OrderByLowestHealth())
+                    .ThenBy(t => t.Distance)
+                    .FirstOrDefault();
+            }
+            #endregion
+
+            #region prefer to gran a lowvaluetarget, if none avail use a high value target
+            if (lowValueTarget != null || highValueTarget != null )
+            {
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking use High Value", Logging.Teal);
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
+                Cache.Instance.PreferredDroneTarget = lowValueTarget ?? highValueTarget ?? null;
+                Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                return true;
+            }
+            #endregion
+
+            Logging.Log("GetBestDroneTarget: none", "Could not determine a suitable target", Logging.Debug);
+            #region If we didnt find anything at all (wtf!?!?)
+            if (Settings.Instance.DebugGetBestDroneTarget)
+            {
+                if (Cache.Instance.Targets.Any())
                 {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredDroneTarget = lowValueTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
+                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
+                    Logging.Log("GetBestDroneTarget (Drones): none", "*** ALL LOCKED/LOCKING TARGETS LISTED BELOW", Logging.Debug);
+                    int LockedTargetNumber = 0; 
+                    foreach (EntityCache __target in Targets)
+                    {
+                        LockedTargetNumber++;
+                        Logging.Log("GetBestDroneTarget (Drones): none", "*** Target: [" + LockedTargetNumber + "][" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
+                    }
+                    Logging.Log("GetBestDroneTarget (Drones): none", "*** ALL LOCKED/LOCKING TARGETS LISTED ABOVE", Logging.Debug);
+                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
                 }
 
-                if (!lowValueFirst && highValueTarget != null)
+                if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                 {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
-
-                    if (lowValueTarget != null)
+                    if (Cache.Instance.IgnoreTargets.Any())
                     {
-                        Cache.Instance.PreferredDroneTarget = lowValueTarget;
-                        Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        Cache.Instance.PreferredDroneTarget = highValueTarget;
-                        Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                        int IgnoreCount = Cache.Instance.IgnoreTargets.Count;
+                        Logging.Log("GetBestDroneTarget (Drones): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
                     }
 
-                    return true;
+                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
+                    int potentialCombatTargetNumber = 0;
+                    foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
+                    {
+                        potentialCombatTargetNumber++;
+                        Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
+                    }
+                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
+                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
                 }
             }
             #endregion
 
-            #region return loworhighvalue or highorlowvalue target
-            EntityCache LowOrHighValueTarget = null;
-            //EntityCache HighOrLowValueTarget = null;
-
-            try
-            {
-                LowOrHighValueTarget = lowValueTarget ?? highValueTarget;
-                //HighOrLowValueTarget = highValueTarget ?? lowValueTarget;
-                // Return either one or the other
-
-                if (LowOrHighValueTarget != null && Cache.Instance.UseDrones)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "LowOrHighValueTarget is [" + LowOrHighValueTarget.Name + "][" + Math.Round(LowOrHighValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(LowOrHighValueTarget.Id) + "] GroupID [" + LowOrHighValueTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredDroneTarget = LowOrHighValueTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-
-                if (Settings.Instance.DebugGetBestDroneTarget)
-                {
-                    if (Cache.Instance.Targets.Any())
-                    {
-                        Logging.Log("GetBestTarget (Drones): none", ".", Logging.Debug);
-                        Logging.Log("GetBestTarget (Drones): none", "ALL TARGETS LISTED BELOW", Logging.Debug);
-                        foreach (EntityCache __target in Targets)
-                        {
-                            Logging.Log("GetBestTarget (Drones): none", "Debug targets: [" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
-                        }
-                        Logging.Log("GetBestTarget (Drones): none", "ALL TARGETS LISTED ABOVE", Logging.Debug);
-                        Logging.Log("GetBestTarget (Drones): none", ".", Logging.Debug);
-                    }
-
-                    if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
-                    {
-                        Logging.Log("GetBestTarget (Drones): none", ".", Logging.Debug);
-                        Logging.Log("GetBestTarget (Drones): none", "ALL potentialCombatTargets LISTED BELOW", Logging.Debug);
-                        foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
-                        {
-                            Logging.Log("GetBestTarget (Drones): none", "Debug entities: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
-                        }
-                        Logging.Log("GetBestTarget (Drones): none", "ALL potentialCombatTargets LISTED ABOVE", Logging.Debug);
-                        Logging.Log("GetBestTarget (Drones): none", ".", Logging.Debug);
-                    }
-                }
-
-                NextGetBestCombatTarget = DateTime.UtcNow;
-                NextGetBestDroneTarget = DateTime.UtcNow;
-                return false;
-            }
-            catch (Exception exception)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Drones):", "LowOrHighValueTarget exception [" + exception + "]", Logging.Debug);
-            }
-            #endregion
-
-            NextGetBestCombatTarget = DateTime.UtcNow;
             NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
         }
-
+        
         private void EWarEffectsOnMe()
         {
             // Get all entity targets

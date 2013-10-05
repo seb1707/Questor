@@ -1965,6 +1965,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.mission_generic_frigates;
                         result |= GroupId == (int)Group.mission_thukker_frigate;
                         result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                        result |= GroupId == (int)Group.TutorialDrone;
                         result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one. 
                         _IsNPCFrigate = result;
                         return _IsNPCFrigate ?? false;    
@@ -2375,6 +2376,7 @@ namespace Questor.Modules.Caching
                     {
                         bool result = false;
                         result |= IsSentry;
+                        result |= GroupId == (int)Group.TutorialDrone;
                         result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
                         //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
                         result |= GroupId == (int)Group.Storyline_Battleship;

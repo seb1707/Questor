@@ -190,6 +190,7 @@ namespace Questor.Modules.Lookup
         //
         // various NPCs
         //
+        TutorialDrone = 286,
         Storyline_Battleship = 523,
         Storyline_Mission_Battleship = 534,
         Asteroid_Angel_Cartel_Battleship = 552,

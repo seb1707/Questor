@@ -9,10 +9,7 @@ namespace Questor.Modules.Misc
 
     public class InnerspaceCommands
     {
-        public InnerspaceCommands()
-        {
-            CreateLavishCommands();
-        }
+        //public InnerspaceCommands() { }
         
         public static void CreateLavishCommands()
         {

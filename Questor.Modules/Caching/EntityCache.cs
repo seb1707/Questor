@@ -40,18 +40,18 @@ namespace Questor.Modules.Caching
                 //
                 // thre are some attributes that will never change and can be cached across frames - some of those are not cleared here
                 //
-                _GroupID = null;
-                _CategoryId = null;
+                //_GroupID = null;
+                //_CategoryId = null;
                 _Id = null;
-                _TypeId = null;
+                //_TypeId = null;
                 _FollowId = null;
-                _Name = null;
+                //_Name = null;
                 _Distance = null;
                 _Nearest5kDistance = null;
                 _ShieldPct = null;
                 _ArmorPct = null;
                 _StructurePct = null;
-                _IsNpc = null;
+                //_IsNpc = null;
                 _Velocity = null;
                 _IsTarget = null;
                 _IsPrimaryWeaponKillPriority = null;

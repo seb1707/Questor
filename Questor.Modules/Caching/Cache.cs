@@ -3541,8 +3541,19 @@ namespace Questor.Modules.Caching
             }
             
             EntityCache currentDroneTarget = null;
-            currentDroneTarget = ((Cache.Instance.PreferredDroneTarget ?? (TargetingCache.CurrentDronesTarget ?? null)));
-            if (currentDroneTarget != null && Cache.Instance.Entities.All(i => i.Id != currentDroneTarget.Id)) currentDroneTarget = null;
+            if (Cache.Instance.PreferredDroneTarget != null)
+            {
+                currentDroneTarget = Cache.Instance.PreferredDroneTarget;
+            }
+            else if (Cache.Instance.Targets.Any())
+            {
+                currentDroneTarget = Cache.Instance.Targets.FirstOrDefault(i => i.IsActiveTarget);
+            }
+            
+            if (currentDroneTarget != null && Cache.Instance.Entities.All(i => i.Id != currentDroneTarget.Id))
+            {
+                currentDroneTarget = null;
+            }
             
             EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
 

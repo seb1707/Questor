@@ -41,7 +41,7 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
-        private readonly InnerspaceCommands _innerspaceCommands;
+        //private readonly InnerspaceCommands _innerspaceCommands;
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
@@ -69,7 +69,7 @@ namespace Questor
             //_backgroundbehavior = new BackgroundBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
-            _innerspaceCommands = new InnerspaceCommands();
+            //_innerspaceCommands = new InnerspaceCommands();
 
             ScheduleCharacterName = Logging._character;
             Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;

@@ -42,6 +42,7 @@ namespace Questor
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
         private readonly InnerspaceCommands _innerspaceCommands;
+        private readonly Statistics _statistics;
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
@@ -70,6 +71,7 @@ namespace Questor
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
             _innerspaceCommands = new InnerspaceCommands();
+            _statistics = new Statistics();
 
             ScheduleCharacterName = Logging._character;
             Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
@@ -508,6 +510,8 @@ namespace Questor
             DebugPerformanceClearandStartTimer();
             _cleanup.ProcessState();
             DebugPerformanceStopandDisplayTimer("Cleanup.ProcessState");
+
+            _statistics.ProcessState();
 
             if (Settings.Instance.DebugStates)
                 Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);

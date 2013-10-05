@@ -219,6 +219,8 @@ namespace Questor.Modules.Misc
             Logging.Log("QuestorUI", "QuestorCommands                              - (this command) ", Logging.White);
             Logging.Log("QuestorUI", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
             Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("QuestorUI", "LogAllEntities                               - Logs Entities on Grid", Logging.White);
+            
             return 0;
         }
 

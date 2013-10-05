@@ -778,13 +778,6 @@ namespace Questor.Modules.Logging
             switch (State)
             {
                 case StatisticsState.Idle:
-                    Logging.Log("Statistics", "State=StatisticsState.Idle", Logging.White);
-
-                    //This State should only start every 20 seconds
-                    //if (DateTime.UtcNow.Subtract(_lastCleanupAction).TotalSeconds < 20)
-                    //    break;
-
-                    //State = StatisticsState.CheckModalWindows;
                     break;
 
                 case StatisticsState.PocketLog:

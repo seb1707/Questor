@@ -415,41 +415,6 @@ namespace Questor.Modules.Activities
 
             Cache.Instance.OpenWrecks = false;
 
-            /*
-            if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
-            {
-                if (DateTime.UtcNow > _nextGetDestinationPath || EVENavdestination == null)
-                {
-                    if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: EVENavdestination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();", Logging.White);
-                    _nextGetDestinationPath = DateTime.UtcNow.AddSeconds(20);
-                    _nextSetEVENavDestination = DateTime.UtcNow.AddSeconds(4);
-                    EVENavdestination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
-                    if (Settings.Instance.DebugGotobase) if (EVENavdestination != null) Logging.Log(module, "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId [" + Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId + "]", Logging.White);
-                    return;
-                }
-
-                if (Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId != Cache.Instance.AgentSolarSystemID)
-                {
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId [" + Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId + "]", Logging.White);
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: EVENavdestination.LastOrDefault() [" + EVENavdestination.LastOrDefault() + "]", Logging.White);
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: Cache.Instance.AgentSolarSystemID [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
-                    if (DateTime.UtcNow > _nextSetEVENavDestination)
-                    {
-                        if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.SetDestination(Cache.Instance.AgentStationId);", Logging.White);
-                        _nextSetEVENavDestination = DateTime.UtcNow.AddSeconds(7);
-                        Cache.Instance.DirectEve.Navigation.SetDestination(Cache.Instance.AgentStationID);
-                        Logging.Log(module, "Setting Destination to [" + Cache.Instance.AgentStationName + "'s] Station", Logging.White);
-                        return;
-                    }
-                }
-                else if (EVENavdestination != null || EVENavdestination.Count != 0)
-                {
-                    if (EVENavdestination.Count == 1 && EVENavdestination.FirstOrDefault() == 0)
-                        EVENavdestination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-                }
-            }
-            */
-
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
 
@@ -492,16 +457,22 @@ namespace Questor.Modules.Activities
                     if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler)
                     {
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
 
                     if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Traveler)
                     {
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
 
                     if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Traveler)
                     {
                         _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
                     return;
                 }

@@ -142,13 +142,70 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///  Primary Weapon target chosen by GetBest Target
         /// </summary>
-        public EntityCache PreferredPrimaryWeaponTarget;
+       
+        public long? PreferredPrimaryWeaponTargetID;
+        private EntityCache _preferredPrimaryWeaponTarget;
+        public EntityCache PreferredPrimaryWeaponTarget
+        {
+            get
+            {
+                if (_preferredPrimaryWeaponTarget == null)
+                {
+                    _preferredPrimaryWeaponTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == PreferredPrimaryWeaponTargetID);
+                    return _preferredPrimaryWeaponTarget ?? null;
+                }
+
+                return _preferredPrimaryWeaponTarget;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _preferredPrimaryWeaponTarget = null;
+                    PreferredPrimaryWeaponTargetID = null;
+                }
+                if (value != null)
+                {
+                    _preferredDroneTarget = value;
+                    PreferredPrimaryWeaponTargetID = value.Id;
+                }
+            }
+        }
+        
         public DateTime LastPreferredPrimaryWeaponTargetDateTime;
 
         /// <summary>
         ///   Drone target chosen by GetBest Target
         /// </summary>
-        public EntityCache PreferredDroneTarget;
+        public long? PreferredDroneTargetID;
+        private EntityCache _preferredDroneTarget;
+        public EntityCache PreferredDroneTarget
+        {
+            get
+            {
+                if (_preferredDroneTarget == null)
+                {
+                    _preferredDroneTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == PreferredDroneTargetID);
+                    return _preferredDroneTarget ?? null;
+                }
+
+                return _preferredDroneTarget;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _preferredDroneTarget = null;
+                    PreferredDroneTargetID = null;
+                }
+                if (value != null)
+                {
+                    _preferredDroneTarget = value;
+                    PreferredDroneTargetID = value.Id;
+                }
+            }
+        }
+
         public DateTime LastPreferredDroneTargetDateTime;
 
         public String OrbitEntityNamed;
@@ -1372,7 +1429,8 @@ namespace Questor.Modules.Caching
                         {
                             return new List<EntityCache>();
                         }
-                        _entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
+                        //_entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
+                        _entities = DirectEve.Entities.Select(i => new EntityCache(i)).ToList();
                         return _entities ?? null;
                     }
 
@@ -2102,14 +2160,8 @@ namespace Questor.Modules.Caching
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
-                {
-                    Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                }
-                if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTarget.Id))
-                {
-                    Cache.Instance.PreferredDroneTarget = null;
-                }
+                _preferredPrimaryWeaponTarget = null;
+                _preferredDroneTarget = null;
 
                 foreach (EntityCache EntityCacheEntity in Cache.Instance.Entities)
                 {
@@ -2968,7 +3020,7 @@ namespace Questor.Modules.Caching
                         if (!FindAUnTargetedEntity)
                         {
                             //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
-                            Logging.Log("FindPrimaryWeaponPriorityTarget", "if (!FindAUnTargetedEntity) Cache.Instance.PreferredPrimaryWeaponTarget = [ " + target.Name + "]", Logging.White);
+                            Logging.Log("FindPrimaryWeaponPriorityTarget", "if (!FindAUnTargetedEntity) Cache.Instance.PreferredPrimaryWeaponTargetID = [ " + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.White);
                             Cache.Instance.PreferredPrimaryWeaponTarget = target;
                             Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                             return target;
@@ -3071,7 +3123,7 @@ namespace Questor.Modules.Caching
                 bool currentTargetHealthLogNow = true;
                 if (Settings.Instance.DetailedCurrentTargetHealthLogging)
                 {
-                    if ((int)PreferredPrimaryWeaponTarget.Id != (int)TargetingCache.CurrentTargetID)
+                    if (PreferredPrimaryWeaponTarget != null && (int)PreferredPrimaryWeaponTarget.Id != (int)TargetingCache.CurrentTargetID)
                     {
                         if ((int)PreferredPrimaryWeaponTarget.ArmorPct == 0 && (int)PreferredPrimaryWeaponTarget.ShieldPct == 0 && (int)PreferredPrimaryWeaponTarget.StructurePct == 0)
                         {

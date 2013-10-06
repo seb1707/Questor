@@ -2157,6 +2157,10 @@ namespace Questor.Modules.Caching
                 _currentShipsCargo = null;
                 _containerInSpace = null;
                 _containers = null;
+                if (_entities != null)
+                {
+                    _entities.ForEach(pt => pt.InvalidateCache());    
+                }
                 _entities = null;
                 _entitiesById.Clear();
                 _gates = null;

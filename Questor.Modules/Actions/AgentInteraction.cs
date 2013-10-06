@@ -118,7 +118,7 @@ namespace Questor.Modules.Actions
             //
             if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
             {
-                if (((int)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
+                if (((float)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
                 {
                     if (!_agentStandingsCheckFlag)
                     {

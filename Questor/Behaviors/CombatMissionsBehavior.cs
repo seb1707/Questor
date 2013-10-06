@@ -154,7 +154,15 @@ namespace Questor.Behaviors
             _combatMissionCtrl.AgentId = Cache.Instance.AgentId;
             _arm.AgentId = Cache.Instance.AgentId;
             _statistics.AgentID = Cache.Instance.AgentId;
-            AgentID = Cache.Instance.AgentId;
+            
+            if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle )
+            {
+                AgentID = Cache.Instance.CurrentStorylineAgentId;
+            }
+            else
+            {
+                AgentID = Cache.Instance.AgentId;
+            }
         }
 
         public void ApplySalvageSettings()

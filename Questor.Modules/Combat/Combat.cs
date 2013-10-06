@@ -799,8 +799,8 @@ namespace Questor.Modules.Combat
                 try
                 {
                 unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget
-                                                                        && (h.Distance > Cache.Instance.MaxRange
-                                                                        || h.IsIgnored)
+                                                                        //&& (h.Distance > Cache.Instance.MaxRange
+                                                                        || (h.IsIgnored)
                                                                         && !h.IsPriorityWarpScrambler)
                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                         .ThenByDescending(t => t.Distance)

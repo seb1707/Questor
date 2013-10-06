@@ -779,16 +779,13 @@ namespace Questor.Modules.Combat
                     {
                         //unlockThisHighValueTarget = Cache.Instance.GetBestWeaponTargets((double)Distances.OnGridWithMe).Where(t => t.IsTarget && highValueTargetsTargeted.Any(e => t.Id == e.Id)).LastOrDefault();
 
-                        unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
-                                                                                                                                            && (((Cache.Instance.PreferredPrimaryWeaponTarget == null || h.Id != Cache.Instance.PreferredPrimaryWeaponTarget.Id)
-                                                                                                                                                 && (Cache.Instance.PreferredDroneTarget == null || h.Id != Cache.Instance.PreferredDroneTarget.Id))
-                                                                                                                                                || (h.IsIgnored)
-                                                                                                                                                || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (__highValueTargetsTargeted.Count() >= maxHighValueTargets && (!Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget || !Cache.Instance.PreferredDroneTarget.IsTarget))))
-                                                                                                                                            && !h.IsPriorityWarpScrambler
-                                                                                                                                            && (__highValueTargetsTargeted.Count() >= maxHighValueTargets)))
-                                                                            .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
-                                                                            .ThenByDescending(t => t.Distance)
-                                                                            .FirstOrDefault();
+                        unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h =>  (h.IsTarget && h.IsIgnored)
+                                                                                        || (h.IsTarget && (Cache.Instance.PreferredPrimaryWeaponTarget != null && !Cache.Instance.PreferredDroneTarget.IsTarget && h.IsHighValueTarget && !h.IsDronePriorityTarget && !h.IsPrimaryWeaponPriorityTarget))
+                                                                                        || (h.IsTarget && (!h.isPreferredPrimaryWeaponTarget && h.IsHigherPriorityPresent && __highValueTargetsTargeted.Count() == maxHighValueTargets))
+                                                                                        && !h.IsPriorityWarpScrambler)
+                                                                                        .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
+                                                                                        .ThenByDescending(t => t.Distance)
+                                                                                        .FirstOrDefault();
                     }
                 } 
                 catch (NullReferenceException) { }
@@ -798,10 +795,7 @@ namespace Questor.Modules.Combat
             {
                 try
                 {
-                unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget
-                                                                        //&& (h.Distance > Cache.Instance.MaxRange
-                                                                        || (h.IsIgnored)
-                                                                        && !h.IsPriorityWarpScrambler)
+                unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget && h.IsIgnored && !h.IsPriorityWarpScrambler)
                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                         .ThenByDescending(t => t.Distance)
                                                                         .FirstOrDefault();
@@ -834,16 +828,13 @@ namespace Questor.Modules.Combat
             {
                 try
                 {
-                    unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => Cache.Instance.PreferredPrimaryWeaponTarget != null && (h.IsTarget
-                                                                                                                                          && !h.IsPrimaryWeaponPriorityTarget
-                                                                                                                                          && ((!h.IsPrimaryWeaponPriorityTarget && !h.IsDronePriorityTarget)
-                                                                                                                                              || (h.IsIgnored)
-                                                                                                                                              || (!h.IsPrimaryWeaponPriorityTarget || (h.IsHigherPriorityPresent && !h.IsLowerPriorityPresent) || (__lowValueTargetsTargeted.Count() >= maxLowValueTargets && (!Cache.Instance.PreferredDroneTarget.IsTarget || !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget))))
-                                                                                                                                          && !h.IsPriorityWarpScrambler
-                                                                                                                                          && (__lowValueTargetsTargeted.Count() >= maxLowValueTargets)))
-                                                                                                                                          .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
-                                                                    .ThenByDescending(t => t.Nearest5kDistance)
-                                                                    .FirstOrDefault();
+                    unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => (h.IsTarget && h.IsIgnored)
+                                                                                 || (h.IsTarget && (Cache.Instance.PreferredDroneTarget != null && !Cache.Instance.PreferredDroneTarget.IsTarget && h.IsLowValueTarget && !h.IsDronePriorityTarget && !h.IsPrimaryWeaponPriorityTarget))
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && h.IsHigherPriorityPresent && __lowValueTargetsTargeted.Count() == maxLowValueTargets))
+                                                                                 && !h.IsPriorityWarpScrambler)
+                                                                                .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
+                                                                                .ThenByDescending(t => t.Nearest5kDistance)
+                                                                                .FirstOrDefault();
                 }
                 catch (NullReferenceException) { }
             }

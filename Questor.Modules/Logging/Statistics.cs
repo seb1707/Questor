@@ -234,7 +234,6 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-
         public static bool EntityStatistics(IEnumerable<EntityCache> things)
         {
             string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsNPCByGroupID;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";

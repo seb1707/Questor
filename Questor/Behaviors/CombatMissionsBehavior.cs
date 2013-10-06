@@ -873,23 +873,23 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.Statistics:
 
                     if (Settings.Instance.UseDrones)
+                    {
+                        if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
                         {
-                            if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
-                            {
-                                if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
-                                InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
-                                Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
-                                //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
-                                if (!Statistics.WriteDroneStatsLog()) break;
-                            }
-                            else
-                            {
-                                Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
-                            }
+                            if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
+                            InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
+                            Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
+                            //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
+                            if (!Statistics.WriteDroneStatsLog()) break;
                         }
-                        
-                        //Logging.Log("CombatMissionsBehavior: Starting: Statistics.AmmoConsumptionStatistics");
-                        if (!Statistics.AmmoConsumptionStatistics()) break;
+                        else
+                        {
+                            Logging.Log("DroneStats", "Could not find the drone TypeID specified in the character settings xml; this should not happen!", Logging.White);
+                        }
+                    }
+
+                    //Logging.Log("CombatMissionsBehavior: Starting: Statistics.AmmoConsumptionStatistics");
+                    if (!Statistics.AmmoConsumptionStatistics()) break;
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)

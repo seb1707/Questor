@@ -65,11 +65,11 @@ pause
 ::
 :: Build Project 7
 ::
-set nameofproject=QuestorStatistics
-set csproj=.\questorstatistics\QuestorStatistics.csproj
-"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
-pause
+::set nameofproject=QuestorStatistics
+::set csproj=.\questorstatistics\QuestorStatistics.csproj
+::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
+::Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
+::pause
 
 ::
 :: Build Project 8

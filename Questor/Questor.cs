@@ -163,6 +163,31 @@ namespace Questor
                 Logging.Log("CombatMissionsBehavior.State is", _States.CurrentQuestorState.ToString(), Logging.White);
         }
 
+        public static void UpdateMissionName(long AgentID = 0)
+        {
+            if (AgentID != 0)
+            {
+                Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, true);
+                if (Cache.Instance.Mission != null && Cache.Instance.Agent != null)
+                {
+                    // Update loyalty points again (the first time might return -1)
+                    Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
+                    Cache.Instance.MissionName = Cache.Instance.Mission.Name;
+                    if (Settings.Instance.UseInnerspace)
+                    {
+                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName + " - " + Cache.Instance.MissionName);
+                    }
+                }    
+            }
+            else
+            {
+                if (Settings.Instance.UseInnerspace)
+                {
+                    LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+                }
+            }
+        }
+
         public void RunOnceAfterStartup()
         {
             if (!_runOnceAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15))
@@ -180,8 +205,7 @@ namespace Questor
                     {
                         InnerspaceCommands.CreateLavishCommands();
 
-                        Logging.Log("RunOnceAfterStartup", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
-                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+                        UpdateMissionName();
 
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("RunOnceAfterStartup", "Running Innerspace command: timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);

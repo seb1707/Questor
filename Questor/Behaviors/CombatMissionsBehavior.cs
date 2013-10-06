@@ -477,6 +477,7 @@ namespace Questor.Behaviors
                             // Update loyalty points again (the first time might return -1)
                             Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
                             Cache.Instance.MissionName = Cache.Instance.Mission.Name;
+                            Questor.UpdateMissionName();
                         }
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.Idle;

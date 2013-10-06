@@ -1956,7 +1956,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.mission_concord_frigate;
                         result |= GroupId == (int)Group.mission_mordu_frigate;
                         result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_frigate2;
+                        result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
                         result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
                         result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
                         result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;

@@ -33,7 +33,7 @@
         public static bool CloseQuestor(string Reason)
         {
             // 30 seconds + 1 to 60 seconds + 1 to 60 seconds before restarting (this should make each instance a bit more spread out over 2 min)
-            int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMaximum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
+            int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMinimum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
 
             // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
             // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 

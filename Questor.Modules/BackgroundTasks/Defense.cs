@@ -406,7 +406,11 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
                 }
-
+                else
+                {
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                        continue;
+                }
                 //
                 // at this point the module should be active but is not: activate it, set the delay and return. The process will resume on the next tick
                 //

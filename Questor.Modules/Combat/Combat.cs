@@ -997,11 +997,11 @@ namespace Questor.Modules.Combat
                 //
                 // unlock low value targets that are out of range or ignored
                 //
-                if (!UnlockLowValueTarget("Combat.TargetCombatants", "OutOfRange or Ignored", true)) return;
+                if (!UnlockLowValueTarget("Combat.TargetCombatants", "[lv]OutOfRange or Ignored", true)) return;
                 //
                 // unlock high value targets that are out of range or ignored
                 //
-                if (!UnlockHighValueTarget("Combat.TargetCombatants", "OutOfRange or Ignored", true)) return;
+                if (!UnlockHighValueTarget("Combat.TargetCombatants", "[hv]OutOfRange or Ignored", true)) return;
             }
             #endregion Remove any target that is too far out of range (Weapon Range)
 

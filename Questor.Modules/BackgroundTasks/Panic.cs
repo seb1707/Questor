@@ -324,6 +324,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.InStation)
                     {
                         Logging.Log("Panic", "Entered a station, lower panic mode", Logging.White);
+                        Settings.Instance.LoadSettings();
                         _States.CurrentPanicState = PanicState.Panic;
                         return;
                     }
@@ -425,7 +426,11 @@ namespace Questor.Modules.BackgroundTasks
                             DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distances.OnGridWithMe);
                             if (offridSafeSpotBookmark != null)
                             {
-                                if (Cache.Instance.InWarp) return;
+                                if (Cache.Instance.InWarp)
+                                {
+                                    _States.CurrentPanicState = PanicState.Panic;
+                                    return;
+                                }
 
                                 if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                                 {
@@ -480,6 +485,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     Logging.Log("Panic", "At the star, lower panic mode", Logging.Red);
+                    Settings.Instance.LoadSettings();
                     _States.CurrentPanicState = PanicState.Panic;
                     break;
 

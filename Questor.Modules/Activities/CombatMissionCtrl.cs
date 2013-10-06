@@ -851,6 +851,52 @@ namespace Questor.Modules.Activities
             return;
         }
 
+        private void WaitUntilAggressed(Actions.Action action)
+        {
+            // Default timeout is 60 seconds
+            int timeout;
+            if (!int.TryParse(action.GetParameterValue("timeout"), out timeout))
+            {
+                timeout = 60;
+            }
+
+            // Default timeout is 30 seconds
+            int WaitUntilShieldsAreThisLow;
+            if (!int.TryParse(action.GetParameterValue("WaitUntilShieldsAreThisLow"), out WaitUntilShieldsAreThisLow))
+            {
+                WaitUntilShieldsAreThisLow = 45;
+                Settings.Instance.MinimumShieldPct = WaitUntilShieldsAreThisLow;
+            }
+
+            // Default timeout is 30 seconds
+            int WaitUntilArmorIsThisLow;
+            if (!int.TryParse(action.GetParameterValue("WaitUntilArmorIsThisLow"), out WaitUntilArmorIsThisLow))
+            {
+                WaitUntilArmorIsThisLow = 100;
+                Settings.Instance.MinimumArmorPct = WaitUntilArmorIsThisLow;
+            }
+
+            if (_waiting)
+            {
+                if (DateTime.UtcNow.Subtract(_waitingSince).TotalSeconds < timeout)
+                {
+                    return;
+                }
+
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Nothing targeted us within [ " + timeout + "sec]!", Logging.Teal);
+
+                // Nothing has targeted us in the specified timeout
+                _waiting = false;
+                Nextaction();
+                return;
+            }
+
+            // Start waiting
+            _waiting = true;
+            _waitingSince = DateTime.UtcNow;
+            return;
+        }
+
         private void DebuggingWait(Actions.Action action)
         {
             // Default timeout is 1200 seconds
@@ -1673,6 +1719,10 @@ namespace Questor.Modules.Activities
 
                 case ActionState.WaitUntilTargeted:
                     WaitUntilTargeted(action);
+                    break;
+
+                case ActionState.WaitUntilAggressed:
+                    WaitUntilAggressed(action);
                     break;
 
                 case ActionState.DebuggingWait:

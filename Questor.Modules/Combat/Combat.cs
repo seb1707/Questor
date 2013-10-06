@@ -385,6 +385,11 @@ namespace Questor.Modules.Combat
         /// <returns></returns>
         private bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
         {
+            if (!module.IsOnline)
+            {
+                return false;
+            }
+
             if (isWeapon && !entity.IsTarget)
             {
                 Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance/1000, 2) + "] which is currently not locked!", Logging.Debug);

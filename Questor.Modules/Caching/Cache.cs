@@ -2186,6 +2186,14 @@ namespace Questor.Modules.Caching
                 {
                     EntityCacheEntity.InvalidateCache();
                 }
+                foreach (EntityCache PrimaryWeaponPriorityTargetEntity in Cache.Instance.PrimaryWeaponPriorityTargets)
+                {
+                    PrimaryWeaponPriorityTargetEntity.InvalidateCache();
+                }
+                foreach (EntityCache DronePriorityTargetEntity in Cache.Instance.DronePriorityTargets)
+                {
+                    DronePriorityTargetEntity.InvalidateCache();
+                }
                 PreferredDroneTarget.InvalidateCache();
                 PreferredPrimaryWeaponTarget.InvalidateCache();
             }

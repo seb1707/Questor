@@ -811,7 +811,7 @@ namespace Questor.Modules.Combat
                 
             if (unlockThisHighValueTarget != null)
             {
-                Logging.Log("Combat [TargetCombatants]" + module, "Unlocking " + unlockThisHighValueTarget.Name + " to make room for [" + reason + "]", Logging.Orange);
+                Logging.Log("Combat [TargetCombatants]" + module, "Unlocking Highvalue " + unlockThisHighValueTarget.Name + "[" + Math.Round(unlockThisHighValueTarget.Distance/1000,0) + "k] myTargtingRange:[" + Cache.Instance.MaxTargetRange + "] myWeaponRange[:" + Cache.Instance.WeaponRange + "] to make room for [" + reason + "]", Logging.Orange);
                 unlockThisHighValueTarget.UnlockTarget("Combat [TargetCombatants]");
                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                 return false;
@@ -865,7 +865,7 @@ namespace Questor.Modules.Combat
 
             if (unlockThisLowValueTarget != null)
             {
-                Logging.Log("Combat [TargetCombatants]" + module, "Unlocking " + unlockThisLowValueTarget.Name + " to make room for [" + reason + "]", Logging.Orange);
+                Logging.Log("Combat [TargetCombatants]" + module, "Unlocking LowValue " + unlockThisLowValueTarget.Name + "[" + Math.Round(unlockThisLowValueTarget.Distance / 1000, 0) + "k] myTargtingRange:[" + Cache.Instance.MaxTargetRange + "] myWeaponRange[:" + Cache.Instance.WeaponRange + "] to make room for [" + reason + "]", Logging.Orange);
                 unlockThisLowValueTarget.UnlockTarget("Combat [TargetCombatants]");
                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                 return false;

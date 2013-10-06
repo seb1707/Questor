@@ -36,9 +36,9 @@ namespace Questor.Modules.Caching
             try
             {
                 //
-                // this list of Entitycache Attributes we want to clear every pulse. (where is this running that does that atm?)
+                // this list of Entitycache Attributes we want to clear every pulse. (see Cache.Instance.InvalidateCache)
                 //
-                // thre are some attributes that will never change and can be cached across frames - some of those are not cleared here
+                // there are some attributes that will never change and can be cached across frames - some of those are not cleared here
                 //
                 //_GroupID = null;
                 //_CategoryId = null;

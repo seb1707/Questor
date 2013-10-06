@@ -684,6 +684,24 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public DirectContainer _containerInSpace { get; set; }
+
+        public DirectContainer ContainerInSpace
+        {
+            get
+            {
+                if (_containerInSpace == null)
+                {
+                    //_containerInSpace = 
+                    return _containerInSpace;
+                }
+
+                return _containerInSpace;
+            }
+            set { _containerInSpace = value; }
+        }
+
+
         private DirectActiveShip _activeship;
 
         public DirectActiveShip ActiveShip
@@ -2135,6 +2153,7 @@ namespace Questor.Modules.Caching
                 _bigObjectsAndGates = null;
                 _combatTargets = null;
                 _currentShipsCargo = null;
+                _containerInSpace = null;
                 _containers = null;
                 _entities = null;
                 _entitiesById.Clear();
@@ -2167,6 +2186,8 @@ namespace Questor.Modules.Caching
                 {
                     EntityCacheEntity.InvalidateCache();
                 }
+                PreferredDroneTarget.InvalidateCache();
+                PreferredPrimaryWeaponTarget.InvalidateCache();
             }
             catch (Exception exception)
             {
@@ -6584,8 +6605,6 @@ namespace Questor.Modules.Caching
 
             return true;
         }
-
-        public DirectContainer ContainerInSpace { get; set; }
 
         public bool OpenContainerInSpace(String module, EntityCache containerToOpen)
         {

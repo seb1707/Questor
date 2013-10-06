@@ -718,7 +718,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             
                         }
-                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Where(x => x.GroupID != ).Select(i => i.DirectItem));
+                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
                     }
                     else
                     {

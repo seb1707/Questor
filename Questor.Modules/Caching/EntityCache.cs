@@ -2376,7 +2376,6 @@ namespace Questor.Modules.Caching
                     {
                         bool result = false;
                         result |= IsSentry;
-                        result |= GroupId == (int)Group.TutorialDrone;
                         result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
                         //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
                         result |= GroupId == (int)Group.Storyline_Battleship;
@@ -2495,6 +2494,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
                         result |= GroupId == (int)Group.Mission_Generic_Destroyers;
                         result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                        result |= GroupId == (int)Group.TutorialDrone;
                         result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
                         result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
                         result |= GroupId == (int)Group.asteroid_guristas_frigate;
@@ -2503,6 +2503,8 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
                         result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
                         result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                        result |= GroupId == (int)Group.Deadspace_Overseer_Frigate;
+                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Swarm;
                         result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
                         result |= GroupId == (int)Group.deadspace_serpentis_frigate;
                         result |= GroupId == (int)Group.mission_amarr_empire_frigate;
@@ -2513,7 +2515,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.mission_concord_frigate;
                         result |= GroupId == (int)Group.mission_mordu_frigate;
                         result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_frigate2;
+                        result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
                         result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
                         result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
                         result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;

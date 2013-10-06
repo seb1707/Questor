@@ -190,6 +190,7 @@ namespace Questor.Modules.Lookup
         //
         // various NPCs
         //
+        Deadspace_Rogue_Drone_Swarm = 806,
         TutorialDrone = 286,
         Storyline_Battleship = 523,
         Storyline_Mission_Battleship = 534,
@@ -325,13 +326,14 @@ namespace Questor.Modules.Lookup
         mission_concord_frigate = 693,
         mission_mordu_frigate = 699,
         asteroid_rouge_drone_frigate = 759,
-        asteroid_rouge_drone_frigate2 = 805,
+        deadspace_rogue_drone_frigate = 805,
         asteroid_angel_cartel_commander_frigate = 789,
         asteroid_blood_raiders_commander_frigate = 792,
         asteroid_guristas_commander_frigate = 800,
         asteroid_sanshas_nation_commander_frigate = 810,
         asteroid_serpentis_commander_frigate = 814,
         mission_generic_frigates = 818,
+        Deadspace_Overseer_Frigate = 819,
         mission_thukker_frigate = 826,
         asteroid_rouge_drone_commander_frigate = 847,
     }

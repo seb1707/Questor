@@ -699,7 +699,26 @@ namespace Questor.Modules.BackgroundTasks
                     if (lootItems.Count != 0)
                     {
                         Logging.Log("Salvage.LootWrecks", "Looting container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(containerEntity.Id) + "], [" + lootItems.Count + "] valuable items", Logging.White);
-                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
+                        if(Settings.Instance.DebugLootWrecks)
+                        {
+                            int icount = 0;
+                            foreach (var lootItem in lootItems)
+                            {
+                                icount++;
+                                Logging.Log("Salvage.LootWrecks", "[" + icount + "]LootItems Contains: [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                if (lootItem.GroupID == (int)Group.Drugs ||
+                                    lootItem.GroupID == (int)Group.ToxicWaste ||
+                                    lootItem.TypeId == (int)TypeID.Small_Arms ||
+                                    lootItem.TypeId == (int)TypeID.Ectoplasm ||
+                                    lootItem.TypeId == (int)TypeID.AIMEDs)
+                                {
+                                    lootItems.Remove(lootItem);
+                                    Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                }
+                            }
+                            
+                        }
+                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Where(x => x.GroupID != ).Select(i => i.DirectItem));
                     }
                     else
                     {

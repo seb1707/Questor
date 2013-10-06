@@ -36,6 +36,12 @@
         <parameter name="Timeout" value="15"/>
       </action>
 
+	  <action name="WaitUntilAggressed">
+          <parameter name="WaitUntilShieldsAreThisLow" value="50"/>
+		  <parameter name="WaitUntilArmorIsThisLow" value="100"/>
+		  <parameter name="Timeout" value="60"/>
+      </action>
+	  
       <action name="ClearPocket">  <!-- This is a commonly used action that clears the pocket of NPCs -->
 		<parameter name="distance">30000</parameter> <!-- default distance is your maxRange, use this if you only want to clear aggro within 30k -->
 	  </action>

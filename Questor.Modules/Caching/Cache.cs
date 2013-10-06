@@ -3687,37 +3687,37 @@ namespace Questor.Modules.Caching
 
             // Do we have ANY warp scrambling entities targeted starting with currentTarget
             // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY ECM entities targeted starting with currentTarget
             // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToDroneTargetList, distance) != null)
                 return true;
 
             // Do we have ANY tracking disrupting entities targeted starting with currentTarget
             // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Neutralizing entities targeted starting with currentTarget
             // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Target Painting entities targeted starting with currentTarget
             // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
             // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Webbing entities targeted starting with currentTarget
             // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList, distance) != null)
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToDronePriorityTargetList, distance) != null)
                 return true;
 
             //
@@ -3735,9 +3735,7 @@ namespace Questor.Modules.Caching
                 if (DronePriorityTargets.Any(pt => pt.IsReadyToShoot 
                                                         && pt.Distance < Cache.Instance.MaxRange 
                                                         && pt.Id == currentDroneTarget.Id
-                                                        && !currentDroneTarget.IsHigherPriorityPresent
-                                                        && (!currentDroneTarget.IsNPCFrigate 
-                                                            || (!Cache.Instance.UseDrones && !currentDroneTarget.IsTooCloseTooFastTooSmallToHit))))
+                                                        && !currentDroneTarget.IsHigherPriorityPresent))
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
@@ -3813,8 +3811,7 @@ namespace Questor.Modules.Caching
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
-                    if (currentDroneTarget.IsReadyToShoot
-                        && currentDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Distance < Settings.Instance.DroneControlRange)
                     {
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
@@ -3831,7 +3828,7 @@ namespace Questor.Modules.Caching
             //
             // Get the closest primary weapon priority target
             //
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest Primary", Logging.Teal);
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest DronePriorityTarget", Logging.Teal);
             EntityCache dronePriorityTarget = null;
             try
             {

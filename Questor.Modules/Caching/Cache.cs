@@ -3588,7 +3588,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
             #region If we didnt find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestTarget)
             {
@@ -3935,7 +3935,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            Logging.Log("GetBestDroneTarget: none", "Could not determine a suitable target", Logging.Debug);
+            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget: none", "Could not determine a suitable Drone target", Logging.Debug);
             #region If we didnt find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestDroneTarget)
             {

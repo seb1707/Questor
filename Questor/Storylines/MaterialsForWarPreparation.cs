@@ -27,7 +27,7 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.ActiveShip == null)
+            if (Cache.Instance.ActiveShip == null || Cache.Instance.ActiveShip.GivenName == null)
             {
                 if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.ActiveShip == null)", Logging.Debug);
                 _nextAction = DateTime.UtcNow.AddSeconds(3);

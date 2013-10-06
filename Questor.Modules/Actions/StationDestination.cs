@@ -95,40 +95,42 @@ namespace Questor.Modules.Actions
             if (nextAction > DateTime.UtcNow)
                 return false;
 
-            EntityCache entity = Cache.Instance.EntityByName(stationName);
-            if (entity == null)
+            EntityCache station = Cache.Instance.EntityByName(stationName);
+            if (station == null)
             {
                 // We are there but no station? Wait a bit
                 return false;
             }
 
-            if (entity.Distance < (int)Distances.DockingRange)
+            if (station.Distance < (int)Distances.DockingRange)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
-                    Logging.Log("StationDestination.StationDestination", "Dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.White);
-                    entity.Dock();
-
+                    Logging.Log("StationDestination.StationDestination", "Dock at [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                    station.Dock();
+                    nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
             }
-            else if (entity.Distance < (int)Distances.WarptoDistance)
+            else if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination", "Approaching [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.White);
-                    entity.Approach();
-
+                    Logging.Log("TravelerDestination.StationDestination", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                    station.Approach();
+                    nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
             }
             else
             {
-                Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + entity.Name + "]", Logging.White);
-                entity.WarpToAndDock();
+                Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + station.Name + "]", Logging.White);
+                station.WarpToAndDock();
+                nextAction = DateTime.UtcNow.AddSeconds(30);
+                return false;
             }
 
-            nextAction = DateTime.UtcNow.AddSeconds(30);
+            nextAction = DateTime.UtcNow.AddSeconds(10);
             return false;
         }
     }

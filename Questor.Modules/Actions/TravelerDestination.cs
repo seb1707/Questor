@@ -195,29 +195,28 @@ namespace Questor.Modules.Actions
 
             //else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
 
-            EntityCache entity = Cache.Instance.EntitiesByName(stationName).FirstOrDefault();
-            if (entity == null)
+            EntityCache station = Cache.Instance.EntitiesByName(stationName).FirstOrDefault();
+            if (station == null)
             {
                 // We are there but no station? Wait a bit
                 return false;
             }
 
-            if (entity.Distance < (int)Distances.DockingRange)
+            if (station.Distance < (int)Distances.DockingRange)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination", "Dock at [" + Logging.Yellow + entity.Name + Logging.Green + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.Green);
-                    entity.Dock();
-
+                    Logging.Log("TravelerDestination.StationDestination", "Dock at [" + Logging.Yellow + station.Name + Logging.Green + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Green);
+                    station.Dock();
                     return false;
                 }
             }
-            else if (entity.Distance < (int)Distances.WarptoDistance)
+            else if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination", "Approaching[" + Logging.Yellow + entity.Name + Logging.Green + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.Green);
-                    entity.Approach();
+                    Logging.Log("TravelerDestination.StationDestination", "Approaching[" + Logging.Yellow + station.Name + Logging.Green + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Green);
+                    station.Approach();
                     return false;
                 }
             }
@@ -225,8 +224,8 @@ namespace Questor.Modules.Actions
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + entity.Name + Logging.Green + "][" + Math.Round((entity.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);
-                    entity.WarpToAndDock();
+                    Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + station.Name + Logging.Green + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);
+                    station.WarpToAndDock();
                     return false;
                 }
             }

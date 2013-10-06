@@ -27,14 +27,67 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
                 LavishScript.Commands.AddCommand("LogAllEntities", LogAllEntities);
+                LavishScript.Commands.AddCommand("ModuleInfo", ModuleInfo);
+                LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
+                LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
+                LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
+                
             }
+        }
+
+        private static int ListTargetedandTargeting(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListTargets - Lists Targeted and Targeting", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.ListTargetedandTargeting;
+            return 0;
+        }
+
+        private static int ListPrimaryWeaponPriorityTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets - Lists PrimaryWeaponPriorityTargets", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
+            return 0;
+        }
+
+        private static int ListDronePriorityTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListDronePriorityTargets - Lists DronePriorityTargets", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.ListDronePriorityTargets;
+            return 0;
+        }
+
+        private static int ModuleInfo(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ModuleInfo - Lists ModuleInfo of current ship", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.ModuleInfo;
+            return 0;
         }
 
         private static int LogAllEntities(string[] args)
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor - Changes the QuestorState to CloseQuestor which will GotoBase and then Exit", Logging.White);
+                Logging.Log("InnerspaceCommands", "LogAllEntities - Logs Entities on grid", Logging.White);
                 return -1;
             }
 
@@ -47,13 +100,13 @@ namespace Questor.Modules.Misc
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
             {
-                Logging.Log("QuestorUI", "SetAutoStart true|false", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetAutoStart true|false", Logging.White);
                 return -1;
             }
 
             Settings.Instance.AutoStart = value;
 
-            Logging.Log("QuestorUI", "AutoStart is turned " + (value ? "[on]" : "[off]"), Logging.White);
+            Logging.Log("InnerspaceCommands", "AutoStart is turned " + (value ? "[on]" : "[off]"), Logging.White);
             return 0;
         }
 
@@ -62,13 +115,13 @@ namespace Questor.Modules.Misc
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
             {
-                Logging.Log("QuestorUI", "SetDisable3D true|false", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetDisable3D true|false", Logging.White);
                 return -1;
             }
 
             Settings.Instance.Disable3D = value;
 
-            Logging.Log("QuestorUI", "Disable3D is turned " + (value ? "[on]" : "[off]"), Logging.White);
+            Logging.Log("InnerspaceCommands", "Disable3D is turned " + (value ? "[on]" : "[off]"), Logging.White);
             return 0;
         }
 
@@ -77,19 +130,19 @@ namespace Questor.Modules.Misc
             bool value;
             if (args.Length != 2 || !bool.TryParse(args[1], out value))
             {
-                Logging.Log("QuestorUI", "SetExitWhenIdle true|false", Logging.White);
-                Logging.Log("QuestorUI", "Note: AutoStart is automatically turned off when ExitWhenIdle is turned on", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetExitWhenIdle true|false", Logging.White);
+                Logging.Log("InnerspaceCommands", "Note: AutoStart is automatically turned off when ExitWhenIdle is turned on", Logging.White);
                 return -1;
             }
 
             Cache.Instance.ExitWhenIdle = value;
 
-            Logging.Log("QuestorUI", "ExitWhenIdle is turned " + (value ? "[on]" : "[off]"), Logging.White);
+            Logging.Log("InnerspaceCommands", "ExitWhenIdle is turned " + (value ? "[on]" : "[off]"), Logging.White);
 
             if (value && Settings.Instance.AutoStart)
             {
                 Settings.Instance.AutoStart = false;
-                Logging.Log("QuestorUI", "AutoStart is turned [off]", Logging.White);
+                Logging.Log("InnerspaceCommands", "AutoStart is turned [off]", Logging.White);
             }
             return 0;
         }
@@ -98,14 +151,14 @@ namespace Questor.Modules.Misc
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor - Changes the QuestorState to CloseQuestor which will GotoBase and then Exit", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetQuestorStatetoCloseQuestor - Changes the QuestorState to CloseQuestor which will GotoBase and then Exit", Logging.White);
                 return -1;
             }
 
             Settings.Instance.AutoStart = false;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
 
-            Logging.Log("QuestorUI", "QuestorState is now: CloseQuestor ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorState is now: CloseQuestor ", Logging.White);
             return 0;
         }
 
@@ -113,7 +166,7 @@ namespace Questor.Modules.Misc
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetQuestorStatetoIdle - Changes the QuestorState to Idle", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetQuestorStatetoIdle - Changes the QuestorState to Idle", Logging.White);
                 return -1;
             }
 
@@ -131,7 +184,7 @@ namespace Questor.Modules.Misc
             _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
 
 
-            Logging.Log("QuestorUI", "QuestorState is now: Idle ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorState is now: Idle ", Logging.White);
             return 0;
         }
 
@@ -140,7 +193,7 @@ namespace Questor.Modules.Misc
             long value;
             if (args.Length != 2 || !long.TryParse(args[1], out value))
             {
-                Logging.Log("QuestorUI", "SetDestToSystem - Sets destination to the locationID specified", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetDestToSystem - Sets destination to the locationID specified", Logging.White);
                 return -1;
             }
 
@@ -178,13 +231,13 @@ namespace Questor.Modules.Misc
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase - Changes the CombatMissionsBehaviorState to GotoBase", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetCombatMissionsBehaviorStatetoGotoBase - Changes the CombatMissionsBehaviorState to GotoBase", Logging.White);
                 return -1;
             }
 
             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
 
-            Logging.Log("QuestorUI", "CombatMissionsBehaviorState is now: GotoBase ", Logging.White);
+            Logging.Log("InnerspaceCommands", "CombatMissionsBehaviorState is now: GotoBase ", Logging.White);
             return 0;
         }
 
@@ -192,57 +245,58 @@ namespace Questor.Modules.Misc
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase - Changes the SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase to GotoBase", Logging.White);
+                Logging.Log("InnerspaceCommands", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase - Changes the SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase to GotoBase", Logging.White);
                 return -1;
             }
 
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
 
-            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase is now: GotoBase ", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase is now: GotoBase ", Logging.White);
             return 0;
         }
 
         private static int ListQuestorCommands(string[] args)
         {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor commands you can run from innerspace", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "SetAutoStart                                 - SetAutoStart true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetDisable3D                                 - SetDisable3D true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetExitWhenIdle                              - SetExitWhenIdle true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor                - SetQuestorStatetoCloseQuestor true", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoIdle                        - SetQuestorStatetoIdle true", Logging.White);
-            Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase     - SetCombatMissionsBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase     - SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCommands                              - (this command) ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "LogAllEntities                               - Logs Entities on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "Questor commands you can run from innerspace", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetAutoStart                                 - SetAutoStart true|false", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetDisable3D                                 - SetDisable3D true|false", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetExitWhenIdle                              - SetExitWhenIdle true|false", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetQuestorStatetoCloseQuestor                - SetQuestorStatetoCloseQuestor true", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetQuestorStatetoIdle                        - SetQuestorStatetoIdle true", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetCombatMissionsBehaviorStatetoGotoBase     - SetCombatMissionsBehaviorStatetoGotoBase true", Logging.White);
+            Logging.Log("InnerspaceCommands", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase     - SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase true", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorCommands                              - (this command) ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "LogAllEntities                               - Logs Entities on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", "ModuleInfo                                   - Logs Module Info of My Current Ship", Logging.White);
             
             return 0;
         }
 
         private static int ListQuestorEvents(string[] args)
         {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor Events you can listen for from an innerspace script", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorState                                  - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "Questor Events you can listen for from an innerspace script", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorState                                  - This Event fires when the State changes", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
+            Logging.Log("InnerspaceCommands", " ", Logging.White);
             return 0;
         }
 
@@ -250,13 +304,13 @@ namespace Questor.Modules.Misc
         {
             if (args.Length != 1)
             {
-                Logging.Log("QuestorUI", "IfInPodSwitchToNoobShiporShuttle - If the toon is in a pod switch to a noobship or shuttle if avail (otherwise do nothing)", Logging.White);
+                Logging.Log("InnerspaceCommands", "IfInPodSwitchToNoobShiporShuttle - If the toon is in a pod switch to a noobship or shuttle if avail (otherwise do nothing)", Logging.White);
                 return -1;
             }
 
             //_States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.SwitchToNoobShip1;
 
-            Logging.Log("QuestorUI", "CurrentBackgroundBehaviorState is now: SwitchToNoobShip1 ", Logging.White);
+            Logging.Log("InnerspaceCommands", "CurrentBackgroundBehaviorState is now: SwitchToNoobShip1 ", Logging.White);
             return 0;
         }
 

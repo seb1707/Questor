@@ -60,6 +60,10 @@ namespace Questor.Modules.Lookup
         CriminalTags = 370,
         EmpireInsigniaDrops = 409,
 
+        RemoteShieldRepairer = 41,
+        RemoteArmorRepairer = 325,
+        RemoteHullRepairer = 585, 
+        WarpDisruptor = 52, 
         StasisWeb = 65,
         NOS = 68,
         TargetPainter = 379,

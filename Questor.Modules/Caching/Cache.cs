@@ -867,6 +867,8 @@ namespace Questor.Modules.Caching
         public DateTime NextReload { get; set; }
         public DateTime NextWeaponAction { get; set; }
         public DateTime NextWebAction { get; set; }
+        public DateTime NextRemoteRepairAction { get; set; }
+        public DateTime NextWarpDisruptorAction { get; set; }
         public DateTime NextNosAction { get; set; }
         public DateTime NextPainterAction { get; set; }
         public DateTime NextActivateAction { get; set; }
@@ -2159,6 +2161,7 @@ namespace Questor.Modules.Caching
                 _entitiesById.Clear();
                 _gates = null;
                 _IDsinInventoryTree = null;
+                _itemHangar = null;
                 _jumpBridges = null;
                 _maxLockedTargets = null;
                 _maxrange = null;
@@ -4088,7 +4091,28 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        public DirectContainer ItemHangar { get; set; }
+        public DirectContainer _itemHangar { get; set; }
+
+        public DirectContainer ItemHangar
+        {
+            get
+            {
+                if (!InSpace && InStation)
+                {
+                    if (_itemHangar == null)
+                    {
+                        _itemHangar = Cache.Instance.DirectEve.GetItemHangar();
+                        return _itemHangar;
+                    }
+
+                    return _itemHangar;
+                }
+
+                return null;
+            }
+            
+            set { _itemHangar = value; }
+        }
 
         public bool ReadyItemsHangarSingleInstance(String module)
         {
@@ -4139,10 +4163,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangar", "We are in Station", Logging.Teal);
-                    Cache.Instance.ItemHangar = Cache.Instance.DirectEve.GetItemHangar();
-                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenInventory);
-                    return true;
+                    if (Cache.Instance.ItemHangar.IsValid) return true;
                 }
                 return false;
             }
@@ -6061,7 +6082,26 @@ namespace Questor.Modules.Caching
             return false;
         }
 
+        //public DirectContainer _ammoHangar { get; set; }
+
         public DirectContainer AmmoHangar { get; set; }
+        //{
+        //    get
+        //    {
+        //        if (_ammoHangar == null)
+        //        {
+        //            _ammoHangar = true;
+        //            return _ammoHangar
+        //        }
+        //
+        //        return _ammoHangar;
+        //    }
+        //
+        //    set 
+        //    { 
+        //        _ammoHangar = value;
+        //    }
+        //}
 
         public bool ReadyAmmoHangar(String module)
         {

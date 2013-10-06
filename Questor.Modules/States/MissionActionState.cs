@@ -17,6 +17,7 @@ namespace Questor.Modules.States
         MoveToBackground,
         Activate,
         WaitUntilTargeted,
+        WaitUntilAggressed,
         ClearPocket,
         ClearAggro,
         ClearWithinWeaponsRangeOnly,

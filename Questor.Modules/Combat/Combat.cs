@@ -760,6 +760,102 @@ namespace Questor.Modules.Combat
             }
         }
 
+        private void ActivateWarpDisruptor(EntityCache target)
+        {
+            if (DateTime.UtcNow < Cache.Instance.NextWarpDisruptorAction) //if we just did something wait a fraction of a second
+                return;
+
+            List<ModuleCache> WarpDisruptors = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.WarpDisruptor).ToList();
+
+            // Find the first active weapon
+            // Assist this weapon
+            _weaponNumber = 0;
+            foreach (ModuleCache WarpDisruptor in WarpDisruptors)
+            {
+                _weaponNumber++;
+
+                // Are we on the right target?
+                if (WarpDisruptor.IsActive)
+                {
+                    if (WarpDisruptor.TargetId != target.Id)
+                    {
+                        WarpDisruptor.Click();
+                        return;
+                    }
+
+                    continue;
+                }
+
+                // Are we deactivating?
+                if (WarpDisruptor.IsDeactivating)
+                    continue;
+
+                // Target is out of web range
+                if (target.Distance >= WarpDisruptor.OptimalRange)
+                    continue;
+
+                if (CanActivate(WarpDisruptor, target, false))
+                {
+                    Logging.Log("Combat", "Activating WarpDisruptor [" + _weaponNumber + "] on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                    WarpDisruptor.Activate(target.Id);
+                    Cache.Instance.NextWarpDisruptorAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WarpDisruptorDelay_milliseconds);
+                    return;
+                }
+            }
+        }
+
+        private void ActivateRemoteRepair(EntityCache target)
+        {
+            if (DateTime.UtcNow < Cache.Instance.NextRemoteRepairAction) //if we just did something wait a fraction of a second
+                return;
+
+            List<ModuleCache> RemoteRepairers = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.RemoteArmorRepairer 
+                                                                               || m.GroupId == (int)Group.RemoteShieldRepairer 
+                                                                               || m.GroupId == (int)Group.RemoteHullRepairer
+                                                                               ).ToList();
+
+            // Find the first active weapon
+            // Assist this weapon
+            _weaponNumber = 0;
+            if (RemoteRepairers.Any())
+            {
+                if (Settings.Instance.DebugRemoteRepair) Logging.Log("ActivateRemoteRepair", "RemoteRepairers [" + RemoteRepairers.Count() + "] Target Distance [" + Math.Round(target.Distance / 1000, 0) + "] RemoteRepairDistance [" + Math.Round(((double)Settings.Instance.RemoteRepairDistance / 1000), digits: 0) + "]", Logging.Debug);
+                foreach (ModuleCache RemoteRepairer in RemoteRepairers)
+                {
+                    _weaponNumber++;
+
+                    // Are we on the right target?
+                    if (RemoteRepairer.IsActive)
+                    {
+                        if (RemoteRepairer.TargetId != target.Id)
+                        {
+                            RemoteRepairer.Click();
+                            return;
+                        }
+
+                        continue;
+                    }
+
+                    // Are we deactivating?
+                    if (RemoteRepairer.IsDeactivating)
+                        continue;
+
+                    // Target is out of RemoteRepair range
+                    if (target.Distance >= Settings.Instance.RemoteRepairDistance)
+                        continue;
+
+                    if (CanActivate(RemoteRepairer, target, false))
+                    {
+                        Logging.Log("Combat", "Activating RemoteRepairer [" + _weaponNumber + "] on [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                        RemoteRepairer.Activate(target.Id);
+                        Cache.Instance.NextRemoteRepairAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.RemoteRepairerDelay_milliseconds);
+                        return;
+                    }
+                }
+            }
+            
+        }
+
         private bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisHighValueTarget = null;
@@ -1012,10 +1108,13 @@ namespace Questor.Modules.Combat
 
                 if (PrimaryWeaponsPriorityTargetUnTargeted > 0)
                 {
+                    Logging.Log("Combat.TargetCombatants", "if (PrimaryWeaponsPriorityTargetUnTargeted > 0)", Logging.Debug);
                     //
                     // unlock a lower priority entity if needed
                     //
                     if (!UnlockHighValueTarget("Combat.TargetCombatants", "PrimaryWeaponPriorityTargets")) return;
+
+                    Logging.Log("Combat.TargetCombatants", "if (!UnlockHighValueTarget(Combat.TargetCombatants, PrimaryWeaponPriorityTargets return;", Logging.Debug);
 
                     IEnumerable<EntityCache> _primaryWeaponPriorityEntities = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                      .OrderByDescending(c => c.IsInOptimalRange)
@@ -1140,7 +1239,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                         {
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)", Logging.Debug);
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxTargetRange)
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
                             {
                                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)", Logging.Debug);
                                 //
@@ -1536,6 +1635,10 @@ namespace Questor.Modules.Combat
                                 ActivateTargetPainters(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
                                 ActivateStasisWeb(killTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating WarpDisruptors", Logging.Debug);
+                                ActivateWarpDisruptor(killTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating RemoteRepairers", Logging.Debug);
+                                ActivateRemoteRepair(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
                                 ActivateNos(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);

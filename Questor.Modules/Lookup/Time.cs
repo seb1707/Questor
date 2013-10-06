@@ -33,6 +33,8 @@ namespace Questor.Modules.Lookup
         public int WeaponDelay_milliseconds = 220;                          //
         public int NosDelay_milliseconds = 220;                             //
         public int WebDelay_milliseconds = 220;                             //
+        public int RemoteRepairerDelay_milliseconds = 220;                  //
+        public int WarpDisruptorDelay_milliseconds = 220;                   //
         public int PainterDelay_milliseconds = 4500;                        // This is the delay between target painter activations and should stagger the painters somewhat (purposely)
         public int ValidateSettings_seconds = 15;                           // This is the delay between character settings validation attempts. The settings will be reloaded at this interval if they have changed. Default is 15
         public int SetupLogPathDelay_seconds = 10;                          // Why is this delay here? this can likely be removed with some testing... Default is 10

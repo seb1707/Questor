@@ -96,9 +96,9 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool PocketObjectStatistics(List<EntityCache> things)
+        public static bool PocketObjectStatistics(List<EntityCache> things, bool force = false)
         {
-            if (Settings.Instance.PocketObjectStatisticsLog)
+            if (Settings.Instance.PocketObjectStatisticsLog || force)
             {
                 string currentPocketName = Cache.Instance.FilterPath("randomgrid");
                 try
@@ -775,7 +775,7 @@ namespace Questor.Modules.Logging
 
         public void ProcessState()
         {
-            switch (State)
+            switch (_States.CurrentStatisticsState)
             {
                 case StatisticsState.Idle:
                     break;
@@ -789,8 +789,14 @@ namespace Questor.Modules.Logging
                     break;
 
                 case StatisticsState.PocketObjectStatistics:
-                    Statistics.PocketObjectStatistics(Cache.Instance.Entities.Where(I => I.IsOnGridWithMe).ToList());
-                    State = StatisticsState.Idle;
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.Entities.Any())
+                        {
+                            Statistics.PocketObjectStatistics(Cache.Instance.Entities.Where(I => I.IsOnGridWithMe).ToList(), true);
+                            State = StatisticsState.Idle;    
+                        }
+                    }
                     break;
 
                 case StatisticsState.Done:

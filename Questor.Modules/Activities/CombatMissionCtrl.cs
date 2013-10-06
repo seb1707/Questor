@@ -276,6 +276,27 @@ namespace Questor.Modules.Activities
             
             if (closest != null)
             {
+                if (DateTime.UtcNow < Cache.Instance.NextActivateAction && Cache.Instance.AttemptedAccelerationgateActivation)
+                {
+                    if (Cache.Instance.InWarp)
+                    {
+                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
+                        _moveToNextPocket = DateTime.UtcNow;
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
+                        Cache.Instance.AttemptedAccelerationgateActivation = false;
+                        return;
+                    }
+
+                    if (DateTime.UtcNow < Cache.Instance.NextActivateAction.AddSeconds(-5))
+                    {
+                        LoadDefaultActions();
+                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;
+                        return;
+                    }
+
+                    return;
+                }
+
                 if (closest.Distance <= (int)Distances.GateActivationRange)
                 {
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance [" + closest.Distance + "] <= (int)Distances.GateActivationRange [" + (int)Distances.GateActivationRange + "])", Logging.Green);
@@ -329,10 +350,9 @@ namespace Questor.Modules.Activities
                     {
                         Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.Green);
                         closest.Activate();
+                        Cache.Instance.AttemptedAccelerationgateActivation = true;
                         AttemptsToActivateGateTimer = 0;
-                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
-                        _moveToNextPocket = DateTime.UtcNow;
-                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
+                        Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
                     }
 
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);
@@ -1731,6 +1751,29 @@ namespace Questor.Modules.Activities
             }
         }
 
+        private void LoadDefaultActions()
+        {
+            // No Pocket action, load default actions
+            Logging.Log("CombatMissionCtrl", "No mission actions specified, loading default actions", Logging.Orange);
+
+            // Wait for 30 seconds to be targeted
+            _pocketActions.Add(new Actions.Action { State = ActionState.WaitUntilTargeted });
+            _pocketActions[0].AddParameter("timeout", "15");
+
+            // Clear the Pocket
+            _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
+
+            // Is there a gate?
+            if (Cache.Instance.AccelerationGates != null && Cache.Instance.AccelerationGates.Any())
+            {
+                // Activate it (Activate action also moves to the gate)
+                _pocketActions.Add(new Actions.Action { State = ActionState.Activate });
+                _pocketActions[_pocketActions.Count - 1].AddParameter("target", "Acceleration Gate");
+            }
+            else // No, were done
+                _pocketActions.Add(new Actions.Action { State = ActionState.Done });
+        }
+
         public void ProcessState()
         {
             // There is really no combat in stations (yet)
@@ -1800,25 +1843,7 @@ namespace Questor.Modules.Activities
                     //
                     if (_pocketActions.Count == 0)
                     {
-                        // No Pocket action, load default actions
-                        Logging.Log("CombatMissionCtrl", "No mission actions specified, loading default actions", Logging.Orange);
-
-                        // Wait for 30 seconds to be targeted
-                        _pocketActions.Add(new Actions.Action { State = ActionState.WaitUntilTargeted });
-                        _pocketActions[0].AddParameter("timeout", "15");
-
-                        // Clear the Pocket
-                        _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
-
-                        // Is there a gate?
-                        if (Cache.Instance.AccelerationGates != null && Cache.Instance.AccelerationGates.Any())
-                        {
-                            // Activate it (Activate action also moves to the gate)
-                            _pocketActions.Add(new Actions.Action { State = ActionState.Activate });
-                            _pocketActions[_pocketActions.Count - 1].AddParameter("target", "Acceleration Gate");
-                        }
-                        else // No, were done
-                            _pocketActions.Add(new Actions.Action { State = ActionState.Done });
+                        LoadDefaultActions();
                     }
 
                     Logging.Log("-", "-----------------------------------------------------------------", Logging.Teal);

@@ -501,6 +501,7 @@ namespace Questor.Modules.Caching
         public bool RouteIsAllHighSecBool = false;
         public bool CurrentlyShouldBeSalvaging = false;
         public bool NeedRepair = false;
+        public bool AttemptedAccelerationgateActivation = false;
 
         public double Wealth { get; set; }
 

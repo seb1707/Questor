@@ -2427,7 +2427,7 @@ namespace Questor.Modules.Caching
 
                     if (File.Exists(Cache.Instance.MissionXmlPath))
                     {
-                        Logging.Log("Cache.SetmissionXmlPath", "[" + Cache.Instance.MissionXmlPath + "] found!", Logging.White);
+                        Logging.Log("Cache.SetmissionXmlPath", "[" + Cache.Instance.MissionXmlPath + "] found!", Logging.Green);
                     }
                 }
             }

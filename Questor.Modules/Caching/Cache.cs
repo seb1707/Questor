@@ -130,16 +130,6 @@ namespace Questor.Modules.Caching
         public List<EntityCache> _entitiesthatHaveExploded;
 
         /// <summary>
-        ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
-        /// </summary>
-        public List<PriorityTarget> _primaryWeaponPriorityTargets;
-
-        /// <summary>
-        ///   Drone Priority targets (e.g. warp scramblers or webbing frigates) //cleared in InvalidateCache
-        /// </summary>
-        public List<PriorityTarget> _dronePriorityTargets;
-
-        /// <summary>
         ///  Primary Weapon target chosen by GetBest Target
         /// </summary>
        
@@ -446,8 +436,6 @@ namespace Questor.Modules.Caching
             //line = string.Empty;
 
             _entitiesthatHaveExploded = new List<EntityCache>();
-            _primaryWeaponPriorityTargets = new List<PriorityTarget>();
-            _dronePriorityTargets = new List<PriorityTarget>();
             LastModuleTargetIDs = new Dictionary<long, long>();
             TargetingIDs = new Dictionary<long, DateTime>();
             _entitiesById = new Dictionary<long, EntityCache>();
@@ -1791,21 +1779,126 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public IEnumerable<EntityCache> PrimaryWeaponPriorityTargets
+        private List<PriorityTarget> _primaryWeaponPriorityTargets;
+        
+        public List<PriorityTarget> PrimaryWeaponPriorityTargets
         {
             get
             {
-                _primaryWeaponPriorityTargets.RemoveAll(pt => Cache.Instance.Entities.All(e => e.Id != pt.EntityID));
-                return _primaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                //
+                // remove targets that no longer exist
+                //
+                if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
+                {
+                    foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
+                    {
+                        if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
+                        {
+                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);    
+                        }
+                    }
+
+                    return _primaryWeaponPriorityTargets;
+                }
+
+                //
+                // initialize a fresh list - to be filled in during panic (updated every tick)
+                //
+                _primaryWeaponPriorityTargets = new List<PriorityTarget>();
+                return _primaryWeaponPriorityTargets;
+            }
+            set
+            {
+                _primaryWeaponPriorityTargets = value;
             }
         }
 
-        public IEnumerable<EntityCache> DronePriorityTargets
+        private IEnumerable<EntityCache> _primaryWeaponPriorityEntities;
+
+        public IEnumerable<EntityCache> PrimaryWeaponPriorityEntities
         {
             get
             {
-                _dronePriorityTargets.RemoveAll(pt => Cache.Instance.Entities.All(e => e.Id != pt.EntityID));
-                return _dronePriorityTargets.OrderByDescending(pt => pt.DronePriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                //
+                // every frame re-populate the DronePriorityEntities from the list of IDs we have tucked away in DronePriorityTargets
+                // this occurs because in Invalidatecache() we are, necessarily,  clearing this every frame!
+                //
+                if (_primaryWeaponPriorityEntities == null)
+                {
+                    if (PrimaryWeaponPriorityTargets != null && PrimaryWeaponPriorityTargets.Any())
+                    {
+                        _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                        return _primaryWeaponPriorityEntities;
+                    }
+
+                    _primaryWeaponPriorityEntities = new List<EntityCache>();
+                    return _primaryWeaponPriorityEntities;
+                }
+
+                //
+                // if we have already populated the list this frame return the list we already generated
+                //
+                return _primaryWeaponPriorityEntities;
+            }
+        }
+
+
+        private List<PriorityTarget> _dronePriorityTargets;
+
+        public List<PriorityTarget> DronePriorityTargets
+        {
+            get
+            {
+                //
+                // remove targets that no longer exist
+                //
+                if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
+                {
+                    foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
+                    {
+                        if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
+                        {
+                            _dronePriorityTargets.Remove(dronePriorityTarget);
+                        }
+                    }
+
+                    return _dronePriorityTargets;
+                }
+
+                //
+                // initialize a fresh list - to be filled in during panic (updated every tick)
+                //
+                _dronePriorityTargets = new List<PriorityTarget>();
+                return _dronePriorityTargets;
+            }
+        }
+
+        private IEnumerable<EntityCache> _dronePriorityEntities;
+
+        public IEnumerable<EntityCache> DronePriorityEntities
+        {
+            get
+            {
+                //
+                // every frame re-populate the DronePriorityEntities from the list of IDs we have tucked away in DronePriorityTargets
+                // this occurs because in Invalidatecache() we are, necessarily,  clearing this every frame!
+                //
+                if (_dronePriorityEntities == null)
+                {
+                    if (DronePriorityTargets != null && DronePriorityTargets.Any())
+                    {
+                        _dronePriorityEntities = DronePriorityTargets.OrderByDescending(pt => pt.DronePriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
+                        return _dronePriorityEntities;
+                    }
+
+                    _dronePriorityEntities = new List<EntityCache>();
+                    return _dronePriorityEntities;
+                }
+
+                //
+                // if we have already populated the list this frame return the list we already generated
+                //
+                return _dronePriorityEntities;
             }
         }
 
@@ -2172,8 +2265,6 @@ namespace Questor.Modules.Caching
                 _maxTargetRange = null;
                 _modules = null;
                 _objects = null;
-                _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
-                _dronePriorityTargets.ForEach(pt => pt.ClearCache());
                 _safeSpotBookmarks = null;
                 _star = null;
                 _stations = null;
@@ -2195,9 +2286,9 @@ namespace Questor.Modules.Caching
                     }    
                 }
                 
-                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                 {
-                    foreach (EntityCache PrimaryWeaponPriorityTargetEntity in Cache.Instance.PrimaryWeaponPriorityTargets)
+                    foreach (EntityCache PrimaryWeaponPriorityTargetEntity in Cache.Instance.PrimaryWeaponPriorityEntities)
                     {
                         PrimaryWeaponPriorityTargetEntity.InvalidateCache();
                     }    
@@ -2205,7 +2296,7 @@ namespace Questor.Modules.Caching
                 
                 if (Cache.Instance.DronePriorityTargets.Any())
                 {
-                    foreach (EntityCache DronePriorityTargetEntity in Cache.Instance.DronePriorityTargets)
+                    foreach (EntityCache DronePriorityTargetEntity in Cache.Instance.DronePriorityEntities)
                     {
 
                         DronePriorityTargetEntity.InvalidateCache();
@@ -2224,7 +2315,13 @@ namespace Questor.Modules.Caching
                     PreferredPrimaryWeaponTarget.InvalidateCache();    
                 }
                 _preferredPrimaryWeaponTarget = null;
-                
+
+
+                _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
+                _primaryWeaponPriorityEntities = null;
+                _dronePriorityTargets.ForEach(pt => pt.ClearCache());
+                _dronePriorityEntities = null;
+
             }
             catch (Exception exception)
             {
@@ -2561,7 +2658,7 @@ namespace Questor.Modules.Caching
 
             if (targets.Any())
             {
-                removed = _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+                removed = PrimaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
             }
             return removed > 0;
         }
@@ -2574,7 +2671,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                _primaryWeaponPriorityTargets.Remove(targetToRemove);
+                PrimaryWeaponPriorityTargets.Remove(targetToRemove);
             }
             catch (Exception)
             {
@@ -2601,9 +2698,9 @@ namespace Questor.Modules.Caching
             return removed > 0;
         }
 
-        public void AddPrimaryWeaponPriorityTarget(EntityCache target, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
+        public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            if ((!target.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id))
+            if ((!ewarEntity.IsIgnored) || PrimaryWeaponPriorityEntities.Any(p => p.Id == ewarEntity.Id))
             {
                 if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
                 return;
@@ -2614,70 +2711,70 @@ namespace Questor.Modules.Caching
                 //
                 // Primary Weapons
                 //
-                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (target.IsNPCFrigate || target.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
+                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (ewarEntity.IsNPCFrigate || ewarEntity.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
                 {
-                    if (target.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
-                        || target.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
+                    if (ewarEntity.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
+                        || ewarEntity.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
                     {
-                        Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                        _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+                        Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                        PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
                     }
 
                     return;
                 }
-                
-                Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = target.Id, PrimaryWeaponPriority = priority });
+
+                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
                 return;
             }
 
             return;
         }
 
-        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
+        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> ewarEntities, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            targets = targets.ToList();
-            if (targets.Any())
+            ewarEntities = ewarEntities.ToList();
+            if (ewarEntities.Any())
             {
-                foreach (EntityCache target in targets)
+                foreach (EntityCache ewarEntity in ewarEntities)
                 {
-                    AddPrimaryWeaponPriorityTarget(target, priority, module, AddEwarTypeToPriorityTargetList);
+                    AddPrimaryWeaponPriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
                 }    
             }
             
             return;
         }
 
-        public void AddDronePriorityTargets(IEnumerable<EntityCache> targets, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
+        public void AddDronePriorityTargets(IEnumerable<EntityCache> ewarEntities, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            targets = targets.ToList();
-            if (targets.Any())
+            ewarEntities = ewarEntities.ToList();
+            if (ewarEntities.Any())
             {
-                foreach (EntityCache target in targets)
+                foreach (EntityCache ewarEntity in ewarEntities)
                 {
-                    AddDronePriorityTarget(target, priority, module, AddEwarTypeToPriorityTargetList);
+                    AddDronePriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
                 }
             }
 
             return;
         }
 
-        public void AddDronePriorityTarget(EntityCache target, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
+        public void AddDronePriorityTarget(EntityCache ewarEntity, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             if (AddEwarTypeToPriorityTargetList && Cache.Instance.UseDrones)
             {
-                if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))
+                if ((!ewarEntity.IsIgnored) || DronePriorityEntities.Any(p => p.Id == ewarEntity.Id))
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("AddDronePriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
                     return;
                 }
 
-                Logging.Log(module, "Adding [" + target.Name + "] Speed [" + Math.Round(target.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(target.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(target.Id) + "] as a drone priority target [" + priority.ToString() + "]", Logging.Teal);
-                _dronePriorityTargets.Add(new PriorityTarget { EntityID = target.Id, DronePriority = priority });
+                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "]", Logging.Teal);
+                _dronePriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, DronePriority = priority });
                 return;
             }
 
-            if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log(module, "UseDrones is [" + Cache.Instance.UseDrones.ToString() + "] AddWarpScramblersToDronePriorityTargetList is [" + Settings.Instance.AddWarpScramblersToDronePriorityTargetList + "] [" + target.Name + "] was not added as a Drone PriorityTarget (why did we even try?)", Logging.Teal);
+            if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log(module, "UseDrones is [" + Cache.Instance.UseDrones.ToString() + "] AddWarpScramblersToDronePriorityTargetList is [" + Settings.Instance.AddWarpScramblersToDronePriorityTargetList + "] [" + ewarEntity.Name + "] was not added as a Drone PriorityTarget (why did we even try?)", Logging.Teal);
             return;
         }
 
@@ -3049,9 +3146,9 @@ namespace Questor.Modules.Caching
                     EntityCache target = null;
                     try
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.PrimaryWeaponPriorityLevel == priorityType))
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.PrimaryWeaponPriorityLevel == priorityType))
                         {
-                            target = Cache.Instance.PrimaryWeaponPriorityTargets.Where(pt => (FindAUnTargetedEntity ||  pt.IsReadyToShoot)
+                            target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => (FindAUnTargetedEntity ||  pt.IsReadyToShoot)
                                                                                         && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
                                                                                             && (pt.Distance < Distance)
                                                                                             && pt.IsActivePrimaryWeaponEwarType() == priorityType
@@ -3108,9 +3205,9 @@ namespace Questor.Modules.Caching
                     EntityCache target = null;
                     try
                     {
-                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.DronePriorityLevel == priorityType))
+                        if (Cache.Instance.DronePriorityEntities.Any(pt => pt.DronePriorityLevel == priorityType))
                         {
-                            target = Cache.Instance.DronePriorityTargets.Where(pt => (FindAUnTargetedEntity || pt.IsReadyToShoot)
+                            target = Cache.Instance.DronePriorityEntities.Where(pt => (FindAUnTargetedEntity || pt.IsReadyToShoot)
                                                                                         && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
                                                                                             && (pt.Distance < Distance)
                                                                                             && pt.IsActiveDroneEwarType() == priorityType
@@ -3341,7 +3438,7 @@ namespace Questor.Modules.Caching
                 // Is our current target any other primary weapon priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Priority", Logging.Teal);
-                if (PrimaryWeaponPriorityTargets.Any(pt => pt.IsReadyToShoot 
+                if (PrimaryWeaponPriorityEntities.Any(pt => pt.IsReadyToShoot 
                                                         && pt.Distance < Cache.Instance.MaxRange 
                                                         && pt.Id == currentTarget.Id
                                                         && !currentTarget.IsHigherPriorityPresent
@@ -3446,7 +3543,7 @@ namespace Questor.Modules.Caching
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange
+                primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Cache.Instance.MaxRange
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot
                                                                             && ((!p.IsNPCFrigate && !p.IsFrigate ) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
@@ -3739,7 +3836,7 @@ namespace Questor.Modules.Caching
                 // Is our current target any other drone priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
-                if (DronePriorityTargets.Any(pt => pt.IsReadyToShoot 
+                if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot 
                                                         && pt.Distance < Cache.Instance.MaxRange 
                                                         && pt.Id == currentDroneTarget.Id
                                                         && !currentDroneTarget.IsHigherPriorityPresent))
@@ -3839,7 +3936,7 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = Cache.Instance.DronePriorityTargets.Where(p => p.Distance < Settings.Instance.DroneControlRange
+                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Distance < Settings.Instance.DroneControlRange
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot)
                                                                            .OrderByDescending(pt => pt.IsTargetedBy)

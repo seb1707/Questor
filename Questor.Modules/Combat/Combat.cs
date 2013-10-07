@@ -459,8 +459,8 @@ namespace Questor.Modules.Combat
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InSpace && Cache.Instance.InWarp)
             {
-                Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
-                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
+                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                 Cache.Instance.ClearEWARCache();
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.Teal);
                 return;
@@ -1107,9 +1107,9 @@ namespace Questor.Modules.Combat
             //
             // Now lets deal with the priority targets
             //
-            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
             {
-                int PrimaryWeaponsPriorityTargetUnTargeted = Cache.Instance.PrimaryWeaponPriorityTargets.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Cache.Instance.PrimaryWeaponPriorityTargets.Contains(t));
+                int PrimaryWeaponsPriorityTargetUnTargeted = Cache.Instance.PrimaryWeaponPriorityEntities.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Cache.Instance.PrimaryWeaponPriorityEntities.Contains(t));
 
                 if (PrimaryWeaponsPriorityTargetUnTargeted > 0)
                 {
@@ -1121,7 +1121,7 @@ namespace Questor.Modules.Combat
 
                     Logging.Log("Combat.TargetCombatants", "if (!UnlockHighValueTarget(Combat.TargetCombatants, PrimaryWeaponPriorityTargets return;", Logging.Debug);
 
-                    IEnumerable<EntityCache> _primaryWeaponPriorityEntities = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
+                    IEnumerable<EntityCache> _primaryWeaponPriorityEntities = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                      .OrderByDescending(c => c.IsInOptimalRange)
                                                                                                                      .ThenBy(c => c.Distance);
 
@@ -1167,13 +1167,13 @@ namespace Questor.Modules.Combat
             //
             if (Cache.Instance.DronePriorityTargets.Any())
             {
-                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityTargets.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Cache.Instance.DronePriorityTargets.Contains(t));
+                int DronesPriorityTargetUnTargeted = Cache.Instance.DronePriorityEntities.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Cache.Instance.DronePriorityEntities.Contains(t));
 
                 if (DronesPriorityTargetUnTargeted > 0)
                 {
                     if (!UnlockLowValueTarget("Combat.TargetCombatants", "DronePriorityTargets")) return;
 
-                    IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityTargets.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
+                    IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                          .OrderByDescending(c => c.IsInOptimalRange)
                                                                                                                          .ThenBy(c => c.Distance);
 

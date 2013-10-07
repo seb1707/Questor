@@ -1090,7 +1090,7 @@ namespace Questor.Modules.Activities
                 EntityCache primaryWeaponPriorityTarget = null;
                 try
                 {
-                    primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityTargets.Where(p => p.Distance < Cache.Instance.MaxRange
+                    primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Cache.Instance.MaxRange
                                                                                 && p.IsReadyToShoot
                                                                                 && p.IsOnGridWithMe
                                                                                 && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
@@ -1107,10 +1107,10 @@ namespace Questor.Modules.Activities
                 {
                     if (Settings.Instance.DebugKillAction)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                         {
                             int icount = 0;
-                            foreach (EntityCache primaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityTargets.Where(i => i.IsOnGridWithMe))
+                            foreach (EntityCache primaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityEntities.Where(i => i.IsOnGridWithMe))
                             {
                                 icount++;
                                 if (Settings.Instance.DebugKillAction) Logging.Log("Combat", "[" + icount + "] PrimaryWeaponPriorityTarget Named [" + primaryWeaponPriorityEntity.Name + "][ID: " + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -1143,11 +1143,11 @@ namespace Questor.Modules.Activities
                         {
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.PreferredPrimaryWeaponTarget =[ " + Cache.Instance.PreferredPrimaryWeaponTarget.Name + " ][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]", Logging.Debug);
 
-                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                             {
                                 if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "PrimaryWeaponPriorityTargets Below (if any)", Logging.Debug);
                                 int icount = 0;
-                                foreach (EntityCache PT in Cache.Instance.PrimaryWeaponPriorityTargets)
+                                foreach (EntityCache PT in Cache.Instance.PrimaryWeaponPriorityEntities)
                                 {
                                     icount++;
                                     if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "PriorityTarget [" + icount + "] [ " + PT.Name + " ][" + Cache.Instance.MaskedID(PT.Id) + "] IsOnGridWithMe [" + PT.IsOnGridWithMe + "]", Logging.Debug);

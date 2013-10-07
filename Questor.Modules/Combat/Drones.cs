@@ -182,7 +182,7 @@ namespace Questor.Modules.Combat
 
             if (!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp)
             {
-                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                 _States.CurrentDroneState = DroneState.Idle;
                 return;
             }

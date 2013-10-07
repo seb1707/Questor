@@ -437,7 +437,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsPrimaryWeaponKillPriority == null)
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
                         {
                             _IsPrimaryWeaponKillPriority = true;
                         }
@@ -483,7 +483,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsDroneKillPriority == null)
                     {
-                        if (Cache.Instance._dronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                        if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
                         {
                             _IsDroneKillPriority = true;
                         }
@@ -611,16 +611,16 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsHigherPriorityPresent == null)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any() || Cache.Instance.DronePriorityTargets.Any())
                         {
 
-                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                             {
-                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == _directEntity.Id))
+                                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.Id == _directEntity.Id))
                                 {
-                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
+                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
 
-                                    if (!Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriorityLevel < _currentPrimaryWeaponPriority && pt.Distance < Cache.Instance.MaxRange))
+                                    if (!Cache.Instance.PrimaryWeaponPriorityEntities.All(pt => pt.PrimaryWeaponPriorityLevel < _currentPrimaryWeaponPriority && pt.Distance < Cache.Instance.MaxRange))
                                     {
                                         _IsHigherPriorityPresent = true;
                                         return _IsHigherPriorityPresent ?? true;
@@ -630,7 +630,7 @@ namespace Questor.Modules.Caching
                                     return _IsHigherPriorityPresent ?? false;
                                 }
 
-                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Distance < Cache.Instance.MaxRange))
+                                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(e => e.Distance < Cache.Instance.MaxRange))
                                 {
                                     _IsHigherPriorityPresent = true;
                                     return _IsHigherPriorityPresent ?? true;
@@ -642,11 +642,11 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance.DronePriorityTargets.Any())
                             {
-                                if (Cache.Instance.DronePriorityTargets.Any(pt => pt.Id == _directEntity.Id))
+                                if (Cache.Instance.DronePriorityEntities.Any(pt => pt.Id == _directEntity.Id))
                                 {
-                                    DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityTargets.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
+                                    DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
 
-                                    if (!Cache.Instance.DronePriorityTargets.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Settings.Instance.DroneControlRange))
+                                    if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Settings.Instance.DroneControlRange))
                                     {
                                         _IsHigherPriorityPresent = true;
                                         return _IsHigherPriorityPresent ?? true;
@@ -656,7 +656,7 @@ namespace Questor.Modules.Caching
                                     return _IsHigherPriorityPresent ?? false;
                                 }
 
-                                if (Cache.Instance.DronePriorityTargets.Any(e => e.Distance < Settings.Instance.DroneControlRange))
+                                if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Settings.Instance.DroneControlRange))
                                 {
                                     _IsHigherPriorityPresent = true;
                                     return _IsHigherPriorityPresent ?? true;
@@ -688,15 +688,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsLowerPriorityPresent == null)
                     {
-                        if (Cache.Instance._primaryWeaponPriorityTargets.Any() || Cache.Instance._dronePriorityTargets.Any())
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
                         {
-                            if (Cache.Instance._primaryWeaponPriorityTargets.Any())
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
                             {
-                                if (Cache.Instance._primaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
                                 {
-                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
+                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
 
-                                    if (!Cache.Instance._primaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority > _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.MaxRange))
+                                    if (!Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority > _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.MaxRange))
                                     {
                                         _IsLowerPriorityPresent = true;
                                         return _IsLowerPriorityPresent ?? true;
@@ -706,7 +706,7 @@ namespace Questor.Modules.Caching
                                     return _IsLowerPriorityPresent ?? false;
                                 }
 
-                                if (Cache.Instance._primaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.MaxRange))
+                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.MaxRange))
                                 {
                                     _IsLowerPriorityPresent = true;
                                     return _IsLowerPriorityPresent ?? true;
@@ -716,13 +716,13 @@ namespace Questor.Modules.Caching
                                 return _IsLowerPriorityPresent ?? false;
                             }
 
-                            if (Cache.Instance._dronePriorityTargets.Any())
+                            if (Cache.Instance.DronePriorityTargets.Any())
                             {
-                                if (Cache.Instance._dronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
                                 {
-                                    DronePriority _currentEntityDronePriority = Cache.Instance._dronePriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.DronePriority).FirstOrDefault();
+                                    DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.DronePriority).FirstOrDefault();
 
-                                    if (!Cache.Instance._dronePriorityTargets.All(pt => pt.DronePriority > _currentEntityDronePriority && pt.Entity.Distance < Settings.Instance.DroneControlRange))
+                                    if (!Cache.Instance.DronePriorityTargets.All(pt => pt.DronePriority > _currentEntityDronePriority && pt.Entity.Distance < Settings.Instance.DroneControlRange))
                                     {
                                         _IsLowerPriorityPresent = true;
                                         return _IsLowerPriorityPresent ?? true;
@@ -732,7 +732,7 @@ namespace Questor.Modules.Caching
                                     return _IsLowerPriorityPresent ?? false;
                                 }
 
-                                if (Cache.Instance._dronePriorityTargets.Any(e => e.Entity.Distance < Settings.Instance.DroneControlRange))
+                                if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Distance < Settings.Instance.DroneControlRange))
                                 {
                                     _IsLowerPriorityPresent = true;
                                     return _IsLowerPriorityPresent ?? true;
@@ -856,7 +856,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsDronePriorityTarget == null)
                     {
-                        if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                        if (Cache.Instance.DronePriorityEntities.All(i => i.Id != _directEntity.Id))
                         {
                             _IsDronePriorityTarget = false;
                             return _IsDronePriorityTarget ?? false;
@@ -883,7 +883,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsPriorityWarpScrambler == null)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == Id))
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.Id == Id))
                         {
                             EntityCache __entity = new EntityCache(_directEntity);
                             if (__entity.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
@@ -893,7 +893,7 @@ namespace Questor.Modules.Caching
                             }
                         }
 
-                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.Id == Id))
+                        if (Cache.Instance.DronePriorityEntities.Any(pt => pt.Id == Id))
                         {
                             EntityCache __entity = new EntityCache(_directEntity);
                             if (__entity.DronePriorityLevel == DronePriority.WarpScrambler)
@@ -924,7 +924,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsPrimaryWeaponPriorityTarget == null)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.All(i => i.Id != _directEntity.Id))
                         {
                             _IsPrimaryWeaponPriorityTarget = false;
                             return _IsPrimaryWeaponPriorityTarget ?? false;
@@ -951,9 +951,9 @@ namespace Questor.Modules.Caching
                 {
                     if(_PrimaryWeaponPriorityLevel == null)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.Id == Id))
+                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.Id == Id))
                         {
-                            PrimaryWeaponPriority currentTargetPriority = Cache.Instance._primaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget
+                            PrimaryWeaponPriority currentTargetPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget
                                                                                                                                && t.EntityID == Id)
                                                                                                                       .Select(pt => pt.PrimaryWeaponPriority)
                                                                                                                       .FirstOrDefault();
@@ -982,9 +982,9 @@ namespace Questor.Modules.Caching
                 {
                     if (_DronePriorityLevel ==null)
                     {
-                        if (Cache.Instance._dronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
                         {
-                            DronePriority currentTargetPriority = Cache.Instance._dronePriorityTargets.Where(t => t.Entity.IsTarget
+                            DronePriority currentTargetPriority = Cache.Instance.DronePriorityTargets.Where(t => t.Entity.IsTarget
                                                                                                                       && t.EntityID == Id)
                                                                                                                       .Select(pt => pt.DronePriority)
                                                                                                                       .FirstOrDefault();

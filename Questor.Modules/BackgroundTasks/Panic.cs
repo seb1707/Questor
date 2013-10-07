@@ -277,7 +277,7 @@ namespace Questor.Modules.BackgroundTasks
                             _lastPriorityTargetLogging = DateTime.UtcNow;
 
                             icount = 1;
-                            foreach (EntityCache target in Cache.Instance.DronePriorityTargets)
+                            foreach (EntityCache target in Cache.Instance.DronePriorityEntities)
                             {
                                 icount++;
                                 Logging.Log("Panic.ListDronePriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
@@ -285,7 +285,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
 
                             icount = 1;
-                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityTargets)
+                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityEntities)
                             {
                                 icount++;
                                 Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
@@ -342,17 +342,17 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Cache.Instance.InWarp)
                         {
-                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
-                            Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
+                            Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                             break;
                         }
 
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(),"Panic");
-                            if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe) || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                            if (Cache.Instance.DronePriorityEntities.Any(pt => pt.IsWarpScramblingMe) || Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.IsWarpScramblingMe))
                             {
-                                EntityCache WarpScrambledBy = Cache.Instance.DronePriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe) ?? Cache.Instance.PrimaryWeaponPriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                                EntityCache WarpScrambledBy = Cache.Instance.DronePriorityEntities.FirstOrDefault(pt => pt.IsWarpScramblingMe) ?? Cache.Instance.PrimaryWeaponPriorityEntities.FirstOrDefault(pt => pt.IsWarpScramblingMe);
                                 if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
                                 {
                                     _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);

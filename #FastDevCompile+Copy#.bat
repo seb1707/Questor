@@ -1,4 +1,4 @@
 @Echo off
-#compile#.bat
+#compile#.bat /nopause
 #TransferToLiveCopy#.bat
 

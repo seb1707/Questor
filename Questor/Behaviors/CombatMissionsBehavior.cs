@@ -471,14 +471,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
-                        Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, true);
-                        if (Cache.Instance.Mission != null && Cache.Instance.Agent != null)
-                        {
-                            // Update loyalty points again (the first time might return -1)
-                            Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
-                            Cache.Instance.MissionName = Cache.Instance.Mission.Name;
-                            Questor.UpdateMissionName();
-                        }
+                        Questor.UpdateMissionName(AgentID);
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Arm;

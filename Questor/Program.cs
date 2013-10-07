@@ -448,9 +448,9 @@ namespace Questor
             }
 
             // We should not get any windows
-            if (Cache.Instance.Windows.Count != 0)
+            if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (DirectWindow window in Cache.Instance.Windows)
+                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;

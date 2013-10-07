@@ -448,9 +448,9 @@ namespace Questor
             }
 
             // We should not get any windows
-            if (Cache.Instance.DirectEve.Windows.Count != 0)
+            if (Cache.Instance.Windows.Count != 0)
             {
-                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
+                foreach (DirectWindow window in Cache.Instance.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -699,7 +699,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 10 + RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {

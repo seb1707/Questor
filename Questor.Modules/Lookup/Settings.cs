@@ -8,6 +8,8 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace Questor.Modules.Lookup
 {
     using System;
@@ -35,6 +37,8 @@ namespace Questor.Modules.Lookup
         private DateTime _lastModifiedDate;
         private int SettingsLoadedICount = 0;
 
+        public static int SettingsInstances = 0;
+
         public Settings()
         {
             Ammo = new List<Ammo>();
@@ -50,6 +54,12 @@ namespace Questor.Modules.Lookup
             FactionBlacklist = new List<string>();
             UseFittingManager = true;
             DefaultFitting = new FactionFitting();
+            Interlocked.Increment(ref SettingsInstances);
+        }
+
+        ~Settings()
+        {
+            Interlocked.Decrement(ref SettingsInstances);
         }
 
         public bool AtLoginScreen { get; set; }

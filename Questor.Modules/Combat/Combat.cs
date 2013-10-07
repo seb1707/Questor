@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
 
@@ -25,33 +26,40 @@ namespace Questor.Modules.Combat
     ///   The combat class will target and kill any NPC that is targeting the questor.
     ///   It will also kill any NPC that is targeted but not aggressive  toward the questor.
     /// </summary>
-    public class Combat
+    public static class Combat
     {
-        private readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
+        private static readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
         private static readonly Dictionary<long, DateTime> LastWeaponReload = new Dictionary<long, DateTime>();
-        private bool _isJammed;
+        private static bool _isJammed;
         private static int _weaponNumber;
 
-        private int MaxCharges { get; set; }
+        private static int MaxCharges { get; set; }
 
-        private DateTime _lastCombatProcessState;
+        private static DateTime _lastCombatProcessState;
 
         //private static DateTime _lastReloadAll;
         private static int _reloadAllIteration;
 
-        private IEnumerable<EntityCache> __highValueTargetsTargeted;
-        private IEnumerable<EntityCache> __lowValueTargetsTargeted;
-        private int maxHighValueTargets;
-        private int maxLowValueTargets;
-        private int maxTotalTargets;
+        private static IEnumerable<EntityCache> __highValueTargetsTargeted;
+        private static IEnumerable<EntityCache> __lowValueTargetsTargeted;
+        private static int maxHighValueTargets;
+        private static int maxLowValueTargets;
+        private static int maxTotalTargets;
+        public static int CombatInstances = 0;
 
-        public Combat()
+        static Combat()
         {
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
             maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
+
+            Interlocked.Increment(ref CombatInstances);
         }
 
+        //~Combat()
+        //{
+        //    Interlocked.Decrement(ref CombatInstances);
+        //}
 
         /// <summary> Reload correct (tm) ammo for the NPC
         /// </summary>
@@ -383,7 +391,7 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "isWeapon"></param>
         /// <returns></returns>
-        private bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
+        private static bool CanActivate(ModuleCache module, EntityCache entity, bool isWeapon)
         {
             if (!module.IsOnline)
             {
@@ -424,10 +432,10 @@ namespace Questor.Modules.Combat
             return false;
         }
 
-        public List<EntityCache> TargetingMe { get; set; }
-        public List<EntityCache> NotYetTargetingMe { get; set; }
+        public static List<EntityCache> TargetingMe { get; set; }
+        public static List<EntityCache> NotYetTargetingMe { get; set; }
 
-        private void TargetInfo()
+        private static void TargetInfo()
         {
             // Find the first active weapon's target
             EntityCache weaponTarget = null;
@@ -454,7 +462,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate weapons
         /// </summary>
-        private void ActivateWeapons(EntityCache target)
+        private static void ActivateWeapons(EntityCache target)
         {
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InSpace && Cache.Instance.InWarp)
@@ -626,7 +634,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate target painters
         /// </summary>
-        private void ActivateTargetPainters(EntityCache target)
+        private static void ActivateTargetPainters(EntityCache target)
         {
             //if (DateTime.UtcNow < Cache.Instance.NextPainterAction) //if we just did something wait a fraction of a second
             //    return;
@@ -671,7 +679,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate Nos
         /// </summary>
-        private void ActivateNos(EntityCache target)
+        private static void ActivateNos(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextNosAction) //if we just did something wait a fraction of a second
                 return;
@@ -721,7 +729,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Activate StasisWeb
         /// </summary>
-        private void ActivateStasisWeb(EntityCache target)
+        private static void ActivateStasisWeb(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextWebAction) //if we just did something wait a fraction of a second
                 return;
@@ -765,7 +773,7 @@ namespace Questor.Modules.Combat
             }
         }
 
-        private void ActivateWarpDisruptor(EntityCache target)
+        private static void ActivateWarpDisruptor(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextWarpDisruptorAction) //if we just did something wait a fraction of a second
                 return;
@@ -809,7 +817,7 @@ namespace Questor.Modules.Combat
             }
         }
 
-        private void ActivateRemoteRepair(EntityCache target)
+        private static void ActivateRemoteRepair(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextRemoteRepairAction) //if we just did something wait a fraction of a second
                 return;
@@ -861,7 +869,7 @@ namespace Questor.Modules.Combat
             
         }
 
-        private bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
+        private static bool UnlockHighValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisHighValueTarget = null;
             long preferredId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
@@ -922,7 +930,7 @@ namespace Questor.Modules.Combat
             
         }
 
-        private bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
+        private static bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
         {
             EntityCache unlockThisLowValueTarget = null;
             if (!OutOfRangeOnly)
@@ -974,7 +982,7 @@ namespace Questor.Modules.Combat
 
         /// <summary> Target combatants
         /// </summary>
-        private void TargetCombatants()
+        private static void TargetCombatants()
         {
             
             if ((Cache.Instance.InSpace && Cache.Instance.InWarp) // When in warp we should not try to target anything
@@ -1567,7 +1575,7 @@ namespace Questor.Modules.Combat
             #endregion
         }
 
-        public void ProcessState()
+        public static void ProcessState()
         {
             try
             {

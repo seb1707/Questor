@@ -36,8 +36,8 @@ namespace Questor.Modules.Activities
         private static string _locationName;
         private static int _locationErrors;
         private static int TravelHomeCounter;
-        private static Combat _combat;
-        private static Drones _drones;
+        //private static Combat _combat;
+        //private static Drones _drones;
 
         //private static List<long> EVENavdestination { get; set; }
 
@@ -46,8 +46,8 @@ namespace Questor.Modules.Activities
         public Traveler()
         {
             _lastPulse = DateTime.MinValue;
-            _combat = new Combat();
-            _drones = new Drones();
+            //_combat = new Combat();
+            //_drones = new Drones();
         }
 
         public static TravelerDestination Destination
@@ -252,7 +252,7 @@ namespace Questor.Modules.Activities
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: _combat.ProcessState()", Logging.White);
-                    _combat.ProcessState();
+                    Combat.ProcessState();
                     if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: we are not scrambled - pulling drones.", Logging.White);
@@ -264,7 +264,7 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }
@@ -389,7 +389,7 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     try
                     {
-                        _combat.ProcessState();
+                        Combat.ProcessState();
                     }
                     catch (Exception exception)
                     {
@@ -407,7 +407,7 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }
@@ -490,7 +490,7 @@ namespace Questor.Modules.Activities
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
-                    _combat.ProcessState();
+                    Combat.ProcessState();
                     if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are not scrambled - pulling drones.", Logging.White);
@@ -502,7 +502,7 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }

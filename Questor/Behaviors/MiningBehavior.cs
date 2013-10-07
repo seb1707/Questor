@@ -19,10 +19,10 @@ namespace Questor.Behaviors
     {
         private static readonly List<int> MiningToolGroupIDs = new List<int>();
         private readonly List<long> EmptyBelts = new List<long>();
-        private readonly Arm _arm;
+        //private readonly Arm _arm;
         private readonly Panic _panic;
-        private readonly Combat _combat;
-        private readonly Drones _drones;
+        //private readonly Combat _combat;
+        //private readonly Drones _drones;
         private readonly UnloadLoot _unloadLoot;
 
         private bool PanicStateReset = false;
@@ -39,11 +39,11 @@ namespace Questor.Behaviors
 
         public MiningBehavior()
         {
-            _arm = new Arm();
+            //_arm = new Arm();
             _panic = new Panic();
-            _combat = new Combat();
+            //_combat = new Combat();
             _unloadLoot = new UnloadLoot();
-            _drones = new Drones();
+            //_drones = new Drones();
 
             _lastPulse = DateTime.MinValue;
 
@@ -208,14 +208,19 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load ammo... this "fixes" the problem I experienced with not reloading after second arm phase. The quantity was getting set to 0.
-                        _arm.AmmoToLoad.Clear();
-                        _arm.AmmoToLoad.Add(Settings.Instance.Ammo.FirstOrDefault());
+                        Arm.AmmoToLoad.Clear();
+                        Arm.AmmoToLoad.Add(Settings.Instance.Ammo.FirstOrDefault());
 
                         //FIXME: bad hack - this should be fixed differently / elsewhere
-                        if (_arm.AmmoToLoad.FirstOrDefault().Quantity == 0) { _arm.AmmoToLoad.FirstOrDefault().Quantity = 333; }
+                        Ammo FirstAmmoToLoad = Arm.AmmoToLoad.FirstOrDefault();
+                        if (FirstAmmoToLoad != null && FirstAmmoToLoad.Quantity == 0)
+                        {
+                            FirstAmmoToLoad.Quantity = 333;
+                        }
+                        
                     }
 
-                    _arm.ProcessState();
+                    Arm.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
 
@@ -410,12 +415,12 @@ namespace Questor.Behaviors
                         return;
                     }
                     _targetAsteroid = Cache.Instance.EntityById(_targetAsteroid.Id);
-                    _combat.ProcessState();
+                    Combat.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("MiningBehavior:MineAsteroid", "Combat processed. Combat.State is: " + _States.CurrentCombatState.ToString(), Logging.White);
 
-                    _drones.ProcessState();
+                    Drones.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.White);
@@ -570,7 +575,7 @@ namespace Questor.Behaviors
                             Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
                                 + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
                                 + "] _targetRoid.Id [" + _targetAsteroid.Id
-                                + "] targetting me count [" + _combat.TargetingMe.Count
+                                + "] targetting me count [" + Combat.TargetingMe.Count
                                 + "]", Logging.White);
                         //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check combatstate instead.
                         if (//Cache.Instance.Approaching.TargetValue == null

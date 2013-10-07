@@ -9,6 +9,7 @@
         LogAllEntities,
         ModuleInfo,
         ListPrimaryWeaponPriorityTargets,
+        ListClassInstanceInfo,
         ListDronePriorityTargets,
         ListTargetedandTargeting,
         PocketObjectStatistics,

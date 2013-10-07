@@ -1,29 +1,30 @@
-﻿namespace Questor.Storylines
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DirectEve;
-    using global::Questor.Modules.Actions;
-    using global::Questor.Modules.Activities;
-    using global::Questor.Modules.BackgroundTasks;
-    using global::Questor.Modules.Caching;
-    using global::Questor.Modules.Combat;
-    using global::Questor.Modules.Logging;
-    using global::Questor.Modules.Lookup;
-    using global::Questor.Modules.States;
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using DirectEve;
+using Questor.Modules.Actions;
+using Questor.Modules.Activities;
+using Questor.Modules.BackgroundTasks;
+using Questor.Modules.Caching;
+using Questor.Modules.Combat;
+using Questor.Modules.Logging;
+using Questor.Modules.Lookup;
+using Questor.Modules.States;
 
+namespace Questor.Storylines
+{
     public class GenericCombatStoryline : IStoryline
     {
         private long _agentId;
         private readonly List<Ammo> _neededAmmo;
 
-        private readonly AgentInteraction _agentInteraction;
-        private readonly Arm _arm;
+        //private readonly AgentInteraction _agentInteraction;
+        //private readonly Arm _arm;
         private readonly CombatMissionCtrl _combatMissionCtrl;
-        private readonly Combat _combat;
-        private readonly Drones _drones;
-        private readonly Salvage _salvage;
+        //private readonly Combat _combat;
+        //private readonly Drones _drones;
+        //private readonly Salvage _salvage;
         private readonly Statistics _statistics;
 
         private GenericCombatStorylineState _state;
@@ -38,11 +39,11 @@
         {
             _neededAmmo = new List<Ammo>();
 
-            _agentInteraction = new AgentInteraction();
-            _arm = new Arm();
-            _combat = new Combat();
-            _drones = new Drones();
-            _salvage = new Salvage();
+            //_agentInteraction = new AgentInteraction();
+            //_arm = new Arm();
+            //_combat = new Combat();
+            //_drones = new Drones();
+            //_salvage = new Salvage();
             _statistics = new Statistics();
             _combatMissionCtrl = new CombatMissionCtrl();
 
@@ -56,10 +57,10 @@
         /// <param name="e"></param>
         private void ApplySettings(object sender, EventArgs e)
         {
-            _salvage.Ammo = Settings.Instance.Ammo;
-            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            _salvage.LootEverything = Settings.Instance.LootEverything;
+            Salvage.Ammo = Settings.Instance.Ammo;
+            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            Salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         /// <summary>
@@ -74,13 +75,13 @@
                 _agentId = Cache.Instance.CurrentStorylineAgentId;
 
                 AgentInteraction.AgentId = _agentId;
-                _agentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
+                AgentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 AgentInteraction.Purpose = AgentInteractionPurpose.AmmoCheck;
 
-                _arm.AgentId = _agentId;
+                Modules.Actions.Arm.AgentId = _agentId;
                 _States.CurrentArmState = ArmState.Idle;
-                _arm.AmmoToLoad.Clear();
+                Modules.Actions.Arm.AmmoToLoad.Clear();
 
                 //Questor.AgentID = _agentId;
 
@@ -133,7 +134,7 @@
                 _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
 
             // Interact with the agent to find out what ammo we need
-            _agentInteraction.ProcessState();
+            AgentInteraction.ProcessState();
 
             if (_States.CurrentAgentInteractionState == AgentInteractionState.DeclineMission)
             {
@@ -145,8 +146,8 @@
 
             if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
             {
-                _arm.AmmoToLoad.Clear();
-                _arm.AmmoToLoad.AddRange(_agentInteraction.AmmoToLoad);
+                Modules.Actions.Arm.AmmoToLoad.Clear();
+                Modules.Actions.Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);
                 return true;
             }
 
@@ -165,7 +166,7 @@
             if (_States.CurrentArmState == ArmState.Idle)
                 _States.CurrentArmState = ArmState.Begin;
 
-            _arm.ProcessState();
+            Modules.Actions.Arm.ProcessState();
 
             if (_States.CurrentArmState == ArmState.Done)
             {
@@ -255,7 +256,7 @@
                     if (Cache.Instance.potentialCombatTargets.Any())
                     {
                         Logging.Log("GenericCombatStoryline", "Priority targets found while traveling, engaging!", Logging.White);
-                        _combat.ProcessState();
+                        Combat.ProcessState();
                     }
 
                     Traveler.ProcessState();
@@ -269,9 +270,9 @@
                     break;
 
                 case GenericCombatStorylineState.ExecuteMission:
-                    _combat.ProcessState();
-                    _drones.ProcessState();
-                    _salvage.ProcessState();
+                    Combat.ProcessState();
+                    Drones.ProcessState();
+                    Salvage.ProcessState();
                     _combatMissionCtrl.ProcessState();
 
                     // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship

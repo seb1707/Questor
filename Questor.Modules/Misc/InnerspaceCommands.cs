@@ -32,10 +32,23 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
+                LavishScript.Commands.AddCommand("ListClassInstanceInfo", ListClassInstanceInfo);
                 LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("Help", ListQuestorCommands);
             }
+        }
+
+        private static int ListClassInstanceInfo(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListClassInstanceInfo - Lists Class Instance Count for These Classes", Logging.White);
+                return -1;
+            }
+
+            _States.CurrentStatisticsState = StatisticsState.ListClassInstanceInfo;
+            return 0;
         }
 
         private static int ListTargetedandTargeting(string[] args)
@@ -280,6 +293,7 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets             - Logs PrimaryWeaponPriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListTargets                                  - Logs ListTargets", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListClassInstanceInfo                        - Logs Class Instance Info", Logging.White);
             return 0;
         }
 

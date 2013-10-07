@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace Questor.Modules.Combat
 {
     using System;
@@ -24,28 +26,40 @@ namespace Questor.Modules.Combat
     /// <remarks>
     ///   Drones will always work their way from lowest value target to highest value target and will only attack entities (not structures)
     /// </remarks>
-    public class Drones
+    public static class Drones
     {
-        private double _armorPctTotal;
-        private int _lastDroneCount;
-        private DateTime _lastEngageCommand;
-        private DateTime _lastRecallCommand;
+        public static int DronesInstances = 0;
 
-        private int _recallCount;
-        private DateTime _lastLaunch;
-        private DateTime _lastRecall;
+        static Drones()
+        {
+            Interlocked.Increment(ref DronesInstances);
+        }
 
-        private long _lastTarget;
-        private DateTime _launchTimeout;
-        private int _launchTries;
-        private double _shieldPctTotal;
-        private double _structurePctTotal;
-        public bool Recall; //false
-        public bool WarpScrambled; //false
-        private DateTime _nextDroneAction = DateTime.UtcNow;
-        private DateTime _nextWarpScrambledWarning = DateTime.MinValue;
+        //~Drones()
+        //{
+        //    Interlocked.Decrement(ref DronesInstances);
+        //}
 
-        private void GetDamagedDrones()
+        private static double _armorPctTotal;
+        private static int _lastDroneCount;
+        private static DateTime _lastEngageCommand;
+        private static DateTime _lastRecallCommand;
+
+        private static int _recallCount;
+        private static DateTime _lastLaunch;
+        private static DateTime _lastRecall;
+
+        private static long _lastTarget;
+        private static DateTime _launchTimeout;
+        private static int _launchTries;
+        private static double _shieldPctTotal;
+        private static double _structurePctTotal;
+        public static bool Recall; //false
+        public static bool WarpScrambled; //false
+        private static DateTime _nextDroneAction = DateTime.UtcNow;
+        private static DateTime _nextWarpScrambledWarning = DateTime.MinValue;
+
+        private static void GetDamagedDrones()
         {
             foreach (EntityCache drone in Cache.Instance.ActiveDrones)
             {
@@ -54,7 +68,7 @@ namespace Questor.Modules.Combat
             Cache.Instance.DamagedDrones = Cache.Instance.ActiveDrones.Where(d => d.Health < Settings.Instance.BelowThisHealthLevelRemoveFromDroneBay);
         }
 
-        private double GetShieldPctTotal()
+        private static double GetShieldPctTotal()
         {
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
@@ -62,7 +76,7 @@ namespace Questor.Modules.Combat
             return Cache.Instance.ActiveDrones.Sum(d => d.ShieldPct);
         }
 
-        private double GetArmorPctTotal()
+        private static double GetArmorPctTotal()
         {
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
@@ -70,7 +84,7 @@ namespace Questor.Modules.Combat
             return Cache.Instance.ActiveDrones.Sum(d => d.ArmorPct);
         }
 
-        private double GetStructurePctTotal()
+        private static double GetStructurePctTotal()
         {
             if (!Cache.Instance.ActiveDrones.Any())
                 return 0;
@@ -81,7 +95,7 @@ namespace Questor.Modules.Combat
         /// <summary>
         ///   Engage the target
         /// </summary>
-        private void EngageTarget()
+        private static void EngageTarget()
         {
             if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "Entering EngageTarget()", Logging.Debug);
                     
@@ -157,7 +171,7 @@ namespace Questor.Modules.Combat
             return;
         }
 
-        public void ProcessState()
+        public static void ProcessState()
         {
             if (_nextDroneAction > DateTime.UtcNow || Settings.Instance.DebugDisableDrones) return;
             

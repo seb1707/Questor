@@ -17,8 +17,8 @@
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
 
-        private readonly Combat _combat;
-        private readonly AgentInteraction _agentInteraction;
+        //private readonly Combat _combat;
+        //private readonly AgentInteraction _agentInteraction;
 
         private DateTime _nextAction = DateTime.UtcNow;
         private DateTime _nextStoryLineAttempt = DateTime.UtcNow;
@@ -28,8 +28,8 @@
 
         public Storyline()
         {
-            _combat = new Combat();
-            _agentInteraction = new AgentInteraction();
+            //_combat = new Combat();
+            //_agentInteraction = new AgentInteraction();
 
             Cache.Instance.AgentBlacklist = new List<long>();
 
@@ -428,7 +428,7 @@
             if (Cache.Instance.potentialCombatTargets.Any())
             {
                 Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.Yellow);
-                _combat.ProcessState();
+                Combat.ProcessState();
             }
 
             Traveler.ProcessState();
@@ -530,7 +530,7 @@
                         AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
@@ -553,10 +553,10 @@
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                         AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
-                        _agentInteraction.ForceAccept = true;
+                        AgentInteraction.ForceAccept = true;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
@@ -587,7 +587,7 @@
                         AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is", _States.CurrentAgentInteractionState.ToString(), Logging.White);

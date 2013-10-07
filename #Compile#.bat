@@ -2,7 +2,7 @@
 
 :: 
 set pause=pause
-if "%1"=="/nopause" set pause = Echo.
+if "%1"=="/nopause" set pause=Echo.
 ::set releasetype=Release
 set releasetype=Debug
 ::

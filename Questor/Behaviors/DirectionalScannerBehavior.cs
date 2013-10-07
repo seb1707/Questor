@@ -26,12 +26,12 @@ namespace Questor.Behaviors
 {
     public class DirectionalScannerBehavior
     {
-        private readonly Arm _arm;
-        private readonly Combat _combat;
-        private readonly Drones _drones;
+        //private readonly Arm _arm;
+        //private readonly Combat _combat;
+        //private readonly Drones _drones;
 
         private readonly Panic _panic;
-        private readonly Salvage _salvage;
+        //private readonly Salvage _salvage;
         public DateTime LastAction;
         public static long AgentID;
         private readonly Stopwatch _watch;
@@ -48,10 +48,10 @@ namespace Questor.Behaviors
 
         public DirectionalScannerBehavior()
         {
-            _salvage = new Salvage();
-            _combat = new Combat();
-            _drones = new Drones();
-            _arm = new Arm();
+            //_salvage = new Salvage();
+            //_combat = new Combat();
+            //_drones = new Drones();
+            //_arm = new Arm();
             _panic = new Panic();
             _watch = new Stopwatch();
 
@@ -123,17 +123,17 @@ namespace Questor.Behaviors
             }
             else
             {
-                _arm.AgentId = agent.AgentId;
+                Arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
 
         public void ApplyDirectionalScannerSettings()
         {
-            _salvage.Ammo = Settings.Instance.Ammo;
-            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            _salvage.LootEverything = Settings.Instance.LootEverything;
+            Salvage.Ammo = Settings.Instance.Ammo;
+            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            Salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()

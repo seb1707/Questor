@@ -14,7 +14,7 @@ namespace Questor.Modules.Activities
     {
         //private DateTime _nextCourierAction;
         //private readonly Traveler _traveler;
-        private readonly AgentInteraction _agentInteraction;
+        //private readonly AgentInteraction _agentInteraction;
         private int moveItemRetryCounter;
         private DateTime _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddDays(-30);
         /// <summary>
@@ -25,7 +25,7 @@ namespace Questor.Modules.Activities
         public CourierMissionCtrl()
         {
             //_traveler = new Traveler();
-            _agentInteraction = new AgentInteraction();
+            //_agentInteraction = new AgentInteraction();
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
@@ -285,7 +285,7 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
 

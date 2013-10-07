@@ -7081,6 +7081,7 @@ namespace Questor.Modules.Caching
                     Logging.Log(module, "Repairing Items: repairWindow.AvgDamage: " + repairWindow.AvgDamage(), Logging.White);
                     if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
                     {
+                        Logging.Log(module, "Repairing Items: Zero Damage: skipping repair.", Logging.White);
                         repairWindow.Close();
                         Cache.Instance.RepairAll = false;
                         return true;

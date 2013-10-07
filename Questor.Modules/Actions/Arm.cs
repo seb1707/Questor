@@ -971,18 +971,16 @@ namespace Questor.Modules.Actions
                     //
                     #region load ammo
 
-                    if (Cache.Instance.Modules.Count(i => i.IsTurret && i.MaxCharges == 0) > 0) //civilian guns of all types
+                    if (Cache.Instance.Modules.Any(i => i.IsTurret && i.MaxCharges == 0)) //civilian guns of all types
                     {
                         Logging.Log("Arm.MoveItems","No ammo needed for civilian guns: done",Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;
                     }
 
-                    // We must create our own Cache, somehow after changing the fitting the cached data is wrong
                     if (!capsMoved)
                     {
-                        DirectContainer modules = Cache.Instance.DirectEve.GetShipsModules();
-                        if (modules.Items.Any(m => m.GroupId == (int)Group.CapacitorInjector))
+                        if (Cache.Instance.Modules.Any(i => i.GroupId == (int)Group.CapacitorInjector)) 
                         {
                             if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 
@@ -1024,8 +1022,6 @@ namespace Questor.Modules.Actions
                                 _States.CurrentArmState = ArmState.NotEnoughAmmo;
                                 return;
                             }
-
-                            return;
                         }
                     }
 

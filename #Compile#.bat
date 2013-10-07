@@ -1,4 +1,8 @@
 @Echo off
+
+:: 
+set pause=pause
+if "%1"=="/nopause" set pause=Echo.
 ::set releasetype=Release
 set releasetype=Debug
 ::
@@ -20,7 +24,7 @@ set nameofproject=BUYLPI
 set csproj=.\BuyLPI\BuyLPI.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building %nameofproject% - see above for any errors - 1 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 2
 ::
@@ -28,7 +32,7 @@ set nameofproject=Questor
 set csproj=.\questor\Questor.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building %nameofproject% - see above for any errors - 2 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 3
 ::
@@ -36,7 +40,7 @@ set nameofproject=Questor.Modules
 set csproj=.\Questor.Modules\Questor.Modules.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building %nameofproject% - see above for any errors - 3 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 4
 ::
@@ -44,7 +48,7 @@ set nameofproject=updateinvtypes
 set csproj=.\updateinvtypes\UpdateInvTypes.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building %nameofproject% - see above for any errors - 4 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 5
 ::
@@ -52,7 +56,7 @@ set nameofproject=valuedump
 set csproj=.\valuedump\ValueDump.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building %nameofproject% - see above for any errors - 5 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 6
 ::
@@ -61,7 +65,7 @@ set csproj=.\QuestorManager\QuestorManager.csproj
 ::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%"
 Echo Done building %nameofproject% - see above for any errors - 6 of 7 builds
-pause
+%pause%
 ::
 :: Build Project 7
 ::
@@ -69,7 +73,7 @@ pause
 ::set csproj=.\questorstatistics\QuestorStatistics.csproj
 ::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 ::Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
-::pause
+::%pause%
 
 ::
 :: Build Project 8
@@ -78,7 +82,7 @@ pause
 ::set csproj=.\QuestorSettings\QuestorSettings.csproj
 ::%pathtomsbuild4%\msbuild %%csproj% /p:configuration="%releasetype%" /target:Clean;Build
 ::Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
-::pause
+::%pause%
 
 if not exist output mkdir output >>nul 2>>nul
 :: Echo deleting old build from the output directory
@@ -109,4 +113,4 @@ if "%releasetype%"=="Debug" copy .\bin\%releasetype%\*.pdb .\output\ >>nul 2>>nu
 Echo.
 Echo use #TransferToLiveCopy#.bat to move the new build into place for testing 
 Echo.
-pause
+%pause%

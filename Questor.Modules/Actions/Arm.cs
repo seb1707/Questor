@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.Actions
 {
     using System;
@@ -24,57 +22,48 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Logging;
     using Questor.Modules.BackgroundTasks;
 
-    public static class Arm
+    public class Arm
     {
-        public static int ArmInstances = 0;
-
-        static Arm()
-        {
-            AmmoToLoad = new List<Ammo>();
-            Interlocked.Increment(ref ArmInstances);
-        }
-
-        //static ~Arm()
-        //{
-        //    Interlocked.Decrement(ref ArmInstances);
-        //}
-
-        private static bool _bringItemMoved;
-        private static bool _bringoptionalItemMoved;
-        private static bool ItemsAreBeingMoved;
-        private static bool CheckCargoForBringItem;
-        private static bool CheckCargoForOptionalBringItem;
+        private bool _bringItemMoved;
+        private bool _bringoptionalItemMoved;
+        private bool ItemsAreBeingMoved;
+        private bool CheckCargoForBringItem;
+        private bool CheckCargoForOptionalBringItem;
         //private bool CheckCargoForAmmo;
 
-        private static DateTime _lastPulse;
-        private static DateTime _lastArmAction;
+        private DateTime _lastPulse;
+        private DateTime _lastArmAction;
 
-        private static int bringItemQuantity;
-        private static int bringOptionalItemQuantity;
-        
+        private int bringItemQuantity;
+        private int bringOptionalItemQuantity;
+        public Arm()
+        {
+            AmmoToLoad = new List<Ammo>();
+        }
+
         // Bleh, we don't want this here, can we move it to cache?
-        public static long AgentId { get; set; }
+        public long AgentId { get; set; }
 
-        public static List<Ammo> AmmoToLoad { get; private set; }
+        public List<Ammo> AmmoToLoad { get; private set; }
 
-        private static bool DefaultFittingChecked; //false; //flag to check for the correct default fitting before using the fitting manager
-        private static bool DefaultFittingFound; //Did we find the default fitting?
-        private static bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
-        private static bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
-        private static bool CustomFittingFound;
-        private static bool WaitForFittingToLoad = true;
-        private static bool capsMoved = false;
+        private bool DefaultFittingChecked; //false; //flag to check for the correct default fitting before using the fitting manager
+        private bool DefaultFittingFound; //Did we find the default fitting?
+        private bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
+        private bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
+        private bool CustomFittingFound;
+        private bool WaitForFittingToLoad = true;
+        private bool capsMoved = false;
         //private bool ammoMoved = false;
-        private static int retryCount = 0;
-        private static int ItemHangarRetries = 0;
+        private int retryCount = 0;
+        private int ItemHangarRetries = 0;
 
-        public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+        public void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
         {
             AmmoToLoad.Clear();
             AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
         }
 
-        private static bool FindDefaultFitting(string module)
+        private bool FindDefaultFitting(string module)
         {
             DefaultFittingFound = false;
             if (!DefaultFittingChecked)
@@ -134,7 +123,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        public static void ProcessState()
+        public void ProcessState()
         {
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 1500) //default: 1500ms

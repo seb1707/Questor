@@ -26,10 +26,10 @@ namespace Questor.Behaviors
 {
     public class DedicatedBookmarkSalvagerBehavior
     {
-        //private readonly Arm _arm;
+        private readonly Arm _arm;
         private readonly Panic _panic;
         private readonly Statistics _statistics;
-        //private readonly Salvage _salvage;
+        private readonly Salvage _salvage;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private DateTime _nextBookmarksrefresh = DateTime.UtcNow;
@@ -53,9 +53,9 @@ namespace Questor.Behaviors
 
         public DedicatedBookmarkSalvagerBehavior()
         {
-            //_salvage = new Salvage();
+            _salvage = new Salvage();
             _unloadLoot = new UnloadLoot();
-            //_arm = new Arm();
+            _arm = new Arm();
             _panic = new Panic();
             _statistics = new Statistics();
             _watch = new Stopwatch();
@@ -114,22 +114,22 @@ namespace Questor.Behaviors
             }
             else
             {
-                Arm.AgentId = agent.AgentId;
+                _arm.AgentId = agent.AgentId;
                 _statistics.AgentID = agent.AgentId;
                 AgentID = agent.AgentId;
-                Salvage.Ammo = Settings.Instance.Ammo;
-                Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-                Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-                Salvage.LootEverything = Settings.Instance.LootEverything;
+                _salvage.Ammo = Settings.Instance.Ammo;
+                _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+                _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+                _salvage.LootEverything = Settings.Instance.LootEverything;
             }
         }
 
         public void ApplySalvageSettings()
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            _salvage.Ammo = Settings.Instance.Ammo;
+            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            _salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -462,7 +462,7 @@ namespace Questor.Behaviors
                         if (_States.CurrentArmState == ArmState.Idle)
                             _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
-                        Arm.ProcessState();
+                        _arm.ProcessState();
                     }
                     if (_States.CurrentArmState == ArmState.Done || Cache.Instance.InSpace)
                     {
@@ -632,10 +632,10 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
-                        Salvage.ReserveCargoCapacity = 80;
-                        Salvage.LootEverything = true;
-                        Salvage.ProcessState();
+                        _salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        _salvage.ReserveCargoCapacity = 80;
+                        _salvage.LootEverything = true;
+                        _salvage.ProcessState();
                         //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);

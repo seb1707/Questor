@@ -24,7 +24,7 @@ namespace Questor.Storylines
 
             // Are we in an industrial?  Yes, goto the agent
             //var directEve = Cache.Instance.DirectEve;
-            //if (Cache.Instance.ActiveShip.TypeId == 648 || Cache.Instance.ActiveShip.TypeId == 649 || Cache.Instance.ActiveShip.TypeId == 650 || Cache.Instance.ActiveShip.TypeId == 651 || Cache.Instance.ActiveShip.TypeId == 652 || Cache.Instance.ActiveShip.TypeId == 653 || Cache.Instance.ActiveShip.TypeId == 654 || Cache.Instance.ActiveShip.TypeId == 655 || Cache.Instance.ActiveShip.TypeId == 656 || Cache.Instance.ActiveShip.TypeId == 657 || Cache.Instance.ActiveShip.TypeId == 1944 || Cache.Instance.ActiveShip.TypeId == 19744)
+            //if (directEve.ActiveShip.TypeId == 648 || directEve.ActiveShip.TypeId == 649 || directEve.ActiveShip.TypeId == 650 || directEve.ActiveShip.TypeId == 651 || directEve.ActiveShip.TypeId == 652 || directEve.ActiveShip.TypeId == 653 || directEve.ActiveShip.TypeId == 654 || directEve.ActiveShip.TypeId == 655 || directEve.ActiveShip.TypeId == 656 || directEve.ActiveShip.TypeId == 657 || directEve.ActiveShip.TypeId == 1944 || directEve.ActiveShip.TypeId == 19744)
             //    return StorylineState.GotoAgent;
 
             // Open the ship hangar

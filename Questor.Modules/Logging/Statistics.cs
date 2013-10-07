@@ -1,6 +1,4 @@
 ﻿
-
-
 namespace Questor.Modules.Logging
 {
     using System;
@@ -9,10 +7,7 @@ namespace Questor.Modules.Logging
     using System.IO;
     using System.Globalization;
     using System.Collections.Generic;
-    using Questor.Modules.Actions;
-    using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
-    using Questor.Modules.Combat;
     using Questor.Modules.Lookup;
     using Questor.Modules.States;
 
@@ -243,28 +238,6 @@ namespace Questor.Modules.Logging
                 }
             }
             Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
-            
-            return true;
-        }
-
-        public static bool ListClassInstanceInfo()
-        {
-            Logging.Log("debug", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.Entities.Any())
-            {
-                Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
-                Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
-                Logging.Log("debug", "Defense Class Instances: [" + Defense.DefenseInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Arm Class Instances: [" + Arm.ArmInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Salvage Class Instances: [" + Salvage.SalvageInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Combat Class Instances: [" + Combat.CombatInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Drone Class Instances: [" + Drones.DronesInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Logging Class Instances: [" + Logging.LoggingInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Cache Class Instances: [" + Cache.CacheInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Settings Class Instances: [" + Settings.SettingsInstances + "]", Logging.Debug);
-            }
-            Logging.Log("debug", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
-            
             
             return true;
         }
@@ -972,20 +945,6 @@ namespace Questor.Modules.Logging
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ModuleInfo", Logging.Debug);
                             Statistics.ModuleInfo(Cache.Instance.Modules);
-                        }
-                    }
-                    break;
-
-                    //ListClassInstanceInfo
-
-                case StatisticsState.ListClassInstanceInfo:
-                    if (!Cache.Instance.InWarp)
-                    {
-                        if (Cache.Instance.InSpace)
-                        {
-                            _States.CurrentStatisticsState = StatisticsState.Idle;
-                            Logging.Log("Statistics", "StatisticsState.ListClassInstanceInfo", Logging.Debug);
-                            Statistics.ListClassInstanceInfo();
                         }
                     }
                     break;

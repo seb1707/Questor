@@ -26,12 +26,12 @@ namespace Questor.Behaviors
 {
     public class DebugHangarsBehavior
     {
-        //private readonly Arm _arm;
-        //private readonly Combat _combat;
-        //private readonly Drones _drones;
+        private readonly Arm _arm;
+        private readonly Combat _combat;
+        private readonly Drones _drones;
 
         private readonly Panic _panic;
-        //private readonly Salvage _salvage;
+        private readonly Salvage _salvage;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         public static long AgentID;
@@ -48,11 +48,11 @@ namespace Questor.Behaviors
 
         public DebugHangarsBehavior()
         {
-            //_salvage = new Salvage();
-            //_combat = new Combat();
-            //_drones = new Drones();
+            _salvage = new Salvage();
+            _combat = new Combat();
+            _drones = new Drones();
             _unloadLoot = new UnloadLoot();
-            //_arm = new Arm();
+            _arm = new Arm();
             _panic = new Panic();
             _watch = new Stopwatch();
 
@@ -125,17 +125,17 @@ namespace Questor.Behaviors
             }
             else
             {
-                Arm.AgentId = agent.AgentId;
+                _arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
 
         public void ApplyDebugSettings()
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            _salvage.Ammo = Settings.Instance.Ammo;
+            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            _salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -164,8 +164,8 @@ namespace Questor.Behaviors
             {
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
-                    Combat.ProcessState();
-                    Drones.ProcessState(); //do we really want to use drones here?
+                    _combat.ProcessState();
+                    _drones.ProcessState(); //do we really want to use drones here?
                 }
             }
             if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
@@ -313,11 +313,11 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load right ammo based on mission
-                        Arm.AmmoToLoad.Clear();
-                        Arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
+                        _arm.AmmoToLoad.Clear();
+                        _arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
                     }
 
-                    Arm.ProcessState();
+                    _arm.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
 
@@ -383,10 +383,10 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
-                        Salvage.ReserveCargoCapacity = 80;
-                        Salvage.LootEverything = true;
-                        Salvage.ProcessState();
+                        _salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        _salvage.ReserveCargoCapacity = 80;
+                        _salvage.LootEverything = true;
+                        _salvage.ProcessState();
                         //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);

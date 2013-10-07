@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -21,37 +19,29 @@ namespace Questor.Modules.BackgroundTasks
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
-    public static class Salvage
+    public class Salvage
     {
-        private static DateTime _lastSalvageProcessState;
+        private DateTime _lastSalvageProcessState;
 
         /// <summary>
         ///   Keep a list of times that we have tried to open a container (do not try to open the same container twice within 10 seconds)
         /// </summary>
         public static Dictionary<long, DateTime> OpenedContainers;
-        public static int SalvageInstances = 0;
 
-        static Salvage()
+        public Salvage()
         {
             OpenedContainers = new Dictionary<long, DateTime>();
-            Interlocked.Increment(ref SalvageInstances);
         }
 
-        
-        //~Salvage()
-        //{
-        //    Interlocked.Decrement(ref SalvageInstances);
-        //}
+        public int MaximumWreckTargets { get; set; }
 
-        public static int MaximumWreckTargets { get; set; }
+        public bool LootEverything { get; set; }
 
-        public static bool LootEverything { get; set; }
+        public int ReserveCargoCapacity { get; set; }
 
-        public static int ReserveCargoCapacity { get; set; }
+        public List<Ammo> Ammo { get; set; }
 
-        public static List<Ammo> Ammo { get; set; }
-
-        private static int ModuleNumber { get; set; }
+        private int ModuleNumber { get; set; }
 
         public static void MoveIntoRangeOfWrecks() // DO NOT USE THIS ANYWHERE EXCEPT A PURPOSEFUL SALVAGE BEHAVIOR! - if you use this while in combat it will make you go poof quickly.
         {
@@ -88,7 +78,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Activates tractorbeam on targeted wrecks
         /// </summary>
-        private static void ActivateTractorBeams()
+        private void ActivateTractorBeams()
         {
             if (Cache.Instance.NextTractorBeamAction > DateTime.UtcNow)
             {
@@ -196,7 +186,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Activate salvagers on targeted wreck
         /// </summary>
-        private static void ActivateSalvagers()
+        private void ActivateSalvagers()
         {
             if (Cache.Instance.NextSalvageAction > DateTime.UtcNow)
             {
@@ -268,7 +258,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Target wrecks within range
         /// </summary>
-        private static void TargetWrecks()
+        private void TargetWrecks()
         {
             if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
             {
@@ -453,7 +443,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Loot any wrecks & cargo containers close by
         /// </summary>
-        private static void LootWrecks()
+        private void LootWrecks()
         {
             if (Cache.Instance.NextLootAction > DateTime.UtcNow)
             {
@@ -748,7 +738,7 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        public static void ProcessState()
+        public void ProcessState()
         {
             if (DateTime.UtcNow < _lastSalvageProcessState.AddMilliseconds(500) || Settings.Instance.DebugDisableSalvage) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;

@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.Caching
 {
     using System;
@@ -408,8 +406,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public static int CacheInstances = 0;
-
         public Cache()
         {
             NextDockAction = DateTime.UtcNow;
@@ -466,13 +462,6 @@ namespace Questor.Modules.Caching
             LowestArmorPercentageThisMission = 100;
             LowestCapacitorPercentageThisMission = 100;
             LastKnownGoodConnectedTime = DateTime.UtcNow;
-
-            Interlocked.Increment(ref CacheInstances);
-        }
-
-        ~Cache()
-        {
-            Interlocked.Decrement(ref CacheInstances);
         }
 
         /// <summary>
@@ -995,7 +984,7 @@ namespace Questor.Modules.Caching
             DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
             if (mission == null)
             {
-                Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+                Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
                 var nearestAgent = Settings.Instance.AgentsList
                     .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                     .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
@@ -1023,7 +1012,7 @@ namespace Questor.Modules.Caching
 
         private string SelectFirstAgent()
         {
-            Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+            Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
             AgentsList FirstAgent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
             if (FirstAgent == null)
             {
@@ -1488,8 +1477,8 @@ namespace Questor.Modules.Caching
                 {
                     return new List<EntityCache>();
                 }
-
-                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.Id != Cache.Instance.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
+                
+                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.Id != DirectEve.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
                 if (_entitiesNotSelf.Any())
                 {
                     return _entitiesNotSelf;
@@ -1508,11 +1497,9 @@ namespace Questor.Modules.Caching
                     return null;
                 }
 
-                return Cache.Instance.Entities.FirstOrDefault(e => e.IsValid && e.Id == Cache.Instance.ActiveShip.ItemId);
+                return Cache.Instance.Entities.FirstOrDefault(e => e.IsValid && e.Id == DirectEve.ActiveShip.ItemId);
             }
         }
-
-        private bool? _inSpace;
 
         public bool InSpace
         {
@@ -1520,30 +1507,21 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_inSpace == null)
+                    if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null)
                     {
-                        if (DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null && DirectEve.Session.IsInSpace && !Cache.Instance.InStation)
-                        {
-                            Cache.Instance.LastInSpace = DateTime.UtcNow;
-                            _inSpace = true;
-                            return _inSpace ?? false;
-                        }
-
-                        _inSpace = false;
-                        return _inSpace ?? false;
+                        Cache.Instance.LastInSpace = DateTime.UtcNow;
+                        return true;
                     }
 
-                    return _inSpace ?? false;
+                    return false;
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.InSpace", "if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
+                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.InSpace", "if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
                     return false;
                 }
             }
         }
-
-        private bool? _inStation;
 
         public bool InStation
         {
@@ -1551,20 +1529,12 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if(_inStation == null)
+                    if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
                     {
-                        if (DirectEve.Session.IsReady && DirectEve.Session.IsInStation && !Cache.Instance.InSpace)
-                        {
-                            Cache.Instance.LastInStation = DateTime.UtcNow;
-                            _inStation = true;
-                            return _inStation ?? false;
-                        }
-
-                        _inStation = false;
-                        return _inStation ?? false;   
+                        Cache.Instance.LastInStation = DateTime.UtcNow;
+                        return true;
                     }
-
-                    return _inStation ?? false;
+                    return false;
                 }
                 catch (Exception ex)
                 {
@@ -1582,29 +1552,29 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.InSpace && !Cache.Instance.InStation)
                     {
-                        if (Cache.Instance.ActiveShip != null)
+                        if (DirectEve.ActiveShip != null)
                         {
-                            if (Cache.Instance.ActiveShip.Entity != null)
+                            if (DirectEve.ActiveShip.Entity != null)
                             {
-                                if (Cache.Instance.ActiveShip.Entity.Mode == 3)
+                                if (DirectEve.ActiveShip.Entity.Mode == 3)
                                 {
-                                    return Cache.Instance.ActiveShip != null && (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 3);
+                                    return DirectEve.ActiveShip != null && (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 3);
                                 }
                                 else
                                 {
-                                    if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.Cache.Instance.ActiveShip.Entity.Mode  is [" + Cache.Instance.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                                    if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.DirectEve.ActiveShip.Entity.Mode  is [" + DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
                                     return false;
                                 }
                             }
                             else
                             {
-                                if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
+                                if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
                                 return false;
                             }
                         }
                         else
                         {
-                            if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip is Null? (session change?)", Logging.Teal);
+                            if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Directeve.ActiveShip is Null? (session change?)", Logging.Teal);
                             return false;
                         }
                     }
@@ -1631,14 +1601,14 @@ namespace Questor.Modules.Caching
 
                 if (EntityWeWantToBeOrbiting != 0)
                 {
-                    _followIDIsOnGrid = (EntityWeWantToBeOrbiting == Cache.Instance.ActiveShip.Entity.FollowId);
+                    _followIDIsOnGrid = (EntityWeWantToBeOrbiting == DirectEve.ActiveShip.Entity.FollowId);
                 }
                 else
                 {
-                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
+                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
                 }
 
-                if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
+                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
                 {
                     return true;
                 }
@@ -1657,14 +1627,14 @@ namespace Questor.Modules.Caching
                 
                 if (EntityWeWantToBeApproaching != 0)
                 {
-                    _followIDIsOnGrid = (EntityWeWantToBeApproaching == Cache.Instance.ActiveShip.Entity.FollowId);
+                    _followIDIsOnGrid = (EntityWeWantToBeApproaching == DirectEve.ActiveShip.Entity.FollowId);
                 }
                 else
                 {
-                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
+                    _followIDIsOnGrid = Cache.Instance.Entities.Any(i => i.Id == DirectEve.ActiveShip.Entity.FollowId);
                 }
 
-                if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
+                if (DirectEve.ActiveShip.Entity != null && DirectEve.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
                 {
                     return true;
                 }
@@ -2288,8 +2258,6 @@ namespace Questor.Modules.Caching
                 _entitiesById.Clear();
                 _gates = null;
                 _IDsinInventoryTree = null;
-                _inStation = null;
-                _inSpace = null;
                 _itemHangar = null;
                 _jumpBridges = null;
                 _maxLockedTargets = null;
@@ -2835,14 +2803,14 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public double DistanceFromMe(double x, double y, double z)
         {
-            if (Cache.Instance.ActiveShip.Entity == null)
+            if (DirectEve.ActiveShip.Entity == null)
             {
                 return double.MaxValue;
             }
 
-            double curX = Cache.Instance.ActiveShip.Entity.X;
-            double curY = Cache.Instance.ActiveShip.Entity.Y;
-            double curZ = Cache.Instance.ActiveShip.Entity.Z;
+            double curX = DirectEve.ActiveShip.Entity.X;
+            double curY = DirectEve.ActiveShip.Entity.Y;
+            double curZ = DirectEve.ActiveShip.Entity.Z;
 
             return Math.Round(Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z)),2);
         }

@@ -1,30 +1,29 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DirectEve;
-using Questor.Modules.Actions;
-using Questor.Modules.Activities;
-using Questor.Modules.BackgroundTasks;
-using Questor.Modules.Caching;
-using Questor.Modules.Combat;
-using Questor.Modules.Logging;
-using Questor.Modules.Lookup;
-using Questor.Modules.States;
-
-namespace Questor.Storylines
+﻿namespace Questor.Storylines
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using DirectEve;
+    using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Activities;
+    using global::Questor.Modules.BackgroundTasks;
+    using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
+    using global::Questor.Modules.Logging;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.States;
+
     public class GenericCombatStoryline : IStoryline
     {
         private long _agentId;
         private readonly List<Ammo> _neededAmmo;
 
-        //private readonly AgentInteraction _agentInteraction;
-        //private readonly Arm _arm;
+        private readonly AgentInteraction _agentInteraction;
+        private readonly Arm _arm;
         private readonly CombatMissionCtrl _combatMissionCtrl;
-        //private readonly Combat _combat;
-        //private readonly Drones _drones;
-        //private readonly Salvage _salvage;
+        private readonly Combat _combat;
+        private readonly Drones _drones;
+        private readonly Salvage _salvage;
         private readonly Statistics _statistics;
 
         private GenericCombatStorylineState _state;
@@ -39,11 +38,11 @@ namespace Questor.Storylines
         {
             _neededAmmo = new List<Ammo>();
 
-            //_agentInteraction = new AgentInteraction();
-            //_arm = new Arm();
-            //_combat = new Combat();
-            //_drones = new Drones();
-            //_salvage = new Salvage();
+            _agentInteraction = new AgentInteraction();
+            _arm = new Arm();
+            _combat = new Combat();
+            _drones = new Drones();
+            _salvage = new Salvage();
             _statistics = new Statistics();
             _combatMissionCtrl = new CombatMissionCtrl();
 
@@ -57,10 +56,10 @@ namespace Questor.Storylines
         /// <param name="e"></param>
         private void ApplySettings(object sender, EventArgs e)
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            _salvage.Ammo = Settings.Instance.Ammo;
+            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            _salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         /// <summary>
@@ -75,13 +74,13 @@ namespace Questor.Storylines
                 _agentId = Cache.Instance.CurrentStorylineAgentId;
 
                 AgentInteraction.AgentId = _agentId;
-                AgentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
+                _agentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 AgentInteraction.Purpose = AgentInteractionPurpose.AmmoCheck;
 
-                Modules.Actions.Arm.AgentId = _agentId;
+                _arm.AgentId = _agentId;
                 _States.CurrentArmState = ArmState.Idle;
-                Modules.Actions.Arm.AmmoToLoad.Clear();
+                _arm.AmmoToLoad.Clear();
 
                 //Questor.AgentID = _agentId;
 
@@ -134,7 +133,7 @@ namespace Questor.Storylines
                 _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
 
             // Interact with the agent to find out what ammo we need
-            AgentInteraction.ProcessState();
+            _agentInteraction.ProcessState();
 
             if (_States.CurrentAgentInteractionState == AgentInteractionState.DeclineMission)
             {
@@ -146,8 +145,8 @@ namespace Questor.Storylines
 
             if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
             {
-                Modules.Actions.Arm.AmmoToLoad.Clear();
-                Modules.Actions.Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);
+                _arm.AmmoToLoad.Clear();
+                _arm.AmmoToLoad.AddRange(_agentInteraction.AmmoToLoad);
                 return true;
             }
 
@@ -166,7 +165,7 @@ namespace Questor.Storylines
             if (_States.CurrentArmState == ArmState.Idle)
                 _States.CurrentArmState = ArmState.Begin;
 
-            Modules.Actions.Arm.ProcessState();
+            _arm.ProcessState();
 
             if (_States.CurrentArmState == ArmState.Done)
             {
@@ -256,7 +255,7 @@ namespace Questor.Storylines
                     if (Cache.Instance.potentialCombatTargets.Any())
                     {
                         Logging.Log("GenericCombatStoryline", "Priority targets found while traveling, engaging!", Logging.White);
-                        Combat.ProcessState();
+                        _combat.ProcessState();
                     }
 
                     Traveler.ProcessState();
@@ -270,9 +269,9 @@ namespace Questor.Storylines
                     break;
 
                 case GenericCombatStorylineState.ExecuteMission:
-                    Combat.ProcessState();
-                    Drones.ProcessState();
-                    Salvage.ProcessState();
+                    _combat.ProcessState();
+                    _drones.ProcessState();
+                    _salvage.ProcessState();
                     _combatMissionCtrl.ProcessState();
 
                     // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship

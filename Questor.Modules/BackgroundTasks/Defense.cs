@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -23,18 +21,6 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Defense
     {
-        public static int DefenseInstances = 0;
-
-        public Defense()
-        {
-            Interlocked.Increment(ref DefenseInstances);
-        }
-
-        ~Defense()
-        {
-            Interlocked.Decrement(ref DefenseInstances);
-        }
-
         private DateTime _lastSessionChange = Cache.Instance.StartTime;
 
         private DateTime _lastPulse = DateTime.UtcNow;

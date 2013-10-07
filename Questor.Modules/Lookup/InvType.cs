@@ -9,7 +9,6 @@
 // -------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Xml.Linq;
 using System.Globalization;
 using Questor.Modules.Caching;
@@ -29,8 +28,6 @@ namespace Questor.Modules.Lookup
                                                   "Pyerite",
                                                   "Tritanium"
                                                };
-
-        public static int InvTypeInstances = 0;
 
         public InvType(XElement element)
         {
@@ -53,8 +50,6 @@ namespace Questor.Modules.Lookup
             {
                 Reprocess.Add(m, (double?) element.Attribute(m));
             }
-
-            Interlocked.Increment(ref InvTypeInstances);
         }
 
         public InvType(ItemCache item)
@@ -72,15 +67,7 @@ namespace Questor.Modules.Lookup
             {
                 Reprocess.Add(m, null);
             }
-
-            Interlocked.Increment(ref InvTypeInstances);
         }
-
-        ~InvType()
-        {
-            Interlocked.Decrement(ref InvTypeInstances);
-        }
-
 
         public int Id { get; set; }
 

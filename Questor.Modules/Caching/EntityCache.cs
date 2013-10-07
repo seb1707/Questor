@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.Caching
 {
     using System;
@@ -22,24 +20,16 @@ namespace Questor.Modules.Caching
     public class EntityCache
     {
         //
-        // ALL of theses (well most) need _equivalents so we can cache the results per frame
+        // ALL of thses (well most) need _equivalents so we can cache the results per frame
         // _GroupID
         //
 
         private readonly DirectEntity _directEntity;
-        public static int EntityCacheInstances = 0;
 
         public EntityCache(DirectEntity entity)
         {
             _directEntity = entity;
-            Interlocked.Increment(ref EntityCacheInstances);
         }
-
-        ~EntityCache()
-        {
-            Interlocked.Decrement(ref EntityCacheInstances);
-        }
-
 
         public void InvalidateCache()
         {
@@ -1786,6 +1776,7 @@ namespace Questor.Modules.Caching
                     {
                         bool result = false;
                         result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                            //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                                    && (!IsTargeting && !IsTarget && IsTargetedBy)
                                    && !IsContainer
                                    && CategoryId == (int)CategoryID.Entity
@@ -1819,6 +1810,7 @@ namespace Questor.Modules.Caching
                     {
                         bool result = false;
                         result |= (((IsNpc || IsNpcByGroupID) || IsAttacking || Cache.Instance.InMission)
+                            //&& (!IsSentry || (IsSentry && Settings.Instance.KillSentries))
                                    && (!IsTargeting && !IsTarget)
                                    && !IsContainer
                                    && CategoryId == (int)CategoryID.Entity

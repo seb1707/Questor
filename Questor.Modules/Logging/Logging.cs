@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.Logging
 {
     using System;
@@ -24,18 +22,6 @@ namespace Questor.Modules.Logging
 
     public static class Logging
     {
-        public static int LoggingInstances = 0;
-
-        static Logging()
-        {
-            Interlocked.Increment(ref LoggingInstances);
-        }
-
-        //~Logging()
-        //{
-        //    Interlocked.Decrement(ref LoggingInstances);
-        //}
-
         public static DateTime DateTimeForLogs;
         //list of colors
         public const string Green = "\ag";    //traveler mission control

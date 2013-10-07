@@ -28,12 +28,12 @@ namespace Questor.Behaviors
 {
     public class CombatMissionsBehavior
     {
-        //private readonly AgentInteraction _agentInteraction;
-        //private readonly Arm _arm;
+        private readonly AgentInteraction _agentInteraction;
+        private readonly Arm _arm;
         private readonly SwitchShip _switchShip;
-        //private readonly Combat _combat;
+        private readonly Combat _combat;
         private readonly CourierMissionCtrl _courierMissionCtrl;
-        //private readonly Drones _drones;
+        private readonly Drones _drones;
 
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
@@ -42,7 +42,7 @@ namespace Questor.Behaviors
         private readonly Panic _panic;
         private readonly Storyline _storyline;
         private readonly Statistics _statistics;
-        //private readonly Salvage _salvage;
+        private readonly Salvage _salvage;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private readonly Random _random;
@@ -72,12 +72,12 @@ namespace Questor.Behaviors
 
             _traveler = new Traveler();
             _random = new Random();
-            //_salvage = new Salvage();
-            //_combat = new Combat();
-            //_drones = new Drones();
+            _salvage = new Salvage();
+            _combat = new Combat();
+            _drones = new Drones();
             _unloadLoot = new UnloadLoot();
-            //_agentInteraction = new AgentInteraction();
-            //_arm = new Arm();
+            _agentInteraction = new AgentInteraction();
+            _arm = new Arm();
             _courierMissionCtrl = new CourierMissionCtrl();
             _switchShip = new SwitchShip();
             _combatMissionCtrl = new CombatMissionCtrl();
@@ -152,17 +152,17 @@ namespace Questor.Behaviors
 
             AgentInteraction.AgentId = Cache.Instance.AgentId;
             _combatMissionCtrl.AgentId = Cache.Instance.AgentId;
-            Arm.AgentId = Cache.Instance.AgentId;
+            _arm.AgentId = Cache.Instance.AgentId;
             _statistics.AgentID = Cache.Instance.AgentId;
             AgentID = Cache.Instance.AgentId;
         }
 
         public void ApplySalvageSettings()
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            _salvage.Ammo = Settings.Instance.Ammo;
+            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            _salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -444,7 +444,7 @@ namespace Questor.Behaviors
                         AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                     }
 
-                    AgentInteraction.ProcessState();
+                    _agentInteraction.ProcessState();
 
                     if (AgentInteraction.Purpose == AgentInteractionPurpose.CompleteMission) //AgentInteractionPurpose was changed 'on the fly' by agentInteraction
                     {
@@ -535,12 +535,12 @@ namespace Questor.Behaviors
                             _States.CurrentArmState = ArmState.Begin;
 
                             // Load right ammo based on mission
-                            Arm.AmmoToLoad.Clear();
-                            Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);
+                            _arm.AmmoToLoad.Clear();
+                            _arm.AmmoToLoad.AddRange(_agentInteraction.AmmoToLoad);
                         }
                     }
 
-                    Arm.ProcessState();
+                    _arm.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
 
@@ -671,7 +671,7 @@ namespace Questor.Behaviors
                     if (Cache.Instance.potentialCombatTargets.Any())
                     {
                         Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
-                        Combat.ProcessState();
+                        _combat.ProcessState();
                     }
 
                     Traveler.ProcessState();
@@ -692,21 +692,21 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.ExecuteMission:
                     DebugPerformanceClearandStartTimer();
-                    Combat.ProcessState();
+                    _combat.ProcessState();
                     DebugPerformanceStopandDisplayTimer("Combat.ProcessState");
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("Combat.State is", _States.CurrentCombatState.ToString(), Logging.White);
 
                     DebugPerformanceClearandStartTimer();
-                    Drones.ProcessState();
+                    _drones.ProcessState();
                     DebugPerformanceStopandDisplayTimer("Drones.ProcessState");
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.White);
 
                     DebugPerformanceClearandStartTimer();
-                    Salvage.ProcessState();
+                    _salvage.ProcessState();
                     DebugPerformanceStopandDisplayTimer("Salvage.ProcessState");
 
                     if (Settings.Instance.DebugStates)
@@ -829,7 +829,7 @@ namespace Questor.Behaviors
                         AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
-                    AgentInteraction.ProcessState();
+                    _agentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
@@ -1061,7 +1061,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentArmState == ArmState.Idle)
                         _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
-                    Arm.ProcessState();
+                    _arm.ProcessState();
                     if (_States.CurrentArmState == ArmState.Done)
                     {
                         _States.CurrentArmState = ArmState.Idle;
@@ -1190,10 +1190,10 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
-                        Salvage.ReserveCargoCapacity = 80;
-                        Salvage.LootEverything = true;
-                        Salvage.ProcessState();
+                        _salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        _salvage.ReserveCargoCapacity = 80;
+                        _salvage.LootEverything = true;
+                        _salvage.ProcessState();
 
                         //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);

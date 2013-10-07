@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using DirectEve;
 using Questor.Modules.Caching;
 using Questor.Modules.Logging;
@@ -27,12 +26,12 @@ namespace Questor.Behaviors
 {
     public class CombatHelperBehavior
     {
-        //private readonly Arm _arm;
-        //private readonly Combat _combat;
-        //private readonly Drones _drones;
+        private readonly Arm _arm;
+        private readonly Combat _combat;
+        private readonly Drones _drones;
 
         private readonly Panic _panic;
-        //private readonly Salvage _salvage;
+        private readonly Salvage _salvage;
         //private readonly Slave _slave;
         private readonly UnloadLoot _unloadLoot;
 
@@ -49,15 +48,13 @@ namespace Questor.Behaviors
 
         public string CharacterName { get; set; }
 
-        public static int CombatHelperBehaviorInstances = 0;
-
         public CombatHelperBehavior()
         {
-            //_arm = new Arm();
-            //_combat = new Combat();
-            //_drones = new Drones();
+            _arm = new Arm();
+            _combat = new Combat();
+            _drones = new Drones();
             _panic = new Panic();
-            //_salvage = new Salvage();
+            _salvage = new Salvage();
             //_slave = new Slave();
             _unloadLoot = new UnloadLoot();
             _watch = new Stopwatch();
@@ -77,13 +74,6 @@ namespace Questor.Behaviors
             //_States.CurrentDroneState = DroneState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
-
-            Interlocked.Increment(ref CombatHelperBehaviorInstances);
-        }
-
-        ~CombatHelperBehavior()
-        {
-            Interlocked.Decrement(ref CombatHelperBehaviorInstances);
         }
 
         public void SettingsLoaded(object sender, EventArgs e)
@@ -141,17 +131,17 @@ namespace Questor.Behaviors
             }
             else
             {
-                Arm.AgentId = agent.AgentId;
+                _arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
 
         public void ApplyCombatHelperSettings()
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            _salvage.Ammo = Settings.Instance.Ammo;
+            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            _salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -299,11 +289,11 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load right ammo based on mission
-                        Arm.AmmoToLoad.Clear();
-                        Arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
+                        _arm.AmmoToLoad.Clear();
+                        _arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
                     }
 
-                    Arm.ProcessState();
+                    _arm.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
 
@@ -344,19 +334,19 @@ namespace Questor.Behaviors
                     if (Cache.Instance.InSpace)
                     {
                         DebugPerformanceClearandStartTimer();
-                        Combat.ProcessState();
+                        _combat.ProcessState();
                         DebugPerformanceStopandDisplayTimer("Combat.ProcessState");
 
                         if (Settings.Instance.DebugStates) Logging.Log("Combat.State is", _States.CurrentCombatState.ToString(), Logging.White);
 
                         DebugPerformanceClearandStartTimer();
-                        Drones.ProcessState();
+                        _drones.ProcessState();
                         DebugPerformanceStopandDisplayTimer("Drones.ProcessState");
 
                         if (Settings.Instance.DebugStates) Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.White);
 
                         DebugPerformanceClearandStartTimer();
-                        Salvage.ProcessState();
+                        _salvage.ProcessState();
                         DebugPerformanceStopandDisplayTimer("Salvage.ProcessState");
 
                         if (Settings.Instance.DebugStates) Logging.Log("Salvage.State is", _States.CurrentSalvageState.ToString(), Logging.White);
@@ -394,10 +384,10 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
-                        Salvage.ReserveCargoCapacity = 80;
-                        Salvage.LootEverything = true;
-                        Salvage.ProcessState();
+                        _salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        _salvage.ReserveCargoCapacity = 80;
+                        _salvage.LootEverything = true;
+                        _salvage.ProcessState();
 
                         //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);

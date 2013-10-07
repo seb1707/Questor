@@ -1372,7 +1372,7 @@ namespace Questor.Modules.Combat
 
             int LockedTargetsThatHaveHighValue = Cache.Instance.Targets.Count(t => (t.IsHighValueTarget));
 
-            List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => !t.IsHighValueTarget)
+            List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => t.IsLowValueTarget)
                                                                .OrderBy(t => t.Nearest5kDistance).ToList();
 
             int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));

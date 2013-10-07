@@ -1630,6 +1630,10 @@ namespace Questor.Modules.Caching
                             if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
                             {
                                 _IsHighValueTarget = true;
+                                if (IsSentry && !Settings.Instance.KillSentries)
+                                {
+                                    _IsHighValueTarget = false;
+                                }
                                 return _IsHighValueTarget ?? true;
                             }
 
@@ -1661,6 +1665,10 @@ namespace Questor.Modules.Caching
                         if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
                         {
                             _IsLowValueTarget = true;
+                            if (IsSentry && !Settings.Instance.KillSentries)
+                            {
+                                _IsLowValueTarget = false;
+                            }
                             return _IsLowValueTarget ?? true;
                         }
 

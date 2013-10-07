@@ -497,9 +497,6 @@ namespace Questor.Modules.BackgroundTasks
                     if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
                         Cache.Instance.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
 
-                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
-                        module.Click();
-
                     if (module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
                         if (module.CurrentCharges > 0)
@@ -508,6 +505,15 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
+                    //
+                    // if capacitor is really really low, do not make it worse
+                    //
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                        continue;
+
+                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
+                        module.Click();
+                    
                     Cache.Instance.StartedBoosting = DateTime.UtcNow;
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)

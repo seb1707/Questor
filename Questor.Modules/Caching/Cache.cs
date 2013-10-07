@@ -3939,8 +3939,8 @@ namespace Questor.Modules.Caching
                 dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Distance < Settings.Instance.DroneControlRange
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot)
-                                                                           .OrderByDescending(pt => pt.IsTargetedBy)
-                                                                           .ThenBy(pt => pt.DronePriorityLevel)
+                                                                           .OrderBy(pt => pt.DronePriorityLevel)
+                                                                           .ThenByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenByDescending(pt => pt.IsEwarTarget())
                                                                            .ThenBy(pt => pt.Distance)
                                                                            .FirstOrDefault();

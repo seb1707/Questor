@@ -1507,7 +1507,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null)
+                    if (DirectEve.Session.IsReady && DirectEve.ActiveShip.Entity != null && DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation)
                     {
                         Cache.Instance.LastInSpace = DateTime.UtcNow;
                         return true;
@@ -1529,7 +1529,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
+                    if (DirectEve.Session.IsReady && DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace)
                     {
                         Cache.Instance.LastInStation = DateTime.UtcNow;
                         return true;

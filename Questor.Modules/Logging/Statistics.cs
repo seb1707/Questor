@@ -160,8 +160,73 @@ namespace Questor.Modules.Logging
             return true;
         }
 
+        public static bool LogAllEntities(List<EntityCache> things, bool force = false)
+        {
+            if (Settings.Instance.PocketObjectStatisticsLog || force)
+            {
+                string currentPocketName = Cache.Instance.FilterPath("randomgrid");
+                try
+                {
+                    if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
+                    {
+                        currentPocketName = Cache.Instance.FilterPath(Cache.Instance.MissionName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Statistics", "PocketObjectStatistics: is cache.Instance.MissionName null?: exception was [" + ex.Message + "]", Logging.White);
+                }
+
+                Settings.Instance.PocketObjectStatisticsFile = Path.Combine(
+                        Settings.Instance.PocketObjectStatisticsPath,
+                        Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " +
+                        Cache.Instance.PocketNumber + " - ObjectStatistics.csv");
+
+                Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket to [" + Settings.Instance.PocketObjectStatisticsFile + "]", Logging.White);
+
+                if (File.Exists(Settings.Instance.PocketObjectStatisticsFile))
+                {
+                    File.Delete(Settings.Instance.PocketObjectStatisticsFile);
+                }
+
+                //
+                // build header
+                //
+                string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;ID;\r\n";
+                //Logging.Log("Statistics",";PocketObjectStatistics;" + objectline,Logging.White);
+                File.AppendAllText(Settings.Instance.PocketObjectStatisticsFile, objectline);
+
+                //
+                // iterate through entities
+                //
+                foreach (EntityCache thing in things.OrderBy(i => i.Distance))
+                {
+                    objectline = thing.Name + ";";
+                    objectline += Math.Round(thing.Distance / 1000, 0) + ";";
+                    objectline += thing.TypeId + ";";
+                    objectline += thing.GroupId + ";";
+                    objectline += thing.CategoryId + ";";
+                    objectline += thing.IsNpc + ";";
+                    objectline += thing.IsPlayer + ";";
+                    objectline += thing.TargetValue + ";";
+                    objectline += Math.Round(thing.Velocity, 0) + ";";
+                    objectline += thing.Id + ";\r\n";
+
+                    //
+                    // can we somehow get the X,Y,Z coord? If we could we could use this info to build some kind of grid layout...
+                    // or at least know the distances between all the NPCs... thus be able to infer which NPCs were in which 'groups'
+                    //
+
+                    //Logging.Log("Statistics", ";PocketObjectStatistics;" + objectline, Logging.White);
+                    File.AppendAllText(Settings.Instance.PocketObjectStatisticsFile, objectline);
+                }
+            }
+            return true;
+        }
+
         public static bool ModuleInfo(IEnumerable<ModuleCache> _modules)
         {
+            Logging.Log("ModuleInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             _modules = _modules.ToList();
             if (_modules.Any())
             {
@@ -172,12 +237,14 @@ namespace Questor.Modules.Logging
                     Logging.Log("ModuleInfo", "[" + icount + "] TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] AveragePrice[" + _module.AveragePrice + "] isActivatable [" + _module.IsActivatable + "] OptimalRange [" + _module.OptimalRange + "] Duration [" + _module.Duration + "]", Logging.Debug);
                 }
             }
-
+            Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            
             return true;
         }
 
         public static bool ListPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> primaryWeaponPriorityTargets)
         {
+            Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
             {
                 Logging.Log("[PWPT]", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
@@ -193,12 +260,13 @@ namespace Questor.Modules.Logging
                     Logging.Log("[PWPT]", "[" + icount + "][" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityTarget.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
-
+            Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             return true;
         }
 
         public static bool ListDronePriorityTargets(IEnumerable<EntityCache> primaryDroneTargets)
         {
+            Logging.Log("DT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             if (Cache.Instance.PreferredDroneTarget != null)
             {
                 Logging.Log("[DT]", "[" + 0 + "] PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredDroneTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredDroneTarget.IsTarget + "]", Logging.Debug);
@@ -214,12 +282,13 @@ namespace Questor.Modules.Logging
                     Logging.Log("[DT]", "[" + icount + "][" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + dronePriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
-
+            Logging.Log("DT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             return true;
         }
 
         public static bool ListTargetedandTargeting(IEnumerable<EntityCache> targetedandTargeting)
         {
+            Logging.Log("List", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             targetedandTargeting = targetedandTargeting.ToList();
             if (targetedandTargeting.Any())
             {
@@ -227,10 +296,10 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache targetedandTargetingEntity in targetedandTargeting.OrderBy(i => i.Distance).ThenBy(i => i.Name))
                 {
                     icount++;
-                    Logging.Log("[List]", "[" + icount + "][" + targetedandTargetingEntity.Name + "][" + Math.Round(targetedandTargetingEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + targetedandTargetingEntity.IsInOptimalRange + "] isTarget [" + targetedandTargetingEntity.IsTarget + "] isTargeting [" + targetedandTargetingEntity.IsTargeting + "] IsPrimaryWeaponPriorityTarget [" + targetedandTargetingEntity.IsPrimaryWeaponPriorityTarget + "] IsDronePriorityTarget [" + targetedandTargetingEntity.IsDronePriorityTarget + "]", Logging.Debug);
+                    Logging.Log("[List]", "[" + icount + "][" + targetedandTargetingEntity.Name + "][" + Math.Round(targetedandTargetingEntity.Distance / 1000, 0) + "k] IsIgnored [" + targetedandTargetingEntity.IsIgnored + "] IsInOptimalRange [" + targetedandTargetingEntity.IsInOptimalRange + "] isTarget [" + targetedandTargetingEntity.IsTarget + "] isTargeting [" + targetedandTargetingEntity.IsTargeting + "] IsPrimaryWeaponPriorityTarget [" + targetedandTargetingEntity.IsPrimaryWeaponPriorityTarget + "] IsDronePriorityTarget [" + targetedandTargetingEntity.IsDronePriorityTarget + "]", Logging.Debug);
                 }
             }
-
+            Logging.Log("List", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
             return true;
         }
 
@@ -854,7 +923,13 @@ namespace Questor.Modules.Logging
                 case StatisticsState.Idle:
                     break;
 
-                case StatisticsState.PocketLog:
+                case StatisticsState.LogAllEntities:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogAllEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
                     _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
 
@@ -881,7 +956,7 @@ namespace Questor.Modules.Logging
                         {
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                            Statistics.ListPrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
+                            Statistics.ListPrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
                         }
                     }
                     break;
@@ -893,7 +968,7 @@ namespace Questor.Modules.Logging
                         {
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ListDronePriorityTargets", Logging.Debug);
-                            Statistics.ListDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                            Statistics.ListDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                         }
                     }
                     break;

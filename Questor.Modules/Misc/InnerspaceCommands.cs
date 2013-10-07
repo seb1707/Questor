@@ -22,7 +22,6 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
                 LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
                 LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
-                LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
@@ -31,7 +30,9 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
                 LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
-                
+                LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
+                LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
+                LavishScript.Commands.AddCommand("Help", ListQuestorCommands);
             }
         }
 
@@ -91,7 +92,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            _States.CurrentStatisticsState = StatisticsState.PocketLog;
+            _States.CurrentStatisticsState = StatisticsState.LogAllEntities;
             return 0;
         }
 
@@ -274,7 +275,9 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", " ", Logging.White);
             Logging.Log("InnerspaceCommands", "LogAllEntities                               - Logs Entities on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ModuleInfo                                   - Logs Module Info of My Current Ship", Logging.White);
-            
+            Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets             - Logs PrimaryWeaponPriorityTargets", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListTargets                                  - Logs ListTargets", Logging.White);
             return 0;
         }
 

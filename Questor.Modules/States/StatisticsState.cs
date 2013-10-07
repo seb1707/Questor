@@ -6,6 +6,7 @@
         SessionLog,
         MissionLog,
         PocketLog,
+        LogAllEntities,
         ModuleInfo,
         ListPrimaryWeaponPriorityTargets,
         ListDronePriorityTargets,

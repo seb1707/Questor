@@ -3827,7 +3827,7 @@ namespace Questor.Modules.Caching
             //
             // if currentTarget set to something (not null) and it is actually an entity...
             //
-            if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot)
+            if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "We have a target, testing conditions", Logging.Teal);
 

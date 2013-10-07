@@ -491,7 +491,7 @@ namespace Questor
 
         public bool OnframeProcessEveryPulse()
         {
-            if (Cache.Instance.DirectEve.Login.AtLogin || DateTime.UtcNow > Program.StartTime.AddSeconds(40))
+            if (Cache.Instance.DirectEve.Login.AtLogin)
             {
                 return false;
             }

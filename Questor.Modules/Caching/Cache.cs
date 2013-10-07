@@ -3837,7 +3837,7 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
                 if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot 
-                                                        && pt.Distance < Cache.Instance.MaxRange 
+                                                        && pt.Nearest5kDistance < Cache.Instance.MaxRange 
                                                         && pt.Id == currentDroneTarget.Id
                                                         && !currentDroneTarget.IsHigherPriorityPresent))
                 {
@@ -3900,7 +3900,7 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
                 if (currentDroneTarget.IsReadyToShoot
-                    && currentDroneTarget.Distance < Settings.Instance.DroneControlRange
+                    && currentDroneTarget.Nearest5kDistance < Settings.Instance.DroneControlRange
                     && currentDroneTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
@@ -3915,7 +3915,7 @@ namespace Questor.Modules.Caching
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
-                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Distance < Settings.Instance.DroneControlRange)
+                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < Settings.Instance.DroneControlRange)
                     {
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
@@ -3936,13 +3936,13 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Distance < Settings.Instance.DroneControlRange
+                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Nearest5kDistance < Settings.Instance.DroneControlRange
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot)
                                                                            .OrderBy(pt => pt.DronePriorityLevel)
                                                                            .ThenByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenByDescending(pt => pt.IsEwarTarget())
-                                                                           .ThenBy(pt => pt.Distance)
+                                                                           .ThenBy(pt => pt.Nearest5kDistance)
                                                                            .FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -3967,7 +3967,7 @@ namespace Questor.Modules.Caching
                 EntityCache callingDroneTarget = null;
                 try
                 {
-                    callingDroneTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
+                    callingDroneTarget = _potentialTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 }
                 catch (NullReferenceException) { }
 
@@ -3999,7 +3999,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Distance)
+                    .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();
             }
             #endregion

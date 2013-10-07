@@ -1175,7 +1175,7 @@ namespace Questor.Modules.Combat
 
                     IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                          .OrderByDescending(c => c.IsInOptimalRange)
-                                                                                                                         .ThenBy(c => c.Distance);
+                                                                                                                         .ThenBy(c => c.Nearest5kDistance);
 
                     if (_dronePriorityTargets.Any())
                     {
@@ -1189,9 +1189,9 @@ namespace Questor.Modules.Combat
                                 break;
                             }
 
-                            if (dronePriorityEntity.Distance < Settings.Instance.DroneControlRange
+                            if (dronePriorityEntity.Nearest5kDistance < Settings.Instance.DroneControlRange
                                 && dronePriorityEntity.IsReadyToTarget
-                                && dronePriorityEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                                && dronePriorityEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                                 && !dronePriorityEntity.IsIgnored
                                 && dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
                             {
@@ -1244,7 +1244,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)
                         {
                             if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)", Logging.Debug);
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget.Nearest5kDistance <= Cache.Instance.MaxRange)
                             {
                                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance <= Cache.Instance.MaxRange)", Logging.Debug);
                                 //
@@ -1311,7 +1311,7 @@ namespace Questor.Modules.Combat
                     && Cache.Instance.Entities.Any(I => I.Id == Cache.Instance.PreferredDroneTarget.Id)
                     && Cache.Instance.UseDrones
                     && Cache.Instance.PreferredDroneTarget.IsReadyToTarget
-                    && Cache.Instance.PreferredDroneTarget.Distance <= Settings.Instance.DroneControlRange)
+                    && Cache.Instance.PreferredDroneTarget.Nearest5kDistance <= Settings.Instance.DroneControlRange)
                 {
                     //
                     // unlock a lower priority entity if needed
@@ -1364,7 +1364,7 @@ namespace Questor.Modules.Combat
             //
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetingMeAndNotYetTargeted
                                                             && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                            && t.Distance < Cache.Instance.MaxRange)
+                                                            && t.Nearest5kDistance < Cache.Instance.MaxRange)
                                                             .ToList();
 
             List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => (t.IsHighValueTarget))
@@ -1456,7 +1456,7 @@ namespace Questor.Modules.Combat
 
                     if (lowValueTargetingMeEntity != null
                         && lowValueTargetingMeEntity.IsReadyToTarget
-                        && lowValueTargetingMeEntity.Distance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
+                        && lowValueTargetingMeEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                         && !lowValueTargetingMeEntity.IsIgnored
                         && lowValueTargetingMeEntity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
                     {
@@ -1545,7 +1545,7 @@ namespace Questor.Modules.Combat
                 EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
                 if (TargetThisNotYetAggressiveNPC != null
                     && TargetThisNotYetAggressiveNPC.IsReadyToTarget
-                    && TargetThisNotYetAggressiveNPC.Distance < Cache.Instance.MaxRange
+                    && TargetThisNotYetAggressiveNPC.Nearest5kDistance < Cache.Instance.MaxRange
                     && !TargetThisNotYetAggressiveNPC.IsIgnored
                     && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
                 {

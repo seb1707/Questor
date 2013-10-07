@@ -995,7 +995,7 @@ namespace Questor.Modules.Caching
             DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
             if (mission == null)
             {
-                Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+                Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
                 var nearestAgent = Settings.Instance.AgentsList
                     .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                     .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
@@ -1023,7 +1023,7 @@ namespace Questor.Modules.Caching
 
         private string SelectFirstAgent()
         {
-            Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+            Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
             AgentsList FirstAgent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
             if (FirstAgent == null)
             {
@@ -1512,19 +1512,28 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _inSpace;
+
         public bool InSpace
         {
             get
             {
                 try
                 {
-                    if (DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null && DirectEve.Session.IsInSpace && !Cache.Instance.InStation)
+                    if (_inSpace == null)
                     {
-                        Cache.Instance.LastInSpace = DateTime.UtcNow;
-                        return true;
+                        if (DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null && DirectEve.Session.IsInSpace && !Cache.Instance.InStation)
+                        {
+                            Cache.Instance.LastInSpace = DateTime.UtcNow;
+                            _inSpace = true;
+                            return _inSpace ?? false;
+                        }
+
+                        _inSpace = false;
+                        return _inSpace ?? false;
                     }
 
-                    return false;
+                    return _inSpace ?? false;
                 }
                 catch (Exception ex)
                 {
@@ -1534,18 +1543,28 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _inStation;
+
         public bool InStation
         {
             get
             {
                 try
                 {
-                    if (DirectEve.Session.IsReady && DirectEve.Session.IsInStation && !Cache.Instance.InSpace)
+                    if(_inStation == null)
                     {
-                        Cache.Instance.LastInStation = DateTime.UtcNow;
-                        return true;
+                        if (DirectEve.Session.IsReady && DirectEve.Session.IsInStation && !Cache.Instance.InSpace)
+                        {
+                            Cache.Instance.LastInStation = DateTime.UtcNow;
+                            _inStation = true;
+                            return _inStation ?? false;
+                        }
+
+                        _inStation = false;
+                        return _inStation ?? false;   
                     }
-                    return false;
+
+                    return _inStation ?? false;
                 }
                 catch (Exception ex)
                 {
@@ -2269,6 +2288,8 @@ namespace Questor.Modules.Caching
                 _entitiesById.Clear();
                 _gates = null;
                 _IDsinInventoryTree = null;
+                _inStation = null;
+                _inSpace = null;
                 _itemHangar = null;
                 _jumpBridges = null;
                 _maxLockedTargets = null;

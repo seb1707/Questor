@@ -408,7 +408,17 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 else
                 {
+                    //
+                    // if capacitor is really really low, do not make it worse
+                    //
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                        continue;
+
+                    //
+                    // if total capacitor is really low, do not run stuff unless we are targeted by something
+                    // this should only kick in when using frigates as the combatship
+                    //
+                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Cache.Instance.TargetedBy.Any() && Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                         continue;
                 }
                 //

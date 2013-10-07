@@ -266,10 +266,10 @@ namespace Questor.Modules.Logging
 
         public static bool ListDronePriorityTargets(IEnumerable<EntityCache> primaryDroneTargets)
         {
-            Logging.Log("DT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            Logging.Log("DPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             if (Cache.Instance.PreferredDroneTarget != null)
             {
-                Logging.Log("[DT]", "[" + 0 + "] PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredDroneTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredDroneTarget.IsTarget + "]", Logging.Debug);
+                Logging.Log("[DPT]", "[" + 0 + "] PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredDroneTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredDroneTarget.IsTarget + "]", Logging.Debug);
             }
 
             primaryDroneTargets = primaryDroneTargets.ToList();
@@ -279,10 +279,10 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache dronePriorityTarget in primaryDroneTargets.OrderBy(i => i.DronePriorityLevel).ThenBy(i => i.Name))
                 {
                     icount++;
-                    Logging.Log("[DT]", "[" + icount + "][" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + dronePriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
+                    Logging.Log("[DPT]", "[" + icount + "][" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + dronePriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
-            Logging.Log("DT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            Logging.Log("DPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             return true;
         }
 

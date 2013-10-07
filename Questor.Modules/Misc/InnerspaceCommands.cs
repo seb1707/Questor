@@ -28,7 +28,9 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("LogAllEntities", LogAllEntities);
                 LavishScript.Commands.AddCommand("ModuleInfo", ModuleInfo);
                 LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
+                LavishScript.Commands.AddCommand("ListPWPT", ListPrimaryWeaponPriorityTargets);
                 LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
+                LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
                 LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);

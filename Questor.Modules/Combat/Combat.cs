@@ -70,7 +70,11 @@ namespace Questor.Modules.Combat
         private static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             if (Settings.Instance.WeaponGroupId == 53) return true;
-            if (entity == null) return false;
+            if (entity == null)
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "if (entity == null)", Logging.Orange);
+                return false;
+            }
 
            // Get ammo based on damage type
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
@@ -154,11 +158,15 @@ namespace Questor.Modules.Combat
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We do not have any ammo left that can hit targets at that range!", Logging.Orange);
                 return false;
+            }
 
             // We have enough ammo loaded
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId && weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges)
             {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have enough ammo loaded", Logging.Orange);
                 //LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
                 return true;
             }
@@ -174,14 +182,23 @@ namespace Questor.Modules.Combat
 
             // This should have shown up as "out of ammo"
             if (charge == null)
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "This should have shown up as out of ammo", Logging.Orange);
                 return false;
+            }
 
             // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait", Logging.Orange);
                 return true;
+            }
 
             if (weapon.IsReloadingAmmo)
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
+            }
 
             LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
             
@@ -356,12 +373,16 @@ namespace Questor.Modules.Combat
 
             IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
             _weaponNumber = 0;
+            if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "Weapons (or stacks of weapons?): [" + Cache.Instance.Weapons.Count() + "]", Logging.Orange); 
             foreach (ModuleCache weapon in weapons)
             {
+                _weaponNumber++;
                 // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
                 if (weapon.IsEnergyWeapon)
+                {
+                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "if (weapon.IsEnergyWeapon) continue (energy weapons do not really need to reload)", Logging.Orange);
                     continue;
-                _weaponNumber++;
+                }
 
                 if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
                 {
@@ -374,8 +395,9 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                     continue;
                 }
+                
                 if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)
-                return false;
+                continue;
             }
             if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "completely reloaded all weapons", Logging.White);
 

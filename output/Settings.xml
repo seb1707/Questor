@@ -385,19 +385,19 @@
   <!--                                                                            -->  
   <!--  E-War Drone PriorityTarget Options--> 
   <!--                                                                            -->  
-  <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Sensor Dampners, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addDampenersToDronePriorityTargetList>true</addDampenersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use ECMs, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use ECMs, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addECMsToDroneTargetList>true</addECMsToDroneTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Neutralizers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Neutralizers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addNeutralizersToDronePriorityTargetList>true</addNeutralizersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Target Painters, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Target Painters, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addTargetPaintersToDronePriorityTargetList>true</addTargetPaintersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Tracking Disruptors, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Tracking Disruptors, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addTrackingDisruptorsToDronePriorityTargetList>true</addTrackingDisruptorsToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Warp Disruptors / Scramblers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Warp Disruptors / Scramblers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWarpScramblersToDronePriorityTargetList>true</addWarpScramblersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Webifiers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Webifiers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWebifiersToDronePriorityTargetList>true</addWebifiersToDronePriorityTargetList>
     
   <!-- MaxRange we should use NOS / Neuts -->

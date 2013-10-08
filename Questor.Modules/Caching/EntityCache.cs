@@ -1093,9 +1093,14 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
-                    bool result = false;
-                    result |= Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
-                    return result;
+                    if (Cache.Instance.IgnoreTargets.Any())
+                    {
+                        bool result = false;
+                        result |= Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
+                        return result;    
+                    }
+
+                    return false;
                 }
 
                 return false;

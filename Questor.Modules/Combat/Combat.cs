@@ -29,7 +29,7 @@ namespace Questor.Modules.Combat
     public static class Combat
     {
         private static readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
-        private static readonly Dictionary<long, DateTime> LastWeaponReload = new Dictionary<long, DateTime>();
+        public static readonly Dictionary<long, DateTime> LastWeaponReload = new Dictionary<long, DateTime>();
         private static bool _isJammed;
         private static int _weaponNumber;
 

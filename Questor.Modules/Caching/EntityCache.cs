@@ -1639,21 +1639,27 @@ namespace Questor.Modules.Caching
                     {
                         if (TargetValue != null)
                         {
-                            if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
+                            if (!IsIgnored)
                             {
-                                _IsHighValueTarget = true;
-                                if (IsSentry && !Settings.Instance.KillSentries)
+                                if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
                                 {
-                                    _IsHighValueTarget = false;
+                                    _IsHighValueTarget = true;
+                                    if (IsSentry && !Settings.Instance.KillSentries)
+                                    {
+                                        _IsHighValueTarget = false;
+                                    }
+                                    return _IsHighValueTarget ?? true;
                                 }
-                                return _IsHighValueTarget ?? true;
-                            }
 
-                            if (IsLargeCollidable)
-                            {
-                                _IsHighValueTarget = true;
-                                return _IsHighValueTarget ?? true;
+                                if (IsLargeCollidable)
+                                {
+                                    _IsHighValueTarget = true;
+                                    return _IsHighValueTarget ?? true;
+                                }    
                             }
+                            
+                            _IsHighValueTarget = false;
+                            return _IsHighValueTarget ?? false;
                         }
                     }
 
@@ -1674,14 +1680,20 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsLowValueTarget == null)
                     {
-                        if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
+                        if (!IsIgnored)
                         {
-                            _IsLowValueTarget = true;
-                            if (IsSentry && !Settings.Instance.KillSentries)
+                            if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
                             {
-                                _IsLowValueTarget = false;
+                                _IsLowValueTarget = true;
+                                if (IsSentry && !Settings.Instance.KillSentries)
+                                {
+                                    _IsLowValueTarget = false;
+                                }
+                                return _IsLowValueTarget ?? true;
                             }
-                            return _IsLowValueTarget ?? true;
+
+                            _IsLowValueTarget = false;
+                            return _IsLowValueTarget ?? false;
                         }
 
                         _IsLowValueTarget = false;

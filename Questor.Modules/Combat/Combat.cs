@@ -1511,17 +1511,16 @@ namespace Questor.Modules.Combat
             //
             
             NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                        && !e.IsIgnored
                                                                         && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                                         //&& !e.IsTarget
-                                                                        && !e.IsIgnored
                                                                         && !e.IsContainer
                                                                         && !e.IsFactionWarfareNPC
                                                                         && !e.IsEntityIShouldLeaveAlone
                                                                         && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                                         && !e.IsLargeCollidable
-                                                                        && !e.IsIgnored
                                                                         && e.IsNotYetTargetingMeAndNotYetTargeted)
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();
@@ -1533,9 +1532,10 @@ namespace Questor.Modules.Combat
                 // include sentries if nothing else is available
                 //
                 NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                        && !e.IsIgnored
+                                                                        && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
                                                                        //&& !e.IsTarget
-                                                                        && !e.IsIgnored
                                                                         && !e.IsContainer
                                                                         && !e.IsFactionWarfareNPC
                                                                         && !e.IsEntityIShouldLeaveAlone

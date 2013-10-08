@@ -558,6 +558,9 @@ namespace Questor.Modules.Lookup
         public string UserDefinedLavishScriptScript4 { get; set; }
         public string UserDefinedLavishScriptScript4Description { get; set; }
 
+        public string LoadQuestorDebugInnerspaceCommand { get; set; }
+        public string UnLoadQuestorDebugInnerspaceCommand { get; set; }
+
         public float StandingsNeededToAccessLevel1Agent { get; set; }
         public float StandingsNeededToAccessLevel2Agent { get; set; }
         public float StandingsNeededToAccessLevel3Agent { get; set; }
@@ -1167,6 +1170,9 @@ namespace Questor.Modules.Lookup
             UserDefinedLavishScriptScript3Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? "";
             UserDefinedLavishScriptScript4 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4") ?? "";
             UserDefinedLavishScriptScript4Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? "";
+
+            LoadQuestorDebugInnerspaceCommand = (string)CharacterSettingsXml.Element("loadQuestorDebugInnerspaceCommand") ?? (string)CommonSettingsXml.Element("loadQuestorDebugInnerspaceCommand") ?? "dotnet q1 questor.exe";
+            UnLoadQuestorDebugInnerspaceCommand = (string)CharacterSettingsXml.Element("unLoadQuestorDebugInnerspaceCommand") ?? (string)CommonSettingsXml.Element("unLoadQuestorDebugInnerspaceCommand") ?? "dotnet -unload q1";
 
             //
             // agent standing requirements

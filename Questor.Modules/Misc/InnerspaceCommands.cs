@@ -41,6 +41,8 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("Help", ListQuestorCommands);
+                LavishScript.ExecuteCommand("alias 1 " + Settings.Instance.LoadQuestorDebugInnerspaceCommand);  //"dotnet q1 questor.exe");
+                LavishScript.ExecuteCommand("alias 2 " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommand);  //"dotnet -unload q1");
             }
         }
 
@@ -68,33 +70,33 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int RemoveIgnoredTarget(string[] args)
+        private static int AddIgnoredTarget(string[] args)
         {
             if (args.Length < 2)
             {
-                Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget NameOfNPCInQuotes", Logging.White);
+                Logging.Log("InnerspaceCommands", "AddIgnoredTarget NameOfNPCInQuotes", Logging.White);
                 return -1;
             }
 
             string ignoreThese = args[1];
             if (Cache.Instance.IgnoreTargets.Contains(ignoreThese))
             {
-                Cache.Instance.IgnoreTargets.Remove(ignoreThese.Trim());    
+                Cache.Instance.IgnoreTargets.Add(ignoreThese.Trim());    
             }
             int IgnoreTargetsCount = 0;
             if (Cache.Instance.IgnoreTargets.Any())
             {
-                IgnoreTargetsCount = Cache.Instance.IgnoreTargets.Count;
+                IgnoreTargetsCount = Cache.Instance.IgnoreTargets.Count();
             }
             Logging.Log("InnerspaceCommands", "Added [" + ignoreThese + "] to Ignored Targets List. IgnoreTargets Contains [" + IgnoreTargetsCount + "] items", Logging.White);
             return 0;
         }
 
-        private static int AddIgnoredTarget(string[] args)
+        private static int RemoveIgnoredTarget(string[] args)
         {
             if (args.Length < 2)
             {
-                Logging.Log("InnerspaceCommands", "AddIgnoredTarget NameOfNPCInQuotes", Logging.White);
+                Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget NameOfNPCInQuotes", Logging.White);
                 return -1;
             }
 

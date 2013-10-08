@@ -236,7 +236,7 @@ namespace Questor.Modules.Logging
                 foreach (string ignoreTarget in Cache.Instance.IgnoreTargets)
                 {
                     icount++;
-                    Logging.Log("IgnoreTargets", "[" + icount + "][" + ignoreTarget + "]", Logging.Debug);
+                    Logging.Log("IgnoreTargets", "[" + icount + "][" + ignoreTarget + "] of a total of [" + Cache.Instance.IgnoreTargets.Count() + "]", Logging.Debug);
                 }
             }
             Logging.Log("IgnoreTargets", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);

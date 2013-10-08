@@ -891,9 +891,7 @@ namespace Questor.Modules.Combat
                         //unlockThisHighValueTarget = Cache.Instance.GetBestWeaponTargets((double)Distances.OnGridWithMe).Where(t => t.IsTarget && highValueTargetsTargeted.Any(e => t.Id == e.Id)).LastOrDefault();
 
                         unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h =>  (h.IsTarget && h.IsIgnored)
-                                                                                        || (h.IsTarget && (Cache.Instance.PreferredPrimaryWeaponTarget != null && !Cache.Instance.PreferredDroneTarget.IsTarget && h.IsHighValueTarget && !h.IsDronePriorityTarget && !h.IsPrimaryWeaponPriorityTarget))
-                                                                                        || (h.IsTarget && (!h.isPreferredPrimaryWeaponTarget && h.IsHigherPriorityPresent && __highValueTargetsTargeted.Count() == maxHighValueTargets))
-                                                                                        && !h.IsPriorityWarpScrambler)
+                                                                                        || (h.IsTarget && (!h.isPreferredPrimaryWeaponTarget && !h.IsDronePriorityTarget && h.IsHigherPriorityPresent && !h.IsPrimaryWeaponPriorityTarget && __highValueTargetsTargeted.Count() == maxHighValueTargets) && !h.IsPriorityWarpScrambler))
                                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                                         .ThenByDescending(t => t.Distance)
                                                                                         .FirstOrDefault();
@@ -1357,7 +1355,21 @@ namespace Questor.Modules.Combat
             // OK so now that we are done dealing with preferred and priorities for now, lets see if we can target anything else
             // First lets see if we have enough targets already
             //
-            if (__highValueTargetsTargeted.Count() >= maxHighValueTargets && __lowValueTargetsTargeted.Count() >= maxLowValueTargets)
+
+            int highValueSlotsreservedForPriorityTargets = 1;
+            int lowValueSlotsreservedForPriorityTargets = 1;
+
+            if (Cache.Instance.MaxLockedTargets <= 4)
+            {
+                //
+                // With a ship/toon combination that has 4 or less slots you really do not have room to reserve 2 slots for priority targets
+                //
+                highValueSlotsreservedForPriorityTargets = 0;
+                lowValueSlotsreservedForPriorityTargets = 0;
+            }
+
+            if ((__highValueTargetsTargeted.Count() >= maxHighValueTargets - highValueSlotsreservedForPriorityTargets)
+                && __lowValueTargetsTargeted.Count() >= maxLowValueTargets - lowValueSlotsreservedForPriorityTargets)
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + Cache.Instance.TotalTargetsandTargeting.Count() + "]", Logging.Debug);
                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
@@ -1541,7 +1553,6 @@ namespace Questor.Modules.Combat
                                                                         && !e.IsEntityIShouldLeaveAlone
                                                                         && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                                         && !e.IsLargeCollidable
-                                                                        && !e.IsIgnored
                                                                         && e.IsNotYetTargetingMeAndNotYetTargeted)
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();

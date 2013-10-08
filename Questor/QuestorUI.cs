@@ -291,13 +291,6 @@ namespace Questor
                         DataAmmoHangarName.Text = Settings.Instance.AmmoHangar;
                         DataLootHangarID.Text = Cache.Instance.LootHangarID.ToString(CultureInfo.InvariantCulture);
                         DataLootHangarName.Text = Settings.Instance.LootHangar;
-                        PrimaryWeaponsPriorityTargetListBox.DataSource = null;
-                        PrimaryWeaponsPriorityTargetListBox.DataSource = Cache.Instance.PrimaryWeaponPriorityEntities;
-                        DronePriorityTargetListBox.DataSource = null;
-                        DronePriorityTargetListBox.DataSource = Cache.Instance.DronePriorityTargets;
-                        lvlCurrentPrimaryWeaponsTarget.Text = Cache.Instance.PreferredPrimaryWeaponTarget.ToString();
-                        lblCurrentDroneTarget.Text = Cache.Instance.PreferredDroneTarget.ToString();
-
                     }
                 }
                 catch (Exception ex)

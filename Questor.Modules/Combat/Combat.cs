@@ -966,7 +966,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            if (!OutOfRangeOnly)
+            if (!OutOfWeaponsRange)
             {
                 //Logging.Log("Combat [TargetCombatants]" + module, "We don't have a spot open to target [" + reason + "], this could be a problem", Logging.Orange);
                 //Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);    

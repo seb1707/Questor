@@ -1834,7 +1834,7 @@ namespace Questor.Modules.Caching
             get
             {
                 //
-                // every frame re-populate the DronePriorityEntities from the list of IDs we have tucked away in DronePriorityTargets
+                // every frame re-populate the PrimaryWeaponPriorityEntities from the list of IDs we have tucked away in PrimaryWeaponPriorityEntities
                 // this occurs because in Invalidatecache() we are, necessarily,  clearing this every frame!
                 //
                 if (_primaryWeaponPriorityEntities == null)
@@ -2264,10 +2264,10 @@ namespace Questor.Modules.Caching
                 _currentShipsCargo = null;
                 _containerInSpace = null;
                 _containers = null;
-                if (_entities != null)
-                {
-                    _entities.ForEach(pt => pt.InvalidateCache());    
-                }
+                //if (_entities != null)
+                //{
+                //    _entities.ForEach(pt => pt.InvalidateCache());    
+                //}
                 _entities = null;
                 _entitiesById.Clear();
                 _gates = null;
@@ -2292,19 +2292,14 @@ namespace Questor.Modules.Caching
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
                 
-                if (Cache.Instance.Entities.Any())
-                {
-                    foreach (EntityCache EntityCacheEntity in Cache.Instance.Entities)
-                    {
-                        EntityCacheEntity.InvalidateCache();
-                    }    
-                }
-                
+                _primaryWeaponPriorityEntities = null;
+                _dronePriorityEntities = null;
+
                 if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                 {
                     foreach (EntityCache PrimaryWeaponPriorityTargetEntity in Cache.Instance.PrimaryWeaponPriorityEntities)
                     {
-                        PrimaryWeaponPriorityTargetEntity.InvalidateCache();
+                        //PrimaryWeaponPriorityTargetEntity.InvalidateEntityCache();
                     }    
                 }
                 
@@ -2312,21 +2307,20 @@ namespace Questor.Modules.Caching
                 {
                     foreach (EntityCache DronePriorityTargetEntity in Cache.Instance.DronePriorityEntities)
                     {
-
-                        DronePriorityTargetEntity.InvalidateCache();
+                        //DronePriorityTargetEntity.InvalidateEntityCache();
                     }    
                 }
                 if (PreferredDroneTarget != null)
                 {
                     //clears EntityCache info every frame so that it refreshes
-                    PreferredDroneTarget.InvalidateCache();    
+                    //PreferredDroneTarget.InvalidateEntityCache();    
                 }
                 
                 _preferredDroneTarget = null;
                 if (PreferredPrimaryWeaponTarget != null)
                 {
                     //clears EntityCache info every frame so that it refreshes
-                    PreferredPrimaryWeaponTarget.InvalidateCache();    
+                    //PreferredPrimaryWeaponTarget.InvalidateEntityCache();    
                 }
                 _preferredPrimaryWeaponTarget = null;
 

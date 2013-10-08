@@ -1003,11 +1003,11 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugTargetCombatants)
             {
                 int i = 0;
-                if (Cache.Instance.potentialCombatTargets.Any())
+                if (Cache.Instance.PotentialCombatTargets.Any())
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets below", Logging.Debug);
 
-                    foreach (EntityCache t in Cache.Instance.potentialCombatTargets)
+                    foreach (EntityCache t in Cache.Instance.PotentialCombatTargets)
                     {
                         i++;
                         Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
@@ -1200,6 +1200,7 @@ namespace Questor.Modules.Combat
 
                             if (dronePriorityEntity.Nearest5kDistance < Settings.Instance.DroneControlRange
                                 && dronePriorityEntity.IsReadyToTarget
+                                && dronePriorityEntity.Distance < Cache.Instance.WeaponRange
                                 && dronePriorityEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                                 && !dronePriorityEntity.IsIgnored
                                 && dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
@@ -1320,6 +1321,7 @@ namespace Questor.Modules.Combat
                     && Cache.Instance.Entities.Any(I => I.Id == Cache.Instance.PreferredDroneTarget.Id)
                     && Cache.Instance.UseDrones
                     && Cache.Instance.PreferredDroneTarget.IsReadyToTarget
+                    && Cache.Instance.PreferredDroneTarget.Distance < Cache.Instance.WeaponRange
                     && Cache.Instance.PreferredDroneTarget.Nearest5kDistance <= Settings.Instance.DroneControlRange)
                 {
                     //
@@ -1465,6 +1467,7 @@ namespace Questor.Modules.Combat
 
                     if (lowValueTargetingMeEntity != null
                         && lowValueTargetingMeEntity.IsReadyToTarget
+                        && lowValueTargetingMeEntity.Distance < Cache.Instance.WeaponRange
                         && lowValueTargetingMeEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                         && !lowValueTargetingMeEntity.IsIgnored
                         && lowValueTargetingMeEntity.LockTarget("TargetCombatants.LowValueTargetingMeEntity"))
@@ -1494,7 +1497,7 @@ namespace Questor.Modules.Combat
             // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
             // or are in the middle of attempting to aggro something
             // 
-            if (Cache.Instance.potentialCombatTargets.Any(i => i.IsTarget 
+            if (Cache.Instance.PotentialCombatTargets.Any(i => i.IsTarget 
                                                            && !i.IsLargeCollidable
                                                            && (!i.IsSentry || (i.IsSentry && Settings.Instance.KillSentries))
                                                            ))
@@ -1510,7 +1513,7 @@ namespace Questor.Modules.Combat
             // Build a list of things not yet targeting me and not yet targetted
             //
             
-            NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
+            NotYetTargetingMe = Cache.Instance.PotentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                                         && !e.IsIgnored
                                                                         && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
@@ -1531,7 +1534,7 @@ namespace Questor.Modules.Combat
                 //
                 // include sentries if nothing else is available
                 //
-                NotYetTargetingMe = Cache.Instance.potentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                NotYetTargetingMe = Cache.Instance.PotentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                                         && !e.IsIgnored
                                                                         && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                                         && (e.IsNpc || e.IsNpcByGroupID)
@@ -1666,7 +1669,7 @@ namespace Questor.Modules.Combat
                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
 
                         //ok so we do need this, but only use it if we actually have some potential targets
-                        if (Cache.Instance.potentialCombatTargets.Any() && Cache.Instance.Targets.Any())
+                        if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any())
                         {
                             Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
                         }

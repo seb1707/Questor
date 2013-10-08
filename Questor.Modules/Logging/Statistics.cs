@@ -165,7 +165,7 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool LogAllEntities(List<EntityCache> things, bool force = false)
+        public static bool LogEntities(List<EntityCache> things, bool force = false)
         {
             // iterate through entities
             //
@@ -929,7 +929,37 @@ namespace Questor.Modules.Logging
                     {
                         _States.CurrentStatisticsState = StatisticsState.Idle;
                         Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
-                        Statistics.LogAllEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                        Statistics.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListPotentialCombatTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListHighValueTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsHighValueTarget).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListLowValueTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsLowValueTarget).ToList());
                     }
                     _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;

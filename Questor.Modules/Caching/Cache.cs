@@ -1366,7 +1366,7 @@ namespace Questor.Modules.Caching
         // entities that may not be in range yet
         // entities that eventually we want to shoot
         //
-        public IEnumerable<EntityCache> potentialCombatTargets
+        public IEnumerable<EntityCache> PotentialCombatTargets
         {
             get
             {
@@ -3101,7 +3101,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> targets = _potentialTargets != null ? _potentialTargets : potentialCombatTargets;
+            IEnumerable<EntityCache> targets = _potentialTargets != null ? _potentialTargets : PotentialCombatTargets;
             long currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
             long preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
 
@@ -3126,7 +3126,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> targets = _potentialTargets ?? potentialCombatTargets;
+            IEnumerable<EntityCache> targets = _potentialTargets ?? PotentialCombatTargets;
             long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
             long preferredTargetId = Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget.Id : -1;
 
@@ -3617,11 +3617,11 @@ namespace Questor.Modules.Caching
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Closest High Value", Logging.Teal);
             EntityCache highValueTarget = null;
 
-            if (potentialCombatTargets.Any())
+            if (PotentialCombatTargets.Any())
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
-                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
+                highValueTarget = PotentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
@@ -3639,9 +3639,9 @@ namespace Questor.Modules.Caching
             //
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking closest Low Value", Logging.Teal);
             EntityCache lowValueTarget = null;
-            if (potentialCombatTargets.Any())
+            if (PotentialCombatTargets.Any())
             {
-                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
+                lowValueTarget = PotentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
                     .OrderByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
@@ -3717,7 +3717,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
                 }
 
-                if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
+                if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                 {
                     if (Cache.Instance.IgnoreTargets.Any())
                     {
@@ -3725,14 +3725,14 @@ namespace Questor.Modules.Caching
                         Logging.Log("GetBestTarget (Weapons): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
                     }
 
-                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
+                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
                     int potentialCombatTargetNumber = 0;
-                    foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
+                    foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
                     {
                         potentialCombatTargetNumber++;
                         Logging.Log("GetBestTarget (Weapons): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
                     }
-                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
+                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
                     Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
                 }
             }
@@ -4004,11 +4004,11 @@ namespace Questor.Modules.Caching
             if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest Low Value", Logging.Teal);
             EntityCache lowValueTarget = null;
 
-            if (potentialCombatTargets.Any())
+            if (PotentialCombatTargets.Any())
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
-                lowValueTarget = potentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
+                lowValueTarget = PotentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
                     .OrderBy(t => t.IsEwarTarget())
                     .ThenByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
@@ -4024,9 +4024,9 @@ namespace Questor.Modules.Caching
             //
             if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking closest Low Value", Logging.Teal);
             EntityCache highValueTarget = null;
-            if (potentialCombatTargets.Any())
+            if (PotentialCombatTargets.Any())
             {
-                highValueTarget = potentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
+                highValueTarget = PotentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
@@ -4064,7 +4064,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
                 }
 
-                if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
+                if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
                 {
                     if (Cache.Instance.IgnoreTargets.Any())
                     {
@@ -4072,14 +4072,14 @@ namespace Questor.Modules.Caching
                         Logging.Log("GetBestDroneTarget (Drones): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
                     }
 
-                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
+                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
                     int potentialCombatTargetNumber = 0;
-                    foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
+                    foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
                     {
                         potentialCombatTargetNumber++;
                         Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
                     }
-                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
+                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
                     Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
                 }
             }

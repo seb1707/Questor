@@ -103,7 +103,7 @@ namespace Questor.Modules.Combat
             TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
 
             // Return best possible low value target
-            Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.potentialCombatTargets.ToList());
+            Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
 
             if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.IsReadyToShoot && Cache.Instance.PreferredDroneTarget.Distance < Settings.Instance.DroneControlRange)
             {
@@ -219,7 +219,7 @@ namespace Questor.Modules.Combat
                         bool launch = true;
 
                         // Always launch if we're scrambled
-                        if (!Cache.Instance.potentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+                        if (!Cache.Instance.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
                             launch &= Cache.Instance.UseDrones;
 
@@ -340,7 +340,7 @@ namespace Questor.Modules.Combat
                     }
                     else
                     {
-                        if (Cache.Instance.potentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+                        if (Cache.Instance.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
                             EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
                             if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)

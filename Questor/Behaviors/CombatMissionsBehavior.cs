@@ -668,9 +668,9 @@ namespace Questor.Behaviors
                         Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);
                     }
 
-                    if (Cache.Instance.potentialCombatTargets.Any())
+                    if (Cache.Instance.PotentialCombatTargets.Any())
                     {
-                        Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
+                        Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
                         Combat.ProcessState();
                     }
 

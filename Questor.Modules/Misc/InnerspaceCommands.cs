@@ -27,7 +27,10 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
-                LavishScript.Commands.AddCommand("LogAllEntities", LogAllEntities);
+                LavishScript.Commands.AddCommand("ListAllEntities", ListAllEntities);
+                LavishScript.Commands.AddCommand("ListPotentialCombatTargets", ListPotentialCombatTargets);
+                LavishScript.Commands.AddCommand("ListHighValueTargets", ListHighValueTargets);
+                LavishScript.Commands.AddCommand("ListLowValueTargets", ListLowValueTargets);
                 LavishScript.Commands.AddCommand("ModuleInfo", ModuleInfo);
                 LavishScript.Commands.AddCommand("ListIgnoredTargets", ListIgnoredTargets);
                 LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
@@ -168,16 +171,55 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int LogAllEntities(string[] args)
+        private static int ListAllEntities(string[] args)
         {
             if (args.Length != 1)
             {
-                Logging.Log("InnerspaceCommands", "LogAllEntities - Logs Entities on grid", Logging.White);
+                Logging.Log("InnerspaceCommands", "ListAllEntities - Logs Entities on grid", Logging.White);
                 return -1;
             }
 
             Logging.Log("Statistics", "Entering StatisticsState.LogAllEntities", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.LogAllEntities;
+            return 0;
+        }
+
+        private static int ListLowValueTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListLowValueTargets - Logs ListLowValueTargets on grid", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListLowValueTargets", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListLowValueTargets;
+            return 0;
+        }
+
+        private static int ListHighValueTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListHighValueTargets - Logs ListHighValueTargets on grid", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListHighValueTargets", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListHighValueTargets;
+            return 0;
+        }
+
+        private static int ListPotentialCombatTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListPotentialCombatTargets - Logs PotentialCombatTargets on grid", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListPotentialCombatTargets", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListPotentialCombatTargets;
             return 0;
         }
 
@@ -358,7 +400,10 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "QuestorCommands                              - (this command) ", Logging.White);
             Logging.Log("InnerspaceCommands", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
             Logging.Log("InnerspaceCommands", " ", Logging.White);
-            Logging.Log("InnerspaceCommands", "LogAllEntities                               - Logs Entities on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListAllEntities                              - Logs All Entities on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListPotentialCombatTargets                   - Logs ListPotentialCombatTargets on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListHighValueTargets                         - Logs ListHighValueTargets on Grid", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListLowValueTargets                          - Logs ListLowValueTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListIgnoredTargets                           - Logs the contents of the IgnoredTargets List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddIgnoredTarget                             - Add name to the IgnoredTarget List", Logging.White);
             Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget                          - Remove name to the IgnoredTarget List", Logging.White);

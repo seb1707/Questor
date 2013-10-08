@@ -425,7 +425,7 @@
                 _highSecChecked = true;
             }
 
-            if (Cache.Instance.potentialCombatTargets.Any())
+            if (Cache.Instance.PotentialCombatTargets.Any())
             {
                 Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.Yellow);
                 Combat.ProcessState();

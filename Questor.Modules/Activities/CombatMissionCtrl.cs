@@ -451,13 +451,13 @@ namespace Questor.Modules.Activities
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
             //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
-            if (Cache.Instance.potentialCombatTargets.Any(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)))
+            if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)))
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
-                EntityCache ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                EntityCache ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 if (ClosestPotentialCombatTarget == null)
                 {
-                    ClosestPotentialCombatTarget = Cache.Instance.potentialCombatTargets.FirstOrDefault();
+                    ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.FirstOrDefault();
                 }
 
                 if (ClosestPotentialCombatTarget != null && ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange)
@@ -1035,7 +1035,7 @@ namespace Questor.Modules.Activities
 
             if (ignoreAttackers)
             {
-                foreach (EntityCache target in Cache.Instance.potentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
+                foreach (EntityCache target in Cache.Instance.PotentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
                 {
                     if (target.IsTargetedBy && target.IsAttacking)
                     {
@@ -1228,10 +1228,10 @@ namespace Questor.Modules.Activities
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given
             //
 
-            Cache.Instance.AddPrimaryWeaponPriorityTarget(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).FirstOrDefault(),PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+            Cache.Instance.AddPrimaryWeaponPriorityTarget(Cache.Instance.PotentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).FirstOrDefault(),PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
             
-            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList())
-                || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList()))
+            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList())
+                || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.PotentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -1261,8 +1261,8 @@ namespace Questor.Modules.Activities
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given, in this everything on grid
             //
 
-            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList())
-                || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.potentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
+            if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList())
+                || Cache.Instance.GetBestDroneTarget((double)Distances.OnGridWithMe, false, "Drones", Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds

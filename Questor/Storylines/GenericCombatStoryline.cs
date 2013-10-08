@@ -253,7 +253,7 @@ namespace Questor.Storylines
                         Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
                     }
 
-                    if (Cache.Instance.potentialCombatTargets.Any())
+                    if (Cache.Instance.PotentialCombatTargets.Any())
                     {
                         Logging.Log("GenericCombatStoryline", "Priority targets found while traveling, engaging!", Logging.White);
                         Combat.ProcessState();

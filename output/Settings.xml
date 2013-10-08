@@ -365,7 +365,7 @@
   <insideThisRangeIsHardToTrack>15000</insideThisRangeIsHardToTrack>
   
   <!--                                                                            -->  
-  <!--  ECM PrimaryWeapon PriorityTarget Options--> 
+  <!--  E-War PrimaryWeapon PriorityTarget Options--> 
   <!--                                                                            -->  
   <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
   <addDampenersToPrimaryWeaponsPriorityTargetList>true</addDampenersToPrimaryWeaponsPriorityTargetList>
@@ -383,7 +383,7 @@
   <addWebifiersToPrimaryWeaponsPriorityTargetList>true</addWebifiersToPrimaryWeaponsPriorityTargetList>
   
   <!--                                                                            -->  
-  <!--  ECM Drone PriorityTarget Options--> 
+  <!--  E-War Drone PriorityTarget Options--> 
   <!--                                                                            -->  
   <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
   <addDampenersToDronePriorityTargetList>true</addDampenersToDronePriorityTargetList>

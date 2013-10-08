@@ -8,6 +8,7 @@
         PocketLog,
         LogAllEntities,
         ModuleInfo,
+        ListIgnoredTargets,
         ListPrimaryWeaponPriorityTargets,
         ListClassInstanceInfo,
         ListDronePriorityTargets,

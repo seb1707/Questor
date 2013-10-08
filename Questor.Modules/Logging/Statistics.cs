@@ -239,7 +239,7 @@ namespace Questor.Modules.Logging
                 foreach (ModuleCache _module in _modules.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
                 {
                     icount++;
-                    Logging.Log("ModuleInfo", "[" + icount + "] TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] AveragePrice[" + _module.AveragePrice + "] isActivatable [" + _module.IsActivatable + "] OptimalRange [" + _module.OptimalRange + "] Duration [" + _module.Duration + "]", Logging.Debug);
+                    Logging.Log("[" + icount + "]", "TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] isOnline [" + _module.IsOnline + "] isActivatable [" + _module.IsActivatable + "] IsActive [" + _module.IsActive + "] OptimalRange [" + _module.OptimalRange + "] Falloff [" + _module.FallOff + "] Duration [" + _module.Duration + "] IsActive [" + _module.IsActive + "]", Logging.Debug);
                 }
             }
             Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
@@ -266,6 +266,24 @@ namespace Questor.Modules.Logging
             Logging.Log("debug", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             
             
+            return true;
+        }
+
+        public static bool ListIgnoredTargets()
+        {
+            Logging.Log("IgnoreTargets", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            Logging.Log("IgnoreTargets", "Note: Ignore Targets are based on Text Matching. If you ignore: Angel Warlord you ignore all of them on the field!", Logging.Debug); 
+            if (Cache.Instance.IgnoreTargets.Any())
+            {
+
+                int icount = 0;
+                foreach (string ignoreTarget in Cache.Instance.IgnoreTargets)
+                {
+                    icount++;
+                    Logging.Log("IgnoreTargets", "[" + icount + "][" + ignoreTarget + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("IgnoreTargets", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             return true;
         }
 
@@ -986,6 +1004,18 @@ namespace Questor.Modules.Logging
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ListClassInstanceInfo", Logging.Debug);
                             Statistics.ListClassInstanceInfo();
+                        }
+                    }
+                    break;
+
+                case StatisticsState.ListIgnoredTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ListIgnoredTargets", Logging.Debug);
+                            Statistics.ListIgnoredTargets();
                         }
                     }
                     break;

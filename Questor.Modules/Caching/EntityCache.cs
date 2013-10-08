@@ -40,11 +40,13 @@ namespace Questor.Modules.Caching
             Interlocked.Decrement(ref EntityCacheInstances);
         }
 
+        internal double InvalidateCacheAttempts;
 
         public void InvalidateCache()
         {
             try
             {
+                InvalidateCacheAttempts++;
                 //
                 // this list of Entitycache Attributes we want to clear every pulse. (see Cache.Instance.InvalidateCache)
                 //
@@ -2354,6 +2356,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.MissionContainer;
                         result |= GroupId == (int)Group.CustomsOffice;
                         result |= GroupId == (int)Group.GasCloud;
+                        result |= GroupId == (int)Group.ConcordBillboard;
                         result |= IsFrigate;
                         result |= IsCruiser;
                         result |= IsBattlecruiser;

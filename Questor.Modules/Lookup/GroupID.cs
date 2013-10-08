@@ -86,6 +86,7 @@ namespace Questor.Modules.Lookup
 
         SentryGun = 99,                       //Protecting the weak and upholding the law
 
+        ConcordBillboard = 323,
         ProtectiveSentryGun = 180,
         MobileSentryGun = 336,
         DestructibleSentryGun = 383,

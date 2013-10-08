@@ -6,6 +6,8 @@
   
   <debugActivateGate>false</debugActivateGate>
   <debugActivateWeapons>false</debugActivateWeapons>
+  <debugAddDronePriorityTarget>false</debugAddDronePriorityTarget>
+  <debugAddPrimaryWeaponPriorityTarget>false</debugAddPrimaryWeaponPriorityTarget>
   <debugAgentInteractionReplyToAgent>false</debugAgentInteractionReplyToAgent>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
@@ -14,21 +16,35 @@
   <debugAutoStart>false</debugAutoStart>
   <debugBlackList>false</debugBlackList>
   <debugCargoHold>false</debugCargoHold>
+  <debugChat>false</debugChat>
   <debugCleanup>false</debugCleanup>
   <debugClearPocket>false</debugClearPocket>
   <debugCourierMissions>false</debugCourierMissions>
   <debugDecline>false</debugDecline>
   <debugDefense>false</debugDefense>
+  <debugDisableCleanup>false</debugDisableCleanup>
+  <debugDisableCombatMissionsBehavior>false</debugDisableCombatMissionsBehavior>
+  <debugDisableCombatMissionCtrl>false</debugDisableCombatMissionCtrl>
+  <debugDisableCombat>false</debugDisableCombat>
+  <debugDisableDrones>false</debugDisableDrones>
+  <debugDisablePanic>false</debugDisablePanic>
+  <debugDisableSalvage>false</debugDisableSalvage>
+  <debugDisableGetBestTarget>false</debugDisableGetBestTarget>
+  <debugDisableTargetCombatants>false</debugDisableTargetCombatants>
+  <debugDisableNavigateIntoRange>false</debugDisableNavigateIntoRange>
+  <debugDrones>false</debugDrones>
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>
   <debugFittingMgr>false</debugFittingMgr>
   <debugGetBestTarget>false</debugGetBestTarget>
+  <debugGetBestDroneTarget>false</debugGetBestDroneTarget>
   <debugGotobase>false</debugGotobase>
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
   <debugItemHangar>false</debugItemHangar>
-  <debugKillTargets>true</debugKillTargets>
+  <debugKillTargets>false</debugKillTargets>
+  <debugKillAction>false</debugKillAction>
   <debugLoadScripts>false</debugLoadScripts>
   <debugLogging>false</debugLogging>
   <debugLootWrecks>false</debugLootWrecks>
@@ -39,11 +55,13 @@
   <debugNavigateOnGrid>false</debugNavigateOnGrid>
   <debugOnframe>false</debugOnframe>
   <debugPerformance>false</debugPerformance>
+  <debugPotentialCombatTargets>false</debugPotentialCombatTargets>
   <debugQuestorManager>false</debugQuestorManager>
   <debugReloadAll>false</debugReloadAll>
   <debugReloadorChangeAmmo>false</debugReloadorChangeAmmo>
   <debugSalvage>false</debugSalvage>
   <debugScheduler>false</debugScheduler>
+  <debugSkillTraining>false</debugSkillTraining>
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
@@ -517,12 +535,22 @@
   <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
   <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
   
+  <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
+  <skillTrainerScript>skilltrainer.iss<skillTrainerScript>
+  
+  <loadQuestorDebugInnerspaceCommandAlias>1</loadQuestorDebugInnerspaceCommandAlias>
+  <loadQuestorDebugInnerspaceCommand>dotnet q1 questor.exe</loadQuestorDebugInnerspaceCommand>
+  <unLoadQuestorDebugInnerspaceCommandAlias>2</unLoadQuestorDebugInnerspaceCommandAlias>
+  <unLoadQuestorDebugInnerspaceCommand>dotnet -unload q1</unLoadQuestorDebugInnerspaceCommand>
   
   <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>
   <standingsNeededToAccessLevel2Agent>1</standingsNeededToAccessLevel2Agent>
   <standingsNeededToAccessLevel3Agent>3</standingsNeededToAccessLevel3Agent>
   <standingsNeededToAccessLevel4Agent>5</standingsNeededToAccessLevel4Agent>
   <standingsNeededToAccessLevel5Agent>7</standingsNeededToAccessLevel5Agent>
+  
+  
+  
   
   <!--                                                        -->
   <!-- SKILL TRAINING SETTINGS       -->

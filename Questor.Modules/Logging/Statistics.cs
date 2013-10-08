@@ -177,7 +177,7 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache thing in things.OrderBy(i => i.Distance))
                 {
                     icount++;
-                    Logging.Log("[" + icount + "]", thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] IsIgnoredrefreshes[" + thing.IsIgnoredRefreshes + "]", Logging.Debug);
+                    Logging.Log(icount.ToString() , thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] IsIgnoredrefreshes[" + thing.IsIgnoredRefreshes + "]IsIgnoredrefreshes[" + thing.InvalidateCacheAttempts + "]", Logging.Debug);
                 }
             }
             Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
@@ -195,7 +195,7 @@ namespace Questor.Modules.Logging
                 foreach (ModuleCache _module in _modules.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
                 {
                     icount++;
-                    Logging.Log("[" + icount + "]", "TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] isOnline [" + _module.IsOnline + "] isActivatable [" + _module.IsActivatable + "] IsActive [" + _module.IsActive + "] OptimalRange [" + _module.OptimalRange + "] Falloff [" + _module.FallOff + "] Duration [" + _module.Duration + "] IsActive [" + _module.IsActive + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] isOnline [" + _module.IsOnline + "] isActivatable [" + _module.IsActivatable + "] IsActive [" + _module.IsActive + "] OptimalRange [" + _module.OptimalRange + "] Falloff [" + _module.FallOff + "] Duration [" + _module.Duration + "] IsActive [" + _module.IsActive + "]", Logging.Debug);
                 }
             }
             Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
@@ -236,7 +236,7 @@ namespace Questor.Modules.Logging
                 foreach (string ignoreTarget in Cache.Instance.IgnoreTargets)
                 {
                     icount++;
-                    Logging.Log("IgnoreTargets", "[" + icount + "][" + ignoreTarget + "] of a total of [" + Cache.Instance.IgnoreTargets.Count() + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(),"[" + ignoreTarget + "] of a total of [" + Cache.Instance.IgnoreTargets.Count() + "]", Logging.Debug);
                 }
             }
             Logging.Log("IgnoreTargets", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
@@ -258,7 +258,7 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache primaryWeaponPriorityTarget in primaryWeaponPriorityTargets.OrderBy(i => i.PrimaryWeaponPriorityLevel).ThenBy(i => i.Name))
                 {
                     icount++;
-                    Logging.Log("PWPT", "[" + icount + "][" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityTarget.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "[" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityTarget.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
             Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
@@ -280,7 +280,7 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache dronePriorityTarget in primaryDroneTargets.OrderBy(i => i.DronePriorityLevel).ThenBy(i => i.Name))
                 {
                     icount++;
-                    Logging.Log("DPT", "[" + icount + "][" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] DronePriorityLevel [" + dronePriorityTarget.DronePriorityLevel + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "[" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] DronePriorityLevel [" + dronePriorityTarget.DronePriorityLevel + "]", Logging.Debug);
                 }
             }
             Logging.Log("DPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
@@ -297,7 +297,7 @@ namespace Questor.Modules.Logging
                 foreach (EntityCache targetedandTargetingEntity in targetedandTargeting.OrderBy(i => i.Distance).ThenBy(i => i.Name))
                 {
                     icount++;
-                    Logging.Log("[List]", "[" + icount + "][" + targetedandTargetingEntity.Name + "][" + Math.Round(targetedandTargetingEntity.Distance / 1000, 0) + "k] IsIgnored [" + targetedandTargetingEntity.IsIgnored + "] IsInOptimalRange [" + targetedandTargetingEntity.IsInOptimalRange + "] isTarget [" + targetedandTargetingEntity.IsTarget + "] isTargeting [" + targetedandTargetingEntity.IsTargeting + "] IsPrimaryWeaponPriorityTarget [" + targetedandTargetingEntity.IsPrimaryWeaponPriorityTarget + "] IsDronePriorityTarget [" + targetedandTargetingEntity.IsDronePriorityTarget + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "[" + targetedandTargetingEntity.Name + "][" + Math.Round(targetedandTargetingEntity.Distance / 1000, 0) + "k] IsIgnored [" + targetedandTargetingEntity.IsIgnored + "] IsInOptimalRange [" + targetedandTargetingEntity.IsInOptimalRange + "] isTarget [" + targetedandTargetingEntity.IsTarget + "] isTargeting [" + targetedandTargetingEntity.IsTargeting + "] IsPrimaryWeaponPriorityTarget [" + targetedandTargetingEntity.IsPrimaryWeaponPriorityTarget + "] IsDronePriorityTarget [" + targetedandTargetingEntity.IsDronePriorityTarget + "]", Logging.Debug);
                 }
             }
             Logging.Log("List", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);

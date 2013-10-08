@@ -54,6 +54,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.ListClassInstanceInfo", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListClassInstanceInfo;
             return 0;
         }
@@ -66,6 +67,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.ListTargetedandTargeting", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListTargetedandTargeting;
             return 0;
         }
@@ -79,7 +81,7 @@ namespace Questor.Modules.Misc
             }
 
             string ignoreThese = args[1];
-            if (Cache.Instance.IgnoreTargets.Contains(ignoreThese))
+            if (!Cache.Instance.IgnoreTargets.Contains(ignoreThese))
             {
                 Cache.Instance.IgnoreTargets.Add(ignoreThese.Trim());    
             }
@@ -101,7 +103,7 @@ namespace Questor.Modules.Misc
             }
 
             string unIgnoreThese = args[1];
-            if (!Cache.Instance.IgnoreTargets.Contains(unIgnoreThese))
+            if (Cache.Instance.IgnoreTargets.Contains(unIgnoreThese))
             {
                 Cache.Instance.IgnoreTargets.Remove(unIgnoreThese.Trim());
             }
@@ -122,7 +124,7 @@ namespace Questor.Modules.Misc
                 Logging.Log("InnerspaceCommands", "ListIgnoredTargets - Lists Ignored Targets", Logging.White);
                 return -1;
             }
-
+            Logging.Log("Statistics", "Entering StatisticsState.ListIgnoredTargets", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListIgnoredTargets;
             return 0;
         }
@@ -135,6 +137,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
             return 0;
         }
@@ -147,6 +150,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.ListDronePriorityTargets", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListDronePriorityTargets;
             return 0;
         }
@@ -159,6 +163,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.ModuleInfo", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ModuleInfo;
             return 0;
         }
@@ -171,6 +176,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
+            Logging.Log("Statistics", "Entering StatisticsState.LogAllEntities", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.LogAllEntities;
             return 0;
         }

@@ -1016,13 +1016,14 @@ namespace Questor.Modules.Combat
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
                 }
                 else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
+                                                                 && !e.IsIgnored
+                                                                 && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
                                                                  && (e.IsNpc || e.IsNpcByGroupID)
                                                                  && !e.IsContainer
                                                                  && !e.IsFactionWarfareNPC
                                                                  && !e.IsEntityIShouldLeaveAlone
                                                                  && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
-                                                                 && !e.IsIgnored))
+                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)))
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);

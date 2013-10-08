@@ -168,14 +168,14 @@ namespace Questor.Modules.Activities
                         _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
                     }
                 }
-                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
+                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
 
                 // We are not yet in space, wait for it
                 return;
             }
 
             // We are apparently not really in space yet...
-            if (Cache.Instance.ActiveShip.Entity == null)
+            if (Cache.Instance.ActiveShip == null || Cache.Instance.ActiveShip.Entity == null)
                 return;
 
             //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Destination is set: processing...", Logging.Teal);

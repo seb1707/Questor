@@ -930,17 +930,15 @@ namespace Questor.Modules.Combat
             
         }
 
-        private static bool UnlockLowValueTarget(string module, string reason, bool OutOfRangeOnly = false)
+        private static bool UnlockLowValueTarget(string module, string reason, bool OutOfWeaponsRange = false)
         {
             EntityCache unlockThisLowValueTarget = null;
-            if (!OutOfRangeOnly)
+            if (!OutOfWeaponsRange)
             {
                 try
                 {
                     unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => (h.IsTarget && h.IsIgnored)
-                                                                                 || (h.IsTarget && (Cache.Instance.PreferredDroneTarget != null && !Cache.Instance.PreferredDroneTarget.IsTarget && h.IsLowValueTarget && !h.IsDronePriorityTarget && !h.IsPrimaryWeaponPriorityTarget))
-                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && h.IsHigherPriorityPresent && __lowValueTargetsTargeted.Count() == maxLowValueTargets))
-                                                                                 && !h.IsPriorityWarpScrambler)
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget  && !h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent && !h.IsPriorityWarpScrambler && __lowValueTargetsTargeted.Count() == maxLowValueTargets)))
                                                                                 .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
                                                                                 .ThenByDescending(t => t.Nearest5kDistance)
                                                                                 .FirstOrDefault();
@@ -951,14 +949,11 @@ namespace Questor.Modules.Combat
             {
                 try
                 {
-                    unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => h.IsTarget
-                                                                    && !h.IsPrimaryWeaponPriorityTarget
-                                                                    && ((h.Distance > Cache.Instance.MaxRange + 5000)
-                                                                    || (h.IsIgnored))
-                                                                    && !h.IsPriorityWarpScrambler)
-                                                                    .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
-                                                                    .ThenByDescending(t => t.Nearest5kDistance)
-                                                                    .FirstOrDefault();
+                    unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => (h.IsTarget && h.IsIgnored)
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget  && !h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent && !h.IsPriorityWarpScrambler && !h.IsReadyToShoot  && __lowValueTargetsTargeted.Count() == maxLowValueTargets)))
+                                                                                 .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
+                                                                                 .ThenByDescending(t => t.Nearest5kDistance)
+                                                                                 .FirstOrDefault();
                 }
                 catch (NullReferenceException) { }
             }

@@ -40,6 +40,10 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
                 LavishScript.Commands.AddCommand("AddIgnoredTarget", AddIgnoredTarget);
                 LavishScript.Commands.AddCommand("RemoveIgnoredTarget", RemoveIgnoredTarget);
+                LavishScript.Commands.AddCommand("AddDronePriorityTargetsByName", AddDronePriorityTargetsByName);
+                LavishScript.Commands.AddCommand("RemovedDronePriorityTargetsByName", RemovedDronePriorityTargetsByName);
+                LavishScript.Commands.AddCommand("AddPrimaryWeaponPriorityTargetsByName", AddPrimaryWeaponPriorityTargetsByName);
+                LavishScript.Commands.AddCommand("RemovedPrimaryWeaponPriorityTargetsByName", RemovedPrimaryWeaponPriorityTargetsByName);
                 LavishScript.Commands.AddCommand("ListClassInstanceInfo", ListClassInstanceInfo);
                 LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
@@ -72,6 +76,62 @@ namespace Questor.Modules.Misc
 
             Logging.Log("Statistics", "Entering StatisticsState.ListTargetedandTargeting", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListTargetedandTargeting;
+            return 0;
+        }
+
+        private static int AddDronePriorityTargetsByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "AddDronePriorityTargetsByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string AddThese = args[1];
+
+            Cache.Instance.AddDronePriorityTargetsByName(AddThese);
+            return 0;
+        }
+
+        private static int RemovedDronePriorityTargetsByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "RemovedDronePriorityTargetsByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string RemoveThese = args[1];
+
+            Cache.Instance.RemovedDronePriorityTargetsByName(RemoveThese);
+            return 0;
+        }
+
+        private static int AddPrimaryWeaponPriorityTargetsByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "AddPrimaryWeaponPriorityTargetsByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string AddThese = args[1];
+
+            Cache.Instance.AddPrimaryWeaponPriorityTargetsByName(AddThese);
+            return 0;
+        }
+
+        private static int RemovedPrimaryWeaponPriorityTargetsByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "RemovedPrimaryWeaponPriorityTargetsByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string RemoveThese = args[1];
+
+            Cache.Instance.RemovedPrimaryWeaponPriorityTargetsByName(RemoveThese);
             return 0;
         }
 
@@ -400,14 +460,17 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "QuestorCommands                              - (this command) ", Logging.White);
             Logging.Log("InnerspaceCommands", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
             Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "AddIgnoredTarget                             - Add name to the IgnoredTarget List", Logging.White);
+            Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget                          - Remove name to the IgnoredTarget List", Logging.White);
+            Logging.Log("InnerspaceCommands", "AddDronePriorityTargetsByName                - Add NPCs by name to the DPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "RemovedDronePriorityTargetsByName            - Remove NPCs name from the DPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "AddPrimaryWeaponPriorityTargetsByName        - Add NPCs by name to the PWPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "RemovedPrimaryWeaponPriorityTargetsByName    - Remove NPCs name from the PWPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "ListAllEntities                              - Logs All Entities on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListPotentialCombatTargets                   - Logs ListPotentialCombatTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListHighValueTargets                         - Logs ListHighValueTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListLowValueTargets                          - Logs ListLowValueTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListIgnoredTargets                           - Logs the contents of the IgnoredTargets List", Logging.White);
-            Logging.Log("InnerspaceCommands", "AddIgnoredTarget                             - Add name to the IgnoredTarget List", Logging.White);
-            Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget                          - Remove name to the IgnoredTarget List", Logging.White);
-            
             Logging.Log("InnerspaceCommands", "ModuleInfo                                   - Logs Module Info of My Current Ship", Logging.White);
             Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets             - Logs PrimaryWeaponPriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);

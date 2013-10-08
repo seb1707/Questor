@@ -1841,8 +1841,14 @@ namespace Questor.Modules.Caching
                 {
                     if (PrimaryWeaponPriorityTargets != null && PrimaryWeaponPriorityTargets.Any())
                     {
-                        _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
-                        return _primaryWeaponPriorityEntities;
+                        _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity).ToList();
+                        
+                        foreach (EntityCache _primaryWeaponPriorityEntity in _primaryWeaponPriorityEntities)
+                        {
+                            //_primaryWeaponPriorityEntity.InvalidateEntityCache();
+                            
+                            return _primaryWeaponPriorityEntities;
+                        }
                     }
 
                     _primaryWeaponPriorityEntities = new List<EntityCache>();
@@ -2753,6 +2759,71 @@ namespace Questor.Modules.Caching
             return;
         }
 
+        public void AddPrimaryWeaponPriorityTargetsByName(String stringEntitiesToAdd)
+        {
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).ToList();
+            if (entitiesToAdd.Any())
+            {
+                foreach (EntityCache entityToAdd in entitiesToAdd)
+                {
+                    AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
+                    continue;
+                }
+
+                return;
+            }
+
+            Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
+            return;
+        }
+
+        public void RemovedPrimaryWeaponPriorityTargetsByName(String stringEntitiesToRemove)
+        {
+            IEnumerable<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
+            if (entitiesToRemove.Any())
+            {
+                Logging.Log("RemovingPWPT", "removing [" + stringEntitiesToRemove + "] from the PWPT List", Logging.Debug);
+                RemovePrimaryWeaponPriorityTargets(entitiesToRemove);
+                return;
+            }
+
+            Logging.Log("RemovingPWPT", "[" + stringEntitiesToRemove + "] was not found on grid", Logging.Debug);
+            return;
+        }
+
+        public void AddDronePriorityTargetsByName(String stringEntitiesToAdd)
+        {
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).ToList();
+            if (entitiesToAdd.Any())
+            {
+                foreach (EntityCache entityToAdd in entitiesToAdd)
+                {
+                    Logging.Log("RemovingPWPT", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the PWPT List", Logging.Debug);
+                    AddDronePriorityTarget(entityToAdd, DronePriority.PriorityKillTarget, "AddDPTByName");
+                    continue;
+                }
+
+                return;
+            }
+
+            Logging.Log("Adding DPT", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
+            return;
+        }
+
+        public void RemovedDronePriorityTargetsByName(String stringEntitiesToRemove)
+        {
+            List<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
+            if (entitiesToRemove.Any())
+            {
+                Logging.Log("RemovingDPT", "removing [" + stringEntitiesToRemove + "] from the DPT List", Logging.Debug);
+                RemovePrimaryWeaponPriorityTargets(entitiesToRemove);
+                return;
+            }
+
+            Logging.Log("RemovingDPT", "[" + stringEntitiesToRemove + "] was not found on grid", Logging.Debug);
+            return;
+        }
+
         public void AddDronePriorityTargets(IEnumerable<EntityCache> ewarEntities, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
             ewarEntities = ewarEntities.ToList();
@@ -2761,7 +2832,10 @@ namespace Questor.Modules.Caching
                 foreach (EntityCache ewarEntity in ewarEntities)
                 {
                     AddDronePriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
+                    continue;
                 }
+
+                return;
             }
 
             return;

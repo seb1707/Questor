@@ -1503,6 +1503,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public double IsIgnoredRefreshes;
+
         private bool? _IsIgnored;
 
         public bool IsIgnored
@@ -1513,16 +1515,16 @@ namespace Questor.Modules.Caching
                 {
                     if (_IsIgnored == null)
                     {
+                        IsIgnoredRefreshes++;
                         if (Cache.Instance.Entities.Any(t => t.Id != Id))
                         {
                             _IsIgnored = false;
                             return _IsIgnored ?? false;
                         }
 
-                        bool result = false;
-                        result |= Cache.Instance.IgnoreTargets.Contains(Name.Trim());
-                        _IsIgnored = result;
-                        return _IsIgnored ?? false;
+                        _IsIgnored = false;
+                        _IsIgnored |= Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
+                         return _IsIgnored ?? false;
                     }
 
                     return _IsIgnored ?? false;

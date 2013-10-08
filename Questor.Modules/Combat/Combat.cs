@@ -159,7 +159,7 @@ namespace Questor.Modules.Combat
             // We have enough ammo loaded
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId && weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges)
             {
-                LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
+                //LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
                 return true;
             }
 
@@ -180,11 +180,11 @@ namespace Questor.Modules.Combat
             if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                 return true;
 
-            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
-
             if (weapon.IsReloadingAmmo)
                 return true;
 
+            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
+            
             try
             {
                 // Reload or change ammo
@@ -305,11 +305,13 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: We are currently reloading: waiting", Logging.White);
                 return false;
             }
-            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
 
             if (weapon.IsReloadingAmmo)
                 return true;
 
+            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
+
+            
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
@@ -369,7 +371,7 @@ namespace Questor.Modules.Combat
 
                 if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                 {
-                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] has been reloaded recently, moving on to next weapon", Logging.White);
+                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                     continue;
                 }
                 if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)

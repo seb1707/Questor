@@ -191,6 +191,7 @@ namespace Questor.Modules.Logging
             _modules = _modules.ToList();
             if (_modules.Any())
             {
+
                 int icount = 0;
                 foreach (ModuleCache _module in _modules.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
                 {
@@ -199,7 +200,21 @@ namespace Questor.Modules.Logging
                 }
             }
             Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
-            
+            Logging.Log("WeaponInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+
+            if (Cache.Instance.Weapons.Any())
+            {
+
+                int icount = 0;
+                foreach (ModuleCache weapon in Cache.Instance.Weapons.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "TypeID [" + weapon.TypeId + "] GroupID [" + weapon.GroupId + "] isOnline [" + weapon.IsOnline + "] isActivatable [" + weapon.IsActivatable + "] IsActive [" + weapon.IsActive + "] OptimalRange [" + weapon.OptimalRange + "] Falloff [" + weapon.FallOff + "] Duration [" + weapon.Duration + "] LastReload [" + Math.Round(DateTime.UtcNow.Subtract(Combat.LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("WeaponInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+
+
             return true;
         }
 

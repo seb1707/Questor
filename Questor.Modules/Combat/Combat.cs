@@ -1200,7 +1200,7 @@ namespace Questor.Modules.Combat
                     if (!UnlockLowValueTarget("Combat.TargetCombatants", "DronePriorityTargets")) return;
 
                     IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
-                                                                                                                         .OrderByDescending(c => c.IsInOptimalRange)
+                                                                                                                         .OrderByDescending(c => c.IsInDroneRange)
                                                                                                                          .ThenBy(c => c.Nearest5kDistance);
 
                     if (_dronePriorityTargets.Any())
@@ -1217,7 +1217,6 @@ namespace Questor.Modules.Combat
 
                             if (dronePriorityEntity.Nearest5kDistance < Settings.Instance.DroneControlRange
                                 && dronePriorityEntity.IsReadyToTarget
-                                && dronePriorityEntity.Distance < Cache.Instance.WeaponRange
                                 && dronePriorityEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                                 && !dronePriorityEntity.IsIgnored
                                 && dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))

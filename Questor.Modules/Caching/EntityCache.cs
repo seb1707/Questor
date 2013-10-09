@@ -585,6 +585,30 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsInDroneRange
+        {
+            get
+            {
+                if (_directEntity != null)
+                {
+                    if (Settings.Instance.DroneControlRange > 0) //&& Cache.Instance.UseDrones)
+                    {
+                        if (_directEntity.Distance < Settings.Instance.DroneControlRange)
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+        }
+
+
         public bool IsDronePriorityTarget
         {
             get

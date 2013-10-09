@@ -176,6 +176,15 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "]", Logging.Orange);
                     return true;
                 }
+
+                if (weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges && force && weapon.CurrentCharges < weapon.MaxCharges)
+                {
+                    //
+                    // allow the reload (and log it!)
+                    //
+                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "] - forced reloading proceeding", Logging.Orange);
+                }
+
             }
 
             // Retry later, assume its ok now

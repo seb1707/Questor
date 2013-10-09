@@ -503,6 +503,8 @@
   <droneTypeId>2488</droneTypeId> 
   <!-- Maximum drone control range -->
   <droneControlRange>50000</droneControlRange>
+  <!-- Drones are HIGHLY recommended to be set on passive! ( this should be set to false!) If you really know what you are doing, and like killing triggers unnecessarily you can enable this setting which will leave drones in space when we have nothing targeted -->
+  <dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive>false</dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive>
   <!-- Do not launch drones if below this shield percentage -->
   <droneMinimumShieldPct>55</droneMinimumShieldPct>
   <!-- Do not launch drones if below this armor percentage -->

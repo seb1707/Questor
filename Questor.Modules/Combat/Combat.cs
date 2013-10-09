@@ -166,7 +166,7 @@ namespace Questor.Modules.Combat
             // We have enough ammo loaded
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId && weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges)
             {
-                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have enough ammo loaded", Logging.Orange);
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have [ " + weapon.CurrentCharges + " ] charges in this weapon which is more than the minimum of [" + Settings.Instance.MinimumAmmoCharges + "] charges weapon max chages is [" + weapon.MaxCharges + "]", Logging.Orange);
                 //LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
                 return true;
             }

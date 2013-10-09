@@ -321,7 +321,7 @@ namespace Questor.Modules.Activities
                     }
 
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Reload before moving to next pocket", Logging.Teal);
-                    if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
+                    if (!Combat.ReloadAll(Cache.Instance.MyShipEntity, true)) return;
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Done reloading", Logging.Teal);
                     AttemptsToActivateGateTimer++;
 

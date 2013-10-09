@@ -61,13 +61,9 @@ namespace Questor.Modules.Combat
         //    Interlocked.Decrement(ref CombatInstances);
         //}
 
-        /// <summary> Reload correct (tm) ammo for the NPC
-        /// </summary>
-        /// <param name = "weapon"></param>
-        /// <param name = "entity"></param>
-        /// <param name = "weaponNumber"></param>
-        /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        private static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        // Reload correct (tm) ammo for the NPC
+        // (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded
+        private static bool ReloadNormalAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber, bool force = false)
         {
             if (Settings.Instance.WeaponGroupId == 53) return true;
             if (entity == null)
@@ -164,11 +160,22 @@ namespace Questor.Modules.Combat
             }
 
             // We have enough ammo loaded
-            if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId && weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges)
+            if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId)
             {
-                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have [ " + weapon.CurrentCharges + " ] charges in this weapon which is more than the minimum of [" + Settings.Instance.MinimumAmmoCharges + "] charges weapon max chages is [" + weapon.MaxCharges + "]", Logging.Orange);
-                //LastWeaponReload[weapon.ItemId] = DateTime.UtcNow; //mark this weapon as reloaded... by the time we need to reload this timer will have aged enough...
-                return true;
+                if (weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges && !force)
+                {
+                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Settings.Instance.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
+                    return true;
+                }
+
+                if (weapon.CurrentCharges >= weapon.MaxCharges && force)
+                {
+                    //
+                    // even if force is true do not reload a weapon that is already full!
+                    //
+                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "]", Logging.Orange);
+                    return true;
+                }
             }
 
             // Retry later, assume its ok now

@@ -876,6 +876,7 @@ namespace Questor.Behaviors
 
                     //Logging.Log("CombatMissionsBehavior: Starting: Statistics.AmmoConsumptionStatistics");
                     if (!Statistics.AmmoConsumptionStatistics()) break;
+                    Statistics.Instance.FinishedMission = DateTime.UtcNow;
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
                     if (Settings.Instance.MissionStats1Log || Settings.Instance.MissionStats3Log || Settings.Instance.MissionStats3Log)
@@ -999,7 +1000,6 @@ namespace Questor.Behaviors
                                     {
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are going to the next mission because it has not been [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
-                                        Statistics.Instance.FinishedMission = DateTime.UtcNow;
                                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                                     }
                                 }
@@ -1025,7 +1025,6 @@ namespace Questor.Behaviors
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                             _States.CurrentQuestorState = QuestorState.Idle;
                             Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
-                            Statistics.Instance.FinishedMission = DateTime.UtcNow;
                             return;
                         }
                     }

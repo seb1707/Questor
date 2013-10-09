@@ -368,7 +368,7 @@ namespace Questor.Modules.Combat
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
         }
 
-        public static bool ReloadAll(EntityCache entity)
+        public static bool ReloadAll(EntityCache entity, bool force = false)
         {
             _reloadAllIteration++;
             if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Entering reloadAll function (again) - it iterates through all weapon stacks [" + _reloadAllIteration + "]", Logging.White);

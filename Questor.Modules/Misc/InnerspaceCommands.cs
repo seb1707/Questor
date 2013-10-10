@@ -227,7 +227,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("Statistics", "Entering StatisticsState.ModuleInfo", Logging.Debug);
+            Logging.Log("Statistics", "Entering StatisticsState.ModuleInfo:", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ModuleInfo;
             return 0;
         }

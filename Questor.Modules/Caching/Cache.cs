@@ -1131,6 +1131,43 @@ namespace Questor.Modules.Caching
             }
         }
 
+
+        public IEnumerable<ItemCache> _modulesAsItemCache;
+
+        public IEnumerable<ItemCache> ModulesAsItemCache
+        {
+            get
+            {
+                try
+                {
+                    if (_modulesAsItemCache == null || Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
+                    {
+                        DirectContainer _modulesAsContainer = Cache.Instance.DirectEve.GetShipsModules();
+                        if (_modulesAsContainer != null && _modulesAsContainer.Items.Any())
+                        {
+                            _modulesAsItemCache = _modulesAsContainer.Items.Select(i => new ItemCache(i)).ToList();
+                            if (_modulesAsItemCache.Any())
+                            {
+                                return _modulesAsItemCache;    
+                            }
+
+                            return null;
+                        }
+
+                        return null;
+                    }
+
+                    return _modulesAsItemCache;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.ModulesAsContainer", "Exception [" + exception + "]", Logging.Debug);
+                }
+
+                return _modulesAsItemCache;
+            }
+        }
+
         public IEnumerable<ModuleCache> Modules
         {
             get
@@ -1139,7 +1176,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_modules == null || !_modules.Any())
                     {
-                        _modules = DirectEve.Modules.Select(m => new ModuleCache(m)).ToList();
+                        _modules = Cache.Instance.DirectEve.Modules.Select(m => new ModuleCache(m)).ToList();
                     }
 
                     return _modules;
@@ -2279,6 +2316,7 @@ namespace Questor.Modules.Caching
                 _maxrange = null;
                 _maxTargetRange = null;
                 _modules = null;
+                _modulesAsItemCache = null;
                 _objects = null;
                 _safeSpotBookmarks = null;
                 _star = null;

@@ -1026,7 +1026,7 @@ namespace Questor.Modules.Actions
                     //
                     #region load ammo
 
-                    if (Cache.Instance.Modules.Any(i => i.IsTurret && i.MaxCharges == 0)) //civilian guns of all types
+                    if (Cache.Instance.ModulesAsItemCache.Any(i => i.DoesNotRequireAmmo)) //civilian guns of all types
                     {
                         Logging.Log("Arm.MoveItems","No ammo needed for civilian guns: done",Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;
@@ -1035,7 +1035,7 @@ namespace Questor.Modules.Actions
 
                     if (!capsMoved)
                     {
-                        if (Cache.Instance.Modules.Any(i => i.GroupId == (int)Group.CapacitorInjector)) 
+                        if (Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector))
                         {
                             if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 
@@ -1251,13 +1251,6 @@ namespace Questor.Modules.Actions
                     // load mining crystals
                     //
                     #region load mining crystals
-
-                    if (Cache.Instance.Modules.Count(i => i.IsTurret && i.MaxCharges == 0) > 0) //civilian guns of all types
-                    {
-                        Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
-                        _States.CurrentArmState = ArmState.Cleanup;
-                        return;
-                    }
 
                     if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;

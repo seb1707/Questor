@@ -2293,20 +2293,24 @@ namespace Questor.Modules.Caching
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
 
-                _primaryWeaponPriorityEntities = null;
-                _dronePriorityEntities = null;
-                _preferredPrimaryWeaponTarget = null;
-                if (_primaryWeaponPriorityTargets.Any())
+                if (QuestorJustStarted)
                 {
-                    _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());    
+                    _primaryWeaponPriorityEntities = null;
+                    _dronePriorityEntities = null;
+                    _preferredPrimaryWeaponTarget = null;
+                    if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
+                    {
+                        _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
+                    }
+                    _primaryWeaponPriorityEntities = null;
+
+                    if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
+                    {
+                        _dronePriorityTargets.ForEach(pt => pt.ClearCache());
+                    }
+                    _dronePriorityEntities = null;    
                 }
-                _primaryWeaponPriorityEntities = null;
                 
-                if (_dronePriorityTargets.Any())
-                {
-                    _dronePriorityTargets.ForEach(pt => pt.ClearCache());    
-                }
-                _dronePriorityEntities = null;
 
             }
             catch (Exception exception)

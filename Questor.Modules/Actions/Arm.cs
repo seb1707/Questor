@@ -31,14 +31,11 @@ namespace Questor.Modules.Actions
         static Arm()
         {
             AmmoToLoad = new List<Ammo>();
+            CrystalsToLoad = new List<MiningCrystals>();
             Interlocked.Increment(ref ArmInstances);
         }
 
-        //static ~Arm()
-        //{
-        //    Interlocked.Decrement(ref ArmInstances);
-        //}
-
+        private static List<MiningCrystals> CrystalsToLoad;
         private static bool _bringItemMoved;
         private static bool _bringoptionalItemMoved;
         private static bool ItemsAreBeingMoved;
@@ -51,7 +48,6 @@ namespace Questor.Modules.Actions
 
         private static int bringItemQuantity;
         private static int bringOptionalItemQuantity;
-        
         // Bleh, we don't want this here, can we move it to cache?
         public static long AgentId { get; set; }
 
@@ -72,6 +68,12 @@ namespace Questor.Modules.Actions
         {
             AmmoToLoad.Clear();
             AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+        }
+
+        public static void LoadSpecificMiningCrystals(IEnumerable<OreType> miningCrystals)
+        {
+            CrystalsToLoad.Clear();
+            CrystalsToLoad.AddRange(Settings.Instance.MiningCrystals.Where(a => miningCrystals.Contains(a.OreType)).Select(a => a.Clone()));
         }
 
         private static bool FindDefaultFitting(string module)
@@ -225,6 +227,7 @@ namespace Questor.Modules.Actions
                 case ArmState.OpenShipHangar:
                 case ArmState.SwitchToTransportShip:
                 case ArmState.SwitchToSalvageShip:
+                case ArmState.SwitchToMiningShip:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     
                     if (!Cache.Instance.OpenShipsHangar("Arm")) return;
@@ -245,7 +248,12 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (_States.CurrentArmState == ArmState.OpenShipHangar)
+                    if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.Instance.CharacterMode == "mining")
+                    {
+                        Logging.Log("Arm", "Activating mining ship", Logging.White);
+                        _States.CurrentArmState = ArmState.ActivateMiningShip;
+                    }
+                    else if (_States.CurrentArmState == ArmState.OpenShipHangar)
                     {
                         Logging.Log("Arm", "Activating combat ship", Logging.White);
                         _States.CurrentArmState = ArmState.ActivateCombatShip;
@@ -261,7 +269,43 @@ namespace Questor.Modules.Actions
                         _States.CurrentArmState = ArmState.ActivateSalvageShip;
                     }
                     return;
-                    
+
+                case ArmState.ActivateMiningShip:
+                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+
+                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return;
+
+                    if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
+                    {
+                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                        Logging.Log("Arm.ActivateMiningShip", "Could not find miningShipName in settings!", Logging.Orange);
+                        return;
+                    }
+
+                    if ((!string.IsNullOrEmpty(Settings.Instance.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.MiningShipName.ToLower()))
+                    {
+                        if (!Cache.Instance.OpenShipsHangar("Arm")) return;
+
+                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
+                        foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                        {
+                            Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
+                            ship.ActivateShip();
+                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            return;
+                        }
+
+                        return;
+                    }
+
+                    if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
+                    {
+                        Logging.Log("Arm.ActivateMiningShip", "Done", Logging.White);
+                        _States.CurrentArmState = ArmState.MoveDrones;
+                        return;
+                    }
+
+                    break;
 
                 case ArmState.ActivateNoobShip:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
@@ -1084,9 +1128,9 @@ namespace Questor.Modules.Actions
                                     if (ItemHangarRetries < 20)
                                     {
                                         //just retry... after 10 tries fail and let the user know we are out of ammo
-                                        return;    
+                                        return;
                                     }
-                                    
+
                                     foreach (Ammo ammo in AmmoToLoad)
                                     {
                                         Logging.Log("Arm", "Itemhangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
@@ -1159,6 +1203,145 @@ namespace Questor.Modules.Actions
                     
                     #endregion move ammo
 
+                case ArmState.MoveMiningCrystals:
+                    if (DateTime.UtcNow < Cache.Instance.NextArmAction)
+                    {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
+                        return;
+                    }
+
+                    if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", " start if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
+                    if (!Cache.Instance.CloseFittingManager("Arm")) return;
+                    if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", " finish if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
+
+                    //
+                    // Check for locked items if we are already moving items
+                    //
+                    #region check for item locks
+
+                    if (ItemsAreBeingMoved)
+                    {
+                        if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", "if (ItemsAreBeingMoved)", Logging.Teal);
+
+                        if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
+                        {
+                            if (DateTime.UtcNow.Subtract(Cache.Instance.NextArmAction).TotalSeconds > 120)
+                            {
+                                Logging.Log("Unloadloot.MoveMiningCrystals", "Moving Items timed out, clearing item locks", Logging.Orange);
+                                Cache.Instance.DirectEve.UnlockItems();
+                                Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(-10);
+                                _States.CurrentArmState = ArmState.Begin;
+                                return;
+                            }
+
+                            if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                            return;
+                        }
+                        ItemsAreBeingMoved = false;
+                        return;
+                    }
+                    #endregion check for item locks
+
+                    //
+                    // load mining crystals
+                    //
+                    #region load mining crystals
+
+                    if (Cache.Instance.Modules.Count(i => i.IsTurret && i.MaxCharges == 0) > 0) //civilian guns of all types
+                    {
+                        Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
+                        _States.CurrentArmState = ArmState.Cleanup;
+                        return;
+                    }
+
+                    if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
+                    if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+
+                    //
+                    // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
+                    //
+                    MiningCrystals CurrentMiningCrystalsToLoad = CrystalsToLoad.FirstOrDefault();
+                    if (CurrentMiningCrystalsToLoad == null)
+                    {
+                        //
+                        // if we have no more ammo types to be loaded we have to be finished with arm.
+                        //
+                        Logging.Log("Arm", "if (CurrentMiningCrystalsToLoad == null)", Logging.Debug);
+                        _States.CurrentArmState = ArmState.Cleanup;
+                        return;
+                    }
+
+                    try
+                    {
+                        IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentMiningCrystalsToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
+                        
+                        if (Settings.Instance.DebugArm) Logging.Log("Arm", "Ammohangar has [" + AmmoHangarItems.Count() + "] items with the right typeID [" + CurrentMiningCrystalsToLoad.TypeId + "] for this ammoType. MoveAmmo will use AmmoHangar", Logging.Debug);
+                        if (!AmmoHangarItems.Any())
+                        {
+                            IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentMiningCrystalsToLoad.TypeId).OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity);
+                            if (Settings.Instance.DebugArm) Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentMiningCrystalsToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);
+                            if (!ItemHangarItems.Any())
+                            {
+                                Logging.Log("Arm.MoveItems", "if (!ItemHangarItems.Any())", Logging.Debug);
+                                foreach (MiningCrystals _miningCrystal in CrystalsToLoad)
+                                {
+                                    Logging.Log("Arm", "Missing [" + _miningCrystal.Quantity + "] units of ammo: [ " + _miningCrystal.Description + " ] with TypeId [" + _miningCrystal.TypeId + "]", Logging.Orange);
+                                }
+
+                                _States.CurrentArmState = ArmState.NotEnoughAmmo; //should we just continue in this case instead of pausing?
+                                return;
+                            }
+                        }
+
+                        foreach (DirectItem item in AmmoHangarItems)
+                        {
+                            int moveMiningCrystalsQuantity = Math.Min(item.Stacksize, CurrentMiningCrystalsToLoad.Quantity);
+                            moveMiningCrystalsQuantity = Math.Max(moveMiningCrystalsQuantity, 1);
+                            Logging.Log("Arm.MoveItems", "Moving [" + moveMiningCrystalsQuantity + "] units of Mining Crystals  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
+                            //
+                            // move items to cargo
+                            //
+                            Cache.Instance.CurrentShipsCargo.Add(item, moveMiningCrystalsQuantity);
+                            //
+                            // subtract the moved items from the items that need to be moved
+                            //
+                            CurrentMiningCrystalsToLoad.Quantity -= moveMiningCrystalsQuantity;
+                            if (CurrentMiningCrystalsToLoad.Quantity == 0)
+                            {
+                                //
+                                // if we have moved all the ammo of this type that needs to be moved remove this type of ammo from the list of ammos that need to be moved
+                                // 
+                                Cache.Instance.MissionAmmo.RemoveAll(a => a.TypeId == CurrentMiningCrystalsToLoad.TypeId);
+                                CrystalsToLoad.RemoveAll(a => a.TypeId == CurrentMiningCrystalsToLoad.TypeId);
+                                return;
+                            }
+
+                            return; //you can only move one set of items per frame.
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log("Arm", "Error while processing Itemhangar Items exception was: [" + exception + "]", Logging.Debug);
+                    }
+
+                    if (CrystalsToLoad.Any()) //if we still have any ammo to load here then we must be missing ammo
+                    {
+                        foreach (MiningCrystals _miningCrystal in CrystalsToLoad)
+                        {
+                            Logging.Log("Arm", "Missing [" + _miningCrystal.Quantity + "] units of ammo: [ " + _miningCrystal.Description + " ] with TypeId [" + _miningCrystal.TypeId + "]", Logging.Orange);
+                        }
+
+                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                        return;
+                    }
+
+                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
+                    Logging.Log("Arm.MoveMiningCrystals", "Waiting for items", Logging.White);
+                    _States.CurrentArmState = ArmState.WaitForItems;
+                    return;
+
+                    #endregion move ammo
+
                 #region WaitForItems
                 case ArmState.WaitForItems:
 
@@ -1215,5 +1398,70 @@ namespace Questor.Modules.Actions
                 #endregion WaitForItems
             }
         }
+
+        /*
+                private void WhatScriptsShouldILoad()
+                {
+                    TrackingComputerScriptsToLoad = 0;
+                    TrackingDisruptorScriptsToLoad = 0;
+                    TrackingLinkScriptsToLoad = 0;
+                    SensorBoosterScriptsToLoad = 0;
+                    SensorDampenerScriptsToLoad = 0;
+                    foreach (ModuleCache module in Cache.Instance.Modules)
+                    {
+                        if (module.GroupId == (int)Group.TrackingDisruptor ||
+                            module.GroupId == (int)Group.TrackingComputer ||
+                            module.GroupId == (int)Group.TrackingLink ||
+                            module.GroupId == (int)Group.SensorBooster ||
+                            module.GroupId == (int)Group.SensorDampener)
+                        {
+                            if (module.CurrentCharges == 0)
+                            {
+                                DirectItem scriptToLoad;
+                                if (module.GroupId == (int)Group.TrackingDisruptor)
+                                {
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
+                                    if (scriptToLoad !=null)
+                                    {
+                                        TrackingDisruptorScriptsToLoad++;
+                                    }
+                                }
+                                if (module.GroupId == (int)Group.TrackingComputer)
+                                {
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
+                                    if (scriptToLoad != null)
+                                    {
+                                        TrackingComputerScriptsToLoad++;
+                                    }
+                                }
+                                if (module.GroupId == (int)Group.TrackingLink)
+                                {
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingLinkScript, 1);
+                                    if (scriptToLoad != null)
+                                    {
+                                        TrackingLinkScriptsToLoad++;
+                                    }
+                                }
+                                if (module.GroupId == (int)Group.SensorBooster)
+                                {
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorBoosterScript, 1);
+                                    if (scriptToLoad != null)
+                                    {
+                                        SensorBoosterScriptsToLoad++;
+                                    }
+                                }
+                                if (module.GroupId == (int)Group.SensorDampener)
+                                {
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorDampenerScript, 1);
+                                    if (scriptToLoad != null)
+                                    {
+                                        SensorDampenerScriptsToLoad++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        */
     }
 }

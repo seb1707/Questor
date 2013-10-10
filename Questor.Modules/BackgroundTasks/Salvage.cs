@@ -581,7 +581,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
 
                         // We pick up loot depending on isk per m3
-                        
+
                         // Never pick up contraband (unless its the mission item)
                         if (!item.IsMissionItem && item.IsContraband)
                         {

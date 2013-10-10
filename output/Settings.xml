@@ -38,6 +38,8 @@
   <debugFittingMgr>false</debugFittingMgr>
   <debugGetBestTarget>false</debugGetBestTarget>
   <debugGetBestDroneTarget>false</debugGetBestDroneTarget>
+  <debugFleetSupportMaster>false</debugFleetSupportMaster>
+  <debugFleetSupportSlave>false</debugFleetSupportSlave>
   <debugGotobase>false</debugGotobase>
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>
@@ -126,6 +128,20 @@
   <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
   <WatchForActiveWars>true</WatchForActiveWars><!-- default is true -->
   
+  <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will seach for and travel to the master (if any)-->
+  <fleetSupportSlave>false</fleetSupportSlave>
+  <!-- fleetSupportMaster is either true or false: if true the master background actions will kick in and communicate targets and its own location to slaves (if any)-->
+  <fleetSupportMaster>false</fleetSupportMaster>
+  <!-- fleetname is used to seperate the IPC communications so that only masters and slaves from the same "fleetName" communicate with each other -->  
+  <fleetName>Fleet1</fleetName>
+
+  <characterNamesForMasterToInviteToFleet>
+	<character></character>
+	<!-- <character>Foobar1</character> -->
+	<!-- <character>Foobar2</character> -->
+	<!-- <character>Foobar3</character> -->
+  </characterNamesForMasterToInviteToFleet>
+
   <!--                                                         -->
   <!-- AGENT AND MISSION SETTINGS -->
   <!--                                                         -->
@@ -550,9 +566,6 @@
   <standingsNeededToAccessLevel3Agent>3</standingsNeededToAccessLevel3Agent>
   <standingsNeededToAccessLevel4Agent>5</standingsNeededToAccessLevel4Agent>
   <standingsNeededToAccessLevel5Agent>7</standingsNeededToAccessLevel5Agent>
-  
-  
-  
   
   <!--                                                        -->
   <!-- SKILL TRAINING SETTINGS       -->

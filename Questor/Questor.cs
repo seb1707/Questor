@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using Questor.Modules.Misc;
-
 namespace Questor
 {
     using System;
@@ -24,6 +22,7 @@ namespace Questor
     using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.Misc;
     using global::Questor.Modules.States;
     using global::Questor.Modules.BackgroundTasks;
     using LavishScriptAPI;
@@ -41,6 +40,7 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
+
         private readonly InnerspaceCommands _innerspaceCommands;
         private readonly Statistics _statistics;
         //private readonly BackgroundBehavior _backgroundbehavior;
@@ -498,15 +498,7 @@ namespace Questor
 
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
-            
-            //if (Cache.Instance.InSpace && !Cache.Instance.InWarp && Cache.Instance.Entities != null && Cache.Instance.Entities.Any())
-            //{
-            //    foreach (EntityCache entity in Cache.Instance.Entities)
-            //    {
-            //        entity.InvalidateEntityCache();
-            //    }
-            //}
-            
+
             //if (Cache.Instance.EntitiesthatHaveExploded.Any())
             //{
             //    if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);

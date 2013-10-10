@@ -31,7 +31,7 @@ namespace Questor.Modules.BackgroundTasks
 
         private DateTime _resumeTime;
         private DateTime _nextWarpScrambledWarning = DateTime.UtcNow;
-        private DateTime _lastPulse;
+        private DateTime _nextPanicProcessState;
 
         private DateTime _lastWarpScrambled = DateTime.UtcNow;
         private DateTime _lastPriorityTargetLogging = DateTime.UtcNow;
@@ -45,9 +45,10 @@ namespace Questor.Modules.BackgroundTasks
         public void ProcessState()
         {
             // Only pulse state changes every 500ms
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 500 || Settings.Instance.DebugDisablePanic) //default: 500ms
+            if (DateTime.UtcNow < _nextPanicProcessState || Settings.Instance.DebugDisablePanic) //default: 500ms
                 return;
-            _lastPulse = DateTime.UtcNow;
+
+            _nextPanicProcessState = DateTime.UtcNow.AddMilliseconds(500);
 
             switch (_States.CurrentPanicState)
             {
@@ -70,12 +71,14 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         _States.CurrentPanicState = PanicState.Idle;
                     }
+
                     if (Cache.Instance.ActiveShip.Entity != null)
                     {
                         _lastNormalX = Cache.Instance.ActiveShip.Entity.X;
                         _lastNormalY = Cache.Instance.ActiveShip.Entity.Y;
                         _lastNormalZ = Cache.Instance.ActiveShip.Entity.Z;
                     }
+
                     if (Cache.Instance.ActiveShip.Entity == null)
                         return;
 
@@ -89,7 +92,7 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Logging.Log("Cache", "Your corp is involved in a war, Starting panic!", Logging.Orange);
                         _States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
+                        //return;
                     }
 
                     if (Cache.Instance.InSpace)
@@ -100,6 +103,88 @@ namespace Questor.Modules.BackgroundTasks
                             _States.CurrentPanicState = PanicState.BookmarkMyWreck;
                             //_States.CurrentPanicState = PanicState.StartPanicking;
                             return;
+                        }
+
+                        if (Cache.Instance.TargetedBy.Any())
+                        {
+                            List<EntityCache> EntitiesThatAreWarpScramblingMe = Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe).ToList();
+                            if (EntitiesThatAreWarpScramblingMe.Any())
+                            {
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWarpScramblingMe, PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                            }
+
+                            if (Settings.Instance.SpeedTank)
+                            {
+                                List<EntityCache> EntitiesThatAreWebbingMe = Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe).ToList();
+                                if (EntitiesThatAreWebbingMe.Any())
+                                {
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList);
+                                }
+
+                                List<EntityCache> EntitiesThatAreTargetPaintingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe).ToList();
+                                if (EntitiesThatAreTargetPaintingMe.Any())
+                                {
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTargetPaintingMe, PrimaryWeaponPriority.TargetPainting, "Panic", Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList);
+                                }
+                            }
+
+                            List<EntityCache> EntitiesThatAreNeutralizingMe = Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe).ToList();
+                            if (EntitiesThatAreNeutralizingMe.Any())
+                            {
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            List<EntityCache> EntitiesThatAreJammingMe = Cache.Instance.TargetedBy.Where(t => t.IsJammingMe).ToList();
+                            if (EntitiesThatAreJammingMe.Any())
+                            {
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            List<EntityCache> EntitiesThatAreSensorDampeningMe = Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe).ToList();
+                            if (EntitiesThatAreSensorDampeningMe.Any())
+                            {
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreSensorDampeningMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            if (Cache.Instance.Modules.Any(m => m.IsTurret))
+                            {
+                                //
+                                // tracking disrupting targets
+                                //
+                                List<EntityCache> EntitiesThatAreTrackingDisruptingMe = Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe).ToList();
+                                if (EntitiesThatAreTrackingDisruptingMe.Any())
+                                {
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTrackingDisruptingMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList);
+                                }
+                            }
+                        }
+
+                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
+                        {
+                            _lastPriorityTargetLogging = DateTime.UtcNow;
+
+                            icount = 1;
+                            foreach (EntityCache target in Cache.Instance.DronePriorityEntities)
+                            {
+                                icount++;
+                                Logging.Log("Panic.ListDronePriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                continue;
+                            }
+
+                            icount = 1;
+                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityEntities)
+                            {
+                                icount++;
+                                Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                continue;
+                            }
                         }
 
                         if (Cache.Instance.ActiveShip.ArmorPercentage < 100)
@@ -207,89 +292,6 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + Math.Round(enemy.Velocity, 0) + "]", Logging.Red);
                                 }
-                            }
-                        }
-
-                        
-                        if (Cache.Instance.TargetedBy.Any())
-                        {
-                            List<EntityCache> EntitiesThatAreWarpScramblingMe = Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe).ToList();
-                            if (EntitiesThatAreWarpScramblingMe.Any())
-                            {
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWarpScramblingMe, PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
-                            }
-
-                            if (Settings.Instance.SpeedTank)
-                            {
-                                List<EntityCache> EntitiesThatAreWebbingMe = Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe).ToList();
-                                if (EntitiesThatAreWebbingMe.Any())
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList);
-                                }
-
-                                List<EntityCache> EntitiesThatAreTargetPaintingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe).ToList();
-                                if (EntitiesThatAreTargetPaintingMe.Any())
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTargetPaintingMe, PrimaryWeaponPriority.TargetPainting, "Panic", Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList);
-                                }
-                            }
-
-                            List<EntityCache> EntitiesThatAreNeutralizingMe = Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe).ToList();
-                            if (EntitiesThatAreNeutralizingMe.Any())
-                            {
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
-                            }
-
-                            List<EntityCache> EntitiesThatAreJammingMe = Cache.Instance.TargetedBy.Where(t => t.IsJammingMe).ToList();
-                            if (EntitiesThatAreJammingMe.Any())
-                            {
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList);
-                            }
-
-                            List<EntityCache> EntitiesThatAreSensorDampeningMe = Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe).ToList();
-                            if (EntitiesThatAreSensorDampeningMe.Any())
-                            {
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreSensorDampeningMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList);
-                            }
-
-                            if (Cache.Instance.Modules.Any(m => m.IsTurret))
-                            {
-                                //
-                                // tracking disrupting targets
-                                //
-                                List<EntityCache> EntitiesThatAreTrackingDisruptingMe = Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe).ToList();
-                                if (EntitiesThatAreTrackingDisruptingMe.Any())
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTrackingDisruptingMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList);
-                                }
-                            }
-                        }
-
-                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
-                        {
-                            _lastPriorityTargetLogging = DateTime.UtcNow;
-
-                            icount = 1;
-                            foreach (EntityCache target in Cache.Instance.DronePriorityEntities)
-                            {
-                                icount++;
-                                Logging.Log("Panic.ListDronePriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
-                                continue;
-                            }
-
-                            icount = 1;
-                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityEntities)
-                            {
-                                icount++;
-                                Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
-                                continue;
                             }
                         }
                     }

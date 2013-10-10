@@ -45,6 +45,7 @@ namespace Questor.Modules.BackgroundTasks
         private int _trackingDisruptorScriptAttempts;
         //private int _ancillaryShieldBoosterAttempts;
         //private int _capacitorInjectorAttempts;
+        private DateTime _nextOverloadAttempt = DateTime.UtcNow;
 
         private int ModuleNumber { get; set; }
 
@@ -446,6 +447,104 @@ namespace Questor.Modules.BackgroundTasks
             ModuleNumber = 0;
         }
 
+        private bool OverLoadWeapons()
+        {
+            //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
+            if (DateTime.UtcNow < _nextOverloadAttempt) //if we just did something wait a bit
+                return true;
+
+            if (!Settings.Instance.OverloadWeapons)
+            {
+                // if we do not have the OverLoadWeapons setting set to true then just return.
+                _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
+                return true;
+            }
+
+            //
+            //if we do not have the skill (to at least lvl1) named thermodynamics, return true and do not try to overload
+            //
+
+
+            ModuleNumber = 0;
+            foreach (ModuleCache module in Cache.Instance.Modules)
+            {
+                if (!module.IsActivatable)
+                    continue;
+
+                if (module.IsOverloaded || module.IsPendingOverloading || module.IsPendingStopOverloading)
+                    continue;
+
+                //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
+
+                if (module.GroupId == (int)Group.EnergyWeapon ||
+                    module.GroupId == (int)Group.HybridWeapon ||
+                    module.GroupId == (int)Group.ProjectileWeapon ||
+                    module.GroupId == (int)Group.CruiseMissileLaunchers ||
+                    module.GroupId == (int)Group.RocketLaunchers ||
+                    module.GroupId == (int)Group.TorpedoLaunchers ||
+                    module.GroupId == (int)Group.StandardMissileLaunchers ||
+                    module.GroupId == (int)Group.HeavyMissilelaunchers ||
+                    module.GroupId == (int)Group.AssaultMissilelaunchers ||
+                    module.GroupId == (int)Group.DefenderMissilelaunchers
+                    )
+                {
+                    //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
+
+                    ModuleNumber++;
+
+                    if (module.IsOverloaded)
+                    {
+                        if (module.IsPendingOverloading || module.IsPendingStopOverloading)
+                        {
+                            continue;
+                        }
+                            
+                        //double DamageThresholdToStopOverloading = 1;
+
+                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "IsOverLoaded - HP [" + Math.Round(module.Hp,2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+
+                        //if (module.Damage > DamageThresholdToStopOverloading)
+                        //{
+                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Diable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
+                        //    return module.ToggleOverload;
+                        //    return false;
+                        //}
+                        
+                        continue;
+                    }
+                    
+                    if (!module.IsOverloaded)
+                    {
+                        if (module.IsPendingOverloading || module.IsPendingStopOverloading)
+                        {
+                            continue;
+                        }
+
+                        //double DamageThresholdToAllowOverLoading = 1;
+
+                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "Is not OverLoaded - HP [" + Math.Round(module.Hp, 2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+                        _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
+
+                        //if (module.Damage < DamageThresholdToAllowOverLoading)
+                        //{
+                        //    Logging.Log("Defense.Overload", "Damage [" + Math.Round(module.Damage, 2) + "] Enable Overloading of Module wTypeID[" + module.TypeId + "]", Logging.Debug);
+                              return module.ToggleOverload;
+                        //}
+
+                        //continue;
+                    }
+
+                    _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(60);
+                    return true;
+                }
+           
+                ModuleNumber++;
+                continue;
+            }
+            ModuleNumber = 0;
+            return true;
+        }
+
         private void ActivateRepairModules()
         {
             //var watch = new Stopwatch();
@@ -527,7 +626,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
                         module.Click();
-                    
+
                     Cache.Instance.StartedBoosting = DateTime.UtcNow;
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)
@@ -653,6 +752,7 @@ namespace Questor.Modules.BackgroundTasks
                 _sensorDampenerScriptAttempts = 0;
                 _trackingComputerScriptAttempts = 0;
                 _trackingDisruptorScriptAttempts = 0;
+                _nextOverloadAttempt = DateTime.UtcNow;
                 return;
             }
 
@@ -672,6 +772,7 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 15)
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
+                _nextOverloadAttempt = DateTime.UtcNow;
                 return;
             }
 
@@ -685,6 +786,7 @@ namespace Questor.Modules.BackgroundTasks
 
             ActivateRepairModules();
             ActivateOnce();
+            if (!OverLoadWeapons()) return; //should only run every 30 min (and likely needs to be run again on every session change)
             
             // this effectively disables control of speed modules when paused, which is expected behavior
             if (Cache.Instance.Paused)

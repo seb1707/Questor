@@ -1075,7 +1075,7 @@ namespace Questor.Modules.Activities
                         if (KillTargetEntity.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)
                         {
                             continue;
-                        }    
+                        }
                     }
                     
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Unlocking [" + KillTargetEntity.Name + "][ID: " + Cache.Instance.MaskedID(KillTargetEntity.Id) + "][" + Math.Round(KillTargetEntity.Distance / 1000, 0) + "k away] due to kill order being put on hold", Logging.Teal);

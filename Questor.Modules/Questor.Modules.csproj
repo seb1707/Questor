@@ -71,6 +71,8 @@
     <Compile Include="Caching\ItemCacheMarket.cs" />
     <Compile Include="Caching\TargetingCache.cs" />
     <Compile Include="Lookup\InvTypeMarket.cs" />
+    <Compile Include="Lookup\MiningCrystals.cs" />
+    <Compile Include="Lookup\OreType.cs" />
     <Compile Include="Lookup\TypeID.cs" />
     <Compile Include="Misc\InnerspaceCommands.cs" />
     <Compile Include="States\CombatHelperBehaviorState.cs" />

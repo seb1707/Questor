@@ -1392,7 +1392,6 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugPotentialCombatTargets)
                     {
                         if (!_potentialCombatTargets.Any())
-                        
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                             List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
@@ -2270,10 +2269,6 @@ namespace Questor.Modules.Caching
                 _currentShipsCargo = null;
                 _containerInSpace = null;
                 _containers = null;
-                //if (_entities != null)
-                //{
-                //    _entities.ForEach(pt => pt.InvalidateCache());    
-                //}
                 _entities = null;
                 _entitiesById.Clear();
                 _gates = null;
@@ -2297,40 +2292,10 @@ namespace Questor.Modules.Caching
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
-                
+
                 _primaryWeaponPriorityEntities = null;
                 _dronePriorityEntities = null;
-
-                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
-                {
-                    foreach (EntityCache PrimaryWeaponPriorityTargetEntity in Cache.Instance.PrimaryWeaponPriorityEntities)
-                    {
-                        //PrimaryWeaponPriorityTargetEntity.InvalidateEntityCache();
-                    }    
-                }
-                
-                if (Cache.Instance.DronePriorityTargets.Any())
-                {
-                    foreach (EntityCache DronePriorityTargetEntity in Cache.Instance.DronePriorityEntities)
-                    {
-                        //DronePriorityTargetEntity.InvalidateEntityCache();
-                    }    
-                }
-                if (PreferredDroneTarget != null)
-                {
-                    //clears EntityCache info every frame so that it refreshes
-                    //PreferredDroneTarget.InvalidateEntityCache();    
-                }
-                
-                _preferredDroneTarget = null;
-                if (PreferredPrimaryWeaponTarget != null)
-                {
-                    //clears EntityCache info every frame so that it refreshes
-                    //PreferredPrimaryWeaponTarget.InvalidateEntityCache();    
-                }
                 _preferredPrimaryWeaponTarget = null;
-
-
                 _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
                 _primaryWeaponPriorityEntities = null;
                 _dronePriorityTargets.ForEach(pt => pt.ClearCache());
@@ -2847,11 +2812,16 @@ namespace Questor.Modules.Caching
             {
                 if ((!ewarEntity.IsIgnored) || DronePriorityEntities.Any(p => p.Id == ewarEntity.Id))
                 {
-                    if (Settings.Instance.DebugDrones) Logging.Log("AddDronePriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
+                    if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log("AddDronePriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
                     return;
                 }
 
-                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "]", Logging.Teal);
+                int DronePriorityTargetCount = 0;
+                if (Cache.Instance.DronePriorityEntities.Any())
+                {
+                    DronePriorityTargetCount = Cache.Instance.DronePriorityTargets.Count();
+                }
+                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "] we have [" + DronePriorityTargetCount + "] other DronePriorityTargets", Logging.Teal);
                 _dronePriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, DronePriority = priority });
                 return;
             }
@@ -4156,7 +4126,7 @@ namespace Questor.Modules.Caching
             NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
         }
-        
+
         private void EWarEffectsOnMe()
         {
             // Get all entity targets
@@ -4293,7 +4263,7 @@ namespace Questor.Modules.Caching
 
                 return null;
             }
-            
+
             set { _itemHangar = value; }
         }
 

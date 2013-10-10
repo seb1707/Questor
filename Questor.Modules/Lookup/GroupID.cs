@@ -102,7 +102,6 @@ namespace Questor.Modules.Lookup
         LargeColidableObject = 226,
         LargeColidableShip = 784,
         DeadSpaceOverseersStructure = 494,
-        DeadSpaceOverseersSentry = 495,
         DeadSpaceOverseersBelongings = 496,
 
         CargoContainer = 12,

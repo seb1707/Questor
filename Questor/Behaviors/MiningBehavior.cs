@@ -495,7 +495,6 @@ namespace Questor.Behaviors
                         }
                         else if (Cache.Instance.Targets.Contains(_targetAsteroid))
                         {
-
                             if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid Targetted.", Logging.White);
                             //if(!_targetAsteroid.IsActiveTarget) _targetAsteroid.MakeActiveTarget();
                             List<ModuleCache> miningTools = Cache.Instance.Modules.Where(m => MiningToolGroupIDs.Contains(m.GroupId)).ToList();
@@ -503,8 +502,6 @@ namespace Questor.Behaviors
                             _minerNumber = 0;
                             foreach (ModuleCache miningTool in miningTools)
                             {
-
-
                                 if (miningTool.ActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
                                     continue;
 

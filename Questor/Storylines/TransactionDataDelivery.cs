@@ -82,7 +82,6 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
 

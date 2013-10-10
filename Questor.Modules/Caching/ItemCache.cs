@@ -242,7 +242,12 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.MissionItems.Any())
                     {
-                        return Cache.Instance.MissionItems.Contains((Name));
+                        if (Cache.Instance.MissionItems.Contains((Name)))
+                        {
+                            return true;
+                        }
+
+                        return false;
                     }
 
                     return false;

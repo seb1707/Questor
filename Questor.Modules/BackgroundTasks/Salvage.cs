@@ -583,7 +583,7 @@ namespace Questor.Modules.BackgroundTasks
                         // We pick up loot depending on isk per m3
 
                         // Never pick up contraband (unless its the mission item)
-                        if (!item.IsMissionItem && item.IsContraband)
+                        if (item.IsContraband) //is the mission item EVER contraband?!
                         {
                             if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and is considered Contraband: ignore it", Logging.Teal);
                             Cache.Instance.LootedContainers.Add(containerEntity.Id);
@@ -712,7 +712,7 @@ namespace Questor.Modules.BackgroundTasks
                         if(Settings.Instance.DebugLootWrecks)
                         {
                             int icount = 0;
-                            if (lootItems.Any())
+                            if (lootItems != null && lootItems.Any())
                             {
                                 foreach (var lootItem in lootItems)
                                 {

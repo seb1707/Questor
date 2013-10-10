@@ -986,7 +986,7 @@ namespace Questor.Modules.Logging
                 case StatisticsState.ModuleInfo:
                     if (!Cache.Instance.InWarp)
                     {
-                        if ((Cache.Instance.InSpace || Cache.Instance.InStation) && Cache.Instance.ActiveShip != null && Cache.Instance.Modules.Any())
+                        if (Cache.Instance.InSpace || Cache.Instance.InStation)
                         {
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ModuleInfo", Logging.Debug);

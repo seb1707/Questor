@@ -554,7 +554,6 @@
   <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
   
   <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
-  <skillTrainerScript>skilltrainer.iss<skillTrainerScript>
   
   <loadQuestorDebugInnerspaceCommandAlias>1</loadQuestorDebugInnerspaceCommandAlias>
   <loadQuestorDebugInnerspaceCommand>dotnet q1 questor.exe</loadQuestorDebugInnerspaceCommand>

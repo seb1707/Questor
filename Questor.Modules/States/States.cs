@@ -207,5 +207,7 @@ namespace Questor.Modules.States
         public static StorylineState CurrentStorylineState { get; set; }
 
         public static StatisticsState CurrentStatisticsState { get; set; }
+
+        public static SkillTrainerState CurrentSkillTrainerState { get; set; }
     }
 }

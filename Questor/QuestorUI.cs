@@ -71,6 +71,14 @@ namespace Questor
 
             if (Settings.Instance.CharacterMode != null)
             {
+                //if (Settings.Instance.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
+                //SkillTrainerStateComboBox.Items.Clear();
+                //foreach (string text in Enum.GetNames(typeof(SkillTrainerState)))
+                //{
+                //    SkillTrainerStateComboBox.Items.Add(text);
+                //}
+
+
                 //
                 // populate combo boxes with the various states that are possible
                 //

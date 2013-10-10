@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Actions;
+
 namespace Questor
 {
     using System;
@@ -303,24 +305,7 @@ namespace Questor
                 {
                     Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
                     _States.LavishEvent_SkillQueueHasRoom();
-
-                    string ScriptPath = System.IO.Path.Combine(Settings.Instance.Path, "../Scripts");
-                    if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ScriptPath [" + ScriptPath + "]", Logging.White);
-                    string SkillTrainerScriptFullPath = ScriptPath + "\\" + Settings.Instance.SkillTrainerScript;
-                    if (!File.Exists(SkillTrainerScriptFullPath))
-                    {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Missing [" + Settings.Instance.SkillTrainerScript + "] from .Net programs - It is not part of questor and is only available as a binary.", Logging.Teal);
-                        return true;
-                    }
-
-                    Logging.Log("Questor.SkillQueueCheck", "Questor will now wait 60 seconds. Launching SkillTrainer", Logging.White);
-                    _nextQuestorAction = DateTime.UtcNow.AddSeconds(60);
-                    //
-                    // this eventually needs to be fixed to use the full path, at the moment if we pass SkillTrainerFullPath to innerspace it has 
-                    // only 1 slash between directories and they get eaten (directory names with no separating slashes)
-                    //
-                    LavishScript.ExecuteCommand("echo runscript " + Settings.Instance.SkillTrainerScript);
-                    LavishScript.ExecuteCommand("runscript " + Settings.Instance.SkillTrainerScript);
+                    SkillTrainerClass.ProcessState();
                     return true;
                 }
                 Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);

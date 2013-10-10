@@ -1048,6 +1048,7 @@ namespace Questor.Modules.Actions
                                 capsIncargo += cargoItem.Quantity;
                                 continue;
                             }
+
                             int capsToLoad = Settings.Instance.CapBoosterToLoad - capsIncargo;
                             if (capsToLoad <= 0)
                             {
@@ -1077,6 +1078,10 @@ namespace Questor.Modules.Actions
                                 _States.CurrentArmState = ArmState.NotEnoughAmmo;
                                 return;
                             }
+                        }
+                        else
+                        {
+                            if (Settings.Instance.DebugArm) Logging.Log("Arm", "No Capacitor Injectors found on the ship, no cap boosters will be loaded!", Logging.Debug);
                         }
                     }
 

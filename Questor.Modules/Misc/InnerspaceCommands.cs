@@ -32,6 +32,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListHighValueTargets", ListHighValueTargets);
                 LavishScript.Commands.AddCommand("ListLowValueTargets", ListLowValueTargets);
                 LavishScript.Commands.AddCommand("ModuleInfo", ModuleInfo);
+                LavishScript.Commands.AddCommand("ListModules", ModuleInfo);
                 LavishScript.Commands.AddCommand("ListIgnoredTargets", ListIgnoredTargets);
                 LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
                 LavishScript.Commands.AddCommand("ListPWPT", ListPrimaryWeaponPriorityTargets);
@@ -471,7 +472,7 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListHighValueTargets                         - Logs ListHighValueTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListLowValueTargets                          - Logs ListLowValueTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListIgnoredTargets                           - Logs the contents of the IgnoredTargets List", Logging.White);
-            Logging.Log("InnerspaceCommands", "ModuleInfo                                   - Logs Module Info of My Current Ship", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListModules                                  - Logs Module List of My Current Ship", Logging.White);
             Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets             - Logs PrimaryWeaponPriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListTargets                                  - Logs ListTargets", Logging.White);

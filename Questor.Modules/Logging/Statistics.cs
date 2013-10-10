@@ -189,7 +189,7 @@ namespace Questor.Modules.Logging
         {
             Logging.Log("ModuleInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             _modules = _modules.ToList();
-            if (_modules.Any())
+            if (_modules != null && _modules.Any())
             {
 
                 int icount = 0;
@@ -202,7 +202,7 @@ namespace Questor.Modules.Logging
             Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
             Logging.Log("WeaponInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
 
-            if (Cache.Instance.Weapons.Any())
+            if (Cache.Instance.Weapons != null && Cache.Instance.Weapons.Any())
             {
 
                 int icount = 0;

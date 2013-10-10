@@ -2296,9 +2296,16 @@ namespace Questor.Modules.Caching
                 _primaryWeaponPriorityEntities = null;
                 _dronePriorityEntities = null;
                 _preferredPrimaryWeaponTarget = null;
-                _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
+                if (_primaryWeaponPriorityTargets.Any())
+                {
+                    _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());    
+                }
                 _primaryWeaponPriorityEntities = null;
-                _dronePriorityTargets.ForEach(pt => pt.ClearCache());
+                
+                if (_dronePriorityTargets.Any())
+                {
+                    _dronePriorityTargets.ForEach(pt => pt.ClearCache());    
+                }
                 _dronePriorityEntities = null;
 
             }

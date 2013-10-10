@@ -234,6 +234,42 @@ namespace Questor.Modules.Caching
             get { return TypeId == 28260 || TypeId == 3814 || TypeId == 2076 || TypeId == 25373 || TypeId == 3810; }
         }
 
+        public bool InjectSkillBook
+        {   //Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810
+            get
+            {
+                if (_directItem.GroupId == (int)Group.SkillBooks)
+                {
+                    _directItem.InjectSkill();    
+                }
+                
+                return false;
+            }
+        }
+
+        public bool DoesNotRequireAmmo
+        {
+            get
+            {
+                if (TypeId == (int)TypeID.CivilianGatlingPulseLaser) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingAutocannon) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingRailgun) return true;
+                if (TypeId == (int)TypeID.CivilianLightElectronBlaster) return true;
+                return false;
+            }
+        }
+
+        public bool IsTurret
+        {
+            get
+            {
+                if (GroupId == (int)Group.EnergyWeapon) return true;
+                if (GroupId == (int)Group.ProjectileWeapon) return true;
+                if (GroupId == (int)Group.HybridWeapon) return true;
+                return false;
+            }
+        }
+
         public bool IsMissionItem
         {
             get

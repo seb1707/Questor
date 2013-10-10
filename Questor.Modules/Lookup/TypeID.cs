@@ -38,7 +38,11 @@ namespace Questor.Modules.Lookup
         ScanResolutionDampeningScript = 29013,
         TargetingRangeDampeningScript = 29015,
 
-
+        CivilianGatlingPulseLaser = 3634,
+        CivilianGatlingAutocannon = 3636,
+        CivilianGatlingRailgun = 3638,
+        CivilianLightElectronBlaster = 3640,
+            
         //Minmater Rookie Ship
         //Amarr Rookie Ship
         //Caldari Rookie Ship

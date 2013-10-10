@@ -1026,16 +1026,21 @@ namespace Questor.Modules.Actions
                     //
                     #region load ammo
 
-                    if (Cache.Instance.ModulesAsItemCache.Any(i => i.DoesNotRequireAmmo)) //civilian guns of all types
+                    if (Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.DoesNotRequireAmmo)) //civilian guns of all types
                     {
                         Logging.Log("Arm.MoveItems","No ammo needed for civilian guns: done",Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;
                     }
+                    
+                    if (Cache.Instance.ModulesAsItemCache == null)
+                    {
+                        Logging.Log("Arm.MoveItems", "if (Cache.Instance.ModulesAsItemCache == null) Note: without ModulesAsItemCache we cant know if we need cap boosters or not ", Logging.White);
+                    }
 
                     if (!capsMoved)
                     {
-                        if (Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector))
+                        if (Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector))
                         {
                             if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 

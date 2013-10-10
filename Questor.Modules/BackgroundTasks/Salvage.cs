@@ -537,7 +537,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     // List its items
                     IEnumerable<ItemCache> items = Cache.Instance.ContainerInSpace.Items.Select(i => new ItemCache(i)).ToList();
-                    if (Settings.Instance.DebugLootWrecks && items.Any()) Logging.Log("Salvage.LootWrecks", "Found [" + items.Count() + "] items in [" + Cache.Instance.ContainerInSpace.Window.ItemId + "]", Logging.Teal);
+                    if (Settings.Instance.DebugLootWrecks && items.Any()) Logging.Log("Salvage.LootWrecks", "Found [" + items.Count() + "] items in [" + containerEntity.Name + "][" +  Math.Round(containerEntity.Distance / 1000,0) + "k][" + Cache.Instance.MaskedID(containerEntity.Id) + "]", Logging.Teal);
 
                     // Build a list of items to loot
                     List<ItemCache> lootItems = new List<ItemCache>();
@@ -569,7 +569,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // Walk through the list of items ordered by highest value item first
-                    foreach (ItemCache item in items.OrderByDescending(i => i.IsAliveandWontFitInContainers).ThenByDescending(i => i.IsContraband).ThenByDescending(i => i.IskPerM3))
+                    foreach (ItemCache item in items.OrderByDescending(i => i.IsContraband).ThenByDescending(i => i.IskPerM3))
                     {
                         if (freeCargoCapacity < 1000) //this should allow BSs to not pickup large low value items but haulers and noctis' to scoop everything
                         {
@@ -712,21 +712,23 @@ namespace Questor.Modules.BackgroundTasks
                         if(Settings.Instance.DebugLootWrecks)
                         {
                             int icount = 0;
-                            foreach (var lootItem in lootItems)
+                            if (lootItems.Any())
                             {
-                                icount++;
-                                Logging.Log("Salvage.LootWrecks", "[" + icount + "]LootItems Contains: [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
-                                if (lootItem.GroupID == (int)Group.Drugs ||
-                                    lootItem.GroupID == (int)Group.ToxicWaste ||
-                                    lootItem.TypeId == (int)TypeID.Small_Arms ||
-                                    lootItem.TypeId == (int)TypeID.Ectoplasm ||
-                                    lootItem.TypeId == (int)TypeID.AIMEDs)
+                                foreach (var lootItem in lootItems)
                                 {
-                                    lootItems.Remove(lootItem);
-                                    Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
-                                }
+                                    icount++;
+                                    Logging.Log("Salvage.LootWrecks", "[" + icount + "]LootItems Contains: [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                    if (lootItem.GroupID == (int)Group.Drugs ||
+                                        lootItem.GroupID == (int)Group.ToxicWaste ||
+                                        lootItem.TypeId == (int)TypeID.Small_Arms ||
+                                        lootItem.TypeId == (int)TypeID.Ectoplasm ||
+                                        lootItem.TypeId == (int)TypeID.AIMEDs)
+                                    {
+                                        lootItems.Remove(lootItem);
+                                        Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                    }
+                                }    
                             }
-                            
                         }
                         Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
                     }

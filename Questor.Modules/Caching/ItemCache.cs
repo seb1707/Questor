@@ -9,6 +9,7 @@
 //-------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using Questor.Modules.States;
 
 namespace Questor.Modules.Caching
@@ -237,10 +238,17 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior;
-                result |= Cache.Instance.MissionItems.Contains((Name ?? string.Empty).ToLower());
-                return result;
+                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                {
+                    if (Cache.Instance.MissionItems.Any())
+                    {
+                        return Cache.Instance.MissionItems.Contains((Name));
+                    }
+
+                    return false;
+                }
+
+                return false;
             }
         }
 

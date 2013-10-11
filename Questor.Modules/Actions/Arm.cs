@@ -1040,7 +1040,7 @@ namespace Questor.Modules.Actions
 
                     if (!capsMoved)
                     {
-                        if (Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector))
+                        if ((Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector)) || Settings.Instance.ArmLoadCapBoosters)
                         {
                             if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 

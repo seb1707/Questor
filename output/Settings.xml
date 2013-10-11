@@ -370,8 +370,11 @@
   <minimumAmmoCharges>6</minimumAmmoCharges>
   <!-- Amount of cap booster you want to carry with you, when using a cap injector in fitting-->
   <capacitorInjectorToLoad>15</capacitorInjectorToLoad>
+  <armLoadCapBoosters>false</armLoadCapBoosters>
+  
   <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasors, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
+  
   <!--  BOTH distance and speed have to be met before the NPC Frigate will be removed from the PrimaryWeapons PriorityTarget List... (under the distance, over the speed) -->
   <!--  If you wish to effectively turn this off you can set the speedTargetsShouldBeIgnoredByMainWeapons to a very high number like: 9999999 -->
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>

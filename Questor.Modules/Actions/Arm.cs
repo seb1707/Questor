@@ -1035,7 +1035,7 @@ namespace Questor.Modules.Actions
                     
                     if (Cache.Instance.ModulesAsItemCache == null)
                     {
-                        Logging.Log("Arm.MoveItems", "if (Cache.Instance.ModulesAsItemCache == null) Note: without ModulesAsItemCache we cant know if we need cap boosters or not ", Logging.White);
+                        if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (Cache.Instance.ModulesAsItemCache == null) Note: without ModulesAsItemCache we cant know if we need cap boosters or not ", Logging.White);
                     }
 
                     if (!capsMoved)

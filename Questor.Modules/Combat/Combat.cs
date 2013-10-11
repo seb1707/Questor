@@ -1711,7 +1711,7 @@ namespace Questor.Modules.Combat
                             return;
                         }
                         
-                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not currently have a kill target ready, how can this be?", Logging.Debug);
+                        if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not have a killtarget targeted, waiting", Logging.Debug);
 
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any())

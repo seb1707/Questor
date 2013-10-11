@@ -691,6 +691,14 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.ExecuteMission:
+
+                    DebugPerformanceClearandStartTimer();
+                    _combatMissionCtrl.ProcessState();
+                    DebugPerformanceStopandDisplayTimer("MissionController.ProcessState");
+
+                    if (Settings.Instance.DebugStates)
+                        Logging.Log("CombatMissionsBehavior.State is", _States.CurrentCombatMissionCtrlState.ToString(), Logging.White);
+
                     DebugPerformanceClearandStartTimer();
                     Combat.ProcessState();
                     DebugPerformanceStopandDisplayTimer("Combat.ProcessState");
@@ -712,12 +720,6 @@ namespace Questor.Behaviors
                     if (Settings.Instance.DebugStates)
                         Logging.Log("Salvage.State is", _States.CurrentSalvageState.ToString(), Logging.White);
 
-                    DebugPerformanceClearandStartTimer();
-                    _combatMissionCtrl.ProcessState();
-                    DebugPerformanceStopandDisplayTimer("MissionController.ProcessState");
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("CombatMissionsBehavior.State is", _States.CurrentCombatMissionCtrlState.ToString(), Logging.White);
 
                     // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship
                     // and try the mission again

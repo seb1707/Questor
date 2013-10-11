@@ -514,14 +514,14 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (IsTarget)
+                    if (_directEntity.IsActiveTarget)
                     {
-                        return false;
+                        return true;
                     }
 
                     return false;
                 }
-
+                
                 return false;
             }
         }

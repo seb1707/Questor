@@ -1102,7 +1102,7 @@ namespace Questor.Modules.Actions
                         //
                         // if we have no more ammo types to be loaded we have to be finished with arm.
                         //
-                        Logging.Log("Arm", "if (CurrentAmmoToLoad == null)", Logging.Debug);
+                        if (Settings.Instance.DebugArm) Logging.Log("Arm", "We have no more ammo types to be loaded. We have to be finished with arm.", Logging.Debug);
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;
                     }

@@ -1140,7 +1140,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_modulesAsItemCache == null || Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
+                    if (_modulesAsItemCache == null && Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
                     {
                         DirectContainer _modulesAsContainer = Cache.Instance.DirectEve.GetShipsModules();
                         if (_modulesAsContainer != null && _modulesAsContainer.Items.Any())
@@ -3448,7 +3448,7 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < NextGetBestCombatTarget)
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Cant GetBest yet....Too Soon!", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
                 return false;
             }
 

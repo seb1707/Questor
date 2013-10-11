@@ -3473,7 +3473,7 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)))
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
 
@@ -3485,6 +3485,7 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                Cache.Instance.PreferredPrimaryWeaponTargetID = null;
             }
 
             //
@@ -3620,7 +3621,7 @@ namespace Questor.Modules.Caching
                 #region If none of the above matches, does our current target meet the conditions of being hittable and in range
                 if (!currentTarget.IsHigherPriorityPresent)
                 {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Does the currentTarget exist? can it be hit?", Logging.Teal);
                     if (currentTarget.IsReadyToShoot
                         && (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit)) 
                         && currentTarget.Distance < Cache.Instance.MaxRange)
@@ -3930,7 +3931,7 @@ namespace Questor.Modules.Caching
             //
             if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
             {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "We have a target, testing conditions", Logging.Teal);
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentDroneTarget", "We have a target, testing conditions", Logging.Teal);
 
                 #region Is our current target any other drone priority target?
                 //
@@ -4015,7 +4016,7 @@ namespace Questor.Modules.Caching
                 #region If none of the above matches, does our current target meet the conditions of being hittable and in range
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Do we exist, and Can we be hit", Logging.Teal);
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Does the currentTarget exist? Can it be hit?", Logging.Teal);
                     if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < Settings.Instance.DroneControlRange)
                     {
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
@@ -4683,6 +4684,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }
+
                     return false;
                 }
 

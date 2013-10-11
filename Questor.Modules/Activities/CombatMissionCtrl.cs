@@ -1061,6 +1061,7 @@ namespace Questor.Modules.Activities
                             {
                                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))", Logging.Red);
                                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                Cache.Instance.PreferredPrimaryWeaponTargetID = null;
                             }
                         }
 

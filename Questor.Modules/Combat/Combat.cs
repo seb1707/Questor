@@ -46,6 +46,7 @@ namespace Questor.Modules.Combat
         private static int maxLowValueTargets;
         private static int maxTotalTargets;
         public static int CombatInstances = 0;
+        private static int i = 0;
 
         static Combat()
         {
@@ -1269,6 +1270,7 @@ namespace Questor.Modules.Combat
                 {
                     Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget.IsIgnored) Cache.Instance.PreferredPrimaryWeaponTarget = null;", Logging.Red);
                     Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                    Cache.Instance.PreferredPrimaryWeaponTargetID = null;
                 }
 
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
@@ -1635,6 +1637,11 @@ namespace Questor.Modules.Combat
 
                 _lastCombatProcessState = DateTime.UtcNow;
 
+                if (Cache.Instance.InSpace && Cache.Instance.InWarp)
+                {
+                    i = 0;
+                }
+
                 if ((_States.CurrentCombatState != CombatState.Idle ||
                     _States.CurrentCombatState != CombatState.OutOfAmmo) &&
                     (Cache.Instance.InStation ||// There is really no combat in stations (yet)
@@ -1693,17 +1700,18 @@ namespace Questor.Modules.Combat
 
                             if (killTarget.IsReadyToShoot)
                             {
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Painters", Logging.Debug);
+                                i++;
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Painters", Logging.Debug);
                                 ActivateTargetPainters(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Webs", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Webs", Logging.Debug);
                                 ActivateStasisWeb(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating WarpDisruptors", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating WarpDisruptors", Logging.Debug);
                                 ActivateWarpDisruptor(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating RemoteRepairers", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating RemoteRepairers", Logging.Debug);
                                 ActivateRemoteRepair(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Nos", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Nos", Logging.Debug);
                                 ActivateNos(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Activating Weapons", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Weapons", Logging.Debug);
                                 ActivateWeapons(killTarget);
                                 return;
                             }
@@ -1717,6 +1725,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any())
                         {
                             Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
+                            i = 0;
                         }
                         
                         break;

@@ -556,8 +556,6 @@
   <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
   <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
   
-  <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
-  
   <loadQuestorDebugInnerspaceCommandAlias>1</loadQuestorDebugInnerspaceCommandAlias>
   <loadQuestorDebugInnerspaceCommand>dotnet q1 questor.exe</loadQuestorDebugInnerspaceCommand>
   <unLoadQuestorDebugInnerspaceCommandAlias>2</unLoadQuestorDebugInnerspaceCommandAlias>

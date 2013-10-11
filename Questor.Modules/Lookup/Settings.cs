@@ -550,8 +550,6 @@ namespace Questor.Modules.Lookup
         //
         public bool ThisToonShouldBeTrainingSkills { get; set; } //as opposed to another toon on the same account
 
-        public string SkillTrainerScript { get; set; } //This needs to be in your "Innerspace\Scripts\" Directory
-
         public string UserDefinedLavishScriptScript1 { get; set; }
         public string UserDefinedLavishScriptScript1Description { get; set; }
         public string UserDefinedLavishScriptScript2 { get; set; }
@@ -1163,9 +1161,7 @@ namespace Questor.Modules.Lookup
             // Skill Training Settings
             //
             ThisToonShouldBeTrainingSkills = (bool?)CharacterSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? (bool?)CommonSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? true;
-            //This needs to be in your "Innerspace\Scripts\" Directory
-            SkillTrainerScript = (string)CharacterSettingsXml.Element("skillTrainerScript") ?? (string)CommonSettingsXml.Element("skillTrainerScript") ?? "skilltrainer.iss";
-
+            
             //
             // User Defined LavishScript Scripts that tie to buttons in the UI
             //
@@ -1866,9 +1862,7 @@ namespace Questor.Modules.Lookup
                 // Skill Training Settings
                 //
                 ThisToonShouldBeTrainingSkills = true;
-                //This needs to be in your "Innerspace\Scripts\" Directory
-                SkillTrainerScript = "";
-
+                
                 UserDefinedLavishScriptScript1 = "";
                 UserDefinedLavishScriptScript1Description = "";
                 UserDefinedLavishScriptScript2 = "";

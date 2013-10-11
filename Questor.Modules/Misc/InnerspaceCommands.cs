@@ -50,7 +50,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("Help", ListQuestorCommands);
                 LavishScript.ExecuteCommand("alias " + Settings.Instance.LoadQuestorDebugInnerspaceCommandAlias + " " + Settings.Instance.LoadQuestorDebugInnerspaceCommand);  //"dotnet q1 questor.exe");
-                LavishScript.ExecuteCommand("alias " + Settings.Instance.LoadQuestorDebugInnerspaceCommandAlias + " " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommand);  //"dotnet -unload q1");
+                LavishScript.ExecuteCommand("alias " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommandAlias + " " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommand);  //"dotnet -unload q1");
             }
         }
 

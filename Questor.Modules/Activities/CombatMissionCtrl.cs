@@ -1053,19 +1053,22 @@ namespace Questor.Modules.Activities
                 
                 if (killTargets.Any())
                 {
-                    foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                     {
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
                         {
-                            if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                             {
-                                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))", Logging.Red);
-                                Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                                Cache.Instance.PreferredPrimaryWeaponTargetID = null;
+                                if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+                                {
+                                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))", Logging.Red);
+                                    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                    Cache.Instance.PreferredPrimaryWeaponTargetID = null;
+                                }
                             }
-                        }
 
-                    }    
+                        }    
+                    }
                 }
                 
 

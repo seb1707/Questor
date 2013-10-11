@@ -276,17 +276,12 @@ namespace Questor.Modules.Caching
             {
                 if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                 {
-                    if (Cache.Instance.MissionItems.Any())
+                    if (Cache.Instance.MissionItems.Contains((Name ?? string.Empty).ToLower()))
                     {
-                        if (Cache.Instance.MissionItems.Contains((Name)))
-                        {
-                            return true;
-                        }
-
-                        return false;
+                        return true;
                     }
 
-                    return false;
+                    return false;   
                 }
 
                 return false;

@@ -581,6 +581,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
 
                         // We pick up loot depending on isk per m3
+                        bool _isMissionItem = Cache.Instance.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
 
                         // Never pick up contraband (unless its the mission item)
                         if (item.IsContraband) //is the mission item EVER contraband?!
@@ -593,7 +594,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (!Settings.Instance.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion)
                         {
                             // Do we want to loot other items?
-                            if (!item.IsMissionItem && !LootEverything)
+                            if (!_isMissionItem && !LootEverything)
                             {
                                 continue;
                             }
@@ -603,7 +604,7 @@ namespace Questor.Modules.BackgroundTasks
                         if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
                         {
                             // We can't drop items in this container anyway, well get it after its salvaged
-                            if (!item.IsMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
+                            if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
                             {
                                 if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
                                 Cache.Instance.LootedContainers.Add(containerEntity.Id);
@@ -612,7 +613,7 @@ namespace Questor.Modules.BackgroundTasks
 
                             // Make a list of items which are worth less
                             List<ItemCache> worthLess;
-                            if (item.IsMissionItem)
+                            if (_isMissionItem)
                             {
                                 worthLess = shipsCargo;
                             }
@@ -635,7 +636,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
 
                                 // Consider dropping ammo if it concerns the mission item!
-                                if (!item.IsMissionItem)
+                                if (!_isMissionItem)
                                 {
                                     worthLess.RemoveAll(wl => Ammo.Any(a => a.TypeId == wl.TypeId));
                                 }
@@ -651,7 +652,7 @@ namespace Questor.Modules.BackgroundTasks
                             // Not enough space even if we dumped the crap
                             if ((freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) < item.TotalVolume)
                             {
-                                if (item.IsMissionItem)
+                                if (_isMissionItem)
                                 {
                                     Logging.Log("Salvage", "Not enough space for mission item! Need [" + item.TotalVolume + "] maximum available [" + (freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) + "]", Logging.White);
                                 }

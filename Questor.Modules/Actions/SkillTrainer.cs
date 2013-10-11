@@ -123,6 +123,7 @@ namespace Questor.Modules.Actions
                     SkillPlan.injectSkillBookAttempts = 0;
                     _nextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
                     _State.CurrentSkillTrainerState = SkillTrainerState.Idle;
+                    _States.CurrentQuestorState = QuestorState.Idle;
                     break;
             }
         }

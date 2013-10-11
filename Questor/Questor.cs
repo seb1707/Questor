@@ -305,9 +305,10 @@ namespace Questor
                 {
                     Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
                     _States.LavishEvent_SkillQueueHasRoom();
-                    SkillTrainerClass.ProcessState();
+                    _States.CurrentQuestorState = QuestorState.SkillTrainer;
                     return true;
                 }
+
                 Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
                 Cache.Instance.NextSkillsCheckAction = DateTime.UtcNow.AddHours(3);
                 return true;
@@ -649,6 +650,14 @@ namespace Questor
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
                     _combatMissionsBehavior.ProcessState();
+                    break;
+
+                case QuestorState.SkillTrainer:
+
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    SkillTrainerClass.ProcessState();
                     break;
 
                 case QuestorState.CombatHelperBehavior:

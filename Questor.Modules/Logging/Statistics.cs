@@ -1086,6 +1086,64 @@ namespace Questor.Modules.Logging
                     }
                     break;
 
+                case StatisticsState.ListItemHangarItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListItemHangarItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.ItemHangar != null && Cache.Instance.ItemHangar.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.ItemHangar.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();
+                        }
+
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
+                case StatisticsState.ListLootHangarItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListLootHangarItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.LootHangar.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();
+                        }
+
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
+                case StatisticsState.ListLootContainerItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListLootContainerItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.LootContainer.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();    
+                        }
+                        
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
+
                 case StatisticsState.Done:
 
                     //_lastStatisticsAction = DateTime.UtcNow;

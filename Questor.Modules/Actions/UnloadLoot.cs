@@ -418,10 +418,10 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            if (!string.IsNullOrEmpty(Settings.Instance.LootContainer) && Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.IsValid)
+            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName) && Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.IsValid)
             {
                 PutLootHere = Cache.Instance.LootContainer;
-                PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainer + "]";
+                PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
             }
             else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName)  && Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.IsValid)
             {

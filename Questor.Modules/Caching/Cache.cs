@@ -5526,13 +5526,18 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (_lootContainer != null)
+                    if (_lootContainer == null)
                     {
-                        if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                        if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                         {
-                            if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                            //if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
 
-                            DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                            DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
+                            if (firstLootContainer == null && Cache.Instance.LootHangar.Items.Any(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer)))
+                            {
+                                if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "Debug: Unable to find a container named [" + Settings.Instance.LootContainerName + "], using the available unnamed container", Logging.Teal);
+                                firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer));
+                            }
 
                             if (firstLootContainer != null)
                             {
@@ -5540,7 +5545,7 @@ namespace Questor.Modules.Caching
 
                                 if (_lootContainer != null && _lootContainer.IsValid)
                                 {
-                                    if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "LootContainer is defined (no window needed)", Logging.DebugHangars);
+                                    //if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "LootContainer is defined (no window needed)", Logging.DebugHangars);
                                     return _lootContainer;
                                 }
 
@@ -5548,7 +5553,7 @@ namespace Questor.Modules.Caching
                                 return null;
                             }
 
-                            Logging.Log("LootContainer", "unable to find LootContainer named [ " + Settings.Instance.LootContainer.ToLower() + " ]", Logging.Orange);
+                            Logging.Log("LootContainer", "unable to find LootContainer named [ " + Settings.Instance.LootContainerName.ToLower() + " ]", Logging.Orange);
                             DirectItem firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
 
                             if (firstOtherContainer != null)
@@ -5588,7 +5593,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.HighTierLootContainer))", Logging.Teal);
                     
@@ -5822,7 +5827,7 @@ namespace Questor.Modules.Caching
             {
                 if (LootContainer.Window == null)
                 {
-                    DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainer.ToLower());
+                    DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
                     if (firstLootContainer != null)
                     {
                         long lootContainerID = firstLootContainer.ItemId;
@@ -5850,10 +5855,10 @@ namespace Questor.Modules.Caching
 
         public bool CloseLootContainer(String module)
         {
-            if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainer);
+                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainerName);
 
                 if (lootHangarWindow != null)
                 {
@@ -5950,7 +5955,7 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            if (Settings.Instance.DebugHangars) Logging.Log("LootHangar", "LootHangar is not yet ready. waiting...", Logging.DebugHangars);
+                            //if (Settings.Instance.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
                             _lootHangar = null;
                             return Cache.Instance.ItemHangar;
                         }
@@ -6017,10 +6022,10 @@ namespace Questor.Modules.Caching
                             return false;
                         }
                     }
-                    else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                    else if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainer));
+                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainerName));
 
                         if (lootHangarWindow != null)
                         {
@@ -6103,7 +6108,7 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                    if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                         if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;

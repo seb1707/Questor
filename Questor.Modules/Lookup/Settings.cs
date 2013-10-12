@@ -269,7 +269,7 @@ namespace Questor.Modules.Lookup
         public string LootHangarTabName { get; set; }
         public string AmmoHangarTabName { get; set; }
         public string BookmarkHangar { get; set; }
-        public string LootContainer { get; set; }
+        public string LootContainerName { get; set; }
 
         public string HighTierLootContainer { get; set; }
 
@@ -900,10 +900,10 @@ namespace Questor.Modules.Lookup
                     Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
                 }
                 BookmarkHangar = (string)CharacterSettingsXml.Element("bookmarkHangar") ?? (string)CommonSettingsXml.Element("bookmarkHangar");
-                LootContainer = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
-                if (LootContainer != null)
+                LootContainerName = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
+                if (LootContainerName != null)
                 {
-                    LootContainer = LootContainer.ToLower();
+                    LootContainerName = LootContainerName.ToLower();
                 }
                 HighTierLootContainer = (string)CharacterSettingsXml.Element("highValueLootContainer") ?? (string)CommonSettingsXml.Element("highValueLootContainer");
                 if (HighTierLootContainer != null)
@@ -1666,7 +1666,7 @@ namespace Questor.Modules.Lookup
                 LootHangarTabName = String.Empty;
                 AmmoHangarTabName = String.Empty;
                 BookmarkHangar = String.Empty;
-                LootContainer = String.Empty;
+                LootContainerName = String.Empty;
 
                 //
                 // Loot and Salvage Settings

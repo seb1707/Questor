@@ -39,6 +39,9 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
+                LavishScript.Commands.AddCommand("ListItemHangarItems", ListItemHangarItems);
+                LavishScript.Commands.AddCommand("ListLootHangarItems", ListLootHangarItems);
+                LavishScript.Commands.AddCommand("ListLootContainerItems", ListLootContainerItems);
                 LavishScript.Commands.AddCommand("AddIgnoredTarget", AddIgnoredTarget);
                 LavishScript.Commands.AddCommand("RemoveIgnoredTarget", RemoveIgnoredTarget);
                 LavishScript.Commands.AddCommand("AddDronePriorityTargetsByName", AddDronePriorityTargetsByName);
@@ -77,6 +80,45 @@ namespace Questor.Modules.Misc
 
             Logging.Log("Statistics", "Entering StatisticsState.ListTargetedandTargeting", Logging.Debug);
             _States.CurrentStatisticsState = StatisticsState.ListTargetedandTargeting;
+            return 0;
+        }
+
+        private static int ListItemHangarItems(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListItemHangarItems - Lists Items in the ItemHangar", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListItemHangarItems", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListItemHangarItems;
+            return 0;
+        }
+
+        private static int ListLootHangarItems(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListLootHangarItems - Lists Items in the LootHangar", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListLootHangarItems", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListLootHangarItems;
+            return 0;
+        }
+
+        private static int ListLootContainerItems(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListLootContainerItems - Lists Items in the LootContainer", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("Statistics", "Entering StatisticsState.ListLootContainerItems", Logging.Debug);
+            _States.CurrentStatisticsState = StatisticsState.ListLootContainerItems;
             return 0;
         }
 

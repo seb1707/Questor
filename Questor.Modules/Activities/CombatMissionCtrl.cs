@@ -1113,7 +1113,7 @@ namespace Questor.Modules.Activities
                                                                                 && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                                .OrderByDescending(pt => pt.IsTargetedBy)
                                                                                .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                               .ThenByDescending(pt => pt.IsEwarTarget())
+                                                                               .ThenByDescending(pt => pt.IsEwarTarget)
                                                                                .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
                                                                                .ThenBy(pt => pt.Distance)
                                                                                .FirstOrDefault();

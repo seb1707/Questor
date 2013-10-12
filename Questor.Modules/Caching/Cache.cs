@@ -1002,7 +1002,6 @@ namespace Questor.Modules.Caching
                 }
             }
 
-
             //DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
             if (mission == null)
             {
@@ -3213,7 +3212,7 @@ namespace Questor.Modules.Caching
                                                   .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                   .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
                                                   .ThenByDescending(t => t.IsWebbingMe)
-                                                  .ThenByDescending(t => t.IsEwarTarget())                                  // Will return True if the target ever eward us (look at caching changes for ewar)
+                                                  .ThenByDescending(t => t.IsEwarTarget)                                  // Will return True if the target ever eward us (look at caching changes for ewar)
                                                   .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
                                                                                                                              * over currently targeting entities will make us switch targets more often what we dont want
                                                                                                                              * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
@@ -3237,7 +3236,7 @@ namespace Questor.Modules.Caching
                                                           .OrderByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                                                           .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
                                                           .ThenByDescending(t => t.IsWebbingMe)
-                                                          .ThenByDescending(t => t.IsEwarTarget())                                  // Will return True if the target ever eward us (look at caching changes for ewar)
+                                                          .ThenByDescending(t => t.IsEwarTarget)                                  // Will return True if the target ever eward us (look at caching changes for ewar)
                                                           .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                           .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
                                                                                                                                      * over currently targeting entities will make us switch targets more often what we dont want
@@ -3266,7 +3265,7 @@ namespace Questor.Modules.Caching
                             target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => (FindAUnTargetedEntity ||  pt.IsReadyToShoot)
                                                                                         && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
                                                                                             && (pt.Distance < Distance)
-                                                                                            && pt.IsActivePrimaryWeaponEwarType() == priorityType
+                                                                                            && pt.IsActivePrimaryWeaponEwarType == priorityType
                                                                                             && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
                                                                                                 || pt.IsNPCBattleship 
                                                                                                 || pt.IsNPCBattlecruiser)) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
@@ -3325,12 +3324,12 @@ namespace Questor.Modules.Caching
                             target = Cache.Instance.DronePriorityEntities.Where(pt => (FindAUnTargetedEntity || pt.IsReadyToShoot)
                                                                                         && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
                                                                                             && (pt.Distance < Distance)
-                                                                                            && pt.IsActiveDroneEwarType() == priorityType
+                                                                                            && pt.IsActiveDroneEwarType == priorityType
                                                                                             && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
                                                                                                 || pt.IsNPCBattleship
                                                                                                 || pt.IsNPCBattlecruiser)) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
                                                                                         || (pt.Distance < Distance
-                                                                                            && pt.IsActiveDroneEwarType() == priorityType //ANY target is warp scrambling me
+                                                                                            && pt.IsActiveDroneEwarType == priorityType //ANY target is warp scrambling me
                                                                                             && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
                                                                                                 || pt.IsNPCBattleship
                                                                                                 || pt.IsNPCBattlecruiser))) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
@@ -3664,7 +3663,7 @@ namespace Questor.Modules.Caching
                                                                             && ((!p.IsNPCFrigate && !p.IsFrigate ) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                            .OrderByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.IsEwarTarget())
+                                                                           .ThenByDescending(pt => pt.IsEwarTarget)
                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
                                                                            .ThenByDescending(pt => pt.TargetValue)
                                                                            .ThenBy(pt => pt.Distance)
@@ -4056,7 +4055,7 @@ namespace Questor.Modules.Caching
                                                                             && p.IsReadyToShoot)
                                                                            .OrderBy(pt => pt.DronePriorityLevel)
                                                                            .ThenByDescending(pt => pt.IsTargetedBy)
-                                                                           .ThenByDescending(pt => pt.IsEwarTarget())
+                                                                           .ThenByDescending(pt => pt.IsEwarTarget)
                                                                            .ThenBy(pt => pt.Nearest5kDistance)
                                                                            .FirstOrDefault();
             }
@@ -4110,7 +4109,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
 
                 lowValueTarget = PotentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
-                    .OrderBy(t => t.IsEwarTarget())
+                    .OrderBy(t => t.IsEwarTarget)
                     .ThenByDescending(t => t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())

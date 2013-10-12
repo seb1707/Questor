@@ -426,6 +426,9 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // if capacitor is really really low, do not make it worse
                     //
+                    if (Cache.Instance.ActiveShip.Capacitor < 45)
+                        continue;
+
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
                         continue;
 
@@ -621,6 +624,9 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // if capacitor is really really low, do not make it worse
                     //
+                    if (Cache.Instance.ActiveShip.Capacitor < 25)
+                        continue;
+
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
                         continue;
 

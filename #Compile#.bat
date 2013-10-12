@@ -20,69 +20,52 @@ del ".\bin\release\*.*" /Q
 ::
 :: Build Project 1
 ::
-set nameofproject=BUYLPI
-set csproj=.\BuyLPI\BuyLPI.csproj
+set nameofproject=Questor.Modules
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 1 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 6 builds
 %pause%
 ::
 :: Build Project 2
 ::
 set nameofproject=Questor
-set csproj=.\questor\Questor.csproj
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 2 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 6 builds
 %pause%
 ::
 :: Build Project 3
 ::
-set nameofproject=Questor.Modules
-set csproj=.\Questor.Modules\Questor.Modules.csproj
+set nameofproject=valuedump
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 3 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 6 builds
 %pause%
 ::
 :: Build Project 4
 ::
-set nameofproject=updateinvtypes
-set csproj=.\updateinvtypes\UpdateInvTypes.csproj
+set nameofproject=QuestorManager
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 4 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 6 builds
 %pause%
 ::
 :: Build Project 5
 ::
-set nameofproject=valuedump
-set csproj=.\valuedump\ValueDump.csproj
+set nameofproject=BUYLPI
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 5 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 6 builds
 %pause%
 ::
 :: Build Project 6
 ::
-set nameofproject=QuestorManager
-set csproj=.\QuestorManager\QuestorManager.csproj
+set nameofproject=updateinvtypes
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 ::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%"
-Echo Done building %nameofproject% - see above for any errors - 6 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 6 builds
 %pause%
-::
-:: Build Project 7
-::
-::set nameofproject=QuestorStatistics
-::set csproj=.\questorstatistics\QuestorStatistics.csproj
-::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-::Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
-::%pause%
-
-::
-:: Build Project 8
-::
-::set nameofproject=QuestorSettings
-::set csproj=.\QuestorSettings\QuestorSettings.csproj
-::%pathtomsbuild4%\msbuild %%csproj% /p:configuration="%releasetype%" /target:Clean;Build
-::Echo Done building %nameofproject% - see above for any errors - 7 of 7 builds
-::%pause%
 
 if not exist output mkdir output >>nul 2>>nul
 :: Echo deleting old build from the output directory

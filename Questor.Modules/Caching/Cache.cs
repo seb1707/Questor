@@ -151,16 +151,9 @@ namespace Questor.Modules.Caching
             }
             set
             {
-                if (value == null)
-                {
-                    _preferredPrimaryWeaponTarget = null;
-                    PreferredPrimaryWeaponTargetID = null;
-                }
-                if (value != null)
-                {
-                    _preferredDroneTarget = value;
-                    PreferredPrimaryWeaponTargetID = value.Id;
-                }
+
+                _preferredPrimaryWeaponTarget = value;
+                PreferredPrimaryWeaponTargetID = value.Id;
             }
         }
         
@@ -185,16 +178,8 @@ namespace Questor.Modules.Caching
             }
             set
             {
-                if (value == null)
-                {
-                    _preferredDroneTarget = null;
-                    PreferredDroneTargetID = null;
-                }
-                if (value != null)
-                {
-                    _preferredDroneTarget = value;
-                    PreferredDroneTargetID = value.Id;
-                }
+                _preferredDroneTarget = value;
+                PreferredDroneTargetID = value.Id;
             }
         }
 
@@ -2892,19 +2877,68 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void AddEntitiesThatHaveExploded(string module)
+        public void AddWarpScramblerByName(String stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
         {
-            foreach (EntityCache _entity in Cache.Instance.Entities)
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
+            if (notTheClosest)
             {
-               if (_entity.HasExploded && _entitiesthatHaveExploded.Any(e => e.Id != _entity.Id))
-               {
-                   if (Settings.Instance.DebugHasExploded) Logging.Log(module, "Adding [" + _entity.Name + "] Distance [" + Math.Round(_entity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(_entity.Id) + "] to the EntitiesThatHaveExploded list", Logging.White);
-                   _entitiesthatHaveExploded.Add(_entity);
-               }
+                entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);
+            } 
+            
+            if (entitiesToAdd.Any())
+            {
+                foreach (EntityCache entityToAdd in entitiesToAdd)
+                {
+                    if (numberToIgnore > 0)
+                    {
+                        numberToIgnore--;
+                        continue;
+                    }
 
-               continue;
+                    Logging.Log("AddWarpScramblerByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the WarpScrambler List", Logging.Debug);
+                    if (!Cache.Instance.WarpScrambler.Contains(entityToAdd.Id))
+                    {
+                        Cache.Instance.WarpScrambler.Add(entityToAdd.Id);
+                    }
+                    continue;
+                }
+
+                return;
             }
 
+            Logging.Log("AddWarpScramblerByName", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
+            return;
+        }
+
+        public void AddWebifierByName(String stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
+        {
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
+            if (notTheClosest)
+            {
+                entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);    
+            }
+            
+            if (entitiesToAdd.Any())
+            {
+                foreach (EntityCache entityToAdd in entitiesToAdd)
+                {
+                    if (numberToIgnore > 0)
+                    {
+                        numberToIgnore--;
+                        continue;
+                    }
+                    Logging.Log("AddWebifierByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the Webifier List", Logging.Debug);
+                    if (!Cache.Instance.Webbing.Contains(entityToAdd.Id))
+                    {
+                        Cache.Instance.Webbing.Add(entityToAdd.Id);
+                    }
+                    continue;
+                }
+
+                return;
+            }
+
+            Logging.Log("AddWebifierByName", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
             return;
         }
 
@@ -3100,10 +3134,23 @@ namespace Questor.Modules.Caching
 
         public string MaskedID(long ID)
         {
-            int numofCharacters = ID.ToString(CultureInfo.InvariantCulture).Length;
-            string maskedID = ID.ToString(CultureInfo.InvariantCulture).Substring(numofCharacters - 5);
-            maskedID = "[truncatedID]" + maskedID;
-            return maskedID;
+            try
+            {
+                int numofCharacters = ID.ToString(CultureInfo.InvariantCulture).Length;
+                if (numofCharacters >= 5)
+                {
+                    string maskedID = ID.ToString(CultureInfo.InvariantCulture).Substring(numofCharacters - 5);
+                    maskedID = "[truncatedID]" + maskedID;
+                    return maskedID;    
+                }
+
+                return "!0!";
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.DoWeCurrentlyHaveTurretsMounted", "Exception [" + exception + "]", Logging.Debug);
+                return "!0!";
+            }
         }
 
         public void ClearEWARCache()
@@ -3227,7 +3274,7 @@ namespace Questor.Modules.Caching
         public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
             IEnumerable<EntityCache> targets = _potentialTargets ?? PotentialCombatTargets;
-            long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
+            //long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
             long preferredTargetId = Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget.Id : -1;
 
             targets = targets.Where(t => !t.IsIgnored && t.Distance < distance)
@@ -3241,7 +3288,7 @@ namespace Questor.Modules.Caching
                                                           .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
                                                                                                                                      * over currently targeting entities will make us switch targets more often what we dont want
                                                                                                                                      * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
-                                                          .ThenByDescending(t => t.Id == currentDroneTargetId)                      // Keep current target
+                                                          //.ThenByDescending(t => t.Id == currentDroneTargetId)                      // Keep current target
                                                           .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
                                                           .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.Distance);
@@ -3384,54 +3431,7 @@ namespace Questor.Modules.Caching
             {
                 PreferredDroneTarget = __GetBestDroneTargets(distance, _potentialTargets).FirstOrDefault();
             }
-
-            #region Current Target Health Logging
-                //
-                // Current Target Health Logging
-                //
-                bool currentTargetHealthLogNow = true;
-                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
-                {
-                    if (PreferredPrimaryWeaponTarget != null && (int)PreferredPrimaryWeaponTarget.Id != (int)TargetingCache.CurrentTargetID)
-                    {
-                        if ((int)PreferredPrimaryWeaponTarget.ArmorPct == 0 && (int)PreferredPrimaryWeaponTarget.ShieldPct == 0 && (int)PreferredPrimaryWeaponTarget.StructurePct == 0)
-                        {
-                            //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
-                        }
-                        else
-                        {
-                            //
-                            // assign shields and armor to targetingcache variables - compare them to each other
-                            // to see if we need to send another log message to the console, if the values have not changed no need to log it.
-                            //
-                            if ((int)PreferredPrimaryWeaponTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
-                                (int)PreferredPrimaryWeaponTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
-                                (int)PreferredPrimaryWeaponTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
-                            {
-                                currentTargetHealthLogNow = false;
-                            }
-
-                            //
-                            // now that we are done comparing - assign new values for this tick
-                            //
-                            TargetingCache.CurrentTargetShieldPct = (int)PreferredPrimaryWeaponTarget.ShieldPct;
-                            TargetingCache.CurrentTargetArmorPct = (int)PreferredPrimaryWeaponTarget.ArmorPct;
-                            TargetingCache.CurrentTargetStructurePct = (int)PreferredPrimaryWeaponTarget.StructurePct;
-                            if (currentTargetHealthLogNow)
-                            {
-                                Logging.Log(callingroutine, ".GetBestTarget: CurrentTarget is [" + PreferredPrimaryWeaponTarget.Name +                              //name
-                                            "][" + (Math.Round(PreferredPrimaryWeaponTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
-                                            "k][Shield%:[" + Math.Round(PreferredPrimaryWeaponTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
-                                            "][Armor%:[" + Math.Round(PreferredPrimaryWeaponTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
-                                            , Logging.White);
-                            }
-                        }
-                    }
-                }
-                #endregion Current Target Health Logging
-
-            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
-
+            
             NextGetBestCombatTarget = DateTime.UtcNow;
 
             return (PreferredPrimaryWeaponTarget != null || PreferredDroneTarget != null);
@@ -3482,9 +3482,7 @@ namespace Questor.Modules.Caching
                 currentTarget = Cache.Instance.CurrentWeaponTarget();
             }
             
-            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
-
-            if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id)))
+            if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
@@ -3494,7 +3492,7 @@ namespace Questor.Modules.Caching
             //This happens when we have killed the last thing within our range (or the last thing in the pocket)
             //and there is nothing to replace it with.
             if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTarget.Id))
+                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
@@ -3566,7 +3564,11 @@ namespace Questor.Modules.Caching
                 }
                 #endregion Is our current target any other primary weapon priority target?
 
+                /*
                 #region Current Target Health Logging
+                
+                 
+                
                 //
                 // Current Target Health Logging
                 //
@@ -3608,9 +3610,11 @@ namespace Questor.Modules.Caching
                             }
                         }
                     }
+                    
                 }
 
                 #endregion Current Target Health Logging
+                */
 
                 #region Is our current target already in armor? keep shooting the same target if so...
                 //
@@ -3880,8 +3884,6 @@ namespace Questor.Modules.Caching
                 currentDroneTarget = null;
             }
             
-            EWarEffectsOnMe(); //updates data that is displayed in the Questor GUI (and possibly used elsewhere later)
-
             if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
@@ -3961,52 +3963,6 @@ namespace Questor.Modules.Caching
                     return true;
                 }
                 #endregion Is our current target any other primary weapon priority target?
-
-                #region Current Target Health Logging
-                //
-                // Current Target Health Logging
-                //
-                bool currentTargetHealthLogNow = true;
-                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
-                {
-                    if ((int)currentDroneTarget.Id != (int)TargetingCache.CurrentTargetID)
-                    {
-                        if ((int)currentDroneTarget.ArmorPct == 0 && (int)currentDroneTarget.ShieldPct == 0 && (int)currentDroneTarget.StructurePct == 0)
-                        {
-                            //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
-                        }
-                        else
-                        {
-                            //
-                            // assign shields and armor to targetingcache variables - compare them to each other
-                            // to see if we need to send another log message to the console, if the values have not changed no need to log it.
-                            //
-                            if ((int)currentDroneTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
-                                (int)currentDroneTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
-                                (int)currentDroneTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
-                            {
-                                currentTargetHealthLogNow = false;
-                            }
-
-                            //
-                            // now that we are done comparing - assign new values for this tick
-                            //
-                            TargetingCache.CurrentTargetShieldPct = (int)currentDroneTarget.ShieldPct;
-                            TargetingCache.CurrentTargetArmorPct = (int)currentDroneTarget.ArmorPct;
-                            TargetingCache.CurrentTargetStructurePct = (int)currentDroneTarget.StructurePct;
-                            if (currentTargetHealthLogNow)
-                            {
-                                Logging.Log(callingroutine, ".GetBestDroneTarget: CurrentTarget is [" + currentDroneTarget.Name +                              //name
-                                            "][" + (Math.Round(currentDroneTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
-                                            "k][Shield%:[" + Math.Round(currentDroneTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
-                                            "][Armor%:[" + Math.Round(currentDroneTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
-                                            , Logging.White);
-                            }
-                        }
-                    }
-                }
-
-                #endregion Current Target Health Logging
 
                 #region Is our current target already in armor? keep shooting the same target if so...
                 //
@@ -4187,96 +4143,6 @@ namespace Questor.Modules.Caching
 
             NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
-        }
-
-        private void EWarEffectsOnMe()
-        {
-            // Get all entity targets
-            IEnumerable<EntityCache> targets = Targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable).ToList();
-
-            //
-            //Start of Current EWar Effects On Me (below)
-            //
-            //Dampening
-            TargetingCache.EntitiesDampeningMe = targets.Where(e => e.IsSensorDampeningMe).ToList();
-            TargetingCache.EntitiesDampeningMeText = String.Empty;
-            foreach (EntityCache entityDampeningMe in TargetingCache.EntitiesDampeningMe)
-            {
-                TargetingCache.EntitiesDampeningMeText = TargetingCache.EntitiesDampeningMeText + " [" +
-                                                          entityDampeningMe.Name + "][" +
-                                                          Math.Round(entityDampeningMe.Distance / 1000, 0) +
-                                                          "k] , ";
-            }
-
-            //Neutralizing
-            TargetingCache.EntitiesNeutralizingMe = targets.Where(e => e.IsNeutralizingMe).ToList();
-            TargetingCache.EntitiesNeutralizingMeText = String.Empty;
-            foreach (EntityCache entityNeutralizingMe in TargetingCache.EntitiesNeutralizingMe)
-            {
-                TargetingCache.EntitiesNeutralizingMeText = TargetingCache.EntitiesNeutralizingMeText + " [" +
-                                                             entityNeutralizingMe.Name + "][" +
-                                                             Math.Round(entityNeutralizingMe.Distance / 1000, 0) +
-                                                             "k] , ";
-            }
-
-            //TargetPainting
-            TargetingCache.EntitiesTargetPatingingMe = targets.Where(e => e.IsTargetPaintingMe).ToList();
-            TargetingCache.EntitiesTargetPaintingMeText = String.Empty;
-            foreach (EntityCache entityTargetpaintingMe in TargetingCache.EntitiesTargetPatingingMe)
-            {
-                TargetingCache.EntitiesTargetPaintingMeText = TargetingCache.EntitiesTargetPaintingMeText + " [" +
-                                                               entityTargetpaintingMe.Name + "][" +
-                                                               Math.Round(entityTargetpaintingMe.Distance / 1000, 0) +
-                                                               "k] , ";
-            }
-
-            //TrackingDisrupting
-            TargetingCache.EntitiesTrackingDisruptingMe = targets.Where(e => e.IsTrackingDisruptingMe).ToList();
-            TargetingCache.EntitiesTrackingDisruptingMeText = String.Empty;
-            foreach (EntityCache entityTrackingDisruptingMe in TargetingCache.EntitiesTrackingDisruptingMe)
-            {
-                TargetingCache.EntitiesTrackingDisruptingMeText = TargetingCache.EntitiesTrackingDisruptingMeText +
-                                                                   " [" + entityTrackingDisruptingMe.Name + "][" +
-                                                                   Math.Round(entityTrackingDisruptingMe.Distance / 1000, 0) +
-                                                                   "k] , ";
-            }
-
-            //Jamming (ECM)
-            TargetingCache.EntitiesJammingMe = targets.Where(e => e.IsJammingMe).ToList();
-            TargetingCache.EntitiesJammingMeText = String.Empty;
-            foreach (EntityCache entityJammingMe in TargetingCache.EntitiesJammingMe)
-            {
-                TargetingCache.EntitiesJammingMeText = TargetingCache.EntitiesJammingMeText + " [" +
-                                                        entityJammingMe.Name + "][" +
-                                                        Math.Round(entityJammingMe.Distance / 1000, 0) +
-                                                        "k] , ";
-            }
-
-            //Warp Disrupting (and warp scrambling)
-            TargetingCache.EntitiesWarpDisruptingMe = targets.Where(e => e.IsWarpScramblingMe).ToList();
-            TargetingCache.EntitiesWarpDisruptingMeText = String.Empty;
-            foreach (EntityCache entityWarpDisruptingMe in TargetingCache.EntitiesWarpDisruptingMe)
-            {
-                TargetingCache.EntitiesWarpDisruptingMeText = TargetingCache.EntitiesWarpDisruptingMeText + " [" +
-                                                               entityWarpDisruptingMe.Name + "][" +
-                                                               Math.Round(entityWarpDisruptingMe.Distance / 1000, 0) +
-                                                               "k] , ";
-            }
-
-            //Webbing
-            TargetingCache.EntitiesWebbingMe = targets.Where(e => e.IsWebbingMe).ToList();
-            TargetingCache.EntitiesWebbingMeText = String.Empty;
-            foreach (EntityCache entityWebbingMe in TargetingCache.EntitiesWebbingMe)
-            {
-                TargetingCache.EntitiesWebbingMeText = TargetingCache.EntitiesWebbingMeText + " [" +
-                                                        entityWebbingMe.Name + "][" +
-                                                        Math.Round(entityWebbingMe.Distance / 1000, 0) +
-                                                        "k] , ";
-            }
-
-            //
-            //End of Current EWar Effects On Me (above)
-            //
         }
 
         public int RandomNumber(int min, int max)

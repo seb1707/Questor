@@ -32,8 +32,20 @@
         <parameter name="Distance" value="0"/>
       </action>
 
-      <action name="WaitUntilTargeted"> <!-- wait this # of seconds before proceeding to the next action (basically a pause for NPCs to spawn)-->
+	  <action name="WaitUntilTargeted"> <!-- wait this # of seconds before proceeding to the next action (basically a pause for NPCs to spawn)-->
         <parameter name="Timeout" value="15"/>
+      </action>
+	  
+	  <action name="AddWarpScramblerByName"> <!-- Add this NPC by name to the list of known WarpScramblers-->
+	    <parameter name="NotClosest" value="false" />
+        <parameter name="NumberToIgnore" value="0" />
+        <parameter name="Target" value="Dim"/>
+      </action>
+	  
+      <action name="AddWebifierByName"> <!-- Add this NPC by name to the list of known Webifiers-->
+        <parameter name="NotClosest" value="false" />
+        <parameter name="NumberToIgnore" value="0" />
+        <parameter name="Target" value="Dim"/>
       </action>
 
 	  <action name="WaitUntilAggressed">

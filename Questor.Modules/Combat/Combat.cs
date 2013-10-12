@@ -1130,10 +1130,11 @@ namespace Questor.Modules.Combat
             #endregion 
 
             #region Remove any target that is out of range (lower of Weapon Range or targeting range, definately matters if damped)
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Remove any target that is out of range", Logging.Debug);
             //
             // If it is currently out of our weapon range unlock it for now, unless it is one of our preferred targets which should technically only happen during kill type actions
             //
-            if (Cache.Instance.Targets.Any())
+            if (Cache.Instance.Targets.Any() && Cache.Instance.Targets.Count() > 1)
             {
                 //
                 // unlock low value targets that are out of range or ignored
@@ -1147,6 +1148,7 @@ namespace Questor.Modules.Combat
             #endregion Remove any target that is too far out of range (Weapon Range)
 
             #region Priority Target Handling
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Priority Target Handling", Logging.Debug);
             //
             // Now lets deal with the priority targets
             //
@@ -1205,6 +1207,7 @@ namespace Questor.Modules.Combat
             #endregion
 
             #region Drone Priority Target Handling
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Drone Priority Target Handling", Logging.Debug);
             //
             // Now lets deal with the priority targets
             //
@@ -1259,6 +1262,7 @@ namespace Questor.Modules.Combat
             #endregion
 
             #region Preferred Primary Weapon target handling
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Preferred Primary Weapon target handling", Logging.Debug);
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
@@ -1340,6 +1344,7 @@ namespace Questor.Modules.Combat
 
 
             #region Preferred Drone target handling
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Preferred Drone target handling", Logging.Debug);
             //
             // Lets deal with our preferred targets next (in other words what Q is actively trying to shoot or engage drones on)
             //
@@ -1390,6 +1395,7 @@ namespace Questor.Modules.Combat
             #endregion
          
             #region Do we have enough targets?
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Do we have enough targets?", Logging.Debug);
             //
             // OK so now that we are done dealing with preferred and priorities for now, lets see if we can target anything else
             // First lets see if we have enough targets already
@@ -1418,6 +1424,7 @@ namespace Questor.Modules.Combat
             #endregion
 
             #region Aggro Handling
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Aggro Handling", Logging.Debug);
             //
             // OHHHH We are still here? OK Cool lets deal with things that are already targetting me
             //

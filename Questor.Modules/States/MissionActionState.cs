@@ -23,6 +23,8 @@ namespace Questor.Modules.States
         ClearWithinWeaponsRangeOnly,
         ClearWithinWeaponsRangewAggroOnly,
         AggroOnly,
+        AddWarpScramblerByName,
+        AddWebifierByName,
         Kill,
         KillOnce,
         UseDrones,

@@ -6,7 +6,7 @@ namespace Questor.Modules.States
     using LavishScriptAPI;
     using Questor.Modules.Lookup;
 
-    public class _States
+    public static class _States
     {
         public static void LavishEvent_QuestorIdle()
         {

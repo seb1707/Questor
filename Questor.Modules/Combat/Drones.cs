@@ -44,12 +44,12 @@ namespace Questor.Modules.Combat
         private static int _lastDroneCount;
         private static DateTime _lastEngageCommand;
         private static DateTime _lastRecallCommand;
+        public static long _lastDroneTarget;
 
         private static int _recallCount;
         private static DateTime _lastLaunch;
         private static DateTime _lastRecall;
 
-        private static long _lastTarget;
         private static DateTime _launchTimeout;
         private static int _launchTries;
         private static double _shieldPctTotal;
@@ -100,7 +100,7 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "Entering EngageTarget()", Logging.Debug);
                     
             // Find the first active weapon's target
-            TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
+            //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
 
             // Return best possible low value target
             Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
@@ -127,7 +127,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Is our current target still the same and is the last Engage command no longer then 15s ago?
-                    if (_lastTarget == Cache.Instance.PreferredDroneTargetID && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
+                    if (_lastDroneTarget == Cache.Instance.PreferredDroneTargetID && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
                     {
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)", Logging.Debug);
                         return;
@@ -150,7 +150,7 @@ namespace Questor.Modules.Combat
                     if (DroneToShoot.IsActiveTarget)
                     {
                         // Save target id (so we do not constantly switch)
-                        _lastTarget = Cache.Instance.PreferredDroneTarget.Id;
+                        _lastDroneTarget = Cache.Instance.PreferredDroneTarget.Id;
 
                         // Engage target
                         Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + Cache.Instance.MaskedID(DroneToShoot.Id) + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);
@@ -331,7 +331,7 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    TargetingCache.CurrentDronesTarget = null;
+                    //TargetingCache.CurrentDronesTarget = null;
                     break;
 
                 case DroneState.Fighting:
@@ -530,7 +530,7 @@ namespace Questor.Modules.Combat
                     {
                         _lastRecall = DateTime.UtcNow;
                         Recall = false;
-                        TargetingCache.CurrentDronesTarget = null;
+                        //TargetingCache.CurrentDronesTarget = null;
                         _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
@@ -559,7 +559,7 @@ namespace Questor.Modules.Combat
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         return;
                     }
-                    TargetingCache.CurrentDronesTarget = null;
+                    //TargetingCache.CurrentDronesTarget = null;
                     break;
             }
 

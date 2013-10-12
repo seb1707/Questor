@@ -40,8 +40,11 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
                 LavishScript.Commands.AddCommand("ListItemHangarItems", ListItemHangarItems);
+                //LavishScript.Commands.AddCommand("ListAmmoHangarItems", ListAmmoHangarItems);
                 LavishScript.Commands.AddCommand("ListLootHangarItems", ListLootHangarItems);
                 LavishScript.Commands.AddCommand("ListLootContainerItems", ListLootContainerItems);
+                LavishScript.Commands.AddCommand("AddWarpScramblerByName", AddWarpScramblerByName);
+                LavishScript.Commands.AddCommand("AddWebifierByName", AddWebifierByName);
                 LavishScript.Commands.AddCommand("AddIgnoredTarget", AddIgnoredTarget);
                 LavishScript.Commands.AddCommand("RemoveIgnoredTarget", RemoveIgnoredTarget);
                 LavishScript.Commands.AddCommand("AddDronePriorityTargetsByName", AddDronePriorityTargetsByName);
@@ -133,6 +136,35 @@ namespace Questor.Modules.Misc
             string AddThese = args[1];
 
             Cache.Instance.AddDronePriorityTargetsByName(AddThese);
+            return 0;
+        }
+
+        //AddWarpScramblerByName
+        private static int AddWarpScramblerByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "AddWarpScramblerByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string AddThese = args[1];
+
+            Cache.Instance.AddWarpScramblerByName(AddThese);
+            return 0;
+        }
+
+        private static int AddWebifierByName(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "AddWebifierByName NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string AddThese = args[1];
+
+            Cache.Instance.AddWebifierByName(AddThese);
             return 0;
         }
 
@@ -503,12 +535,18 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "QuestorCommands                              - (this command) ", Logging.White);
             Logging.Log("InnerspaceCommands", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
             Logging.Log("InnerspaceCommands", " ", Logging.White);
+            Logging.Log("InnerspaceCommands", "AddWarpScramblerByName                       - Add NPCs by name to the WarpScramblers List", Logging.White);
+            Logging.Log("InnerspaceCommands", "AddWebifierByName                            - Add NPCs by name to the Webifiers List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddIgnoredTarget                             - Add name to the IgnoredTarget List", Logging.White);
             Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget                          - Remove name to the IgnoredTarget List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddDronePriorityTargetsByName                - Add NPCs by name to the DPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "RemovedDronePriorityTargetsByName            - Remove NPCs name from the DPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddPrimaryWeaponPriorityTargetsByName        - Add NPCs by name to the PWPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "RemovedPrimaryWeaponPriorityTargetsByName    - Remove NPCs name from the PWPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListItemHangarItems                          - Logs All Items in the ItemHangar", Logging.White);
+            //Logging.Log("InnerspaceCommands", "ListAmmoHangarItems - missing                - Logs All Items in the (optionally configured) AmmoHangar", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListLootHangarItems                          - Logs All Items in the (optionally configured) LootHangar", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListLootContainerItems                       - Logs All Items in the (optionally configured) LootContainer", Logging.White);
             Logging.Log("InnerspaceCommands", "ListAllEntities                              - Logs All Entities on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListPotentialCombatTargets                   - Logs ListPotentialCombatTargets on Grid", Logging.White);
             Logging.Log("InnerspaceCommands", "ListHighValueTargets                         - Logs ListHighValueTargets on Grid", Logging.White);

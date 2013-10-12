@@ -986,6 +986,72 @@ namespace Questor.Modules.Activities
             return;
         }
 
+        private void AddWarpScramblerByNameAction(Actions.Action action)
+        {
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+            {
+                notTheClosest = false;
+            }
+
+            int numberToIgnore;
+            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numberToIgnore))
+            {
+                numberToIgnore = 0;
+            }
+
+            List<string> targetNames = action.GetParameterValues("target");
+
+            // No parameter? Ignore kill action
+            if (!targetNames.Any())
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "No targets defined in AddWarpScramblerByName action!", Logging.Teal);
+                Nextaction();
+                return;
+            }
+
+            Cache.Instance.AddWarpScramblerByName(targetNames.FirstOrDefault(), numberToIgnore, notTheClosest);
+            
+            //
+            // this action is passive and only adds things to the WarpScramblers list )before they have a chance to scramble you, so you can target them early
+            //
+            Nextaction();
+            return;
+        }
+
+        private void AddWebifierByNameAction(Actions.Action action)
+        {
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+            {
+                notTheClosest = false;
+            }
+
+            int numberToIgnore;
+            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numberToIgnore))
+            {
+                numberToIgnore = 0;
+            }
+
+            List<string> targetNames = action.GetParameterValues("target");
+
+            // No parameter? Ignore kill action
+            if (!targetNames.Any())
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "No targets defined in AddWebifierByName action!", Logging.Teal);
+                Nextaction();
+                return;
+            }
+
+            Cache.Instance.AddWebifierByName(targetNames.FirstOrDefault(), numberToIgnore, notTheClosest);
+
+            //
+            // this action is passive and only adds things to the WarpScramblers list )before they have a chance to scramble you, so you can target them early
+            //
+            Nextaction();
+            return;
+        }
+
         private void KillAction(Actions.Action action)
         {
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
@@ -1153,7 +1219,7 @@ namespace Questor.Modules.Activities
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                         {
                             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
-                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
+                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName", true);
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }
                         else if (Settings.Instance.DebugKillAction)
@@ -1660,6 +1726,14 @@ namespace Questor.Modules.Activities
 
                 case ActionState.Done:
                     DoneAction();
+                    break;
+
+                case ActionState.AddWarpScramblerByName:
+                    AddWarpScramblerByNameAction(action);
+                    break;
+
+                case ActionState.AddWebifierByName:
+                    AddWebifierByNameAction(action);
                     break;
 
                 case ActionState.Kill:

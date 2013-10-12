@@ -351,8 +351,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-
-                        if (Cache.Instance.PreferredPrimaryWeaponTargetID == _directEntity.Id)
+                        if (Cache.Instance.PreferredPrimaryWeaponTargetID != null && Cache.Instance.PreferredPrimaryWeaponTargetID == _directEntity.Id)
                         {
                             return true;
                         }
@@ -825,7 +824,7 @@ namespace Questor.Modules.Caching
                             return false;
                         }
 
-                        return true; ;
+                        return true;
                     }
 
                     return false;
@@ -1230,14 +1229,17 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
+                        {
+                            return true;
+                        }
 
                         if (_directEntity.Attacks.Contains("effects.WarpScramble"))
                         {
-                            if (!Cache.Instance.WarpScrambler.Contains(_directEntity.Id)) Cache.Instance.WarpScrambler.Add(_directEntity.Id);
-                            return true;
-                        }
-                        if (Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
-                        {
+                            if (!Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
+                            {
+                                Cache.Instance.WarpScrambler.Add(_directEntity.Id);
+                            }
                             return true;
                         }
 

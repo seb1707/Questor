@@ -3905,12 +3905,12 @@ namespace Questor.Modules.Caching
             //We need to make sure that our current Preferred is still valid, if not we need to clear it out
             //This happens when we have killed the last thing within our range (or the last thing in the pocket)
             //and there is nothing to replace it with.
-            if (Cache.Instance.PreferredDroneTarget != null
-                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTarget.Id))
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget", "PreferredDroneTarget is not valid, clearing it", Logging.White);
-                Cache.Instance.PreferredDroneTarget = null;
-            }
+            //if (Cache.Instance.PreferredDroneTarget != null
+            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTargetID))
+            //{
+            //    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget", "PreferredDroneTarget is not valid, clearing it", Logging.White);
+            //    Cache.Instance.PreferredDroneTarget = null;
+            //}
 
             //
             // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable

@@ -21,6 +21,8 @@
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorFlag = true;
+        private bool FoundDuelInvitation = false;
+        private DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
 
         public static void BeginClosingQuestor()
         {
@@ -691,8 +693,25 @@
                                 continue;
                             }
                         }
+
                         if (Cache.Instance.InSpace)
                         {
+                            if (FoundDuelInvitation && window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                if (DateTime.UtcNow > FoundDuelInvitationTime.AddSeconds(Cache.Instance.RandomNumber(4, 25)))
+                                {
+                                    //window.AnswerModal("yes");
+                                    //window.Close();
+                                    FoundDuelInvitation = true;
+                                }
+                            }
+                            
+                            if (window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                FoundDuelInvitation = true;
+                                FoundDuelInvitationTime = DateTime.UtcNow;
+                            }
+                            
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&
@@ -714,6 +733,7 @@
                             }
                         }
                     }
+
                     _States.CurrentCleanupState = CleanupState.CleanupTasks;
                     break;
 

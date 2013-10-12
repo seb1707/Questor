@@ -454,7 +454,7 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    Logging.Log(module, "Arrived at destination", Logging.White);
+                    if (Settings.Instance.DebugTraveler) Logging.Log(module, "Arrived at destination", Logging.White);
                     if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler)
                     {
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;

@@ -6218,7 +6218,6 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            if (Settings.Instance.DebugHangars) Logging.Log("AmmoHangar", "LootHangar is not yet ready. waiting...", Logging.DebugHangars);
                             _ammoHangar = null;
                             return Cache.Instance.ItemHangar;
                         }

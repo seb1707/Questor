@@ -236,7 +236,7 @@ namespace Questor.Modules.Caching
                 if (_directEntity != null)
                 {
                     
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget.Id == _directEntity.Id)
+                    if (Cache.Instance.PreferredPrimaryWeaponTargetID == _directEntity.Id)
                     {
                         return true;
                     }

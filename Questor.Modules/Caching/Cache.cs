@@ -5799,10 +5799,10 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.LootHangarID = -99;
                                 Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName); //- 1;
-                                if (Settings.Instance.DebugHangars) Logging.Log("LootHangar: GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
+                                if (Settings.Instance.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                                 _lootHangar = null;
-                                _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.AmmoHangarID);
+                                _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.LootHangarID);
 
                                 if (_lootHangar != null && _lootHangar.IsValid) //do we have a corp hangar tab setup with that name?
                                 {
@@ -5843,7 +5843,7 @@ namespace Questor.Modules.Caching
                 }
                 catch (Exception exception)
                 {
-                    Logging.Log("AmmoHangar", "Unable to define AmmoHangar [" + exception + "]", Logging.Teal);
+                    Logging.Log("LootHangar", "Unable to define LootHangar [" + exception + "]", Logging.Teal);
                     return null;
                 }     
             }

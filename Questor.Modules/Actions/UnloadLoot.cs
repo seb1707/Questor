@@ -423,7 +423,7 @@ namespace Questor.Modules.Actions
                 PutLootHere = Cache.Instance.LootContainer;
                 PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
             }
-            else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName)  && Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.IsValid)
+            else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName)  && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
             {
                 PutLootHere = Cache.Instance.LootHangar;
                 PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";

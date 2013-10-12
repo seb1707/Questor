@@ -34,6 +34,7 @@ namespace Questor.Modules.Actions
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
         private static IEnumerable<DirectItem> missionGateKeysToMove;
         private static DirectContainer PutLootHere;
+        private static string PutLootHere_Description;
 
         public UnloadLoot()
         {
@@ -375,7 +376,7 @@ namespace Questor.Modules.Actions
                     if (lootToMove.Any() && !LootIsBeingMoved)
                     {
                         //Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count() + "] items in it now.", Logging.White);
-                        Logging.Log("UnloadLoot.MoveLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar", Logging.White);
+                        Logging.Log("UnloadLoot.MoveLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to [" + PutLootHere_Description + "]", Logging.White);
                         AllLootWillFit = true;
                         LootIsBeingMoved = true;
                         PutLootHere.Add(lootToMove);
@@ -420,14 +421,17 @@ namespace Questor.Modules.Actions
             if (!string.IsNullOrEmpty(Settings.Instance.LootContainer) && Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.IsValid)
             {
                 PutLootHere = Cache.Instance.LootContainer;
+                PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainer + "]";
             }
             else if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.IsValid)
             {
                 PutLootHere = Cache.Instance.LootHangar;
+                PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";
             }
             else
             {
                 PutLootHere = Cache.Instance.ItemHangar;
+                PutLootHere_Description = "ItemHangar";
             }
 
             switch (_States.CurrentUnloadLootState)

@@ -372,7 +372,8 @@ namespace Questor.Modules.Activities
                 }
 
                 Logging.Log("Traveler.TravelHome", "HomeBookmarkName bookmark not found! using AgentsStation info instead: We were Looking for bookmark starting with [" + Settings.Instance.HomeBookmarkName + "] found none.", Logging.Orange);
-            } 
+            }
+
             TravelToAgentsStation(module);
             return;
         }

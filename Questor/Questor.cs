@@ -627,6 +627,13 @@ namespace Questor
                     if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
                     
                     if (!SkillQueueCheck()) return; //Should we 'pause' questor for a few while an external app trains skills?
+                    if (_States.CurrentQuestorState == QuestorState.SkillTrainer)
+                    {
+                        //
+                        // this will run the SkillTrainer on the next iteration. we have to return here because the next thing idle would have checked is the questorstate, which in this case would be bad.
+                        //
+                        return;
+                    }
 
                     if (Cache.Instance.StopBot)
                     {

@@ -3265,16 +3265,14 @@ namespace Questor.Modules.Caching
             long preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
 
             targets = targets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                  .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid))
+                                                  .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid && e.IsTarget))
                                                   .OrderByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
                                                   .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                   .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                   .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
                                                   .ThenByDescending(t => t.IsWebbingMe)
                                                   .ThenByDescending(t => t.IsEwarTarget)                                  // Will return True if the target ever eward us (look at caching changes for ewar)
-                                                  .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
-                                                                                                                             * over currently targeting entities will make us switch targets more often what we dont want
-                                                                                                                             * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
+                                                  //.ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets over currently targeting entities will make us switch targets more often what we dont want and our weapons will be on cooldown when we can finaly hit that scrambler for example */
                                                   .ThenByDescending(t => t.Id == currentWeaponId)                           // Lets keep shooting
                                                   .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
                                                   .ThenByDescending(t => t.IsInOptimalRange)

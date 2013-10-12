@@ -3488,7 +3488,6 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
                 Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                Cache.Instance.PreferredPrimaryWeaponTargetID = null;
             }
 
             //

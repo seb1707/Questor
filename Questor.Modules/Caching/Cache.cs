@@ -143,17 +143,29 @@ namespace Questor.Modules.Caching
             {
                 if (_preferredPrimaryWeaponTarget == null)
                 {
-                    _preferredPrimaryWeaponTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == PreferredPrimaryWeaponTargetID);
-                    return _preferredPrimaryWeaponTarget ?? null;
+                    if (PreferredPrimaryWeaponTargetID != null)
+                    {
+                        _preferredPrimaryWeaponTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == PreferredPrimaryWeaponTargetID);
+                        return _preferredPrimaryWeaponTarget ?? null;    
+                    }
+
+                    return null;
                 }
 
                 return _preferredPrimaryWeaponTarget;
             }
             set
             {
-
-                _preferredPrimaryWeaponTarget = value;
-                PreferredPrimaryWeaponTargetID = value.Id;
+                if (value == null)
+                {
+                    _preferredPrimaryWeaponTarget = null;
+                    PreferredPrimaryWeaponTargetID = null;
+                }
+                else
+                {
+                    _preferredPrimaryWeaponTarget = value;
+                    PreferredPrimaryWeaponTargetID = value.Id;    
+                }
             }
         }
         
@@ -3473,7 +3485,6 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-
             EntityCache currentTarget = null;
             if (Cache.Instance.CurrentWeaponTarget() != null 
                 && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
@@ -3484,19 +3495,20 @@ namespace Questor.Modules.Caching
             
             if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance/1000,0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
+
 
             //We need to make sure that our current Preferred is still valid, if not we need to clear it out
             //This happens when we have killed the last thing within our range (or the last thing in the pocket)
             //and there is nothing to replace it with.
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-                && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
-                Cache.Instance.PreferredPrimaryWeaponTarget = null;
-            }
+            //if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
+            //{
+            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
+            //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+            //}
 
             //
             // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable

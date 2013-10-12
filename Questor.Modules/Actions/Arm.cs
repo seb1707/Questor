@@ -666,7 +666,6 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveDrones")) break;
                     if (!Cache.Instance.OpenItemsHangar("Arm.MoveDrones")) break;
                     if (!Cache.Instance.OpenDroneBay("Arm.MoveDrones")) return;
 
@@ -692,18 +691,18 @@ namespace Questor.Modules.Actions
                         ItemHangarDronesQuantity = ItemHangarDrones.Sum(item => item.Stacksize);
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + ItemHangarDronesQuantity + "] Drones available in the ItemHangar", Logging.Debug);
 
-                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                        if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                         {
                             AmmoHangarDrones = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == Settings.Instance.DroneTypeId).ToList();
                             AmmoHangarDronesQuantity = AmmoHangarDrones.Sum(item => item.Stacksize);
-                            if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);        
+                            if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);        
                         }
 
-                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                        if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                         {
                             LootHangarDrones = Cache.Instance.LootHangar.Items.Where(i => i.TypeId == Settings.Instance.DroneTypeId).ToList();
                             LootHangarDronesQuantity = LootHangarDrones.Sum(item => item.Stacksize);
-                            if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.Instance.LootHangar.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
+                            if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.Instance.LootHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
                         }
                     }
                     catch (Exception exception)
@@ -724,7 +723,7 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                     {
                         if (drone == null && AmmoHangarDrones != null && AmmoHangarDrones.Any())
                         {
@@ -734,12 +733,12 @@ namespace Questor.Modules.Actions
                             drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
                             if (drone != null)
                             {
-                                Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangar + "] using a stack of [" + drone.Quantity + "]", Logging.White);    
+                                Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);    
                             }
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                     {
                         if (drone == null && LootHangarDrones != null && LootHangarDrones.Any())
                         {
@@ -749,14 +748,14 @@ namespace Questor.Modules.Actions
                             drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault(); 
                             if (drone != null)
                             {
-                                Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangar + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                                Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
                             }
                         }
                     }
 
                     if (drone == null || drone.Quantity < -1 || retryCount > 30)
                     {
-                        string droneHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangar) ? "ItemHangar" : Settings.Instance.AmmoHangar.ToString(CultureInfo.InvariantCulture);
+                        string droneHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) ? "ItemHangar" : Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture);
                         Logging.Log("Arm.MoveDrones", "Out of drones with typeID [" + Settings.Instance.DroneTypeId + "] in [" + droneHangarName + "] retryCount [" + retryCount + "]", Logging.Orange);
                         if (drone != null && Settings.Instance.DebugArm)
                         {
@@ -842,7 +841,6 @@ namespace Questor.Modules.Actions
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
-                        if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
@@ -853,12 +851,12 @@ namespace Questor.Modules.Actions
                            hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem); 
                         }
 
-                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.AmmoHangar) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
                         {
                             hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                         }
 
-                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                        if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
                         {
                             hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                         }
@@ -947,7 +945,6 @@ namespace Questor.Modules.Actions
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
                         if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
-                        if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
@@ -1063,8 +1060,6 @@ namespace Questor.Modules.Actions
 
                             if (capsToLoad > 0)
                             {
-                                if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
-
                                 foreach (DirectItem item in Cache.Instance.AmmoHangar.Items)
                                 {
                                     if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
@@ -1090,7 +1085,6 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 
                     //
@@ -1257,7 +1251,6 @@ namespace Questor.Modules.Actions
                     //
                     #region load mining crystals
 
-                    if (!Cache.Instance.ReadyAmmoHangar("Arm.MoveItems")) break;
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 
                     //

@@ -805,8 +805,7 @@ namespace Questor.Modules.Actions
                 if (Settings.Instance.DebugValuedump) Logging.Log(module, "RefineItems: if (!refine)", Logging.Debug);
                 
                 if (!Cache.Instance.OpenCargoHold(module)) return false;
-                if (!Cache.Instance.ReadyAmmoHangar(module)) return false;
-
+                
                 IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId)).ToList();
                 if (refineItems.Any())
                 {

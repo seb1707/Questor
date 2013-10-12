@@ -32,12 +32,13 @@ namespace Questor.Modules.Actions
         private static IEnumerable<DirectItem> ammoToMove;
         private static IEnumerable<DirectItem> scriptsToMove;
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
-        private static IEnumerable<DirectItem> missionGateKeysToMove; 
+        private static IEnumerable<DirectItem> missionGateKeysToMove;
+        private static DirectContainer PutLootHere;
 
-        //public UnloadLoot()
-        //{
-        //    ItemsToMove = new List<ItemCache>();
-        //}
+        public UnloadLoot()
+        {
+            
+        }
 
         //public double LootValue { get; set; }
         private bool MoveAmmo()
@@ -86,8 +87,6 @@ namespace Questor.Modules.Actions
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
 
-                if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot.MoveAmmo")) return false;
-
                 if (Cache.Instance.AmmoHangar.IsValid)
                 {
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.AmmoHangar.IsValid)", Logging.Teal);
@@ -110,7 +109,6 @@ namespace Questor.Modules.Actions
                         if (ammoToMove.Any())
                         {
                             if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (ammoToMove.Any())", Logging.White);
-                            if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return false;
                             Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + ammoToMove.Count() + "] Ammo Stacks to AmmoHangar", Logging.White);
                             AmmoIsBeingMoved = true;
                             Cache.Instance.AmmoHangar.Add(ammoToMove);
@@ -142,7 +140,6 @@ namespace Questor.Modules.Actions
                         if (missionGateKeysToMove.Any())
                         {
                             if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (missionGateKeysToMove.Any())", Logging.White);
-                            if (!Cache.Instance.ReadyAmmoHangar("UnloadLoot")) return false;
                             Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + missionGateKeysToMove.Count() + "] Mission GateKeys to AmmoHangar", Logging.White);
                             AmmoIsBeingMoved = true;
                             Cache.Instance.AmmoHangar.Add(missionGateKeysToMove);
@@ -323,11 +320,7 @@ namespace Questor.Modules.Actions
                 {
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
 
-                    if (!Cache.Instance.ReadyLootHangar("UnloadLoot.MoveLoot")) return false;
-
-                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.LootHangar.IsValid)", Logging.White);
-
-                    if (string.IsNullOrEmpty(Settings.Instance.LootHangar)) // if we do NOT have the loot hangar configured.
+                    if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName)) // if we do NOT have the loot hangar configured.
                     {
                         /*
                         if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "LootHangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
@@ -385,7 +378,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("UnloadLoot.MoveLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar", Logging.White);
                         AllLootWillFit = true;
                         LootIsBeingMoved = true;
-                        Cache.Instance.LootHangar.Add(lootToMove);
+                        PutLootHere.Add(lootToMove);
                         _nextUnloadAction = DateTime.UtcNow.AddSeconds(5);
                         return false;
                     }
@@ -423,6 +416,19 @@ namespace Questor.Modules.Actions
 
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
+
+            if (!string.IsNullOrEmpty(Settings.Instance.LootContainer) && Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.IsValid)
+            {
+                PutLootHere = Cache.Instance.LootContainer;
+            }
+            else if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.IsValid)
+            {
+                PutLootHere = Cache.Instance.LootHangar;
+            }
+            else
+            {
+                PutLootHere = Cache.Instance.ItemHangar;
+            }
 
             switch (_States.CurrentUnloadLootState)
             {

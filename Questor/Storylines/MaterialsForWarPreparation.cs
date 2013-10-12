@@ -61,7 +61,6 @@ namespace Questor.Storylines
             if (!items.Any())
             {
                 if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + Settings.Instance.MaterialsForWarOreID + "] not found in ItemHangar", Logging.Debug);
-                if (!Cache.Instance.ReadyAmmoHangar("StorylineState.Arm")) return StorylineState.Arm;
                 items = Cache.Instance.AmmoHangar.Items.Where(k => k.TypeId == Settings.Instance.MaterialsForWarOreID).ToList();
                 if (!items.Any())
                 {
@@ -90,8 +89,6 @@ namespace Questor.Storylines
                 //OreLoaded = true;
                 return StorylineState.GotoAgent;
             }
-
-            if (!Cache.Instance.ReadyAmmoHangar("StorylineState.Arm")) return StorylineState.Arm;
 
             DirectItem item = items.FirstOrDefault();
             if (item != null)

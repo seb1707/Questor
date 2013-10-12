@@ -296,9 +296,9 @@ namespace Questor
                         UnlootedContainersData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
 
                         DataAmmoHangarID.Text = Cache.Instance.AmmoHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataAmmoHangarName.Text = Settings.Instance.AmmoHangar;
+                        DataAmmoHangarName.Text = Settings.Instance.AmmoHangarTabName;
                         DataLootHangarID.Text = Cache.Instance.LootHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataLootHangarName.Text = Settings.Instance.LootHangar;
+                        DataLootHangarName.Text = Settings.Instance.LootHangarTabName;
                     }
                 }
                 catch (Exception ex)

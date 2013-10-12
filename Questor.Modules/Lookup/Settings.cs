@@ -266,8 +266,8 @@ namespace Questor.Modules.Lookup
         // Storage location for loot, ammo, and bookmarks
         //
         public string HomeBookmarkName { get; set; }
-        public string LootHangar { get; set; }
-        public string AmmoHangar { get; set; }
+        public string LootHangarTabName { get; set; }
+        public string AmmoHangarTabName { get; set; }
         public string BookmarkHangar { get; set; }
         public string LootContainer { get; set; }
 
@@ -881,23 +881,23 @@ namespace Questor.Modules.Lookup
                 // Storage Location for Loot, Ammo, Bookmarks
                 //
                 HomeBookmarkName = (string)CharacterSettingsXml.Element("homeBookmarkName") ?? (string)CommonSettingsXml.Element("homeBookmarkName") ?? "myHomeBookmark";
-                LootHangar = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
-                if (string.IsNullOrEmpty(Settings.Instance.LootHangar))
+                LootHangarTabName = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
+                if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                 {
                     Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
                 }
                 else
                 {
-                    Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangar + "]", Logging.White);
+                    Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangarTabName + "]", Logging.White);
                 }
-                AmmoHangar = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
-                if (string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
+                AmmoHangarTabName = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
+                if (string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                 {
                     Logging.Log("Settings", "AmmoHangar [" + "ItemHangar" + "]", Logging.White);
                 }
                 else
                 {
-                    Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangar + "]", Logging.White);
+                    Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
                 }
                 BookmarkHangar = (string)CharacterSettingsXml.Element("bookmarkHangar") ?? (string)CommonSettingsXml.Element("bookmarkHangar");
                 LootContainer = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
@@ -1663,8 +1663,8 @@ namespace Questor.Modules.Lookup
                 // Storage Location for Loot, Ammo, Bookmarks
                 //
                 HomeBookmarkName = "myHomeBookmark";
-                LootHangar = String.Empty;
-                AmmoHangar = String.Empty;
+                LootHangarTabName = String.Empty;
+                AmmoHangarTabName = String.Empty;
                 BookmarkHangar = String.Empty;
                 LootContainer = String.Empty;
 

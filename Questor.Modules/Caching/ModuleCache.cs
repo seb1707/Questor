@@ -259,6 +259,9 @@ namespace Questor.Modules.Caching
                 result |= IsGoingOnline;
                 result |= IsReloadingAmmo;
                 result |= IsChangingAmmo;
+                result |= !Cache.Instance.InSpace;
+                result |= Cache.Instance.InStation;
+                result |= Cache.Instance.LastInStation.AddSeconds(7) > DateTime.UtcNow; 
                 return result;
             }
         }

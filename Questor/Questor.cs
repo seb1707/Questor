@@ -262,7 +262,7 @@ namespace Questor
             {
                 if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar) || !string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.InStation)
+                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) || !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.InStation)
                     {
                         Logging.Log("RunOnceAfterStartup", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);", Logging.Debug);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);

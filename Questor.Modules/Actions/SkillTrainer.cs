@@ -107,19 +107,12 @@ namespace Questor.Modules.Actions
                     _State.CurrentSkillTrainerState = SkillTrainerState.Idle;
                     break;
 
-                case SkillTrainerState.Done:
-                    //if (_quitEveWhenDone)
-                    //{
-                    //    _State.CurrentSkillTrainerState = SkillTrainerState.CloseQuestor;
-                    //    return;
-                    //}
+                case SkillTrainerState.Error:
+                    Logging.Log("SkillTrainer", "Note: SkillTrainer just entered the Error State. There is likely a missing skill plan or broken contents of the skillplan!", Logging.Teal);
+                    _States.CurrentSkillTrainerState = SkillTrainerState.Done;
+                    break;
 
-                    //if (_closeSkillTrainerWhenDone)
-                    //{
-                    //    //Close SkillTrainer - without closing eve here
-                    //    Application.Exit();
-                    //    return;
-                    //}
+                case SkillTrainerState.Done:
                     SkillPlan.injectSkillBookAttempts = 0;
                     _nextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
                     _State.CurrentSkillTrainerState = SkillTrainerState.Idle;

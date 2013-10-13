@@ -306,7 +306,7 @@ namespace Questor
                     Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
                     _States.LavishEvent_SkillQueueHasRoom();
                     _States.CurrentQuestorState = QuestorState.SkillTrainer;
-                    return true;
+                    return false;
                 }
 
                 Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
@@ -626,15 +626,8 @@ namespace Questor
                 case QuestorState.Idle:
                     if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
                     
-                    if (!SkillQueueCheck()) return; //Should we 'pause' questor for a few while an external app trains skills?
-                    if (_States.CurrentQuestorState == QuestorState.SkillTrainer)
-                    {
-                        //
-                        // this will run the SkillTrainer on the next iteration. we have to return here because the next thing idle would have checked is the questorstate, which in this case would be bad.
-                        //
-                        return;
-                    }
-
+                    if (!SkillQueueCheck()) return; //if we need to train skills we return here, on the next pass we will be _States.CurrentQuestorState = QuestorSate.SkillTrainer
+                    
                     if (Cache.Instance.StopBot)
                     {
                         if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the localwatch code so that we stay in station when local is unsafe", Logging.Orange);

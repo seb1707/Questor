@@ -607,6 +607,10 @@ namespace Questor.Behaviors
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
                         break;
                     }
+                    else if (Cache.Instance.CurrentShipsCargo.IsValid)
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedSalvager", "CurrentCapacity [" + Cache.Instance.CurrentShipsCargo.Capacity + "] UsedCapacity [" + Cache.Instance.CurrentShipsCargo.UsedCapacity + "][" + Settings.Instance.ReserveCargoCapacity + "]", Logging.Debug);
+                    }
 
                     if (!Cache.Instance.UnlootedContainers.Any())
                     {

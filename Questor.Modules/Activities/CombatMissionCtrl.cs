@@ -1100,9 +1100,9 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            IEnumerable<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance);
+            List<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
 
-            if (notTheClosest) killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance);
+            if (notTheClosest) killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).ToList();
             
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
@@ -1128,27 +1128,35 @@ namespace Questor.Modules.Activities
 
             if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !t.IsIgnored) > killTargets.Count(e => e.IsTargetedBy))
             {
+                //
                 // We are being attacked, break the kill order
+                // which involves removing the named targets as PrimaryWeaponPriorityTargets, PreferredPrimaryWeaponTarget, DronePriorityTargets, and PreferredDroneTarget
+                //
                 if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets)) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
                 targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
                 
                 if (killTargets.Any())
                 {
-                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                    {
-                        foreach (EntityCache killTarget in killTargets.Where(e => targetNames.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name)))
-                        {
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                            {
-                                if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))
-                                {
-                                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (killTarget.Name.Contains(Cache.Instance.PreferredPrimaryWeaponTarget.Name))", Logging.Red);
-                                    Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                                    Cache.Instance.PreferredPrimaryWeaponTargetID = null;
-                                }
-                            }
+                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name));
+                    Cache.Instance.RemoveDronePriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name));
 
+                    if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
+                    {
+                        foreach (EntityCache killTarget in killTargets.Where(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTargetID))
+                        {
+                            if (Cache.Instance.PreferredPrimaryWeaponTargetID == null) continue;
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Breaking Kill Order in: [" + killTarget.Name + "][" + Math.Round(killTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID((long)Cache.Instance.PreferredPrimaryWeaponTargetID) + "]", Logging.Red);
+                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
                         }    
+                    }
+                    if (Cache.Instance.PreferredDroneTargetID != null)
+                    {
+                        foreach (EntityCache killTarget in killTargets.Where(e => e.Id == Cache.Instance.PreferredDroneTargetID))
+                        {
+                            if (Cache.Instance.PreferredDroneTargetID == null) continue;
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Breaking Kill Order in: [" + killTarget.Name + "][" + Math.Round(killTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID((long)Cache.Instance.PreferredDroneTargetID) + "]", Logging.Red);
+                            Cache.Instance.PreferredDroneTarget = null;
+                        }
                     }
                 }
                 
@@ -1214,14 +1222,14 @@ namespace Questor.Modules.Activities
                     //
                     Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
 
-                    EntityCache currentKillTarget = killTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                    EntityCache currentKillTarget = killTargets.FirstOrDefault();
                     if (currentKillTarget != null) //if it is not null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
                         if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " proceeding to kill the target (this is spammy, but useful debug info)", Logging.White);
                         if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe && Cache.Instance.PreferredPrimaryWeaponTarget != currentKillTarget)
                         {
                             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
-                            Cache.Instance.AddPrimaryWeaponPriorityTargets(killTargets.OrderBy(t => t.Nearest5kDistance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName", true);
+                            Cache.Instance.AddPrimaryWeaponPriorityTarget(killTargets.FirstOrDefault(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.Kill", true);
                             Cache.Instance.PreferredPrimaryWeaponTarget = currentKillTarget;
                         }
                         else if (Settings.Instance.DebugKillAction)

@@ -1,13 +1,13 @@
 @Echo off
 cls
 :: delims is a TAB followed by a space
-(set debug=false)
+set debug=false
 ::Custom Path to innerspace if you have yours in another location
-::(set InnerSpacePath=..\..\InnerSpace\)
+::set InnerSpacePath=..\..\InnerSpace\
 :: Path for 32bit OSs - likely Windows XP (but could be windows vista or windows 7, but not commonly)
-::(set InnerSpacePath=%ProgramFiles%\InnerSpace\InnerSpace.exe)
+::set InnerSpacePath=%ProgramFiles%\InnerSpace\InnerSpace.exe
 :: Path for 64bit OSs - likely windows Vista or Windows 7
-(set InnerSpacePath=%ProgramFiles(x86)%\InnerSpace\InnerSpace.exe)
+set InnerSpacePath=%ProgramFiles(x86)%\InnerSpace\
 ::
 :: if you choose not to hard code the path above we will search the registry for your innerSpace directory
 :: 

@@ -49,7 +49,7 @@ namespace Questor
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
-        public string ScheduleCharacterName = Logging._character;
+        public readonly string ScheduleCharacterName = Logging._character;
         //public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;

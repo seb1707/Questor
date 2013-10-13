@@ -832,7 +832,7 @@ namespace Questor.Modules.Caching
 
         public bool AllAgentsStillInDeclineCoolDown { get; set; }
 
-        private string _agentName = "";
+        public string _agentName = "";
 
         public DateTime NextAgentWindowAction { get; set; }
         public DateTime NextGetAgentMissionAction { get; set; }

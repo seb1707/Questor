@@ -162,6 +162,9 @@ namespace Questor.Modules.Logging
                 line = line.Replace("\\" + Settings.Instance.CharacterName, "\\" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
                 line = line.Replace("[" + Settings.Instance.CharacterName + "]", "[" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
                 line = line.Replace(Settings.Instance.CharacterName + ".xml", Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                line = line.Replace(Settings.Instance.CharacterSettingsPath, Settings.Instance.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
+                line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
+                //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
             }
 
             //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))

@@ -460,7 +460,7 @@ namespace Questor.Modules.Activities
                     ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.FirstOrDefault();
                 }
 
-                if (ClosestPotentialCombatTarget != null && ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange)
+                if (ClosestPotentialCombatTarget != null && (ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange || !ClosestPotentialCombatTarget.IsInOptimalRange))
                 {
                     if (!Cache.Instance.IsApproachingOrOrbiting(ClosestPotentialCombatTarget.Id))
                     {
@@ -1265,7 +1265,7 @@ namespace Questor.Modules.Activities
 
 
                         //we may need to get closer so combat will take over
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange || Settings.Instance.SpeedTank)
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange || !Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange)
                         {
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange)", Logging.Debug);
                             //if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.PreferredPrimaryWeaponTarget.Id))

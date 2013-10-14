@@ -1110,6 +1110,20 @@ namespace Questor.Modules.Activities
 
                 // We killed it/them !?!?!? :)
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
+                if (ignoreAttackers)
+                {
+                    //
+                    // UNIgnore attackers when kill is done.
+                    //
+                    foreach (EntityCache target in Cache.Instance.PotentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
+                    {
+                        if (target.IsTargetedBy && target.IsAttacking)
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "UN-Ignoring [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater (and kill action being complete)", Logging.Teal);
+                            Cache.Instance.IgnoreTargets.Remove(target.Name.Trim());
+                        }
+                    }
+                }
                 Nextaction();
                 return;
             }

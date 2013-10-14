@@ -1100,9 +1100,9 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            List<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Distance).ToList();
+            List<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Nearest5kDistance).ToList();
 
-            if (notTheClosest) killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderByDescending(t => t.Distance).ToList();
+            if (notTheClosest) killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderByDescending(t => t.Nearest5kDistance).ToList();
             
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {

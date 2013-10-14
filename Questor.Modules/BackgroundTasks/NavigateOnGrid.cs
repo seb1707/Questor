@@ -215,12 +215,15 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
                         {
-                            if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
-                            {
-                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
-                                OrbitGateorTarget(target, module);
-                                return;
-                            }
+                            //
+                            // why would we want to orbit the frig?
+                            //
+                            //if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            //{
+                            //    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
+                            //    OrbitGateorTarget(target, module);
+                            //    return;
+                            //}
 
                             target.Approach(Cache.Instance.OptimalRange);
                             Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);

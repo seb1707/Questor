@@ -3108,25 +3108,22 @@ namespace Questor.Modules.Caching
                     if (currentPath == null || !currentPath.Any()) return false;
                     if (currentPath[0] == 0) return false; //No destination set - prevents exception if somehow we have got an invalid destination
 
-                    for (int i = currentPath.Count - 1; i >= 0; i--)
+                    foreach (int _system in currentPath)
                     {
-                        if (currentPath[i] < 6000000) // not a station
+                        if (currentPath[_system] < 6000000) // not a station
                         {
-                            DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[i]];
-                            if (solarSystemInRoute.Security < 0.45)
+                            DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[_system]];
+                            if (solarSystemInRoute != null)
                             {
-                                //Bad bad bad
-                                Cache.Instance.RouteIsAllHighSecBool = false;
-                                return true;
+                                if (solarSystemInRoute.Security < 0.45)
+                                {
+                                    //Bad bad bad
+                                    Cache.Instance.RouteIsAllHighSecBool = false;
+                                    return true;
+                                }    
                             }
-                        }
-                        if (currentPath[i] > 6000000) //this is a station
-                        {
-                            //
-                            // a station will only be at the end of a route, assume if we got this far that we are golden.
-                            //
-                            Cache.Instance.RouteIsAllHighSecBool = true;
-                            return true;
+
+                            Logging.Log("CheckifRouteIsAllHighSec", "Jump number [" + _system + "of" + currentPath.Count() + "] in the route came back as null, we could not get the system name or sec level", Logging.Debug);
                         }
                     }
                 }

@@ -741,11 +741,16 @@ namespace Questor.Modules.Caching
                                 optimal = Settings.Instance.OptimalRange;
                             }
 
+                            if (optimal > Cache.Instance.ActiveShip.MaxTargetRange)
+                            {
+                                optimal = Cache.Instance.ActiveShip.MaxTargetRange - 500;
+                            }
+
                             if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //Lasers, Projectile, and Hybrids
                             {
                                 if (Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
                                 {
-                                    if (Distance < (optimal * 1.5))
+                                    if (Distance < (optimal * 1.5) && Distance < Cache.Instance.ActiveShip.MaxTargetRange)
                                     {
                                         return true;
                                     }

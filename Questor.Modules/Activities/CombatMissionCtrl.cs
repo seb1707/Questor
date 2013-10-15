@@ -742,7 +742,6 @@ namespace Questor.Modules.Activities
                                 Cache.Instance.Approaching = null;
                                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Stop ship, we have been targeted and are [" + DistanceToApproach + "] from [ID: " + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                             }
-                            
                         }
                     }
                 }

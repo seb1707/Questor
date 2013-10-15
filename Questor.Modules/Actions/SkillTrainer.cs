@@ -14,37 +14,26 @@ namespace Questor.Modules.Actions
     
     public static class SkillTrainerClass
     {
-        //private static bool QuitEVEWhenDone = false;
-        //private static bool CloseSkillTrainerWhenDone = false;
-        //private static bool _showHelp;
-
-        private static DateTime _nextSkillTrainerProcessState;
-        private static DateTime _nextSkillTrainerAction = DateTime.MinValue;
-        //private static readonly bool _quitEveWhenDone;
-        //private static readonly bool _closeSkillTrainerWhenDone;
-
         static SkillTrainerClass()
         {
             Logging.Log("SkillTrainer", "Starting SkillTrainer", Logging.Orange);
             _State.CurrentSkillTrainerState = SkillTrainerState.Idle;
-            //_quitEveWhenDone = QuitEVEWhenDone;
-            //_closeSkillTrainerWhenDone = CloseSkillTrainerWhenDone;
         }
 
         public static void ProcessState()
         {
             // Only pulse state changes every .5s
-            if (DateTime.UtcNow <  _nextSkillTrainerProcessState) //default: 2000ms
+            if (DateTime.UtcNow <  Cache.Instance.NextSkillTrainerProcessState) //default: 2000ms
             {
                 return;
             }
             
-            _nextSkillTrainerProcessState = DateTime.UtcNow.AddMilliseconds(Time.Instance.SkillTrainerPulse_milliseconds);
+            Cache.Instance.NextSkillTrainerProcessState = DateTime.UtcNow.AddMilliseconds(Time.Instance.SkillTrainerPulse_milliseconds);
 
             switch (_State.CurrentSkillTrainerState)
             {
                 case SkillTrainerState.Idle:
-                    if (Cache.Instance.InStation && DateTime.UtcNow > _nextSkillTrainerAction)
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.NextSkillTrainerAction)
                     {
                         Logging.Log("SkillTrainer", "It is Time to Start SkillTrainer again...", Logging.White);
                         _State.CurrentSkillTrainerState = SkillTrainerState.Begin;
@@ -114,7 +103,7 @@ namespace Questor.Modules.Actions
 
                 case SkillTrainerState.Done:
                     SkillPlan.injectSkillBookAttempts = 0;
-                    _nextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
+                    Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
                     _State.CurrentSkillTrainerState = SkillTrainerState.Idle;
                     _States.CurrentQuestorState = QuestorState.Idle;
                     break;

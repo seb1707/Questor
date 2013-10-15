@@ -209,5 +209,13 @@ namespace Questor.Modules.States
         public static StatisticsState CurrentStatisticsState { get; set; }
 
         public static SkillTrainerState CurrentSkillTrainerState { get; set; }
+
+        public static MasterState CurrentMasterState { get; set; }
+
+        public static SlaveState CurrentSlaveState { get; set; }
+
+        public static ManageFleetState CurrentManageFleetState { get; set; }
+
+        public static BackgroundBehaviorState CurrentBackgroundBehaviorState { get; set; }
     }
 }

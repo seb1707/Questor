@@ -36,10 +36,7 @@ namespace Questor.Modules.Actions
         private static DirectContainer PutLootHere;
         private static string PutLootHere_Description;
 
-        public UnloadLoot()
-        {
-            
-        }
+        public UnloadLoot(){}
 
         //public double LootValue { get; set; }
         private bool MoveAmmo()

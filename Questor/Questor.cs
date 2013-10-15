@@ -295,7 +295,7 @@ namespace Questor
 
         public static bool SkillQueueCheck()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextSkillsCheckAction)
+            if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
                 return true;
 
             if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
@@ -310,7 +310,7 @@ namespace Questor
                 }
 
                 Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
-                Cache.Instance.NextSkillsCheckAction = DateTime.UtcNow.AddHours(3);
+                Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
                 return true;
             }
             

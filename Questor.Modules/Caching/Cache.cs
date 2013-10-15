@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
-
 namespace Questor.Modules.Caching
 {
     using System;
@@ -22,6 +20,7 @@ namespace Questor.Modules.Caching
     using System.Reflection;
     using System.Xml.Linq;
     using System.Xml.XPath;
+    using System.Threading;
     using global::Questor.Modules.Actions;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
@@ -879,6 +878,8 @@ namespace Questor.Modules.Caching
         public DateTime NextEVEMemoryManagerAction { get; set; }
         public DateTime NextGetBestCombatTarget { get; set; }
         public DateTime NextGetBestDroneTarget { get; set; }
+        public DateTime NextSkillTrainerProcessState;
+        public DateTime NextSkillTrainerAction = DateTime.MinValue;
 
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;
@@ -887,8 +888,7 @@ namespace Questor.Modules.Caching
         public DateTime LastUpdateOfSessionRunningTime;
         public DateTime NextInSpaceorInStation;
         public DateTime NextTimeCheckAction = DateTime.UtcNow;
-        public DateTime NextSkillsCheckAction = DateTime.UtcNow;
-
+        
         public DateTime LastFrame = DateTime.UtcNow;
         public DateTime LastSessionIsReady = DateTime.UtcNow;
         public DateTime LastLogMessage = DateTime.UtcNow;

@@ -1851,7 +1851,8 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
                         {
-                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);    
+                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
+                            break;
                         }
                     }
 
@@ -1922,6 +1923,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
                         {
                             _dronePriorityTargets.Remove(dronePriorityTarget);
+                            break;
                         }
                     }
 

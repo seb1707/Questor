@@ -450,6 +450,11 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (IsNPCBattleship || IsNPCBattlecruiser)
+                        {
+                            return false;
+                        }
+
                         if (IsNPCFrigate || IsFrigate)
                         {
                             if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
@@ -1240,6 +1245,7 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.WarpScrambler.Add(_directEntity.Id);
                             }
+
                             return true;
                         }
 

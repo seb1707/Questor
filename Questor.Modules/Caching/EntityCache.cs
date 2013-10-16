@@ -21,11 +21,6 @@ namespace Questor.Modules.Caching
 
     public class EntityCache
     {
-        //
-        // ALL of theses (well most) need _equivalents so we can cache the results per frame
-        // _GroupID
-        //
-
         private readonly DirectEntity _directEntity;
         public static int EntityCacheInstances = 0;
 

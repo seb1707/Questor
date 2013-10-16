@@ -1213,7 +1213,7 @@ namespace Questor.Modules.Activities
                 {
                     if (Settings.Instance.DebugKillAction)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
                         {
                             int icount = 0;
                             foreach (EntityCache primaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityEntities.Where(i => i.IsOnGridWithMe))
@@ -1249,7 +1249,7 @@ namespace Questor.Modules.Activities
                         {
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.PreferredPrimaryWeaponTarget =[ " + Cache.Instance.PreferredPrimaryWeaponTarget.Name + " ][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]", Logging.Debug);
 
-                            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
                             {
                                 if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "PrimaryWeaponPriorityTargets Below (if any)", Logging.Debug);
                                 int icount = 0;

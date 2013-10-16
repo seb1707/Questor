@@ -135,6 +135,7 @@ namespace Questor.Modules.Misc
 
             string AddThese = args[1];
 
+            Logging.Log("InnerspaceCommands", "Processing Command as: AddDronePriorityTargetsByName " + AddThese, Logging.White);
             Cache.Instance.AddDronePriorityTargetsByName(AddThese);
             return 0;
         }
@@ -150,6 +151,7 @@ namespace Questor.Modules.Misc
 
             string AddThese = args[1];
 
+            Logging.Log("InnerspaceCommands", "Processing Command as: AddWarpScramblerByName " + AddThese, Logging.White);
             Cache.Instance.AddWarpScramblerByName(AddThese);
             return 0;
         }
@@ -164,6 +166,7 @@ namespace Questor.Modules.Misc
 
             string AddThese = args[1];
 
+            Logging.Log("InnerspaceCommands", "Processing Command as: AddWebifierByName " + AddThese, Logging.White);
             Cache.Instance.AddWebifierByName(AddThese);
             return 0;
         }
@@ -192,6 +195,7 @@ namespace Questor.Modules.Misc
 
             string AddThese = args[1];
 
+            Logging.Log("InnerspaceCommands", "Processing Command as: AddPrimaryWeaponPriorityTargetsByName " + AddThese, Logging.White);
             Cache.Instance.AddPrimaryWeaponPriorityTargetsByName(AddThese);
             return 0;
         }

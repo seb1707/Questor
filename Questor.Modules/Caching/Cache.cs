@@ -2740,7 +2740,7 @@ namespace Questor.Modules.Caching
 
         public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityEntities.Any(p => p.Id == ewarEntity.Id))
+            if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
             {
                 if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
                 return;
@@ -2878,16 +2878,16 @@ namespace Questor.Modules.Caching
         {
             if (AddEwarTypeToPriorityTargetList && Cache.Instance.UseDrones)
             {
-                if ((ewarEntity.IsIgnored) || DronePriorityEntities.Any(p => p.Id == ewarEntity.Id))
+                if ((ewarEntity.IsIgnored) || DronePriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
                 {
                     if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log("AddDronePriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
                     return;
                 }
 
-                if (DronePriorityEntities.All(i => i.Id != ewarEntity.Id))
+                if (DronePriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                 {
                     int DronePriorityTargetCount = 0;
-                    if (Cache.Instance.DronePriorityEntities.Any())
+                    if (Cache.Instance.DronePriorityTargets.Any())
                     {
                         DronePriorityTargetCount = Cache.Instance.DronePriorityTargets.Count();
                     }

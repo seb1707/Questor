@@ -1152,7 +1152,7 @@ namespace Questor.Modules.Combat
             //
             // Now lets deal with the priority targets
             //
-            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
             {
                 int PrimaryWeaponsPriorityTargetUnTargeted = Cache.Instance.PrimaryWeaponPriorityEntities.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Cache.Instance.PrimaryWeaponPriorityEntities.Contains(t));
 

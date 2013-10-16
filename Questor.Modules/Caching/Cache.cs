@@ -1847,14 +1847,14 @@ namespace Questor.Modules.Caching
                 //
                 if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                 {
-                    foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
-                    {
-                        if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
-                        {
-                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
-                            break;
-                        }
-                    }
+                    //foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
+                    //{
+                    //    if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
+                    //    {
+                    //        _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
+                    //        return _primaryWeaponPriorityTargets;
+                    //    }
+                    //}
 
                     return _primaryWeaponPriorityTargets;
                 }
@@ -1918,14 +1918,14 @@ namespace Questor.Modules.Caching
                 //
                 if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
                 {
-                    foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
-                    {
-                        if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
-                        {
-                            _dronePriorityTargets.Remove(dronePriorityTarget);
-                            break;
-                        }
-                    }
+                    //foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
+                    //{
+                    //    if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
+                    //    {
+                    //        _dronePriorityTargets.Remove(dronePriorityTarget);
+                    //        return _dronePriorityTargets;
+                    //    }
+                    //}
 
                     return _dronePriorityTargets;
                 }
@@ -2787,7 +2787,7 @@ namespace Questor.Modules.Caching
 
         public void AddPrimaryWeaponPriorityTargetsByName(String stringEntitiesToAdd)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByNamePart(stringEntitiesToAdd).ToList();
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)
@@ -2819,7 +2819,7 @@ namespace Questor.Modules.Caching
 
         public void AddDronePriorityTargetsByName(String stringEntitiesToAdd)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByNamePart(stringEntitiesToAdd).ToList();
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)

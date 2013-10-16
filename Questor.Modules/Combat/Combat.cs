@@ -617,7 +617,7 @@ namespace Questor.Modules.Combat
             }
 
             int weaponsActivatedThisTick = 0;
-            int weaponsToActivateThisTick = Cache.Instance.RandomNumber(1, 2);
+            int weaponsToActivateThisTick = Cache.Instance.RandomNumber(1, 4);
 
             // Activate the weapons (it not yet activated)))
             _weaponNumber = 0;

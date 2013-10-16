@@ -1847,14 +1847,14 @@ namespace Questor.Modules.Caching
                 //
                 if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                 {
-                    //foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
-                    //{
-                    //    if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
-                    //    {
-                    //        _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
-                    //        return _primaryWeaponPriorityTargets;
-                    //    }
-                    //}
+                    foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
+                    {
+                        if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
+                        {
+                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
+                            break;
+                        }
+                    }
 
                     return _primaryWeaponPriorityTargets;
                 }
@@ -1918,14 +1918,14 @@ namespace Questor.Modules.Caching
                 //
                 if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
                 {
-                    //foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
-                    //{
-                    //    if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
-                    //    {
-                    //        _dronePriorityTargets.Remove(dronePriorityTarget);
-                    //        return _dronePriorityTargets;
-                    //    }
-                    //}
+                    foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
+                    {
+                        if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
+                        {
+                            _dronePriorityTargets.Remove(dronePriorityTarget);
+                            break;
+                        }
+                    }
 
                     return _dronePriorityTargets;
                 }

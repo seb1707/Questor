@@ -2756,15 +2756,22 @@ namespace Questor.Modules.Caching
                     if (ewarEntity.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
                         || ewarEntity.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
                     {
-                        Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                        PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
+                        if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
+                        {
+                            Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                            PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
+                        }
                     }
 
                     return;
                 }
 
-                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
+                if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
+                {
+                    Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                    PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
+                }
+
                 return;
             }
 
@@ -2877,13 +2884,17 @@ namespace Questor.Modules.Caching
                     return;
                 }
 
-                int DronePriorityTargetCount = 0;
-                if (Cache.Instance.DronePriorityEntities.Any())
+                if (DronePriorityEntities.All(i => i.Id != ewarEntity.Id))
                 {
-                    DronePriorityTargetCount = Cache.Instance.DronePriorityTargets.Count();
+                    int DronePriorityTargetCount = 0;
+                    if (Cache.Instance.DronePriorityEntities.Any())
+                    {
+                        DronePriorityTargetCount = Cache.Instance.DronePriorityTargets.Count();
+                    }
+                    Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + " m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "] we have [" + DronePriorityTargetCount + "] other DronePriorityTargets", Logging.Teal);
+                    _dronePriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, DronePriority = priority });
                 }
-                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity / 1000, 2) + "k/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "] we have [" + DronePriorityTargetCount + "] other DronePriorityTargets", Logging.Teal);
-                _dronePriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, DronePriority = priority });
+                
                 return;
             }
 

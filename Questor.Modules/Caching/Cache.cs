@@ -2738,9 +2738,9 @@ namespace Questor.Modules.Caching
 
         public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            if ((!ewarEntity.IsIgnored) || PrimaryWeaponPriorityEntities.Any(p => p.Id == ewarEntity.Id))
+            if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityEntities.Any(p => p.Id == ewarEntity.Id))
             {
-                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
+                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
                 return;
             }
 
@@ -2869,9 +2869,9 @@ namespace Questor.Modules.Caching
         {
             if (AddEwarTypeToPriorityTargetList && Cache.Instance.UseDrones)
             {
-                if ((!ewarEntity.IsIgnored) || DronePriorityEntities.Any(p => p.Id == ewarEntity.Id))
+                if ((ewarEntity.IsIgnored) || DronePriorityEntities.Any(p => p.Id == ewarEntity.Id))
                 {
-                    if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log("AddDronePriorityTargets", "if ((!target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
+                    if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log("AddDronePriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
                     return;
                 }
 
@@ -3316,18 +3316,8 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.PrimaryWeaponPriorityLevel == priorityType))
                         {
-                            target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => (FindAUnTargetedEntity ||  pt.IsReadyToShoot)
-                                                                                        && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
-                                                                                            && (pt.Distance < Distance)
-                                                                                            && pt.IsActivePrimaryWeaponEwarType == priorityType
-                                                                                            && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
-                                                                                                || pt.IsNPCBattleship 
-                                                                                                || pt.IsNPCBattlecruiser)) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
-                                                                                        || (pt.Distance < Distance 
-                                                                                            && pt.PrimaryWeaponPriorityLevel == priorityType //ANY target is warp scrambling me
-                                                                                            && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
-                                                                                                || pt.IsNPCBattleship 
-                                                                                                || pt.IsNPCBattlecruiser))) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
+                            target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && pt.Distance < Distance && pt.IsActivePrimaryWeaponEwarType == priorityType && !pt.IsTooCloseTooFastTooSmallToHit)
+                                                                                            || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.PrimaryWeaponPriorityLevel == priorityType && !pt.IsTooCloseTooFastTooSmallToHit))
                                                                                     .OrderByDescending(pt => pt.IsReadyToShoot)
                                                                                     .ThenByDescending(pt => !pt.IsNPCFrigate)
                                                                                     .ThenByDescending(pt => pt.IsInOptimalRange)
@@ -3375,23 +3365,13 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.DronePriorityEntities.Any(pt => pt.DronePriorityLevel == priorityType))
                         {
-                            target = Cache.Instance.DronePriorityEntities.Where(pt => (FindAUnTargetedEntity || pt.IsReadyToShoot)
-                                                                                        && (currentTarget != null && pt.Id == currentTarget.Id // currentTarget is WarpScrambling me right now
-                                                                                            && (pt.Distance < Distance)
-                                                                                            && pt.IsActiveDroneEwarType == priorityType
-                                                                                            && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
-                                                                                                || pt.IsNPCBattleship
-                                                                                                || pt.IsNPCBattlecruiser)) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
-                                                                                        || (pt.Distance < Distance
-                                                                                            && pt.IsActiveDroneEwarType == priorityType //ANY target is warp scrambling me
-                                                                                            && (!pt.IsTooCloseTooFastTooSmallToHit // and is not too small and too fast for me to hit
-                                                                                                || pt.IsNPCBattleship
-                                                                                                || pt.IsNPCBattlecruiser))) //and is their big or we have been configured to specifically add warp scramblers to the PrimaryWeaponsPriorityTarget List 
-                                                                                    .OrderByDescending(pt => !pt.IsNPCFrigate)
-                                                                                    .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                                    .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                    .ThenBy(pt => pt.Distance)
-                                                                                    .FirstOrDefault();
+                            target = Cache.Instance.DronePriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && (pt.Distance < Distance) && pt.IsActiveDroneEwarType == priorityType)
+                                                                                                || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
+                                                                                                       .OrderByDescending(pt => !pt.IsNPCFrigate)
+                                                                                                       .ThenByDescending(pt => pt.IsInOptimalRange)
+                                                                                                       .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
+                                                                                                       .ThenBy(pt => pt.Distance)
+                                                                                                       .FirstOrDefault();
                         }
                     }
                     catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem

@@ -455,15 +455,19 @@ namespace Questor.Modules.Activities
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
                 EntityCache ClosestPotentialCombatTarget = null;
-                
+
                 //
                 // grab the preferredPrimaryWeaponsTarget if its defined and exists on grid as our navigation point
                 //
-                if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredDroneTarget.IsOnGridWithMe)
+                if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
                 {
-                    ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;    
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+                    {
+                        ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;        
+                    }        
                 }
-                else //otherwise just grab something close (excluding sentries)
+
+                if (ClosestPotentialCombatTarget == null) //otherwise just grab something close (excluding sentries)
                 {
                     ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();    
                 }

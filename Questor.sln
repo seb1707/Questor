@@ -13,12 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuyLPI", "BuyLPI\BuyLPI.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorManager", "QuestorManager\QuestorManager.csproj", "{393DE7BE-C792-477A-B884-75F174BAB9B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainManager", "DomainManager\DomainManager.csproj", "{005DB097-1071-4953-AB23-A6C889F55E67}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Injector", "Injector\Injector.csproj", "{E01B9141-8006-46D5-A76C-E80A8FC81CFC}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InjectorLib", "InjectorLib\InjectorLib.vcxproj", "{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,42 +95,6 @@ Global
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|Win32.ActiveCfg = Release|x86
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|x86.ActiveCfg = Release|x86
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|x86.Build.0 = Release|x86
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|Win32.ActiveCfg = Release|Any CPU
-		{005DB097-1071-4953-AB23-A6C889F55E67}.Release|x86.ActiveCfg = Release|Any CPU
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|Win32.ActiveCfg = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|x86.ActiveCfg = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Debug|x86.Build.0 = Debug|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|Any CPU.ActiveCfg = Release|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|Mixed Platforms.Build.0 = Release|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|Win32.ActiveCfg = Release|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|x86.ActiveCfg = Release|x86
-		{E01B9141-8006-46D5-A76C-E80A8FC81CFC}.Release|x86.Build.0 = Release|x86
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|Win32.Build.0 = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Debug|x86.ActiveCfg = Debug|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|Any CPU.ActiveCfg = Release|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|Win32.ActiveCfg = Release|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|Win32.Build.0 = Release|Win32
-		{EEA7D95B-97F3-40E2-941C-0DC4F4598DE2}.Release|x86.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -78,7 +78,7 @@ namespace Questor.Modules.Activities
 
                 if (tractorBeams.Count > 0)
                 {
-                    RangeToConsiderWrecksDuringLootAll = tractorBeams.Min(t => t.OptimalRange);
+                    RangeToConsiderWrecksDuringLootAll = Math.Min(tractorBeams.Min(t => t.OptimalRange), Cache.Instance.ActiveShip.MaxTargetRange);
                 }
                 else
                 {
@@ -117,13 +117,8 @@ namespace Questor.Modules.Activities
                             return true;
                         }
 
-                        if (Settings.Instance.LootEverything)
-                        {
-                            Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
-                            return true;
-                        }
-
-                        return false;
+                        Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.UnlootedContainers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
+                        return true;
                     }
 
                     return false;

@@ -149,13 +149,20 @@ namespace Questor.Modules.Activities
             Cache.Instance.IsMissionPocketDone = true;
             Cache.Instance.UseDrones = Settings.Instance.UseDrones;
 
-            // We do not switch to "done" status if we still have drones out
-            if (Cache.Instance.ActiveDrones.Any()) return;
+            if (Cache.Instance.ActiveDrones.Any())
+            {
+                if (Settings.Instance.DebugDoneAction) Logging.Log("CombatMissionCtrl.Done", "We still have drones out! Wait for them to return.", Logging.Debug);
+                return;
+            }
 
             // Add bookmark (before we're done)
             if (Settings.Instance.CreateSalvageBookmarks)
             {
-                if (!BookmarkPocketForSalvaging()) return;
+                if (!BookmarkPocketForSalvaging())
+                {
+                    if (Settings.Instance.DebugDoneAction) Logging.Log("CombatMissionCtrl.Done", "Wait for CreateSalvageBookmarks to return true (it just returned false!)", Logging.Debug);
+                    return;
+                }
             }
 
             //
@@ -163,6 +170,7 @@ namespace Questor.Modules.Activities
             //
             Cache.Instance.CurrentlyShouldBeSalvaging = false;
             _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done;
+            if (Settings.Instance.DebugDoneAction) Logging.Log("CombatMissionCtrl.Done", "we are ready and have set [ _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Done ]", Logging.Debug);
             return;
         }
 

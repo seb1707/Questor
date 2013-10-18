@@ -345,7 +345,7 @@ namespace Questor.Modules.Caching
                 {
                     if (InvType.MinSell == null)
                     {
-                        return null;
+                        return 1;
                     }
 
                     return InvType.MedianSell / InvType.Volume;

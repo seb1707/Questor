@@ -143,52 +143,6 @@ namespace Questor.Modules.Activities
             return true;
         }
 
-        private void AddPriorityKillTargetsAndMoveIntoRangeAsNeeded(EntityCache target, double range, int targetedby, bool MoveShip)
-        {
-            if (target != null)
-            {
-                // Reset timeout
-                _clearPocketTimeout = null;
-                
-                // Combat.cs will Lock target if it is within weapons range (especially after we make it a PrimaryWeapons or Drone prioritytarget!)
-                if (target.Distance < range)
-                {
-                    //panic handles adding any priority targets and combat will prefer to kill any priority targets
-                    if (targetedby == 0 && DateTime.UtcNow > Cache.Instance.NextReload)
-                    {
-                        if (!Combat.ReloadAll(target)) return;
-                    }
-
-                    //Adds the target we want to kill to the priority list so that combat.cs will kill it (especially if it is an LCO this is important)
-                    if (!target.IsNPCFrigate)
-                    {
-                        Cache.Instance.AddPrimaryWeaponPriorityTargets(new[] {target}, PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
-
-                    if (Settings.Instance.DronesKillHighValueTargets || target.IsNPCFrigate) //killing of normal frigates and E-war frigates is handled by combat as needed, this is for killing big stuff w or drones (Dominix? ishtar?)
-                    {
-                        Cache.Instance.AddDronePriorityTargets(new[] {target}, DronePriority.LowPriorityTarget, "CombatMissionCtrl." + _pocketActions[_currentAction]);
-                    }
-                }
-
-                if (MoveShip)
-                {
-                    NavigateOnGrid.NavigateIntoRange(target, "CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], true);
-                }
-
-                if (target.Distance > range) //target is not in range...
-                {
-                    if (DateTime.UtcNow > Cache.Instance.NextReload)
-                    {
-                        //Logging.Log("CombatMissionCtrl." + _pocketActions[_currentAction] ,"ReloadAll: Reload weapons",Logging.teal);
-                        if (!Combat.ReloadAll(target)) return;
-                    }
-                }
-            }
-
-            return;
-        }
-
         private void DoneAction()
         {
             // Tell the drones module to retract drones

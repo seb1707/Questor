@@ -459,7 +459,24 @@ namespace Questor.Modules.Activities
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                     {
                         ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;        
-                    }        
+                    }
+                }
+                else
+                {
+                    Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
+                    if (Cache.Instance.UseDrones)
+                        Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
+                }
+
+                //
+                // retry to use PreferredPrimaryWeaponTarget
+                //
+                if (ClosestPotentialCombatTarget == null && Cache.Instance.PreferredPrimaryWeaponTargetID != null)
+                {
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+                    {
+                        ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;
+                    }
                 }
 
                 if (ClosestPotentialCombatTarget == null) //otherwise just grab something close (excluding sentries)
@@ -479,12 +496,7 @@ namespace Questor.Modules.Activities
                         NavigateOnGrid.NavigateIntoRange(ClosestPotentialCombatTarget, "combatMissionControl", true);
                     }
                 }
-                else
-                {
-                    Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
-                    if (Cache.Instance.UseDrones)
-                        Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
-                }
+                
                 _clearPocketTimeout = null;
             }
             //Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");

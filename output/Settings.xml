@@ -32,6 +32,7 @@
   <debugDisableGetBestTarget>false</debugDisableGetBestTarget>
   <debugDisableTargetCombatants>false</debugDisableTargetCombatants>
   <debugDisableNavigateIntoRange>false</debugDisableNavigateIntoRange>
+  <debugDoneState>false</debugDoneState>
   <debugDrones>false</debugDrones>
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>

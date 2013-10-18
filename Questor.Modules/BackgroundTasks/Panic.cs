@@ -532,9 +532,9 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
-                    bool isSafe = Cache.Instance.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct;
-                    isSafe &= Cache.Instance.ActiveShip.ShieldPercentage > Settings.Instance.SafeShieldPct;
-                    isSafe &= Cache.Instance.ActiveShip.ArmorPercentage > Settings.Instance.SafeArmorPct;
+                    bool isSafe = Cache.Instance.ActiveShip.CapacitorPercentage >= Settings.Instance.SafeCapacitorPct;
+                    isSafe &= Cache.Instance.ActiveShip.ShieldPercentage >= Settings.Instance.SafeShieldPct;
+                    isSafe &= Cache.Instance.ActiveShip.ArmorPercentage >= Settings.Instance.SafeArmorPct;
                     if (isSafe)
                     {
                         if (Cache.Instance.InSpace)

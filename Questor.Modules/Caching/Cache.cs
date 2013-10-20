@@ -1846,11 +1846,11 @@ namespace Questor.Modules.Caching
                 //
                 if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                 {
-                    foreach (PriorityTarget primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
+                    foreach (PriorityTarget _primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
                     {
-                        if (Cache.Instance.Entities.Any(i => i.Id != primaryWeaponPriorityTarget.EntityID))
+                        if (Cache.Instance.Entities.All(i => i.Id != _primaryWeaponPriorityTarget.EntityID))
                         {
-                            _primaryWeaponPriorityTargets.Remove(primaryWeaponPriorityTarget);
+                            _primaryWeaponPriorityTargets.Remove(_primaryWeaponPriorityTarget);
                             break;
                         }
                     }
@@ -1918,7 +1918,7 @@ namespace Questor.Modules.Caching
                 {
                     foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
                     {
-                        if (Cache.Instance.Entities.Any(i => i.Id != dronePriorityTarget.EntityID))
+                        if (Cache.Instance.Entities.All(i => i.Id != dronePriorityTarget.EntityID))
                         {
                             _dronePriorityTargets.Remove(dronePriorityTarget);
                             break;
@@ -2696,7 +2696,7 @@ namespace Questor.Modules.Caching
 
             if (targets.Any())
             {
-                removed = PrimaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+                removed = _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
             }
             return removed > 0;
         }
@@ -2709,7 +2709,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                PrimaryWeaponPriorityTargets.Remove(targetToRemove);
+                _primaryWeaponPriorityTargets.Remove(targetToRemove);
             }
             catch (Exception)
             {
@@ -2757,7 +2757,7 @@ namespace Questor.Modules.Caching
                         if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                         {
                             Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                            PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
+                            _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
                         }
                     }
 
@@ -2767,7 +2767,7 @@ namespace Questor.Modules.Caching
                 if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                 {
                     Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                    PrimaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
+                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
                 }
 
                 return;

@@ -2948,17 +2948,17 @@ namespace Questor.Modules.Caching
                                 }
                                 else
                                 {
-                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we are out of targeting slots!", Logging.White);
+                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
                                 }
                             }
                             else
                             {
-                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is out of range!", Logging.White);
+                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
                             }
                         }
                         else
                         {
-                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Cache.Instance.Targets.Count() + "] targets already, target is alread dead!", Logging.White);
+                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already dead!", Logging.White);
                         }
                     }
                     else

@@ -729,7 +729,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-
         private double? _maxTargetRange;
 
         public double MaxTargetRange
@@ -1887,12 +1886,11 @@ namespace Questor.Modules.Caching
                     {
                         _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity).ToList();
                         
-                        foreach (EntityCache _primaryWeaponPriorityEntity in _primaryWeaponPriorityEntities)
-                        {
-                            //_primaryWeaponPriorityEntity.InvalidateEntityCache();
-                            
-                            return _primaryWeaponPriorityEntities;
-                        }
+                        //foreach (EntityCache _primaryWeaponPriorityEntity in _primaryWeaponPriorityEntities)
+                        //{
+                        //    //_primaryWeaponPriorityEntity.InvalidateEntityCache();
+                        //}
+                        return _primaryWeaponPriorityEntities;
                     }
 
                     _primaryWeaponPriorityEntities = new List<EntityCache>();

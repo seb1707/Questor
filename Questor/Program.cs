@@ -36,6 +36,7 @@ namespace Questor
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.UtcNow;
+        public static DateTime NextSlotActivate = DateTime.UtcNow;
         private static string _scriptFile;
         private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
@@ -699,7 +700,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds) && DateTime.Now > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -709,6 +710,7 @@ namespace Questor
                         }
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
+                        NextSlotActivate = DateTime.UtcNow.AddSeconds(30);
                         slot.Activate();
                         return;
                     }

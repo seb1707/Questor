@@ -2740,7 +2740,7 @@ namespace Questor.Modules.Caching
         {
             if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
             {
-                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
+                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
                 return;
             }
 
@@ -3121,9 +3121,9 @@ namespace Questor.Modules.Caching
 
                     foreach (int _system in currentPath)
                     {
-                        if (currentPath[_system] < 6000000) // not a station
+                        if (_system < 6000000) // not a station
                         {
-                            DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[currentPath[_system]];
+                            DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[_system];
                             if (solarSystemInRoute != null)
                             {
                                 if (solarSystemInRoute.Security < 0.45)

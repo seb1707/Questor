@@ -101,7 +101,7 @@ namespace Questor.Modules.Caching
                 try
                 {
                     double? _maxRange = null;
-                    _maxRange = _module.Attributes.TryGet<double>("maxRange");
+                    //_maxRange = _module.Attributes.TryGet<double>("maxRange");
 
                     if (_maxRange == null || _maxRange == 0)
                     {

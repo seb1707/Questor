@@ -725,7 +725,7 @@ namespace Questor.Modules.Combat
             if (DateTime.UtcNow < Cache.Instance.NextNosAction) //if we just did something wait a fraction of a second
                 return;
 
-            List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS).ToList();
+            List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS || m.GroupId == (int)Group.Neutralizer).ToList();
 
             //Logging.Log("Combat: we have " + noses.Count.ToString() + " Nos modules");
             // Find the first active weapon
@@ -753,7 +753,7 @@ namespace Questor.Modules.Combat
 
                 //Logging.Log("Combat: Distances Target[ " + Math.Round(target.Distance,0) + " Optimal[" + nos.OptimalRange.ToString()+"]");
                 // Target is out of Nos range
-                if (target.Distance >= Settings.Instance.NosDistance)
+                if (target.Distance >= nos.MaxRange)
                     continue;
 
                 if (CanActivate(nos, target, false))
@@ -895,7 +895,7 @@ namespace Questor.Modules.Combat
                         continue;
 
                     // Target is out of RemoteRepair range
-                    if (target.Distance >= Settings.Instance.RemoteRepairDistance)
+                    if (target.Distance >= RemoteRepairer.MaxRange)
                         continue;
 
                     if (CanActivate(RemoteRepairer, target, false))

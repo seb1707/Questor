@@ -14,6 +14,7 @@ namespace Questor.Modules.Caching
     //using System.Collections.Generic;
     using DirectEve;
     using Questor.Modules.Lookup;
+    using Questor.Modules.Logging;
 
     public class ModuleCache
     {
@@ -91,6 +92,48 @@ namespace Questor.Modules.Caching
         public double FallOff
         {
             get { return _module.FallOff ?? 0; }
+        }
+
+        public double MaxRange
+        {
+            get
+            {
+                try
+                {
+                    double? _maxRange = null;
+                    _maxRange = _module.Attributes.TryGet<double>("maxRange");
+
+                    if (_maxRange == null || _maxRange == 0)
+                    {
+                        //
+                        // if we could not find the max range via EVE use the XML setting for RemoteRepairers
+                        //
+                        if (_module.GroupId == (int)Group.RemoteArmorRepairer || _module.GroupId == (int)Group.RemoteShieldRepairer || _module.GroupId == (int)Group.RemoteHullRepairer)
+                        {
+                            return Settings.Instance.RemoteRepairDistance;
+                        }
+                        //
+                        // if we could not find the max range via EVE use the XML setting for Nos/Neuts
+                        //
+                        if (_module.GroupId == (int)Group.NOS || _module.GroupId == (int)Group.Neutralizer)
+                        {
+                            return Settings.Instance.NosDistance;
+                        }
+                        //
+                        // Add other types of modules here?
+                        //
+                        return 0;
+                    }
+
+                    return (double)_maxRange;
+                }
+                catch(Exception ex)
+                {
+                    Logging.Log("ModuleCache.RemoteRepairDistance", "Exception [ " + ex + " ]", Logging.Debug);
+                }
+
+                return 0;
+            }            
         }
 
         public double Hp

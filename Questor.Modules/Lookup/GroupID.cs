@@ -66,6 +66,7 @@ namespace Questor.Modules.Lookup
         WarpDisruptor = 52, 
         StasisWeb = 65,
         NOS = 68,
+        Neutralizer = 71,
         TargetPainter = 379,
 
         EnergyWeapon = 53,

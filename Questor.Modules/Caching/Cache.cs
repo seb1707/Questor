@@ -3848,7 +3848,7 @@ namespace Questor.Modules.Caching
 
         public bool GetBestDroneTarget(double distance, bool highValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
         {
-            if (Settings.Instance.DebugDisableGetBestTarget)
+            if (Settings.Instance.DebugDisableGetBestTarget || !Cache.Instance.UseDrones)
             {
                 return true;
             }

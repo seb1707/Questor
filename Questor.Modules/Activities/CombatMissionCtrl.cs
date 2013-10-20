@@ -426,10 +426,10 @@ namespace Questor.Modules.Activities
                 else
                 {
                     Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
-                    if (Cache.Instance.UseDrones)
-                        Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
+                    Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 }
 
+                
                 //
                 // retry to use PreferredPrimaryWeaponTarget
                 //
@@ -446,11 +446,6 @@ namespace Questor.Modules.Activities
                     ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();    
                 }
                 
-                if (ClosestPotentialCombatTarget == null) //if we still have nothing, just grab any valid target
-                {
-                    ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.FirstOrDefault();
-                }
-
                 if (ClosestPotentialCombatTarget != null && (ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange || !ClosestPotentialCombatTarget.IsInOptimalRange))
                 {
                     if (!Cache.Instance.IsApproachingOrOrbiting(ClosestPotentialCombatTarget.Id))
@@ -1225,7 +1220,7 @@ namespace Questor.Modules.Activities
                     if (currentKillTarget != null) //if it is not null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
                         if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " proceeding to kill the target (this is spammy, but useful debug info)", Logging.White);
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe && Cache.Instance.PreferredPrimaryWeaponTarget != currentKillTarget)
+                        if (Cache.Instance.PreferredPrimaryWeaponTargetID == null || !Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe && Cache.Instance.PreferredPrimaryWeaponTarget != currentKillTarget)
                         {
                             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "][" + Cache.Instance.MaskedID(currentKillTarget.Id) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
                             Cache.Instance.AddPrimaryWeaponPriorityTarget(killTargets.FirstOrDefault(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.Kill", true);
@@ -1264,10 +1259,7 @@ namespace Questor.Modules.Activities
                 
                 // GetTargets
                 Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
-                if (Cache.Instance.UseDrones)
-                {
-                    Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
-                }
+                Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
             }
 
             // Don't use NextAction here, only if target is killed (checked further up)

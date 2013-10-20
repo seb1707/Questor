@@ -1677,6 +1677,7 @@ namespace Questor.Modules.Combat
                         {
                             if (!Cache.Instance.InMission || Settings.Instance.SpeedTank)
                             {
+                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("Combat","Navigate Toward the Closest Preferred PWPT",Logging.Debug);
                                 NavigateOnGrid.NavigateIntoRange(killTarget, "Combat", Cache.Instance.normalNav);    
                             }
 

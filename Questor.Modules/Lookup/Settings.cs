@@ -586,6 +586,97 @@ namespace Questor.Modules.Lookup
 
         public bool DefaultSettingsLoaded;
 
+        private void LoadMissionBlackList(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //{
+                //
+                // Mission Blacklist
+                //
+                MissionBlacklist.Clear();
+                XElement xmlElementBlackListSection = CharacterSettingsXml.Element("blacklist") ?? CommonSettingsXml.Element("blacklist");
+                if (xmlElementBlackListSection != null)
+                {
+                    Logging.Log("Settings", "Loading Mission Blacklist", Logging.White);
+                    int i = 1;
+                    foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
+                    {
+                        MissionBlacklist.Add((string)BlacklistedMission);
+                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
+                        i++;
+                    }
+                    Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
+                }
+                //}
+
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionBlackList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
+        private void LoadMissionGreyList(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //{
+                //
+                // Mission Greylist
+                //
+                MissionGreylist.Clear();
+                XElement xmlElementGreyListSection = CharacterSettingsXml.Element("greylist") ?? CommonSettingsXml.Element("greylist");
+
+                if (xmlElementGreyListSection != null)
+                {
+                    Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
+                    int i = 1;
+                    foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
+                    {
+                        MissionGreylist.Add((string)GreylistedMission);
+                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
+                        i++;
+                    }
+                    Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
+                }
+                //}
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionGreyList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
+        private void LoadFactionBlacklist(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //
+                // Faction Blacklist
+                //
+                FactionBlacklist.Clear();
+                XElement factionblacklist = CharacterSettingsXml.Element("factionblacklist") ?? CommonSettingsXml.Element("factionblacklist");
+                if (factionblacklist != null)
+                {
+                    Logging.Log("Settings", "Loading Faction Blacklist", Logging.White);
+                    foreach (XElement faction in factionblacklist.Elements("faction"))
+                    {
+                        Logging.Log("Settings", "        Missions from the faction [" + (string)faction + "] will be declined", Logging.White);
+                        FactionBlacklist.Add((string)faction);
+                    }
+
+                    Logging.Log("Settings", "        Faction Blacklist now has [" + FactionBlacklist.Count + "] entries", Logging.White);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionGreyList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
         public void ReadSettingsFromXML(XElement CharacterSettingsXml)
         {
             Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
@@ -1313,66 +1404,11 @@ namespace Questor.Modules.Lookup
                 }
             }
 
+            LoadMissionBlackList(CharacterSettingsXml, CommonSettingsXml);
 
-            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-            //{
-            //
-            // Mission Blacklist
-            //
-            MissionBlacklist.Clear();
-            XElement xmlElementBlackListSection = CharacterSettingsXml.Element("blacklist") ?? CommonSettingsXml.Element("blacklist");
-            if (xmlElementBlackListSection != null)
-            {
-                Logging.Log("Settings", "Loading Mission Blacklist", Logging.White);
-                int i = 1;
-                foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
-                {
-                    MissionBlacklist.Add((string)BlacklistedMission);
-                    if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
-                    i++;
-                }
-                Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
-            }
-            //}
-
-            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-            //{
-            //
-            // Mission Greylist
-            //
-            MissionGreylist.Clear();
-            XElement xmlElementGreyListSection = CharacterSettingsXml.Element("greylist") ?? CommonSettingsXml.Element("greylist");
-
-            if (xmlElementGreyListSection != null)
-            {
-                Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
-                int i = 1;
-                foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
-                {
-                    MissionGreylist.Add((string)GreylistedMission);
-                    if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
-                    i++;
-                }
-                Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
-            }
-            //}
-
-            //
-            // Faction Blacklist
-            //
-            FactionBlacklist.Clear();
-            XElement factionblacklist = CharacterSettingsXml.Element("factionblacklist") ?? CommonSettingsXml.Element("factionblacklist");
-            if (factionblacklist != null)
-            {
-                Logging.Log("Settings", "Loading Faction Blacklist", Logging.White);
-                foreach (XElement faction in factionblacklist.Elements("faction"))
-                {
-                    Logging.Log("Settings", "        Missions from the faction [" + (string)faction + "] will be declined", Logging.White);
-                    FactionBlacklist.Add((string)faction);
-                }
-
-                Logging.Log("Settings", "        Faction Blacklist now has [" + FactionBlacklist.Count + "] entries", Logging.White);
-            }
+            LoadMissionGreyList(CharacterSettingsXml, CommonSettingsXml);
+            
+            LoadFactionBlacklist(CharacterSettingsXml, CommonSettingsXml);
         }
 
         public void LoadSettings()

@@ -590,6 +590,7 @@
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
+                                sayOk |= window.Html.Contains("You have already selected a character for this session.");
 
                                 //
                                 // Not Enough Shelf Space

@@ -419,7 +419,10 @@
   <addWarpScramblersToDronePriorityTargetList>true</addWarpScramblersToDronePriorityTargetList>
   <!-- Use Drones on Targets that use Webifiers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWebifiersToDronePriorityTargetList>true</addWebifiersToDronePriorityTargetList>
-    
+ 
+  <!-- This logs to the console (and console log) the current PrimaryWeapon and Drone priorityTargets every x seconds, whatever you specify -->
+  <listPriorityTargetsEveryXSeconds>300</listPriorityTargetsEveryXSeconds>
+ 
   <!-- MaxRange we should use NOS / Neuts -->
   <NosDistance>38000</NosDistance>
   

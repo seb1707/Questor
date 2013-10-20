@@ -427,6 +427,8 @@ namespace Questor.Modules.Lookup
         public bool AddECMsToDroneTargetList { get; set; }
         public bool AddTrackingDisruptorsToDronePriorityTargetList { get; set; }
 
+        public double ListPriorityTargetsEveryXSeconds { get; set; } 
+
         public double InsideThisRangeIsHardToTrack { get; set; }
         //
         // Script Settings - TypeIDs for the scripts you would like to use in these modules
@@ -1052,6 +1054,8 @@ namespace Questor.Modules.Lookup
             AddTrackingDisruptorsToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? true;
             AddWarpScramblersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? true;
             AddWebifiersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? true;
+
+            ListPriorityTargetsEveryXSeconds = (double?)CharacterSettingsXml.Element("listPriorityTargetsEveryXSeconds") ?? (double?)CommonSettingsXml.Element("listPriorityTargetsEveryXSeconds") ?? 900;
 
             InsideThisRangeIsHardToTrack = (double?)CharacterSettingsXml.Element("insideThisRangeIsHardToTrack") ?? (double?)CommonSettingsXml.Element("insideThisRangeIsHardToTrack") ?? 15000;
 

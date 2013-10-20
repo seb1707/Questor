@@ -166,7 +166,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                         }
 
-                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
+                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalSeconds) > Settings.Instance.ListPriorityTargetsEveryXSeconds)
                         {
                             _lastPriorityTargetLogging = DateTime.UtcNow;
 

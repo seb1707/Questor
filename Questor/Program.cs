@@ -54,6 +54,7 @@ namespace Questor
         private const int RandStartDelay = 30; //Random startup delay in minutes
         private static readonly Random R = new Random();
         public static bool StopTimeSpecified; //false;
+        private static int ServerStatusCheck = 0;
 
         private static DateTime _nextPulse;
         public static DateTime StartTime = DateTime.MaxValue;
@@ -674,8 +675,18 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
-                Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
-                _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                if (ServerStatusCheck <= 6)
+                {
+                    Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
+                    ServerStatusCheck++;
+                    _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                    return;
+                }
+                ServerStatusCheck = 0;
+                Cache.Instance.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
+                Logging.Log("Startup", Cache.Instance.ReasonToStopQuestor, Logging.Red);
+                Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                 return;
             }
 

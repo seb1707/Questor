@@ -992,6 +992,157 @@ namespace Questor.Modules.Combat
             return true;
         }
 
+        private static void TargetCombatants2()
+        {
+            if ((Cache.Instance.InSpace && Cache.Instance.InWarp) // When in warp we should not try to target anything
+                    || Cache.Instance.InStation //How can we target if we are in a station?
+                    || DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
+                    || !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
+                    || Settings.Instance.DebugDisableTargetCombatants
+                )
+            {
+                return;
+            }
+
+            maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
+            maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
+            //maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
+
+            #region Debugging for listing possible targets
+            if (Settings.Instance.DebugTargetCombatants)
+            {
+                int i = 0;
+                if (Cache.Instance.PotentialCombatTargets.Any())
+                {
+                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets below", Logging.Debug);
+
+                    foreach (EntityCache t in Cache.Instance.PotentialCombatTargets)
+                    {
+                        i++;
+                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
+                        continue;
+                    }
+                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
+                }
+                else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
+                                                                 && !e.IsIgnored
+                                                                 && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                                 && (e.IsNpc || e.IsNpcByGroupID)
+                                                                 && !e.IsContainer
+                                                                 && !e.IsFactionWarfareNPC
+                                                                 && !e.IsEntityIShouldLeaveAlone
+                                                                 && (!e.IsBadIdea || e.IsAttacking)
+                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)))
+                {
+                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
+                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);
+
+                    foreach (EntityCache t in Cache.Instance.EntitiesNotSelf.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                 && (e.IsNpc || e.IsNpcByGroupID)
+                                                                 && !e.IsContainer
+                                                                 && !e.IsFactionWarfareNPC
+                                                                 && !e.IsEntityIShouldLeaveAlone
+                                                                 && (!e.IsBadIdea || e.IsAttacking)
+                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
+                                                                 && !e.IsIgnored))
+                    {
+                        i++;
+                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
+                        continue;
+                    }
+
+                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities above", Logging.Debug);
+                }
+            }
+            #endregion
+
+            #region ECM Jamming checks
+            //
+            // First, can we even target?
+            // We are ECM'd / jammed, forget targeting anything...
+            //
+            if (Cache.Instance.MaxLockedTargets == 0)
+            {
+                if (!_isJammed)
+                {
+                    Logging.Log("Combat", "We are jammed and can not target anything", Logging.Orange);
+                }
+
+                _isJammed = true;
+                return;
+            }
+
+            if (_isJammed)
+            {
+                // Clear targeting list as it does not apply
+                Cache.Instance.TargetingIDs.Clear();
+                Logging.Log("Combat", "We are no longer jammed, retargeting", Logging.Teal);
+            }
+
+            _isJammed = false;
+            #endregion
+
+            #region Current active targets/targeting
+            //
+            // What do we currently have targeted?
+            // Get our current targets/targetting
+            //
+
+            // Get lists of the current high and low value targets
+            try
+            {
+                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
+            }
+            catch (NullReferenceException) { }
+
+            try
+            {
+                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
+            }
+            catch (NullReferenceException) { }
+
+            int targetsTargeted = __highValueTargetsTargeted.Count() + __lowValueTargetsTargeted.Count();
+            #endregion
+
+           #region Targeting using priority
+            IEnumerable<EntityCache> primaryWeaponTargetsToTarget = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe)
+                                                                .OrderByDescending(e => Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == e.Id)
+                                                                .Take(maxHighValueTargets).ToList();
+            IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe)
+                                                                .Where(e => primaryWeaponTargetsToTarget.All(wt => wt.Id != e.Id))
+                                                                .OrderByDescending(e => Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Id == e.Id)
+                                                                .Take(maxLowValueTargets).ToList();
+            IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded));
+
+            // Untarget stuff
+            foreach (EntityCache target in activeTargets)
+            {
+                if (primaryWeaponTargetsToTarget.All(e => e.Id != target.Id) && droneTargetsToTarget.All(e => e.Id != target.Id) && !target.IsContainer)
+                {
+                    Logging.Log("Combat", "Target [" + target.Name + "] does not need to be shot at the moment, untargeting", Logging.Green);
+                    target.UnlockTarget("Combat");
+                    return;
+                }
+            }
+
+            int totalTargets = Cache.Instance.Entities.Count(e => (e.IsTargeting || e.IsTarget));
+
+            // Target a weapon target
+            EntityCache toTarget = primaryWeaponTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxRange);
+            // If we targeted all highValueTargets already take a lowvaluetarget
+            if (toTarget == null)
+            {
+                toTarget = droneTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxRange);
+            }
+
+            if (toTarget != null && totalTargets < maxTotalTargets)
+            {
+                Logging.Log("Combat", "Target [" + toTarget.Name + "] as a priority target.", Logging.Green);
+                toTarget.LockTarget("Combat");
+                return;
+            }
+            #endregion
+        }
         /// <summary> Target combatants
         /// </summary>
         private static void TargetCombatants()
@@ -1664,7 +1815,7 @@ namespace Questor.Modules.Combat
                 {
                     case CombatState.CheckTargets:
                         _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the outofammo state)
-                        TargetCombatants();
+                        TargetCombatants2();
                         break;
 
                     case CombatState.KillTargets:

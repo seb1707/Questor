@@ -3268,40 +3268,35 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> targets = _potentialTargets != null ? _potentialTargets : PotentialCombatTargets;
+            IEnumerable<EntityCache> BestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets;
             long currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
             long preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
 
-            targets = targets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                  .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid && e.IsTarget))
+            BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                                                  .Where(t => !Cache.Instance.Entities.Any(e => e.Id == t.Id && !e.IsValid && e.IsTarget))
                                                   .OrderByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
                                                   .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                   .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
-                                                  .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
-                                                  .ThenByDescending(t => t.IsWebbingMe)
-                                                  .ThenByDescending(t => t.IsEwarTarget)                                  // Will return True if the target ever eward us (look at caching changes for ewar)
-                                                  //.ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets over currently targeting entities will make us switch targets more often what we dont want and our weapons will be on cooldown when we can finaly hit that scrambler for example */
+                                                  .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                      // WarpScram over Webs over any other EWAR
                                                   .ThenByDescending(t => t.Id == currentWeaponId)                           // Lets keep shooting
                                                   .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
                                                   .ThenByDescending(t => t.IsInOptimalRange)
                                                   .ThenBy(t => t.Distance);
 
-            return targets;
+            return BestPrimaryWeaponTargets;
         }
 
         public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> targets = _potentialTargets ?? PotentialCombatTargets;
+            IEnumerable<EntityCache> BestDroneTargets = _potentialTargets ?? PotentialCombatTargets;
             //long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
             long preferredTargetId = Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget.Id : -1;
 
-            targets = targets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                          .Where(t => !Entities.Any(e => e.Id == t.Id && !e.IsValid))
+            BestDroneTargets = BestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                                                          .Where(t => !Cache.Instance.Entities.Any(e => e.Id == t.Id && !e.IsValid))
                                                           .Where(t => t.Distance < Settings.Instance.DroneControlRange)
                                                           .OrderByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
-                                                          .ThenByDescending(t => t.IsWarpScramblingMe)                                 // WarpScram over Webs over any other EWAR
-                                                          .ThenByDescending(t => t.IsWebbingMe)
-                                                          .ThenByDescending(t => t.IsEwarTarget)                                  // Will return True if the target ever eward us (look at caching changes for ewar)
+                                                          .ThenByDescending(t => t.DronePriorityLevel)
                                                           .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                           .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
                                                                                                                                      * over currently targeting entities will make us switch targets more often what we dont want
@@ -3311,7 +3306,7 @@ namespace Questor.Modules.Caching
                                                           .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.Distance);
 
-            return targets;
+            return BestDroneTargets;
         }
 
         public EntityCache FindPrimaryWeaponPriorityTarget(EntityCache currentTarget, PrimaryWeaponPriority priorityType, bool AddECMTypeToPrimaryWeaponPriorityTargetList, double Distance, bool FindAUnTargetedEntity = true)

@@ -905,6 +905,7 @@ namespace Questor.Modules.Combat
                         //unlockThisHighValueTarget = Cache.Instance.GetBestWeaponTargets((double)Distances.OnGridWithMe).Where(t => t.IsTarget && highValueTargetsTargeted.Any(e => t.Id == e.Id)).LastOrDefault();
 
                         unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h =>  (h.IsTarget && h.IsIgnored)
+                                                                                        || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget && !h.IsPrimaryWeaponPriorityTarget && !h.IsPriorityWarpScrambler && !h.IsInOptimalRange && Cache.Instance.PotentialCombatTargets.Count() >= 3))
                                                                                         || (h.IsTarget && (!h.isPreferredPrimaryWeaponTarget && !h.IsDronePriorityTarget && h.IsHigherPriorityPresent && !h.IsPrimaryWeaponPriorityTarget && __highValueTargetsTargeted.Count() == maxHighValueTargets) && !h.IsPriorityWarpScrambler))
                                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                                         .ThenByDescending(t => t.Distance)
@@ -918,7 +919,7 @@ namespace Questor.Modules.Combat
             {
                 try
                 {
-                unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget && h.IsIgnored && !h.IsPriorityWarpScrambler)
+                    unlockThisHighValueTarget = __highValueTargetsTargeted.Where(h => h.IsTarget && h.IsIgnored && !h.IsPriorityWarpScrambler)
                                                                         .OrderByDescending(t => t.Distance > Cache.Instance.MaxRange)
                                                                         .ThenByDescending(t => t.Distance)
                                                                         .FirstOrDefault();
@@ -952,8 +953,9 @@ namespace Questor.Modules.Combat
                 try
                 {
                     unlockThisLowValueTarget = __lowValueTargetsTargeted.Where(h => (h.IsTarget && h.IsIgnored)
-                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget  && !h.IsPrimaryWeaponPriorityTarget && !Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget  && !h.IsPriorityWarpScrambler && __lowValueTargetsTargeted.Count() == maxLowValueTargets))
-                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget  && !h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent && !h.IsPriorityWarpScrambler && __lowValueTargetsTargeted.Count() == maxLowValueTargets)))
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget && !h.IsPrimaryWeaponPriorityTarget && !h.IsPriorityWarpScrambler && !h.IsInOptimalRange && Cache.Instance.PotentialCombatTargets.Count() >= 3))
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget && !h.IsPrimaryWeaponPriorityTarget && !h.IsPriorityWarpScrambler && __lowValueTargetsTargeted.Count() == maxLowValueTargets))
+                                                                                 || (h.IsTarget && (!h.isPreferredDroneTarget && !h.IsDronePriorityTarget && !h.isPreferredPrimaryWeaponTarget && !h.IsPrimaryWeaponPriorityTarget && h.IsHigherPriorityPresent && !h.IsPriorityWarpScrambler && __lowValueTargetsTargeted.Count() == maxLowValueTargets)))
                                                                                  .OrderByDescending(t => t.Distance < (Cache.Instance.UseDrones ? Settings.Instance.DroneControlRange : Cache.Instance.WeaponRange))
                                                                                 .ThenByDescending(t => t.Nearest5kDistance)
                                                                                 .FirstOrDefault();
@@ -1446,6 +1448,7 @@ namespace Questor.Modules.Combat
 
                     if (highValueTargetingMeEntity != null
                         && highValueTargetingMeEntity.IsReadyToTarget
+                        && highValueTargetingMeEntity.IsInOptimalRangeOrNothingElseAvail
                         && highValueTargetingMeEntity.Distance < Cache.Instance.MaxRange
                         && !highValueTargetingMeEntity.IsIgnored
                         && highValueTargetingMeEntity.LockTarget("TargetCombatants.HighValueTargetingMeEntity"))
@@ -1498,6 +1501,7 @@ namespace Questor.Modules.Combat
 
                     if (lowValueTargetingMeEntity != null
                         && lowValueTargetingMeEntity.IsReadyToTarget
+                        && lowValueTargetingMeEntity.IsInOptimalRangeOrNothingElseAvail
                         && lowValueTargetingMeEntity.Distance < Cache.Instance.WeaponRange
                         && lowValueTargetingMeEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                         && !lowValueTargetingMeEntity.IsIgnored
@@ -1587,6 +1591,7 @@ namespace Questor.Modules.Combat
                 EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
                 if (TargetThisNotYetAggressiveNPC != null
                     && TargetThisNotYetAggressiveNPC.IsReadyToTarget
+                    && TargetThisNotYetAggressiveNPC.IsInOptimalRangeOrNothingElseAvail
                     && TargetThisNotYetAggressiveNPC.Nearest5kDistance < Cache.Instance.MaxRange
                     && !TargetThisNotYetAggressiveNPC.IsIgnored
                     && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))

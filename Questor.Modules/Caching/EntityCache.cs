@@ -783,6 +783,37 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsInOptimalRangeOrNothingElseAvail
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (IsInOptimalRange)
+                        {
+                            return true;
+                        }
+                        
+                        if (!Cache.Instance.Targets.Any())
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
         public bool IsInDroneRange
         {
             get

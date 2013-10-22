@@ -1242,7 +1242,7 @@ namespace Questor.Behaviors
                             closest.Approach();
                         }
                     }
-                    else
+                    else if (closest != null)
                     {
                         // Probably never happens
                         if (DateTime.UtcNow > Cache.Instance.NextWarpTo)

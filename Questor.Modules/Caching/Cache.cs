@@ -2186,11 +2186,11 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Return entities by name
         /// </summary>
-        /// <param name = "name"></param>
+        /// <param name = "nameToSearchFor"></param>
         /// <returns></returns>
-        public IEnumerable<EntityCache> EntitiesByName(string name)
+        public IEnumerable<EntityCache> EntitiesByName(string nameToSearchFor)
         {
-            return Entities.Where(e => e.Name.ToLower() == name.ToLower()).ToList();
+            return Cache.Instance.Entities.Where(e => e.Name.ToLower() == nameToSearchFor.ToLower()).ToList();
         }
 
         /// <summary>
@@ -2200,12 +2200,22 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public EntityCache EntityByName(string name)
         {
-            return Entities.FirstOrDefault(e => System.String.Compare(e.Name, name, System.StringComparison.OrdinalIgnoreCase) == 0);
+            return Cache.Instance.Entities.FirstOrDefault(e => System.String.Compare(e.Name, name, System.StringComparison.OrdinalIgnoreCase) == 0);
         }
 
-        public IEnumerable<EntityCache> EntitiesByNamePart(string name)
+        public IEnumerable<EntityCache> EntitiesByPartialName(string nameToSearchFor)
         {
-            return Entities.Where(e => e.Name.ToLower().Contains(name.ToLower())).ToList();
+            IEnumerable<EntityCache> _entitiesByPartialName = Cache.Instance.Entities.Where(e => e.Name.Contains(nameToSearchFor)).ToList();
+            if(_entitiesByPartialName != null && !_entitiesByPartialName.Any())
+            {
+                _entitiesByPartialName = Cache.Instance.Entities.Where(e => e.Name == nameToSearchFor).ToList();
+            }
+            if (_entitiesByPartialName != null && !_entitiesByPartialName.Any())
+            {
+                _entitiesByPartialName = null;
+            }
+
+            return _entitiesByPartialName;
         }
 
         /// <summary>
@@ -2214,7 +2224,7 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public IEnumerable<EntityCache> EntitiesThatContainTheName(string label)
         {
-            return Entities.Where(e => !string.IsNullOrEmpty(e.Name) && e.Name.ToLower().Contains(label.ToLower())).ToList();
+            return Cache.Instance.Entities.Where(e => !string.IsNullOrEmpty(e.Name) && e.Name.ToLower().Contains(label.ToLower())).ToList();
         }
 
         /// <summary>
@@ -2229,7 +2239,7 @@ namespace Questor.Modules.Caching
                 return _entitiesById[id];
             }
 
-            EntityCache entity = Entities.FirstOrDefault(e => e.Id == id);
+            EntityCache entity = Cache.Instance.Entities.FirstOrDefault(e => e.Id == id);
             _entitiesById[id] = entity;
             return entity;
         }
@@ -2792,7 +2802,7 @@ namespace Questor.Modules.Caching
 
         public void AddPrimaryWeaponPriorityTargetsByName(String stringEntitiesToAdd)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByNamePart(stringEntitiesToAdd).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByPartialName(stringEntitiesToAdd).ToList();
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)
@@ -2824,7 +2834,7 @@ namespace Questor.Modules.Caching
 
         public void AddDronePriorityTargetsByName(String stringEntitiesToAdd)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByNamePart(stringEntitiesToAdd).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByPartialName(stringEntitiesToAdd).ToList();
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)
@@ -3269,12 +3279,12 @@ namespace Questor.Modules.Caching
         public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
             IEnumerable<EntityCache> BestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets;
-            long currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
-            long preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTarget != null ? Cache.Instance.PreferredPrimaryWeaponTarget.Id : -1;
+            long? currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
+            long? preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTargetID ?? -1;
 
             BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                  .Where(t => !Cache.Instance.Entities.Any(e => e.Id == t.Id && !e.IsValid && e.IsTarget))
-                                                  .OrderByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
+                                                  .OrderByDescending(t => t.isPreferredPrimaryWeaponTarget)
+                                                  .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
                                                   .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                                                   .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                   .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                      // WarpScram over Webs over any other EWAR
@@ -3290,12 +3300,12 @@ namespace Questor.Modules.Caching
         {
             IEnumerable<EntityCache> BestDroneTargets = _potentialTargets ?? PotentialCombatTargets;
             //long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
-            long preferredTargetId = Cache.Instance.PreferredDroneTarget != null ? Cache.Instance.PreferredDroneTarget.Id : -1;
+            long? preferredTargetId = Cache.Instance.PreferredDroneTargetID ?? -1;
 
             BestDroneTargets = BestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                          .Where(t => !Cache.Instance.Entities.Any(e => e.Id == t.Id && !e.IsValid))
                                                           .Where(t => t.Distance < Settings.Instance.DroneControlRange)
-                                                          .OrderByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
+                                                          .OrderByDescending(t => t.isPreferredDroneTarget)
+                                                          .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                                                           .ThenByDescending(t => t.DronePriorityLevel)
                                                           .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
                                                           .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 

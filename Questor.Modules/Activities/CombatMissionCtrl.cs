@@ -416,7 +416,7 @@ namespace Questor.Modules.Activities
                 //
                 // grab the preferredPrimaryWeaponsTarget if its defined and exists on grid as our navigation point
                 //
-                if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
+                if (Cache.Instance.PreferredPrimaryWeaponTargetID != null && Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                     {
@@ -586,7 +586,7 @@ namespace Questor.Modules.Activities
                 return;
             }
                
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByNamePart(target).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByPartialName(target).ToList();
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action

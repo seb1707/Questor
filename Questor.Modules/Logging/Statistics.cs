@@ -275,22 +275,22 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool ListPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> primaryWeaponPriorityTargets)
+        public static bool ListPrimaryWeaponPriorityTargets()
         {
             Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsValid)
             {
                 Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
             }
 
-            primaryWeaponPriorityTargets = primaryWeaponPriorityTargets.ToList();
-            if (primaryWeaponPriorityTargets.Any())
+            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
             {
                 int icount = 0;
-                foreach (EntityCache primaryWeaponPriorityTarget in primaryWeaponPriorityTargets.OrderBy(i => i.PrimaryWeaponPriorityLevel).ThenBy(i => i.Name))
+                foreach (EntityCache primaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityEntities.OrderBy(i => i.PrimaryWeaponPriorityLevel).ThenBy(i => i.Name))
                 {
+                    if (!primaryWeaponPriorityEntity.IsOnGridWithMe) continue;
                     icount++;
-                    Logging.Log(icount.ToString(), "[" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityTarget.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityTarget.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityTarget.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "[" + primaryWeaponPriorityEntity.Name + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityEntity.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityEntity.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
             Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
@@ -1045,7 +1045,7 @@ namespace Questor.Modules.Logging
                         {
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                            Statistics.ListPrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
+                            Statistics.ListPrimaryWeaponPriorityTargets();
                         }
                     }
                     break;

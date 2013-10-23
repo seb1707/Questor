@@ -433,7 +433,7 @@ namespace Questor.Modules.Activities
                 //
                 // retry to use PreferredPrimaryWeaponTarget
                 //
-                if (ClosestPotentialCombatTarget == null && Cache.Instance.PreferredPrimaryWeaponTargetID != null)
+                if (ClosestPotentialCombatTarget == null && Cache.Instance.PreferredPrimaryWeaponTargetID != null && Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                     {

@@ -466,7 +466,6 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (!Cache.Instance.OpenCargoHold("Salvage")) return;
             List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
             
@@ -800,8 +799,6 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Settings.Instance.DoNotDoANYSalvagingOutsideMissionActions && !Cache.Instance.CurrentlyShouldBeSalvaging)
                 return;
-
-            if (!Cache.Instance.OpenCargoHold("Salvage")) return;
 
             switch (_States.CurrentSalvageState)
             {

@@ -17,12 +17,20 @@ namespace Questor.Modules.Misc
         {
             if (Settings.Instance.UseInnerspace)
             {
+                //Autostart on/off
                 LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);
+                LavishScript.Commands.AddCommand("AutoStart", SetAutoStart);
+                //Direct3d on/off
                 LavishScript.Commands.AddCommand("SetDisable3D", SetDisable3D);
+                LavishScript.Commands.AddCommand("Disable3D", SetDisable3D);
+                //GotoBase
+                LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
+                LavishScript.Commands.AddCommand("GotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
+                //misc other commands
+                LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
+                LavishScript.Commands.AddCommand("Idle", SetQuestorStatetoIdle);
                 LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
-                LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
-                LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
                 LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
                 LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
@@ -36,17 +44,25 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListIgnoredTargets", ListIgnoredTargets);
                 LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
                 LavishScript.Commands.AddCommand("ListPWPT", ListPrimaryWeaponPriorityTargets);
+                LavishScript.Commands.AddCommand("PWPT", ListPrimaryWeaponPriorityTargets);
                 LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
+                LavishScript.Commands.AddCommand("DPT", ListDronePriorityTargets);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
                 LavishScript.Commands.AddCommand("ListItemHangarItems", ListItemHangarItems);
+                LavishScript.Commands.AddCommand("ListItemHangar", ListItemHangarItems);
                 //LavishScript.Commands.AddCommand("ListAmmoHangarItems", ListAmmoHangarItems);
                 LavishScript.Commands.AddCommand("ListLootHangarItems", ListLootHangarItems);
+                LavishScript.Commands.AddCommand("ListLootHangar", ListLootHangarItems);
                 LavishScript.Commands.AddCommand("ListLootContainerItems", ListLootContainerItems);
                 LavishScript.Commands.AddCommand("AddWarpScramblerByName", AddWarpScramblerByName);
+                LavishScript.Commands.AddCommand("AddWarpScrambler", AddWarpScramblerByName);
                 LavishScript.Commands.AddCommand("AddWebifierByName", AddWebifierByName);
+                LavishScript.Commands.AddCommand("AddWebifier", AddWebifierByName);
                 LavishScript.Commands.AddCommand("AddIgnoredTarget", AddIgnoredTarget);
+                LavishScript.Commands.AddCommand("AddIgnored", AddIgnoredTarget);
                 LavishScript.Commands.AddCommand("RemoveIgnoredTarget", RemoveIgnoredTarget);
+                LavishScript.Commands.AddCommand("RemoveIgnored", RemoveIgnoredTarget);
                 LavishScript.Commands.AddCommand("AddDronePriorityTargetsByName", AddDronePriorityTargetsByName);
                 LavishScript.Commands.AddCommand("AddDPT", AddDronePriorityTargetsByName);
                 LavishScript.Commands.AddCommand("RemovedDronePriorityTargetsByName", RemovedDronePriorityTargetsByName);

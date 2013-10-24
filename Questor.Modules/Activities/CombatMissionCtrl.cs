@@ -1108,10 +1108,6 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            // GetTargets
-            Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
-            Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
-
             if (ignoreAttackers)
             {
                 foreach (EntityCache target in Cache.Instance.PotentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
@@ -1276,6 +1272,14 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
+
+                if (Cache.Instance.PreferredPrimaryWeaponTarget != killTargets.FirstOrDefault())
+                {
+                    // GetTargets
+                    Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());    
+                }
+
+                Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
             }
 
             // Don't use NextAction here, only if target is killed (checked further up)

@@ -1108,6 +1108,10 @@ namespace Questor.Modules.Activities
                 return;
             }
 
+            // GetTargets
+            Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
+            Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
+
             if (ignoreAttackers)
             {
                 foreach (EntityCache target in Cache.Instance.PotentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
@@ -1171,24 +1175,32 @@ namespace Questor.Modules.Activities
             }
             else //Do not break aggression on attackers (attack normally)
             {
+                
                 //
                 // check to see if we have priority targets (ECM, warp scramblers, etc, and let combat process those first)
                 //
                 EntityCache primaryWeaponPriorityTarget = null;
-                try
+                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
                 {
-                    primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Cache.Instance.MaxRange
-                                                                                && p.IsReadyToShoot
-                                                                                && p.IsOnGridWithMe
-                                                                                && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
-                                                                               .OrderByDescending(pt => pt.IsTargetedBy)
-                                                                               .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                               .ThenByDescending(pt => pt.IsEwarTarget)
-                                                                               .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
-                                                                               .ThenBy(pt => pt.Distance)
-                                                                               .FirstOrDefault();
+                    try
+                    {
+                        primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Cache.Instance.MaxRange
+                                                                                    && p.IsReadyToShoot
+                                                                                    && p.IsOnGridWithMe
+                                                                                    && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
+                                                                                   .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                                   .ThenByDescending(pt => pt.IsInOptimalRange)
+                                                                                   .ThenByDescending(pt => pt.IsEwarTarget)
+                                                                                   .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                                   .ThenBy(pt => pt.Distance)
+                                                                                   .FirstOrDefault();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log("CombatMissionCtrl.Kill","Exception [" + ex + "]",Logging.Debug);
+                    } 
                 }
-                catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
+
 
                 if (primaryWeaponPriorityTarget != null && primaryWeaponPriorityTarget.IsOnGridWithMe)
                 {
@@ -1243,7 +1255,6 @@ namespace Questor.Modules.Activities
                             }
                         }
 
-
                         //we may need to get closer so combat will take over
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange || !Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange)
                         {
@@ -1256,10 +1267,6 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-                
-                // GetTargets
-                Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());
-                Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());
             }
 
             // Don't use NextAction here, only if target is killed (checked further up)

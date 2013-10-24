@@ -920,12 +920,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityEntities.All(i => i.Id != _directEntity.Id))
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(i => i.EntityID == Id))
                         {
-                            return false;
+                            return true;
                         }
 
-                        return true;
+                        return false;
                     }
 
                     return false;
@@ -1517,7 +1517,6 @@ namespace Questor.Modules.Caching
                     //
                     // Is our current target already in armor? keep shooting the same target if so...
                     //
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Checking Low Health", Logging.Teal);
                     if (IsReadyToShoot
                         && IsInOptimalRange && !IsLargeCollidable
                         && (((!IsFrigate && !IsNPCFrigate) || !IsTooCloseTooFastTooSmallToHit))
@@ -1526,12 +1525,14 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
                         return true;
                     }
+
                     return false;
                 }
                 catch (Exception ex)
                 {
                     Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Exception: [" + ex + "]", Logging.Debug);
                 }
+
                 return false;
             }
         }

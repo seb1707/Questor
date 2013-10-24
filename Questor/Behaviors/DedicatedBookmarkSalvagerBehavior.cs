@@ -365,7 +365,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoBase:
-
+                    Cache.Instance.CurrentlyShouldBeSalvaging = false;
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DedicatedBookmarkSalvagerBehaviorState.GotoBase");
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: Traveler.TravelHome()", Logging.White);
@@ -574,6 +574,7 @@ namespace Questor.Behaviors
                     if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
+                    Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
                     const int distanceToCheck = (int)Distances.OnGridWithMe;
 

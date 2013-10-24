@@ -759,6 +759,7 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.GotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
+                    Cache.Instance.CurrentlyShouldBeSalvaging = false;
 
                     if (Settings.Instance.AvoidBumpingThings)
                     {
@@ -1035,6 +1036,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.BeginAfterMissionSalvaging:
                     Statistics.Instance.StartedSalvaging = DateTime.UtcNow; //this will be reset for each "run" between the station and the field if using <unloadLootAtStation>true</unloadLootAtStation>
                     Cache.Instance.IsMissionPocketDone = false;
+                    Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
                     if (DateTime.UtcNow.Subtract(_lastSalvageTrip).TotalMinutes < Time.Instance.DelayBetweenSalvagingSessions_minutes && Settings.Instance.CharacterMode.ToLower() == "salvage".ToLower())
                     {
@@ -1107,6 +1109,7 @@ namespace Questor.Behaviors
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
+                    Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
                     EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsLargeCollidable).OrderBy(t => t.Distance).FirstOrDefault();
                     if (deadlyNPC != null)

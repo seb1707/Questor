@@ -85,6 +85,10 @@ namespace Questor.Modules.Activities
                     missionItem = "DNA Sample"; //typeid: 13288	 groupID: 314
                     break;
 
+                case "Interstellar Railroad (2 of 4)":                //lvl1 courier
+                    missionItem = "Reports"; //not correct here
+                    break;
+
                 case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
                 case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
                 case "Portal to War (3 of 5)":                        //lvl3 courier - this likely needs to be corrected to be the correct mission name
@@ -96,6 +100,7 @@ namespace Questor.Modules.Activities
                 case "Angel Strike - The Flu Outbreak (6 of 10)":     //lvl3 courier - this likely needs to be corrected to be the correct mission name
                     missionItem = "Encoded Data Chip"; //not correct here
                     break;
+
 
                 default:
                     missionItem = "Encoded Data Chip"; //likely not correct - add an entry above for the courier mission in question

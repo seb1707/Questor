@@ -680,15 +680,16 @@ namespace Questor.Modules.Actions
                 case "In the Midst of Deadspace (2 of 5)":            //lvl4 courier
                 case "Pot and Kettle - Delivery (3 of 5)":            //lvl4 courier
                 case "Technological Secrets (2 of 3)":                //lvl4 courier
-                case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Portal to War (3 of 5)":                        //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - The Interrogation (2 of 10)": //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - Possible Leads (4 of 10)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - The Flu Outbreak (6 of 10)":  //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - The Interrogation (2 of 10)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - Possible Leads (4 of 10)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - The Flu Outbreak (6 of 10)":     //lvl3 courier - this likely needs to be corrected to be the correct mission name
+                case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier
+                case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier
+                case "Portal to War (3 of 5)":                        //lvl3 courier
+                case "Guristas Strike - The Interrogation (2 of 10)": //lvl3 courier
+                case "Guristas Strike - Possible Leads (4 of 10)":    //lvl3 courier
+                case "Guristas Strike - The Flu Outbreak (6 of 10)":  //lvl3 courier
+                case "Angel Strike - The Interrogation (2 of 10)":    //lvl3 courier
+                case "Angel Strike - Possible Leads (4 of 10)":       //lvl3 courier
+                case "Angel Strike - The Flu Outbreak (6 of 10)":     //lvl3 courier
+                case "Interstellar Railroad (2 of 4)":                //lvl1 courier
                     Cache.Instance.CourierMission = true;
                     break;
 

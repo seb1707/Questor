@@ -1255,14 +1255,23 @@ namespace Questor.Modules.Activities
                             }
                         }
 
+                        EntityCache NavigateTowardThisTarget = null;
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        {
+                            NavigateTowardThisTarget = Cache.Instance.PreferredPrimaryWeaponTarget;
+                        }
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                        {
+                            NavigateTowardThisTarget = killTargets.FirstOrDefault();
+                        }
                         //we may need to get closer so combat will take over
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange || !Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange)
+                        if (NavigateTowardThisTarget.Distance > Cache.Instance.MaxRange || !NavigateTowardThisTarget.IsInOptimalRange)
                         {
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (Cache.Instance.PreferredPrimaryWeaponTarget.Distance > Cache.Instance.MaxRange)", Logging.Debug);
                             //if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                             //{
                             //    if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "if (!Cache.Instance.IsApproachingOrOrbiting(Cache.Instance.PreferredPrimaryWeaponTarget.Id))", Logging.Debug);
-                                NavigateOnGrid.NavigateIntoRange(Cache.Instance.PreferredPrimaryWeaponTarget, "combatMissionControl", true);
+                                  NavigateOnGrid.NavigateIntoRange(NavigateTowardThisTarget, "combatMissionControl", true);
                             //}
                         }
                     }

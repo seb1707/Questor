@@ -1851,6 +1851,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.Entities.All(i => i.Id != _primaryWeaponPriorityTarget.EntityID))
                         {
+                            Logging.Log("PrimaryWeaponPriorityTargets", "Remove Target that is no longer in the Entities list [" + _primaryWeaponPriorityTarget.EntityID + "]", Logging.Debug);
                             _primaryWeaponPriorityTargets.Remove(_primaryWeaponPriorityTarget);
                             break;
                         }

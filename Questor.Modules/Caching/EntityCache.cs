@@ -1508,6 +1508,34 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsEntityIShouldKeepShooting
+        {
+            get
+            {
+                try
+                {
+                    //
+                    // Is our current target already in armor? keep shooting the same target if so...
+                    //
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Checking Low Health", Logging.Teal);
+                    if (IsReadyToShoot
+                        && IsInOptimalRange && !IsLargeCollidable
+                        && (((!IsFrigate && !IsNPCFrigate) || !IsTooCloseTooFastTooSmallToHit))
+                            && _directEntity.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                        return true;
+                    }
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Exception: [" + ex + "]", Logging.Debug);
+                }
+                return false;
+            }
+        }
+
         public bool IsSentry
         {
             get
@@ -2331,9 +2359,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        /// <summary>
-        /// A bad idea to attack these targets
-        /// </summary>
         public bool IsLargeCollidable
         {
             get
@@ -2361,9 +2386,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        /// <summary>
-        /// A bad idea to attack these targets
-        /// </summary>
         public bool IsMiscJunk
         {
             get
@@ -2395,9 +2417,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        /// <summary>
-        /// A bad idea to attack these targets
-        /// </summary>
         public bool IsBadIdea
         {
             get
@@ -2911,7 +2930,6 @@ namespace Questor.Modules.Caching
             }
         }
         
-
         public bool LockTarget(string module)
         {
             try

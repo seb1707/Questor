@@ -195,6 +195,7 @@ namespace Questor.Modules.Caching
         }
 
         public DateTime LastPreferredDroneTargetDateTime;
+        public long LastDroneTargetID;
 
         public String OrbitEntityNamed;
 
@@ -3284,12 +3285,13 @@ namespace Questor.Modules.Caching
 
             BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
                                                   .OrderByDescending(t => t.isPreferredPrimaryWeaponTarget)
-                                                  .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                  // Weapons should fire big targets first
+                                                  .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                      // Weapons should fire big targets first
                                                   .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                  .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
-                                                  .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                      // WarpScram over Webs over any other EWAR
-                                                  .ThenByDescending(t => t.Id == currentWeaponId)                           // Lets keep shooting
-                                                  .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
+                                                  .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
+                                                  .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
+                                                  .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
+                                                  .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
+                                                  .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
                                                   .ThenByDescending(t => t.IsInOptimalRange)
                                                   .ThenBy(t => t.Distance);
 
@@ -3307,12 +3309,11 @@ namespace Questor.Modules.Caching
                                                           .OrderByDescending(t => t.isPreferredDroneTarget)
                                                           .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                                                           .ThenByDescending(t => t.DronePriorityLevel)
-                                                          .ThenByDescending(t => t.IsTargetedBy)                                    // if something does not target us it's not too interesting
-                                                          .ThenByDescending(t => t.IsTarget || t.IsTargeting)                       /* We like targets we alrdy targeted or targeting atm, priorizing targets 
-                                                                                                                                     * over currently targeting entities will make us switch targets more often what we dont want
-                                                                                                                                     * and our weapons will be on cooldown when we can finaly hit that scrambler for example */
-                                                          //.ThenByDescending(t => t.Id == currentDroneTargetId)                      // Keep current target
-                                                          .ThenByDescending(t => t.Id == preferredTargetId)                         // Keep the preferred target so we dont switch our targets too often
+                                                          .ThenByDescending(t => t.IsTargetedBy)                                      // if something does not target us it's not too interesting
+                                                          .ThenByDescending(t => t.IsTarget || t.IsTargeting)                         // is the entity already targeted?
+                                                          .ThenByDescending(t => t.Id == Cache.Instance.LastDroneTargetID)            // Keep current target
+                                                          .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we dont switch our targets too often
+                                                          .ThenByDescending(t => t.IsEntityIShouldKeepShooting && t.IsLowValueTarget) // Shoot targets that are in armor!
                                                           .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.Distance);
 
@@ -3624,10 +3625,7 @@ namespace Questor.Modules.Caching
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Low Health", Logging.Teal);
-                if (currentTarget.IsReadyToShoot
-                    && currentTarget.IsInOptimalRange
-                    && (((!currentTarget.IsFrigate && !currentTarget.IsNPCFrigate) || !currentTarget.IsTooCloseTooFastTooSmallToHit))
-                        && currentTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                if (currentTarget.IsEntityIShouldKeepShooting)
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;

@@ -44,8 +44,7 @@ namespace Questor.Modules.Combat
         private static int _lastDroneCount;
         private static DateTime _lastEngageCommand;
         private static DateTime _lastRecallCommand;
-        public static long _lastDroneTarget;
-
+        
         private static int _recallCount;
         private static DateTime _lastLaunch;
         private static DateTime _lastRecall;
@@ -127,7 +126,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Is our current target still the same and is the last Engage command no longer then 15s ago?
-                    if (_lastDroneTarget == Cache.Instance.PreferredDroneTargetID && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
+                    if (Cache.Instance.LastDroneTargetID == Cache.Instance.PreferredDroneTargetID && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
                     {
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)", Logging.Debug);
                         return;
@@ -150,7 +149,7 @@ namespace Questor.Modules.Combat
                     if (DroneToShoot.IsActiveTarget)
                     {
                         // Save target id (so we do not constantly switch)
-                        _lastDroneTarget = Cache.Instance.PreferredDroneTarget.Id;
+                        Cache.Instance.LastDroneTargetID = Cache.Instance.PreferredDroneTarget.Id;
 
                         // Engage target
                         Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + Cache.Instance.MaskedID(DroneToShoot.Id) + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);

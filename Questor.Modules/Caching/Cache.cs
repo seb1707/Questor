@@ -4576,12 +4576,12 @@ namespace Questor.Modules.Caching
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 4));
                         Logging.Log(module, "Opening Cargohold of active ship: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                        return false;
+                        return true;
                     }
 
                     if (!Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
-                        //Logging.Log(module, "cargo window is not ready", Logging.White);
+                        Logging.Log(module, "cargo window is not ready", Logging.White);
                         return false;
                     }
 

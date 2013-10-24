@@ -3457,13 +3457,8 @@ namespace Questor.Modules.Caching
             }
 
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
-            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
-            {
-                Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We should have called GetBestDroneTarget here instead of GetBestTarget", Logging.Debug);
-                return false;
-            }
-
-            if (DateTime.UtcNow < NextGetBestCombatTarget)
+            
+            if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
                 return false;
@@ -3471,11 +3466,11 @@ namespace Questor.Modules.Caching
 
             NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
-            if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
-                return false;
-            }
+            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            //{
+            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
+            //    return false;
+            //}
 
             EntityCache currentTarget = null;
             if (Cache.Instance.CurrentWeaponTarget() != null 

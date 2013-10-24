@@ -2769,7 +2769,12 @@ namespace Questor.Modules.Caching
                         if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                         {
                             Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                            _primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
+                            _primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
+                            if (Settings.Instance.DebugKillAction)
+                            {
+                                Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
+                                _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
+                            }
                         }
                     }
 

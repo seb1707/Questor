@@ -1184,7 +1184,7 @@ namespace Questor.Behaviors
                         break;
                     }
 
-                    //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
+                    if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage: we __cannot ever__ approach in salvage.cs so this section _is_ needed", Logging.White);
                     Salvage.MoveIntoRangeOfWrecks();
                     try
                     {

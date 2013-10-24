@@ -803,6 +803,7 @@ namespace Questor.Modules.BackgroundTasks
             switch (_States.CurrentSalvageState)
             {
                 case SalvageState.TargetWrecks:
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "SalvageState.TargetWrecks:", Logging.Debug);
                     TargetWrecks();
 
                     // Next state
@@ -810,12 +811,14 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case SalvageState.LootWrecks:
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "SalvageState.LootWrecks:", Logging.Debug);
                     LootWrecks();
 
                     _States.CurrentSalvageState = SalvageState.SalvageWrecks;
                     break;
 
                 case SalvageState.SalvageWrecks:
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "SalvageState.SalvageWrecks:", Logging.Debug);
                     ActivateTractorBeams();
                     ActivateSalvagers();
 
@@ -846,6 +849,7 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
                         !Cache.Instance.InWarp))
                     {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "SalvageState.Idle:", Logging.Debug);
                         _States.CurrentSalvageState = SalvageState.TargetWrecks;
                         return;
                     }

@@ -522,6 +522,7 @@ namespace Questor
             DebugPerformanceStopandDisplayTimer("Cleanup.ProcessState");
 
             _statistics.ProcessState();
+            _innerspaceCommands.ProcessState();
 
             if (Settings.Instance.DebugStates)
                 Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);

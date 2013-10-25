@@ -1,4 +1,6 @@
 ﻿
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Questor.Modules.Misc
@@ -35,7 +37,10 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
+                //LavishScript.Commands.AddCommand("FindEntities", FindEntitiesNamed);
                 LavishScript.Commands.AddCommand("ListAllEntities", ListAllEntities);
+                LavishScript.Commands.AddCommand("ListEntities", ListAllEntities);
+                LavishScript.Commands.AddCommand("Entities", ListAllEntities);
                 LavishScript.Commands.AddCommand("ListPotentialCombatTargets", ListPotentialCombatTargets);
                 LavishScript.Commands.AddCommand("ListHighValueTargets", ListHighValueTargets);
                 LavishScript.Commands.AddCommand("ListLowValueTargets", ListLowValueTargets);
@@ -293,7 +298,7 @@ namespace Questor.Modules.Misc
 
             string RemoveThese = args[1];
 
-            Cache.Instance.RemovedPrimaryWeaponPriorityTargetsByName(RemoveThese);
+            Cache.Instance.RemovePrimaryWeaponPriorityTargetsByName(RemoveThese);
             return 0;
         }
 
@@ -392,6 +397,22 @@ namespace Questor.Modules.Misc
             _States.CurrentStatisticsState = StatisticsState.ModuleInfo;
             return 0;
         }
+
+        /*
+        private static int FindEntitiesNamed(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Logging.Log("InnerspaceCommands", "FindEntitiesNamed NameOfNPCInQuotes", Logging.White);
+                return -1;
+            }
+
+            string FindTheseEntityNames = args[1];
+            Logging.Log("InnerspaceCommands", "Processing Command as: FindEntitiesNamed " + FindTheseEntityNames, Logging.White);
+            _States.CurrentStatisticsState = StatisticsState.FindEntitiesnamed;
+            return 0;
+        }
+        */
 
         private static int ListAllEntities(string[] args)
         {
@@ -619,5 +640,55 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
+        public static bool LogEntities(List<EntityCache> things, bool force = false)
+        {
+            // iterate through entities
+            //
+            Logging.Log("Entities", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            things = things.ToList();
+            if (things.Any())
+            {
+                int icount = 0;
+                foreach (EntityCache thing in things.OrderBy(i => i.Distance))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] IsIgnoredrefreshes[" + thing.IsIgnoredRefreshes + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+
+            return true;
+        }
+
+        public void ProcessState()
+        {
+            switch (_States.CurrentInnerspaceCommandsState)
+            {
+                case InnerspaceCommandsState.Idle:
+                    break;
+
+                case InnerspaceCommandsState.LogAllEntities:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    break;
+
+                case InnerspaceCommandsState.Done:
+
+                    //_lastStatisticsAction = DateTime.UtcNow;
+                    _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    break;
+
+                default:
+
+                    // Next state
+                    _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    break;
+            }
+        }
     }
 }

@@ -217,5 +217,7 @@ namespace Questor.Modules.States
         public static ManageFleetState CurrentManageFleetState { get; set; }
 
         public static BackgroundBehaviorState CurrentBackgroundBehaviorState { get; set; }
+
+        public static InnerspaceCommandsState CurrentInnerspaceCommandsState { get; set; }
     }
 }

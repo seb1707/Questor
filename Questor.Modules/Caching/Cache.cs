@@ -197,7 +197,7 @@ namespace Questor.Modules.Caching
         public DateTime LastPreferredDroneTargetDateTime;
         public long LastDroneTargetID;
 
-        public String OrbitEntityNamed;
+        public string OrbitEntityNamed;
 
         public DirectLocation MissionSolarSystem;
 
@@ -698,19 +698,11 @@ namespace Questor.Modules.Caching
         }
 
 
-        private DirectActiveShip _activeship;
-
         public DirectActiveShip ActiveShip
         {
             get
             {
-                if (_activeship == null)
-                {
-                    _activeship = Cache.Instance.DirectEve.ActiveShip;
-                    return _activeship;
-                }
-
-                return _activeship;
+                return Cache.Instance.DirectEve.ActiveShip;
             }
         }
 
@@ -1564,7 +1556,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DirectEve.Session.IsInSpace && !Cache.Instance.InStation && Cache.Instance.ActiveShip.Entity != null && DirectEve.Session.IsReady)
+                    if (DirectEve.Session.IsInSpace && !Cache.Instance.InStation && Cache.Instance.DirectEve.ActiveShip.Entity != null && DirectEve.Session.IsReady)
                     {
                         Cache.Instance.LastInSpace = DateTime.UtcNow;
                         return true;
@@ -1905,8 +1897,7 @@ namespace Questor.Modules.Caching
                 return _primaryWeaponPriorityEntities;
             }
         }
-
-
+        
         private List<PriorityTarget> _dronePriorityTargets;
 
         public List<PriorityTarget> DronePriorityTargets
@@ -2314,7 +2305,7 @@ namespace Questor.Modules.Caching
                 // this list of variables is cleared every pulse.
                 //
                 _activeDrones = null;
-                _activeship = null;
+                //_activeship = null;
                 _agent = null;
                 _aggressed = null;
                 _ammoHangar = null;
@@ -2703,33 +2694,23 @@ namespace Questor.Modules.Caching
         /// <param name = "targets"></param>
         public bool RemovePrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets)
         {
-            int removed = 0;
-            targets = targets.ToList();
-
-            if (targets.Any())
-            {
-                removed = _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
-            }
-            return removed > 0;
-        }
-
-        /// <summary>
-        ///   Remove target from priority list
-        /// </summary>
-        /// <param name = "targetToRemove"></param>
-        public bool RemovePrimaryWeaponPriorityTarget(PriorityTarget targetToRemove)
-        {
             try
             {
-                _primaryWeaponPriorityTargets.Remove(targetToRemove);
-            }
-            catch (Exception)
-            {
-                Logging.Log("Cache.RemovePrimaryWeaponPriorityTargets","Unable to remove [" + targetToRemove.Entity.Name + "] from the _primaryWeaponPriorityTargets list, was it already removed?",Logging.Teal);
-                return true;  //(should we return false here?!) - if we did questor would hang...
-            }
+                targets = targets.ToList();
 
-            return true;
+                if (targets.Any() && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+                {
+                    _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("RemovePrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);  
+            }
+            return false;
         }
 
         /// <summary>
@@ -2738,94 +2719,154 @@ namespace Questor.Modules.Caching
         /// <param name = "targets"></param>
         public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
         {
-            int removed = 0;
-            targets = targets.ToList();
-
-            if (targets.Any())
+            try
             {
-                removed = _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+                targets = targets.ToList();
+
+                if (targets.Any() && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+                {
+                    _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+                    return true;
+                }
+
+                return false;
             }
-            return removed > 0;
+            catch (Exception ex)
+            {
+                Logging.Log("RemoveDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+            }
+            return false;
         }
 
         public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
+            try
             {
-                if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
-                return;
-            }
-
-            if (AddEwarTypeToPriorityTargetList)
-            {
-                //
-                // Primary Weapons
-                //
-                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (ewarEntity.IsNPCFrigate || ewarEntity.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
+                if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
                 {
-                    if (ewarEntity.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
-                        || ewarEntity.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
+                    if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
+                    return;
+                }
+
+                if (AddEwarTypeToPriorityTargetList)
+                {
+                    //
+                    // Primary Weapons
+                    //
+                    if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (ewarEntity.IsNPCFrigate || ewarEntity.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
                     {
-                        if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
+                        if (ewarEntity.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
+                            || ewarEntity.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
                         {
-                            Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                            _primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
-                            if (Settings.Instance.DebugKillAction)
+                            if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                             {
-                                Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                                _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
+                                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                                Cache.Instance._primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
+                                if (Settings.Instance.DebugKillAction)
+                                {
+                                    Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
+                                    _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
+                                }
                             }
+                        }
+
+                        return;
+                    }
+
+                    if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
+                    {
+                        Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
+                        Cache.Instance._primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
+                        if (Settings.Instance.DebugKillAction)
+                        {
+                            Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
+                            _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
                         }
                     }
 
                     return;
                 }
 
-                if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
-                {
-                    Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                    _primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });    
-                }
-
                 return;
             }
-
-            return;
-        }
-
-        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> ewarEntities, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
-        {
-            ewarEntities = ewarEntities.ToList();
-            if (ewarEntities.Any())
+            catch (Exception ex)
             {
-                foreach (EntityCache ewarEntity in ewarEntities)
-                {
-                    AddPrimaryWeaponPriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
-                }    
+                Logging.Log("AddPrimaryWeaponPriorityTarget", "Exception [" + ex + "]", Logging.Debug);
             }
             
             return;
         }
 
-        public void AddPrimaryWeaponPriorityTargetsByName(String stringEntitiesToAdd)
+        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> ewarEntities, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByPartialName(stringEntitiesToAdd).ToList();
-            if (entitiesToAdd.Any())
+            try
             {
-                foreach (EntityCache entityToAdd in entitiesToAdd)
+                ewarEntities = ewarEntities.ToList();
+                if (ewarEntities.Any())
                 {
-                    AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
-                    continue;
+                    foreach (EntityCache ewarEntity in ewarEntities)
+                    {
+                        AddPrimaryWeaponPriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
+                    }
                 }
 
                 return;
             }
+            catch (Exception ex)
+            {
+                Logging.Log("AddPrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+            }
 
-            Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
             return;
         }
 
-        public void RemovedPrimaryWeaponPriorityTargetsByName(String stringEntitiesToRemove)
+        public void AddPrimaryWeaponPriorityTargetsByName(string stringEntitiesToAdd)
+        {
+            try
+            {
+                if (Cache.Instance.Entities.Any(i => i.Name == stringEntitiesToAdd))
+                {
+                    IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.Entities.Where(i => i.Name == stringEntitiesToAdd).ToList();
+                    if (entitiesToAdd.Any())
+                    {
+
+                        foreach (EntityCache entityToAdd in entitiesToAdd)
+                        {
+                            AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
+                            continue;
+                        }
+
+                        return;
+                    }
+
+                    Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found.", Logging.Debug);
+                    return;
+                }
+
+                int EntitiesOnGridCount = 0;
+                if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
+                {
+                    EntitiesOnGridCount = Cache.Instance.Entities.Count(i => i.IsOnGridWithMe);
+                }
+                
+                int EntitiesCount = 0;
+                if (Cache.Instance.Entities.Any())
+                {
+                    EntitiesCount = Cache.Instance.Entities.Count();
+                }
+
+                Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found. [" + EntitiesOnGridCount + "] entities on grid [" + EntitiesCount + "] entities", Logging.Debug);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("AddPrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+            }
+
+            return;
+        }
+
+        public void RemovePrimaryWeaponPriorityTargetsByName(string stringEntitiesToRemove)
         {
             IEnumerable<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
             if (entitiesToRemove.Any())
@@ -2839,7 +2880,7 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void AddDronePriorityTargetsByName(String stringEntitiesToAdd)
+        public void AddDronePriorityTargetsByName(string stringEntitiesToAdd)
         {
             IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByPartialName(stringEntitiesToAdd).ToList();
             if (entitiesToAdd.Any())
@@ -2858,13 +2899,13 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void RemovedDronePriorityTargetsByName(String stringEntitiesToRemove)
+        public void RemovedDronePriorityTargetsByName(string stringEntitiesToRemove)
         {
             List<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
             if (entitiesToRemove.Any())
             {
                 Logging.Log("RemovingDPT", "removing [" + stringEntitiesToRemove + "] from the DPT List", Logging.Debug);
-                RemovePrimaryWeaponPriorityTargets(entitiesToRemove);
+                RemoveDronePriorityTargets(entitiesToRemove);
                 return;
             }
 
@@ -2917,7 +2958,7 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void AddWarpScramblerByName(String stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
+        public void AddWarpScramblerByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
         {
             IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
             if (notTheClosest)
@@ -2950,7 +2991,7 @@ namespace Questor.Modules.Caching
             return;
         }
 
-        public void AddWebifierByName(String stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
+        public void AddWebifierByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
         {
             IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
             if (notTheClosest)
@@ -4197,7 +4238,7 @@ namespace Questor.Modules.Caching
             set { _itemHangar = value; }
         }
 
-        public bool ReadyItemsHangarSingleInstance(String module)
+        public bool ReadyItemsHangarSingleInstance(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4230,7 +4271,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool OpenItemsHangar(String module)
+        public bool OpenItemsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4257,7 +4298,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool CloseItemsHangar(String module)
+        public bool CloseItemsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4312,7 +4353,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool ReadyItemsHangarAsLootHangar(String module)
+        public bool ReadyItemsHangarAsLootHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4342,7 +4383,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool ReadyItemsHangarAsAmmoHangar(String module)
+        public bool ReadyItemsHangarAsAmmoHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4374,7 +4415,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackItemsHangarAsLootHangar(String module)
+        public bool StackItemsHangarAsLootHangar(string module)
         {
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
@@ -4462,7 +4503,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackItemsHangarAsAmmoHangar(String module)
+        public bool StackItemsHangarAsAmmoHangar(string module)
         {
             //Logging.Log("StackItemsHangarAsAmmoHangar", "test", Logging.Teal);
 
@@ -4552,7 +4593,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool OpenCargoHold(String module)
+        public bool OpenCargoHold(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -4587,14 +4628,14 @@ namespace Questor.Modules.Caching
 
                     if (!Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
                     {
-                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
+                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                         return true;
                     }
 
                     if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
                     {
-                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugHangars:Opening cargoHold window as secondary", Logging.DebugHangars);
+                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
                         Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                         return false;
@@ -4612,7 +4653,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool ReadyCargoHold(String module)
+        public bool ReadyCargoHold(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -4636,7 +4677,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackCargoHold(String module)
+        public bool StackCargoHold(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -4694,7 +4735,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool CloseCargoHold(String module)
+        public bool CloseCargoHold(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -4743,7 +4784,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer ShipHangar { get; set; }
 
-        public bool OpenShipsHangar(String module)
+        public bool OpenShipsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4796,7 +4837,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool ReadyShipsHangar(String module)
+        public bool ReadyShipsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -4841,7 +4882,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackShipsHangar(String module)
+        public bool StackShipsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -4873,7 +4914,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool CloseShipsHangar(String module)
+        public bool CloseShipsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
@@ -5021,7 +5062,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackCorpAmmoHangar(String module)
+        public bool StackCorpAmmoHangar(string module)
         {
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
@@ -5116,7 +5157,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainerWindow corpLootHangarSecondaryWindow { get; set; }
 
-        public bool OpenInventoryWindow(String module)
+        public bool OpenInventoryWindow(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -5155,7 +5196,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool StackCorpLootHangar(String module)
+        public bool StackCorpLootHangar(string module)
         {
             if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
@@ -5242,7 +5283,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool SortCorpLootHangar(String module)
+        public bool SortCorpLootHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -5280,7 +5321,7 @@ namespace Questor.Modules.Caching
         //
         // why do we still have this in here? depreciated in favor of using the corporate bookmark system
         //
-        public bool OpenCorpBookmarkHangar(String module)
+        public bool OpenCorpBookmarkHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -5340,11 +5381,11 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool CloseCorpHangar(String module, String window)
+        public bool CloseCorpHangar(string module, string window)
         {
             try
             {
-                if (Cache.Instance.InStation && !String.IsNullOrEmpty(window))
+                if (Cache.Instance.InStation && !string.IsNullOrEmpty(window))
                 {
                     DirectContainerWindow corpHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption == window);
 
@@ -5367,7 +5408,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool ClosePrimaryInventoryWindow(String module)
+        public bool ClosePrimaryInventoryWindow(string module)
         {
             if (DateTime.UtcNow < NextOpenHangarAction)
                 return false;
@@ -5458,7 +5499,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool ReadyHighTierLootContainer(String module)
+        public bool ReadyHighTierLootContainer(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -5517,7 +5558,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool StackHighTierLootContainer(String module)
+        public bool StackHighTierLootContainer(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -5685,7 +5726,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool StackLootContainer(String module)
+        public bool StackLootContainer(string module)
         {
             if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootContainer)
             {
@@ -5732,7 +5773,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool CloseLootContainer(String module)
+        public bool CloseLootContainer(string module)
         {
             if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
             {
@@ -5753,7 +5794,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainerWindow OreHoldWindow { get; set; }
 
-        public bool OpenOreHold(String module)
+        public bool OpenOreHold(string module)
         {
             if (DateTime.Now < Cache.Instance.NextOpenHangarAction) return false;
 
@@ -5858,7 +5899,7 @@ namespace Questor.Modules.Caching
 
         public DirectContainer HighTierLootContainer { get; set; }
 
-        public bool CloseLootHangar(String module)
+        public bool CloseLootHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
@@ -5942,7 +5983,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool StackLootHangar(String module)
+        public bool StackLootHangar(string module)
         {
             StackLoothangarAttempts++;
             if (StackLoothangarAttempts > 10)
@@ -6010,7 +6051,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool SortLootHangar(String module)
+        public bool SortLootHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6118,7 +6159,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-       public bool StackAmmoHangar(String module)
+        public bool StackAmmoHangar(string module)
         {
             StackAmmohangarAttempts++;
             if (StackAmmohangarAttempts > 10)
@@ -6186,7 +6227,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool CloseAmmoHangar(String module)
+        public bool CloseAmmoHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
@@ -6272,7 +6313,7 @@ namespace Questor.Modules.Caching
         //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
         //}
 
-        public bool OpenDroneBay(String module)
+        public bool OpenDroneBay(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextDroneBayAction)
             {
@@ -6336,7 +6377,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool CloseDroneBay(String module)
+        public bool CloseDroneBay(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextDroneBayAction)
             {
@@ -6381,7 +6422,7 @@ namespace Questor.Modules.Caching
 
         public DirectLoyaltyPointStoreWindow LPStore { get; set; }
 
-        public bool OpenLPStore(String module)
+        public bool OpenLPStore(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6416,7 +6457,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool CloseLPStore(String module)
+        public bool CloseLPStore(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
@@ -6447,7 +6488,7 @@ namespace Questor.Modules.Caching
 
         public DirectFittingManagerWindow FittingManagerWindow { get; set; }
 
-        public bool OpenFittingManagerWindow(String module)
+        public bool OpenFittingManagerWindow(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6493,7 +6534,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool CloseFittingManager(String module)
+        public bool CloseFittingManager(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
             {
@@ -6550,7 +6591,7 @@ namespace Questor.Modules.Caching
 
         public DirectWindow JournalWindow { get; set; }
 
-        public bool OpenJournalWindow(String module)
+        public bool OpenJournalWindow(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6586,7 +6627,7 @@ namespace Questor.Modules.Caching
 
         public DirectMarketWindow MarketWindow { get; set; }
 
-        public bool OpenMarket(String module)
+        public bool OpenMarket(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6620,7 +6661,7 @@ namespace Questor.Modules.Caching
             return false;
         }
 
-        public bool CloseMarket(String module)
+        public bool CloseMarket(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
@@ -6651,7 +6692,7 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        public bool OpenContainerInSpace(String module, EntityCache containerToOpen)
+        public bool OpenContainerInSpace(string module, EntityCache containerToOpen)
         {
             if (DateTime.UtcNow < Cache.Instance.NextLootAction)
             {

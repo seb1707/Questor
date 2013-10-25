@@ -90,6 +90,7 @@
     <Compile Include="Lookup\CombatMissionSettings.cs" />
     <Compile Include="Actions\Action.cs" />
     <Compile Include="States\CombatMissionsBehaviorState.cs" />
+    <Compile Include="States\InnerspaceCommandsState.cs" />
     <Compile Include="States\ManageFleetState.cs" />
     <Compile Include="States\MasterState.cs" />
     <Compile Include="States\MiningState.cs" />

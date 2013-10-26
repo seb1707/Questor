@@ -151,7 +151,7 @@ namespace Questor.Modules.Caching
                 result |= (TypeId == (int)TypeID.Slaves);
                 result |= (TypeId == (int)TypeID.Small_Arms);
                 result |= (TypeId == (int)TypeID.Ectoplasm);
-                result |= (TypeId == (int)TypeID.AIMEDs);
+                //result |= (TypeId == (int)TypeID.AIMEDs);
                 return result;
             }
         }

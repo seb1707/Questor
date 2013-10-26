@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Questor.Modules.Caching
@@ -33,6 +34,46 @@ namespace Questor.Modules.Caching
         ~EntityCache()
         {
             Interlocked.Decrement(ref EntityCacheInstances);
+        }
+
+        public bool BookmarkThis(string NameOfBookmark = "bookmark", string Comment = "")
+        {
+            try
+            {
+                if (Cache.Instance.BookmarksByLabel(NameOfBookmark).Any(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId))
+                {
+                    List<DirectBookmark> PreExistingBookmarks = Cache.Instance.BookmarksByLabel(NameOfBookmark);
+                    if (PreExistingBookmarks.Any())
+                    {
+                        foreach (DirectBookmark _PreExistingBookmark in PreExistingBookmarks)
+                        {
+
+                            if (_PreExistingBookmark.X == _directEntity.X 
+                             && _PreExistingBookmark.Y == _directEntity.Y 
+                             && _PreExistingBookmark.Z == _directEntity.Z)
+                            {
+                                Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + _directEntity.Name + "] and do not need another.", Logging.Debug);
+                                return true;
+                            }
+                            continue;
+                        }
+                    }
+                }
+
+                if (IsLargeCollidable || IsStation || IsAsteroid || IsAsteroidBelt)
+                {
+                    Cache.Instance.DirectEve.BookmarkEntity(_directEntity, NameOfBookmark, Comment, 0, false);
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+            }
+            
+            return false;
         }
 
         public int GroupId

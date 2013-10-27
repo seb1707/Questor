@@ -591,6 +591,7 @@
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
                                 sayOk |= window.Html.Contains("You have already selected a character for this session.");
+                                sayOk |= window.Html.Contains("If you decline or fail a mission from an agent");
 
                                 //
                                 // Not Enough Shelf Space

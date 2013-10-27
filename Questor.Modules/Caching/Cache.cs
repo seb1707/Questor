@@ -961,7 +961,7 @@ namespace Questor.Modules.Caching
                         }
                         catch (Exception ex)
                         {
-                            Logging.Log("Cache.AgentId", "Unable to get agent details: trying again in a moment [" + ex.Message + "]",Logging.Debug);
+                            Logging.Log("Cache.AgentId", "Exception [" + ex + "]",Logging.Debug);
                             return "";
                         }
                     }
@@ -981,43 +981,59 @@ namespace Questor.Modules.Caching
 
         private string SelectNearestAgent()
         {
-            DirectAgentMission mission = null;
-
-            foreach (AgentsList potentialAgent in Settings.Instance.AgentsList)
+            try
             {
-                if (Cache.Instance.DirectEve.AgentMissions.Any(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name))
-                {
-                    mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name);
-                }
-            }
+                DirectAgentMission mission = null;
 
-            //DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
-            if (mission == null)
-            {
-                Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
-                var nearestAgent = Settings.Instance.AgentsList
-                    .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
-                    .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
-
-                if (nearestAgent != null)
+                foreach (AgentsList potentialAgent in Settings.Instance.AgentsList)
                 {
-                    return nearestAgent.Agent.Name;
-                }
-
-                
-                if (Settings.Instance.AgentsList.OrderBy(j => j.Priorit).Any())
-                {
-                    AgentsList __HighestPriorityAgentInList = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
-                    if (__HighestPriorityAgentInList != null)
+                    if (Cache.Instance.DirectEve.AgentMissions.Any(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name))
                     {
-                        return __HighestPriorityAgentInList.Name;
+                        mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name);
                     }
                 }
 
-                return null;
+                //DirectAgentMission mission = DirectEve.AgentMissions.FirstOrDefault(x => x.State == (int)MissionState.Accepted && !x.Important);
+                if (mission == null && Cache.Instance.DirectEve.Session.IsReady)
+                {
+                    try
+                    {
+                        Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+                        var nearestAgent = Settings.Instance.AgentsList
+                            .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
+                            .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
+
+                        if (nearestAgent != null)
+                        {
+                            return nearestAgent.Agent.Name;
+                        }
+
+
+                        if (Settings.Instance.AgentsList.OrderBy(j => j.Priorit).Any())
+                        {
+                            AgentsList __HighestPriorityAgentInList = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                            if (__HighestPriorityAgentInList != null)
+                            {
+                                return __HighestPriorityAgentInList.Name;
+                            }
+                        }
+
+                        return null;
+                    }
+                    catch (NullReferenceException) {}
+                }
+
+                if (mission != null)
+                {
+                    return DirectEve.GetAgentById(mission.AgentId).Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("SelectNearestAgent", "Exception [" + ex + "]", Logging.Debug);
             }
 
-            return DirectEve.GetAgentById(mission.AgentId).Name;
+            return null;
         }
 
         private string SelectFirstAgent()
@@ -1482,13 +1498,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_entities == null)
                     {
-                        if (!InSpace)
-                        {
-                            return new List<EntityCache>();
-                        }
-                        //_entities = DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
-                        _entities = DirectEve.Entities.Select(i => new EntityCache(i)).ToList();
-                        return _entities ?? null;
+                        return Cache.Instance.DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
                     }
 
                     return _entities;
@@ -1556,12 +1566,31 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DirectEve.Session.IsInSpace && !Cache.Instance.InStation && Cache.Instance.DirectEve.ActiveShip.Entity != null && DirectEve.Session.IsReady)
+                    if (DirectEve.Session.IsInSpace)
                     {
-                        Cache.Instance.LastInSpace = DateTime.UtcNow;
-                        return true;
+                        if (!Cache.Instance.InStation)
+                        {
+                            if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
+                            {
+                                if (DirectEve.Session.IsReady)
+                                {
+                                    Cache.Instance.LastInSpace = DateTime.UtcNow;
+                                    return true;
+                                }
+                                
+                                if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Session is Not Ready", Logging.Debug);
+                                return false;
+                            }
+                            
+                            if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Cache.Instance.DirectEve.ActiveShip.Entity is null", Logging.Debug);
+                            return false;
+                        }
+                        
+                        if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "NOT InStation is False", Logging.Debug);
+                        return false;
                     }
-
+                    
+                    if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "InSpace is False", Logging.Debug);
                     return false;
                 }
                 catch (Exception ex)
@@ -1876,17 +1905,13 @@ namespace Questor.Modules.Caching
                 //
                 if (_primaryWeaponPriorityEntities == null)
                 {
-                    if (PrimaryWeaponPriorityTargets != null && PrimaryWeaponPriorityTargets.Any())
+                    if (_primaryWeaponPriorityTargets.Any())
                     {
                         _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity).ToList();
-                        
-                        //foreach (EntityCache _primaryWeaponPriorityEntity in _primaryWeaponPriorityEntities)
-                        //{
-                        //    //_primaryWeaponPriorityEntity.InvalidateEntityCache();
-                        //}
                         return _primaryWeaponPriorityEntities;
                     }
 
+                    if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("PrimaryWeaponPriorityEntities", "if (_primaryWeaponPriorityTargets.Any()) none available yet", Logging.Debug);
                     _primaryWeaponPriorityEntities = new List<EntityCache>();
                     return _primaryWeaponPriorityEntities;
                 }
@@ -2353,13 +2378,11 @@ namespace Questor.Modules.Caching
                     {
                         _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
                     }
-                    _primaryWeaponPriorityEntities = null;
-
+                    
                     if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
                     {
                         _dronePriorityTargets.ForEach(pt => pt.ClearCache());
                     }
-                    _dronePriorityEntities = null;    
                 }
                 
 
@@ -3462,30 +3485,6 @@ namespace Questor.Modules.Caching
             }
 
             return null;
-        }
-
-        public bool __GetBestTarget(double distance, bool lowValueFirst, string callingroutine, IEnumerable<EntityCache> _potentialTargets = null)
-        {
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Attempting to get Best Target", Logging.Teal);
-
-            if (DateTime.UtcNow < NextGetBestCombatTarget)
-            {
-                return (PreferredPrimaryWeaponTarget != null || PreferredDroneTarget != null);
-            }
-
-            NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
-
-            PreferredPrimaryWeaponTarget = __GetBestWeaponTargets(distance, _potentialTargets).FirstOrDefault();
-
-            // Drone Target
-            if (Settings.Instance.UseDrones)
-            {
-                PreferredDroneTarget = __GetBestDroneTargets(distance, _potentialTargets).FirstOrDefault();
-            }
-            
-            NextGetBestCombatTarget = DateTime.UtcNow;
-
-            return (PreferredPrimaryWeaponTarget != null || PreferredDroneTarget != null);
         }
 
         /// <summary>

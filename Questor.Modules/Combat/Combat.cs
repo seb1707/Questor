@@ -997,10 +997,11 @@ namespace Questor.Modules.Combat
             if ((Cache.Instance.InSpace && Cache.Instance.InWarp) // When in warp we should not try to target anything
                     || Cache.Instance.InStation //How can we target if we are in a station?
                     || DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
-                    || !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
+                    //|| !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
                     || Settings.Instance.DebugDisableTargetCombatants
                 )
             {
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Inspace [ " + Cache.Instance.InSpace + " ] InWarp [ " + Cache.Instance.InWarp + " ] InStation [ " + Cache.Instance.InStation + " ] NextTargetAction [ " + Cache.Instance.NextTargetAction.Subtract(DateTime.UtcNow).TotalSeconds + " seconds] DebugDisableTargetCombatants [ " + Settings.Instance.DebugDisableTargetCombatants + " ]", "", Logging.Debug);
                 return;
             }
 
@@ -1104,17 +1105,37 @@ namespace Questor.Modules.Combat
             int targetsTargeted = __highValueTargetsTargeted.Count() + __lowValueTargetsTargeted.Count();
             #endregion
 
-           #region Targeting using priority
+            #region Targeting using priority
             IEnumerable<EntityCache> primaryWeaponTargetsToTarget = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe)
                                                                 .OrderByDescending(e => Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == e.Id)
                                                                 .Take(maxHighValueTargets).ToList();
+            int primaryWeaponTargetsToTargetCount = 0;
+            if (primaryWeaponTargetsToTarget.Any())
+            {
+                primaryWeaponTargetsToTargetCount = primaryWeaponTargetsToTarget.Count();
+            }
+
             IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe)
                                                                 .Where(e => primaryWeaponTargetsToTarget.All(wt => wt.Id != e.Id))
                                                                 .OrderByDescending(e => Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Id == e.Id)
                                                                 .Take(maxLowValueTargets).ToList();
-            IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded));
+            int droneTargetsToTargetCount = 0;
+            if (droneTargetsToTarget.Any())
+            {
+                droneTargetsToTargetCount = droneTargetsToTarget.Count();
+            }
 
-            // Untarget stuff
+            IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)).ToList();
+            int activeTargetsCount = 0;
+            if (activeTargets.Any())
+            {
+                activeTargetsCount = activeTargets.Count();
+            }
+
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "primaryWeaponTargetsToTarget [" + primaryWeaponTargetsToTargetCount + "] droneTargetsToTarget [" + droneTargetsToTargetCount + "] activeTargets [" + activeTargetsCount + "]", Logging.Debug);
+
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Untarget stuff (if needed)", Logging.Debug);
+
             foreach (EntityCache target in activeTargets)
             {
                 if (primaryWeaponTargetsToTarget.All(e => e.Id != target.Id) && droneTargetsToTarget.All(e => e.Id != target.Id) && !target.IsContainer)
@@ -1127,12 +1148,14 @@ namespace Questor.Modules.Combat
 
             int totalTargets = Cache.Instance.Entities.Count(e => (e.IsTargeting || e.IsTarget));
 
-            // Target a weapon target
-            EntityCache toTarget = primaryWeaponTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxRange);
+
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Target a weapon target)", Logging.Debug);
+            EntityCache toTarget = primaryWeaponTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
             // If we targeted all highValueTargets already take a lowvaluetarget
             if (toTarget == null)
             {
-                toTarget = droneTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxRange);
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "if (toTarget == null)", Logging.Debug);
+                toTarget = droneTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
             }
 
             if (toTarget != null && totalTargets < maxTotalTargets)
@@ -1862,9 +1885,10 @@ namespace Questor.Modules.Combat
                         if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "We do not have a killtarget targeted, waiting", Logging.Debug);
 
                         //ok so we do need this, but only use it if we actually have some potential targets
-                        if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any())
+                        if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any() && (!Cache.Instance.InMission || Settings.Instance.SpeedTank))
                         {
-                            Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
+                            Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
+                            //Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
                             i = 0;
                         }
                         

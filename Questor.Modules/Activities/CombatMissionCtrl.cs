@@ -413,6 +413,11 @@ namespace Questor.Modules.Activities
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
                 EntityCache ClosestPotentialCombatTarget = null;
 
+                Cache.Instance.__GetBestWeaponTargets(DistanceToClear, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
+                Cache.Instance.__GetBestDroneTargets(DistanceToClear, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
+                //Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
+                //Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
+                
                 //
                 // grab the preferredPrimaryWeaponsTarget if its defined and exists on grid as our navigation point
                 //
@@ -423,12 +428,6 @@ namespace Questor.Modules.Activities
                         ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;        
                     }
                 }
-                else
-                {
-                    Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
-                    Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
-                }
-
                 
                 //
                 // retry to use PreferredPrimaryWeaponTarget
@@ -1276,7 +1275,8 @@ namespace Questor.Modules.Activities
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != killTargets.FirstOrDefault())
                 {
                     // GetTargets
-                    Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());    
+                    Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
+                    //Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());    
                 }
 
                 Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());

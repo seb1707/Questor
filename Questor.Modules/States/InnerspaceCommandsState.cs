@@ -4,6 +4,8 @@
     {
         Idle,
         LogAllEntities,
+        AddPWPT,
+        AddDPT,
         Done
     }
 }

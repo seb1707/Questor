@@ -45,6 +45,8 @@
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
+  <debugInSpace>false</debugInSpace>
+  <debugInStation>false</debugInStation>
   <debugItemHangar>false</debugItemHangar>
   <debugKillTargets>false</debugKillTargets>
   <debugKillAction>false</debugKillAction>

@@ -73,7 +73,9 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("RemovedDronePriorityTargetsByName", RemovedDronePriorityTargetsByName);
                 LavishScript.Commands.AddCommand("AddPrimaryWeaponPriorityTargetsByName", AddPrimaryWeaponPriorityTargetsByName);
                 LavishScript.Commands.AddCommand("AddPWPT", AddPrimaryWeaponPriorityTargetsByName);
-                LavishScript.Commands.AddCommand("RemovedPrimaryWeaponPriorityTargetsByName", RemovedPrimaryWeaponPriorityTargetsByName);
+                LavishScript.Commands.AddCommand("RemovePrimaryWeaponPriorityTargetsByName", RemovePrimaryWeaponPriorityTargetsByName);
+                LavishScript.Commands.AddCommand("RemovePWPTByName", RemovePrimaryWeaponPriorityTargetsByName);
+                LavishScript.Commands.AddCommand("RemovePWPT", RemovePrimaryWeaponPriorityTargetsByName);
                 LavishScript.Commands.AddCommand("ListClassInstanceInfo", ListClassInstanceInfo);
                 LavishScript.Commands.AddCommand("ListQuestorCommands", ListQuestorCommands);
                 LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
@@ -105,9 +107,9 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "AddIgnoredTarget                             - Add name to the IgnoredTarget List", Logging.White);
             Logging.Log("InnerspaceCommands", "RemoveIgnoredTarget                          - Remove name to the IgnoredTarget List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddDronePriorityTargetsByName                - Add NPCs by name to the DPT List", Logging.White);
-            Logging.Log("InnerspaceCommands", "RemovedDronePriorityTargetsByName            - Remove NPCs name from the DPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "RemoveDronePriorityTargetsByName             - Remove NPCs name from the DPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "AddPrimaryWeaponPriorityTargetsByName        - Add NPCs by name to the PWPT List", Logging.White);
-            Logging.Log("InnerspaceCommands", "RemovedPrimaryWeaponPriorityTargetsByName    - Remove NPCs name from the PWPT List", Logging.White);
+            Logging.Log("InnerspaceCommands", "RemovePrimaryWeaponPriorityTargetsByName     - Remove NPCs name from the PWPT List", Logging.White);
             Logging.Log("InnerspaceCommands", "ListItemHangarItems                          - Logs All Items in the ItemHangar", Logging.White);
             //Logging.Log("InnerspaceCommands", "ListAmmoHangarItems - missing                - Logs All Items in the (optionally configured) AmmoHangar", Logging.White);
             Logging.Log("InnerspaceCommands", "ListLootHangarItems                          - Logs All Items in the (optionally configured) LootHangar", Logging.White);
@@ -146,7 +148,6 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", " ", Logging.White);
             return 0;
         }
-
 
         private static int ListClassInstanceInfo(string[] args)
         {
@@ -273,6 +274,8 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
+        private static string AddThese;
+
         private static int AddPrimaryWeaponPriorityTargetsByName(string[] args)
         {
             if (args.Length < 2)
@@ -281,14 +284,67 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            string AddThese = args[1];
+            AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddPrimaryWeaponPriorityTargetsByName " + AddThese, Logging.White);
-            Cache.Instance.AddPrimaryWeaponPriorityTargetsByName(AddThese);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.AddPWPT;
             return 0;
         }
 
-        private static int RemovedPrimaryWeaponPriorityTargetsByName(string[] args)
+        public static void AddPrimaryWeaponPriorityTargetsByName(string stringEntitiesToAdd)
+        {
+            try
+            {
+                if (Cache.Instance.Entities.Any())
+                {
+                    if (Cache.Instance.Entities.Any(i => i.Name == stringEntitiesToAdd))
+                    {
+                        IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.Entities.Where(i => i.Name == stringEntitiesToAdd).ToList();
+                        if (entitiesToAdd.Any())
+                        {
+
+                            foreach (EntityCache entityToAdd in entitiesToAdd)
+                            {
+                                Cache.Instance.AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
+                                continue;
+                            }
+
+                            return;
+                        }
+
+                        Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found.", Logging.Debug);
+                        return;
+                    }
+
+                    int EntitiesOnGridCount = 0;
+                    if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
+                    {
+                        EntitiesOnGridCount = Cache.Instance.Entities.Count(i => i.IsOnGridWithMe);
+                    }
+
+                    int EntitiesCount = 0;
+                    if (Cache.Instance.Entities.Any())
+                    {
+                        EntitiesCount = Cache.Instance.Entities.Count();
+                    }
+
+                    Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found. [" + EntitiesOnGridCount + "] entities on grid [" + EntitiesCount + "] entities", Logging.Debug);
+                    return;
+                }
+
+                Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found. no entities on grid", Logging.Debug);
+                return;
+
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("AddPrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+            }
+
+            return;
+        }
+
+        private static int RemovePrimaryWeaponPriorityTargetsByName(string[] args)
         {
             if (args.Length < 2)
             {
@@ -423,7 +479,7 @@ namespace Questor.Modules.Misc
             }
 
             Logging.Log("Statistics", "Entering StatisticsState.LogAllEntities", Logging.Debug);
-            _States.CurrentStatisticsState = StatisticsState.LogAllEntities;
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.LogAllEntities;
             return 0;
         }
 
@@ -671,10 +727,18 @@ namespace Questor.Modules.Misc
                     if (!Cache.Instance.InWarp)
                     {
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
-                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.LogAllEntities", Logging.Debug);
                         InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
                     }
-                    _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    break;
+
+                case InnerspaceCommandsState.AddPWPT:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.AddPWPT", Logging.Debug);
+                        InnerspaceCommands.AddPrimaryWeaponPriorityTargetsByName(AddThese);
+                    }
                     break;
 
                 case InnerspaceCommandsState.Done:

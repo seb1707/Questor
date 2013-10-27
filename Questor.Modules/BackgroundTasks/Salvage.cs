@@ -726,8 +726,7 @@ namespace Questor.Modules.BackgroundTasks
                                     if (lootItem.GroupID == (int)Group.Drugs ||
                                         lootItem.GroupID == (int)Group.ToxicWaste ||
                                         lootItem.TypeId == (int)TypeID.Small_Arms ||
-                                        lootItem.TypeId == (int)TypeID.Ectoplasm ||
-                                        lootItem.TypeId == (int)TypeID.AIMEDs)
+                                        lootItem.TypeId == (int)TypeID.Ectoplasm)
                                     {
                                         lootItems.Remove(lootItem);
                                         Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);

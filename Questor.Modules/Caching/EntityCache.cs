@@ -542,15 +542,19 @@ namespace Questor.Modules.Caching
                                     return true;
                                 }
 
+                                if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] Unable to find ID in the Entity List", Logging.Debug);
                                 return false;
                             }
 
+                            if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] Distance [" + Math.Round(Distance) + "] is not less than MaxRange [" + Cache.Instance.MaxRange + "]", Logging.Debug);
                             return false;
                         }
 
+                        if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] HasExploded [" + HasExploded + "] IsTarget [" + IsTarget + "] IsIgnored [" + IsIgnored + "]", Logging.Debug);
                         return false;
                     }
 
+                    if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "_directEntity is null or invalid", Logging.Debug);
                     return false;
                 }
                 catch (Exception exception)
@@ -1632,6 +1636,13 @@ namespace Questor.Modules.Caching
                         {
                             bool result = false;
                             result |= Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
+                            if (result)
+                            {
+                                if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id != Id)
+                                {
+                                    Cache.Instance.PreferredPrimaryWeaponTarget = null;    
+                                }
+                            }
                             return result;
                         }
 

@@ -140,31 +140,43 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_preferredPrimaryWeaponTarget == null)
+                if (Cache.Instance._preferredPrimaryWeaponTarget == null)
                 {
-                    if (PreferredPrimaryWeaponTargetID != null)
+                    if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
                     {
-                        _preferredPrimaryWeaponTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == PreferredPrimaryWeaponTargetID);
-                        return _preferredPrimaryWeaponTarget ?? null;    
+                        Cache.Instance._preferredPrimaryWeaponTarget = Cache.Instance.Entities.FirstOrDefault(i => i.IsOnGridWithMe && i.Id == Cache.Instance.PreferredPrimaryWeaponTargetID);
+
+                        return Cache.Instance._preferredPrimaryWeaponTarget ?? null;    
                     }
 
                     return null;
                 }
 
-                return _preferredPrimaryWeaponTarget;
+                return Cache.Instance._preferredPrimaryWeaponTarget;
             }
             set
             {
                 if (value == null)
                 {
-                    _preferredPrimaryWeaponTarget = null;
-                    PreferredPrimaryWeaponTargetID = null;
+                    if (Cache.Instance._preferredPrimaryWeaponTarget != null)
+                    {
+                        Cache.Instance._preferredPrimaryWeaponTarget = null;
+                        Cache.Instance.PreferredPrimaryWeaponTargetID = null;
+                        if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", "[ null ]", Logging.Debug);
+                        return;
+                    }
                 }
-                else
+
+                if ((Cache.Instance._preferredPrimaryWeaponTarget != null && Cache.Instance._preferredPrimaryWeaponTarget.Id != value.Id) || Cache.Instance._preferredPrimaryWeaponTarget == null)
                 {
-                    _preferredPrimaryWeaponTarget = value;
-                    PreferredPrimaryWeaponTargetID = value.Id;    
+                    Cache.Instance._preferredPrimaryWeaponTarget = value;
+                    Cache.Instance.PreferredPrimaryWeaponTargetID = value.Id;
+                    if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", value.Name + " [" + Cache.Instance.MaskedID(value.Id) + "][" + Math.Round(value.Distance / 1000, 0) + "k] isTarget [" + value.IsTarget + "]", Logging.Debug);
+                    return;
                 }
+
+                //if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget", "Cache.Instance._preferredPrimaryWeaponTarget [" + Cache.Instance._preferredPrimaryWeaponTarget.Name + "] is already set (no need to change)", Logging.Debug);
+                return;
             }
         }
         
@@ -189,8 +201,25 @@ namespace Questor.Modules.Caching
             }
             set
             {
-                _preferredDroneTarget = value;
-                PreferredDroneTargetID = value.Id;
+                if (value == null)
+                {
+                    if (_preferredDroneTarget != null)
+                    {
+                        _preferredDroneTarget = null;
+                        PreferredDroneTargetID = null;
+                        Logging.Log("PreferredPrimaryWeaponTarget.Set", "[ null ]", Logging.Debug);
+                    }
+                }
+                else
+                {
+                    if (_preferredDroneTarget != null && _preferredDroneTarget.Id != value.Id)
+                    {
+                        _preferredDroneTarget = value;
+                        PreferredDroneTargetID = value.Id;
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", value + " [" + Cache.Instance.MaskedID(value.Id) + "]", Logging.Debug);
+                    }
+                }
+                
             }
         }
 
@@ -2163,6 +2192,8 @@ namespace Questor.Modules.Caching
 
         public bool QuestorJustStarted = true;
 
+        public bool InvalidateCacheQuestorJustStartedFlag = false;
+
         public DateTime EnteredCloseQuestor_DateTime;
 
         public bool DropMode { get; set; }
@@ -2369,8 +2400,10 @@ namespace Questor.Modules.Caching
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
 
-                if (QuestorJustStarted)
+                if (QuestorJustStarted && InvalidateCacheQuestorJustStartedFlag)
                 {
+                    InvalidateCacheQuestorJustStartedFlag = false;
+                    if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("Cache.InvalidateCache", "QuestorJustStarted: initializing", Logging.Debug);
                     _primaryWeaponPriorityEntities = null;
                     _dronePriorityEntities = null;
                     _preferredPrimaryWeaponTarget = null;
@@ -2384,8 +2417,6 @@ namespace Questor.Modules.Caching
                         _dronePriorityTargets.ForEach(pt => pt.ClearCache());
                     }
                 }
-                
-
             }
             catch (Exception exception)
             {
@@ -3233,18 +3264,21 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        public string MaskedID(long ID)
+        public string MaskedID(long? ID)
         {
             try
             {
-                int numofCharacters = ID.ToString(CultureInfo.InvariantCulture).Length;
-                if (numofCharacters >= 5)
+                if (ID != null)
                 {
-                    string maskedID = ID.ToString(CultureInfo.InvariantCulture).Substring(numofCharacters - 5);
-                    maskedID = "[truncatedID]" + maskedID;
-                    return maskedID;    
+                    int numofCharacters = ID.ToString().Length;
+                    if (numofCharacters >= 5)
+                    {
+                        string maskedID = ID.ToString().Substring(numofCharacters - 5);
+                        maskedID = "[truncatedID]" + maskedID;
+                        return maskedID;
+                    }    
                 }
-
+                
                 return "!0!";
             }
             catch (Exception exception)
@@ -3349,22 +3383,72 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> BestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets;
+
+            //if (Settings.Instance.DebugDisableGetBestTarget)
+            //{
+            //    return null;
+            //}
+
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
+
+            //if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
+            //{
+            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTargets" + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
+            //    return null;
+            //}
+
+            //NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+            
+            IEnumerable<EntityCache> BestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets.ToList();
             long? currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
             long? preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTargetID ?? -1;
 
-            BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                  .OrderByDescending(t => t.isPreferredPrimaryWeaponTarget)
-                                                  .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                      // Weapons should fire big targets first
-                                                  .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                  .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
-                                                  .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
-                                                  .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
-                                                  .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
-                                                  .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
-                                                  .ThenByDescending(t => t.IsInOptimalRange)
-                                                  .ThenBy(t => t.Distance);
-
+            if (BestPrimaryWeaponTargets.Any())
+            {
+                BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                                                      .OrderByDescending(t => t.isPreferredPrimaryWeaponTarget)
+                                                      .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                      // Weapons should fire big targets first
+                                                      .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                      .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
+                                                      .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
+                                                      .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
+                                                      .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
+                                                      .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
+                                                      .ThenByDescending(t => t.IsInOptimalRange)
+                                                      .ThenBy(t => t.Nearest5kDistance);
+            }
+            
+            if (BestPrimaryWeaponTargets.Any())
+            {
+                int BestPrimaryWeaponTargetsCount = BestPrimaryWeaponTargets.Count();
+                if (BestPrimaryWeaponTargets.FirstOrDefault() != null)
+                {
+                    Cache.Instance.PreferredPrimaryWeaponTarget = BestPrimaryWeaponTargets.FirstOrDefault();
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]", Logging.Debug);    
+                    }
+                    else if (Cache.Instance.PreferredPrimaryWeaponTarget == null)
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [ null ] huh?", Logging.Debug);    
+                    }
+                }
+                
+                if (Settings.Instance.DebugGetBestTarget)
+                {
+                    if (BestPrimaryWeaponTargets.Any())
+                    {
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(PreferredPrimaryWeaponTargetID) + "] BestPrimaryWeaponTargets Total [" + BestPrimaryWeaponTargetsCount + "]", Logging.Teal);
+                        int i = 0;
+                        foreach (EntityCache bestPrimaryWeaponTarget in BestPrimaryWeaponTargets)
+                        {
+                            i++;
+                            Logging.Log("Debug: GetBestTarget (Weapons):", "[" + i + "] BestPrimaryWeaponTarget [" + bestPrimaryWeaponTarget.Name + "][" + Math.Round(bestPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestPrimaryWeaponTarget.Id) + "]", Logging.Teal);
+                        }
+                    }
+                }
+            }
+            
             return BestPrimaryWeaponTargets;
         }
 
@@ -3385,7 +3469,9 @@ namespace Questor.Modules.Caching
                                                           .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we dont switch our targets too often
                                                           .ThenByDescending(t => t.IsEntityIShouldKeepShooting && t.IsLowValueTarget) // Shoot targets that are in armor!
                                                           .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
-                                                          .ThenBy(t => t.Distance);
+                                                          .ThenBy(t => t.Nearest5kDistance);
+
+            Cache.Instance.PreferredDroneTarget = BestDroneTargets.FirstOrDefault();
 
             return BestDroneTargets;
         }

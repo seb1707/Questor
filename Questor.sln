@@ -95,8 +95,6 @@ Global
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|Win32.ActiveCfg = Release|x86
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|x86.ActiveCfg = Release|x86
 		{393DE7BE-C792-477A-B884-75F174BAB9B6}.Release|x86.Build.0 = Release|x86
-		{4727F3DC-CBD6-42A9-819D-7830FBED4714}.Debug|Win32.Build.0 = Debug|x86
-		{4727F3DC-CBD6-42A9-819D-7830FBED4714}.Release|Win32.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

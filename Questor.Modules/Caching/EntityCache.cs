@@ -730,35 +730,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool IsTooCloseTooFastTooSmallToHit
-        {
-            get
-            {
-                if (_directEntity != null)
-                {
-                    if (IsNPCFrigate || IsFrigate)
-                    {
-                        if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
-                        {
-                            if (_directEntity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                             && _directEntity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
-                            {
-                                return true;
-                            }
-
-                            return false;
-                        }
-
-                        return false;
-                    }
-
-                    return false;
-                }
-
-                return false;
-            }
-        }
-
         public bool IsActiveTarget
         {
             get
@@ -2057,10 +2028,6 @@ namespace Questor.Modules.Caching
                     Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                     return false;
                 }
-            }
-        }
-
-                return result;
             }
         }
 

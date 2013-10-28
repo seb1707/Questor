@@ -228,7 +228,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            //if (closest.Distance <= (int)Distances.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
+            //if (closest.Distance <= (int)Distance.CloseToGateActivationRange) // if your distance is less than the 'close enough' range, default is 7000 meters
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
             
             if (closest != null)
@@ -492,14 +492,6 @@ namespace Questor.Modules.Activities
 
             // Target
             if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat") || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones"))
-            int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                               && !t.IsEntityIShouldLeaveAlone 
-                                                               && !t.IsContainer
-                                                               && (t.IsNpc || t.IsNpcByGroupID)
-                                                               && t.CategoryId == (int)CategoryID.Entity
-                                                               && t.GroupId != (int)Group.LargeColidableStructure 
-                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
-
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -961,25 +953,12 @@ namespace Questor.Modules.Activities
 
             // Are we in timeout?
             if (DateTime.UtcNow < _clearPocketTimeout.Value)
-            if(Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name)) != null)
-            {
-                targets.Add(Cache.Instance.Entities.FirstOrDefault(e => targetNames.Contains(e.Name)));
-            }
-
             {
                 return;
             }
 
             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "is complete: no more targets that are targeting us", Logging.Teal);
             Nextaction();
-            int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                               && !t.IsEntityIShouldLeaveAlone
-                                                               && !t.IsContainer
-                                                               && t.IsNpc
-                                                               && t.CategoryId == (int)CategoryID.Entity
-                                                               && t.GroupId != (int)Group.LargeColidableStructure
-                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
-
 
             // Reset timeout
             _clearPocketTimeout = null;
@@ -1107,9 +1086,6 @@ namespace Questor.Modules.Activities
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "All targets killed " + targetNames.Aggregate((current, next) => current + "[" + next + "] NumToIgnore [" + numberToIgnore + "]"), Logging.Teal);
-            }
-
-            {
 
                 // We killed it/them !?!?!? :)
                 Cache.Instance.IgnoreTargets.RemoveWhere(targetNames.Contains);
@@ -1132,17 +1108,6 @@ namespace Questor.Modules.Activities
             }
 
             if (ignoreAttackers)
-
-            //if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => !t.IsSentry && t.Distance < Cache.Instance.MaxRange) > 1)
-            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !Cache.Instance.IgnoreTargets.Contains(t.Name)) > killTargets.Count(e => e.IsTargetedBy))
-                foreach (EntityCache entity in Cache.Instance.Targets.Where(e => targetNames.Contains(e.Name) && (e.IsTarget || e.IsTargeting)))
-            int targetedby = Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
-                                                               && !t.IsEntityIShouldLeaveAlone 
-                                                               && !t.IsContainer 
-                                                               && t.IsNpc 
-                                                               && t.CategoryId == (int)CategoryID.Entity 
-                                                               && t.GroupId != (int)Group.LargeColidableStructure 
-                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
             {
                 foreach (EntityCache target in Cache.Instance.PotentialCombatTargets.Where(e => !targetNames.Contains(e.Name)))
                 {
@@ -1252,12 +1217,6 @@ namespace Questor.Modules.Activities
                     //
                 }
                 else 
-
-            if(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault() != null)
-            {
-                targets.Add(Cache.Instance.Entities.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Distance).FirstOrDefault());
-            }
-
                 {
                     //
                     // then proceed to kill the target
@@ -1279,11 +1238,6 @@ namespace Questor.Modules.Activities
                             if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.PreferredPrimaryWeaponTarget =[ " + Cache.Instance.PreferredPrimaryWeaponTarget.Name + " ][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]", Logging.Debug);
 
                             if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
-                                                               && t.IsNpc
-                                                               && t.CategoryId == (int)CategoryID.Entity
-                                                               && t.GroupId != (int)Group.LargeColidableStructure
-                                                               && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim()));
-
                             {
                                 if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "PrimaryWeaponPriorityTargets Below (if any)", Logging.Debug);
                                 int icount = 0;
@@ -1650,7 +1604,7 @@ namespace Questor.Modules.Activities
                     }
 
                     EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-                    if (closest != null && (closest.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
+                    if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
                         {

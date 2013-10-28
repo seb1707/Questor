@@ -451,12 +451,6 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            if (isWeapon && entity.Distance > Cache.Instance.WeaponRange)
-            {
-                Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 2) + "] which is out of weapons range!", Logging.Debug);
-                return false;
-            }
-
             // We have changed target, allow activation
             if (entity.Id != module.LastTargetId)
                 return true;
@@ -947,7 +941,6 @@ namespace Questor.Modules.Combat
                 //Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                 return false;
             }
-
 
             if (!OutOfRangeOnly)
             {

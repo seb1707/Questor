@@ -111,7 +111,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 // Unlock if within loot range - - - - is this needed or wanted in this mode?!
-                //if (wreck.Distance < (int)Distances.SafeScoopRange)
+                //if (wreck.Distance < (int)Distance.SafeScoopRange)
                 //{
                 //    Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][" + wreck.Id + "] within loot range, unlocking container.");
                 //    wreck.UnlockTarget();

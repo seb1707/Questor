@@ -1529,6 +1529,7 @@ namespace Questor.Modules.Caching
                     {
                         return Cache.Instance.DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
                     }
+
                     return _entities;
                 }
                 catch (NullReferenceException) { }  // this can happen during session changes
@@ -1544,65 +1545,12 @@ namespace Questor.Modules.Caching
                 if (!InSpace)
                 {
                     return new List<EntityCache>();
-                                                        //&& !e.IsTarget
-                                                        && !e.IsLargeCollidable
-                                                        && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
-                                                        )
-
-                    if (Settings.Instance.DebugTargetCombatants)
-                    {
-                        if (!_potentialCombatTargets.Any())
-                        {
-                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                            List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            && (e.IsNpc || e.IsNpcByGroupID)
-                                                            && !e.IsTarget
-                                                            && (!e.IsBadIdea || e.IsBadIdea && e.IsAttacking)
-                                                            && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
-                                                            && !e.IsCelestial
-                                                            && !e.IsStation
-                                                            && !e.IsCustomsOffice
-                                                            && !e.IsAsteroid
-                                                            && !e.IsAsteroidBelt
-                                                            && !Cache.Instance.IgnoreTargets.Contains(e.Name.Trim())
-                                                            )
-                                                            .ToList();
-
-                            int _entitiescount = 0;
-
-                            if (__entities.Any())
-                            {
-                                _entitiescount = __entities.Count();
-                                Logging.Log("Cache.potentialCombatTargets", "DebugTargetCombatants: list of __entities below", Logging.Debug);
-                                int i = 0;
-                                foreach (EntityCache t in Cache.Instance.EntitiesNotSelf)
-                                {
-                                    i++;
-                                    Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                                    continue;
-                                }
+                }
 
                 IEnumerable<EntityCache> _entitiesActivelyBeingLocked = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.IsTargeting).ToList();
                 if (_entitiesActivelyBeingLocked.Any())
-
-                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
-                        }    
-                    }
-                    
-                    return _potentialCombatTargets;
-                }
-
-                return new List<EntityCache>();
-            }
-        }
-
-        public IEnumerable<EntityCache> Entities
-        {
-                    return _entitiesActivelyBeingLocked;
-            {
-                if (!InSpace)
                 {
-                    return new List<EntityCache>();
+                    return _entitiesActivelyBeingLocked;
                 }
 
                 return new List<EntityCache>();
@@ -3414,75 +3362,6 @@ namespace Questor.Modules.Caching
                     {
                         FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
                     }
-                    
-                    return _currentWeaponTarget;
-                }
-
-                return null;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("GetCurrentWeaponTarget", "exception [" + exception + "]", Logging.Debug);
-            }
-
-            return null;
-        }
-
-            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)))
-            {
-                if (DateTime.UtcNow < NextGetBestCombatTarget)
-                    return null; //false;
-
-                NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
-            }
-
-            if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)))
-            {
-                if (DateTime.UtcNow < NextGetBestDroneTarget)
-                    return null; //false;
-
-                NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
-            }
-
-            //EntityCache currentTarget = null;
-            if ((string.Equals(callingroutine, "Combat", StringComparison.OrdinalIgnoreCase)) && Cache.Instance.CurrentWeaponTarget() != null)
-            {
-                currentTarget = Cache.Instance.CurrentWeaponTarget();
-            }
-            else if ((string.Equals(callingroutine, "Drones", StringComparison.OrdinalIgnoreCase)) && TargetingCache.CurrentDronesTarget != null)
-            {
-                currentTarget = TargetingCache.CurrentDronesTarget;
-            }
-            
-        {
-            // Find the first active weapon's target
-            EntityCache _currentWeaponTarget = null;
-            double OptimalOfWeapon = 0;
-            double FallOffOfWeapon = 0;
-
-            try
-            {
-                // Find the target associated with the weapon
-                ModuleCache weapon = Cache.Instance.Weapons.FirstOrDefault(m => m.IsOnline
-                                                                                    && !m.IsReloadingAmmo
-                                                                                    && !m.IsChangingAmmo
-                                                                                    && m.IsActive);
-                if (weapon != null)
-                {
-                    _currentWeaponTarget = Cache.Instance.EntityById(weapon.TargetId);
-
-                    //
-                    // in a perfect world we'd always use the same guns / missiles across the board, for those that dont this will at least come up with sane numbers
-                    //
-                    if (OptimalOfWeapon <= 1)
-                    {
-                        OptimalOfWeapon = Math.Min(OptimalOfWeapon, weapon.OptimalRange);
-                    }
-
-                    if (FallOffOfWeapon <= 1)
-                    {
-                        FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
-                    }
 
                     if (_currentWeaponTarget != null && _currentWeaponTarget.IsReadyToShoot)
                     {
@@ -4380,18 +4259,6 @@ namespace Questor.Modules.Caching
                     Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
                     int potentialCombatTargetNumber = 0;
                     foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
-                        foreach (EntityCache potentialCombatTarget in Cache.Instance.potentialCombatTargets)
-                        {
-                            Logging.Log("GetBestTarget: none", "Debug entities: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
-                        }
-                        Logging.Log("GetBestTarget: none", "ALL potentialCombatTargets LISTED ABOVE", Logging.Debug);
-                        Logging.Log("GetBestTarget: none", ".", Logging.Debug);    
-                    }
-                }
-
-                NextGetBestCombatTarget = DateTime.UtcNow;
-                NextGetBestDroneTarget = DateTime.UtcNow;
-                return null; //false;
                     {
                         potentialCombatTargetNumber++;
                         Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);

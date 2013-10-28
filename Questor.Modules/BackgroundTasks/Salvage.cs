@@ -765,7 +765,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp)
+            if (Cache.Instance.InSpace && Cache.Instance.InWarp)
             {
                 _States.CurrentSalvageState = SalvageState.Idle;
                 return;
@@ -824,11 +824,11 @@ namespace Questor.Modules.BackgroundTasks
 
                 case SalvageState.Idle:
                     if (Cache.Instance.InSpace &&
-                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&
+                        (Cache.Instance.DirectEve.ActiveShip.Entity != null &&
                         !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked &&
                         (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower() ||
                         Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
-                        !Cache.Instance.InWarp)
+                        !Cache.Instance.InWarp))
                     {
                         _States.CurrentSalvageState = SalvageState.TargetWrecks;
                         return;

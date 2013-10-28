@@ -291,6 +291,13 @@ namespace Questor
                         DataAmmoHangarName.Text = Settings.Instance.AmmoHangar;
                         DataLootHangarID.Text = Cache.Instance.LootHangarID.ToString(CultureInfo.InvariantCulture);
                         DataLootHangarName.Text = Settings.Instance.LootHangar;
+                        PrimaryWeaponsPriorityTargetListBox.DataSource = null;
+                        PrimaryWeaponsPriorityTargetListBox.DataSource = Cache.Instance.PrimaryWeaponPriorityTargets;
+                        DronePriorityTargetListBox.DataSource = null;
+                        DronePriorityTargetListBox.DataSource = Cache.Instance.DronePriorityTargets;
+                        lvlCurrentPrimaryWeaponsTarget.Text = Cache.Instance.PreferredPrimaryWeaponTarget.ToString();
+                        lblCurrentDroneTarget.Text = Cache.Instance.PreferredDroneTarget.ToString();
+
                     }
                 }
                 catch (Exception ex)
@@ -806,9 +813,9 @@ namespace Questor
             //
             // Right Group
             //
-            if ((string)CombatMissionCtrlStateComboBox.SelectedItem != text && !CombatMissionCtrlStateComboBox.DroppedDown)
+            if ((string)CombatMissionCtrlStateComboBox.SelectedItem != _States.CurrentCombatMissionCtrlState.ToString() && !CombatMissionCtrlStateComboBox.DroppedDown)
             {
-                CombatMissionCtrlStateComboBox.SelectedItem = text;
+                CombatMissionCtrlStateComboBox.SelectedItem = _States.CurrentCombatMissionCtrlState.ToString();
             }
 
             if ((string)StorylineStateComboBox.SelectedItem != _States.CurrentStorylineState.ToString() && !StorylineStateComboBox.DroppedDown)

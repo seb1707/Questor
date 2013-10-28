@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -139,7 +139,6 @@ namespace Questor
             {
                 _readyToStart = true;
             }
-
 
             #region Load DirectEVE
             //

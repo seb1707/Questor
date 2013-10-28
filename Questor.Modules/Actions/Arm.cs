@@ -1085,6 +1085,8 @@ namespace Questor.Modules.Actions
                                 Logging.Log("Arm.MoveItems","Itemhangar Exception [" + exception + "]",Logging.Debug);
                             }
                             
+                            }
+                            
                         }
 
                         try

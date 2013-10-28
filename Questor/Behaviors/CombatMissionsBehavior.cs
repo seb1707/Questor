@@ -652,9 +652,9 @@ namespace Questor.Behaviors
                         Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);
                     }
 
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt != null && pt.IsValid) || Cache.Instance.DronePriorityTargets.Any(pt => pt != null && pt.IsValid))
+                    if (Cache.Instance.potentialCombatTargets.Any())
                     {
-                        Logging.Log("CombatMissionsBehavior.GotoMission", "Priority targets found, engaging!", Logging.White);
+                        Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Cache.Instance.potentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
                         _combat.ProcessState();
                     }
 
@@ -813,7 +813,7 @@ namespace Questor.Behaviors
                             {
                                 if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
                                 InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
-// This was causing a lockup       Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
+                                Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                                 //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
                                 if (!Statistics.WriteDroneStatsLog()) break;
                             }

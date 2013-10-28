@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questor", "Questor\Questor.csproj", "{0E528457-6A20-441F-94BB-84F6FC0EEE70}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueDump", "ValueDump\ValueDump.csproj", "{4E4C340D-0D20-4C96-A44B-55B86C5CEA77}"

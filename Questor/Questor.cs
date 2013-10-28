@@ -73,6 +73,19 @@ namespace Questor
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
 
+            if (Cache.Instance.DirectEve == null)
+            {
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
+            }
+
             try
             {
                 if (Cache.Instance.DirectEve.HasSupportInstances())
@@ -401,6 +414,7 @@ namespace Questor
             if (Settings.Instance.DebugWalletBalance)
             {
                 Logging.Log("Questor.WalletCheck", String.Format("DEBUG: Wallet Balance [ {0} ] has been checked.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.Yellow);
+
             }
 
             //Settings.Instance.WalletBalanceChangeLogOffDelay = 2;  //used for debugging purposes
@@ -452,7 +466,7 @@ namespace Questor
 
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
-
+            
             //if (Cache.Instance.EntitiesthatHaveExploded.Any())
             //{
             //    if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);

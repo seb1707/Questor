@@ -561,6 +561,7 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrievalAttempts + "] retrying...", Logging.White);
                 return;
             }
+
             AgentLPRetrievalAttempts = 0;
 
             Statistics.Instance.MissionsThisSession++;

@@ -596,6 +596,7 @@ namespace Questor.Modules.Combat
 
             // Activate the weapons (it not yet activated)))
             _weaponNumber = 0;
+            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: activate: Do we need to activate any weapons?", Logging.Teal);
             foreach (ModuleCache weapon in weapons)
             {
                 _weaponNumber++;
@@ -621,12 +622,15 @@ namespace Questor.Modules.Combat
                 }
 
                 // No, check ammo type and if that is correct, activate weapon
-                if (ReloadAmmo(weapon, target, _weaponNumber) && CanActivate(weapon, target, true))
+                bool ReloadReady = ReloadAmmo(weapon, target, _weaponNumber);
+                bool CanActivateReady = CanActivate(weapon, target, true);
+                if (ReloadReady && CanActivateReady)
                 {
                     if (weaponsActivatedThisTick > weaponsToActivateThisTick)
-
-                        //if we have already activated x num of weapons return, which will wait until the next ProcessState
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: if we have already activated x num of weapons return, which will wait until the next ProcessState", Logging.Teal); 
                         return;
+                    }
 
                     if (!target.IsTarget)
                     {
@@ -645,6 +649,8 @@ namespace Questor.Modules.Combat
                     //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     continue;
                 }
+                
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: ReloadReady [" + ReloadReady + "] CanActivateReady [" + CanActivateReady + "]", Logging.Teal);
             }
         }
 

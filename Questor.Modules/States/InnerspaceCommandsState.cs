@@ -4,6 +4,7 @@
     {
         Idle,
         LogAllEntities,
+        ListPrimaryWeaponPriorityTargets,
         AddPWPT,
         AddDPT,
         Done

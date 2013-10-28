@@ -47,12 +47,12 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ModuleInfo", ModuleInfo);
                 LavishScript.Commands.AddCommand("ListModules", ModuleInfo);
                 LavishScript.Commands.AddCommand("ListIgnoredTargets", ListIgnoredTargets);
-                LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargets);
-                LavishScript.Commands.AddCommand("ListPWPT", ListPrimaryWeaponPriorityTargets);
-                LavishScript.Commands.AddCommand("PWPT", ListPrimaryWeaponPriorityTargets);
-                LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargets);
-                LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargets);
-                LavishScript.Commands.AddCommand("DPT", ListDronePriorityTargets);
+                LavishScript.Commands.AddCommand("ListPrimaryWeaponPriorityTargets", ListPrimaryWeaponPriorityTargetsInnerspaceCommand);
+                LavishScript.Commands.AddCommand("ListPWPT", ListPrimaryWeaponPriorityTargetsInnerspaceCommand);
+                LavishScript.Commands.AddCommand("PWPT", ListPrimaryWeaponPriorityTargetsInnerspaceCommand);
+                LavishScript.Commands.AddCommand("ListDronePriorityTargets", ListDronePriorityTargetsInnerspaceCommand);
+                LavishScript.Commands.AddCommand("ListDPT", ListDronePriorityTargetsInnerspaceCommand);
+                LavishScript.Commands.AddCommand("DPT", ListDronePriorityTargetsInnerspaceCommand);
                 LavishScript.Commands.AddCommand("ListTargets", ListTargetedandTargeting);
                 LavishScript.Commands.AddCommand("ListItemHangarItems", ListItemHangarItems);
                 LavishScript.Commands.AddCommand("ListItemHangar", ListItemHangarItems);
@@ -415,7 +415,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int ListPrimaryWeaponPriorityTargets(string[] args)
+        private static int ListPrimaryWeaponPriorityTargetsInnerspaceCommand(string[] args)
         {
             if (args.Length != 1)
             {
@@ -424,11 +424,33 @@ namespace Questor.Modules.Misc
             }
 
             Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-            _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.ListPrimaryWeaponPriorityTargets;
             return 0;
         }
 
-        private static int ListDronePriorityTargets(string[] args)
+        public static bool ListPrimaryWeaponPriorityTargets()
+        {
+            Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+            {
+                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
+            }
+
+            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+            {
+                int icount = 0;
+                foreach (PriorityTarget PrimaryWeaponPriorityTarget in Cache.Instance.PrimaryWeaponPriorityTargets)
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityTarget.PrimaryWeaponPriority + "] EntityID [" + Cache.Instance.MaskedID(PrimaryWeaponPriorityTarget.EntityID) + "]", Logging.Debug);
+                    //Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityEntity.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityEntity.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            return true;
+        }
+
+        private static int ListDronePriorityTargetsInnerspaceCommand(string[] args)
         {
             if (args.Length != 1)
             {
@@ -729,6 +751,15 @@ namespace Questor.Modules.Misc
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.LogAllEntities", Logging.Debug);
                         InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    break;
+
+                case InnerspaceCommandsState.ListPrimaryWeaponPriorityTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
+                        InnerspaceCommands.ListPrimaryWeaponPriorityTargets();
                     }
                     break;
 

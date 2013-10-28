@@ -275,28 +275,6 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool ListPrimaryWeaponPriorityTargets()
-        {
-            Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsValid)
-            {
-                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
-            }
-
-            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
-            {
-                int icount = 0;
-                foreach (PriorityTarget PrimaryWeaponPriorityTarget in Cache.Instance.PrimaryWeaponPriorityTargets)
-                {
-                    icount++;
-                    Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityTarget.PrimaryWeaponPriority + "] EntityID [" + Cache.Instance.MaskedID(PrimaryWeaponPriorityTarget.EntityID) + "]", Logging.Debug);
-                    //Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityEntity.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityEntity.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
-                }
-            }
-            Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
-            return true;
-        }
-
         public static bool ListDronePriorityTargets(IEnumerable<EntityCache> primaryDroneTargets)
         {
             Logging.Log("DPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
@@ -723,7 +701,7 @@ namespace Questor.Modules.Logging
                 }
             }
 
-            if (AgentLPRetrievalAttempts > 20)
+            if (AgentLPRetrievalAttempts > 10)
             {
                 Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrievalAttempts + "] giving up", Logging.White);
                 AgentLPRetrievalAttempts = 0;
@@ -1034,18 +1012,6 @@ namespace Questor.Modules.Logging
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.ListIgnoredTargets", Logging.Debug);
                             Statistics.ListIgnoredTargets();
-                        }
-                    }
-                    break;
-
-                case StatisticsState.ListPrimaryWeaponPriorityTargets:
-                    if (!Cache.Instance.InWarp)
-                    {
-                        if (Cache.Instance.InSpace)
-                        {
-                            _States.CurrentStatisticsState = StatisticsState.Idle;
-                            Logging.Log("Statistics", "StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                            Statistics.ListPrimaryWeaponPriorityTargets();
                         }
                     }
                     break;

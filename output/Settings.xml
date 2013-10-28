@@ -6,6 +6,8 @@
   
   <debugActivateGate>false</debugActivateGate>
   <debugActivateWeapons>false</debugActivateWeapons>
+  <debugAddDronePriorityTarget>false</debugAddDronePriorityTarget>
+  <debugAddPrimaryWeaponPriorityTarget>false</debugAddPrimaryWeaponPriorityTarget>
   <debugAgentInteractionReplyToAgent>false</debugAgentInteractionReplyToAgent>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
@@ -14,21 +16,40 @@
   <debugAutoStart>false</debugAutoStart>
   <debugBlackList>false</debugBlackList>
   <debugCargoHold>false</debugCargoHold>
+  <debugChat>false</debugChat>
   <debugCleanup>false</debugCleanup>
   <debugClearPocket>false</debugClearPocket>
   <debugCourierMissions>false</debugCourierMissions>
   <debugDecline>false</debugDecline>
   <debugDefense>false</debugDefense>
+  <debugDisableCleanup>false</debugDisableCleanup>
+  <debugDisableCombatMissionsBehavior>false</debugDisableCombatMissionsBehavior>
+  <debugDisableCombatMissionCtrl>false</debugDisableCombatMissionCtrl>
+  <debugDisableCombat>false</debugDisableCombat>
+  <debugDisableDrones>false</debugDisableDrones>
+  <debugDisablePanic>false</debugDisablePanic>
+  <debugDisableSalvage>false</debugDisableSalvage>
+  <debugDisableGetBestTarget>false</debugDisableGetBestTarget>
+  <debugDisableTargetCombatants>false</debugDisableTargetCombatants>
+  <debugDisableNavigateIntoRange>false</debugDisableNavigateIntoRange>
+  <debugDoneState>false</debugDoneState>
+  <debugDrones>false</debugDrones>
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>
   <debugFittingMgr>false</debugFittingMgr>
   <debugGetBestTarget>false</debugGetBestTarget>
+  <debugGetBestDroneTarget>false</debugGetBestDroneTarget>
+  <debugFleetSupportMaster>false</debugFleetSupportMaster>
+  <debugFleetSupportSlave>false</debugFleetSupportSlave>
   <debugGotobase>false</debugGotobase>
   <debugGreyList>false</debugGreyList>
   <debugHangars>false</debugHangars>
   <debugIdle>false</debugIdle>
+  <debugInSpace>false</debugInSpace>
+  <debugInStation>false</debugInStation>
   <debugItemHangar>false</debugItemHangar>
-  <debugKillTargets>true</debugKillTargets>
+  <debugKillTargets>false</debugKillTargets>
+  <debugKillAction>false</debugKillAction>
   <debugLoadScripts>false</debugLoadScripts>
   <debugLogging>false</debugLogging>
   <debugLootWrecks>false</debugLootWrecks>
@@ -39,11 +60,13 @@
   <debugNavigateOnGrid>false</debugNavigateOnGrid>
   <debugOnframe>false</debugOnframe>
   <debugPerformance>false</debugPerformance>
+  <debugPotentialCombatTargets>false</debugPotentialCombatTargets>
   <debugQuestorManager>false</debugQuestorManager>
   <debugReloadAll>false</debugReloadAll>
   <debugReloadorChangeAmmo>false</debugReloadorChangeAmmo>
   <debugSalvage>false</debugSalvage>
   <debugScheduler>false</debugScheduler>
+  <debugSkillTraining>false</debugSkillTraining>
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
@@ -108,6 +131,20 @@
   <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
   <WatchForActiveWars>true</WatchForActiveWars><!-- default is true -->
   
+  <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will seach for and travel to the master (if any)-->
+  <fleetSupportSlave>false</fleetSupportSlave>
+  <!-- fleetSupportMaster is either true or false: if true the master background actions will kick in and communicate targets and its own location to slaves (if any)-->
+  <fleetSupportMaster>false</fleetSupportMaster>
+  <!-- fleetname is used to seperate the IPC communications so that only masters and slaves from the same "fleetName" communicate with each other -->  
+  <fleetName>Fleet1</fleetName>
+
+  <characterNamesForMasterToInviteToFleet>
+	<character></character>
+	<!-- <character>Foobar1</character> -->
+	<!-- <character>Foobar2</character> -->
+	<!-- <character>Foobar3</character> -->
+  </characterNamesForMasterToInviteToFleet>
+
   <!--                                                         -->
   <!-- AGENT AND MISSION SETTINGS -->
   <!--                                                         -->
@@ -335,9 +372,12 @@
        before attacking a new target -->
   <minimumAmmoCharges>6</minimumAmmoCharges>
   <!-- Amount of cap booster you want to carry with you, when using a cap injector in fitting-->
-  <capBoosterToLoad>15</capBoosterToLoad>
+  <capacitorInjectorToLoad>15</capacitorInjectorToLoad>
+  <armLoadCapBoosters>false</armLoadCapBoosters>
+  
   <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasors, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
+  
   <!--  BOTH distance and speed have to be met before the NPC Frigate will be removed from the PrimaryWeapons PriorityTarget List... (under the distance, over the speed) -->
   <!--  If you wish to effectively turn this off you can set the speedTargetsShouldBeIgnoredByMainWeapons to a very high number like: 9999999 -->
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
@@ -347,7 +387,7 @@
   <insideThisRangeIsHardToTrack>15000</insideThisRangeIsHardToTrack>
   
   <!--                                                                            -->  
-  <!--  ECM PrimaryWeapon PriorityTarget Options--> 
+  <!--  E-War PrimaryWeapon PriorityTarget Options--> 
   <!--                                                                            -->  
   <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
   <addDampenersToPrimaryWeaponsPriorityTargetList>true</addDampenersToPrimaryWeaponsPriorityTargetList>
@@ -365,23 +405,26 @@
   <addWebifiersToPrimaryWeaponsPriorityTargetList>true</addWebifiersToPrimaryWeaponsPriorityTargetList>
   
   <!--                                                                            -->  
-  <!--  ECM Drone PriorityTarget Options--> 
+  <!--  E-War Drone PriorityTarget Options--> 
   <!--                                                                            -->  
-  <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Sensor Dampners, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addDampenersToDronePriorityTargetList>true</addDampenersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use ECMs, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use ECMs, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addECMsToDroneTargetList>true</addECMsToDroneTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Neutralizers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Neutralizers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addNeutralizersToDronePriorityTargetList>true</addNeutralizersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Target Painters, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Target Painters, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addTargetPaintersToDronePriorityTargetList>true</addTargetPaintersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Tracking Disruptors, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Tracking Disruptors, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addTrackingDisruptorsToDronePriorityTargetList>true</addTrackingDisruptorsToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Warp Disruptors / Scramblers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Warp Disruptors / Scramblers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWarpScramblersToDronePriorityTargetList>true</addWarpScramblersToDronePriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Webifiers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use Drones on Targets that use Webifiers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWebifiersToDronePriorityTargetList>true</addWebifiersToDronePriorityTargetList>
-    
+ 
+  <!-- This logs to the console (and console log) the current PrimaryWeapon and Drone priorityTargets every x seconds, whatever you specify -->
+  <listPriorityTargetsEveryXSeconds>300</listPriorityTargetsEveryXSeconds>
+ 
   <!-- MaxRange we should use NOS / Neuts -->
   <NosDistance>38000</NosDistance>
   
@@ -485,6 +528,8 @@
   <droneTypeId>2488</droneTypeId> 
   <!-- Maximum drone control range -->
   <droneControlRange>50000</droneControlRange>
+  <!-- Drones are HIGHLY recommended to be set on passive! ( this should be set to false!) If you really know what you are doing, and like killing triggers unnecessarily you can enable this setting which will leave drones in space when we have nothing targeted -->
+  <dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive>false</dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive>
   <!-- Do not launch drones if below this shield percentage -->
   <droneMinimumShieldPct>55</droneMinimumShieldPct>
   <!-- Do not launch drones if below this armor percentage -->
@@ -517,6 +562,10 @@
   <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
   <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
   
+  <loadQuestorDebugInnerspaceCommandAlias>1</loadQuestorDebugInnerspaceCommandAlias>
+  <loadQuestorDebugInnerspaceCommand>dotnet q1 questor.exe</loadQuestorDebugInnerspaceCommand>
+  <unLoadQuestorDebugInnerspaceCommandAlias>2</unLoadQuestorDebugInnerspaceCommandAlias>
+  <unLoadQuestorDebugInnerspaceCommand>dotnet -unload q1</unLoadQuestorDebugInnerspaceCommand>
   
   <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>
   <standingsNeededToAccessLevel2Agent>1</standingsNeededToAccessLevel2Agent>

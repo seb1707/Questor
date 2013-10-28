@@ -36,8 +36,8 @@ namespace Questor
             PopulateStateComboBoxes();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
             PopulateBehaviorStateComboBox();
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.White);
-            CreateLavishCommands();
+            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.White);
+            //CreateLavishCommands();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
             Show();
             if (Settings.Instance.DebugAttachVSDebugger)
@@ -71,6 +71,14 @@ namespace Questor
 
             if (Settings.Instance.CharacterMode != null)
             {
+                //if (Settings.Instance.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
+                //SkillTrainerStateComboBox.Items.Clear();
+                //foreach (string text in Enum.GetNames(typeof(SkillTrainerState)))
+                //{
+                //    SkillTrainerStateComboBox.Items.Add(text);
+                //}
+
+
                 //
                 // populate combo boxes with the various states that are possible
                 //
@@ -288,16 +296,9 @@ namespace Questor
                         UnlootedContainersData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
 
                         DataAmmoHangarID.Text = Cache.Instance.AmmoHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataAmmoHangarName.Text = Settings.Instance.AmmoHangar;
+                        DataAmmoHangarName.Text = Settings.Instance.AmmoHangarTabName;
                         DataLootHangarID.Text = Cache.Instance.LootHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataLootHangarName.Text = Settings.Instance.LootHangar;
-                        PrimaryWeaponsPriorityTargetListBox.DataSource = null;
-                        PrimaryWeaponsPriorityTargetListBox.DataSource = Cache.Instance.PrimaryWeaponPriorityTargets;
-                        DronePriorityTargetListBox.DataSource = null;
-                        DronePriorityTargetListBox.DataSource = Cache.Instance.DronePriorityTargets;
-                        lvlCurrentPrimaryWeaponsTarget.Text = Cache.Instance.PreferredPrimaryWeaponTarget.ToString();
-                        lblCurrentDroneTarget.Text = Cache.Instance.PreferredDroneTarget.ToString();
-
+                        DataLootHangarName.Text = Settings.Instance.LootHangarTabName;
                     }
                 }
                 catch (Exception ex)
@@ -431,240 +432,6 @@ namespace Questor
                 //    }
                 //}
             }
-        }
-
-        private void CreateLavishCommands()
-        {
-            //if (Settings.Instance.UseInnerspace)
-            //{
-            LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);
-            LavishScript.Commands.AddCommand("SetDisable3D", SetDisable3D);
-            LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
-            LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
-            LavishScript.Commands.AddCommand("SetQuestorStatetoIdle", SetQuestorStatetoIdle);
-            LavishScript.Commands.AddCommand("SetCombatMissionsBehaviorStatetoGotoBase", SetCombatMissionsBehaviorStatetoGotoBase);
-            LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
-            LavishScript.Commands.AddCommand("QuestorCommands", ListQuestorCommands);
-            LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
-            LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
-            LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
-            //}
-        }
-
-        private int SetAutoStart(string[] args)
-        {
-            bool value;
-            if (args.Length != 2 || !bool.TryParse(args[1], out value))
-            {
-                Logging.Log("QuestorUI", "SetAutoStart true|false", Logging.White);
-                return -1;
-            }
-
-            Settings.Instance.AutoStart = value;
-
-            Logging.Log("QuestorUI", "AutoStart is turned " + (value ? "[on]" : "[off]"), Logging.White);
-            return 0;
-        }
-
-        private int SetDisable3D(string[] args)
-        {
-            bool value;
-            if (args.Length != 2 || !bool.TryParse(args[1], out value))
-            {
-                Logging.Log("QuestorUI", "SetDisable3D true|false", Logging.White);
-                return -1;
-            }
-
-            Settings.Instance.Disable3D = value;
-
-            Logging.Log("QuestorUI", "Disable3D is turned " + (value ? "[on]" : "[off]"), Logging.White);
-            return 0;
-        }
-
-        private int SetExitWhenIdle(string[] args)
-        {
-            bool value;
-            if (args.Length != 2 || !bool.TryParse(args[1], out value))
-            {
-                Logging.Log("QuestorUI", "SetExitWhenIdle true|false", Logging.White);
-                Logging.Log("QuestorUI", "Note: AutoStart is automatically turned off when ExitWhenIdle is turned on", Logging.White);
-                return -1;
-            }
-
-            Cache.Instance.ExitWhenIdle = value;
-
-            Logging.Log("QuestorUI", "ExitWhenIdle is turned " + (value ? "[on]" : "[off]"), Logging.White);
-
-            if (value && Settings.Instance.AutoStart)
-            {
-                Settings.Instance.AutoStart = false;
-                Logging.Log("QuestorUI", "AutoStart is turned [off]", Logging.White);
-            }
-            return 0;
-        }
-
-        private int SetQuestorStatetoCloseQuestor(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor - Changes the QuestorState to CloseQuestor which will GotoBase and then Exit", Logging.White);
-                return -1;
-            }
-
-            Settings.Instance.AutoStart = false;
-            _States.CurrentQuestorState = QuestorState.CloseQuestor;
-
-            Logging.Log("QuestorUI", "QuestorState is now: CloseQuestor ", Logging.White);
-            return 0;
-        }
-
-        private int SetQuestorStatetoIdle(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("QuestorUI", "SetQuestorStatetoIdle - Changes the QuestorState to Idle", Logging.White);
-                return -1;
-            }
-
-            Cache.Instance.Paused = false;
-            _States.CurrentQuestorState = QuestorState.Idle;
-            
-            _States.CurrentPanicState = PanicState.Idle;
-            _States.CurrentArmState = ArmState.Idle;
-            _States.CurrentTravelerState = TravelerState.Idle;
-            _States.CurrentMiningState = MiningState.Idle;
-
-            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
-            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-            //_States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Idle;
-            _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
-
-
-            Logging.Log("QuestorUI", "QuestorState is now: Idle ", Logging.White);
-            return 0;
-        }
-
-        private int SetDestToSystem(string[] args )
-        {
-            long value;
-            if (args.Length != 2 || !long.TryParse(args[1], out value))
-            {
-                Logging.Log("QuestorUI", "SetDestToSystem - Sets destination to the locationID specified", Logging.White);
-                return -1;
-            }
-            
-            long _locationid = value;
-
-            Cache.Instance.DirectEve.Navigation.SetDestination(_locationid);
-            switch (_States.CurrentQuestorState)
-            {
-                case QuestorState.Idle:
-                    return -1;
-                case QuestorState.CombatMissionsBehavior:
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Traveler;
-                    return 0;
-            
-                case QuestorState.DedicatedBookmarkSalvagerBehavior:
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Traveler;
-                    return 0;
-
-                case QuestorState.CombatHelperBehavior:
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Traveler;
-                    return 0;
-
-                //case QuestorState.BackgroundBehavior:
-                //    _States.CurrentTravelerState = TravelerState.Idle;
-                //    _States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.Traveler;
-                //    return 0;
-            }
-            return 0;
-        }
-
-        private int SetCombatMissionsBehaviorStatetoGotoBase(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase - Changes the CombatMissionsBehaviorState to GotoBase", Logging.White);
-                return -1;
-            }
-
-            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-
-            Logging.Log("QuestorUI", "CombatMissionsBehaviorState is now: GotoBase ", Logging.White);
-            return 0;
-        }
-
-        private int SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase - Changes the SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase to GotoBase", Logging.White);
-                return -1;
-            }
-
-            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
-
-            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase is now: GotoBase ", Logging.White);
-            return 0;
-        }
-
-        private int ListQuestorCommands(string[] args)
-        {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor commands you can run from innerspace", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "SetAutoStart                                 - SetAutoStart true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetDisable3D                                 - SetDisable3D true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetExitWhenIdle                              - SetExitWhenIdle true|false", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoCloseQuestor                - SetQuestorStatetoCloseQuestor true", Logging.White);
-            Logging.Log("QuestorUI", "SetQuestorStatetoIdle                        - SetQuestorStatetoIdle true", Logging.White);
-            Logging.Log("QuestorUI", "SetCombatMissionsBehaviorStatetoGotoBase     - SetCombatMissionsBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", "SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase     - SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase true", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCommands                              - (this command) ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorEvents                                - Lists the available InnerSpace Events you can listen for ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            return 0;
-        }
-
-        private int ListQuestorEvents(string[] args)
-        {
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "Questor Events you can listen for from an innerspace script", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorState                                  - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
-            Logging.Log("QuestorUI", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
-            Logging.Log("QuestorUI", " ", Logging.White);
-            return 0;
-        }
-
-        private int IfInPodSwitchToNoobShiporShuttle(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("QuestorUI", "IfInPodSwitchToNoobShiporShuttle - If the toon is in a pod switch to a noobship or shuttle if avail (otherwise do nothing)", Logging.White);
-                return -1;
-            }
-
-            //_States.CurrentBackgroundBehaviorState = BackgroundBehaviorState.SwitchToNoobShip1;
-
-            Logging.Log("QuestorUI", "CurrentBackgroundBehaviorState is now: SwitchToNoobShip1 ", Logging.White);
-            return 0;
         }
 
         private void UpdateUiTick(object sender, EventArgs e)
@@ -1100,7 +867,7 @@ namespace Questor
 
         private void ChkShowConsoleCheckedChanged(object sender, EventArgs e)
         {
-            var frmMain = new Form();
+            Form frmMain = new Form();
             Size = chkShowDetails.Checked ? new System.Drawing.Size(707, 434) : new System.Drawing.Size(362, 124);
         }
 
@@ -1391,158 +1158,6 @@ namespace Questor
             Cache.Instance.Paused = false;
             Logging.Log("QuestorUI", "OutOfAmmo button was pressed: changing CombatState to OutOfAmmo", Logging.Teal);
             _States.CurrentCombatState = CombatState.OutOfAmmo;
-        }
-
-        private void BtnOpenShipsHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open ShipsHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenShipsHangar;
-        }
-
-        private void BtnStackShipsHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack ShipsHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackShipsHangar;
-        }
-
-        private void BtnOpenFreightContainerClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open Loot Container button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenLootContainer;
-        }
-
-        private void BtnStackFreightContainerClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack Loot Container button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackLootContainer;
-        }
-
-        private void BtnOpenCorpAmmoHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open Corp AmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenCorpAmmoHangar;
-        }
-
-        private void BtnOpenCorpLootHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open Corp LootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenCorpLootHangar;
-        }
-
-        private void BtnStackCorpAmmoHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack Corp AmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackCorpAmmoHangar;
-        }
-
-        private void BtnStackCorpLootHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack Corp LootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackCorpLootHangar;
-        }
-
-        private void BtnOpenAmmoHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open AmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenAmmoHangar;
-        }
-
-        private void BtnOpenLootHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Open LootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.OpenLootHangar;
-        }
-
-        private void BtnStackAmmoHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack AmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackAmmoHangar;
-        }
-
-        private void BtnStackLootHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Stack LootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.StackLootHangar;
-        }
-
-        private void BttnCloseLootContainerClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close LootContainer button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseLootContainer;
-        }
-
-        private void BttnCloseShipsHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close ShipsHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseShipsHangar;
-        }
-
-        private void BttnCloseItemsHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close ItemsHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseItemsHangar;
-        }
-
-        private void BttnCloseCorpAmmoHangar_Click(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close CorpAmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseCorpAmmoHangar;
-        }
-
-        private void BttnCloseCorpLootHangarClick(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close CorpLootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseCorpLootHangar;
-        }
-
-        private void BttnCloseAmmoHangar_Click(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close AmmoHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseAmmoHangar;
-        }
-
-        private void BttnCloseLootHangar_Click(object sender, EventArgs e)
-        {
-            Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "Close LootHangar button was pressed", Logging.Teal);
-            _States.CurrentQuestorState = QuestorState.DebugHangarsBehavior;
-            _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.CloseLootHangar;
         }
 
         private void BttnCloseAllInventoryWindowsClick(object sender, EventArgs e)

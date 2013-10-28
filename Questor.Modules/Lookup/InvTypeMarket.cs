@@ -26,7 +26,7 @@ namespace Questor.Modules.Lookup
             ReprocessValue = (double?)element.Attribute("reprocess");
             LastUpdate = (DateTime?)element.Attribute("lastupdate");
             Reprocess = new Dictionary<string, double?>();
-            foreach (var m in Minerals)
+            foreach (string m in Minerals)
                 Reprocess.Add(m, (double?)element.Attribute(m));
         }
 
@@ -41,13 +41,13 @@ namespace Questor.Modules.Lookup
             PortionSize = item.PortionSize;
             LastUpdate = DateTime.MinValue;
             Reprocess = new Dictionary<string, double?>();
-            foreach (var m in Minerals)
+            foreach (string m in Minerals)
                 Reprocess.Add(m, null);
         }
 
         public XElement Save()
         {
-            var element = new XElement("invtype");
+            XElement element = new XElement("invtype");
             element.SetAttributeValue("id", Id);
             element.SetAttributeValue("name", Name);
             element.SetAttributeValue("groupid", GroupId);
@@ -63,7 +63,7 @@ namespace Questor.Modules.Lookup
                 element.SetAttributeValue("medianall", MedianAll.Value.ToString("0.00", CultureInfo.InvariantCulture));
             if (ReprocessValue.HasValue && ReprocessValue.Value > 0)
                 element.SetAttributeValue("reprocess", ReprocessValue.Value.ToString("0.00", CultureInfo.InvariantCulture));
-            foreach (var m in Minerals)
+            foreach (string m in Minerals)
                 if (Reprocess[m].HasValue && Reprocess[m] > 0)
                     element.SetAttributeValue(m, Reprocess[m].Value);
 

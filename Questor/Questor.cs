@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Actions;
+
 namespace Questor
 {
     using System;
@@ -22,6 +24,7 @@ namespace Questor
     using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.Misc;
     using global::Questor.Modules.States;
     using global::Questor.Modules.BackgroundTasks;
     using LavishScriptAPI;
@@ -39,12 +42,15 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
+
+        private readonly InnerspaceCommands _innerspaceCommands;
+        private readonly Statistics _statistics;
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
         public DateTime LastAction;
-        public string ScheduleCharacterName = Logging._character;
-        public bool PanicStateReset = false;
+        public readonly string ScheduleCharacterName = Logging._character;
+        //public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;
 
@@ -66,6 +72,8 @@ namespace Questor
             //_backgroundbehavior = new BackgroundBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
+            _innerspaceCommands = new InnerspaceCommands();
+            _statistics = new Statistics();
 
             ScheduleCharacterName = Logging._character;
             Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
@@ -157,6 +165,31 @@ namespace Questor
                 Logging.Log("CombatMissionsBehavior.State is", _States.CurrentQuestorState.ToString(), Logging.White);
         }
 
+        public static void UpdateMissionName(long AgentID = 0)
+        {
+            if (AgentID != 0)
+            {
+                Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, true);
+                if (Cache.Instance.Mission != null && Cache.Instance.Agent != null)
+                {
+                    // Update loyalty points again (the first time might return -1)
+                    Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
+                    Cache.Instance.MissionName = Cache.Instance.Mission.Name;
+                    if (Settings.Instance.UseInnerspace)
+                    {
+                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName + " - " + Cache.Instance.MissionName);
+                    }
+                }    
+            }
+            else
+            {
+                if (Settings.Instance.UseInnerspace)
+                {
+                    LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+                }
+            }
+        }
+
         public void RunOnceAfterStartup()
         {
             if (!_runOnceAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15))
@@ -172,8 +205,9 @@ namespace Questor
 
                     if (Settings.Instance.UseInnerspace)
                     {
-                        Logging.Log("RunOnceAfterStartup", "Running Innerspace command: WindowText EVE - " + Settings.Instance.CharacterName, Logging.White);
-                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+                        InnerspaceCommands.CreateLavishCommands();
+
+                        UpdateMissionName();
 
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("RunOnceAfterStartup", "Running Innerspace command: timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
@@ -228,7 +262,7 @@ namespace Questor
             {
                 if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar) || !string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.InStation)
+                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) || !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.InStation)
                     {
                         Logging.Log("RunOnceAfterStartup", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);", Logging.Debug);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);
@@ -261,7 +295,7 @@ namespace Questor
 
         public static bool SkillQueueCheck()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextSkillsCheckAction)
+            if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
                 return true;
 
             if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
@@ -271,28 +305,12 @@ namespace Questor
                 {
                     Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
                     _States.LavishEvent_SkillQueueHasRoom();
-
-                    string ScriptPath = System.IO.Path.Combine(Settings.Instance.Path, "../Scripts");
-                    if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ScriptPath [" + ScriptPath + "]", Logging.White);
-                    string SkillTrainerScriptFullPath = ScriptPath + "\\" + Settings.Instance.SkillTrainerScript;
-                    if (!File.Exists(SkillTrainerScriptFullPath))
-                    {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Missing [" + Settings.Instance.SkillTrainerScript + "] from .Net programs - It is not part of questor and is only available as a binary.", Logging.Teal);
-                        return true;
-                    }
-
-                    Logging.Log("Questor.SkillQueueCheck", "Questor will now wait 60 seconds. Launching SkillTrainer", Logging.White);
-                    _nextQuestorAction = DateTime.UtcNow.AddSeconds(60);
-                    //
-                    // this eventually needs to be fixed to use the full path, at the moment if we pass SkillTrainerFullPath to innerspace it has 
-                    // only 1 slash between directories and they get eaten (directory names with no separating slashes)
-                    //
-                    LavishScript.ExecuteCommand("echo runscript " + Settings.Instance.SkillTrainerScript);
-                    LavishScript.ExecuteCommand("runscript " + Settings.Instance.SkillTrainerScript);
-                    return true;
+                    _States.CurrentQuestorState = QuestorState.SkillTrainer;
+                    return false;
                 }
+
                 Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
-                Cache.Instance.NextSkillsCheckAction = DateTime.UtcNow.AddHours(3);
+                Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
                 return true;
             }
             
@@ -466,7 +484,7 @@ namespace Questor
 
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
-            
+
             //if (Cache.Instance.EntitiesthatHaveExploded.Any())
             //{
             //    if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);
@@ -503,6 +521,9 @@ namespace Questor
             _cleanup.ProcessState();
             DebugPerformanceStopandDisplayTimer("Cleanup.ProcessState");
 
+            _statistics.ProcessState();
+            _innerspaceCommands.ProcessState();
+
             if (Settings.Instance.DebugStates)
                 Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);
 
@@ -530,7 +551,7 @@ namespace Questor
 
             if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation)
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                 {
                     Logging.Log("Panic", "We are in a pod. Don't wait for the session wait timer to expire!", Logging.Red);
                     Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
@@ -606,8 +627,8 @@ namespace Questor
                 case QuestorState.Idle:
                     if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
                     
-                    if (!SkillQueueCheck()) return; //Should we 'pause' questor for a few while an external app trains skills?
-
+                    if (!SkillQueueCheck()) return; //if we need to train skills we return here, on the next pass we will be _States.CurrentQuestorState = QuestorSate.SkillTrainer
+                    
                     if (Cache.Instance.StopBot)
                     {
                         if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the localwatch code so that we stay in station when local is unsafe", Logging.Orange);
@@ -630,6 +651,14 @@ namespace Questor
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
                     _combatMissionsBehavior.ProcessState();
+                    break;
+
+                case QuestorState.SkillTrainer:
+
+                    //
+                    // QuestorState will stay here until changed externally by the behavior we just kicked into starting
+                    //
+                    SkillTrainerClass.ProcessState();
                     break;
 
                 case QuestorState.CombatHelperBehavior:

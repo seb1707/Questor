@@ -7,7 +7,10 @@ namespace Questor.Modules.Logging
     using System.IO;
     using System.Globalization;
     using System.Collections.Generic;
+    using Questor.Modules.Actions;
+    using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
+    using Questor.Modules.Combat;
     using Questor.Modules.Lookup;
     using Questor.Modules.States;
 
@@ -96,9 +99,9 @@ namespace Questor.Modules.Logging
             return true;
         }
 
-        public static bool PocketObjectStatistics(List<EntityCache> things)
+        public static bool PocketObjectStatistics(List<EntityCache> things, bool force = false)
         {
-            if (Settings.Instance.PocketObjectStatisticsLog)
+            if (Settings.Instance.PocketObjectStatisticsLog || force)
             {
                 string currentPocketName = Cache.Instance.FilterPath("randomgrid");
                 try
@@ -160,9 +163,160 @@ namespace Questor.Modules.Logging
             return true;
         }
 
+        public static bool LogEntities(List<EntityCache> things, bool force = false)
+        {
+            // iterate through entities
+            //
+            Logging.Log("Entities", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            things = things.ToList();
+            if (things.Any())
+            {
+                int icount = 0;
+                foreach (EntityCache thing in things.OrderBy(i => i.Distance))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] IsIgnoredrefreshes[" + thing.IsIgnoredRefreshes + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            
+            return true;
+        }
+
+        public static bool ListItems(IEnumerable<ItemCache> ItemsToList)
+        {
+            Logging.Log("Items", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            ItemsToList = ItemsToList.ToList();
+            if (ItemsToList.Any())
+            {
+
+                int icount = 0;
+                foreach (ItemCache item in ItemsToList.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "[" + item.Name + "] GroupID [" + item.GroupId + "], IsContraband [" + item.IsContraband + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("Items", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            
+            return true;
+        }
+
+        public static bool ModuleInfo(IEnumerable<ModuleCache> _modules)
+        {
+            Logging.Log("ModuleInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            _modules = _modules.ToList();
+            if (_modules != null && _modules.Any())
+            {
+
+                int icount = 0;
+                foreach (ModuleCache _module in _modules.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "TypeID [" + _module.TypeId + "] GroupID [" + _module.GroupId + "] isOnline [" + _module.IsOnline + "] isActivatable [" + _module.IsActivatable + "] IsActive [" + _module.IsActive + "] OptimalRange [" + _module.OptimalRange + "] Falloff [" + _module.FallOff + "] Duration [" + _module.Duration + "] IsActive [" + _module.IsActive + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("ModuleInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            //Logging.Log("WeaponInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            //
+            //if (Cache.Instance.Weapons != null && Cache.Instance.Weapons.Any())
+            //{
+            //
+            //    int icount = 0;
+            //    foreach (ModuleCache weapon in Cache.Instance.Weapons.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
+            //    {
+            //        icount++;
+            //        Logging.Log(icount.ToString(), "TypeID [" + weapon.TypeId + "] GroupID [" + weapon.GroupId + "] isOnline [" + weapon.IsOnline + "] isActivatable [" + weapon.IsActivatable + "] IsActive [" + weapon.IsActive + "] OptimalRange [" + weapon.OptimalRange + "] Falloff [" + weapon.FallOff + "] Duration [" + weapon.Duration + "] LastReload [" + Math.Round(DateTime.UtcNow.Subtract(Combat.LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "]", Logging.Debug);
+            //    }
+            //}
+            //Logging.Log("WeaponInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+
+
+            return true;
+        }
+
+        public static bool ListClassInstanceInfo()
+        {
+            Logging.Log("debug", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            if (Cache.Instance.Entities.Any())
+            {
+                Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
+                Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
+                Logging.Log("debug", "Defense Class Instances: [" + Defense.DefenseInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Arm Class Instances: [" + Arm.ArmInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Salvage Class Instances: [" + Salvage.SalvageInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Combat Class Instances: [" + Combat.CombatInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Drone Class Instances: [" + Drones.DronesInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Logging Class Instances: [" + Logging.LoggingInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Cache Class Instances: [" + Cache.CacheInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Settings Class Instances: [" + Settings.SettingsInstances + "]", Logging.Debug);
+            }
+            Logging.Log("debug", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            
+            
+            return true;
+        }
+
+        public static bool ListIgnoredTargets()
+        {
+            Logging.Log("IgnoreTargets", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            Logging.Log("IgnoreTargets", "Note: Ignore Targets are based on Text Matching. If you ignore: Angel Warlord you ignore all of them on the field!", Logging.Debug); 
+            if (Cache.Instance.IgnoreTargets.Any())
+            {
+
+                int icount = 0;
+                foreach (string ignoreTarget in Cache.Instance.IgnoreTargets)
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(),"[" + ignoreTarget + "] of a total of [" + Cache.Instance.IgnoreTargets.Count() + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("IgnoreTargets", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            return true;
+        }
+
+        public static bool ListDronePriorityTargets(IEnumerable<EntityCache> primaryDroneTargets)
+        {
+            Logging.Log("DPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            if (Cache.Instance.PreferredDroneTarget != null)
+            {
+                Logging.Log("DPT", "[" + 0 + "] PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Math.Round(Cache.Instance.PreferredDroneTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredDroneTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredDroneTarget.IsTarget + "]", Logging.Debug);
+            }
+
+            primaryDroneTargets = primaryDroneTargets.ToList();
+            if (primaryDroneTargets.Any())
+            {
+                int icount = 0;
+                foreach (EntityCache dronePriorityTarget in primaryDroneTargets.OrderBy(i => i.DronePriorityLevel).ThenBy(i => i.Name))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "[" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + dronePriorityTarget.IsInOptimalRange + "] IsTarget [" + dronePriorityTarget.IsTarget + "] DronePriorityLevel [" + dronePriorityTarget.DronePriorityLevel + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("DPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            return true;
+        }
+
+        public static bool ListTargetedandTargeting(IEnumerable<EntityCache> targetedandTargeting)
+        {
+            Logging.Log("List", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            targetedandTargeting = targetedandTargeting.ToList();
+            if (targetedandTargeting.Any())
+            {
+                int icount = 0;
+                foreach (EntityCache targetedandTargetingEntity in targetedandTargeting.OrderBy(i => i.Distance).ThenBy(i => i.Name))
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "[" + targetedandTargetingEntity.Name + "][" + Math.Round(targetedandTargetingEntity.Distance / 1000, 0) + "k] IsIgnored [" + targetedandTargetingEntity.IsIgnored + "] IsInOptimalRange [" + targetedandTargetingEntity.IsInOptimalRange + "] isTarget [" + targetedandTargetingEntity.IsTarget + "] isTargeting [" + targetedandTargetingEntity.IsTargeting + "] IsPrimaryWeaponPriorityTarget [" + targetedandTargetingEntity.IsPrimaryWeaponPriorityTarget + "] IsDronePriorityTarget [" + targetedandTargetingEntity.IsDronePriorityTarget + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("List", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            return true;
+        }
+
         public static bool EntityStatistics(IEnumerable<EntityCache> things)
         {
-            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";
+            string objectline = "Name;Distance;TypeId;GroupId;CategoryId;IsNPC;IsNPCByGroupID;IsPlayer;TargetValue;Velocity;HaveLootRights;IsContainer;ID;\r\n";
             Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.White);
 
             things = things.ToList();
@@ -181,6 +335,7 @@ namespace Questor.Modules.Logging
                 objectline += thing.GroupId + ";";
                 objectline += thing.CategoryId + ";";
                 objectline += thing.IsNpc + ";";
+                objectline += thing.IsNpcByGroupID + ";";
                 objectline += thing.IsPlayer + ";";
                 objectline += thing.TargetValue + ";";
                 objectline += Math.Round(thing.Velocity, 0) + ";";
@@ -205,7 +360,7 @@ namespace Questor.Modules.Logging
             if (!Cache.Instance.OpenCargoHold("Statistics: AmmoConsumptionStats")) return false;
 
             IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
-            IEnumerable<DirectItem> ammoCargo = Cache.Instance.CargoHold.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
+            IEnumerable<DirectItem> ammoCargo = Cache.Instance.CurrentShipsCargo.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
             try
             {
                 foreach (DirectItem item in ammoCargo)
@@ -240,12 +395,12 @@ namespace Questor.Modules.Logging
             {
                 // Lost drone statistics
                 if (Settings.Instance.UseDrones &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Capsule &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Frigate &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
-                     Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Freighter)
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.Capsule &&
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle &&
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.Frigate &&
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial &&
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip &&
+                     Cache.Instance.ActiveShip.GroupId != (int)Group.Freighter)
                 {
                     if (!File.Exists(Settings.Instance.DroneStatslogFile))
                     {
@@ -303,7 +458,7 @@ namespace Questor.Modules.Logging
                     }
 
                     // Build the line
-                    var line = DateTimeForLogs + ";";                           //Date
+                    string line = DateTimeForLogs + ";";                           //Date
                     line += "0" + ";";                                          //RunningTime
                     line += Cache.Instance.SessionState + ";";                  //SessionState
                     line += "" + ";";                                           //LastMission
@@ -365,7 +520,7 @@ namespace Questor.Modules.Logging
                 }
 
                 // Build the line
-                var line = DateTimeForLogs + ";";                               // Date
+                string line = DateTimeForLogs + ";";                               // Date
                 line += Cache.Instance.SessionRunningTime + ";";                // RunningTime
                 line += Cache.Instance.SessionState + ";";                      // SessionState
                 line += Cache.Instance.MissionName + ";";                       // LastMission
@@ -546,7 +701,7 @@ namespace Questor.Modules.Logging
                 }
             }
 
-            if (AgentLPRetrievalAttempts > 20)
+            if (AgentLPRetrievalAttempts > 10)
             {
                 Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrievalAttempts + "] giving up", Logging.White);
                 AgentLPRetrievalAttempts = 0;
@@ -595,7 +750,7 @@ namespace Questor.Modules.Logging
             Logging.Log("Statistics", "MissionXMLIsAvailable: [" + Cache.Instance.MissionXMLIsAvailable + "]", Logging.White);
             Logging.Log("Statistics", "MissionCompletionerrors: [" + Statistics.Instance.MissionCompletionErrors + "]", Logging.White);
             Logging.Log("Statistics", "the stats below may not yet be correct and need some TLC", Logging.White);
-            var weaponNumber = 0;
+            int weaponNumber = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weaponNumber++;
@@ -774,36 +929,197 @@ namespace Questor.Modules.Logging
 
         public void ProcessState()
         {
-            switch (State)
+            switch (_States.CurrentStatisticsState)
             {
                 case StatisticsState.Idle:
-                    Logging.Log("Statistics", "State=StatisticsState.Idle", Logging.White);
-
-                    //This State should only start every 20 seconds
-                    //if (DateTime.UtcNow.Subtract(_lastCleanupAction).TotalSeconds < 20)
-                    //    break;
-
-                    //State = StatisticsState.CheckModalWindows;
                     break;
 
-                case StatisticsState.PocketLog:
-                    State = StatisticsState.Idle;
+                case StatisticsState.LogAllEntities:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListPotentialCombatTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListHighValueTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsHighValueTarget).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
+                    break;
+
+                case StatisticsState.ListLowValueTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
+                        Statistics.LogEntities(Cache.Instance.PotentialCombatTargets.Where(i => i.IsLowValueTarget).ToList());
+                    }
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
 
                 case StatisticsState.SessionLog:
-                    State = StatisticsState.Idle;
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
+
+                case StatisticsState.ModuleInfo:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace || Cache.Instance.InStation)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ModuleInfo", Logging.Debug);
+                            Statistics.ModuleInfo(Cache.Instance.Modules);
+                        }
+                    }
+                    break;
+
+                    //ListClassInstanceInfo
+
+                case StatisticsState.ListClassInstanceInfo:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ListClassInstanceInfo", Logging.Debug);
+                            Statistics.ListClassInstanceInfo();
+                        }
+                    }
+                    break;
+
+                case StatisticsState.ListIgnoredTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ListIgnoredTargets", Logging.Debug);
+                            Statistics.ListIgnoredTargets();
+                        }
+                    }
+                    break;
+
+                case StatisticsState.ListDronePriorityTargets:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ListDronePriorityTargets", Logging.Debug);
+                            Statistics.ListDronePriorityTargets(Cache.Instance.DronePriorityEntities);
+                        }
+                    }
+                    break;
+
+                case StatisticsState.ListTargetedandTargeting:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.InSpace)
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.ListTargetedandTargeting", Logging.Debug);
+                            Statistics.ListTargetedandTargeting(Cache.Instance.TotalTargetsandTargeting);
+                        }
+                    }
+                    break;
+
+                case StatisticsState.PocketObjectStatistics:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        if (Cache.Instance.Entities.Any())
+                        {
+                            _States.CurrentStatisticsState = StatisticsState.Idle;
+                            Logging.Log("Statistics", "StatisticsState.PocketObjectStatistics", Logging.Debug);
+                            Statistics.PocketObjectStatistics(Cache.Instance.Entities.Where(I => I.IsOnGridWithMe).ToList(), true);
+                        }
+                    }
+                    break;
+
+                case StatisticsState.ListItemHangarItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListItemHangarItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.ItemHangar != null && Cache.Instance.ItemHangar.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.ItemHangar.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();
+                        }
+
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
+                case StatisticsState.ListLootHangarItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListLootHangarItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.LootHangar != null && Cache.Instance.LootHangar.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.LootHangar.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();
+                        }
+
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
+                case StatisticsState.ListLootContainerItems:
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    {
+                        _States.CurrentStatisticsState = StatisticsState.Idle;
+                        Logging.Log("Statistics", "StatisticsState.ListLootContainerItems", Logging.Debug);
+                        List<ItemCache> ItemsToList;
+                        if (Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.Items.Any())
+                        {
+                            ItemsToList = Cache.Instance.LootContainer.Items.Select(i => new ItemCache(i)).ToList();
+                        }
+                        else
+                        {
+                            ItemsToList = new List<ItemCache>();    
+                        }
+                        
+                        Statistics.ListItems(ItemsToList);
+                    }
+                    break;
+
 
                 case StatisticsState.Done:
 
                     //_lastStatisticsAction = DateTime.UtcNow;
-                    State = StatisticsState.Idle;
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
 
                 default:
 
                     // Next state
-                    State = StatisticsState.Idle;
+                    _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
             }
         }

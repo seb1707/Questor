@@ -36,6 +36,7 @@ namespace Questor
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.UtcNow;
+        public static DateTime NextSlotActivate = DateTime.UtcNow;
         private static string _scriptFile;
         private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
@@ -53,6 +54,7 @@ namespace Questor
         private const int RandStartDelay = 30; //Random startup delay in minutes
         private static readonly Random R = new Random();
         public static bool StopTimeSpecified; //false;
+        private static int ServerStatusCheck = 0;
 
         private static DateTime _nextPulse;
         public static DateTime StartTime = DateTime.MaxValue;
@@ -73,7 +75,7 @@ namespace Questor
         private static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
-            var p = new OptionSet {
+            OptionSet p = new OptionSet {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
@@ -450,7 +452,7 @@ namespace Questor
             // We should not get any windows
             if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (var window in Cache.Instance.DirectEve.Windows)
+                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -673,8 +675,18 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
-                Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
-                _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                if (ServerStatusCheck <= 6)
+                {
+                    Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
+                    ServerStatusCheck++;
+                    _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                    return;
+                }
+                ServerStatusCheck = 0;
+                Cache.Instance.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
+                Logging.Log("Startup", Cache.Instance.ReasonToStopQuestor, Logging.Red);
+                Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                 return;
             }
 
@@ -699,7 +711,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds))
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -709,6 +721,7 @@ namespace Questor
                         }
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
+                        NextSlotActivate = DateTime.UtcNow.AddSeconds(30);
                         slot.Activate();
                         return;
                     }
@@ -727,7 +740,7 @@ namespace Questor
 
         public static int RandomNumber(int min, int max)
         {
-            var random = new Random();
+            Random random = new Random();
             return random.Next(min, max);
         }
     }

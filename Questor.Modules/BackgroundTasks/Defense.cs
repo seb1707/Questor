@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -21,6 +23,18 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Defense
     {
+        public static int DefenseInstances = 0;
+
+        public Defense()
+        {
+            Interlocked.Increment(ref DefenseInstances);
+        }
+
+        ~Defense()
+        {
+            Interlocked.Decrement(ref DefenseInstances);
+        }
+
         private DateTime _lastSessionChange = Cache.Instance.StartTime;
 
         private DateTime _lastPulse = DateTime.UtcNow;
@@ -31,6 +45,7 @@ namespace Questor.Modules.BackgroundTasks
         private int _trackingDisruptorScriptAttempts;
         //private int _ancillaryShieldBoosterAttempts;
         //private int _capacitorInjectorAttempts;
+        private DateTime _nextOverloadAttempt = DateTime.UtcNow;
 
         private int ModuleNumber { get; set; }
 
@@ -406,7 +421,24 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
                 }
+                else
+                {
+                    //
+                    // if capacitor is really really low, do not make it worse
+                    //
+                    if (Cache.Instance.ActiveShip.Capacitor < 45)
+                        continue;
 
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                        continue;
+
+                    //
+                    // if total capacitor is really low, do not run stuff unless we are targeted by something
+                    // this should only kick in when using frigates as the combatship
+                    //
+                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Cache.Instance.TargetedBy.Any() && Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                        continue;
+                }
                 //
                 // at this point the module should be active but is not: activate it, set the delay and return. The process will resume on the next tick
                 //
@@ -416,6 +448,104 @@ namespace Questor.Modules.BackgroundTasks
                 continue;
             }
             ModuleNumber = 0;
+        }
+
+        private bool OverLoadWeapons()
+        {
+            //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
+            if (DateTime.UtcNow < _nextOverloadAttempt) //if we just did something wait a bit
+                return true;
+
+            if (!Settings.Instance.OverloadWeapons)
+            {
+                // if we do not have the OverLoadWeapons setting set to true then just return.
+                _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
+                return true;
+            }
+
+            //
+            //if we do not have the skill (to at least lvl1) named thermodynamics, return true and do not try to overload
+            //
+
+
+            ModuleNumber = 0;
+            foreach (ModuleCache module in Cache.Instance.Modules)
+            {
+                if (!module.IsActivatable)
+                    continue;
+
+                if (module.IsOverloaded || module.IsPendingOverloading || module.IsPendingStopOverloading)
+                    continue;
+
+                //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
+
+                if (module.GroupId == (int)Group.EnergyWeapon ||
+                    module.GroupId == (int)Group.HybridWeapon ||
+                    module.GroupId == (int)Group.ProjectileWeapon ||
+                    module.GroupId == (int)Group.CruiseMissileLaunchers ||
+                    module.GroupId == (int)Group.RocketLaunchers ||
+                    module.GroupId == (int)Group.TorpedoLaunchers ||
+                    module.GroupId == (int)Group.StandardMissileLaunchers ||
+                    module.GroupId == (int)Group.HeavyMissilelaunchers ||
+                    module.GroupId == (int)Group.AssaultMissilelaunchers ||
+                    module.GroupId == (int)Group.DefenderMissilelaunchers
+                    )
+                {
+                    //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
+
+                    ModuleNumber++;
+
+                    if (module.IsOverloaded)
+                    {
+                        if (module.IsPendingOverloading || module.IsPendingStopOverloading)
+                        {
+                            continue;
+                        }
+                            
+                        //double DamageThresholdToStopOverloading = 1;
+
+                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "IsOverLoaded - HP [" + Math.Round(module.Hp,2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+
+                        //if (module.Damage > DamageThresholdToStopOverloading)
+                        //{
+                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Diable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
+                        //    return module.ToggleOverload;
+                        //    return false;
+                        //}
+                        
+                        continue;
+                    }
+                    
+                    if (!module.IsOverloaded)
+                    {
+                        if (module.IsPendingOverloading || module.IsPendingStopOverloading)
+                        {
+                            continue;
+                        }
+
+                        //double DamageThresholdToAllowOverLoading = 1;
+
+                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "Is not OverLoaded - HP [" + Math.Round(module.Hp, 2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+                        _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
+
+                        //if (module.Damage < DamageThresholdToAllowOverLoading)
+                        //{
+                        //    Logging.Log("Defense.Overload", "Damage [" + Math.Round(module.Damage, 2) + "] Enable Overloading of Module wTypeID[" + module.TypeId + "]", Logging.Debug);
+                              return module.ToggleOverload;
+                        //}
+
+                        //continue;
+                    }
+
+                    _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(60);
+                    return true;
+                }
+           
+                ModuleNumber++;
+                continue;
+            }
+            ModuleNumber = 0;
+            return true;
         }
 
         private void ActivateRepairModules()
@@ -437,14 +567,14 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.CapacitorInjector)
                 {
                     ModuleNumber++;
-                    perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                    cap = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                    perc = Cache.Instance.ActiveShip.ShieldPercentage;
+                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else if (module.GroupId == (int)Group.ArmorRepairer)
                 {
                     ModuleNumber++;
-                    perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                    cap = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                    perc = Cache.Instance.ActiveShip.ArmorPercentage;
+                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else
                     continue;
@@ -455,36 +585,33 @@ namespace Questor.Modules.BackgroundTasks
                 if (!module.IsActive && inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
                 {
                     module.Click();
-                    perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                    perc = Cache.Instance.ActiveShip.ShieldPercentage;
                     Logging.Log("Defense", "Cap: [" + Math.Round(cap, 0) + "%] Capacitor Booster: [" + ModuleNumber + "] activated", Logging.White);
                 }
 
                 // Shield/Armor recharging
                 else if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
                 {
-                    if (Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
                     {
-                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
-                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
+                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
-                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
+                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
+                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
                     if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
                         Cache.Instance.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
-
-                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
-                        module.Click();
 
                     if (module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
@@ -494,16 +621,28 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
+                    //
+                    // if capacitor is really really low, do not make it worse
+                    //
+                    if (Cache.Instance.ActiveShip.Capacitor < 25)
+                        continue;
+
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                        continue;
+
+                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.ArmorRepairer)
+                        module.Click();
+
                     Cache.Instance.StartedBoosting = DateTime.UtcNow;
                     Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        perc = Cache.Instance.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        perc = Cache.Instance.ActiveShip.ArmorPercentage;
                         Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
                         int aggressiveEntities = Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsAttacking && e.IsPlayer);
                         if (aggressiveEntities == 0 && Cache.Instance.Entities.Count(e => e.Distance < (int)Distances.OnGridWithMe && e.IsStation) == 1)
@@ -531,12 +670,12 @@ namespace Questor.Modules.BackgroundTasks
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.CapacitorInjector)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ShieldPercentage;
+                        perc = Cache.Instance.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
-                        perc = Cache.Instance.DirectEve.ActiveShip.ArmorPercentage;
+                        perc = Cache.Instance.ActiveShip.ArmorPercentage;
                         Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                     }
 
@@ -586,9 +725,9 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // If we have less then x% cap, do not activate the module
-                //Logging.Log("Defense: Current Cap [" + Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
-                activate &= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.MinimumPropulsionModuleCapacitor;
-                deactivate |= Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor;
+                //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
+                activate &= Cache.Instance.ActiveShip.CapacitorPercentage > Settings.Instance.MinimumPropulsionModuleCapacitor;
+                deactivate |= Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor;
 
                 if (activate && !module.IsActive)
                 {
@@ -619,6 +758,7 @@ namespace Questor.Modules.BackgroundTasks
                 _sensorDampenerScriptAttempts = 0;
                 _trackingComputerScriptAttempts = 0;
                 _trackingDisruptorScriptAttempts = 0;
+                _nextOverloadAttempt = DateTime.UtcNow;
                 return;
             }
 
@@ -629,7 +769,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // What? No ship entity?
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null || Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+            if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
             {
                 _lastSessionChange = DateTime.UtcNow;
                 return;
@@ -638,19 +778,21 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 15)
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
+                _nextOverloadAttempt = DateTime.UtcNow;
                 return;
             }
 
             // There is no better defense then being cloaked ;)
-            if (Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+            if (Cache.Instance.ActiveShip.Entity.IsCloaked)
                 return;
 
             // Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow
-            if (Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
+            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
                 return;
 
             ActivateRepairModules();
             ActivateOnce();
+            if (!OverLoadWeapons()) return; //should only run every 30 min (and likely needs to be run again on every session change)
             
             // this effectively disables control of speed modules when paused, which is expected behavior
             if (Cache.Instance.Paused)

@@ -26,8 +26,7 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
 
             // Are we in a shuttle?  Yes, go to the agent
-            DirectEve directEve = Cache.Instance.DirectEve;
-            if (directEve.ActiveShip.GroupId == (int)Group.Shuttle)
+            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle)
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
@@ -66,7 +65,7 @@ namespace Questor.Storylines
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
@@ -83,8 +82,6 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            DirectEve directEve = Cache.Instance.DirectEve;
-
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
 
@@ -92,14 +89,14 @@ namespace Questor.Storylines
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;
-            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
-            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CurrentShipsCargo;
+            DirectContainer to = pickup ? Cache.Instance.CurrentShipsCargo : Cache.Instance.ItemHangar;
 
             // We moved the item
             if (to.Items.Any(i => i.GroupId == groupId))
                 return true;
 
-            if (directEve.GetLockedItems().Count != 0)
+            if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 return false;
 
             // Move items

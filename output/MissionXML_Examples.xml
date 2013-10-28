@@ -11,31 +11,49 @@
   <missionWarpAtDistanceRange>100</missionWarpAtDistanceRange> <!-- distance to warp to bookmark at in km (this only works 2nd through nth times, 1st time you will warpto 0 -->
   <pockets>
     <pocket id="0">
-      <action name="LogWhatIsOnGrid"></action> <!-- logs the details of all on grid entities to the console log -->
+      <action name="LogWhatIsOnGrid"</> <!-- logs the details of all on grid entities to the console log -->
 
       <action name="MoveTo"> <!-- initiate movement to the "target" and fight only those NPCs that target you while you are on the way, process no other actions until you reach the target-->
-        <parameter name="Target">Acceleration Gate</parameter>
-        <parameter name="Distance" value="0"></parameter>
-        <parameter name="StopWhenTargeted" value="false"></parameter>
-        <parameter name="StopWhenAggressed" value="false"></parameter>
+        <parameter name="Target" value="Acceleration Gate" />
+        <parameter name="Distance" value="0"</>
+        <parameter name="StopWhenTargeted" value="false" />
+        <parameter name="StopWhenAggressed" value="false" />
       </action>
       
 	  <action name="orbitdistance">20000</action> <!-- per pocket orbit distance if you choose to change it -->
 	  
       <action name="OrbitEntityNamed"> <!-- orbits the Entity with this name -->
         <parameter name="Target">Beacon</parameter>
-        <parameter name="NotClosest" value="true"></parameter>
+        <parameter name="NotClosest" value="true" />
       </action> 
 	  
       <action name="MoveToBackground"> <!-- initiate movement to to the "target" and move on to the next action, using this action assumes that the actions used after this will not move the ship as we likely need to stay moving toward the target-->
-        <parameter name="Target">Acceleration Gate</parameter>
-        <parameter name="Distance" value="0"></parameter>
+        <parameter name="Target" value="Acceleration Gate" />
+        <parameter name="Distance" value="0"/>
       </action>
 
-      <action name="WaitUntilTargeted"> <!-- wait this # of seconds before proceeding to the next action (basically a pause for NPCs to spawn)-->
-        <parameter name="Timeout" value="15"></parameter>
+	  <action name="WaitUntilTargeted"> <!-- wait this # of seconds before proceeding to the next action (basically a pause for NPCs to spawn)-->
+        <parameter name="Timeout" value="15"/>
+      </action>
+	  
+	  <action name="AddWarpScramblerByName"> <!-- Add this NPC by name to the list of known WarpScramblers-->
+	    <parameter name="NotClosest" value="false" />
+        <parameter name="NumberToIgnore" value="0" />
+        <parameter name="Target" value="Dim"/>
+      </action>
+	  
+      <action name="AddWebifierByName"> <!-- Add this NPC by name to the list of known Webifiers-->
+        <parameter name="NotClosest" value="false" />
+        <parameter name="NumberToIgnore" value="0" />
+        <parameter name="Target" value="Dim"/>
       </action>
 
+	  <action name="WaitUntilAggressed">
+          <parameter name="WaitUntilShieldsAreThisLow" value="50"/>
+		  <parameter name="WaitUntilArmorIsThisLow" value="100"/>
+		  <parameter name="Timeout" value="60"/>
+      </action>
+	  
       <action name="ClearPocket">  <!-- This is a commonly used action that clears the pocket of NPCs -->
 		<parameter name="distance">30000</parameter> <!-- default distance is your maxRange, use this if you only want to clear aggro within 30k -->
 	  </action>
@@ -53,19 +71,19 @@
 	  </action> 
 
       <action name="AggroOnly">
-        <parameter name="IgnoreAttackers" value="true"></parameter>
-        <parameter name="BreakOnAttackers" value="true"></parameter>
-        <parameter name="NotClosest" value="true"></parameter>
-        <parameter name="NumberToIgnore" value="50"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
+        <parameter name="IgnoreAttackers" value="true" />
+        <parameter name="BreakOnAttackers" value="true" />
+        <parameter name="NotClosest" value="true" />
+        <parameter name="NumberToIgnore" value="50" />
+        <parameter name="Target" value="Dim" />
       </action>
       
 	  <action name="Kill">
-        <parameter name="IgnoreAttackers" value="true"></parameter>
-        <parameter name="BreakOnAttackers" value="true"></parameter>
-        <parameter name="NotClosest" value="true"></parameter>
-        <parameter name="NumberToIgnore" value="50"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
+        <parameter name="IgnoreAttackers" value="true" />
+        <parameter name="BreakOnAttackers" value="true" />
+        <parameter name="NotClosest" value="true" />
+        <parameter name="NumberToIgnore" value="50" />
+        <parameter name="Target" value="Dim" />
       </action>
       
 	  <action name="KillOnce">
@@ -77,34 +95,34 @@
       </action>
       
 	  <action name="UseDrones">
-        <parameter name="Use" value="true"></parameter>
+        <parameter name="Use" value="true" />
       </action>
       
 	  <action name="KillClosestByName">
-        <parameter name="NotClosest" value="true"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
+        <parameter name="NotClosest" value="true" />
+        <parameter name="Target" value="Dim" />
       </action>
       
 	  <action name="KillClosest">
-        <parameter name="NotClosest" value="true"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
+        <parameter name="NotClosest" value="true" />
+        <parameter name="Target" value="Dim" />
       </action>
       
 	  <action name="Ignore">
-        <parameter name="Clear" value="true"></parameter>
-        <parameter name="Add" value="Dim"></parameter>
-        <parameter name="Remove" value="Dim"></parameter>
+        <parameter name="Clear" value="true" />
+        <parameter name="Add" value="Dim" />
+        <parameter name="Remove" value="Dim" />
       </action>
       
 	  <action name="Loot"> <!-- this loots the field if LootEverything is true, if False it only loots item below then moves on --> 
-        <parameter name="Item" value="DimsIsk"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
+        <parameter name="Item" value="DimsIsk" />
+        <parameter name="Target" value="Dim" />
       </action>
       
 	  <action name="LootItem"> <!-- this looks in a specific container for a specific item potentially saving ALOT of time because it does not necessarily have to "loot the field" to find the item -->
-        <parameter name="Item" value="DimsIsk"></parameter>
-        <parameter name="Target" value="Dim"></parameter>
-        <parameter name="Quantity" value="30"></parameter>
+        <parameter name="Item" value="DimsIsk" />
+        <parameter name="Target" value="Dim" />
+        <parameter name="Quantity" value="30" />
       </action>
       
 	  <action name="DropItem"> <!--  this puts a specific item (in your cargo already) into the target container -->
@@ -117,13 +135,13 @@
 		  <parameter name="timeout" value="1200"></parameter>
 	  </action> 
 	  
-	  <action name="Done"></action> <!-- end of mission: gotobase -->
+	  <action name="Done"/> <!-- end of mission: gotobase -->
 	  
-	  <action name="SalvageBookmark"></action>
+	  <action name="SalvageBookmark" />
 	  
 	  <action name="Activate">
-		<parameter name="optional" value="false"></parameter> <!-- if true and we cant find the target to avtivate we assume the mission is done -->
-		<parameter name="target" value="Acceleration Gate"></parameter>
+		<parameter name="optional" value="false" /> <!-- if true and we cant find the target to avtivate we assume the mission is done -->
+		<parameter name="target" value="Acceleration Gate" />
 	  </action>
     </pocket>
 	<pocket id="1">

@@ -36,8 +36,8 @@ namespace Questor.Modules.Activities
         private static string _locationName;
         private static int _locationErrors;
         private static int TravelHomeCounter;
-        private static Combat _combat;
-        private static Drones _drones;
+        //private static Combat _combat;
+        //private static Drones _drones;
 
         //private static List<long> EVENavdestination { get; set; }
 
@@ -46,8 +46,8 @@ namespace Questor.Modules.Activities
         public Traveler()
         {
             _lastPulse = DateTime.MinValue;
-            _combat = new Combat();
-            _drones = new Drones();
+            //_combat = new Combat();
+            //_drones = new Drones();
         }
 
         public static TravelerDestination Destination
@@ -162,28 +162,54 @@ namespace Questor.Modules.Activities
             {
                 if (Cache.Instance.InStation)
                 {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                    }
                 }
-                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
+                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
 
                 // We are not yet in space, wait for it
                 return;
             }
 
             // We are apparently not really in space yet...
-            if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+            if (Cache.Instance.ActiveShip == null || Cache.Instance.ActiveShip.Entity == null)
                 return;
 
             //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Destination is set: processing...", Logging.Teal);
 
             // Find the first waypoint
-            long waypoint = _destinationRoute.FirstOrDefault();
+            int waypoint = _destinationRoute.FirstOrDefault();
 
             //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.Teal);
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "]", Logging.Teal);
+            DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[waypoint];
 
+            if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+            {
+                if (solarSystemInRoute.Security < 0.45 && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle || Cache.Instance.ActiveShip.GroupId != (int)Group.Frigate || Cache.Instance.ActiveShip.GroupId != (int)Group.Interceptor))
+                {
+                    Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "] which is LOW SEC! This should never happen. Turning off AutoStart and going home.", Logging.Teal);
+                    Settings.Instance.AutoStart = false;
+                    if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                    {
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    }
+                    if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+                    {
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                    }
+                    //if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
+                    //{
+                    //    _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
+                    //}
+                    return;
+                }
+            }
+            
             // Find the stargate associated with it
 
             if (!Cache.Instance.Stargates.Any())
@@ -198,7 +224,7 @@ namespace Questor.Modules.Activities
             EntityCache MyNextStargate = Cache.Instance.StargateByName(_locationName);
             if (MyNextStargate != null)
             {
-                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked)
                 {
                     Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
                     MyNextStargate.Jump();
@@ -246,10 +272,10 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: _combat.ProcessState()", Logging.White);
-                    _combat.ProcessState();
+                    Combat.ProcessState();
                     if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: we are not scrambled - pulling drones.", Logging.White);
@@ -261,7 +287,7 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }
@@ -369,7 +395,8 @@ namespace Questor.Modules.Activities
                 }
 
                 Logging.Log("Traveler.TravelHome", "HomeBookmarkName bookmark not found! using AgentsStation info instead: We were Looking for bookmark starting with [" + Settings.Instance.HomeBookmarkName + "] found none.", Logging.Orange);
-            } 
+            }
+
             TravelToAgentsStation(module);
             return;
         }
@@ -381,12 +408,12 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     try
                     {
-                        _combat.ProcessState();
+                        Combat.ProcessState();
                     }
                     catch (Exception exception)
                     {
@@ -404,48 +431,13 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }
             }
 
             Cache.Instance.OpenWrecks = false;
-
-            /*
-            if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
-            {
-                if (DateTime.UtcNow > _nextGetDestinationPath || EVENavdestination == null)
-                {
-                    if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: EVENavdestination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();", Logging.White);
-                    _nextGetDestinationPath = DateTime.UtcNow.AddSeconds(20);
-                    _nextSetEVENavDestination = DateTime.UtcNow.AddSeconds(4);
-                    EVENavdestination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
-                    if (Settings.Instance.DebugGotobase) if (EVENavdestination != null) Logging.Log(module, "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId [" + Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId + "]", Logging.White);
-                    return;
-                }
-
-                if (Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId != Cache.Instance.AgentSolarSystemID)
-                {
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId [" + Cache.Instance.DirectEve.Navigation.GetLocation(EVENavdestination.Last()).LocationId + "]", Logging.White);
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: EVENavdestination.LastOrDefault() [" + EVENavdestination.LastOrDefault() + "]", Logging.White);
-                    //Logging.Log("CombatMissionsBehavior", "TravelToAgentsStation: Cache.Instance.AgentSolarSystemID [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
-                    if (DateTime.UtcNow > _nextSetEVENavDestination)
-                    {
-                        if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: Cache.Instance.DirectEve.Navigation.SetDestination(Cache.Instance.AgentStationId);", Logging.White);
-                        _nextSetEVENavDestination = DateTime.UtcNow.AddSeconds(7);
-                        Cache.Instance.DirectEve.Navigation.SetDestination(Cache.Instance.AgentStationID);
-                        Logging.Log(module, "Setting Destination to [" + Cache.Instance.AgentStationName + "'s] Station", Logging.White);
-                        return;
-                    }
-                }
-                else if (EVENavdestination != null || EVENavdestination.Count != 0)
-                {
-                    if (EVENavdestination.Count == 1 && EVENavdestination.FirstOrDefault() == 0)
-                        EVENavdestination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-                }
-            }
-            */
 
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
@@ -485,20 +477,26 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    Logging.Log(module, "Arrived at destination", Logging.White);
+                    if (Settings.Instance.DebugTraveler) Logging.Log(module, "Arrived at destination", Logging.White);
                     if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Traveler)
                     {
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
 
                     if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Traveler)
                     {
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
 
                     if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Traveler)
                     {
                         _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
+                        _lastPulse = DateTime.UtcNow;
+                        return;
                     }
                     return;
                 }
@@ -513,10 +511,10 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
-                    _combat.ProcessState();
+                    Combat.ProcessState();
                     if (!Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are not scrambled - pulling drones.", Logging.White);
@@ -528,7 +526,7 @@ namespace Questor.Modules.Activities
                     {
                         Cache.Instance.IsMissionPocketDone = false;
                         if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: we are scrambled", Logging.Teal);
-                        _drones.ProcessState();
+                        Drones.ProcessState();
                         return;
                     }
                 }

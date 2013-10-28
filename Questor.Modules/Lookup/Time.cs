@@ -24,14 +24,17 @@ namespace Questor.Modules.Lookup
         public int AfterburnerDelay_milliseconds = 3500;                    //
         public int RepModuleDelay_milliseconds = 2500;                      //
         public int ApproachDelay_seconds = 15;                              //
-        public int TargetDelay_milliseconds = 1200;                          //
+        public int TargetDelay_milliseconds = 1200;                         //
+        public int TargetsAreFullDelay_seconds = 5;                         // Delay used when we have determined that all our targeting slots are full
         public int DelayBetweenSalvagingSessions_minutes = 10;              //
         public int OrbitDelay_seconds = 15;                                 // This is the delay between orbit commands, units: seconds. Default is 15
-        public int DockingDelay_seconds = 5;                                // This is the delay between docking attempts, units: seconds. Default is 5
-        public int WarptoDelay_seconds = 5;                                 // This is the delay between warpto commands, units: seconds. Default is 5
+        public int DockingDelay_seconds = 10;                               // This is the delay between docking attempts, units: seconds. Default is 5
+        public int WarptoDelay_seconds = 10;                                // This is the delay between warpto commands, units: seconds. Default is 5
         public int WeaponDelay_milliseconds = 220;                          //
         public int NosDelay_milliseconds = 220;                             //
         public int WebDelay_milliseconds = 220;                             //
+        public int RemoteRepairerDelay_milliseconds = 220;                  //
+        public int WarpDisruptorDelay_milliseconds = 220;                   //
         public int PainterDelay_milliseconds = 4500;                        // This is the delay between target painter activations and should stagger the painters somewhat (purposely)
         public int ValidateSettings_seconds = 15;                           // This is the delay between character settings validation attempts. The settings will be reloaded at this interval if they have changed. Default is 15
         public int SetupLogPathDelay_seconds = 10;                          // Why is this delay here? this can likely be removed with some testing... Default is 10
@@ -73,8 +76,8 @@ namespace Questor.Modules.Lookup
         public int Marketbuyorderdelay_seconds = 2;
         public int QuestorScheduleNotUsed_Hours = 10;
         public int SkillTrainerPulse_milliseconds = 800;
-        public int LoginDelayMinimum_seconds = 20;
-        public int LoginDelayMaximum_seconds = 30;
+        public int LoginDelayMinimum_seconds = 15;
+        public int LoginDelayMaximum_seconds = 25;
         public int ReLogDelayMinimum_seconds = 35;                    //DO NOT set this lower than 20 or so seconds!
         public int ReLogDelayMaximum_seconds = 60;                    
     }

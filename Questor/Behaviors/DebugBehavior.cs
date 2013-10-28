@@ -26,12 +26,12 @@ namespace Questor.Behaviors
 {
     public class DebugBehavior
     {
-        private readonly Arm _arm;
+        //private readonly Arm _arm;
         //private readonly Combat _combat;
         //private readonly Drones _drones;
 
         private readonly Panic _panic;
-        private readonly Salvage _salvage;
+        //private readonly Salvage _salvage;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
 
@@ -49,11 +49,11 @@ namespace Questor.Behaviors
 
         public DebugBehavior()
         {
-            _salvage = new Salvage();
+            //_salvage = new Salvage();
             //_combat = new Combat();
             //_drones = new Drones();
             _unloadLoot = new UnloadLoot();
-            _arm = new Arm();
+            //_arm = new Arm();
             _panic = new Panic();
             _watch = new Stopwatch();
 
@@ -127,17 +127,17 @@ namespace Questor.Behaviors
             }
             else
             {
-                _arm.AgentId = agent.AgentId;
+                Arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
 
         public void ApplyDebugSettings()
         {
-            _salvage.Ammo = Settings.Instance.Ammo;
-            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            _salvage.LootEverything = Settings.Instance.LootEverything;
+            Salvage.Ammo = Settings.Instance.Ammo;
+            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            Salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -149,7 +149,7 @@ namespace Questor.Behaviors
         private void AvoidBumpingThings()
         {
             //if It has not been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                 return;
             //
             // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -203,7 +203,7 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -316,11 +316,11 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load right ammo based on mission
-                        _arm.AmmoToLoad.Clear();
-                        _arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
+                        Arm.AmmoToLoad.Clear();
+                        Arm.LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
                     }
 
-                    _arm.ProcessState();
+                    Arm.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
 
@@ -362,13 +362,12 @@ namespace Questor.Behaviors
                     if (!Cache.Instance.InSpace)
                         return;
 
-                    DirectContainer salvageCargo = Cache.Instance.DirectEve.GetShipsCargo();
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
                     if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
 
-                    if (Settings.Instance.UnloadLootAtStation && salvageCargo.Window.IsReady && (salvageCargo.Capacity - salvageCargo.UsedCapacity) < 100)
+                    if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.Window.IsReady && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
                         if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage)
@@ -387,11 +386,11 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                        _salvage.ReserveCargoCapacity = 80;
-                        _salvage.LootEverything = true;
-                        _salvage.ProcessState();
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        Salvage.ReserveCargoCapacity = 80;
+                        Salvage.LootEverything = true;
+                        Salvage.ProcessState();
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
                     }
@@ -517,7 +516,7 @@ namespace Questor.Behaviors
 
                 case DebugBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
@@ -566,7 +565,7 @@ namespace Questor.Behaviors
 
                 case DebugBehaviorState.LogDroneTargets:
                     //drone targets
-                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && e.GroupId != (int)Group.LargeColidableStructure).ToList();
+                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && !e.IsLargeCollidable).ToList();
                     Statistics.EntityStatistics(droneentitiesInList);
                     Cache.Instance.Paused = true;
                     break;

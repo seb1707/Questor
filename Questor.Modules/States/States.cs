@@ -6,7 +6,7 @@ namespace Questor.Modules.States
     using LavishScriptAPI;
     using Questor.Modules.Lookup;
 
-    public class _States
+    public static class _States
     {
         public static void LavishEvent_QuestorIdle()
         {
@@ -205,5 +205,19 @@ namespace Questor.Modules.States
         public static ValueDumpState CurrentValueDumpState { get; set; }
 
         public static StorylineState CurrentStorylineState { get; set; }
+
+        public static StatisticsState CurrentStatisticsState { get; set; }
+
+        public static SkillTrainerState CurrentSkillTrainerState { get; set; }
+
+        public static MasterState CurrentMasterState { get; set; }
+
+        public static SlaveState CurrentSlaveState { get; set; }
+
+        public static ManageFleetState CurrentManageFleetState { get; set; }
+
+        public static BackgroundBehaviorState CurrentBackgroundBehaviorState { get; set; }
+
+        public static InnerspaceCommandsState CurrentInnerspaceCommandsState { get; set; }
     }
 }

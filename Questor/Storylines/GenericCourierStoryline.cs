@@ -24,7 +24,7 @@ namespace Questor.Storylines
 
             // Are we in an industrial?  Yes, goto the agent
             //var directEve = Cache.Instance.DirectEve;
-            //if (directEve.ActiveShip.TypeId == 648 || directEve.ActiveShip.TypeId == 649 || directEve.ActiveShip.TypeId == 650 || directEve.ActiveShip.TypeId == 651 || directEve.ActiveShip.TypeId == 652 || directEve.ActiveShip.TypeId == 653 || directEve.ActiveShip.TypeId == 654 || directEve.ActiveShip.TypeId == 655 || directEve.ActiveShip.TypeId == 656 || directEve.ActiveShip.TypeId == 657 || directEve.ActiveShip.TypeId == 1944 || directEve.ActiveShip.TypeId == 19744)
+            //if (Cache.Instance.ActiveShip.TypeId == 648 || Cache.Instance.ActiveShip.TypeId == 649 || Cache.Instance.ActiveShip.TypeId == 650 || Cache.Instance.ActiveShip.TypeId == 651 || Cache.Instance.ActiveShip.TypeId == 652 || Cache.Instance.ActiveShip.TypeId == 653 || Cache.Instance.ActiveShip.TypeId == 654 || Cache.Instance.ActiveShip.TypeId == 655 || Cache.Instance.ActiveShip.TypeId == 656 || Cache.Instance.ActiveShip.TypeId == 657 || Cache.Instance.ActiveShip.TypeId == 1944 || Cache.Instance.ActiveShip.TypeId == 19744)
             //    return StorylineState.GotoAgent;
 
             // Open the ship hangar
@@ -61,9 +61,9 @@ namespace Questor.Storylines
             try
             {
                 if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
                     if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; //no ships?!?
 
                     if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; done", Logging.White);
@@ -91,7 +91,7 @@ namespace Questor.Storylines
 
             if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 7 seconds
             {
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.White);
                     _States.CurrentArmState = ArmState.Done;
@@ -119,7 +119,7 @@ namespace Questor.Storylines
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
@@ -136,15 +136,15 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            var directEve = Cache.Instance.DirectEve;
+            DirectEve.DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("GenericCourierStoryline: MoveItem")) return false;
 
             if (!Cache.Instance.OpenCargoHold("GenericCourierStoryline: MoveItem")) return false;
 
-            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CargoHold;
-            DirectContainer to = pickup ? Cache.Instance.CargoHold : Cache.Instance.ItemHangar;
+            DirectContainer from = pickup ? Cache.Instance.ItemHangar : Cache.Instance.CurrentShipsCargo;
+            DirectContainer to = pickup ? Cache.Instance.CurrentShipsCargo : Cache.Instance.ItemHangar;
 
             // We moved the item
 
@@ -155,7 +155,7 @@ namespace Questor.Storylines
                 return false;
 
             // Move items
-            foreach (var item in from.Items.Where(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
+            foreach (DirectItem item in from.Items.Where(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
             {
                 Logging.Log("GenericCourier", "Moving [" + item.TypeName + "][" + item.ItemId + "] to " + (pickup ? "cargo" : "hangar"), Logging.White);
                 to.Add(item, item.Stacksize);

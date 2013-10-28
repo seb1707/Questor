@@ -8,6 +8,8 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace Questor.Modules.Lookup
 {
     using System;
@@ -35,6 +37,8 @@ namespace Questor.Modules.Lookup
         private DateTime _lastModifiedDate;
         private int SettingsLoadedICount = 0;
 
+        public static int SettingsInstances = 0;
+
         public Settings()
         {
             Ammo = new List<Ammo>();
@@ -50,6 +54,12 @@ namespace Questor.Modules.Lookup
             FactionBlacklist = new List<string>();
             UseFittingManager = true;
             DefaultFitting = new FactionFitting();
+            Interlocked.Increment(ref SettingsInstances);
+        }
+
+        ~Settings()
+        {
+            Interlocked.Decrement(ref SettingsInstances);
         }
 
         public bool AtLoginScreen { get; set; }
@@ -86,6 +96,17 @@ namespace Questor.Modules.Lookup
         public bool DebugCourierMissions { get; set; }
         public bool DebugDecline { get; set; }
         public bool DebugDefense { get; set; }
+        public bool DebugDisableCleanup { get; set; }
+        public bool DebugDisableCombatMissionsBehavior { get; set; }
+        public bool DebugDisableCombatMissionCtrl { get; set; }
+        public bool DebugDisableCombat { get; set; }
+        public bool DebugDisableDrones { get; set; }
+        public bool DebugDisablePanic { get; set; }
+        public bool DebugDisableSalvage { get; set; }
+        public bool DebugDisableTargetCombatants { get; set; }
+        public bool DebugDisableGetBestTarget { get; set; }
+        public bool DebugDisableNavigateIntoRange { get; set; }
+        public bool DebugDoneAction { get; set; }
         public bool DebugDrones { get; set; }
         public bool DebugDroneHealth { get; set; }
         public bool DebugExceptions { get; set; }
@@ -93,14 +114,19 @@ namespace Questor.Modules.Lookup
         public bool DebugFleetSupportSlave { get; set; }
         public bool DebugFleetSupportMaster { get; set; }
         public bool DebugGetBestTarget { get; set; }
+        public bool DebugGetBestDroneTarget { get; set; }
         public bool DebugGotobase { get; set; }
         public bool DebugGreyList { get; set; }
         public bool DebugHangars { get; set; }
         public bool DebugHasExploded { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugInSpace { get; set; }
+        public bool DebugInStation { get; set; }
         public bool DebugInWarp { get; set; }
+        public bool DebugIsReadyToShoot { get; set; }
         public bool DebugItemHangar { get; set; }
         public bool DebugKillTargets { get; set; }
+        public bool DebugKillAction { get; set; }
         public bool DebugLoadScripts { get; set; }
         public bool DebugLogging { get; set; }
         public bool DebugLootWrecks { get; set; }
@@ -112,9 +138,12 @@ namespace Questor.Modules.Lookup
         public bool DebugOnframe { get; set; }
         public bool DebugOverLoadWeapons { get; set; }
         public bool DebugPerformance { get; set; }
+        public bool DebugPotentialCombatTargets { get; set; }
+        public bool DebugPreferredPrimaryWeaponTarget { get; set; }
         public bool DebugQuestorManager { get; set; }
         public bool DebugReloadAll { get; set; }
         public bool DebugReloadorChangeAmmo { get; set; }
+        public bool DebugRemoteRepair { get; set; }
         public bool DebugSalvage { get; set; }
         public bool DebugScheduler { get; set; }
         public bool DebugSettings { get; set; }
@@ -131,6 +160,7 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DebugWalletBalance { get; set; }
         public bool DebugWatchForActiveWars { get; set; }
+
 
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
@@ -230,6 +260,7 @@ namespace Questor.Modules.Lookup
         public string SalvageShipName { get; set; }
         public string TransportShipName { get; set; }
         public string TravelShipName { get; set; }
+        public string MiningShipName { get; set; }
 
         //
         //Use Homebookmark
@@ -240,10 +271,10 @@ namespace Questor.Modules.Lookup
         // Storage location for loot, ammo, and bookmarks
         //
         public string HomeBookmarkName { get; set; }
-        public string LootHangar { get; set; }
-        public string AmmoHangar { get; set; }
+        public string LootHangarTabName { get; set; }
+        public string AmmoHangarTabName { get; set; }
         public string BookmarkHangar { get; set; }
-        public string LootContainer { get; set; }
+        public string LootContainerName { get; set; }
 
         public string HighTierLootContainer { get; set; }
 
@@ -374,11 +405,15 @@ namespace Questor.Modules.Lookup
         public int MaximumLowValueTargets { get; set; }
         public int MinimumAmmoCharges { get; set; }
         public List<Ammo> Ammo { get; private set; }
+        public List<MiningCrystals> MiningCrystals { get; private set; }
+        public int MinimumTargetValueToConsiderTargetAHighValueTarget { get; set; }
+        public int MaximumTargetValueToConsiderTargetALowValueTarget { get; set; }
+        public bool ArmLoadCapBoosters { get; set; }
 
         public int DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage { get; set; }
 
-        public int DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
-        public int SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+        public double DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
+        public double SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons { get; set; } //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
         
         public bool AddWarpScramblersToPrimaryWeaponsPriorityTargetList { get; set; }
         public bool AddWebifiersToPrimaryWeaponsPriorityTargetList { get; set; }
@@ -395,6 +430,8 @@ namespace Questor.Modules.Lookup
         public bool AddTargetPaintersToDronePriorityTargetList { get; set; }
         public bool AddECMsToDroneTargetList { get; set; }
         public bool AddTrackingDisruptorsToDronePriorityTargetList { get; set; }
+
+        public double ListPriorityTargetsEveryXSeconds { get; set; } 
 
         public double InsideThisRangeIsHardToTrack { get; set; }
         //
@@ -423,6 +460,7 @@ namespace Questor.Modules.Lookup
         public bool OrbitStructure { get; set; }
         public int OptimalRange { get; set; }
         public int NosDistance { get; set; }
+        public int RemoteRepairDistance { get; set; }
         public int MinimumPropulsionModuleDistance { get; set; }
         public int MinimumPropulsionModuleCapacitor { get; set; }
 
@@ -466,6 +504,7 @@ namespace Questor.Modules.Lookup
 
         public int DroneTypeId { get; set; }
         public int DroneControlRange { get; set; }
+        public bool DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive { get; set; }
         public int DroneMinimumShieldPct { get; set; }
         public int DroneMinimumArmorPct { get; set; }
         public int DroneMinimumCapacitorPct { get; set; }
@@ -518,8 +557,6 @@ namespace Questor.Modules.Lookup
         //
         public bool ThisToonShouldBeTrainingSkills { get; set; } //as opposed to another toon on the same account
 
-        public string SkillTrainerScript { get; set; } //This needs to be in your "Innerspace\Scripts\" Directory
-
         public string UserDefinedLavishScriptScript1 { get; set; }
         public string UserDefinedLavishScriptScript1Description { get; set; }
         public string UserDefinedLavishScriptScript2 { get; set; }
@@ -528,6 +565,11 @@ namespace Questor.Modules.Lookup
         public string UserDefinedLavishScriptScript3Description { get; set; }
         public string UserDefinedLavishScriptScript4 { get; set; }
         public string UserDefinedLavishScriptScript4Description { get; set; }
+
+        public string LoadQuestorDebugInnerspaceCommandAlias { get; set; }
+        public string LoadQuestorDebugInnerspaceCommand { get; set; }
+        public string UnLoadQuestorDebugInnerspaceCommandAlias { get; set; }
+        public string UnLoadQuestorDebugInnerspaceCommand { get; set; }
 
         public float StandingsNeededToAccessLevel1Agent { get; set; }
         public float StandingsNeededToAccessLevel2Agent { get; set; }
@@ -547,6 +589,835 @@ namespace Questor.Modules.Lookup
         public event EventHandler<EventArgs> SettingsLoaded;
 
         public bool DefaultSettingsLoaded;
+
+        private void LoadMissionBlackList(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //{
+                //
+                // Mission Blacklist
+                //
+                MissionBlacklist.Clear();
+                XElement xmlElementBlackListSection = CharacterSettingsXml.Element("blacklist") ?? CommonSettingsXml.Element("blacklist");
+                if (xmlElementBlackListSection != null)
+                {
+                    Logging.Log("Settings", "Loading Mission Blacklist", Logging.White);
+                    int i = 1;
+                    foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
+                    {
+                        MissionBlacklist.Add((string)BlacklistedMission);
+                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
+                        i++;
+                    }
+                    Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
+                }
+                //}
+
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionBlackList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
+        private void LoadMissionGreyList(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //{
+                //
+                // Mission Greylist
+                //
+                MissionGreylist.Clear();
+                XElement xmlElementGreyListSection = CharacterSettingsXml.Element("greylist") ?? CommonSettingsXml.Element("greylist");
+
+                if (xmlElementGreyListSection != null)
+                {
+                    Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
+                    int i = 1;
+                    foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
+                    {
+                        MissionGreylist.Add((string)GreylistedMission);
+                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
+                        i++;
+                    }
+                    Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
+                }
+                //}
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionGreyList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
+        private void LoadFactionBlacklist(XElement CharacterSettingsXml, XElement CommonSettingsXml)
+        {
+            try
+            {
+                //
+                // Faction Blacklist
+                //
+                FactionBlacklist.Clear();
+                XElement factionblacklist = CharacterSettingsXml.Element("factionblacklist") ?? CommonSettingsXml.Element("factionblacklist");
+                if (factionblacklist != null)
+                {
+                    Logging.Log("Settings", "Loading Faction Blacklist", Logging.White);
+                    foreach (XElement faction in factionblacklist.Elements("faction"))
+                    {
+                        Logging.Log("Settings", "        Missions from the faction [" + (string)faction + "] will be declined", Logging.White);
+                        FactionBlacklist.Add((string)faction);
+                    }
+
+                    Logging.Log("Settings", "        Faction Blacklist now has [" + FactionBlacklist.Count + "] entries", Logging.White);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Settings.LoadMissionGreyList", "Exception: [" + ex + "]", Logging.Debug);
+            }
+        }
+
+        public void ReadSettingsFromXML(XElement CharacterSettingsXml)
+        {
+            Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
+            Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
+
+            XElement CommonSettingsXml;
+            if (File.Exists(Settings.Instance.CommonSettingsPath))
+            {
+                Settings.Instance.CommonXMLExists = true;
+                CommonSettingsXml = XDocument.Load(Settings.Instance.CommonSettingsPath).Root;
+                if (CommonSettingsXml == null)
+                {
+                    Logging.Log("Settings", "found [" + Settings.Instance.CommonSettingsPath + "] but was unable to load it: FATAL ERROR - use the provided settings.xml to create that file.", Logging.Red);
+                }
+            }
+            else
+            {
+                Settings.Instance.CommonXMLExists = false;
+                //
+                // if the common XML does not exist, load the characters XML into the CommonSettingsXml just so we can simplify the XML element loading stuff.
+                //
+                CommonSettingsXml = XDocument.Load(Settings.Instance.CharacterSettingsPath).Root;
+            }
+
+            if (CommonSettingsXml == null) return; // this should never happen as we load the characters xml here if the common xml is mising. adding this does quiet some warnings though
+
+            if (Settings.Instance.CommonXMLExists) Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CommonSettingsPath + "] and", Logging.Green);
+            Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CharacterSettingsPath + "]", Logging.Green);
+            //
+            // these are listed by feature and should likely be re-ordered to reflect that
+            //
+
+            //
+            // Debug Settings
+            //
+            DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
+            DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
+            DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
+            DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
+            DebugAgentInteractionReplyToAgent = (bool?)CharacterSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? (bool?)CommonSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? false;
+            DebugAllMissionsOnBlackList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnBlackList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnBlackList") ?? false;
+            DebugAllMissionsOnGreyList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnGreyList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnGreyList") ?? false;
+            DebugArm = (bool?)CharacterSettingsXml.Element("debugArm") ?? (bool?)CommonSettingsXml.Element("debugArm") ?? false;
+            DebugAttachVSDebugger = (bool?)CharacterSettingsXml.Element("debugAttachVSDebugger") ?? (bool?)CommonSettingsXml.Element("debugAttachVSDebugger") ?? false;
+            DebugAutoStart = (bool?)CharacterSettingsXml.Element("debugAutoStart") ?? (bool?)CommonSettingsXml.Element("debugAutoStart") ?? false;
+            DebugBlackList = (bool?)CharacterSettingsXml.Element("debugBlackList") ?? (bool?)CommonSettingsXml.Element("debugBlackList") ?? false;
+            DebugCargoHold = (bool?)CharacterSettingsXml.Element("debugCargoHold") ?? (bool?)CommonSettingsXml.Element("debugCargoHold") ?? false;
+            DebugChat = (bool?)CharacterSettingsXml.Element("debugChat") ?? (bool?)CommonSettingsXml.Element("debugChat") ?? false;
+            DebugCleanup = (bool?)CharacterSettingsXml.Element("debugCleanup") ?? (bool?)CommonSettingsXml.Element("debugCleanup") ?? false;
+            DebugClearPocket = (bool?)CharacterSettingsXml.Element("debugClearPocket") ?? (bool?)CommonSettingsXml.Element("debugClearPocket") ?? false;
+            DebugCourierMissions = (bool?)CharacterSettingsXml.Element("debugCourierMissions") ?? (bool?)CommonSettingsXml.Element("debugCourierMissions") ?? false;
+            DebugDecline = (bool?)CharacterSettingsXml.Element("debugDecline") ?? (bool?)CommonSettingsXml.Element("debugDecline") ?? false;
+            DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
+            DebugDisableCleanup = (bool?)CharacterSettingsXml.Element("debugDisableCleanup") ?? (bool?)CommonSettingsXml.Element("debugDisableCleanup") ?? false;
+            DebugDisableCombatMissionsBehavior = (bool?)CharacterSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? (bool?)CommonSettingsXml.Element("debugDisableCombatMissionsBehavior") ?? false;
+            DebugDisableCombatMissionCtrl = (bool?)CharacterSettingsXml.Element("debugDisableCombatMissionCtrl") ?? (bool?)CommonSettingsXml.Element("debugDisableCombatMissionCtrl") ?? false;
+            DebugDisableCombat = (bool?)CharacterSettingsXml.Element("debugDisableCombat") ?? (bool?)CommonSettingsXml.Element("debugDisableCombat") ?? false;
+            DebugDisableDrones = (bool?)CharacterSettingsXml.Element("debugDisableDrones") ?? (bool?)CommonSettingsXml.Element("debugDisableDrones") ?? false;
+            DebugDisablePanic = (bool?)CharacterSettingsXml.Element("debugDisablePanic") ?? (bool?)CommonSettingsXml.Element("debugDisablePanic") ?? false;
+            DebugDisableSalvage = (bool?)CharacterSettingsXml.Element("debugDisableSalvage") ?? (bool?)CommonSettingsXml.Element("debugDisableSalvage") ?? false;
+            DebugDisableGetBestTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false;
+            DebugDisableTargetCombatants = (bool?)CharacterSettingsXml.Element("debugDisableTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugDisableTargetCombatants") ?? false;
+            DebugDisableNavigateIntoRange = (bool?)CharacterSettingsXml.Element("debugDisableNavigateIntoRange") ?? (bool?)CommonSettingsXml.Element("debugDisableNavigateIntoRange") ?? false;
+            DebugDoneAction = (bool?)CharacterSettingsXml.Element("debugDoneAction") ?? (bool?)CommonSettingsXml.Element("debugDoneAction") ?? false;
+            DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
+            DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
+            DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;
+            DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
+            DebugFleetSupportSlave = (bool?)CharacterSettingsXml.Element("debugFleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportSlave") ?? false;
+            DebugFleetSupportMaster = (bool?)CharacterSettingsXml.Element("debugFleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportMaster") ?? false;
+            DebugGetBestTarget = (bool?)CharacterSettingsXml.Element("debugGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugGetBestTarget") ?? false;
+            DebugGetBestDroneTarget = (bool?)CharacterSettingsXml.Element("debugGetBestDroneTarget") ?? (bool?)CommonSettingsXml.Element("debugGetBestDroneTarget") ?? false;
+            DebugGotobase = (bool?)CharacterSettingsXml.Element("debugGotobase") ?? (bool?)CommonSettingsXml.Element("debugGotobase") ?? false;
+            DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
+            DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
+            DebugHasExploded = (bool?)CharacterSettingsXml.Element("debugHasExploded") ?? (bool?)CommonSettingsXml.Element("debugHasExploded") ?? false;
+            DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
+            DebugInSpace = (bool?)CharacterSettingsXml.Element("debugInSpace") ?? (bool?)CommonSettingsXml.Element("debugInSpace") ?? false;
+            DebugInStation = (bool?)CharacterSettingsXml.Element("debugInStation") ?? (bool?)CommonSettingsXml.Element("debugInStation") ?? false;
+            DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
+            DebugIsReadyToShoot = (bool?)CharacterSettingsXml.Element("debugIsReadyToShoot") ?? (bool?)CommonSettingsXml.Element("debugIsReadyToShoot") ?? false;
+            DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
+            DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
+            DebugKillAction = (bool?)CharacterSettingsXml.Element("debugKillAction") ?? (bool?)CommonSettingsXml.Element("debugKillAction") ?? false;
+            DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
+            DebugLogging = (bool?)CharacterSettingsXml.Element("debugLogging") ?? (bool?)CommonSettingsXml.Element("debugLogging") ?? false;
+            DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
+            DebugLootValue = (bool?)CharacterSettingsXml.Element("debugLootValue") ?? (bool?)CommonSettingsXml.Element("debugLootValue") ?? false;
+            DebugMaintainConsoleLogs = (bool?)CharacterSettingsXml.Element("debugMaintainConsoleLogs") ?? (bool?)CommonSettingsXml.Element("debugMaintainConsoleLogs") ?? false;
+            DebugMissionFittings = (bool?)CharacterSettingsXml.Element("debugMissionFittings") ?? (bool?)CommonSettingsXml.Element("debugMissionFittings") ?? false;
+            DebugMoveTo = (bool?)CharacterSettingsXml.Element("debugMoveTo") ?? (bool?)CommonSettingsXml.Element("debugMoveTo") ?? false;
+            DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
+            DebugOnframe = (bool?)CharacterSettingsXml.Element("debugOnframe") ?? (bool?)CommonSettingsXml.Element("debugOnframe") ?? false;
+            DebugOverLoadWeapons = (bool?)CharacterSettingsXml.Element("debugOverLoadWeapons") ?? (bool?)CommonSettingsXml.Element("debugOverLoadWeapons") ?? false;
+            DebugPerformance = (bool?)CharacterSettingsXml.Element("debugPerformance") ?? (bool?)CommonSettingsXml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
+            DebugPotentialCombatTargets = (bool?)CharacterSettingsXml.Element("debugPotentialCombatTargets") ?? (bool?)CommonSettingsXml.Element("debugPotentialCombatTargets") ?? false;
+            DebugPreferredPrimaryWeaponTarget = (bool?)CharacterSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? (bool?)CommonSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? false;
+            DebugQuestorManager = (bool?)CharacterSettingsXml.Element("debugQuestorManager") ?? (bool?)CommonSettingsXml.Element("debugQuestorManager") ?? false;
+            DebugReloadAll = (bool?)CharacterSettingsXml.Element("debugReloadAll") ?? (bool?)CommonSettingsXml.Element("debugReloadAll") ?? false;
+            DebugReloadorChangeAmmo = (bool?)CharacterSettingsXml.Element("debugReloadOrChangeAmmo") ?? (bool?)CommonSettingsXml.Element("debugReloadOrChangeAmmo") ?? false;
+            DebugRemoteRepair = (bool?)CharacterSettingsXml.Element("debugRemoteRepair") ?? (bool?)CommonSettingsXml.Element("debugRemoteRepair") ?? false;
+            DebugSalvage = (bool?)CharacterSettingsXml.Element("debugSalvage") ?? (bool?)CommonSettingsXml.Element("debugSalvage") ?? false;
+            DebugScheduler = (bool?)CharacterSettingsXml.Element("debugScheduler") ?? (bool?)CommonSettingsXml.Element("debugScheduler") ?? false;
+            DebugSettings = (bool?)CharacterSettingsXml.Element("debugSettings") ?? (bool?)CommonSettingsXml.Element("debugSettings") ?? false;
+            DebugShipTargetValues = (bool?)CharacterSettingsXml.Element("debugShipTargetValues") ?? (bool?)CommonSettingsXml.Element("debugShipTargetValues") ?? false;
+            DebugSkillTraining = (bool?)CharacterSettingsXml.Element("debugSkillTraining") ?? (bool?)CommonSettingsXml.Element("debugSkillTraining") ?? false;
+            DebugStates = (bool?)CharacterSettingsXml.Element("debugStates") ?? (bool?)CommonSettingsXml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
+            DebugStatistics = (bool?)CharacterSettingsXml.Element("debugStatistics") ?? (bool?)CommonSettingsXml.Element("debugStatistics") ?? false;
+            DebugStorylineMissions = (bool?)CharacterSettingsXml.Element("debugStorylineMissions") ?? (bool?)CommonSettingsXml.Element("debugStorylineMissions") ?? false;
+            DebugTargetCombatants = (bool?)CharacterSettingsXml.Element("debugTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugTargetCombatants") ?? false;
+            DebugTargetWrecks = (bool?)CharacterSettingsXml.Element("debugTargetWrecks") ?? (bool?)CommonSettingsXml.Element("debugTargetWrecks") ?? false;
+            DebugTraveler = (bool?)CharacterSettingsXml.Element("debugTraveler") ?? (bool?)CommonSettingsXml.Element("debugTraveler") ?? false;
+            DebugTractorBeams = (bool?)CharacterSettingsXml.Element("debugTractorBeams") ?? (bool?)CommonSettingsXml.Element("debugTractorBeams") ?? false;
+            DebugUI = (bool?)CharacterSettingsXml.Element("debugUI") ?? (bool?)CommonSettingsXml.Element("debugUI") ?? false;
+            DebugUnloadLoot = (bool?)CharacterSettingsXml.Element("debugUnloadLoot") ?? (bool?)CommonSettingsXml.Element("debugUnloadLoot") ?? false;
+            DebugValuedump = (bool?)CharacterSettingsXml.Element("debugValuedump") ?? (bool?)CommonSettingsXml.Element("debugValuedump") ?? false;
+            DebugWalletBalance = (bool?)CharacterSettingsXml.Element("debugWalletBalance") ?? (bool?)CommonSettingsXml.Element("debugWalletBalance") ?? false;
+            DebugWatchForActiveWars = (bool?)CharacterSettingsXml.Element("debugWatchForActiveWars") ?? (bool?)CommonSettingsXml.Element("debugWatchForActiveWars") ?? false;
+            DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
+            DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
+            UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
+            setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
+
+            CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
+
+            //
+            // Misc Settings
+            //
+            CharacterMode = (string)CharacterSettingsXml.Element("characterMode") ?? (string)CommonSettingsXml.Element("characterMode") ?? "Combat Missions".ToLower();
+
+            //other option is "salvage"
+
+            if (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
+            {
+                Settings.Instance.CharacterMode = "Combat Missions".ToLower();
+            }
+
+            AutoStart = (bool?)CharacterSettingsXml.Element("autoStart") ?? (bool?)CommonSettingsXml.Element("autoStart") ?? false; // auto Start enabled or disabled by default?
+            MaxLineConsole = (int?)CharacterSettingsXml.Element("maxLineConsole") ?? (int?)CommonSettingsXml.Element("maxLineConsole") ?? 1000;
+            // maximum console log lines to show in the GUI
+            Disable3D = (bool?)CharacterSettingsXml.Element("disable3D") ?? (bool?)CommonSettingsXml.Element("disable3D") ?? false; // Disable3d graphics while in space
+            RandomDelay = (int?)CharacterSettingsXml.Element("randomDelay") ?? (int?)CommonSettingsXml.Element("randomDelay") ?? 0;
+            MinimumDelay = (int?)CharacterSettingsXml.Element("minimumDelay") ?? (int?)CommonSettingsXml.Element("minimumDelay") ?? 0;
+
+            //
+            // Enable / Disable Major Features that do not have categories of their own below
+            //
+            UseFittingManager = (bool?)CharacterSettingsXml.Element("UseFittingManager") ?? (bool?)CommonSettingsXml.Element("UseFittingManager") ?? true;
+            EnableStorylines = (bool?)CharacterSettingsXml.Element("enableStorylines") ?? (bool?)CommonSettingsXml.Element("enableStorylines") ?? false;
+            UseLocalWatch = (bool?)CharacterSettingsXml.Element("UseLocalWatch") ?? (bool?)CommonSettingsXml.Element("UseLocalWatch") ?? true;
+            WatchForActiveWars = (bool?)CharacterSettingsXml.Element("watchForActiveWars") ?? (bool?)CommonSettingsXml.Element("watchForActiveWars") ?? true;
+
+            FleetSupportSlave = (bool?)CharacterSettingsXml.Element("fleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("fleetSupportSlave") ?? true;
+            FleetSupportMaster = (bool?)CharacterSettingsXml.Element("fleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("fleetSupportMaster") ?? true;
+            FleetName = (string)CharacterSettingsXml.Element("fleetName") ?? (string)CommonSettingsXml.Element("fleetName") ?? "Fleet1";
+
+            //
+            //CharacterNamesForMasterToInviteToFleet
+            //
+            Settings.Instance.CharacterNamesForMasterToInviteToFleet.Clear();
+            XElement xmlCharacterNamesForMasterToInviteToFleet = CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet") ?? CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet");
+            if (xmlCharacterNamesForMasterToInviteToFleet != null)
+            {
+                Logging.Log("Settings", "Loading CharacterNames For Master To Invite To Fleet", Logging.White);
+                int i = 1;
+                foreach (XElement CharacterToInvite in xmlCharacterNamesForMasterToInviteToFleet.Elements("character"))
+                {
+                    Settings.Instance.CharacterNamesForMasterToInviteToFleet.Add((string)CharacterToInvite);
+                    if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("Settings.LoadFleetList", "[" + i + "] CharacterName [" + (string)CharacterToInvite + "]", Logging.Teal);
+                    i++;
+                }
+                if (Settings.Instance.FleetSupportMaster) Logging.Log("Settings", "        CharacterNamesForMasterToInviteToFleet now has [" + CharacterNamesForMasterToInviteToFleet.Count + "] entries", Logging.White);
+            }
+
+            //
+            // Agent Standings and Mission Settings
+            //
+            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+            //{
+            MinAgentBlackListStandings = (float?)CharacterSettingsXml.Element("minAgentBlackListStandings") ?? (float?)CommonSettingsXml.Element("minAgentBlackListStandings") ?? (float)6.0;
+            MinAgentGreyListStandings = (float?)CharacterSettingsXml.Element("minAgentGreyListStandings") ?? (float?)CommonSettingsXml.Element("minAgentGreyListStandings") ?? (float)5.0;
+            WaitDecline = (bool?)CharacterSettingsXml.Element("waitDecline") ?? (bool?)CommonSettingsXml.Element("waitDecline") ?? false;
+
+            string relativeMissionsPath = (string)CharacterSettingsXml.Element("missionsPath") ?? (string)CommonSettingsXml.Element("missionsPath");
+            MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
+            Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.White);
+
+            RequireMissionXML = (bool?)CharacterSettingsXml.Element("requireMissionXML") ?? (bool?)CommonSettingsXml.Element("requireMissionXML") ?? false;
+            AllowNonStorylineCourierMissionsInLowSec = (bool?)CharacterSettingsXml.Element("LowSecMissions") ?? (bool?)CommonSettingsXml.Element("LowSecMissions") ?? false;
+            MaterialsForWarOreID = (int?)CharacterSettingsXml.Element("MaterialsForWarOreID") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreID") ?? 20;
+            MaterialsForWarOreQty = (int?)CharacterSettingsXml.Element("MaterialsForWarOreQty") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreQty") ?? 8000;
+            KillSentries = (bool?)CharacterSettingsXml.Element("killSentries") ?? (bool?)CommonSettingsXml.Element("killSentries") ?? false;
+            //}
+
+            //
+            // Local Watch Settings - if enabled
+            //
+            LocalBadStandingPilotsToTolerate = (int?)CharacterSettingsXml.Element("LocalBadStandingPilotsToTolerate") ?? (int?)CommonSettingsXml.Element("LocalBadStandingPilotsToTolerate") ?? 1;
+            LocalBadStandingLevelToConsiderBad = (double?)CharacterSettingsXml.Element("LocalBadStandingLevelToConsiderBad") ?? (double?)CommonSettingsXml.Element("LocalBadStandingLevelToConsiderBad") ?? -0.1;
+
+            //
+            // Invasion Settings
+            //
+            BattleshipInvasionLimit = (int?)CharacterSettingsXml.Element("battleshipInvasionLimit") ?? (int?)CommonSettingsXml.Element("battleshipInvasionLimit") ?? 0;
+
+            // if this number of battleships lands on grid while in a mission we will enter panic
+            BattlecruiserInvasionLimit = (int?)CharacterSettingsXml.Element("battlecruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("battlecruiserInvasionLimit") ?? 0;
+
+            // if this number of battlecruisers lands on grid while in a mission we will enter panic
+            CruiserInvasionLimit = (int?)CharacterSettingsXml.Element("cruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("cruiserInvasionLimit") ?? 0;
+
+            // if this number of cruisers lands on grid while in a mission we will enter panic
+            FrigateInvasionLimit = (int?)CharacterSettingsXml.Element("frigateInvasionLimit") ?? (int?)CommonSettingsXml.Element("frigateInvasionLimit") ?? 0;
+
+            // if this number of frigates lands on grid while in a mission we will enter panic
+            InvasionRandomDelay = (int?)CharacterSettingsXml.Element("invasionRandomDelay") ?? (int?)CommonSettingsXml.Element("invasionRandomDelay") ?? 0; // random relay to stay docked
+            InvasionMinimumDelay = (int?)CharacterSettingsXml.Element("invasionMinimumDelay") ?? (int?)CommonSettingsXml.Element("invasionMinimumDelay") ?? 0;
+
+            // minimum delay to stay docked
+
+            //
+            // Value - Used in calculations
+            //
+            IskPerLP = (double?)CharacterSettingsXml.Element("IskPerLP") ?? (double?)CommonSettingsXml.Element("IskPerLP") ?? 600; //used in value calculations
+
+            //
+            // Undock settings
+            //
+            UndockDelay = (int?)CharacterSettingsXml.Element("undockdelay") ?? (int?)CommonSettingsXml.Element("undockdelay") ?? 10; //Delay when undocking - not in use
+            UndockPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? "Insta";
+
+            //Undock bookmark prefix - used by traveler - not in use
+            BookmarkWarpOut = (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "";
+
+            //
+            // Location of the Questor GUI on startup (default is off the screen)
+            //
+            //X Questor GUI window position (needs to be changed, default is off screen)
+            WindowXPosition = (int?)CharacterSettingsXml.Element("windowXPosition") ?? (int?)CommonSettingsXml.Element("windowXPosition") ?? 1;
+
+            //Y Questor GUI window position (needs to be changed, default is off screen)
+            WindowYPosition = (int?)CharacterSettingsXml.Element("windowYPosition") ?? (int?)CommonSettingsXml.Element("windowYPosition") ?? 1;
+
+            //
+            // Location of the EVE Window on startup (default is to leave the window alone)
+            //
+            try
+            {
+                //EVE Client window position
+                EVEWindowXPosition = (int?)CharacterSettingsXml.Element("eveWindowXPosition") ?? (int?)CommonSettingsXml.Element("eveWindowXPosition") ?? 0;
+
+                //EVE Client window position
+                EVEWindowYPosition = (int?)CharacterSettingsXml.Element("eveWindowYPosition") ?? (int?)CommonSettingsXml.Element("eveWindowYPosition") ?? 0;
+
+                //
+                // Size of the EVE Window on startup (default is to leave the window alone)
+                // This CAN and WILL distort the proportions of the EVE client if you configure it to do so.
+                // ISBOXER arguably does this with more elegance...
+                //
+                //EVE Client window position
+                EVEWindowXSize = (int?)CharacterSettingsXml.Element("eveWindowXSize") ?? (int?)CommonSettingsXml.Element("eveWindowXSize") ?? 0;
+
+                //EVE Client window position
+                EVEWindowYSize = (int?)CharacterSettingsXml.Element("eveWindowYSize") ?? (int?)CommonSettingsXml.Element("eveWindowYSize") ?? 0;
+            }
+            catch
+            {
+                Logging.Log("Settings", "Invalid Format for eveWindow Settings - skipping", Logging.Teal);
+            }
+
+            try
+            {
+                //
+                // Ship Names
+                //
+                CombatShipName = (string)CharacterSettingsXml.Element("combatShipName") ?? (string)CommonSettingsXml.Element("combatShipName") ?? "My frigate of doom";
+                SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
+                TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
+                TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings", "Error Loading Ship Name Settings [" + exception + "]", Logging.Teal);
+            }
+
+            try
+            {
+                //
+                // Storage Location for Loot, Ammo, Bookmarks
+                //
+                UseHomebookmark = (bool?)CharacterSettingsXml.Element("UseHomebookmark") ?? (bool?)CommonSettingsXml.Element("UseHomebookmark") ?? false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings", "Error Loading UseHomebookmark [" + exception + "]", Logging.Teal);
+            }
+
+            try
+            {
+                //
+                // Storage Location for Loot, Ammo, Bookmarks
+                //
+                HomeBookmarkName = (string)CharacterSettingsXml.Element("homeBookmarkName") ?? (string)CommonSettingsXml.Element("homeBookmarkName") ?? "myHomeBookmark";
+                LootHangarTabName = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
+                if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                {
+                    Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
+                }
+                else
+                {
+                    Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangarTabName + "]", Logging.White);
+                }
+                AmmoHangarTabName = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
+                if (string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+                {
+                    Logging.Log("Settings", "AmmoHangar [" + "ItemHangar" + "]", Logging.White);
+                }
+                else
+                {
+                    Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
+                }
+                BookmarkHangar = (string)CharacterSettingsXml.Element("bookmarkHangar") ?? (string)CommonSettingsXml.Element("bookmarkHangar");
+                LootContainerName = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
+                if (LootContainerName != null)
+                {
+                    LootContainerName = LootContainerName.ToLower();
+                }
+                HighTierLootContainer = (string)CharacterSettingsXml.Element("highValueLootContainer") ?? (string)CommonSettingsXml.Element("highValueLootContainer");
+                if (HighTierLootContainer != null)
+                {
+                    HighTierLootContainer = HighTierLootContainer.ToLower();
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings", "Error Loading Hangar Settings [" + exception + "]", Logging.Teal);
+            }
+
+            try
+            {
+                //
+                // Loot and Salvage Settings
+                //
+                LootEverything = (bool?)CharacterSettingsXml.Element("lootEverything") ?? (bool?)CommonSettingsXml.Element("lootEverything") ?? true;
+                UseGatesInSalvage = (bool?)CharacterSettingsXml.Element("useGatesInSalvage") ?? (bool?)CommonSettingsXml.Element("useGatesInSalvage") ?? false;
+
+                // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
+                CreateSalvageBookmarks = (bool?)CharacterSettingsXml.Element("createSalvageBookmarks") ?? (bool?)CommonSettingsXml.Element("createSalvageBookmarks") ?? false;
+                CreateSalvageBookmarksIn = (string)CharacterSettingsXml.Element("createSalvageBookmarksIn") ?? (string)CommonSettingsXml.Element("createSalvageBookmarksIn") ?? "Player";
+
+                //Player or Corp
+                //other setting is "Corp"
+                BookmarkPrefix = (string)CharacterSettingsXml.Element("bookmarkPrefix") ?? (string)CommonSettingsXml.Element("bookmarkPrefix") ?? "Salvage:";
+                SafeSpotBookmarkPrefix = (string)CharacterSettingsXml.Element("safeSpotBookmarkPrefix") ?? (string)CommonSettingsXml.Element("safeSpotBookmarkPrefix") ?? "safespot";
+                BookmarkFolder = (string)CharacterSettingsXml.Element("bookmarkFolder") ?? (string)CommonSettingsXml.Element("bookmarkFolder") ?? "Salvage:";
+                TravelToBookmarkPrefix = (string)CharacterSettingsXml.Element("travelToBookmarkPrefix") ?? (string)CommonSettingsXml.Element("travelToBookmarkPrefix") ?? "MeetHere:";
+                MinimumWreckCount = (int?)CharacterSettingsXml.Element("minimumWreckCount") ?? (int?)CommonSettingsXml.Element("minimumWreckCount") ?? 1;
+                AfterMissionSalvaging = (bool?)CharacterSettingsXml.Element("afterMissionSalvaging") ?? (bool?)CommonSettingsXml.Element("afterMissionSalvaging") ?? false;
+                FirstSalvageBookmarksInSystem = (bool?)CharacterSettingsXml.Element("FirstSalvageBookmarksInSystem") ?? (bool?)CommonSettingsXml.Element("FirstSalvageBookmarksInSystem") ?? false;
+                SalvageMultipleMissionsinOnePass = (bool?)CharacterSettingsXml.Element("salvageMultpleMissionsinOnePass") ?? (bool?)CommonSettingsXml.Element("salvageMultpleMissionsinOnePass") ?? false;
+                UnloadLootAtStation = (bool?)CharacterSettingsXml.Element("unloadLootAtStation") ?? (bool?)CommonSettingsXml.Element("unloadLootAtStation") ?? false;
+                ReserveCargoCapacity = (int?)CharacterSettingsXml.Element("reserveCargoCapacity") ?? (int?)CommonSettingsXml.Element("reserveCargoCapacity") ?? 0;
+                MaximumWreckTargets = (int?)CharacterSettingsXml.Element("maximumWreckTargets") ?? (int?)CommonSettingsXml.Element("maximumWreckTargets") ?? 0;
+                WreckBlackListSmallWrecks = (bool?)CharacterSettingsXml.Element("WreckBlackListSmallWrecks") ?? (bool?)CommonSettingsXml.Element("WreckBlackListSmallWrecks") ?? false;
+                WreckBlackListMediumWrecks = (bool?)CharacterSettingsXml.Element("WreckBlackListMediumWrecks") ?? (bool?)CommonSettingsXml.Element("WreckBlackListMediumWrecks") ?? false;
+                AgeofBookmarksForSalvageBehavior = (int?)CharacterSettingsXml.Element("ageofBookmarksForSalvageBehavior") ?? (int?)CommonSettingsXml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
+                AgeofSalvageBookmarksToExpire = (int?)CharacterSettingsXml.Element("ageofSalvageBookmarksToExpire") ?? (int?)CommonSettingsXml.Element("ageofSalvageBookmarksToExpire") ?? 120;
+                LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = (bool?)CharacterSettingsXml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? (bool?)CommonSettingsXml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? false;
+                TractorBeamMinimumCapacitor = (int?)CharacterSettingsXml.Element("tractorBeamMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("tractorBeamMinimumCapacitor") ?? 0;
+                SalvagerMinimumCapacitor = (int?)CharacterSettingsXml.Element("salvagerMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("salvagerMinimumCapacitor") ?? 0;
+                DoNotDoANYSalvagingOutsideMissionActions = (bool?)CharacterSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? (bool?)CommonSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings", "Error Loading Loot and Salvage Settings [" + exception + "]", Logging.Teal);
+            }
+
+            //
+            // at what memory usage do we need to restart this session?
+            //
+            EVEProcessMemoryCeiling = (int?)CharacterSettingsXml.Element("EVEProcessMemoryCeiling") ?? (int?)CommonSettingsXml.Element("EVEProcessMemoryCeiling") ?? 900;
+            EVEProcessMemoryCeilingLogofforExit = (string)CharacterSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? (string)CommonSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? "exit";
+
+            CloseQuestorCMDUplinkInnerspaceProfile = (bool?)CharacterSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? (bool?)CommonSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
+            CloseQuestorCMDUplinkIsboxerCharacterSet = (bool?)CharacterSettingsXml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? (bool?)CommonSettingsXml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
+            CloseQuestorAllowRestart = (bool?)CharacterSettingsXml.Element("CloseQuestorAllowRestart") ?? (bool?)CommonSettingsXml.Element("CloseQuestorAllowRestart") ?? true;
+            CloseQuestorArbitraryOSCmd = (bool?)CharacterSettingsXml.Element("CloseQuestorArbitraryOSCmd") ?? (bool?)CommonSettingsXml.Element("CloseQuestorArbitraryOSCmd") ?? false;
+
+            //true or false
+            CloseQuestorOSCmdContents = (string)CharacterSettingsXml.Element("CloseQuestorOSCmdContents") ?? (string)CommonSettingsXml.Element("CloseQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: CloseQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+
+            LoginQuestorArbitraryOSCmd = (bool?)CharacterSettingsXml.Element("LoginQuestorArbitraryOSCmd") ?? (bool?)CommonSettingsXml.Element("LoginQuestorArbitraryOSCmd") ?? false;
+
+            //true or false
+            LoginQuestorOSCmdContents = (string)CharacterSettingsXml.Element("LoginQuestorOSCmdContents") ?? (string)CommonSettingsXml.Element("LoginQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: LoginQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+            LoginQuestorLavishScriptCmd = (bool?)CharacterSettingsXml.Element("LoginQuestorLavishScriptCmd") ?? (bool?)CommonSettingsXml.Element("LoginQuestorLavishScriptCmd") ?? false;
+
+            //true or false
+            LoginQuestorLavishScriptContents = (string)CharacterSettingsXml.Element("LoginQuestorLavishScriptContents") ?? (string)CommonSettingsXml.Element("LoginQuestorLavishScriptContents") ?? "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
+
+            MinimizeEveAfterStartingUp = (bool?)CharacterSettingsXml.Element("MinimizeEveAfterStartingUp") ?? (bool?)CommonSettingsXml.Element("MinimizeEveAfterStartingUp") ?? false;
+
+            //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
+
+            WalletBalanceChangeLogOffDelay = (int?)CharacterSettingsXml.Element("walletbalancechangelogoffdelay") ?? (int?)CommonSettingsXml.Element("walletbalancechangelogoffdelay") ?? 30;
+            WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
+            SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
+
+            if (UseInnerspace)
+            {
+                LavishScriptObject lavishsriptObject = LavishScript.Objects.GetObject("LavishScript");
+                if (lavishsriptObject == null)
+                {
+                    InnerSpace.Echo("Testing: object not found");
+                }
+                else
+                {
+                    /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
+                    //var version = lavishsriptObject.GetValue<float>();
+                    // //var TestISVariable = "Game"
+                    // //LavishIsBoxerCharacterSet = LavishsriptObject.
+                    //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
+                }
+            }
+
+            //
+            // Enable / Disable the different types of logging that are available
+            //
+            InnerspaceGeneratedConsoleLog = (bool?)CharacterSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? (bool?)CommonSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? false; // save the innerspace generated console log to file
+            SaveConsoleLog = (bool?)CharacterSettingsXml.Element("saveLog") ?? (bool?)CommonSettingsXml.Element("saveLog") ?? true; // save the console log to file
+            ConsoleLogRedacted = (bool?)CharacterSettingsXml.Element("saveLogRedacted") ?? (bool?)CommonSettingsXml.Element("saveLogRedacted") ?? true; // save the console log redacted to file
+            SessionsLog = (bool?)CharacterSettingsXml.Element("SessionsLog") ?? (bool?)CommonSettingsXml.Element("SessionsLog") ?? true;
+            DroneStatsLog = (bool?)CharacterSettingsXml.Element("DroneStatsLog") ?? (bool?)CommonSettingsXml.Element("DroneStatsLog") ?? true;
+            WreckLootStatistics = (bool?)CharacterSettingsXml.Element("WreckLootStatistics") ?? (bool?)CommonSettingsXml.Element("WreckLootStatistics") ?? true;
+            MissionStats1Log = (bool?)CharacterSettingsXml.Element("MissionStats1Log") ?? (bool?)CommonSettingsXml.Element("MissionStats1Log") ?? true;
+            MissionStats2Log = (bool?)CharacterSettingsXml.Element("MissionStats2Log") ?? (bool?)CommonSettingsXml.Element("MissionStats2Log") ?? true;
+            MissionStats3Log = (bool?)CharacterSettingsXml.Element("MissionStats3Log") ?? (bool?)CommonSettingsXml.Element("MissionStats3Log") ?? true;
+            MissionDungeonIdLog = (bool?)CharacterSettingsXml.Element("MissionDungeonIdLog") ?? (bool?)CommonSettingsXml.Element("MissionDungeonIdLog") ?? true;
+            PocketStatistics = (bool?)CharacterSettingsXml.Element("PocketStatistics") ?? (bool?)CommonSettingsXml.Element("PocketStatistics") ?? true;
+            PocketStatsUseIndividualFilesPerPocket = (bool?)CharacterSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? (bool?)CommonSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
+            PocketObjectStatisticsLog = (bool?)CharacterSettingsXml.Element("PocketObjectStatisticsLog") ?? (bool?)CommonSettingsXml.Element("PocketObjectStatisticsLog") ?? true;
+
+            //
+            // Weapon and targeting Settings
+            //
+            WeaponGroupId = (int?)CharacterSettingsXml.Element("weaponGroupId") ?? (int?)CommonSettingsXml.Element("weaponGroupId") ?? 0;
+            DontShootFrigatesWithSiegeorAutoCannons = (bool?)CharacterSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? (bool?)CommonSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
+            MaximumHighValueTargets = (int?)CharacterSettingsXml.Element("maximumHighValueTargets") ?? (int?)CommonSettingsXml.Element("maximumHighValueTargets") ?? 2;
+            MaximumLowValueTargets = (int?)CharacterSettingsXml.Element("maximumLowValueTargets") ?? (int?)CommonSettingsXml.Element("maximumLowValueTargets") ?? 2;
+            DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)CharacterSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? (int?)CommonSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
+            DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
+            SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+            ArmLoadCapBoosters = (bool?)CharacterSettingsXml.Element("armLoadCapBoosters") ?? (bool?)CommonSettingsXml.Element("armLoadCapBoosters") ?? false;
+
+            MinimumTargetValueToConsiderTargetAHighValueTarget = (int?)CharacterSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? (int?)CommonSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? 2;
+            MaximumTargetValueToConsiderTargetALowValueTarget = (int?)CharacterSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? (int?)CommonSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? 1;
+
+            AddDampenersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddECMsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddNeutralizersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddTargetPaintersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddWarpScramblersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? true;
+            AddWebifiersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? true;
+
+            AddDampenersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? true;
+            AddECMsToDroneTargetList = (bool?)CharacterSettingsXml.Element("addECMsToDroneTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToDroneTargetList") ?? true;
+            AddNeutralizersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? true;
+            AddTargetPaintersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? true;
+            AddTrackingDisruptorsToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? true;
+            AddWarpScramblersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? true;
+            AddWebifiersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? true;
+
+            ListPriorityTargetsEveryXSeconds = (double?)CharacterSettingsXml.Element("listPriorityTargetsEveryXSeconds") ?? (double?)CommonSettingsXml.Element("listPriorityTargetsEveryXSeconds") ?? 900;
+
+            InsideThisRangeIsHardToTrack = (double?)CharacterSettingsXml.Element("insideThisRangeIsHardToTrack") ?? (double?)CommonSettingsXml.Element("insideThisRangeIsHardToTrack") ?? 15000;
+
+            //
+            // Script Settings - TypeIDs for the scripts you would like to use in these modules
+            //
+            // 29003 Focused Warp Disruption Script   // hictor and infinipoint
+            //
+            // 29007 Tracking Speed Disruption Script // tracking disruptor
+            // 29005 Optimal Range Disruption Script  // tracking disruptor
+            // 29011 Scan Resolution Script           // sensor booster
+            // 29009 Targeting Range Script           // sensor booster
+            // 29015 Targeting Range Dampening Script // sensor dampener
+            // 29013 Scan Resolution Dampening Script // sensor dampener
+            // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
+            // 28999 Optimal Range Script             // tracking enhancer and tracking computer
+
+            // 3554  Cap Booster 100
+            // 11283 Cap Booster 150
+            // 11285 Cap Booster 200
+            // 263   Cap Booster 25
+            // 11287 Cap Booster 400
+            // 264   Cap Booster 50
+            // 3552  Cap Booster 75
+            // 11289 Cap Booster 800
+            // 31982 Navy Cap Booster 100
+            // 31990 Navy Cap Booster 150
+            // 31998 Navy Cap Booster 200
+            // 32006 Navy Cap Booster 400
+            // 32014 Navy Cap Booster 800
+
+            TrackingDisruptorScript = (int?)CharacterSettingsXml.Element("trackingDisruptorScript") ?? (int?)CommonSettingsXml.Element("trackingDisruptorScript") ?? (int)TypeID.TrackingSpeedDisruptionScript;
+            TrackingComputerScript = (int?)CharacterSettingsXml.Element("trackingComputerScript") ?? (int?)CommonSettingsXml.Element("trackingComputerScript") ?? (int)TypeID.TrackingSpeedScript;
+            TrackingLinkScript = (int?)CharacterSettingsXml.Element("trackingLinkScript") ?? (int?)CommonSettingsXml.Element("trackingLinkScript") ?? (int)TypeID.TrackingSpeedScript;
+            SensorBoosterScript = (int?)CharacterSettingsXml.Element("sensorBoosterScript") ?? (int?)CommonSettingsXml.Element("sensorBoosterScript") ?? (int)TypeID.TargetingRangeScript;
+            SensorDampenerScript = (int?)CharacterSettingsXml.Element("sensorDampenerScript") ?? (int?)CommonSettingsXml.Element("sensorDampenerScript") ?? (int)TypeID.TargetingRangeDampeningScript;
+            AncillaryShieldBoosterScript = (int?)CharacterSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int?)CommonSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int)TypeID.AncillaryShieldBoosterScript;
+            CapacitorInjectorScript = (int?)CharacterSettingsXml.Element("capacitorInjectorScript") ?? (int?)CommonSettingsXml.Element("capacitorInjectorScript") ?? (int)TypeID.CapacitorInjectorScript;
+            CapBoosterToLoad = (int?)CharacterSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CommonSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CharacterSettingsXml.Element("capBoosterToLoad") ?? (int?)CommonSettingsXml.Element("capBoosterToLoad") ?? 15;
+
+            //
+            // OverLoad Settings (this WILL burn out modules, likely very quickly!
+            // If you enable the overloading of a slot it is HIGHLY recommended you actually have something overloadable in that slot =/ 
+            //
+            OverloadWeapons = (bool?)CharacterSettingsXml.Element("overloadWeapons") ?? (bool?)CommonSettingsXml.Element("overloadWeapons") ?? false;
+
+            //
+            // Speed and Movement Settings
+            //
+            AvoidBumpingThings = (bool?)CharacterSettingsXml.Element("avoidBumpingThings") ?? (bool?)CommonSettingsXml.Element("avoidBumpingThings") ?? true;
+            SpeedTank = (bool?)CharacterSettingsXml.Element("speedTank") ?? (bool?)CommonSettingsXml.Element("speedTank") ?? false;
+            OrbitDistance = (int?)CharacterSettingsXml.Element("orbitDistance") ?? (int?)CommonSettingsXml.Element("orbitDistance") ?? 0;
+            OrbitStructure = (bool?)CharacterSettingsXml.Element("orbitStructure") ?? (bool?)CommonSettingsXml.Element("orbitStructure") ?? false;
+            OptimalRange = (int?)CharacterSettingsXml.Element("optimalRange") ?? (int?)CommonSettingsXml.Element("optimalRange") ?? 0;
+            NosDistance = (int?)CharacterSettingsXml.Element("NosDistance") ?? (int?)CommonSettingsXml.Element("NosDistance") ?? 38000;
+            RemoteRepairDistance = (int?)CharacterSettingsXml.Element("remoteRepairDistance") ?? (int?)CommonSettingsXml.Element("remoteRepairDistance") ?? 2000;
+            MinimumPropulsionModuleDistance = (int?)CharacterSettingsXml.Element("minimumPropulsionModuleDistance") ?? (int?)CommonSettingsXml.Element("minimumPropulsionModuleDistance") ?? 5000;
+            MinimumPropulsionModuleCapacitor = (int?)CharacterSettingsXml.Element("minimumPropulsionModuleCapacitor") ?? (int?)CommonSettingsXml.Element("minimumPropulsionModuleCapacitor") ?? 0;
+
+            //
+            // Tanking Settings
+            //
+            ActivateRepairModules = (int?)CharacterSettingsXml.Element("activateRepairModules") ?? (int?)CommonSettingsXml.Element("activateRepairModules") ?? 65;
+            DeactivateRepairModules = (int?)CharacterSettingsXml.Element("deactivateRepairModules") ?? (int?)CommonSettingsXml.Element("deactivateRepairModules") ?? 95;
+            InjectCapPerc = (int?)CharacterSettingsXml.Element("injectcapperc") ?? (int?)CommonSettingsXml.Element("injectcapperc") ?? 60;
+
+            //
+            // Panic Settings
+            //
+            MinimumShieldPct = (int?)CharacterSettingsXml.Element("minimumShieldPct") ?? (int?)CommonSettingsXml.Element("minimumShieldPct") ?? 100;
+            MinimumArmorPct = (int?)CharacterSettingsXml.Element("minimumArmorPct") ?? (int?)CommonSettingsXml.Element("minimumArmorPct") ?? 100;
+            MinimumCapacitorPct = (int?)CharacterSettingsXml.Element("minimumCapacitorPct") ?? (int?)CommonSettingsXml.Element("minimumCapacitorPct") ?? 50;
+            SafeShieldPct = (int?)CharacterSettingsXml.Element("safeShieldPct") ?? (int?)CommonSettingsXml.Element("safeShieldPct") ?? 100;
+            SafeArmorPct = (int?)CharacterSettingsXml.Element("safeArmorPct") ?? (int?)CommonSettingsXml.Element("safeArmorPct") ?? 100;
+            SafeCapacitorPct = (int?)CharacterSettingsXml.Element("safeCapacitorPct") ?? (int?)CommonSettingsXml.Element("safeCapacitorPct") ?? 80;
+            UseStationRepair = (bool?)CharacterSettingsXml.Element("useStationRepair") ?? (bool?)CommonSettingsXml.Element("useStationRepair") ?? true;
+
+            //
+            // Drone Settings
+            //
+            UseDrones = (bool?)CharacterSettingsXml.Element("useDrones") ?? (bool?)CommonSettingsXml.Element("useDrones") ?? true;
+            DroneTypeId = (int?)CharacterSettingsXml.Element("droneTypeId") ?? (int?)CommonSettingsXml.Element("droneTypeId") ?? 0;
+            DroneControlRange = (int?)CharacterSettingsXml.Element("droneControlRange") ?? (int?)CommonSettingsXml.Element("droneControlRange") ?? 0;
+            DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive = (bool?)CharacterSettingsXml.Element("dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive") ?? (bool?)CommonSettingsXml.Element("dronesDontNeedTargetsBecauseWehaveThemSetOnAggressive") ?? true;
+            DroneMinimumShieldPct = (int?)CharacterSettingsXml.Element("droneMinimumShieldPct") ?? (int?)CommonSettingsXml.Element("droneMinimumShieldPct") ?? 50;
+            DroneMinimumArmorPct = (int?)CharacterSettingsXml.Element("droneMinimumArmorPct") ?? (int?)CommonSettingsXml.Element("droneMinimumArmorPct") ?? 50;
+            DroneMinimumCapacitorPct = (int?)CharacterSettingsXml.Element("droneMinimumCapacitorPct") ?? (int?)CommonSettingsXml.Element("droneMinimumCapacitorPct") ?? 0;
+            DroneRecallShieldPct = (int?)CharacterSettingsXml.Element("droneRecallShieldPct") ?? (int?)CommonSettingsXml.Element("droneRecallShieldPct") ?? 0;
+            DroneRecallArmorPct = (int?)CharacterSettingsXml.Element("droneRecallArmorPct") ?? (int?)CommonSettingsXml.Element("droneRecallArmorPct") ?? 0;
+            DroneRecallCapacitorPct = (int?)CharacterSettingsXml.Element("droneRecallCapacitorPct") ?? (int?)CommonSettingsXml.Element("droneRecallCapacitorPct") ?? 0;
+            LongRangeDroneRecallShieldPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallShieldPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallShieldPct") ?? 0;
+            LongRangeDroneRecallArmorPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallArmorPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallArmorPct") ?? 0;
+            LongRangeDroneRecallCapacitorPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallCapacitorPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
+            DronesKillHighValueTargets = (bool?)CharacterSettingsXml.Element("dronesKillHighValueTargets") ?? (bool?)CommonSettingsXml.Element("dronesKillHighValueTargets") ?? false;
+            BelowThisHealthLevelRemoveFromDroneBay = (int?)CharacterSettingsXml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? (int?)CommonSettingsXml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? 150;
+
+            //
+            // Email Settings
+            //
+            EmailSupport = (bool?)CharacterSettingsXml.Element("emailSupport") ?? (bool?)CommonSettingsXml.Element("emailSupport") ?? false;
+            EmailAddress = (string)CharacterSettingsXml.Element("emailAddress") ?? (string)CommonSettingsXml.Element("emailAddress") ?? "";
+            EmailPassword = (string)CharacterSettingsXml.Element("emailPassword") ?? (string)CommonSettingsXml.Element("emailPassword") ?? "";
+            EmailSMTPServer = (string)CharacterSettingsXml.Element("emailSMTPServer") ?? (string)CommonSettingsXml.Element("emailSMTPServer") ?? "";
+            EmailSMTPPort = (int?)CharacterSettingsXml.Element("emailSMTPPort") ?? (int?)CommonSettingsXml.Element("emailSMTPPort") ?? 25;
+            EmailAddressToSendAlerts = (string)CharacterSettingsXml.Element("emailAddressToSendAlerts") ?? (string)CommonSettingsXml.Element("emailAddressToSendAlerts") ?? "";
+            EmailEnableSSL = (bool?)CharacterSettingsXml.Element("emailEnableSSL") ?? (bool?)CommonSettingsXml.Element("emailEnableSSL") ?? false;
+
+            //
+            // Skill Training Settings
+            //
+            ThisToonShouldBeTrainingSkills = (bool?)CharacterSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? (bool?)CommonSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? true;
+            
+            //
+            // User Defined LavishScript Scripts that tie to buttons in the UI
+            //
+            UserDefinedLavishScriptScript1 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript1") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript1") ?? "";
+            UserDefinedLavishScriptScript1Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript1Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript1Description") ?? "";
+            UserDefinedLavishScriptScript2 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript2") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript2") ?? "";
+            UserDefinedLavishScriptScript2Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript2Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript2Description") ?? "";
+            UserDefinedLavishScriptScript3 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3") ?? "";
+            UserDefinedLavishScriptScript3Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? "";
+            UserDefinedLavishScriptScript4 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4") ?? "";
+            UserDefinedLavishScriptScript4Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? "";
+
+            LoadQuestorDebugInnerspaceCommandAlias = (string)CharacterSettingsXml.Element("loadQuestorDebugInnerspaceCommandAlias") ?? (string)CommonSettingsXml.Element("loadQuestorDebugInnerspaceCommandAlias") ?? "1";
+            LoadQuestorDebugInnerspaceCommand = (string)CharacterSettingsXml.Element("loadQuestorDebugInnerspaceCommand") ?? (string)CommonSettingsXml.Element("loadQuestorDebugInnerspaceCommand") ?? "dotnet q1 questor.exe";
+            UnLoadQuestorDebugInnerspaceCommandAlias = (string)CharacterSettingsXml.Element("unLoadQuestorDebugInnerspaceCommandAlias") ?? (string)CommonSettingsXml.Element("unLoadQuestorDebugInnerspaceCommandAlias") ?? "2";
+            UnLoadQuestorDebugInnerspaceCommand = (string)CharacterSettingsXml.Element("unLoadQuestorDebugInnerspaceCommand") ?? (string)CommonSettingsXml.Element("unLoadQuestorDebugInnerspaceCommand") ?? "dotnet -unload q1";
+            
+            //
+            // agent standing requirements
+            //
+            StandingsNeededToAccessLevel1Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? -11;
+            StandingsNeededToAccessLevel2Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? 1;
+            StandingsNeededToAccessLevel3Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? 3;
+            StandingsNeededToAccessLevel4Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? 5;
+            StandingsNeededToAccessLevel5Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? 7;
+
+            //
+            // number of days of console logs to keep (anything older will be deleted on startup)
+            //
+            ConsoleLogDaysOfLogsToKeep = (int?)CharacterSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? (int?)CommonSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
+
+            //
+            // Ammo settings
+            //
+            Ammo.Clear();
+            XElement ammoTypes = CharacterSettingsXml.Element("ammoTypes") ?? CommonSettingsXml.Element("ammoTypes");
+
+            if (ammoTypes != null)
+            {
+                foreach (XElement ammo in ammoTypes.Elements("ammoType"))
+                {
+                    Ammo.Add(new Ammo(ammo));
+                }
+            }
+
+            MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 0;
+
+            //
+            // List of Agents we should use
+            //
+            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+            //{
+            AgentsList.Clear();
+            XElement agentList = CharacterSettingsXml.Element("agentsList") ?? CommonSettingsXml.Element("agentsList");
+
+            if (agentList != null)
+            {
+                if (agentList.HasElements)
+                {
+                    int i = 0;
+                    foreach (XElement agent in agentList.Elements("agentList"))
+                    {
+                        AgentsList.Add(new AgentsList(agent));
+                        i++;
+                    }
+                    if (i >= 2)
+                    {
+                        MultiAgentSupport = true;
+                        Logging.Log("Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
+                    }
+                    else
+                    {
+                        MultiAgentSupport = false;
+                        Logging.Log("Settings", "Found only one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
+                    }
+                }
+                else
+                {
+                    Logging.Log("Settings", "agentList exists in your characters config but no agents were listed.", Logging.Red);
+                }
+            }
+            else
+                Logging.Log("Settings", "Error! No Agents List specified.", Logging.Red);
+
+            //}
+
+            //
+            // Fittings chosen based on the faction of the mission
+            //
+            FactionFitting.Clear();
+            XElement factionFittings = CharacterSettingsXml.Element("factionfittings") ?? CommonSettingsXml.Element("factionfittings");
+            if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
+            {
+                if (factionFittings != null)
+                {
+                    foreach (XElement factionfitting in factionFittings.Elements("factionfitting"))
+                    {
+                        FactionFitting.Add(new FactionFitting(factionfitting));
+                    }
+
+                    if (FactionFitting.Exists(m => m.Faction.ToLower() == "default"))
+                    {
+                        DefaultFitting = FactionFitting.Find(m => m.Faction.ToLower() == "default");
+                        if (string.IsNullOrEmpty(DefaultFitting.Fitting))
+                        {
+                            UseFittingManager = false;
+                            Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
+                        }
+
+                        Logging.Log("Settings", "Faction Fittings defined. Fitting manager will be used when appropriate.", Logging.White);
+                    }
+                    else
+                    {
+                        UseFittingManager = false;
+                        Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
+                    }
+                }
+                else
+                {
+                    UseFittingManager = false;
+                    Logging.Log("Settings", "No faction fittings specified.  Fitting manager will not be used.", Logging.Orange);
+                }
+            }
+
+            //
+            // Fitting based on the name of the mission
+            //
+            MissionFitting.Clear();
+            XElement xmlElementMissionFittingsSection = CharacterSettingsXml.Element("missionfittings") ?? CommonSettingsXml.Element("missionfittings");
+            if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
+            {
+                if (xmlElementMissionFittingsSection != null)
+                {
+                    Logging.Log("Settings", "Loading Mission Fittings", Logging.White);
+                    int i = 1;
+                    foreach (XElement missionfitting in xmlElementMissionFittingsSection.Elements("missionfitting"))
+                    {
+                        MissionFitting.Add(new MissionFitting(missionfitting));
+                        if (Settings.Instance.DebugMissionFittings) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
+                        i++;
+                    }
+                    Logging.Log("Settings", "        Mission Fittings now has [" + MissionFitting.Count + "] entries", Logging.White);
+                }
+            }
+
+            LoadMissionBlackList(CharacterSettingsXml, CommonSettingsXml);
+
+            LoadMissionGreyList(CharacterSettingsXml, CommonSettingsXml);
+            
+            LoadFactionBlacklist(CharacterSettingsXml, CommonSettingsXml);
+        }
 
         public void LoadSettings()
         {
@@ -638,6 +1509,16 @@ namespace Questor.Modules.Lookup
                 DebugCourierMissions = false;
                 DebugDecline = false;
                 DebugDefense = false;
+                DebugDisableCleanup = false;
+                DebugDisableCombatMissionsBehavior = false;
+                DebugDisableCombatMissionCtrl = false;
+                DebugDisableCombat = false;
+                DebugDisableDrones = false;
+                DebugDisablePanic = false;
+                DebugDisableSalvage = false;
+                DebugDisableGetBestTarget = false;
+                DebugDisableTargetCombatants = false;
+                DebugDisableNavigateIntoRange = false;
                 DebugDrones = false;
                 DebugDroneHealth = false;
                 DebugExceptions = false;
@@ -645,6 +1526,7 @@ namespace Questor.Modules.Lookup
                 DebugFleetSupportSlave = false;
                 DebugFleetSupportMaster = false;
                 DebugGetBestTarget = false;
+                DebugGetBestDroneTarget = false;
                 DebugGotobase = false;
                 DebugGreyList = false;
                 DebugHangars = false;
@@ -653,6 +1535,7 @@ namespace Questor.Modules.Lookup
                 DebugInWarp = false;
                 DebugItemHangar = false;
                 DebugKillTargets = false;
+                DebugKillAction = false;
                 DebugLoadScripts = false;
                 DebugLogging = false;
                 DebugLootWrecks = false;
@@ -664,9 +1547,11 @@ namespace Questor.Modules.Lookup
                 DebugOnframe = false;
                 DebugOverLoadWeapons = false;
                 DebugPerformance = false;
+                DebugPotentialCombatTargets = false;
                 DebugQuestorManager = false;
                 DebugReloadAll = false;
                 DebugReloadorChangeAmmo = false;
+                DebugRemoteRepair = false;
                 DebugSalvage = false;
                 DebugScheduler = false;
                 DebugSettings = false;
@@ -819,6 +1704,7 @@ namespace Questor.Modules.Lookup
                 SalvageShipName = "Noctis";
                 TransportShipName = "Transport";
                 TravelShipName = "Travel";
+                MiningShipName = "Hulk";
 
                 //
                 // Usage of Homebookmark @ dedicated salvager
@@ -827,10 +1713,10 @@ namespace Questor.Modules.Lookup
                 // Storage Location for Loot, Ammo, Bookmarks
                 //
                 HomeBookmarkName = "myHomeBookmark";
-                LootHangar = String.Empty;
-                AmmoHangar = String.Empty;
+                LootHangarTabName = String.Empty;
+                AmmoHangarTabName = String.Empty;
                 BookmarkHangar = String.Empty;
-                LootContainer = String.Empty;
+                LootContainerName = String.Empty;
 
                 //
                 // Loot and Salvage Settings
@@ -885,6 +1771,14 @@ namespace Questor.Modules.Lookup
                 DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = 60;
                 DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                 SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
+
+
+                // (IsNPCBattleship) return 4;
+                // (IsNPCBattlecruiser) return 3;
+                // (IsNPCCruiser) return 2;
+                // (IsNPCFrigate) return 0;
+                MinimumTargetValueToConsiderTargetAHighValueTarget = 2; 
+                MaximumTargetValueToConsiderTargetALowValueTarget = 1;
 
                 AddDampenersToPrimaryWeaponsPriorityTargetList = true;
                 AddNeutralizersToPrimaryWeaponsPriorityTargetList = true;
@@ -955,6 +1849,7 @@ namespace Questor.Modules.Lookup
                 OrbitStructure = false;
                 OptimalRange = 0;
                 NosDistance = 38000;
+                RemoteRepairDistance = 2000;
                 MinimumPropulsionModuleDistance = 5000;
                 MinimumPropulsionModuleCapacitor = 0;
 
@@ -1017,9 +1912,7 @@ namespace Questor.Modules.Lookup
                 // Skill Training Settings
                 //
                 ThisToonShouldBeTrainingSkills = true;
-                //This needs to be in your "Innerspace\Scripts\" Directory
-                SkillTrainerScript = "";
-
+                
                 UserDefinedLavishScriptScript1 = "";
                 UserDefinedLavishScriptScript1Description = "";
                 UserDefinedLavishScriptScript2 = "";
@@ -1057,7 +1950,7 @@ namespace Questor.Modules.Lookup
             {
                 Settings.Instance.CharacterXMLExists = true;
                 XElement CharacterSettingsXml;
-                using (var reader = new XmlTextReader(Settings.Instance.CharacterSettingsPath))
+                using (XmlTextReader reader = new XmlTextReader(Settings.Instance.CharacterSettingsPath))
                 {
                     reader.EntityHandling = EntityHandling.ExpandEntities;
                     CharacterSettingsXml = XDocument.Load(reader).Root;
@@ -1069,765 +1962,7 @@ namespace Questor.Modules.Lookup
                 }
                 else
                 {
-                    Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
-                    Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
-
-                    XElement CommonSettingsXml;
-                    if (File.Exists(Settings.Instance.CommonSettingsPath))
-                    {
-                        Settings.Instance.CommonXMLExists = true;
-                        CommonSettingsXml = XDocument.Load(Settings.Instance.CommonSettingsPath).Root;
-                        if (CommonSettingsXml == null)
-                        {
-                            Logging.Log("Settings", "found [" + Settings.Instance.CommonSettingsPath + "] but was unable to load it: FATAL ERROR - use the provided settings.xml to create that file.", Logging.Red);
-                        }
-                    }
-                    else
-                    {
-                        Settings.Instance.CommonXMLExists = false;
-                        //
-                        // if the common XML does not exist, load the characters XML into the CommonSettingsXml just so we can simplify the XML element loading stuff.
-                        //
-                        CommonSettingsXml = XDocument.Load(Settings.Instance.CharacterSettingsPath).Root;
-                    }
-
-                    if (CommonSettingsXml == null) return; // this should never happen as we load the characters xml here if the common xml is mising. adding this does quiet some warnings though
-
-                    if (Settings.Instance.CommonXMLExists) Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CommonSettingsPath + "] and", Logging.Green);
-                    Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CharacterSettingsPath + "]", Logging.Green);
-                    //
-                    // these are listed by feature and should likely be re-ordered to reflect that
-                    //
-
-                    //
-                    // Debug Settings
-                    //
-                    DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
-                    DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
-                    DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
-                    DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
-                    DebugAgentInteractionReplyToAgent = (bool?)CharacterSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? (bool?)CommonSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? false;
-                    DebugAllMissionsOnBlackList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnBlackList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnBlackList") ?? false;
-                    DebugAllMissionsOnGreyList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnGreyList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnGreyList") ?? false;
-                    DebugArm = (bool?)CharacterSettingsXml.Element("debugArm") ?? (bool?)CommonSettingsXml.Element("debugArm") ?? false;
-                    DebugAttachVSDebugger = (bool?)CharacterSettingsXml.Element("debugAttachVSDebugger") ?? (bool?)CommonSettingsXml.Element("debugAttachVSDebugger") ?? false;
-                    DebugAutoStart = (bool?)CharacterSettingsXml.Element("debugAutoStart") ?? (bool?)CommonSettingsXml.Element("debugAutoStart") ?? false;
-                    DebugBlackList = (bool?)CharacterSettingsXml.Element("debugBlackList") ?? (bool?)CommonSettingsXml.Element("debugBlackList") ?? false;
-                    DebugCargoHold = (bool?)CharacterSettingsXml.Element("debugCargoHold") ?? (bool?)CommonSettingsXml.Element("debugCargoHold") ?? false;
-                    DebugChat = (bool?)CharacterSettingsXml.Element("debugChat") ?? (bool?)CommonSettingsXml.Element("debugChat") ?? false;
-                    DebugCleanup = (bool?)CharacterSettingsXml.Element("debugCleanup") ?? (bool?)CommonSettingsXml.Element("debugCleanup") ?? false;
-                    DebugClearPocket = (bool?)CharacterSettingsXml.Element("debugClearPocket") ?? (bool?)CommonSettingsXml.Element("debugClearPocket") ?? false;
-                    DebugCourierMissions = (bool?)CharacterSettingsXml.Element("debugCourierMissions") ?? (bool?)CommonSettingsXml.Element("debugCourierMissions") ?? false;
-                    DebugDecline = (bool?)CharacterSettingsXml.Element("debugDecline") ?? (bool?)CommonSettingsXml.Element("debugDecline") ?? false;
-                    DebugDefense = (bool?)CharacterSettingsXml.Element("debugDefense") ?? (bool?)CommonSettingsXml.Element("debugDefense") ?? false;
-                    DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
-                    DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
-                    DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;
-                    DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
-                    DebugFleetSupportSlave = (bool?)CharacterSettingsXml.Element("debugFleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportSlave") ?? false;
-                    DebugFleetSupportMaster = (bool?)CharacterSettingsXml.Element("debugFleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportMaster") ?? false;
-                    DebugGetBestTarget = (bool?)CharacterSettingsXml.Element("debugGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugGetBestTarget") ?? false;
-                    DebugGotobase = (bool?)CharacterSettingsXml.Element("debugGotobase") ?? (bool?)CommonSettingsXml.Element("debugGotobase") ?? false;
-                    DebugGreyList = (bool?)CharacterSettingsXml.Element("debugGreyList") ?? (bool?)CommonSettingsXml.Element("debugGreyList") ?? false;
-                    DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
-                    DebugHasExploded = (bool?)CharacterSettingsXml.Element("debugHasExploded") ?? (bool?)CommonSettingsXml.Element("debugHasExploded") ?? false;
-                    DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
-                    DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
-                    DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
-                    DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
-                    DebugLoadScripts = (bool?)CharacterSettingsXml.Element("debugLoadScripts") ?? (bool?)CommonSettingsXml.Element("debugLoadScripts") ?? false;
-                    DebugLogging = (bool?)CharacterSettingsXml.Element("debugLogging") ?? (bool?)CommonSettingsXml.Element("debugLogging") ?? false;
-                    DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
-                    DebugLootValue = (bool?)CharacterSettingsXml.Element("debugLootValue") ?? (bool?)CommonSettingsXml.Element("debugLootValue") ?? false;
-                    DebugMaintainConsoleLogs = (bool?)CharacterSettingsXml.Element("debugMaintainConsoleLogs") ?? (bool?)CommonSettingsXml.Element("debugMaintainConsoleLogs") ?? false;
-                    DebugMissionFittings = (bool?)CharacterSettingsXml.Element("debugMissionFittings") ?? (bool?)CommonSettingsXml.Element("debugMissionFittings") ?? false;
-                    DebugMoveTo = (bool?)CharacterSettingsXml.Element("debugMoveTo") ?? (bool?)CommonSettingsXml.Element("debugMoveTo") ?? false;
-                    DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
-                    DebugOnframe = (bool?)CharacterSettingsXml.Element("debugOnframe") ?? (bool?)CommonSettingsXml.Element("debugOnframe") ?? false;
-                    DebugOverLoadWeapons = (bool?)CharacterSettingsXml.Element("debugOverLoadWeapons") ?? (bool?)CommonSettingsXml.Element("debugOverLoadWeapons") ?? false;
-                    DebugPerformance = (bool?)CharacterSettingsXml.Element("debugPerformance") ?? (bool?)CommonSettingsXml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
-                    DebugQuestorManager = (bool?)CharacterSettingsXml.Element("debugQuestorManager") ?? (bool?)CommonSettingsXml.Element("debugQuestorManager") ?? false;
-                    DebugReloadAll = (bool?)CharacterSettingsXml.Element("debugReloadAll") ?? (bool?)CommonSettingsXml.Element("debugReloadAll") ?? false;
-                    DebugReloadorChangeAmmo = (bool?)CharacterSettingsXml.Element("debugReloadOrChangeAmmo") ?? (bool?)CommonSettingsXml.Element("debugReloadOrChangeAmmo") ?? false;
-                    DebugSalvage = (bool?)CharacterSettingsXml.Element("debugSalvage") ?? (bool?)CommonSettingsXml.Element("debugSalvage") ?? false;
-                    DebugScheduler = (bool?)CharacterSettingsXml.Element("debugScheduler") ?? (bool?)CommonSettingsXml.Element("debugScheduler") ?? false;
-                    DebugSettings = (bool?)CharacterSettingsXml.Element("debugSettings") ?? (bool?)CommonSettingsXml.Element("debugSettings") ?? false;
-                    DebugShipTargetValues = (bool?)CharacterSettingsXml.Element("debugShipTargetValues") ?? (bool?)CommonSettingsXml.Element("debugShipTargetValues") ?? false;
-                    DebugSkillTraining = (bool?)CharacterSettingsXml.Element("debugSkillTraining") ?? (bool?)CommonSettingsXml.Element("debugSkillTraining") ?? false;
-                    DebugStates = (bool?)CharacterSettingsXml.Element("debugStates") ?? (bool?)CommonSettingsXml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
-                    DebugStatistics = (bool?)CharacterSettingsXml.Element("debugStatistics") ?? (bool?)CommonSettingsXml.Element("debugStatistics") ?? false;
-                    DebugStorylineMissions = (bool?)CharacterSettingsXml.Element("debugStorylineMissions") ?? (bool?)CommonSettingsXml.Element("debugStorylineMissions") ?? false;
-                    DebugTargetCombatants = (bool?)CharacterSettingsXml.Element("debugTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugTargetCombatants") ?? false;
-                    DebugTargetWrecks = (bool?)CharacterSettingsXml.Element("debugTargetWrecks") ?? (bool?)CommonSettingsXml.Element("debugTargetWrecks") ?? false;
-                    DebugTraveler = (bool?)CharacterSettingsXml.Element("debugTraveler") ?? (bool?)CommonSettingsXml.Element("debugTraveler") ?? false;
-                    DebugTractorBeams = (bool?)CharacterSettingsXml.Element("debugTractorBeams") ?? (bool?)CommonSettingsXml.Element("debugTractorBeams") ?? false;
-                    DebugUI = (bool?)CharacterSettingsXml.Element("debugUI") ?? (bool?)CommonSettingsXml.Element("debugUI") ?? false;
-                    DebugUnloadLoot = (bool?)CharacterSettingsXml.Element("debugUnloadLoot") ?? (bool?)CommonSettingsXml.Element("debugUnloadLoot") ?? false;
-                    DebugValuedump = (bool?)CharacterSettingsXml.Element("debugValuedump") ?? (bool?)CommonSettingsXml.Element("debugValuedump") ?? false;
-                    DebugWalletBalance = (bool?)CharacterSettingsXml.Element("debugWalletBalance") ?? (bool?)CommonSettingsXml.Element("debugWalletBalance") ?? false;
-                    DebugWatchForActiveWars = (bool?)CharacterSettingsXml.Element("debugWatchForActiveWars") ?? (bool?)CommonSettingsXml.Element("debugWatchForActiveWars") ?? false;
-                    DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
-                    DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
-                    UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
-                    setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
-
-                    CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
-
-                    //
-                    // Misc Settings
-                    //
-                    CharacterMode = (string)CharacterSettingsXml.Element("characterMode") ?? (string)CommonSettingsXml.Element("characterMode") ?? "Combat Missions".ToLower();
-
-                    //other option is "salvage"
-
-                    if (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
-                    {
-                        Settings.Instance.CharacterMode = "Combat Missions".ToLower();
-                    }
-
-                    AutoStart = (bool?)CharacterSettingsXml.Element("autoStart") ?? (bool?)CommonSettingsXml.Element("autoStart") ?? false; // auto Start enabled or disabled by default?
-                    MaxLineConsole = (int?)CharacterSettingsXml.Element("maxLineConsole") ?? (int?)CommonSettingsXml.Element("maxLineConsole") ?? 1000;
-                    // maximum console log lines to show in the GUI
-                    Disable3D = (bool?)CharacterSettingsXml.Element("disable3D") ?? (bool?)CommonSettingsXml.Element("disable3D") ?? false; // Disable3d graphics while in space
-                    RandomDelay = (int?)CharacterSettingsXml.Element("randomDelay") ?? (int?)CommonSettingsXml.Element("randomDelay") ?? 0;
-                    MinimumDelay = (int?)CharacterSettingsXml.Element("minimumDelay") ?? (int?)CommonSettingsXml.Element("minimumDelay") ?? 0;
-
-                    //
-                    // Enable / Disable Major Features that do not have categories of their own below
-                    //
-                    UseFittingManager = (bool?)CharacterSettingsXml.Element("UseFittingManager") ?? (bool?)CommonSettingsXml.Element("UseFittingManager") ?? true;
-                    EnableStorylines = (bool?)CharacterSettingsXml.Element("enableStorylines") ?? (bool?)CommonSettingsXml.Element("enableStorylines") ?? false;
-                    UseLocalWatch = (bool?)CharacterSettingsXml.Element("UseLocalWatch") ?? (bool?)CommonSettingsXml.Element("UseLocalWatch") ?? true;
-                    WatchForActiveWars = (bool?)CharacterSettingsXml.Element("watchForActiveWars") ?? (bool?)CommonSettingsXml.Element("watchForActiveWars") ?? true;
-
-                    FleetSupportSlave = (bool?)CharacterSettingsXml.Element("fleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("fleetSupportSlave") ?? true;
-                    FleetSupportMaster = (bool?)CharacterSettingsXml.Element("fleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("fleetSupportMaster") ?? true;
-                    FleetName = (string)CharacterSettingsXml.Element("fleetName") ?? (string)CommonSettingsXml.Element("fleetName") ?? "Fleet1";
-
-                    //
-                    //CharacterNamesForMasterToInviteToFleet
-                    //
-                    Settings.Instance.CharacterNamesForMasterToInviteToFleet.Clear();
-                    XElement xmlCharacterNamesForMasterToInviteToFleet = CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet") ?? CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet");
-                    if (xmlCharacterNamesForMasterToInviteToFleet != null)
-                    {
-                        Logging.Log("Settings", "Loading CharacterNames For Master To Invite To Fleet", Logging.White);
-                        int i = 1;
-                        foreach (XElement CharacterToInvite in xmlCharacterNamesForMasterToInviteToFleet.Elements("character"))
-                        {
-                            Settings.Instance.CharacterNamesForMasterToInviteToFleet.Add((string)CharacterToInvite);
-                            if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("Settings.LoadFleetList", "[" + i + "] CharacterName [" + (string)CharacterToInvite + "]", Logging.Teal);
-                            i++;
-                        }
-                        if (Settings.Instance.FleetSupportMaster) Logging.Log("Settings", "        CharacterNamesForMasterToInviteToFleet now has [" + CharacterNamesForMasterToInviteToFleet.Count + "] entries", Logging.White);
-                    }
-
-                    //
-                    // Agent Standings and Mission Settings
-                    //
-                    //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-                    //{
-                    MinAgentBlackListStandings = (float?)CharacterSettingsXml.Element("minAgentBlackListStandings") ?? (float?)CommonSettingsXml.Element("minAgentBlackListStandings") ?? (float)6.0;
-                    MinAgentGreyListStandings = (float?)CharacterSettingsXml.Element("minAgentGreyListStandings") ?? (float?)CommonSettingsXml.Element("minAgentGreyListStandings") ?? (float)5.0;
-                    WaitDecline = (bool?)CharacterSettingsXml.Element("waitDecline") ?? (bool?)CommonSettingsXml.Element("waitDecline") ?? false;
-
-                    var relativeMissionsPath = (string)CharacterSettingsXml.Element("missionsPath") ?? (string)CommonSettingsXml.Element("missionsPath");
-                    MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
-                    Logging.Log("Settings", "MissionsPath is: [" + MissionsPath + "]", Logging.White);
-
-                    RequireMissionXML = (bool?)CharacterSettingsXml.Element("requireMissionXML") ?? (bool?)CommonSettingsXml.Element("requireMissionXML") ?? false;
-                    AllowNonStorylineCourierMissionsInLowSec = (bool?)CharacterSettingsXml.Element("LowSecMissions") ?? (bool?)CommonSettingsXml.Element("LowSecMissions") ?? false;
-                    MaterialsForWarOreID = (int?)CharacterSettingsXml.Element("MaterialsForWarOreID") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreID") ?? 20;
-                    MaterialsForWarOreQty = (int?)CharacterSettingsXml.Element("MaterialsForWarOreQty") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreQty") ?? 8000;
-                    KillSentries = (bool?)CharacterSettingsXml.Element("killSentries") ?? (bool?)CommonSettingsXml.Element("killSentries") ?? false;
-                    //}
-
-                    //
-                    // Local Watch Settings - if enabled
-                    //
-                    LocalBadStandingPilotsToTolerate = (int?)CharacterSettingsXml.Element("LocalBadStandingPilotsToTolerate") ?? (int?)CommonSettingsXml.Element("LocalBadStandingPilotsToTolerate") ?? 1;
-                    LocalBadStandingLevelToConsiderBad = (double?)CharacterSettingsXml.Element("LocalBadStandingLevelToConsiderBad") ?? (double?)CommonSettingsXml.Element("LocalBadStandingLevelToConsiderBad") ?? -0.1;
-
-                    //
-                    // Invasion Settings
-                    //
-                    BattleshipInvasionLimit = (int?)CharacterSettingsXml.Element("battleshipInvasionLimit") ?? (int?)CommonSettingsXml.Element("battleshipInvasionLimit") ?? 0;
-
-                    // if this number of battleships lands on grid while in a mission we will enter panic
-                    BattlecruiserInvasionLimit = (int?)CharacterSettingsXml.Element("battlecruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("battlecruiserInvasionLimit") ?? 0;
-
-                    // if this number of battlecruisers lands on grid while in a mission we will enter panic
-                    CruiserInvasionLimit = (int?)CharacterSettingsXml.Element("cruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("cruiserInvasionLimit") ?? 0;
-
-                    // if this number of cruisers lands on grid while in a mission we will enter panic
-                    FrigateInvasionLimit = (int?)CharacterSettingsXml.Element("frigateInvasionLimit") ?? (int?)CommonSettingsXml.Element("frigateInvasionLimit") ?? 0;
-
-                    // if this number of frigates lands on grid while in a mission we will enter panic
-                    InvasionRandomDelay = (int?)CharacterSettingsXml.Element("invasionRandomDelay") ?? (int?)CommonSettingsXml.Element("invasionRandomDelay") ?? 0; // random relay to stay docked
-                    InvasionMinimumDelay = (int?)CharacterSettingsXml.Element("invasionMinimumDelay") ?? (int?)CommonSettingsXml.Element("invasionMinimumDelay") ?? 0;
-
-                    // minimum delay to stay docked
-
-                    //
-                    // Value - Used in calculations
-                    //
-                    IskPerLP = (double?)CharacterSettingsXml.Element("IskPerLP") ?? (double?)CommonSettingsXml.Element("IskPerLP") ?? 600; //used in value calculations
-
-                    //
-                    // Undock settings
-                    //
-                    UndockDelay = (int?)CharacterSettingsXml.Element("undockdelay") ?? (int?)CommonSettingsXml.Element("undockdelay") ?? 10; //Delay when undocking - not in use
-                    UndockPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? "Insta";
-
-                    //Undock bookmark prefix - used by traveler - not in use
-                    BookmarkWarpOut = (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "";
-
-                    //
-                    // Location of the Questor GUI on startup (default is off the screen)
-                    //
-                    //X Questor GUI window position (needs to be changed, default is off screen)
-                    WindowXPosition = (int?)CharacterSettingsXml.Element("windowXPosition") ?? (int?)CommonSettingsXml.Element("windowXPosition") ?? 1;
-
-                    //Y Questor GUI window position (needs to be changed, default is off screen)
-                    WindowYPosition = (int?)CharacterSettingsXml.Element("windowYPosition") ?? (int?)CommonSettingsXml.Element("windowYPosition") ?? 1;
-
-                    //
-                    // Location of the EVE Window on startup (default is to leave the window alone)
-                    //
-                    try
-                    {
-                        //EVE Client window position
-                        EVEWindowXPosition = (int?)CharacterSettingsXml.Element("eveWindowXPosition") ?? (int?)CommonSettingsXml.Element("eveWindowXPosition") ?? 0;
-
-                        //EVE Client window position
-                        EVEWindowYPosition = (int?)CharacterSettingsXml.Element("eveWindowYPosition") ?? (int?)CommonSettingsXml.Element("eveWindowYPosition") ?? 0;
-
-                        //
-                        // Size of the EVE Window on startup (default is to leave the window alone)
-                        // This CAN and WILL distort the proportions of the EVE client if you configure it to do so.
-                        // ISBOXER arguably does this with more elegance...
-                        //
-                        //EVE Client window position
-                        EVEWindowXSize = (int?)CharacterSettingsXml.Element("eveWindowXSize") ?? (int?)CommonSettingsXml.Element("eveWindowXSize") ?? 0;
-
-                        //EVE Client window position
-                        EVEWindowYSize = (int?)CharacterSettingsXml.Element("eveWindowYSize") ?? (int?)CommonSettingsXml.Element("eveWindowYSize") ?? 0;
-                    }
-                    catch
-                    {
-                        Logging.Log("Settings", "Invalid Format for eveWindow Settings - skipping", Logging.Teal);
-                    }
-
-                    try
-                    {
-                        //
-                        // Ship Names
-                        //
-                        CombatShipName = (string)CharacterSettingsXml.Element("combatShipName") ?? (string)CommonSettingsXml.Element("combatShipName") ?? "My frigate of doom";
-                        SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
-                        TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
-                        TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
-                    }
-                    catch (Exception exception)
-                    {
-                        Logging.Log("Settings", "Error Loading Ship Name Settings [" + exception + "]", Logging.Teal);
-                    }
-
-                    try
-                    {
-                        //
-                        // Storage Location for Loot, Ammo, Bookmarks
-                        //
-                        UseHomebookmark = (bool?)CharacterSettingsXml.Element("UseHomebookmark") ?? (bool?)CommonSettingsXml.Element("UseHomebookmark") ?? false;
-                    }
-                    catch (Exception exception)
-                    {
-                        Logging.Log("Settings", "Error Loading UseHomebookmark [" + exception + "]", Logging.Teal);
-                    }
-
-                    try
-                    {
-                        //
-                        // Storage Location for Loot, Ammo, Bookmarks
-                        //
-                        HomeBookmarkName = (string)CharacterSettingsXml.Element("homeBookmarkName") ?? (string)CommonSettingsXml.Element("homeBookmarkName") ?? "myHomeBookmark";
-                        LootHangar = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
-                        if (string.IsNullOrEmpty(Settings.Instance.LootHangar))
-                        {
-                            Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
-                        }
-                        else
-                        {
-                            Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangar + "]", Logging.White);
-                        }
-                        AmmoHangar = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
-                        if (string.IsNullOrEmpty(Settings.Instance.AmmoHangar))
-                        {
-                            Logging.Log("Settings", "AmmoHangar [" + "ItemHangar" + "]", Logging.White);
-                        }
-                        else
-                        {
-                            Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangar + "]", Logging.White);
-                        }
-                        BookmarkHangar = (string)CharacterSettingsXml.Element("bookmarkHangar") ?? (string)CommonSettingsXml.Element("bookmarkHangar");
-                        LootContainer = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
-                        if (LootContainer != null)
-                        {
-                            LootContainer = LootContainer.ToLower();
-                        }
-                        HighTierLootContainer = (string)CharacterSettingsXml.Element("highValueLootContainer") ?? (string)CommonSettingsXml.Element("highValueLootContainer");
-                        if (HighTierLootContainer != null)
-                        {
-                            HighTierLootContainer = HighTierLootContainer.ToLower();
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        Logging.Log("Settings", "Error Loading Hangar Settings [" + exception + "]", Logging.Teal);
-                    }
-
-                    try
-                    {
-                        //
-                        // Loot and Salvage Settings
-                        //
-                        LootEverything = (bool?)CharacterSettingsXml.Element("lootEverything") ?? (bool?)CommonSettingsXml.Element("lootEverything") ?? true;
-                        UseGatesInSalvage = (bool?)CharacterSettingsXml.Element("useGatesInSalvage") ?? (bool?)CommonSettingsXml.Element("useGatesInSalvage") ?? false;
-
-                        // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
-                        CreateSalvageBookmarks = (bool?)CharacterSettingsXml.Element("createSalvageBookmarks") ?? (bool?)CommonSettingsXml.Element("createSalvageBookmarks") ?? false;
-                        CreateSalvageBookmarksIn = (string)CharacterSettingsXml.Element("createSalvageBookmarksIn") ?? (string)CommonSettingsXml.Element("createSalvageBookmarksIn") ?? "Player";
-
-                        //Player or Corp
-                        //other setting is "Corp"
-                        BookmarkPrefix = (string)CharacterSettingsXml.Element("bookmarkPrefix") ?? (string)CommonSettingsXml.Element("bookmarkPrefix") ?? "Salvage:";
-                        SafeSpotBookmarkPrefix = (string)CharacterSettingsXml.Element("safeSpotBookmarkPrefix") ?? (string)CommonSettingsXml.Element("safeSpotBookmarkPrefix") ?? "safespot";
-                        BookmarkFolder = (string)CharacterSettingsXml.Element("bookmarkFolder") ?? (string)CommonSettingsXml.Element("bookmarkFolder") ?? "Salvage:";
-                        TravelToBookmarkPrefix = (string)CharacterSettingsXml.Element("travelToBookmarkPrefix") ?? (string)CommonSettingsXml.Element("travelToBookmarkPrefix") ?? "MeetHere:";
-                        MinimumWreckCount = (int?)CharacterSettingsXml.Element("minimumWreckCount") ?? (int?)CommonSettingsXml.Element("minimumWreckCount") ?? 1;
-                        AfterMissionSalvaging = (bool?)CharacterSettingsXml.Element("afterMissionSalvaging") ?? (bool?)CommonSettingsXml.Element("afterMissionSalvaging") ?? false;
-                        FirstSalvageBookmarksInSystem = (bool?)CharacterSettingsXml.Element("FirstSalvageBookmarksInSystem") ?? (bool?)CommonSettingsXml.Element("FirstSalvageBookmarksInSystem") ?? false;
-                        SalvageMultipleMissionsinOnePass = (bool?)CharacterSettingsXml.Element("salvageMultpleMissionsinOnePass") ?? (bool?)CommonSettingsXml.Element("salvageMultpleMissionsinOnePass") ?? false;
-                        UnloadLootAtStation = (bool?)CharacterSettingsXml.Element("unloadLootAtStation") ?? (bool?)CommonSettingsXml.Element("unloadLootAtStation") ?? false;
-                        ReserveCargoCapacity = (int?)CharacterSettingsXml.Element("reserveCargoCapacity") ?? (int?)CommonSettingsXml.Element("reserveCargoCapacity") ?? 0;
-                        MaximumWreckTargets = (int?)CharacterSettingsXml.Element("maximumWreckTargets") ?? (int?)CommonSettingsXml.Element("maximumWreckTargets") ?? 0;
-                        WreckBlackListSmallWrecks = (bool?)CharacterSettingsXml.Element("WreckBlackListSmallWrecks") ?? (bool?)CommonSettingsXml.Element("WreckBlackListSmallWrecks") ?? false;
-                        WreckBlackListMediumWrecks = (bool?)CharacterSettingsXml.Element("WreckBlackListMediumWrecks") ?? (bool?)CommonSettingsXml.Element("WreckBlackListMediumWrecks") ?? false;
-                        AgeofBookmarksForSalvageBehavior = (int?)CharacterSettingsXml.Element("ageofBookmarksForSalvageBehavior") ?? (int?)CommonSettingsXml.Element("ageofBookmarksForSalvageBehavior") ?? 45;
-                        AgeofSalvageBookmarksToExpire = (int?)CharacterSettingsXml.Element("ageofSalvageBookmarksToExpire") ?? (int?)CommonSettingsXml.Element("ageofSalvageBookmarksToExpire") ?? 120;
-                        LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion = (bool?)CharacterSettingsXml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? (bool?)CommonSettingsXml.Element("lootOnlyWhatYouCanWithoutSlowingDownMissionCompletion") ?? false;
-                        TractorBeamMinimumCapacitor = (int?)CharacterSettingsXml.Element("tractorBeamMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("tractorBeamMinimumCapacitor") ?? 0;
-                        SalvagerMinimumCapacitor = (int?)CharacterSettingsXml.Element("salvagerMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("salvagerMinimumCapacitor") ?? 0;
-                        DoNotDoANYSalvagingOutsideMissionActions = (bool?)CharacterSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? (bool?)CommonSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? false;
-                    }
-                    catch (Exception exception)
-                    {
-                        Logging.Log("Settings", "Error Loading Loot and Salvage Settings [" + exception + "]", Logging.Teal);
-                    }
-
-                    //
-                    // at what memory usage do we need to restart this session?
-                    //
-                    EVEProcessMemoryCeiling = (int?)CharacterSettingsXml.Element("EVEProcessMemoryCeiling") ?? (int?)CommonSettingsXml.Element("EVEProcessMemoryCeiling") ?? 900;
-                    EVEProcessMemoryCeilingLogofforExit = (string)CharacterSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? (string)CommonSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? "exit";
-
-                    CloseQuestorCMDUplinkInnerspaceProfile = (bool?)CharacterSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? (bool?)CommonSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
-                    CloseQuestorCMDUplinkIsboxerCharacterSet = (bool?)CharacterSettingsXml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? (bool?)CommonSettingsXml.Element("CloseQuestorCMDUplinkIsboxerCharacterSet") ?? false;
-                    CloseQuestorAllowRestart = (bool?)CharacterSettingsXml.Element("CloseQuestorAllowRestart") ?? (bool?)CommonSettingsXml.Element("CloseQuestorAllowRestart") ?? true;
-                    CloseQuestorArbitraryOSCmd = (bool?)CharacterSettingsXml.Element("CloseQuestorArbitraryOSCmd") ?? (bool?)CommonSettingsXml.Element("CloseQuestorArbitraryOSCmd") ?? false;
-
-                    //true or false
-                    CloseQuestorOSCmdContents = (string)CharacterSettingsXml.Element("CloseQuestorOSCmdContents") ?? (string)CommonSettingsXml.Element("CloseQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: CloseQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
-
-                    LoginQuestorArbitraryOSCmd = (bool?)CharacterSettingsXml.Element("LoginQuestorArbitraryOSCmd") ?? (bool?)CommonSettingsXml.Element("LoginQuestorArbitraryOSCmd") ?? false;
-
-                    //true or false
-                    LoginQuestorOSCmdContents = (string)CharacterSettingsXml.Element("LoginQuestorOSCmdContents") ?? (string)CommonSettingsXml.Element("LoginQuestorOSCmdContents") ?? "cmd /k (date /t && time /t && echo. && echo. && echo Questor is configured to use the feature: LoginQuestorArbitraryOSCmd && echo But No actual command was specified in your characters settings xml! && pause)";
-                    LoginQuestorLavishScriptCmd = (bool?)CharacterSettingsXml.Element("LoginQuestorLavishScriptCmd") ?? (bool?)CommonSettingsXml.Element("LoginQuestorLavishScriptCmd") ?? false;
-
-                    //true or false
-                    LoginQuestorLavishScriptContents = (string)CharacterSettingsXml.Element("LoginQuestorLavishScriptContents") ?? (string)CommonSettingsXml.Element("LoginQuestorLavishScriptContents") ?? "echo Questor is configured to use the feature: LoginQuestorLavishScriptCmd && echo But No actual command was specified in your characters settings xml! && pause)";
-
-                    MinimizeEveAfterStartingUp = (bool?)CharacterSettingsXml.Element("MinimizeEveAfterStartingUp") ?? (bool?)CommonSettingsXml.Element("MinimizeEveAfterStartingUp") ?? false;
-
-                    //the above setting can be set to any script or commands available on the system. make sure you test it from a command prompt while in your .net programs directory
-
-                    WalletBalanceChangeLogOffDelay = (int?)CharacterSettingsXml.Element("walletbalancechangelogoffdelay") ?? (int?)CommonSettingsXml.Element("walletbalancechangelogoffdelay") ?? 30;
-                    WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
-                    SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
-                    if (UseInnerspace)
-                    {
-                        LavishScriptObject lavishsriptObject = LavishScript.Objects.GetObject("LavishScript");
-                        if (lavishsriptObject == null)
-                        {
-                            InnerSpace.Echo("Testing: object not found");
-                        }
-                        else
-                        {
-                            /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
-                            //var version = lavishsriptObject.GetValue<float>();
-                            // //var TestISVariable = "Game"
-                            // //LavishIsBoxerCharacterSet = LavishsriptObject.
-                            //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
-                        }
-                    }
-
-                    //
-                    // Enable / Disable the different types of logging that are available
-                    //
-                    InnerspaceGeneratedConsoleLog = (bool?)CharacterSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? (bool?)CommonSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? false; // save the innerspace generated console log to file
-                    SaveConsoleLog = (bool?)CharacterSettingsXml.Element("saveLog") ?? (bool?)CommonSettingsXml.Element("saveLog") ?? true; // save the console log to file
-                    ConsoleLogRedacted = (bool?)CharacterSettingsXml.Element("saveLogRedacted") ?? (bool?)CommonSettingsXml.Element("saveLogRedacted") ?? true; // save the console log redacted to file
-                    SessionsLog = (bool?)CharacterSettingsXml.Element("SessionsLog") ?? (bool?)CommonSettingsXml.Element("SessionsLog") ?? true;
-                    DroneStatsLog = (bool?)CharacterSettingsXml.Element("DroneStatsLog") ?? (bool?)CommonSettingsXml.Element("DroneStatsLog") ?? true;
-                    WreckLootStatistics = (bool?)CharacterSettingsXml.Element("WreckLootStatistics") ?? (bool?)CommonSettingsXml.Element("WreckLootStatistics") ?? true;
-                    MissionStats1Log = (bool?)CharacterSettingsXml.Element("MissionStats1Log") ?? (bool?)CommonSettingsXml.Element("MissionStats1Log") ?? true;
-                    MissionStats2Log = (bool?)CharacterSettingsXml.Element("MissionStats2Log") ?? (bool?)CommonSettingsXml.Element("MissionStats2Log") ?? true;
-                    MissionStats3Log = (bool?)CharacterSettingsXml.Element("MissionStats3Log") ?? (bool?)CommonSettingsXml.Element("MissionStats3Log") ?? true;
-                    MissionDungeonIdLog = (bool?)CharacterSettingsXml.Element("MissionDungeonIdLog") ?? (bool?)CommonSettingsXml.Element("MissionDungeonIdLog") ?? true;
-                    PocketStatistics = (bool?)CharacterSettingsXml.Element("PocketStatistics") ?? (bool?)CommonSettingsXml.Element("PocketStatistics") ?? true;
-                    PocketStatsUseIndividualFilesPerPocket = (bool?)CharacterSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? (bool?)CommonSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
-                    PocketObjectStatisticsLog = (bool?)CharacterSettingsXml.Element("PocketObjectStatisticsLog") ?? (bool?)CommonSettingsXml.Element("PocketObjectStatisticsLog") ?? true;
-
-                    //
-                    // Weapon and targeting Settings
-                    //
-                    WeaponGroupId = (int?)CharacterSettingsXml.Element("weaponGroupId") ?? (int?)CommonSettingsXml.Element("weaponGroupId") ?? 0;
-                    DontShootFrigatesWithSiegeorAutoCannons = (bool?)CharacterSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? (bool?)CommonSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
-                    MaximumHighValueTargets = (int?)CharacterSettingsXml.Element("maximumHighValueTargets") ?? (int?)CommonSettingsXml.Element("maximumHighValueTargets") ?? 2;
-                    MaximumLowValueTargets = (int?)CharacterSettingsXml.Element("maximumLowValueTargets") ?? (int?)CommonSettingsXml.Element("maximumLowValueTargets") ?? 2;
-                    DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)CharacterSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? (int?)CommonSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
-                    DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
-                    SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
-
-                    AddDampenersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToPrimaryWeaponsPriorityTargetList") ?? true;
-                    AddECMsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToPrimaryWeaponsPriorityTargetList") ?? true;
-                    AddNeutralizersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToPrimaryWeaponsPriorityTargetList") ?? true;
-                    AddTargetPaintersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToPrimaryWeaponsPriorityTargetList") ?? true;
-                    AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToPrimaryWeaponsPriorityTargetList") ?? true; 
-                    AddWarpScramblersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToPrimaryWeaponsPriorityTargetList") ?? true;
-                    AddWebifiersToPrimaryWeaponsPriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToPrimaryWeaponsPriorityTargetList") ?? true;
-
-                    AddDampenersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addDampenersToDronePriorityTargetList") ?? true;
-                    AddECMsToDroneTargetList = (bool?)CharacterSettingsXml.Element("addECMsToDroneTargetList") ?? (bool?)CommonSettingsXml.Element("addECMsToDroneTargetList") ?? true;
-                    AddNeutralizersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addNeutralizersToDronePriorityTargetList") ?? true;
-                    AddTargetPaintersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTargetPaintersToDronePriorityTargetList") ?? true;
-                    AddTrackingDisruptorsToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addTrackingDisruptorsToDronePriorityTargetList") ?? true;
-                    AddWarpScramblersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWarpScramblersToDronePriorityTargetList") ?? true;
-                    AddWebifiersToDronePriorityTargetList = (bool?)CharacterSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? (bool?)CommonSettingsXml.Element("addWebifiersToDronePriorityTargetList") ?? true;
-
-                    InsideThisRangeIsHardToTrack = (double?)CharacterSettingsXml.Element("insideThisRangeIsHardToTrack") ?? (double?)CommonSettingsXml.Element("insideThisRangeIsHardToTrack") ?? 15000;
-
-                    //
-                    // Script Settings - TypeIDs for the scripts you would like to use in these modules
-                    //
-                    // 29003 Focused Warp Disruption Script   // hictor and infinipoint
-                    //
-                    // 29007 Tracking Speed Disruption Script // tracking disruptor
-                    // 29005 Optimal Range Disruption Script  // tracking disruptor
-                    // 29011 Scan Resolution Script           // sensor booster
-                    // 29009 Targeting Range Script           // sensor booster
-                    // 29015 Targeting Range Dampening Script // sensor dampener
-                    // 29013 Scan Resolution Dampening Script // sensor dampener
-                    // 29001 Tracking Speed Script            // tracking enhancer and tracking computer
-                    // 28999 Optimal Range Script             // tracking enhancer and tracking computer
-
-                    // 3554  Cap Booster 100
-                    // 11283 Cap Booster 150
-                    // 11285 Cap Booster 200
-                    // 263   Cap Booster 25
-                    // 11287 Cap Booster 400
-                    // 264   Cap Booster 50
-                    // 3552  Cap Booster 75
-                    // 11289 Cap Booster 800
-                    // 31982 Navy Cap Booster 100
-                    // 31990 Navy Cap Booster 150
-                    // 31998 Navy Cap Booster 200
-                    // 32006 Navy Cap Booster 400
-                    // 32014 Navy Cap Booster 800
-
-                    TrackingDisruptorScript = (int?)CharacterSettingsXml.Element("trackingDisruptorScript") ?? (int?)CommonSettingsXml.Element("trackingDisruptorScript") ?? (int)TypeID.TrackingSpeedDisruptionScript;
-                    TrackingComputerScript = (int?)CharacterSettingsXml.Element("trackingComputerScript") ?? (int?)CommonSettingsXml.Element("trackingComputerScript") ?? (int)TypeID.TrackingSpeedScript;
-                    TrackingLinkScript = (int?)CharacterSettingsXml.Element("trackingLinkScript") ?? (int?)CommonSettingsXml.Element("trackingLinkScript") ?? (int)TypeID.TrackingSpeedScript;
-                    SensorBoosterScript = (int?)CharacterSettingsXml.Element("sensorBoosterScript") ?? (int?)CommonSettingsXml.Element("sensorBoosterScript") ?? (int)TypeID.TargetingRangeScript;
-                    SensorDampenerScript = (int?)CharacterSettingsXml.Element("sensorDampenerScript") ?? (int?)CommonSettingsXml.Element("sensorDampenerScript") ?? (int)TypeID.TargetingRangeDampeningScript;
-                    AncillaryShieldBoosterScript = (int?)CharacterSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int?)CommonSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int)TypeID.AncillaryShieldBoosterScript;
-                    CapacitorInjectorScript = (int?)CharacterSettingsXml.Element("capacitorInjectorScript") ?? (int?)CommonSettingsXml.Element("capacitorInjectorScript") ?? (int)TypeID.CapacitorInjectorScript;
-                    CapBoosterToLoad = (int?)CharacterSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CommonSettingsXml.Element("capacitorInjectorToLoad") ?? 15;
-
-                    //
-                    // OverLoad Settings (this WILL burn out modules, likely very quickly!
-                    // If you enable the overloading of a slot it is HIGHLY recommended you actually have something overloadable in that slot =/ 
-                    //
-                    OverloadWeapons = (bool?)CharacterSettingsXml.Element("overloadWeapons") ?? (bool?)CommonSettingsXml.Element("overloadWeapons") ?? false;
-
-                    //
-                    // Speed and Movement Settings
-                    //
-                    AvoidBumpingThings = (bool?)CharacterSettingsXml.Element("avoidBumpingThings") ?? (bool?)CommonSettingsXml.Element("avoidBumpingThings") ?? true;
-                    SpeedTank = (bool?)CharacterSettingsXml.Element("speedTank") ?? (bool?)CommonSettingsXml.Element("speedTank") ?? false;
-                    OrbitDistance = (int?)CharacterSettingsXml.Element("orbitDistance") ?? (int?)CommonSettingsXml.Element("orbitDistance") ?? 0;
-                    OrbitStructure = (bool?)CharacterSettingsXml.Element("orbitStructure") ?? (bool?)CommonSettingsXml.Element("orbitStructure") ?? false;
-                    OptimalRange = (int?)CharacterSettingsXml.Element("optimalRange") ?? (int?)CommonSettingsXml.Element("optimalRange") ?? 0;
-                    NosDistance = (int?)CharacterSettingsXml.Element("NosDistance") ?? (int?)CommonSettingsXml.Element("NosDistance") ?? 38000;
-                    MinimumPropulsionModuleDistance = (int?)CharacterSettingsXml.Element("minimumPropulsionModuleDistance") ?? (int?)CommonSettingsXml.Element("minimumPropulsionModuleDistance") ?? 5000;
-                    MinimumPropulsionModuleCapacitor = (int?)CharacterSettingsXml.Element("minimumPropulsionModuleCapacitor") ?? (int?)CommonSettingsXml.Element("minimumPropulsionModuleCapacitor") ?? 0;
-
-                    //
-                    // Tanking Settings
-                    //
-                    ActivateRepairModules = (int?)CharacterSettingsXml.Element("activateRepairModules") ?? (int?)CommonSettingsXml.Element("activateRepairModules") ?? 65;
-                    DeactivateRepairModules = (int?)CharacterSettingsXml.Element("deactivateRepairModules") ?? (int?)CommonSettingsXml.Element("deactivateRepairModules") ?? 95;
-                    InjectCapPerc = (int?)CharacterSettingsXml.Element("injectcapperc") ?? (int?)CommonSettingsXml.Element("injectcapperc") ?? 60;
-
-                    //
-                    // Panic Settings
-                    //
-                    MinimumShieldPct = (int?)CharacterSettingsXml.Element("minimumShieldPct") ?? (int?)CommonSettingsXml.Element("minimumShieldPct") ?? 100;
-                    MinimumArmorPct = (int?)CharacterSettingsXml.Element("minimumArmorPct") ?? (int?)CommonSettingsXml.Element("minimumArmorPct") ?? 100;
-                    MinimumCapacitorPct = (int?)CharacterSettingsXml.Element("minimumCapacitorPct") ?? (int?)CommonSettingsXml.Element("minimumCapacitorPct") ?? 50;
-                    SafeShieldPct = (int?)CharacterSettingsXml.Element("safeShieldPct") ?? (int?)CommonSettingsXml.Element("safeShieldPct") ?? 0;
-                    SafeArmorPct = (int?)CharacterSettingsXml.Element("safeArmorPct") ?? (int?)CommonSettingsXml.Element("safeArmorPct") ?? 0;
-                    SafeCapacitorPct = (int?)CharacterSettingsXml.Element("safeCapacitorPct") ?? (int?)CommonSettingsXml.Element("safeCapacitorPct") ?? 0;
-                    UseStationRepair = (bool?)CharacterSettingsXml.Element("useStationRepair") ?? (bool?)CommonSettingsXml.Element("useStationRepair") ?? true;
-
-                    //
-                    // Drone Settings
-                    //
-                    UseDrones = (bool?)CharacterSettingsXml.Element("useDrones") ?? (bool?)CommonSettingsXml.Element("useDrones") ?? true;
-                    DroneTypeId = (int?)CharacterSettingsXml.Element("droneTypeId") ?? (int?)CommonSettingsXml.Element("droneTypeId") ?? 0;
-                    DroneControlRange = (int?)CharacterSettingsXml.Element("droneControlRange") ?? (int?)CommonSettingsXml.Element("droneControlRange") ?? 0;
-                    DroneMinimumShieldPct = (int?)CharacterSettingsXml.Element("droneMinimumShieldPct") ?? (int?)CommonSettingsXml.Element("droneMinimumShieldPct") ?? 50;
-                    DroneMinimumArmorPct = (int?)CharacterSettingsXml.Element("droneMinimumArmorPct") ?? (int?)CommonSettingsXml.Element("droneMinimumArmorPct") ?? 50;
-                    DroneMinimumCapacitorPct = (int?)CharacterSettingsXml.Element("droneMinimumCapacitorPct") ?? (int?)CommonSettingsXml.Element("droneMinimumCapacitorPct") ?? 0;
-                    DroneRecallShieldPct = (int?)CharacterSettingsXml.Element("droneRecallShieldPct") ?? (int?)CommonSettingsXml.Element("droneRecallShieldPct") ?? 0;
-                    DroneRecallArmorPct = (int?)CharacterSettingsXml.Element("droneRecallArmorPct") ?? (int?)CommonSettingsXml.Element("droneRecallArmorPct") ?? 0;
-                    DroneRecallCapacitorPct = (int?)CharacterSettingsXml.Element("droneRecallCapacitorPct") ?? (int?)CommonSettingsXml.Element("droneRecallCapacitorPct") ?? 0;
-                    LongRangeDroneRecallShieldPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallShieldPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallShieldPct") ?? 0;
-                    LongRangeDroneRecallArmorPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallArmorPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallArmorPct") ?? 0;
-                    LongRangeDroneRecallCapacitorPct = (int?)CharacterSettingsXml.Element("longRangeDroneRecallCapacitorPct") ?? (int?)CommonSettingsXml.Element("longRangeDroneRecallCapacitorPct") ?? 0;
-                    DronesKillHighValueTargets = (bool?)CharacterSettingsXml.Element("dronesKillHighValueTargets") ?? (bool?)CommonSettingsXml.Element("dronesKillHighValueTargets") ?? false;
-                    BelowThisHealthLevelRemoveFromDroneBay = (int?)CharacterSettingsXml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? (int?)CommonSettingsXml.Element("belowThisHealthLevelRemoveFromDroneBay") ?? 150;
-
-                    //
-                    // Email Settings
-                    //
-                    EmailSupport = (bool?)CharacterSettingsXml.Element("emailSupport") ?? (bool?)CommonSettingsXml.Element("emailSupport") ?? false;
-                    EmailAddress = (string)CharacterSettingsXml.Element("emailAddress") ?? (string)CommonSettingsXml.Element("emailAddress") ?? "";
-                    EmailPassword = (string)CharacterSettingsXml.Element("emailPassword") ?? (string)CommonSettingsXml.Element("emailPassword") ?? "";
-                    EmailSMTPServer = (string)CharacterSettingsXml.Element("emailSMTPServer") ?? (string)CommonSettingsXml.Element("emailSMTPServer") ?? "";
-                    EmailSMTPPort = (int?)CharacterSettingsXml.Element("emailSMTPPort") ?? (int?)CommonSettingsXml.Element("emailSMTPPort") ?? 25;
-                    EmailAddressToSendAlerts = (string)CharacterSettingsXml.Element("emailAddressToSendAlerts") ?? (string)CommonSettingsXml.Element("emailAddressToSendAlerts") ?? "";
-                    EmailEnableSSL = (bool?)CharacterSettingsXml.Element("emailEnableSSL") ?? (bool?)CommonSettingsXml.Element("emailEnableSSL") ?? false;
-
-                    //
-                    // Skill Training Settings
-                    //
-                    ThisToonShouldBeTrainingSkills = (bool?)CharacterSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? (bool?)CommonSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? true;
-                    //This needs to be in your "Innerspace\Scripts\" Directory
-                    SkillTrainerScript = (string)CharacterSettingsXml.Element("skillTrainerScript") ?? (string)CommonSettingsXml.Element("skillTrainerScript") ?? "skilltrainer.iss";
-
-                    //
-                    // User Defined LavishScript Scripts that tie to buttons in the UI
-                    //
-                    UserDefinedLavishScriptScript1 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript1") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript1") ?? "";
-                    UserDefinedLavishScriptScript1Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript1Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript1Description") ?? "";
-                    UserDefinedLavishScriptScript2 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript2") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript2") ?? "";
-                    UserDefinedLavishScriptScript2Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript2Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript2Description") ?? "";
-                    UserDefinedLavishScriptScript3 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3") ?? "";
-                    UserDefinedLavishScriptScript3Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript3Description") ?? "";
-                    UserDefinedLavishScriptScript4 = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4") ?? "";
-                    UserDefinedLavishScriptScript4Description = (string)CharacterSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? (string)CommonSettingsXml.Element("userDefinedLavishScriptScript4Description") ?? "";
-
-                    //
-                    // agent standing requirements
-                    //
-                    StandingsNeededToAccessLevel1Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel1Agent") ?? -11;
-                    StandingsNeededToAccessLevel2Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel2Agent") ?? 1;
-                    StandingsNeededToAccessLevel3Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel3Agent") ?? 3;
-                    StandingsNeededToAccessLevel4Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel4Agent") ?? 5;
-                    StandingsNeededToAccessLevel5Agent = (float?)CharacterSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? (float?)CommonSettingsXml.Element("standingsNeededToAccessLevel5Agent") ?? 7;
-
-                    //
-                    // number of days of console logs to keep (anything older will be deleted on startup)
-                    //
-                    ConsoleLogDaysOfLogsToKeep = (int?)CharacterSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? (int?)CommonSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
-
-                    //
-                    // Ammo settings
-                    //
-                    Ammo.Clear();
-                    XElement ammoTypes = CharacterSettingsXml.Element("ammoTypes") ?? CommonSettingsXml.Element("ammoTypes");
-
-                    if (ammoTypes != null)
-                    {
-                        foreach (XElement ammo in ammoTypes.Elements("ammoType"))
-                        {
-                            Ammo.Add(new Ammo(ammo));
-                        }
-                    }
-
-                    MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 0;
-
-                    //
-                    // List of Agents we should use
-                    //
-                    //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-                    //{
-                    AgentsList.Clear();
-                    XElement agentList = CharacterSettingsXml.Element("agentsList") ?? CommonSettingsXml.Element("agentsList");
-
-                    if (agentList != null)
-                    {
-                        if (agentList.HasElements)
-                        {
-                            int i = 0;
-                            foreach (XElement agent in agentList.Elements("agentList"))
-                            {
-                                AgentsList.Add(new AgentsList(agent));
-                                i++;
-                            }
-                            if (i >= 2)
-                            {
-                                MultiAgentSupport = true;
-                                Logging.Log("Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
-                            }
-                            else
-                            {
-                                MultiAgentSupport = false;
-                                Logging.Log("Settings", "Found only one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
-                            }
-                        }
-                        else
-                        {
-                            Logging.Log("Settings", "agentList exists in your characters config but no agents were listed.", Logging.Red);
-                        }
-                    }
-                    else
-                        Logging.Log("Settings", "Error! No Agents List specified.", Logging.Red);
-
-                    //}
-
-                    //
-                    // Fittings chosen based on the faction of the mission
-                    //
-                    FactionFitting.Clear();
-                    XElement factionFittings = CharacterSettingsXml.Element("factionfittings") ?? CommonSettingsXml.Element("factionfittings");
-                    if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
-                    {
-                        if (factionFittings != null)
-                        {
-                            foreach (XElement factionfitting in factionFittings.Elements("factionfitting"))
-                            {
-                                FactionFitting.Add(new FactionFitting(factionfitting));
-                            }
-
-                            if (FactionFitting.Exists(m => m.Faction.ToLower() == "default"))
-                            {
-                                DefaultFitting = FactionFitting.Find(m => m.Faction.ToLower() == "default");
-                                if (string.IsNullOrEmpty(DefaultFitting.Fitting))
-                                {
-                                    UseFittingManager = false;
-                                    Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
-                                }
-
-                                Logging.Log("Settings", "Faction Fittings defined. Fitting manager will be used when appropriate.", Logging.White);
-                            }
-                            else
-                            {
-                                UseFittingManager = false;
-                                Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
-                            }
-                        }
-                        else
-                        {
-                            UseFittingManager = false;
-                            Logging.Log("Settings", "No faction fittings specified.  Fitting manager will not be used.", Logging.Orange);
-                        }
-                    }
-
-                    //
-                    // Fitting based on the name of the mission
-                    //
-                    MissionFitting.Clear();
-                    XElement xmlElementMissionFittingsSection = CharacterSettingsXml.Element("missionfittings") ?? CommonSettingsXml.Element("missionfittings");
-                    if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
-                    {
-                        if (xmlElementMissionFittingsSection != null)
-                        {
-                            Logging.Log("Settings", "Loading Mission Fittings", Logging.White);
-                            int i = 1;
-                            foreach (XElement missionfitting in xmlElementMissionFittingsSection.Elements("missionfitting"))
-                            {
-                                MissionFitting.Add(new MissionFitting(missionfitting));
-                                if (Settings.Instance.DebugMissionFittings) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
-                                i++;
-                            }
-                            Logging.Log("Settings", "        Mission Fittings now has [" + MissionFitting.Count + "] entries", Logging.White);
-                        }
-                    }
-
-
-                    //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-                    //{
-                    //
-                    // Mission Blacklist
-                    //
-                    MissionBlacklist.Clear();
-                    XElement xmlElementBlackListSection = CharacterSettingsXml.Element("blacklist") ?? CommonSettingsXml.Element("blacklist");
-                    if (xmlElementBlackListSection != null)
-                    {
-                        Logging.Log("Settings", "Loading Mission Blacklist", Logging.White);
-                        int i = 1;
-                        foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
-                        {
-                            MissionBlacklist.Add((string)BlacklistedMission);
-                            if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
-                            i++;
-                        }
-                        Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
-                    }
-                    //}
-
-                    //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
-                    //{
-                    //
-                    // Mission Greylist
-                    //
-                    MissionGreylist.Clear();
-                    XElement xmlElementGreyListSection = CharacterSettingsXml.Element("greylist") ?? CommonSettingsXml.Element("greylist");
-
-                    if (xmlElementGreyListSection != null)
-                    {
-                        Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
-                        int i = 1;
-                        foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
-                        {
-                            MissionGreylist.Add((string)GreylistedMission);
-                            if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
-                            i++;
-                        }
-                        Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
-                    }
-                    //}
-
-                    //
-                    // Faction Blacklist
-                    //
-                    FactionBlacklist.Clear();
-                    XElement factionblacklist = CharacterSettingsXml.Element("factionblacklist") ?? CommonSettingsXml.Element("factionblacklist");
-                    if (factionblacklist != null)
-                    {
-                        Logging.Log("Settings", "Loading Faction Blacklist", Logging.White);
-                        foreach (XElement faction in factionblacklist.Elements("faction"))
-                        {
-                            Logging.Log("Settings", "        Missions from the faction [" + (string)faction + "] will be declined", Logging.White);
-                            FactionBlacklist.Add((string)faction);
-                        }
-
-                        Logging.Log("Settings", "        Faction Blacklist now has [" + FactionBlacklist.Count + "] entries", Logging.White);
-                    }
+                    ReadSettingsFromXML(CharacterSettingsXml);
                 }
             }
 
@@ -1934,7 +2069,7 @@ namespace Questor.Modules.Lookup
 
         public int RandomNumber(int min, int max)
         {
-            var random = new Random();
+            Random random = new Random();
             return random.Next(min, max);
         }
     }

@@ -31,3 +31,4 @@ output/*.dll
 output/*.exe
 Questor.opensdf
 Questor.sdf
+CompileSettings.xml

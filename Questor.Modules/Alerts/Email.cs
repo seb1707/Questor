@@ -40,7 +40,7 @@ namespace Questor.Modules.Alerts
                 }
                 else
                 {
-                    long mySolarSystemlocation = Cache.Instance.DirectEve.ActiveShip.LocationId;
+                    long mySolarSystemlocation = Cache.Instance.ActiveShip.LocationId;
                     _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(mySolarSystemlocation);
                 }
                 
@@ -95,7 +95,7 @@ namespace Questor.Modules.Alerts
                 {
                     try
                     {
-                        var smtpClient = new SmtpClient(Settings.Instance.EmailSMTPServer, Settings.Instance.EmailSMTPPort) //587
+                        SmtpClient smtpClient = new SmtpClient(Settings.Instance.EmailSMTPServer, Settings.Instance.EmailSMTPPort) //587
                         {
                             Credentials = new NetworkCredential(Settings.Instance.EmailAddress, Settings.Instance.EmailPassword),
                             EnableSsl = _useSSL

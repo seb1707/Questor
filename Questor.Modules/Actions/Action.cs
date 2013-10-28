@@ -58,10 +58,10 @@ namespace Questor.Modules.Actions
 
         public override string ToString()
         {
-            var output = State.ToString();
+            string output = State.ToString();
 
-            foreach (var key in Parameters.Keys)
-                foreach (var value in Parameters[key])
+            foreach (string key in Parameters.Keys)
+                foreach (string value in Parameters[key])
                     output += string.Format(" [{0}: {1}]", key, value);
 
             return output;

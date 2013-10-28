@@ -8,23 +8,24 @@ namespace Questor.Modules.BackgroundTasks
     using System.Linq;
     using DirectEve;
 
-    public class NavigateOnGrid
+    public static class NavigateOnGrid
     {
         public static DateTime AvoidBumpingThingsTimeStamp = Cache.Instance.StartTime;
         public static int SafeDistanceFromStructureMultiplier = 1;
         public static bool AvoidBumpingThingsWarningSent = false;
+        public static DateTime NextNavigateIntoRange = DateTime.UtcNow;
 
         public static void AvoidBumpingThings(EntityCache thisBigObject, string module)
         {
             if (Settings.Instance.AvoidBumpingThings)
             {
                 //if It has not been at least 60 seconds since we last session changed do not do anything
-                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                     return;
                 //
                 // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
                 //
-                if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
+                if (Cache.Instance.ClosestStargate.Distance < 9000 || Cache.Instance.ClosestStation.Distance < 11000)
                 {
                     //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
                     if (thisBigObject != null)
@@ -139,7 +140,7 @@ namespace Questor.Modules.BackgroundTasks
                                 if (DateTime.UtcNow > Cache.Instance.NextAlign)
                                 {
                                     Cache.Instance.Star.AlignTo();
-                                    Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][ActiveShip.Entity.Mode:[" + Cache.Instance.DirectEve.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                                    Logging.Log(module, "Aligning to the Star so we might possibly hit [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][ActiveShip.Entity.Mode:[" + Cache.Instance.ActiveShip.Entity.Mode + "]", Logging.Teal);
                                     return;
                                 }
                             }
@@ -151,7 +152,7 @@ namespace Questor.Modules.BackgroundTasks
                     Logging.Log(module, "Out of range. ignoring orbit around structure.", Logging.Teal);
                     target.Orbit(Cache.Instance.OrbitDistance);
                     Logging.Log(module, "Initiating Orbit [" + target.Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                    Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(90);
+                    Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     return;
                 }
                 return;
@@ -162,6 +163,11 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (!Cache.Instance.InSpace || (Cache.Instance.InSpace && Cache.Instance.InWarp) || !moveMyShip)
                 return;
+
+            if (DateTime.UtcNow < NextNavigateIntoRange || Settings.Instance.DebugDisableNavigateIntoRange)
+                return;
+
+            NextNavigateIntoRange = DateTime.UtcNow.AddSeconds(5);
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);
 
@@ -314,7 +320,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject", "We are not approaching nor orbiting", Logging.Teal);
                             bool orbitStructure = Settings.Instance.OrbitStructure;
-                            var structure = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.LargeColidableStructure || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
+                            EntityCache structure = Cache.Instance.Entities.Where(i => i.IsLargeCollidable || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
 
                             if (orbitStructure && structure != null)
                             {

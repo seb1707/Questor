@@ -21,6 +21,8 @@
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorFlag = true;
+        private bool FoundDuelInvitation = false;
+        private DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
 
         public static void BeginClosingQuestor()
         {
@@ -33,7 +35,7 @@
         public static bool CloseQuestor(string Reason)
         {
             // 30 seconds + 1 to 60 seconds + 1 to 60 seconds before restarting (this should make each instance a bit more spread out over 2 min)
-            int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMaximum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
+            int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMinimum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
 
             // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
             // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 
@@ -380,7 +382,7 @@
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100) || Settings.Instance.DebugDisableCleanup) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
             _lastCleanupProcessState = DateTime.UtcNow;
@@ -588,6 +590,8 @@
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
+                                sayOk |= window.Html.Contains("You have already selected a character for this session.");
+                                sayOk |= window.Html.Contains("If you decline or fail a mission from an agent");
 
                                 //
                                 // Not Enough Shelf Space
@@ -691,14 +695,31 @@
                                 continue;
                             }
                         }
+
                         if (Cache.Instance.InSpace)
                         {
+                            if (FoundDuelInvitation && window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                if (DateTime.UtcNow > FoundDuelInvitationTime.AddSeconds(Cache.Instance.RandomNumber(4, 25)))
+                                {
+                                    //window.AnswerModal("yes");
+                                    //window.Close();
+                                    FoundDuelInvitation = true;
+                                }
+                            }
+                            
+                            if (window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                FoundDuelInvitation = true;
+                                FoundDuelInvitationTime = DateTime.UtcNow;
+                            }
+                            
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&
-                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
+                                   (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip &&
                                     _droneBayClosingAttempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.UtcNow;
@@ -714,11 +735,12 @@
                             }
                         }
                     }
+
                     _States.CurrentCleanupState = CleanupState.CleanupTasks;
                     break;
 
                 case CleanupState.CleanupTasks:
-                    if (Settings.Instance.EVEMemoryManager)
+                    if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
                         {

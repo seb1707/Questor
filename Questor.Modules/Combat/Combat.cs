@@ -373,7 +373,7 @@ namespace Questor.Modules.Combat
         private static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
             // We need the cargo bay open for both reload actions
-            if (!Cache.Instance.OpenCargoHold("Combat: ReloadAmmo")) return false;
+            //if (!Cache.Instance.OpenCargoHold("Combat: ReloadAmmo")) return false;
 
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
         }

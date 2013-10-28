@@ -1504,7 +1504,7 @@ namespace Questor.Modules.Activities
                 bool done = items.Count == 0;
                 if (!done)
                 {
-                    if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
+                    //if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
                     if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
                         if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity))))

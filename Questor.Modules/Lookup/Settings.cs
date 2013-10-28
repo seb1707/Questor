@@ -123,6 +123,7 @@ namespace Questor.Modules.Lookup
         public bool DebugInSpace { get; set; }
         public bool DebugInStation { get; set; }
         public bool DebugInWarp { get; set; }
+        public bool DebugIsReadyToShoot { get; set; }
         public bool DebugItemHangar { get; set; }
         public bool DebugKillTargets { get; set; }
         public bool DebugKillAction { get; set; }
@@ -138,6 +139,7 @@ namespace Questor.Modules.Lookup
         public bool DebugOverLoadWeapons { get; set; }
         public bool DebugPerformance { get; set; }
         public bool DebugPotentialCombatTargets { get; set; }
+        public bool DebugPreferredPrimaryWeaponTarget { get; set; }
         public bool DebugQuestorManager { get; set; }
         public bool DebugReloadAll { get; set; }
         public bool DebugReloadorChangeAmmo { get; set; }
@@ -759,6 +761,7 @@ namespace Questor.Modules.Lookup
             DebugInSpace = (bool?)CharacterSettingsXml.Element("debugInSpace") ?? (bool?)CommonSettingsXml.Element("debugInSpace") ?? false;
             DebugInStation = (bool?)CharacterSettingsXml.Element("debugInStation") ?? (bool?)CommonSettingsXml.Element("debugInStation") ?? false;
             DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;
+            DebugIsReadyToShoot = (bool?)CharacterSettingsXml.Element("debugIsReadyToShoot") ?? (bool?)CommonSettingsXml.Element("debugIsReadyToShoot") ?? false;
             DebugItemHangar = (bool?)CharacterSettingsXml.Element("debugItemHangar") ?? (bool?)CommonSettingsXml.Element("debugItemHangar") ?? false;
             DebugKillTargets = (bool?)CharacterSettingsXml.Element("debugKillTargets") ?? (bool?)CommonSettingsXml.Element("debugKillTargets") ?? false;
             DebugKillAction = (bool?)CharacterSettingsXml.Element("debugKillAction") ?? (bool?)CommonSettingsXml.Element("debugKillAction") ?? false;
@@ -774,6 +777,7 @@ namespace Questor.Modules.Lookup
             DebugOverLoadWeapons = (bool?)CharacterSettingsXml.Element("debugOverLoadWeapons") ?? (bool?)CommonSettingsXml.Element("debugOverLoadWeapons") ?? false;
             DebugPerformance = (bool?)CharacterSettingsXml.Element("debugPerformance") ?? (bool?)CommonSettingsXml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
             DebugPotentialCombatTargets = (bool?)CharacterSettingsXml.Element("debugPotentialCombatTargets") ?? (bool?)CommonSettingsXml.Element("debugPotentialCombatTargets") ?? false;
+            DebugPreferredPrimaryWeaponTarget = (bool?)CharacterSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? (bool?)CommonSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? false;
             DebugQuestorManager = (bool?)CharacterSettingsXml.Element("debugQuestorManager") ?? (bool?)CommonSettingsXml.Element("debugQuestorManager") ?? false;
             DebugReloadAll = (bool?)CharacterSettingsXml.Element("debugReloadAll") ?? (bool?)CommonSettingsXml.Element("debugReloadAll") ?? false;
             DebugReloadorChangeAmmo = (bool?)CharacterSettingsXml.Element("debugReloadOrChangeAmmo") ?? (bool?)CommonSettingsXml.Element("debugReloadOrChangeAmmo") ?? false;

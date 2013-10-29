@@ -60,7 +60,7 @@ namespace Questor.Modules.Activities
             // Open the item hangar (should still be open)
             if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
 
-            //if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
+            if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
             string missionItem;
 
             switch (Cache.Instance.Mission.Name)

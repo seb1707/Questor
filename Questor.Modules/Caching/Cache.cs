@@ -3454,11 +3454,13 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
-            IEnumerable<EntityCache> BestDroneTargets = _potentialTargets ?? PotentialCombatTargets;
+            IEnumerable<EntityCache> BestDroneTargets = _potentialTargets ?? PotentialCombatTargets.ToList();
             //long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
             long? preferredTargetId = Cache.Instance.PreferredDroneTargetID ?? -1;
 
-            BestDroneTargets = BestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+            if (BestDroneTargets.Any())
+            {
+                BestDroneTargets = BestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
                                                           .Where(t => t.Distance < Settings.Instance.DroneControlRange)
                                                           .OrderByDescending(t => t.isPreferredDroneTarget)
                                                           .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
@@ -3471,7 +3473,35 @@ namespace Questor.Modules.Caching
                                                           .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                           .ThenBy(t => t.Nearest5kDistance);
 
-            Cache.Instance.PreferredDroneTarget = BestDroneTargets.FirstOrDefault();
+                
+                int BestDroneTargetsCount = BestDroneTargets.Count();
+                if (BestDroneTargets.FirstOrDefault() != null)
+                {
+                    Cache.Instance.PreferredDroneTarget = BestDroneTargets.FirstOrDefault();
+                    if (Cache.Instance.PreferredDroneTarget != null)
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "]", Logging.Debug);
+                    }
+                    else if (Cache.Instance.PreferredDroneTarget == null)
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredDroneTarget [ null ] huh?", Logging.Debug);
+                    }
+                }
+
+                if (Settings.Instance.DebugGetBestTarget)
+                {
+                    if (BestDroneTargets.Any())
+                    {
+                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(PreferredPrimaryWeaponTargetID) + "] BestPrimaryWeaponTargets Total [" + BestDroneTargetsCount + "]", Logging.Teal);
+                        int i = 0;
+                        foreach (EntityCache bestDroneTarget in BestDroneTargets)
+                        {
+                            i++;
+                            Logging.Log("GetBestTarget (Drones):", "[" + i + "] BestPrimaryWeaponTarget [" + bestDroneTarget.Name + "][" + Math.Round(bestDroneTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestDroneTarget.Id) + "] IsPWPT [" + bestDroneTarget.IsPrimaryWeaponPriorityTarget + "] IsLockedTarget [" + bestDroneTarget.IsTarget + "] IsTargetedBy [" + bestDroneTarget.IsTargetedBy + "] IsEwarTarget [" + bestDroneTarget.IsEwarTarget + "] IsWarpScramblingMe [" + bestDroneTarget.IsWarpScramblingMe + "]", Logging.Teal);
+                        }
+                    }
+                }
+            }
 
             return BestDroneTargets;
         }

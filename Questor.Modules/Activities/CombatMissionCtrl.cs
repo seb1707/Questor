@@ -707,6 +707,9 @@ namespace Questor.Modules.Activities
 
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
+            Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
+            Cache.Instance.__GetBestDroneTargets(Cache.Instance.MaxRange, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));  
+
             if (closest != null)
             {
                 if (stopWhenTargeted)

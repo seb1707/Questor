@@ -1934,7 +1934,7 @@ namespace Questor.Modules.Caching
                 //
                 if (_primaryWeaponPriorityEntities == null)
                 {
-                    if (_primaryWeaponPriorityTargets.Any())
+                    if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                     {
                         _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity).ToList();
                         return _primaryWeaponPriorityEntities;

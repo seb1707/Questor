@@ -24,11 +24,13 @@ namespace Questor.Modules.Caching
     {
         private readonly DirectEntity _directEntity;
         public static int EntityCacheInstances = 0;
+        private DateTime ThisEntityCacheCreated = DateTime.UtcNow;
 
         public EntityCache(DirectEntity entity)
         {
             _directEntity = entity;
             Interlocked.Increment(ref EntityCacheInstances);
+            ThisEntityCacheCreated = DateTime.UtcNow;
         }
 
         ~EntityCache()
@@ -190,6 +192,10 @@ namespace Questor.Modules.Caching
 
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated )
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
                         return _directEntity.Name ?? string.Empty;
                     }
 
@@ -212,6 +218,10 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
                         return _directEntity.Distance;
                     }
 
@@ -3115,10 +3125,17 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid)
+                if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now && Cache.Instance.InSpace)
                 {
-                    _directEntity.Jump();
-                }    
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        _directEntity.Jump();
+                    }                        
+                }
             }
             catch (Exception exception)
             {
@@ -3132,6 +3149,10 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextActivateAction)
                 {
+                    if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
                     _directEntity.Activate();
                     Cache.Instance.LastInWarp = DateTime.UtcNow;
                     Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
@@ -3151,6 +3172,10 @@ namespace Questor.Modules.Caching
 
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
+                    if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
                     Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     _directEntity.Approach();
                 }    
@@ -3169,6 +3194,10 @@ namespace Questor.Modules.Caching
 
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
+                    if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
                     Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                     _directEntity.KeepAtRange(range);
                 }    
@@ -3187,6 +3216,10 @@ namespace Questor.Modules.Caching
 
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
+                    if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
                     _directEntity.Orbit(range);
                 }    
@@ -3201,11 +3234,18 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now && Cache.Instance.InSpace)
                 {
-                    Cache.Instance.LastInWarp = DateTime.UtcNow;
-                    Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                    _directEntity.WarpTo();
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                    {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        Cache.Instance.LastInWarp = DateTime.UtcNow;
+                        Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                        _directEntity.WarpTo();
+                    }
                 }
             }
             catch (Exception exception)
@@ -3220,6 +3260,10 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextAlign)
                 {
+                    if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
                     Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
                     _directEntity.AlignTo();
                 }    
@@ -3234,12 +3278,19 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now && Cache.Instance.InSpace)
                 {
-                    Cache.Instance.LastInWarp = DateTime.UtcNow;
-                    Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                    Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
-                    _directEntity.WarpToAndDock();
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                    {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        Cache.Instance.LastInWarp = DateTime.UtcNow;
+                        Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                        Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                        _directEntity.WarpToAndDock();
+                    }
                 }
             }
             catch (Exception exception)
@@ -3252,10 +3303,17 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.Now && Cache.Instance.InSpace)
                 {
-                    _directEntity.Dock();
-                    Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                    {
+                        if (DateTime.Now.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        _directEntity.Dock();
+                        Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                    }
                 }
             }
             catch (Exception exception)

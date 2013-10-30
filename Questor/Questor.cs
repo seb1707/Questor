@@ -258,7 +258,7 @@ namespace Questor
 
         public void RunOnceInStationAfterStartup()
         {
-            if (!_runOnceInStationAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15) && Cache.Instance.InStation && DateTime.Now > Cache.Instance.LastInSpace.AddSeconds(10))
+            if (!_runOnceInStationAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15) && Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10))
             {
                 if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
                 {
@@ -331,7 +331,7 @@ namespace Questor
                         "] StopTime [ " + Cache.Instance.StopTime +
                         "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.White);
 
-            if (DateTime.Now.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
+            if (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
             {
                 // quit questor
                 Logging.Log("Questor", "Maximum runtime exceeded.  Quitting...", Logging.White);
@@ -509,7 +509,7 @@ namespace Questor
                 }
             }
 
-            if (DateTime.Now < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (DateTime.UtcNow < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
                 Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
             }

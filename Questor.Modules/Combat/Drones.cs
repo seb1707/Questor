@@ -162,7 +162,7 @@ namespace Questor.Modules.Combat
                         {
                             DroneToShoot.MakeActiveTarget();
                             Logging.Log("Drones", "[" + DroneToShoot.Name + "][ID: " + Cache.Instance.MaskedID(DroneToShoot.Id) + "]IsActiveTarget[" + DroneToShoot.IsActiveTarget + "][" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away] has been made the ActiveTarget (needed for drones)", Logging.Magenta);
-                            Cache.Instance.NextMakeActiveTargetAction = DateTime.Now.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
+                            Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
                         }
                     }
                 }

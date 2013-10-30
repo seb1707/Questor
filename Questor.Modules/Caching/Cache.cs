@@ -892,6 +892,8 @@ namespace Questor.Modules.Caching
         public DateTime NextAlign { get; set; }
         public DateTime NextUndockAction { get; set; }
         public DateTime NextDockAction { get; set; }
+        public DateTime NextJumpAction { get; set; }
+        public DateTime NextWarpAction { get; set; }
         public DateTime NextDroneRecall { get; set; }
         public DateTime NextStartupAction { get; set; }
         public DateTime NextRepairItemsAction { get; set; }
@@ -1801,7 +1803,7 @@ namespace Questor.Modules.Caching
         {
             get { return _jumpBridges ?? (_jumpBridges = Entities.Where(e => e.GroupId == (int)Group.JumpBridge).ToList()); }
         }
-
+        
         public IEnumerable<EntityCache> Stargates
         {
             get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList()); }
@@ -5911,7 +5913,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenOreHold(string module)
         {
-            if (DateTime.Now < Cache.Instance.NextOpenHangarAction) return false;
+            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction) return false;
 
             if (!Cache.Instance.OpenInventoryWindow("OpenOreHold")) return false;
 
@@ -5924,7 +5926,7 @@ namespace Questor.Modules.Caching
             {
                 // No, command it to open
                 Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.Now).TotalSeconds, 0) + "sec]", Logging.White);
+                Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 long OreHoldID = 1;  //no idea how to get this value atm. this is not yet correct.
                 if (!Cache.Instance.PrimaryInventoryWindow.SelectTreeEntry("Ore Hold", OreHoldID - 1))
                 {

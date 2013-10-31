@@ -1890,6 +1890,9 @@ namespace Questor.Modules.Combat
                             else
                             {
                                 Logging.Log("Combat.Killtargets", "Unable to find the PreferredPrimaryWeaponTarget!!! [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "]",Logging.Debug);
+                                Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                Cache.Instance.PreferredPrimaryWeaponTargetID = null;
+                                Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
                             }
                         }
 

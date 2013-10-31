@@ -2164,6 +2164,8 @@ namespace Questor.Modules.Caching
 
         public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
 
+        public DateTime WehaveMoved = DateTime.UtcNow;
+
         public bool CloseQuestorCMDLogoff; //false;
 
         public bool CloseQuestorCMDExitGame = true;

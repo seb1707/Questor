@@ -763,10 +763,15 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.AddSeconds(-2) > Cache.Instance.LastInSpace) return;
+            if (DateTime.UtcNow.AddSeconds(-2) > Cache.Instance.LastInSpace)
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "it was more than 2 seconds ago since we thought we were in space", Logging.White);
+                return;
+            }
 
             if (!Cache.Instance.InSpace)
             {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are not in space (yet?)", Logging.White);
                 _lastSessionChange = DateTime.UtcNow;
                 return;
             }
@@ -774,6 +779,7 @@ namespace Questor.Modules.BackgroundTasks
             // What? No ship entity?
             if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
             {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "no ship entity, or we are in a pod...", Logging.White);
                 _lastSessionChange = DateTime.UtcNow;
                 return;
             }
@@ -788,19 +794,32 @@ namespace Questor.Modules.BackgroundTasks
             // There is no better defense then being cloaked ;)
             if (Cache.Instance.ActiveShip.Entity.IsCloaked)
             {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are cloaked... no defense needed.", Logging.White);
                 _lastCloaked = DateTime.UtcNow;
                 return;
             }
 
             if (DateTime.UtcNow.Subtract(_lastCloaked).TotalSeconds < 2)
             {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are cloaked.... waiting.", Logging.White);
                 return;
             }
 
-
-            // Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow
-            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
+            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(30))
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we havent moved yet after jumping or undocking... waiting.", Logging.White);
+                //
+                // we reset this datetime stamp to -7 days when we jump, and set it to DateTime.UtcNow when we move (to deactivate jump cloak!)
+                // once we have moved (warp, orbit, dock, etc) this should be false and before that it will be true
+                //
                 return;
+            }
+
+            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow)", Logging.White);
+                return;
+            }
 
             ActivateRepairModules();
             ActivateOnce();

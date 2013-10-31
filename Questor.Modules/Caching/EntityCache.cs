@@ -3135,6 +3135,8 @@ namespace Questor.Modules.Caching
                             {
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
+
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
                             Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
                             _directEntity.Jump();
                         }
@@ -3256,6 +3258,7 @@ namespace Questor.Modules.Caching
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.LastInWarp = DateTime.UtcNow;
                             Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             _directEntity.WarpTo();
@@ -3281,6 +3284,8 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
+
+                        Cache.Instance.WehaveMoved = DateTime.UtcNow;
                         Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
                         _directEntity.AlignTo();
                     }    
@@ -3306,6 +3311,8 @@ namespace Questor.Modules.Caching
                             {
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
+
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.LastInWarp = DateTime.UtcNow;
                             Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
@@ -3334,8 +3341,11 @@ namespace Questor.Modules.Caching
                             {
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
-                            _directEntity.Dock();
+
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            _directEntity.Dock();
+                            
                         }
                     }    
                 }

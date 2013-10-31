@@ -805,7 +805,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(30))
+            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we havent moved yet after jumping or undocking... waiting.", Logging.White);
                 //

@@ -3277,8 +3277,8 @@ namespace Questor.Modules.Caching
                     int numofCharacters = ID.ToString().Length;
                     if (numofCharacters >= 5)
                     {
-                        string maskedID = ID.ToString().Substring(numofCharacters - 5);
-                        maskedID = "[truncatedID]" + maskedID;
+                        string maskedID = ID.ToString().Substring(numofCharacters - 4);
+                        maskedID = "[MaskedID]" + maskedID;
                         return maskedID;
                     }    
                 }
@@ -3410,15 +3410,16 @@ namespace Questor.Modules.Caching
             if (BestPrimaryWeaponTargets.Any())
             {
                 BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                      .OrderByDescending(t => t.isPreferredPrimaryWeaponTarget)
-                                                      .ThenByDescending(t => !t.IsFrigate && !t.IsNPCFrigate)                      // Weapons should fire big targets first
+                                                      .OrderByDescending(t => t.IsInOptimalRange)
+                                                      .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget && t.IsInOptimalRange)
+                                                      .ThenByDescending(t => t.IsCorrectSizeForMyWeapons)                          // Weapons should fire big targets first
                                                       .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                      .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget)
                                                       .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
                                                       .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
                                                       .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
                                                       .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
                                                       .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
-                                                      .ThenByDescending(t => t.IsInOptimalRange)
                                                       .ThenBy(t => t.Nearest5kDistance);
             }
             
@@ -3447,7 +3448,7 @@ namespace Questor.Modules.Caching
                         foreach (EntityCache bestPrimaryWeaponTarget in BestPrimaryWeaponTargets)
                         {
                             i++;
-                            Logging.Log("GetBestTarget (Weapons):", "[" + i + "] BestPrimaryWeaponTarget [" + bestPrimaryWeaponTarget.Name + "][" + Math.Round(bestPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestPrimaryWeaponTarget.Id) + "] IsPWPT [" + bestPrimaryWeaponTarget.IsPrimaryWeaponPriorityTarget + "] IsLockedTarget [" + bestPrimaryWeaponTarget.IsTarget + "] IsTargetedBy [" + bestPrimaryWeaponTarget.IsTargetedBy + "] IsEwarTarget [" + bestPrimaryWeaponTarget.IsEwarTarget + "] IsWarpScramblingMe [" + bestPrimaryWeaponTarget.IsWarpScramblingMe + "]", Logging.Teal);
+                            Logging.Log("GetBestTarget (Weapons):", "[" + i + "] BestPrimaryWeaponTarget [" + bestPrimaryWeaponTarget.Name + "][" + Math.Round(bestPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestPrimaryWeaponTarget.Id) + "] IsInOptimal [" + bestPrimaryWeaponTarget.IsInOptimalRange + "] isCorrectSize [" + bestPrimaryWeaponTarget.IsCorrectSizeForMyWeapons + "] isPPWPT [" + bestPrimaryWeaponTarget.isPreferredPrimaryWeaponTarget + "] IsPWPT [" + bestPrimaryWeaponTarget.IsPrimaryWeaponPriorityTarget + "] IsLockedTarget [" + bestPrimaryWeaponTarget.IsTarget + "] IsTargetedBy [" + bestPrimaryWeaponTarget.IsTargetedBy + "] IsEwarTarget [" + bestPrimaryWeaponTarget.IsEwarTarget + "] IsWarpScramblingMe [" + bestPrimaryWeaponTarget.IsWarpScramblingMe + "]", Logging.Teal);
                         }
                     }
                 }

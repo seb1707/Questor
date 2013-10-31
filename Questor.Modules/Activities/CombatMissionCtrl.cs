@@ -413,8 +413,9 @@ namespace Questor.Modules.Activities
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
                 EntityCache ClosestPotentialCombatTarget = null;
 
+                
                 Cache.Instance.__GetBestWeaponTargets(DistanceToClear, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
-                Cache.Instance.__GetBestDroneTargets(DistanceToClear, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
+                if (Cache.Instance.UseDrones) Cache.Instance.__GetBestDroneTargets(DistanceToClear, Cache.Instance.PotentialCombatTargets.Where(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)));
                 //Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
                 //Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 

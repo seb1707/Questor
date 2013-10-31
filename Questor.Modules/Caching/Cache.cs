@@ -1460,7 +1460,7 @@ namespace Questor.Modules.Caching
                                                         && !e.IsIgnored
                                                         && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
                                                         && e.Distance < (int)Distances.OnGridWithMe
-                                                        && (e.IsNpcByGroupID) //|| e.IsNpc)
+                                                        && (e.IsNpcByGroupID || e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC

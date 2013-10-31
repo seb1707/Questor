@@ -36,6 +36,7 @@ namespace Questor.Modules.BackgroundTasks
         }
 
         private DateTime _lastSessionChange = Cache.Instance.StartTime;
+        private DateTime _lastCloaked = DateTime.UtcNow;
 
         private DateTime _lastPulse = DateTime.UtcNow;
         private int _trackingLinkScriptAttempts;
@@ -762,6 +763,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
+            if (DateTime.UtcNow.AddSeconds(-2) > Cache.Instance.LastInSpace) return;
+
             if (!Cache.Instance.InSpace)
             {
                 _lastSessionChange = DateTime.UtcNow;
@@ -784,7 +787,16 @@ namespace Questor.Modules.BackgroundTasks
 
             // There is no better defense then being cloaked ;)
             if (Cache.Instance.ActiveShip.Entity.IsCloaked)
+            {
+                _lastCloaked = DateTime.UtcNow;
                 return;
+            }
+
+            if (DateTime.UtcNow.Subtract(_lastCloaked).TotalSeconds < 2)
+            {
+                return;
+            }
+
 
             // Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow
             if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())

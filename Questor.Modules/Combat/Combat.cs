@@ -1014,8 +1014,7 @@ namespace Questor.Modules.Combat
 
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
-            //maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
-
+            
             #region Debugging for listing possible targets
             if (Settings.Instance.DebugTargetCombatants)
             {
@@ -1123,6 +1122,10 @@ namespace Questor.Modules.Combat
                 {
                     primaryWeaponTargetsToTargetCount = primaryWeaponTargetsToTarget.Count();
                 }
+                else
+                {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
+                }
 
                 IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe)
                                                                     .Where(e => primaryWeaponTargetsToTarget.All(wt => wt.Id != e.Id))
@@ -1132,6 +1135,10 @@ namespace Questor.Modules.Combat
                 if (droneTargetsToTarget.Any())
                 {
                     droneTargetsToTargetCount = droneTargetsToTarget.Count();
+                }
+                else
+                {
+                    //if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
                 }
 
                 IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)).ToList();

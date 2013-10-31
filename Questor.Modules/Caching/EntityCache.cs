@@ -389,6 +389,48 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsCorrectSizeForMyWeapons
+        {
+            get
+            {
+                try
+                {
+                    if (Cache.Instance.MyShipEntity.IsFrigate)
+                    {
+                        if (IsFrigate)
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (Cache.Instance.MyShipEntity.IsCruiser)
+                    {
+                        if (IsCruiser)
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (Cache.Instance.MyShipEntity.IsBattlecruiser || Cache.Instance.MyShipEntity.IsBattleship)
+                    {
+                        if (IsBattleship || IsBattlecruiser)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                }
+
+                return false;
+            }
+            
+        }
+
         public bool isPreferredPrimaryWeaponTarget
         {
             get

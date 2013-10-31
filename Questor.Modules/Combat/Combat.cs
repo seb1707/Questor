@@ -1114,9 +1114,7 @@ namespace Questor.Modules.Combat
             #region Targeting using priority
             if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
             {
-                IEnumerable<EntityCache> primaryWeaponTargetsToTarget = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe)
-                                                                .OrderByDescending(e => Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == e.Id)
-                                                                .Take(maxHighValueTargets).ToList();
+                IEnumerable<EntityCache> primaryWeaponTargetsToTarget = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe).Take(maxHighValueTargets).ToList();
                 int primaryWeaponTargetsToTargetCount = 0;
                 if (primaryWeaponTargetsToTarget.Any())
                 {
@@ -1127,10 +1125,7 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
                 }
 
-                IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe)
-                                                                    .Where(e => primaryWeaponTargetsToTarget.All(wt => wt.Id != e.Id))
-                                                                    .OrderByDescending(e => Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Id == e.Id)
-                                                                    .Take(maxLowValueTargets).ToList();
+                IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe).Take(maxLowValueTargets).ToList();
                 int droneTargetsToTargetCount = 0;
                 if (droneTargetsToTarget.Any())
                 {

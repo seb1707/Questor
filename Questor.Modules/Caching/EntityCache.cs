@@ -78,6 +78,8 @@ namespace Questor.Modules.Caching
             return false;
         }
 
+        private int? _groupID;
+
         public int GroupId
         {
             get
@@ -86,7 +88,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.GroupId;
+                        if (_groupID == null)
+                        {
+                            _groupID = _directEntity.GroupId;
+                        }
+
+                        return _groupID ?? _directEntity.GroupId;
                     }
 
                     return 0;
@@ -98,6 +105,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private int? _categoryId;
 
         public int CategoryId
         {
@@ -107,7 +116,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.CategoryId;
+                        if (_categoryId == null)
+                        {
+                            _categoryId = _directEntity.CategoryId;
+                        }
+
+                        return _categoryId ?? _directEntity.CategoryId;
                     }
 
                     return 0;
@@ -119,6 +133,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private long? _id;
 
         public long Id
         {
@@ -128,7 +144,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.Id;
+                        if (_id == null)
+                        {
+                            _id = _directEntity.Id;
+                        }
+
+                        return _id ?? _directEntity.Id;
                     }
 
                     return 0;
@@ -140,6 +161,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private int? _TypeId;
 
         public int TypeId
         {
@@ -149,7 +172,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.TypeId;
+                        if (_TypeId == null)
+                        {
+                            _TypeId = _directEntity.TypeId;
+                        }
+
+                        return _TypeId ?? _directEntity.TypeId;
                     }
 
                     return 0;
@@ -161,6 +189,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private long? _followId;
 
         public long FollowId
         {
@@ -170,7 +200,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.FollowId;
+                        if (_followId == null)
+                        {
+                            _followId = _directEntity.FollowId;
+                        }
+
+                        return _followId ?? _directEntity.FollowId;
                     }
 
                     return 0;
@@ -182,6 +217,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private string _name;
 
         public string Name
         {
@@ -194,14 +231,20 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
-                        return _directEntity.Name ?? string.Empty;
+
+                        if (_name == null)
+                        {
+                            _name = _directEntity.Name;
+                        }
+
+                        return _name ?? _directEntity.Name ?? string.Empty;
                     }
 
-                    return string.Empty;    
+                    return string.Empty;
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                     return string.Empty;
@@ -209,6 +252,8 @@ namespace Questor.Modules.Caching
 
             }
         }
+
+        private double? _distance;
 
         public double Distance
         {
@@ -222,7 +267,12 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
-                        return _directEntity.Distance;
+                        if (_distance == null)
+                        {
+                            _distance = _directEntity.Distance;
+                        }
+
+                        return _distance ?? _directEntity.Distance;
                     }
 
                     return 0;
@@ -235,7 +285,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private double? _Nearest5kDistance;
+        private double? _nearest5kDistance;
 
         public double Nearest5kDistance
         {
@@ -245,12 +295,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                        if (_nearest5kDistance == null)
                         {
-                            _Nearest5kDistance = Math.Round((_directEntity.Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                            if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                            {
+                                _nearest5kDistance = Math.Round((_directEntity.Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                            }
                         }
 
-                        return _Nearest5kDistance ?? _directEntity.Distance;
+                        return _nearest5kDistance ?? _directEntity.Distance;
                     }
 
                     return 0;
@@ -262,6 +315,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private double? _shieldPct;
 
         public double ShieldPct
         {
@@ -271,7 +326,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.ShieldPct;
+                        if (_shieldPct == null)
+                        {
+                            _shieldPct = _directEntity.ShieldPct;
+                        }
+
+                        return _shieldPct ?? _directEntity.ShieldPct;
                     }
 
                     return 0;
@@ -283,6 +343,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private double? _armorPct;
 
         public double ArmorPct
         {
@@ -292,7 +354,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.ArmorPct;
+                        if (_armorPct == null)
+                        {
+                            _armorPct = _directEntity.ArmorPct;
+                        }
+
+                        return _armorPct ?? _directEntity.ArmorPct;
                     }
 
                     return 0;
@@ -304,6 +371,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private double? _structurePct;
 
         public double StructurePct
         {
@@ -313,7 +382,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.StructurePct;
+                        if (_structurePct == null)
+                        {
+                            _structurePct = _directEntity.StructurePct;
+                        }
+
+                        return _structurePct ?? _directEntity.StructurePct;
                     }
 
                     return 0;
@@ -325,6 +399,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _isNpc;
 
         public bool IsNpc
         {
@@ -334,7 +410,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsNpc;
+                        if (_isNpc == null)
+                        {
+                            _isNpc = _directEntity.IsNpc;
+                        }
+
+                        return _isNpc ?? _directEntity.IsNpc;
+
                     }
 
                     return false;
@@ -346,6 +428,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private double? _velocity;
 
         public double Velocity
         {
@@ -355,7 +439,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.Velocity;
+                        if (_velocity == null)
+                        {
+                            _velocity = _directEntity.Velocity;
+                        }
+
+                        return _velocity ?? _directEntity.Velocity;
                     }
 
                     return 0;
@@ -367,6 +456,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _isTarget;
 
         public bool IsTarget
         {
@@ -376,7 +467,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsTarget;
+                        if (_isTarget == null)
+                        {
+                            if (!_directEntity.HasExploded && Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                            {
+                                _isTarget = _directEntity.IsTarget;
+                            }
+                        }
+
+                        return _isTarget ?? _directEntity.IsTarget;
                     }
 
                     return false;
@@ -389,37 +488,47 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isCorrectSizeForMyWeapons;
+
         public bool IsCorrectSizeForMyWeapons
         {
             get
             {
                 try
                 {
-                    if (Cache.Instance.MyShipEntity.IsFrigate)
+                    if (_isCorrectSizeForMyWeapons == null)
                     {
-                        if (IsFrigate)
+                        if (Cache.Instance.MyShipEntity.IsFrigate)
                         {
-                            return true;
+                            if (IsFrigate)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
                         }
+
+                        if (Cache.Instance.MyShipEntity.IsCruiser)
+                        {
+                            if (IsCruiser)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
+                        }
+
+                        if (Cache.Instance.MyShipEntity.IsBattlecruiser || Cache.Instance.MyShipEntity.IsBattleship)
+                        {
+                            if (IsBattleship || IsBattlecruiser)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
+                        }
+
+                        return false;
                     }
 
-                    if (Cache.Instance.MyShipEntity.IsCruiser)
-                    {
-                        if (IsCruiser)
-                        {
-                            return true;
-                        }
-                    }
-
-                    if (Cache.Instance.MyShipEntity.IsBattlecruiser || Cache.Instance.MyShipEntity.IsBattleship)
-                    {
-                        if (IsBattleship || IsBattlecruiser)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
+                    return _isCorrectSizeForMyWeapons ?? false;
                 }
                 catch (Exception exception)
                 {
@@ -428,8 +537,10 @@ namespace Questor.Modules.Caching
 
                 return false;
             }
-            
+
         }
+
+        private bool? _isPreferredPrimaryWeaponTarget;
 
         public bool isPreferredPrimaryWeaponTarget
         {
@@ -439,12 +550,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.PreferredPrimaryWeaponTargetID != null && Cache.Instance.PreferredPrimaryWeaponTargetID == _directEntity.Id)
+                        if (_isPreferredPrimaryWeaponTarget == null)
                         {
-                            return true;
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == _directEntity.Id)
+                            {
+                                _isPreferredPrimaryWeaponTarget = true;
+                                return _isPreferredPrimaryWeaponTarget ?? true;
+                            }
+
+                            _isPreferredPrimaryWeaponTarget = false;
+                            return _isPreferredPrimaryWeaponTarget ?? false;
                         }
 
-                        return false;
+                        return _isPreferredPrimaryWeaponTarget ?? false;
                     }
 
                     return false;
@@ -456,6 +574,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _isPrimaryWeaponKillPriority;
 
         public bool IsPrimaryWeaponKillPriority
         {
@@ -465,12 +585,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                        if (_isPrimaryWeaponKillPriority == null)
                         {
-                            return true;
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                            {
+                                _isPrimaryWeaponKillPriority = true;
+                            }
                         }
 
-                        return false;
+                        return _isPrimaryWeaponKillPriority ?? false;
                     }
 
                     return false;
@@ -482,6 +605,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _isPreferredDroneTarget;
 
         public bool isPreferredDroneTarget
         {
@@ -491,12 +616,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.PreferredDroneTargetID != null && Cache.Instance.PreferredDroneTargetID == _directEntity.Id)
+                        if (_isPreferredDroneTarget == null)
                         {
-                            return true;
+                            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Id == _directEntity.Id)
+                            {
+                                _isPreferredDroneTarget = true;
+                                return _isPreferredDroneTarget ?? true;
+                            }
+
+                            _isPreferredDroneTarget = false;
+                            return _isPreferredDroneTarget ?? true;
                         }
 
-                        return false;
+                        return _isPreferredDroneTarget ?? false;
                     }
 
                     return false;
@@ -508,6 +640,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _IsDroneKillPriority;
 
         public bool IsDroneKillPriority
         {
@@ -517,12 +651,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                        if (_IsDroneKillPriority == null)
                         {
-                            return true;
+                            if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                            {
+                                _IsDroneKillPriority = true;
+                            }
                         }
 
-                        return false;
+                        return _IsDroneKillPriority ?? false;
                     }
 
                     return false;
@@ -534,6 +671,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _IsTooCloseTooFastTooSmallToHit;
 
         public bool IsTooCloseTooFastTooSmallToHit
         {
@@ -543,28 +682,29 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (IsNPCBattleship || IsNPCBattlecruiser)
+                        if (_IsTooCloseTooFastTooSmallToHit == null)
                         {
-                            return false;
-                        }
-
-                        if (IsNPCFrigate || IsFrigate)
-                        {
-                            if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
+                            if (IsNPCFrigate || IsFrigate)
                             {
-                                if (_directEntity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                    && _directEntity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
                                 {
-                                    return true;
+                                    if (_directEntity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                                     && _directEntity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                                    {
+                                        _IsTooCloseTooFastTooSmallToHit = true;
+                                        return _IsTooCloseTooFastTooSmallToHit ?? true;
+                                    }
+
+                                    _IsTooCloseTooFastTooSmallToHit = false;
+                                    return _IsTooCloseTooFastTooSmallToHit ?? false;
                                 }
 
-                                return false;
+                                _IsTooCloseTooFastTooSmallToHit = false;
+                                return _IsTooCloseTooFastTooSmallToHit ?? false;
                             }
-
-                            return false;
                         }
 
-                        return false;
+                        return _IsTooCloseTooFastTooSmallToHit ?? false;
                     }
 
                     return false;
@@ -577,6 +717,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _IsReadyToShoot;
+
         public bool IsReadyToShoot
         {
             get
@@ -585,25 +727,28 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (!HasExploded && IsTarget && !IsIgnored)
+                        if (_IsReadyToShoot == null)
                         {
-                            if (_directEntity.Distance < Cache.Instance.MaxRange)
+                            if (!HasExploded && IsTarget && !IsIgnored)
                             {
-                                if (Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                                if (_directEntity.Distance < Cache.Instance.MaxRange)
                                 {
-                                    return true;
+                                    if (Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                                    {
+                                        _IsReadyToShoot = true;
+                                        return _IsReadyToShoot ?? true;
+                                    }
+
+                                    _IsReadyToShoot = false;
+                                    return _IsReadyToShoot ?? false;
                                 }
 
-                                if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] Unable to find ID in the Entity List", Logging.Debug);
-                                return false;
+                                _IsReadyToShoot = false;
+                                return _IsReadyToShoot ?? false;
                             }
-
-                            if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] Distance [" + Math.Round(Distance) + "] is not less than MaxRange [" + Cache.Instance.MaxRange + "]", Logging.Debug);
-                            return false;
                         }
 
-                        if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "Name [" + Name + "] HasExploded [" + HasExploded + "] IsTarget [" + IsTarget + "] IsIgnored [" + IsIgnored + "]", Logging.Debug);
-                        return false;
+                        return _IsReadyToShoot ?? false;
                     }
 
                     if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "_directEntity is null or invalid", Logging.Debug);
@@ -617,6 +762,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _IsReadyToTarget;
+
         public bool IsReadyToTarget
         {
             get
@@ -625,13 +772,16 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-
-                        if (!HasExploded && !IsTarget && !IsTargeting)
+                        if (_IsReadyToTarget == null)
                         {
-                            return true;
+                            if (!HasExploded && !IsTarget && !IsTargeting)
+                            {
+                                _IsReadyToTarget = true;
+                                return _IsReadyToTarget ?? true;
+                            }
                         }
 
-                        return false;
+                        return _IsReadyToTarget ?? false;
                     }
 
                     return false;
@@ -643,6 +793,8 @@ namespace Questor.Modules.Caching
                 }
             }
         }
+
+        private bool? _isHigherPriorityPresent;
 
         public bool IsHigherPriorityPresent
         {
@@ -652,54 +804,66 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
+                        if (_isHigherPriorityPresent == null)
                         {
-                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
                             {
-                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
                                 {
-                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
-
-                                    if (!Cache.Instance.PrimaryWeaponPriorityEntities.All(pt => pt.PrimaryWeaponPriorityLevel < _currentPrimaryWeaponPriority && pt.Distance < Cache.Instance.MaxRange))
+                                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
                                     {
-                                        return true;
+                                        PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
+
+                                        if (!Cache.Instance.PrimaryWeaponPriorityEntities.All(pt => pt.PrimaryWeaponPriorityLevel < _currentPrimaryWeaponPriority && pt.Distance < Cache.Instance.MaxRange))
+                                        {
+                                            _isHigherPriorityPresent = true;
+                                            return _isHigherPriorityPresent ?? true;
+                                        }
+
+                                        _isHigherPriorityPresent = false;
+                                        return _isHigherPriorityPresent ?? false;
                                     }
 
-                                    return false;
-                                }
-
-                                if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(e => e.Distance < Cache.Instance.MaxRange))
-                                {
-                                    return true;
-                                }
-
-                                return false;
-                            }
-
-                            if (Cache.Instance.DronePriorityTargets.Any())
-                            {
-                                if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
-                                {
-                                    DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
-
-                                    if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Settings.Instance.DroneControlRange))
+                                    if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(e => e.Distance < Cache.Instance.MaxRange))
                                     {
-                                        return true;
+                                        _isHigherPriorityPresent = true;
+                                        return _isHigherPriorityPresent ?? true;
                                     }
 
-                                    return false;
+                                    _isHigherPriorityPresent = false;
+                                    return _isHigherPriorityPresent ?? false;
                                 }
 
-                                if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Settings.Instance.DroneControlRange))
+                                if (Cache.Instance.DronePriorityTargets.Any())
                                 {
-                                    return true;
+                                    if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                    {
+                                        DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
+
+                                        if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Settings.Instance.DroneControlRange))
+                                        {
+                                            return true;
+                                        }
+
+                                        return false;
+                                    }
+
+                                    if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Settings.Instance.DroneControlRange))
+                                    {
+                                        _isHigherPriorityPresent = true;
+                                        return _isHigherPriorityPresent ?? true;
+                                    }
+
+                                    _isHigherPriorityPresent = false;
+                                    return _isHigherPriorityPresent ?? false;
                                 }
 
-                                return false;
+                                _isHigherPriorityPresent = false;
+                                return _isHigherPriorityPresent ?? false;
                             }
-
-                            return false;
                         }
+
+                        return _isHigherPriorityPresent ?? false;
                     }
 
                     return false;
@@ -712,75 +876,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool IsLowerPriorityPresent
-        {
-            get
-            {
-                try
-                {
-                    if (_directEntity != null && _directEntity.IsValid)
-                    {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
-                        {
-                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
-                            {
-                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
-                                {
-                                    PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriority).FirstOrDefault();
-
-                                    if (!Cache.Instance.PrimaryWeaponPriorityTargets.All(pt => pt.PrimaryWeaponPriority > _currentPrimaryWeaponPriority && pt.Entity.Distance < Cache.Instance.MaxRange))
-                                    {
-                                        return true;
-                                    }
-
-                                    return false;
-                                }
-
-                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Distance < Cache.Instance.MaxRange))
-                                {
-                                    return true;
-                                }
-
-                                return false;
-                            }
-
-                            if (Cache.Instance.DronePriorityTargets.Any())
-                            {
-                                if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
-                                {
-                                    DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityTargets.Where(t => t.EntityID == _directEntity.Id).Select(pt => pt.DronePriority).FirstOrDefault();
-
-                                    if (!Cache.Instance.DronePriorityTargets.All(pt => pt.DronePriority > _currentEntityDronePriority && pt.Entity.Distance < Settings.Instance.DroneControlRange))
-                                    {
-                                        return true;
-                                    }
-
-                                    return false;
-                                }
-
-                                if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Distance < Settings.Instance.DroneControlRange))
-                                {
-                                    return true;
-                                }
-
-                                return false;
-                            }
-
-                            return false;
-                        }
-
-                        return false;
-                    }
-
-                    return false;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
-                    return false;
-                }
-            }
-        }
+        private bool? _isActiveTarget;
 
         public bool IsActiveTarget
         {
@@ -790,12 +886,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (_directEntity.IsActiveTarget)
+                        if (_isActiveTarget == null)
                         {
-                            return true;
+                            if (_directEntity.IsActiveTarget)
+                            {
+                                _isActiveTarget = true;
+                                return _isActiveTarget ?? true;
+                            }
+
+                            _isActiveTarget = false;
+                            return _isActiveTarget ?? false;
                         }
 
-                        return false;
+                        return _isActiveTarget ?? false;
                     }
 
                     return false;
@@ -808,6 +911,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isInOptimalRange;
+
         public bool IsInOptimalRange
         {
             get
@@ -816,58 +921,65 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-
-                        if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0)
+                        if (_isInOptimalRange == null)
                         {
-                            if (Settings.Instance.OptimalRange == 0)
+                            if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0)
                             {
-                                Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
-                            }
-                        }
-
-                        if (Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
-                        {
-                            double optimal = 0;
-
-                            if (Cache.Instance.OptimalRange != 0)
-                            {
-                                optimal = Cache.Instance.OptimalRange;
-                            }
-                            else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them isnt != 0, that is the idea, if its 0 we sure as hell dont want to use it as the optimal
-                            {
-                                optimal = Settings.Instance.OptimalRange;
-                            }
-
-                            if (optimal > Cache.Instance.ActiveShip.MaxTargetRange)
-                            {
-                                optimal = Cache.Instance.ActiveShip.MaxTargetRange - 500;
-                            }
-
-                            if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //Lasers, Projectile, and Hybrids
-                            {
-                                if (Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
+                                if (Settings.Instance.OptimalRange == 0)
                                 {
-                                    if (Distance < (optimal * 1.5) && Distance < Cache.Instance.ActiveShip.MaxTargetRange)
+                                    Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
+                                }
+                            }
+
+                            if (Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                            {
+                                double optimal = 0;
+
+                                if (Cache.Instance.OptimalRange != 0)
+                                {
+                                    optimal = Cache.Instance.OptimalRange;
+                                }
+                                else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them isnt != 0, that is the idea, if its 0 we sure as hell dont want to use it as the optimal
+                                {
+                                    optimal = Settings.Instance.OptimalRange;
+                                }
+
+                                if (optimal > Cache.Instance.ActiveShip.MaxTargetRange)
+                                {
+                                    optimal = Cache.Instance.ActiveShip.MaxTargetRange - 500;
+                                }
+
+                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //Lasers, Projectile, and Hybrids
+                                {
+                                    if (Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
                                     {
-                                        return true;
+                                        if (Distance < (optimal * 1.5) && Distance < Cache.Instance.ActiveShip.MaxTargetRange)
+                                        {
+                                            _isInOptimalRange = true;
+                                            return _isInOptimalRange ?? true;
+                                        }
                                     }
                                 }
-                            }
-                            else //missile boats - use max range
-                            {
-                                optimal = Cache.Instance.MaxRange;
-                                if (Distance < optimal)
+                                else //missile boats - use max range
                                 {
-                                    return true;
+                                    optimal = Cache.Instance.MaxRange;
+                                    if (Distance < optimal)
+                                    {
+                                        _isInOptimalRange = true;
+                                        return _isInOptimalRange ?? true;
+                                    }
                                 }
+
+                                _isInOptimalRange = false;
+                                return _isInOptimalRange ?? false;
                             }
 
-                            return false;
+                            // If you have no optimal you have to assume the entity is within Optimal... (like missiles)
+                            _isInOptimalRange = true;
+                            return _isInOptimalRange ?? true;
                         }
 
-                        // If you have no optimal you have to assume the entity is within Optimal... (like missiles)
-                        return true;
-
+                        return _isInOptimalRange ?? false;
                     }
 
                     return false;
@@ -892,7 +1004,7 @@ namespace Questor.Modules.Caching
                         {
                             return true;
                         }
-                        
+
                         if (!Cache.Instance.Targets.Any())
                         {
                             return true;
@@ -941,7 +1053,6 @@ namespace Questor.Modules.Caching
                 }
             }
         }
-
 
         public bool IsDronePriorityTarget
         {
@@ -1097,6 +1208,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isTargeting;
+
         public bool IsTargeting
         {
             get
@@ -1105,7 +1218,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsTargeting;
+                        if (_isTargeting == null)
+                        {
+                            _isTargeting = _directEntity.IsTargeting;
+                            return _isTargeting ?? false;
+                        }
+
+                        return _isTargeting ?? false;
                     }
 
                     return false;
@@ -1118,6 +1237,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isTargetedBy;
+
         public bool IsTargetedBy
         {
             get
@@ -1126,7 +1247,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsTargetedBy;
+                        if (_isTargetedBy == null)
+                        {
+                            _isTargetedBy = _directEntity.IsTargetedBy;
+                            return _isTargetedBy ?? false;
+                        }
+
+                        return _isTargetedBy ?? false; 
                     }
 
                     return false;
@@ -1223,6 +1350,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isEwarTarget;
+
         public bool IsEwarTarget
         {
             get
@@ -1231,18 +1360,24 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= IsWarpScramblingMe;
-                        result |= IsWebbingMe;
-                        result |= IsNeutralizingMe;
-                        result |= IsJammingMe;
-                        result |= IsSensorDampeningMe;
-                        result |= IsTargetPaintingMe;
-                        result |= IsTrackingDisruptingMe;
-                        return result;
+                        if (_isEwarTarget == null)
+                        {
+                            bool result = false;
+                            result |= IsWarpScramblingMe;
+                            result |= IsWebbingMe;
+                            result |= IsNeutralizingMe;
+                            result |= IsJammingMe;
+                            result |= IsSensorDampeningMe;
+                            result |= IsTargetPaintingMe;
+                            result |= IsTrackingDisruptingMe;
+                            _isEwarTarget = result;
+                            return _isEwarTarget ?? false;
+                        }
+
+                        return _isEwarTarget ?? false;
                     }
 
-                    return false;
+                    return _isEwarTarget ?? false;
                 }
                 catch (Exception exception)
                 {
@@ -1605,24 +1740,35 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isEntityIShouldKeepShooting;
+
         public bool IsEntityIShouldKeepShooting
         {
             get
             {
                 try
                 {
-                    //
-                    // Is our current target already in armor? keep shooting the same target if so...
-                    //
-                    if (IsReadyToShoot
-                        && IsInOptimalRange && !IsLargeCollidable
-                        && (((!IsFrigate && !IsNPCFrigate) || !IsTooCloseTooFastTooSmallToHit))
-                            && _directEntity.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
-                        return true;
-                    }
+                        if (_isEntityIShouldKeepShooting == null)
+                        {
+                            //
+                            // Is our current target already in armor? keep shooting the same target if so...
+                            //
+                            if (IsReadyToShoot
+                                && IsInOptimalRange && !IsLargeCollidable
+                                && (((!IsFrigate && !IsNPCFrigate) || !IsTooCloseTooFastTooSmallToHit))
+                                    && ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                            {
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                                _isEntityIShouldKeepShooting = true;
+                                return _isEntityIShouldKeepShooting ?? true;
+                            }
+                        }
 
+                        return _isEntityIShouldKeepShooting ?? false;
+                    }
+                    
                     return false;
                 }
                 catch (Exception ex)
@@ -1634,6 +1780,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isSentry;
+
         public bool IsSentry
         {
             get
@@ -1642,19 +1790,25 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        //if (GroupId == (int)Group.SentryGun) return true;
-                        result |= (GroupId == (int)Group.ProtectiveSentryGun);
-                        result |= (GroupId == (int)Group.MobileSentryGun);
-                        result |= (GroupId == (int)Group.DestructibleSentryGun);
-                        result |= (GroupId == (int)Group.MobileMissileSentry);
-                        result |= (GroupId == (int)Group.MobileProjectileSentry);
-                        result |= (GroupId == (int)Group.MobileLaserSentry);
-                        result |= (GroupId == (int)Group.MobileHybridSentry);
-                        result |= (GroupId == (int)Group.DeadspaceOverseersSentry);
-                        result |= (GroupId == (int)Group.StasisWebificationBattery);
-                        result |= (GroupId == (int)Group.EnergyNeutralizingBattery);
-                        return result;
+                        if (_isSentry == null)
+                        {
+                            bool result = false;
+                            //if (GroupId == (int)Group.SentryGun) return true;
+                            result |= (GroupId == (int)Group.ProtectiveSentryGun);
+                            result |= (GroupId == (int)Group.MobileSentryGun);
+                            result |= (GroupId == (int)Group.DestructibleSentryGun);
+                            result |= (GroupId == (int)Group.MobileMissileSentry);
+                            result |= (GroupId == (int)Group.MobileProjectileSentry);
+                            result |= (GroupId == (int)Group.MobileLaserSentry);
+                            result |= (GroupId == (int)Group.MobileHybridSentry);
+                            result |= (GroupId == (int)Group.DeadspaceOverseersSentry);
+                            result |= (GroupId == (int)Group.StasisWebificationBattery);
+                            result |= (GroupId == (int)Group.EnergyNeutralizingBattery);
+                            _isSentry = result;
+                            return _isSentry ?? false;
+                        }
+
+                        return _isSentry ?? false;
                     }
 
                     return false;
@@ -1669,6 +1823,8 @@ namespace Questor.Modules.Caching
 
         public double IsIgnoredRefreshes;
 
+        private bool? _isIgnored;
+
         public bool IsIgnored
         {
             get
@@ -1677,28 +1833,33 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        IsIgnoredRefreshes++;
-                        if (Cache.Instance.Entities.All(t => t.Id != _directEntity.Id))
+                        if (_isIgnored == null)
                         {
-                            IsIgnoredRefreshes = IsIgnoredRefreshes + 1000;
-                            return true;
-                        }
-
-                        if (Cache.Instance.IgnoreTargets.Any())
-                        {
-                            bool result = false;
-                            result |= Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
-                            if (result)
+                            IsIgnoredRefreshes++;
+                            if (Cache.Instance.Entities.All(t => t.Id != _directEntity.Id))
                             {
-                                if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id != Id)
-                                {
-                                    Cache.Instance.PreferredPrimaryWeaponTarget = null;    
-                                }
+                                IsIgnoredRefreshes = IsIgnoredRefreshes + 1000;
+                                _isIgnored = true;
+                                return _isIgnored ?? true;
                             }
-                            return result;
+
+                            if (Cache.Instance.IgnoreTargets.Any())
+                            {
+                                _isIgnored = Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
+                                if ((bool)_isIgnored)
+                                {
+                                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id != Id)
+                                    {
+                                        Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                    }
+                                }
+                                return _isIgnored ?? false;
+                            }
+
+                            return _isIgnored ?? false;
                         }
 
-                        return false;
+                        return _isIgnored ?? false;
                     }
 
                     return false;
@@ -1750,52 +1911,59 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private int? _targetValue;
+
         public int? TargetValue
         {
             get
             {
                 try
                 {
-                    ShipTargetValue value = null;
                     int result = -1;
 
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        try
+                        if (_targetValue == null)
                         {
-                            value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                            ShipTargetValue value = null;
+
+                            try
+                            {
+                                value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                            }
+                            catch (Exception exception)
+                            {
+                                if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
+                            }
+
+                            if (value == null)
+                            {
+
+                                if (IsNPCBattleship)
+                                {
+                                    _targetValue = 4;
+                                }
+                                else if (IsNPCBattlecruiser)
+                                {
+                                    _targetValue = 3;
+                                }
+                                else if (IsNPCCruiser)
+                                {
+                                    _targetValue = 2;
+                                }
+                                else if (IsNPCFrigate)
+                                {
+                                    _targetValue = 0;
+                                }
+
+                                return _targetValue ?? -1;
+                            }
+
+                            _targetValue = value.TargetValue;
+                            return _targetValue;
                         }
-                        catch (Exception exception)
-                        {
-                            if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
-                        }
 
-                        if (value == null)
-                        {
-
-                            if (IsNPCBattleship)
-                            {
-                                result = 4;
-                            }
-                            else if (IsNPCBattlecruiser)
-                            {
-                                result = 3;
-                            }
-                            else if (IsNPCCruiser)
-                            {
-                                result = 2;
-                            }
-                            else if (IsNPCFrigate)
-                            {
-                                result = 0;
-                            }
-
-                            return result;
-                        }
-
-                        result = value.TargetValue;
-                        return result;
-
+                        return _targetValue ?? -1;
                     }
 
                     return result;
@@ -1808,6 +1976,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isHighValueTarget;
+
         public bool IsHighValueTarget
         {
             get
@@ -1816,31 +1986,39 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-
-                        if (TargetValue != null)
+                        if (_isHighValueTarget == null)
                         {
-                            if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
+                            if (TargetValue != null)
                             {
-                                if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
+                                if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
                                 {
-                                    if (IsSentry && !Settings.Instance.KillSentries)
+                                    if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
                                     {
-                                        return false;
+                                        if (IsSentry && !Settings.Instance.KillSentries)
+                                        {
+                                            _isHighValueTarget = false;
+                                            return _isHighValueTarget ?? false;
+                                        }
+
+                                        _isHighValueTarget = true;
+                                        return _isHighValueTarget ?? true;
                                     }
 
-                                    return true;
+                                    //if (IsLargeCollidable)
+                                    //{
+                                    //    return true;
+                                    //}    
                                 }
 
-                                //if (IsLargeCollidable)
-                                //{
-                                //    return true;
-                                //}    
+                                _isHighValueTarget = false;
+                                return _isHighValueTarget ?? false;
                             }
 
-                            return false;
+                            _isHighValueTarget = false;
+                            return _isHighValueTarget ?? false;
                         }
 
-                        return false;
+                        return _isHighValueTarget ?? false;
                     }
 
                     return false;
@@ -1853,6 +2031,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isLowValueTarget;
+
         public bool IsLowValueTarget
         {
             get
@@ -1861,29 +2041,37 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-
-                        if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
+                        if (_isLowValueTarget == null)
                         {
-                            if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
+                            if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
                             {
-                                if (IsSentry && !Settings.Instance.KillSentries)
+                                if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
                                 {
-                                    return false;
+                                    if (IsSentry && !Settings.Instance.KillSentries)
+                                    {
+                                        _isLowValueTarget = false;
+                                        return _isLowValueTarget ?? false;
+                                    }
+
+                                    if (TargetValue < 0 && _directEntity.Velocity == 0)
+                                    {
+                                        _isLowValueTarget = false;
+                                        return _isLowValueTarget ?? false;
+                                    }
+
+                                    _isLowValueTarget = true;
+                                    return _isLowValueTarget ?? true;
                                 }
 
-                                if (TargetValue < 0 && _directEntity.Velocity == 0)
-                                {
-                                    return false;
-                                }
-
-                                return true;
+                                _isLowValueTarget = false;
+                                return _isLowValueTarget ?? false;
                             }
 
-                            return false;
+                            _isLowValueTarget = false;
+                            return _isLowValueTarget ?? false;
                         }
 
-                        return false;
-
+                        return _isLowValueTarget ?? false;
                     }
 
                     return false;
@@ -1939,6 +2127,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isContainer;
+
         public bool IsContainer
         {
             get
@@ -1947,12 +2137,18 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= (GroupId == (int)Group.Wreck);
-                        result |= (GroupId == (int)Group.CargoContainer);
-                        result |= (GroupId == (int)Group.SpawnContainer);
-                        result |= (GroupId == (int)Group.MissionContainer);
-                        return result;
+                        if (_isContainer == null)
+                        {
+                            bool result = false;
+                            result |= (GroupId == (int)Group.Wreck);
+                            result |= (GroupId == (int)Group.CargoContainer);
+                            result |= (GroupId == (int)Group.SpawnContainer);
+                            result |= (GroupId == (int)Group.MissionContainer);
+                            _isContainer = result;
+                            return _isContainer ?? false;
+                        }
+
+                        return _isContainer ?? false;
                     }
 
                     return false;
@@ -1965,6 +2161,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isPlayer;
+
         public bool IsPlayer
         {
             get
@@ -1973,7 +2171,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsPc;
+                        if (_isPlayer == null)
+                        {
+                            _isPlayer = _directEntity.IsPc;
+                            return _isPlayer ?? false;
+                        }
+
+                        return _isPlayer ?? false;
                     }
 
                     return false;
@@ -2087,7 +2291,7 @@ namespace Questor.Modules.Caching
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
         /// 
-        
+
         public bool IsFrigate
         {
             get
@@ -2465,6 +2669,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isLargeCollidable;
+
         public bool IsLargeCollidable
         {
             get
@@ -2473,13 +2679,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.LargeColidableObject;
-                        result |= GroupId == (int)Group.LargeColidableShip;
-                        result |= GroupId == (int)Group.LargeColidableStructure;
-                        result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
-                        result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
-                        return result;
+                        if (_isLargeCollidable == null)
+                        {
+                            bool result = false;
+                            result |= GroupId == (int)Group.LargeColidableObject;
+                            result |= GroupId == (int)Group.LargeColidableShip;
+                            result |= GroupId == (int)Group.LargeColidableStructure;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
+                            _isLargeCollidable = result;
+                            return _isLargeCollidable ?? false;
+                        }
+
+                        return _isLargeCollidable ?? false;
                     }
 
                     return false;
@@ -2523,6 +2735,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _IsBadIdea;
+
         public bool IsBadIdea
         {
             get
@@ -2531,30 +2745,36 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.Entities.All(t => t.Id != Id))
+                        if (_IsBadIdea == null)
                         {
-                            return false;
+                            if (Cache.Instance.Entities.All(t => t.Id != Id))
+                            {
+                                return false;
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.ConcordDrone;
+                            result |= GroupId == (int)Group.PoliceDrone;
+                            result |= GroupId == (int)Group.CustomsOfficial;
+                            result |= GroupId == (int)Group.Billboard;
+                            result |= GroupId == (int)Group.Stargate;
+                            result |= GroupId == (int)Group.Station;
+                            result |= GroupId == (int)Group.SentryGun;
+                            result |= GroupId == (int)Group.Capsule;
+                            result |= GroupId == (int)Group.MissionContainer;
+                            result |= GroupId == (int)Group.CustomsOffice;
+                            result |= GroupId == (int)Group.GasCloud;
+                            result |= GroupId == (int)Group.ConcordBillboard;
+                            result |= IsFrigate;
+                            result |= IsCruiser;
+                            result |= IsBattlecruiser;
+                            result |= IsBattleship;
+                            result |= IsPlayer;
+                            _IsBadIdea =  result;
+                            return _IsBadIdea ?? false;
                         }
 
-                        bool result = false;
-                        result |= GroupId == (int)Group.ConcordDrone;
-                        result |= GroupId == (int)Group.PoliceDrone;
-                        result |= GroupId == (int)Group.CustomsOfficial;
-                        result |= GroupId == (int)Group.Billboard;
-                        result |= GroupId == (int)Group.Stargate;
-                        result |= GroupId == (int)Group.Station;
-                        result |= GroupId == (int)Group.SentryGun;
-                        result |= GroupId == (int)Group.Capsule;
-                        result |= GroupId == (int)Group.MissionContainer;
-                        result |= GroupId == (int)Group.CustomsOffice;
-                        result |= GroupId == (int)Group.GasCloud;
-                        result |= GroupId == (int)Group.ConcordBillboard;
-                        result |= IsFrigate;
-                        result |= IsCruiser;
-                        result |= IsBattlecruiser;
-                        result |= IsBattleship;
-                        result |= IsPlayer;
-                        return result;
+                        return _IsBadIdea ?? false;
                     }
 
                     return false;
@@ -2591,6 +2811,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isNpcByGroupID;
+
         public bool IsNpcByGroupID
         {
             get
@@ -2599,158 +2821,164 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= IsSentry;
-                        result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
-                        //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
-                        result |= GroupId == (int)Group.Storyline_Battleship;
-                        result |= GroupId == (int)Group.Storyline_Mission_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
-                        result |= GroupId == (int)Group.Mission_Khanid_Battleship;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
-                        result |= GroupId == (int)Group.Mission_Mordu_Battleship;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
-                        result |= GroupId == (int)Group.Mission_Generic_Battleships;
-                        result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
-                        result |= GroupId == (int)Group.Mission_Thukker_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
-                        result |= GroupId == (int)Group.Mission_Faction_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Faction_Industrials;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Storyline_Cruiser;
-                        result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Generic_Cruisers;
-                        result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Faction_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Generic_Destroyers;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
-                        result |= GroupId == (int)Group.TutorialDrone;
-                        result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
-                        result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
-                        result |= GroupId == (int)Group.asteroid_guristas_frigate;
-                        result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
-                        result |= GroupId == (int)Group.asteroid_serpentis_frigate;
-                        result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
-                        result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
-                        result |= GroupId == (int)Group.deadspace_guristas_frigate;
-                        result |= GroupId == (int)Group.Deadspace_Overseer_Frigate;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Swarm;
-                        result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
-                        result |= GroupId == (int)Group.deadspace_serpentis_frigate;
-                        result |= GroupId == (int)Group.mission_amarr_empire_frigate;
-                        result |= GroupId == (int)Group.mission_caldari_state_frigate;
-                        result |= GroupId == (int)Group.mission_gallente_federation_frigate;
-                        result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
-                        result |= GroupId == (int)Group.mission_khanid_frigate;
-                        result |= GroupId == (int)Group.mission_concord_frigate;
-                        result |= GroupId == (int)Group.mission_mordu_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                        result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
-                        result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
-                        result |= GroupId == (int)Group.mission_generic_frigates;
-                        result |= GroupId == (int)Group.mission_thukker_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
-                        return result;
+                        if (_isNpcByGroupID == null)
+                        {
+                            bool result = false;
+                            result |= IsSentry;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                            //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
+                            result |= GroupId == (int)Group.Storyline_Battleship;
+                            result |= GroupId == (int)Group.Storyline_Mission_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battleship;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battleship;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Mission_Generic_Battleships;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
+                            result |= GroupId == (int)Group.Mission_Faction_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Industrials;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Storyline_Cruiser;
+                            result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Cruisers;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Generic_Destroyers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                            result |= GroupId == (int)Group.TutorialDrone;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_frigate;
+                            result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Frigate;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Swarm;
+                            result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.deadspace_serpentis_frigate;
+                            result |= GroupId == (int)Group.mission_amarr_empire_frigate;
+                            result |= GroupId == (int)Group.mission_caldari_state_frigate;
+                            result |= GroupId == (int)Group.mission_gallente_federation_frigate;
+                            result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
+                            result |= GroupId == (int)Group.mission_khanid_frigate;
+                            result |= GroupId == (int)Group.mission_concord_frigate;
+                            result |= GroupId == (int)Group.mission_mordu_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
+                            result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
+                            result |= GroupId == (int)Group.mission_generic_frigates;
+                            result |= GroupId == (int)Group.mission_thukker_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                            _isNpcByGroupID = result;
+                            return _isNpcByGroupID ?? false;
+                        }
+
+                        return _isNpcByGroupID ?? false;
                     }
 
                     return false;
@@ -2788,6 +3016,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isOnGridWithMe;
+
         public bool IsOnGridWithMe
         {
             get
@@ -2796,9 +3026,15 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= Distance < (double)Distances.OnGridWithMe;
-                        return result;
+                        if (_isOnGridWithMe == null)
+                        {
+                            bool result = false;
+                            result |= Distance < (double)Distances.OnGridWithMe;
+                            _isOnGridWithMe = result;
+                            return result;
+                        }
+
+                        return _isOnGridWithMe ?? false;
                     }
 
                     return false;
@@ -3036,7 +3272,7 @@ namespace Questor.Modules.Caching
                 }
             }
         }
-        
+
         public bool LockTarget(string module)
         {
             try
@@ -3230,7 +3466,7 @@ namespace Questor.Modules.Caching
                         }
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
-                    }    
+                    }
                 }
             }
             catch (Exception exception)
@@ -3255,8 +3491,8 @@ namespace Questor.Modules.Caching
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
                         //_directEntity.Approach();
-                    }    
-                }   
+                    }
+                }
             }
             catch (Exception exception)
             {
@@ -3279,7 +3515,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(Id) + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     _directEntity.Orbit(range);
-                }    
+                }
             }
             catch (Exception exception)
             {
@@ -3307,7 +3543,7 @@ namespace Questor.Modules.Caching
                             Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             _directEntity.WarpTo();
                         }
-                    } 
+                    }
                 }
             }
             catch (Exception exception)
@@ -3332,7 +3568,7 @@ namespace Questor.Modules.Caching
                         Cache.Instance.WehaveMoved = DateTime.UtcNow;
                         Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
                         _directEntity.AlignTo();
-                    }    
+                    }
                 }
             }
             catch (Exception exception)
@@ -3389,9 +3625,9 @@ namespace Questor.Modules.Caching
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                             _directEntity.Dock();
-                            
+
                         }
-                    }    
+                    }
                 }
             }
             catch (Exception exception)

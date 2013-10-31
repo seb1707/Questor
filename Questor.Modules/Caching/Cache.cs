@@ -3388,41 +3388,48 @@ namespace Questor.Modules.Caching
         public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
         {
 
-            //if (Settings.Instance.DebugDisableGetBestTarget)
-            //{
-            //    return null;
-            //}
-
             if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
 
-            //if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
-            //{
-            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTargets" + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
-            //    return null;
-            //}
-
-            //NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
-            
             IEnumerable<EntityCache> BestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets.ToList();
             long? currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
             long? preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTargetID ?? -1;
 
-            if (BestPrimaryWeaponTargets.Any())
+            if (MaxLockedTargets > 0 && !Settings.Instance.DebugDisableGetBestTarget) //if we are not ECMd
             {
-                BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                      .OrderByDescending(t => t.IsInOptimalRange)
-                                                      .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget && t.IsInOptimalRange)
-                                                      .ThenByDescending(t => t.IsCorrectSizeForMyWeapons)                          // Weapons should fire big targets first
-                                                      .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                      .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget)
-                                                      .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
-                                                      .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
-                                                      .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
-                                                      .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
-                                                      .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
-                                                      .ThenBy(t => t.Nearest5kDistance);
+                if (BestPrimaryWeaponTargets.Any())
+                {
+                    if (PreferredPrimaryWeaponTarget == null || (PreferredPrimaryWeaponTarget != null && !PreferredPrimaryWeaponTarget.IsOnGridWithMe) || DateTime.UtcNow > Cache.Instance.NextGetBestCombatTarget)
+                    {
+                        BestPrimaryWeaponTargets = BestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                                                                .OrderByDescending(t => t.IsInOptimalRange)
+                                                                .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget && t.IsInOptimalRange)
+                                                                .ThenByDescending(t => t.IsCorrectSizeForMyWeapons)                          // Weapons should fire big targets first
+                                                                .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
+                                                                .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget)
+                                                                .ThenByDescending(t => t.IsTargetedBy)                                       // if something does not target us it's not too interesting
+                                                                .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                         // WarpScram over Webs over any other EWAR
+                                                                .ThenByDescending(t => t.Id == currentWeaponId)                              // Lets keep shooting
+                                                                .ThenByDescending(t => t.Id == preferredTargetId)                            // Keep the preferred target so we dont switch our targets too often
+                                                                .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget) // Shoot targets that are in armor!
+                                                                .ThenBy(t => t.Nearest5kDistance);
+                        
+                        Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                    }
+                    else
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Cache.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).Seconds + "]", Logging.Debug);
+                    }
+                }
+                else
+                {
+                    if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "We have nothing to shoot yet. Waiting", Logging.Debug);
+                }
             }
-            
+            else
+            {
+                if (Settings.Instance.DebugGetBestTarget && !Settings.Instance.DebugDisableGetBestTarget) Logging.Log("__GetBestWeaponTarget","We have no targeting slots (ECMd?). Waiting",Logging.Debug);
+            }
+
             if (BestPrimaryWeaponTargets.Any())
             {
                 int BestPrimaryWeaponTargetsCount = BestPrimaryWeaponTargets.Count();
@@ -3453,7 +3460,8 @@ namespace Questor.Modules.Caching
                     }
                 }
             }
-            
+
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "return BestPrimaryWeaponTargets;", Logging.Debug);
             return BestPrimaryWeaponTargets;
         }
 

@@ -1917,7 +1917,7 @@ namespace Questor.Modules.Combat
                                 return;
                             }
 
-                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "killtarget [" + killTarget.Name + "][" + Math.Round(killTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(killTarget.Id) + "] is not yet ReadyToShoot, LockedTarget [" + killTarget.IsTarget + "]", Logging.Debug);
+                            if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "killtarget [" + killTarget.Name + "][" + Math.Round(killTarget.Distance/1000,0) + "k][" + Cache.Instance.MaskedID(killTarget.Id) + "] is not yet ReadyToShoot, LockedTarget [" + killTarget.IsTarget + "] My MaxRange [" + Math.Round(Cache.Instance.MaxRange/1000,0) + "]", Logging.Debug);
                             return;
                         }
                         

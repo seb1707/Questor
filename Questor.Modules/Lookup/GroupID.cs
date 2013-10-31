@@ -244,6 +244,7 @@ namespace Questor.Modules.Lookup
         Mission_Minmatar_Republic_Battlecruiser = 685,
         Mission_Khanid_Battlecruiser = 690,
         Mission_CONCORD_Battlecruiser = 696,
+        Mission_Faction_Industrials = 927,
         Mission_Mordu_Battlecruiser = 702,
         Asteroid_Rogue_Drone_BattleCruiser = 755,
         Asteroid_Angel_Cartel_Commander_BattleCruiser = 793,

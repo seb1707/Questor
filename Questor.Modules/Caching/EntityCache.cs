@@ -2245,6 +2245,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
                         result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
                         result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                        result |= GroupId == (int)Group.Mission_Faction_Industrials;
                         return result;
                     }
 
@@ -2608,6 +2609,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
                         result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
                         result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                        result |= GroupId == (int)Group.Mission_Faction_Industrials;
                         result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
                         result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
                         result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;

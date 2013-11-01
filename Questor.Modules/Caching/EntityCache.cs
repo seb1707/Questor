@@ -2823,6 +2823,7 @@ namespace Questor.Modules.Caching
                         if (_isNpcByGroupID == null)
                         {
                             bool result = false;
+                            result |= IsLargeCollidable;
                             result |= IsSentry;
                             result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
                             //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;

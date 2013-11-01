@@ -1497,16 +1497,16 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
+                        if (Cache.Instance.WarpScrambler.Contains(Id))
                         {
                             return true;
                         }
 
                         if (_directEntity.Attacks.Contains("effects.WarpScramble"))
                         {
-                            if (!Cache.Instance.WarpScrambler.Contains(_directEntity.Id))
+                            if (!Cache.Instance.WarpScrambler.Contains(Id))
                             {
-                                Cache.Instance.WarpScrambler.Add(_directEntity.Id);
+                                Cache.Instance.WarpScrambler.Add(Id);
                             }
 
                             return true;
@@ -2401,7 +2401,7 @@ namespace Questor.Modules.Caching
                         result |= GroupId == (int)Group.mission_thukker_frigate;
                         result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
                         result |= GroupId == (int)Group.TutorialDrone;
-                        result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one. 
+                        //result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one. 
                         return result;
                     }
 
@@ -2798,7 +2798,6 @@ namespace Questor.Modules.Caching
                         bool result = false;
                         result |= GroupId == (int)Group.FactionWarfareNPC;
                         return result;
-
                     }
 
                     return false;

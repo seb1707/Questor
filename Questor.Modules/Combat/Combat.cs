@@ -1114,28 +1114,38 @@ namespace Questor.Modules.Combat
             #region Targeting using priority
             if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
             {
-                IEnumerable<EntityCache> primaryWeaponTargetsToTarget = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe).Take(maxHighValueTargets).ToList();
+                IEnumerable<EntityCache> primaryWeaponTargetsToLock = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe).Take(maxHighValueTargets).ToList();
                 int primaryWeaponTargetsToTargetCount = 0;
-                if (primaryWeaponTargetsToTarget.Any())
+                if (primaryWeaponTargetsToLock.Any())
                 {
-                    primaryWeaponTargetsToTargetCount = primaryWeaponTargetsToTarget.Count();
+                    primaryWeaponTargetsToTargetCount = primaryWeaponTargetsToLock.Count();
                 }
                 else
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
                 }
 
-                IEnumerable<EntityCache> droneTargetsToTarget = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe).Take(maxLowValueTargets).ToList();
+                IEnumerable<EntityCache> droneTargetsToLock = null;
                 int droneTargetsToTargetCount = 0;
-                if (droneTargetsToTarget.Any())
+                if (Cache.Instance.UseDrones)
                 {
-                    droneTargetsToTargetCount = droneTargetsToTarget.Count();
+                    droneTargetsToLock = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe).Take(maxLowValueTargets).ToList();
+                    droneTargetsToLock = droneTargetsToLock.ToList();
+                    if (droneTargetsToLock.Any())
+                    {
+                        droneTargetsToTargetCount = droneTargetsToLock.Count();
+                    }
+                    else
+                    {
+                        //if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
+                    }    
                 }
                 else
                 {
-                    //if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "!primaryWeaponTargetsToTarget.Any()", Logging.Debug);
+                    droneTargetsToLock = primaryWeaponTargetsToLock;
+                    droneTargetsToLock = droneTargetsToLock.ToList();
                 }
-
+                
                 IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)).ToList();
                 int activeTargetsCount = 0;
                 if (activeTargets.Any())
@@ -1149,24 +1159,26 @@ namespace Questor.Modules.Combat
 
                 foreach (EntityCache target in activeTargets)
                 {
-                    if (primaryWeaponTargetsToTarget.All(e => e.Id != target.Id) && droneTargetsToTarget.All(e => e.Id != target.Id) && !target.IsContainer)
+                    if (primaryWeaponTargetsToLock.All(e => e.Id != target.Id) && droneTargetsToLock.All(e => e.Id != target.Id) && !target.IsContainer)
                     {
-                        Logging.Log("Combat", "Target [" + target.Name + "] does not need to be shot at the moment, untargeting", Logging.Green);
+                        Logging.Log("Combat", "Target [" + target.Name + "] does not need to be shot at the moment, unLocking", Logging.Green);
                         target.UnlockTarget("Combat");
                         return;
                     }
                 }
 
                 int totalTargets = Cache.Instance.Entities.Count(e => (e.IsTargeting || e.IsTarget));
-
-
+                
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Target a weapon target)", Logging.Debug);
-                EntityCache toTarget = primaryWeaponTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
-                // If we targeted all highValueTargets already take a lowvaluetarget
-                if (toTarget == null)
+                EntityCache toTarget = primaryWeaponTargetsToLock.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
+                if (Cache.Instance.UseDrones)
                 {
-                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "if (toTarget == null)", Logging.Debug);
-                    toTarget = droneTargetsToTarget.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
+                    // If we targeted all highValueTargets already take a lowvaluetarget
+                    if (toTarget == null)
+                    {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "if (toTarget == null)", Logging.Debug);
+                        toTarget = droneTargetsToLock.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
+                    }    
                 }
 
                 if (toTarget != null && totalTargets < maxTotalTargets)
@@ -1849,6 +1861,7 @@ namespace Questor.Modules.Combat
                 {
                     case CombatState.CheckTargets:
                         _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the outofammo state)
+                        //TargetCombatants();
                         TargetCombatants2();
                         break;
 

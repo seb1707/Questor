@@ -41,7 +41,7 @@ namespace Questor.Modules.Actions
 
                 //if (window.Name.Contains(wreck.Name))
                 //{
-                //    Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] on the ignore list, ignoring.");
+                //    Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][" + wreck.Id + "] on the ignore list, ignoring.");
                 //    wreck.UnlockTarget();
                 //    continue;
                 //}

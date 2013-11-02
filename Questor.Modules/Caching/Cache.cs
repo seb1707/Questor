@@ -1411,7 +1411,7 @@ namespace Questor.Modules.Caching
             get
             {
                 //List<EntityCache>
-                if (Cache.Instance.InSpace)
+                if (Cache.Instance.Entities != null && Cache.Instance.Entities.Any())
                 {
                     if (_combatTargets == null)
                     {
@@ -1453,7 +1453,7 @@ namespace Questor.Modules.Caching
             get
             {
                 //List<EntityCache>
-                if (Cache.Instance.InSpace)
+                if (Cache.Instance.Entities != null && Cache.Instance.Entities.Any())
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                         && !e.IsIgnored

@@ -1596,6 +1596,12 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddMilliseconds(800))
+                    {
+                        //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
+                        return true;
+                    }
+
                     if (DirectEve.Session.IsInSpace)
                     {
                         if (!Cache.Instance.InStation)
@@ -1637,6 +1643,12 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
+                    if (DateTime.UtcNow < Cache.Instance.LastInStation.AddMilliseconds(800))
+                    {
+                        //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
+                        return true;
+                    }
+
                     if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
                     {
                         Cache.Instance.LastInStation = DateTime.UtcNow;

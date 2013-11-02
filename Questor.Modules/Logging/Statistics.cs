@@ -240,7 +240,7 @@ namespace Questor.Modules.Logging
             Logging.Log("debug", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
             if (Cache.Instance.Entities.Any())
             {
-                //Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
+                Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
                 Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
                 Logging.Log("debug", "Defense Class Instances: [" + Defense.DefenseInstances + "]", Logging.Debug);
                 Logging.Log("debug", "Arm Class Instances: [" + Arm.ArmInstances + "]", Logging.Debug);

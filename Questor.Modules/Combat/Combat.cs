@@ -1001,8 +1001,12 @@ namespace Questor.Modules.Combat
 
         private static void TargetCombatants2()
         {
-            if ( DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
-              || Settings.Instance.DebugDisableTargetCombatants)
+            if ((Cache.Instance.InSpace && Cache.Instance.InWarp) // When in warp we should not try to target anything
+                    || Cache.Instance.InStation //How can we target if we are in a station?
+                    || DateTime.UtcNow < Cache.Instance.NextTargetAction //if we just did something wait a fraction of a second
+                    //|| !Cache.Instance.OpenCargoHold("Combat.TargetCombatants") //If we can't open our cargohold then something MUST be wrong
+                    || Settings.Instance.DebugDisableTargetCombatants
+                )
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Inspace [ " + Cache.Instance.InSpace + " ] InWarp [ " + Cache.Instance.InWarp + " ] InStation [ " + Cache.Instance.InStation + " ] NextTargetAction [ " + Cache.Instance.NextTargetAction.Subtract(DateTime.UtcNow).TotalSeconds + " seconds] DebugDisableTargetCombatants [ " + Settings.Instance.DebugDisableTargetCombatants + " ]", "", Logging.Debug);
                 return;
@@ -1893,9 +1897,9 @@ namespace Questor.Modules.Combat
                             }
                             else
                             {
-                                //Logging.Log("Combat.Killtargets", "Unable to find the PreferredPrimaryWeaponTarget in the Entities list... PPWT.Name[" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] PPWTID [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "]", Logging.Debug);
-                                //Cache.Instance.PreferredPrimaryWeaponTarget = null;
-                                //Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
+                                Logging.Log("Combat.Killtargets", "Unable to find the PreferredPrimaryWeaponTarget in the Entities list... PPWT.Name[" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] PPWTID [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "]", Logging.Debug);
+                                Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
                             }
                         }
 

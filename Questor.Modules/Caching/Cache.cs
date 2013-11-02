@@ -166,8 +166,7 @@ namespace Questor.Modules.Caching
                         return;
                     }
                 }
-
-                if ((Cache.Instance._preferredPrimaryWeaponTarget != null && Cache.Instance._preferredPrimaryWeaponTarget.Id != value.Id) || Cache.Instance._preferredPrimaryWeaponTarget == null)
+                else if ((Cache.Instance._preferredPrimaryWeaponTarget != null && Cache.Instance._preferredPrimaryWeaponTarget.Id != value.Id) || Cache.Instance._preferredPrimaryWeaponTarget == null)
                 {
                     Cache.Instance._preferredPrimaryWeaponTarget = value;
                     Cache.Instance.PreferredPrimaryWeaponTargetID = value.Id;
@@ -1460,7 +1459,7 @@ namespace Questor.Modules.Caching
                                                         && !e.IsIgnored
                                                         && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
                                                         && e.Distance < (int)Distances.OnGridWithMe
-                                                        && (e.IsNpcByGroupID || e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
+                                                        && (e.IsNpcByGroupID || e.IsAttacking || e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
                                                         && !e.IsFactionWarfareNPC
@@ -3397,6 +3396,7 @@ namespace Questor.Modules.Caching
             if (Settings.Instance.DebugDisableGetBestTarget)
             {
                 _bestPrimaryWeaponTargets = _potentialTargets ?? PotentialCombatTargets.OrderBy(i => i.Nearest5kDistance).ToList();
+                _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.ToList();
             }
 
             if (_bestPrimaryWeaponTargets == null)
@@ -3767,9 +3767,6 @@ namespace Questor.Modules.Caching
 
                 /*
                 #region Current Target Health Logging
-                
-                 
-                
                 //
                 // Current Target Health Logging
                 //

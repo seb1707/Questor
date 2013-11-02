@@ -111,8 +111,11 @@ namespace Questor.Modules.Actions
                     nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
+
+                return false;
             }
-            else if (station.Distance < (int)Distances.WarptoDistance)
+            
+            if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
@@ -121,8 +124,11 @@ namespace Questor.Modules.Actions
                     nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
+
+                return false;
             }
-            else
+
+            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
                 Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + station.Name + "]", Logging.White);
                 station.WarpToAndDock();
@@ -130,7 +136,6 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            nextAction = DateTime.UtcNow.AddSeconds(10);
             return false;
         }
     }

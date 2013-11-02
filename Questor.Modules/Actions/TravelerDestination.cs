@@ -210,8 +210,11 @@ namespace Questor.Modules.Actions
                     station.Dock();
                     return false;
                 }
+
+                return false;
             }
-            else if (station.Distance < (int)Distances.WarptoDistance)
+            
+            if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
@@ -219,18 +222,17 @@ namespace Questor.Modules.Actions
                     station.Approach();
                     return false;
                 }
+
+                return false;
             }
-            else
+            
+            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
-                {
-                    Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + station.Name + Logging.Green + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);
-                    station.WarpToAndDock();
-                    return false;
-                }
+                Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + station.Name + Logging.Green + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);
+                station.WarpToAndDock();
+                return false;
             }
 
-            nextAction = DateTime.UtcNow.AddSeconds(20);
             return false;
         }
     }

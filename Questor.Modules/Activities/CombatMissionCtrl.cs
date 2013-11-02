@@ -1395,6 +1395,7 @@ namespace Questor.Modules.Activities
             bool done = items.Count == 0;
 
             IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            targets = targets.Where(i => i.IsContainer);
             if (!targets.Any())
             {
                 Logging.Log("MissionController.DropItem", "No target name: " + targets, Logging.Orange);
@@ -1461,6 +1462,8 @@ namespace Questor.Modules.Activities
                                 Nextaction();
                                 return;
                             }
+
+                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                         }
                     }
                 }

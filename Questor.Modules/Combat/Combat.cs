@@ -1857,8 +1857,8 @@ namespace Questor.Modules.Combat
                 {
                     case CombatState.CheckTargets:
                         _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the outofammo state)
-                        //TargetCombatants();
-                        TargetCombatants2();
+                        TargetCombatants();
+                        //TargetCombatants2();
                         break;
 
                     case CombatState.KillTargets:
@@ -1934,8 +1934,8 @@ namespace Questor.Modules.Combat
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any() && (!Cache.Instance.InMission || Settings.Instance.SpeedTank))
                         {
-                            Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
-                            //Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
+                            //Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
+                            Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
                             i = 0;
                         }
                         

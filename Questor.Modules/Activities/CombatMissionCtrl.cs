@@ -414,15 +414,15 @@ namespace Questor.Modules.Activities
                 EntityCache ClosestPotentialCombatTarget = null;
 
                 if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestWeaponTargets(DistanceToClear);", Logging.Debug);
-                Cache.Instance.__GetBestWeaponTargets(DistanceToClear);
+                //Cache.Instance.__GetBestWeaponTargets(DistanceToClear);
+                Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
                 
                 if (Cache.Instance.UseDrones)
                 {
                     if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestDroneTargets(DistanceToClear);", Logging.Debug);
-                    Cache.Instance.__GetBestDroneTargets(DistanceToClear);
+                    //Cache.Instance.__GetBestDroneTargets(DistanceToClear);
+                    Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 }
-                //Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
-                //Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 
                 //
                 // grab the preferredPrimaryWeaponsTarget if its defined and exists on grid as our navigation point
@@ -716,8 +716,13 @@ namespace Questor.Modules.Activities
 
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
-            Cache.Instance.__GetBestWeaponTargets(Cache.Instance.WeaponRange);
-            if (Cache.Instance.UseDrones) Cache.Instance.__GetBestDroneTargets(Cache.Instance.WeaponRange);  
+            //Cache.Instance.__GetBestWeaponTargets(Cache.Instance.WeaponRange);
+            Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "combat");
+            if (Cache.Instance.UseDrones)
+            {
+                //Cache.Instance.__GetBestDroneTargets(Cache.Instance.MaxDroneRange);
+                Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, false, "combat");
+            }  
 
             if (closest != null)
             {
@@ -1281,8 +1286,8 @@ namespace Questor.Modules.Activities
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != killTargets.FirstOrDefault())
                 {
                     // GetTargets
-                    Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
-                    //Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());    
+                    //Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
+                    Cache.Instance.GetBestPrimaryWeaponTarget((int)Distances.OnGridWithMe, false, "combat", killTargets.ToList());    
                 }
 
                 Cache.Instance.GetBestDroneTarget((int)Distances.OnGridWithMe, false, "Drones", killTargets.ToList());

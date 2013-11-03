@@ -1110,7 +1110,7 @@ namespace Questor.Modules.Combat
             #region Targeting using priority
             if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
             {
-                IEnumerable<EntityCache> primaryWeaponTargetsToLock = Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe).Take(maxHighValueTargets).ToList();
+                IEnumerable<EntityCache> primaryWeaponTargetsToLock = Cache.Instance.__GetBestWeaponTargets((double) Distances.OnGridWithMe).Take(maxHighValueTargets); //.ToList();
                 int primaryWeaponTargetsToTargetCount = 0;
                 if (primaryWeaponTargetsToLock.Any())
                 {
@@ -1125,8 +1125,8 @@ namespace Questor.Modules.Combat
                 int droneTargetsToTargetCount = 0;
                 if (Cache.Instance.UseDrones)
                 {
-                    droneTargetsToLock = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe).Take(maxLowValueTargets).ToList();
-                    droneTargetsToLock = droneTargetsToLock.ToList();
+                    droneTargetsToLock = Cache.Instance.__GetBestDroneTargets((double)Distances.OnGridWithMe).Take(maxLowValueTargets); //.ToList();
+                    //droneTargetsToLock = droneTargetsToLock.ToList();
                     if (droneTargetsToLock.Any())
                     {
                         droneTargetsToTargetCount = droneTargetsToLock.Count();
@@ -1139,10 +1139,10 @@ namespace Questor.Modules.Combat
                 else
                 {
                     droneTargetsToLock = primaryWeaponTargetsToLock;
-                    droneTargetsToLock = droneTargetsToLock.ToList();
+                    //droneTargetsToLock = droneTargetsToLock.ToList();
                 }
                 
-                IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)).ToList();
+                IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)); //.ToList();
                 int activeTargetsCount = 0;
                 if (activeTargets.Any())
                 {

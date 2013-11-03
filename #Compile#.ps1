@@ -2,7 +2,7 @@ $global:goodbuilds=0
 $global:badbuilds=0
 $settingsfileloc=".\CompileSettings.xml"
 [xml]$compilelocsettings = Get-Content $settingsfileloc
-[System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+[System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
 #Region Functions
 function compilesolution {
   param (

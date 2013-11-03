@@ -115,7 +115,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Settings.Instance.OrbitStructure && structure != null)
                         {
                             structure.Orbit(Cache.Instance.OrbitDistance);
-                            Logging.Log(module, "Initiating Orbit [" + structure.Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(structure.Id) + "]", Logging.Teal);
+                            Logging.Log(module, "Initiating Orbit [" + structure.Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + Cache.Instance.MaskedID(structure.Id) + "]", Logging.Teal);
                             return;
                         }
 

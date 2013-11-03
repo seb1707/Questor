@@ -1577,16 +1577,23 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private EntityCache _myShipEntity;
         public EntityCache MyShipEntity 
         {
             get
             {
-                if (!InSpace)
+                if (_myShipEntity == null)
                 {
-                    return null;
+                    if (!Cache.Instance.InSpace)
+                    {
+                        return null;
+                    }
+
+                    _myShipEntity = Cache.Instance.Entities.FirstOrDefault(e => e.Id == Cache.Instance.ActiveShip.ItemId);
+                    return _myShipEntity;
                 }
 
-                return Cache.Instance.Entities.FirstOrDefault(e => e.IsValid && e.Id == Cache.Instance.ActiveShip.ItemId);
+                return _myShipEntity;
             }
         }
 
@@ -2403,6 +2410,7 @@ namespace Questor.Modules.Caching
                 _maxTargetRange = null;
                 _modules = null;
                 _modulesAsItemCache = null;
+                _myShipEntity = null; 
                 _objects = null;
                 _safeSpotBookmarks = null;
                 _star = null;

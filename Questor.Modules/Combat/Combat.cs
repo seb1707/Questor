@@ -195,7 +195,7 @@ namespace Questor.Modules.Combat
             //    return true;
             //}
 
-            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == ammo.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges);
+            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(e => e.TypeId == ammo.TypeId && e.Quantity >= Settings.Instance.MinimumAmmoCharges);
 
             // This should have shown up as "out of ammo"
             if (charge == null)
@@ -270,7 +270,7 @@ namespace Questor.Modules.Combat
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId)).ToList();
+            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId)).ToList();
 
             //check if mission specific ammo is defined
             if (Cache.Instance.MissionAmmo.Count() != 0)
@@ -279,7 +279,7 @@ namespace Questor.Modules.Combat
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
+            correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId && e.Quantity >= Settings.Instance.MinimumAmmoCharges)).ToList();
             if (Cache.Instance.MissionAmmo.Count() != 0)
             {
                 correctAmmoInCargo = Cache.Instance.MissionAmmo;
@@ -315,7 +315,7 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + ammo.TypeId + "][" + ammo.DamageType + "]", Logging.White);
             if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: best possible ammo: [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "]", Logging.White);
 
-            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.OrderBy(i => i.Quantity).FirstOrDefault(i => i.TypeId == ammo.TypeId);
+            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.OrderBy(e => e.Quantity).FirstOrDefault(e => e.TypeId == ammo.TypeId);
 
             // We do not have any ammo left that can hit targets at that range!
             if (charge == null)
@@ -1208,15 +1208,15 @@ namespace Questor.Modules.Combat
             #region Debugging for listing possible targets
             if (Settings.Instance.DebugTargetCombatants)
             {
-                int i = 0;
+                int _i_ = 0;
                 if (Cache.Instance.PotentialCombatTargets.Any())
                 {
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets below", Logging.Debug);
 
                     foreach (EntityCache t in Cache.Instance.PotentialCombatTargets)
                     {
-                        i++;
-                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
+                        _i_++;
+                        Logging.Log("Combat.TargetCombatants", "[" + _i_ + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
                         continue;
                     }
                     Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
@@ -1451,7 +1451,7 @@ namespace Questor.Modules.Combat
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget != null)", Logging.Debug);
-                    if (Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
+                    if (Cache.Instance.Entities.Any(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                     {
                         if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))", Logging.Debug);
                         
@@ -1614,7 +1614,7 @@ namespace Questor.Modules.Combat
 
             int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));
 
-            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveLowValue + "] :::  highValueTargetingMe [" + highValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveHighValue + "] LCOs [" + Cache.Instance.Entities.Where(i => i.IsLargeCollidable).Count() + "]", Logging.Debug);
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveLowValue + "] :::  highValueTargetingMe [" + highValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveHighValue + "] LCOs [" + Cache.Instance.Entities.Count(e => e.IsLargeCollidable) + "]", Logging.Debug);
 
             // High Value
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);
@@ -1725,9 +1725,9 @@ namespace Questor.Modules.Combat
             // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
             // or are in the middle of attempting to aggro something
             // 
-            if (Cache.Instance.PotentialCombatTargets.Any(i => i.IsTarget 
-                                                           && !i.IsLargeCollidable
-                                                           && (!i.IsSentry || (i.IsSentry && Settings.Instance.KillSentries))
+            if (Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget 
+                                                           && !e.IsLargeCollidable
+                                                           && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
                                                            ))
             {
                 return;

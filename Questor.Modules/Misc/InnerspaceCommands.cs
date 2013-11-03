@@ -222,7 +222,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            string AddThese = args[1];
+            AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddDronePriorityTargetsByName " + AddThese, Logging.White);
             Cache.Instance.AddDronePriorityTargetsByName(AddThese);
@@ -238,7 +238,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            string AddThese = args[1];
+            AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddWarpScramblerByName " + AddThese, Logging.White);
             Cache.Instance.AddWarpScramblerByName(AddThese);
@@ -253,7 +253,7 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            string AddThese = args[1];
+            AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddWebifierByName " + AddThese, Logging.White);
             Cache.Instance.AddWebifierByName(AddThese);
@@ -730,7 +730,7 @@ namespace Questor.Modules.Misc
                 foreach (EntityCache thing in things.OrderBy(i => i.Distance))
                 {
                     icount++;
-                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] IsIgnoredrefreshes[" + thing.IsIgnoredRefreshes + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "]", Logging.Debug);
                 }
             }
             Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);

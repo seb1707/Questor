@@ -408,13 +408,19 @@ namespace Questor.Modules.Activities
             //panic handles adding any priority targets and combat will prefer to kill any priority targets
 
             //If the closest target is out side of our max range, combat cant target, which means GetBest cant return true, so we are going to try and use potentialCombatTargets instead
-            if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)))
+            if (Cache.Instance.PotentialCombatTargets.Any())
             {
                 //we may be too far out of range of the closest target to get combat to kick in, lets move us into range here
                 EntityCache ClosestPotentialCombatTarget = null;
-                
+
+                if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestWeaponTargets(DistanceToClear);", Logging.Debug);
                 Cache.Instance.__GetBestWeaponTargets(DistanceToClear);
-                if (Cache.Instance.UseDrones) Cache.Instance.__GetBestDroneTargets(DistanceToClear);
+                
+                if (Cache.Instance.UseDrones)
+                {
+                    if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestDroneTargets(DistanceToClear);", Logging.Debug);
+                    Cache.Instance.__GetBestDroneTargets(DistanceToClear);
+                }
                 //Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat");
                 //Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones");
                 
@@ -425,7 +431,8 @@ namespace Questor.Modules.Activities
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                     {
-                        ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;        
+                        if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "]", Logging.Debug);
+                        ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;    
                     }
                 }
                 
@@ -436,13 +443,15 @@ namespace Questor.Modules.Activities
                 {
                     if (Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
                     {
+                        if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "]", Logging.Debug);
                         ClosestPotentialCombatTarget = Cache.Instance.PreferredPrimaryWeaponTarget;
                     }
                 }
 
                 if (ClosestPotentialCombatTarget == null) //otherwise just grab something close (excluding sentries)
                 {
-                    ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Nearest5kDistance).FirstOrDefault();    
+                    if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(); [" + Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Name + "]", Logging.Debug);
+                    ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 }
                 
                 if (ClosestPotentialCombatTarget != null && (ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange || !ClosestPotentialCombatTarget.IsInOptimalRange))
@@ -1529,7 +1538,7 @@ namespace Questor.Modules.Activities
                 //
                 // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
                 //
-                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
+                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
 
                 if (!containers.Any())
                 {
@@ -1655,7 +1664,17 @@ namespace Questor.Modules.Activities
             //
             // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
             //
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Id);
+            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+            
+            if (Settings.Instance.DebugLootWrecks)
+            {
+                int i = 0;
+                foreach (EntityCache _container in containers)
+                {
+                    i++;
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "[" + i + "] " + _container.Name + "[" + Math.Round(_container.Distance/1000,0) + "k] isWreckEmpty [" + _container.IsWreckEmpty + "] IsTarget [" + _container.IsTarget + "]" , Logging.Debug);
+                }
+            }
 
             if (!containers.Any())
             {
@@ -1671,7 +1690,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
-            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
+            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
             if (container != null && (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)

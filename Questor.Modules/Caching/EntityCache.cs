@@ -54,7 +54,7 @@ namespace Questor.Modules.Caching
                              && _PreExistingBookmark.Y == _directEntity.Y 
                              && _PreExistingBookmark.Z == _directEntity.Z)
                             {
-                                Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + _directEntity.Name + "] and do not need another.", Logging.Debug);
+                                Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + Name + "] and do not need another.", Logging.Debug);
                                 return true;
                             }
                             continue;
@@ -231,7 +231,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         if (_name == null)
@@ -265,7 +265,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         if (_distance == null)
                         {
@@ -297,13 +297,13 @@ namespace Questor.Modules.Caching
                     {
                         if (_nearest5kDistance == null)
                         {
-                            if (_directEntity.Distance > 0 && _directEntity.Distance < 900000000)
+                            if (Distance > 0 && Distance < 900000000)
                             {
-                                _nearest5kDistance = Math.Round((_directEntity.Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                                _nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
                             }
                         }
 
-                        return _nearest5kDistance ?? _directEntity.Distance;
+                        return _nearest5kDistance ?? Distance;
                     }
 
                     return 0;
@@ -469,7 +469,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isTarget == null)
                         {
-                            if (!_directEntity.HasExploded && Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                            if (Cache.Instance.Entities.Any(t => t.Id == Id))
                             {
                                 _isTarget = _directEntity.IsTarget;
                             }
@@ -552,7 +552,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isPreferredPrimaryWeaponTarget == null)
                         {
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == _directEntity.Id)
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == Id)
                             {
                                 _isPreferredPrimaryWeaponTarget = true;
                                 return _isPreferredPrimaryWeaponTarget ?? true;
@@ -587,7 +587,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isPrimaryWeaponKillPriority == null)
                         {
-                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == Id))
                             {
                                 _isPrimaryWeaponKillPriority = true;
                             }
@@ -688,8 +688,8 @@ namespace Questor.Modules.Caching
                             {
                                 if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
                                 {
-                                    if (_directEntity.Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
-                                     && _directEntity.Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                                    if (Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                                     && Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
                                     {
                                         _IsTooCloseTooFastTooSmallToHit = true;
                                         return _IsTooCloseTooFastTooSmallToHit ?? true;
@@ -733,7 +733,7 @@ namespace Questor.Modules.Caching
                             {
                                 if (_directEntity.Distance < Cache.Instance.MaxRange)
                                 {
-                                    if (Cache.Instance.Entities.Any(t => t.Id == _directEntity.Id))
+                                    if (Cache.Instance.Entities.Any(t => t.Id == Id))
                                     {
                                         _IsReadyToShoot = true;
                                         return _IsReadyToShoot ?? true;
@@ -810,7 +810,7 @@ namespace Questor.Modules.Caching
                             {
                                 if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
                                 {
-                                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
                                     {
                                         PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
 
@@ -1033,7 +1033,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DroneControlRange > 0) //&& Cache.Instance.UseDrones)
                         {
-                            if (_directEntity.Distance < Settings.Instance.DroneControlRange)
+                            if (Distance < Settings.Instance.DroneControlRange)
                             {
                                 return true;
                             }
@@ -1063,7 +1063,7 @@ namespace Questor.Modules.Caching
                     if (_directEntity != null)
                     {
 
-                        if (Cache.Instance.DronePriorityTargets.All(i => i.EntityID != _directEntity.Id))
+                        if (Cache.Instance.DronePriorityTargets.All(i => i.EntityID != Id))
                         {
                             return false;
                         }
@@ -1091,8 +1091,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
                         {
-                            EntityCache __entity = new EntityCache(_directEntity);
-                            if (__entity.PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
+                            if (PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
                             {
                                 return true;
                             }
@@ -1100,8 +1099,7 @@ namespace Questor.Modules.Caching
 
                         if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == Id))
                         {
-                            EntityCache __entity = new EntityCache(_directEntity);
-                            if (__entity.DronePriorityLevel == DronePriority.WarpScrambler)
+                            if (DronePriorityLevel == DronePriority.WarpScrambler)
                             {
                                 return true;
                             }
@@ -1146,6 +1144,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private PrimaryWeaponPriority? _primaryWeaponPriorityLevel;
         public PrimaryWeaponPriority PrimaryWeaponPriorityLevel
         {
             get
@@ -1154,16 +1153,20 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null)
                     {
-                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
+                        if (_primaryWeaponPriorityLevel == null)
                         {
-                            PrimaryWeaponPriority currentTargetPriority = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget
-                                                                                                                                && t.EntityID == Id)
-                                                                                                                        .Select(pt => pt.PrimaryWeaponPriority)
-                                                                                                                        .FirstOrDefault();
-                            return currentTargetPriority;
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
+                            {
+                                _primaryWeaponPriorityLevel = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget && t.EntityID == Id)
+                                                                                                                            .Select(pt => pt.PrimaryWeaponPriority)
+                                                                                                                            .FirstOrDefault();
+                                return _primaryWeaponPriorityLevel ?? PrimaryWeaponPriority.NotUsed;
+                            }
+
+                            return PrimaryWeaponPriority.NotUsed;
                         }
 
-                        return PrimaryWeaponPriority.NotUsed;
+                        return _primaryWeaponPriorityLevel ?? PrimaryWeaponPriority.NotUsed;
                     }
 
                     return PrimaryWeaponPriority.NotUsed;
@@ -1821,8 +1824,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public double IsIgnoredRefreshes;
-
         private bool? _isIgnored;
 
         public bool IsIgnored
@@ -1845,7 +1846,7 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance.IgnoreTargets.Any())
                             {
-                                _isIgnored = Cache.Instance.IgnoreTargets.Contains(_directEntity.Name.Trim());
+                                _isIgnored = Cache.Instance.IgnoreTargets.Contains(Name.Trim());
                                 if ((bool)_isIgnored)
                                 {
                                     if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id != Id)
@@ -2053,7 +2054,7 @@ namespace Questor.Modules.Caching
                                         return _isLowValueTarget ?? false;
                                     }
 
-                                    if (TargetValue < 0 && _directEntity.Velocity == 0)
+                                    if (TargetValue < 0 && Velocity == 0)
                                     {
                                         _isLowValueTarget = false;
                                         return _isLowValueTarget ?? false;
@@ -3283,7 +3284,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (!IsTargeting)
                                     {
-                                        if (Cache.Instance.Entities.Any(i => i.Id == _directEntity.Id))
+                                        if (Cache.Instance.Entities.Any(i => i.Id == Id))
                                         {
                                             // If the bad idea is attacking, attack back
                                             if (IsBadIdea && !IsAttacking)
@@ -3324,22 +3325,22 @@ namespace Questor.Modules.Caching
                                                 return true;
                                             }
 
-                                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed (unknown reason)", Logging.White);
+                                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed (unknown reason)", Logging.White);
                                         }
 
-                                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed: target was not in Entities List", Logging.White);
+                                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed: target was not in Entities List", Logging.White);
                                     }
 
-                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget aborted: target is already being targeted", Logging.White);
+                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget aborted: target is already being targeted", Logging.White);
                                 }
                                 else
                                 {
-                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
+                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
                                 }
                             }
                             else
                             {
-                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
+                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
                             }
                         }
                         else
@@ -3407,7 +3408,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
@@ -3431,7 +3432,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                     }
                     _directEntity.Activate();
                     Cache.Instance.LastInWarp = DateTime.UtcNow;
@@ -3456,7 +3457,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
@@ -3480,7 +3481,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
@@ -3504,7 +3505,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                     }
                     Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(Id) + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
@@ -3529,7 +3530,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
@@ -3556,7 +3557,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         Cache.Instance.WehaveMoved = DateTime.UtcNow;
@@ -3583,7 +3584,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
@@ -3613,7 +3614,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(_directEntity.Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
@@ -3652,7 +3653,7 @@ namespace Questor.Modules.Caching
             {
                 if (_directEntity != null)
                 {
-                    if (_directEntity.IsTarget)
+                    if (IsTarget)
                     {
                         _directEntity.MakeActiveTarget();
                         Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));

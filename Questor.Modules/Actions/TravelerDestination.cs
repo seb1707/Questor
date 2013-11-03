@@ -19,7 +19,7 @@ namespace Questor.Modules.Actions
 
     public abstract class TravelerDestination
     {
-        public long SolarSystemId { get; set; }
+        public long SolarSystemId { get; protected set; }
 
         public DirectBookmark UndockBookmark { get; set; }
 

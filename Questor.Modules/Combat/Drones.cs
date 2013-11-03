@@ -102,15 +102,15 @@ namespace Questor.Modules.Combat
             //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
 
             // Return best possible low value target
-            Cache.Instance.GetBestDroneTarget(Settings.Instance.DroneControlRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
+            Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
 
             if (Cache.Instance.PreferredDroneTargetID != null)
             {
                 EntityCache DroneToShoot = Cache.Instance.Entities.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
 
-                if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Settings.Instance.DroneControlRange)
+                if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)
                 {
-                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Settings.Instance.DroneControlRange)", Logging.Debug);
+                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
 
                      // Nothing to engage yet, probably retargeting
                     if (!DroneToShoot.IsTarget)
@@ -167,7 +167,7 @@ namespace Questor.Modules.Combat
                     }
                 }
 
-                if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Settings.Instance.DroneControlRange)", Logging.Debug);
+                if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
                 return;
             }
 
@@ -236,11 +236,11 @@ namespace Questor.Modules.Combat
                             launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
 
                             // yes if there are targets to kill
-                            launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Settings.Instance.DroneControlRange) > 0;
+                            launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
 
                             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                             {
-                                launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Settings.Instance.DroneControlRange) > 0;
+                                launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
                             }
 
                             // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
@@ -367,8 +367,8 @@ namespace Questor.Modules.Combat
                         // Are we done (for now) ?
                         if (
                             Cache.Instance.TargetedBy.Count(e => !e.IsSentry 
-                                                               && e.IsNpc 
-                                                               && e.Distance < Settings.Instance.DroneControlRange) == 0)
+                                                               && e.IsNpc
+                                                               && e.Distance < Cache.Instance.MaxDroneRange) == 0)
                         {
                             Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within dronerange", Logging.Magenta);
                             Recall = true;
@@ -415,7 +415,7 @@ namespace Questor.Modules.Combat
                             int lowCapWarning = Settings.Instance.LongRangeDroneRecallCapacitorPct;
 
                             if (Cache.Instance.ActiveDrones.Average(d => d.Distance) <
-                                (Settings.Instance.DroneControlRange / 2d))
+                                (Cache.Instance.MaxDroneRange / 2d))
                             {
                                 lowShieldWarning = Settings.Instance.DroneRecallShieldPct;
                                 lowArmorWarning = Settings.Instance.DroneRecallArmorPct;

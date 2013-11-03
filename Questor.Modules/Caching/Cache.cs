@@ -734,6 +734,22 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private double? _maxDroneRange;
+
+        public double MaxDroneRange
+        {
+            get
+            {
+                if (_maxDroneRange == null)
+                {
+                    _maxDroneRange = Math.Min(Settings.Instance.DroneControlRange, Cache.Instance.MaxTargetRange);
+                    return _maxDroneRange ?? 0;
+                }
+
+                return _maxDroneRange ?? 0;
+            }
+        }
+
         private double? _maxrange;
         
         public double MaxRange
@@ -770,9 +786,9 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Cache.Instance.UseDrones && Settings.Instance.DroneControlRange != 0)
+                if (Cache.Instance.UseDrones && Cache.Instance.MaxDroneRange != 0)
                 {
-                    return Settings.Instance.DroneControlRange;
+                    return Cache.Instance.MaxDroneRange;
                 }
                 
                 //
@@ -2406,6 +2422,7 @@ namespace Questor.Modules.Caching
                 _lootContainer = null;
                 _lootHangar = null;
                 _maxLockedTargets = null;
+                _maxDroneRange = null;
                 _maxrange = null;
                 _maxTargetRange = null;
                 _modules = null;
@@ -3530,7 +3547,7 @@ namespace Questor.Modules.Caching
                     if (_bestDroneTargets.Any())
                     {
                         _bestDroneTargets = _bestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
-                                                                  .Where(t => t.Distance < Settings.Instance.DroneControlRange)
+                                                                  .Where(t => t.Distance < Cache.Instance.MaxDroneRange)
                                                                   .OrderByDescending(t => t.isPreferredDroneTarget)
                                                                   .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
                                                                   .ThenByDescending(t => t.DronePriorityLevel)
@@ -4202,7 +4219,7 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
                 if (currentDroneTarget.IsReadyToShoot
-                    && currentDroneTarget.Nearest5kDistance < Settings.Instance.DroneControlRange
+                    && currentDroneTarget.Nearest5kDistance < Cache.Instance.MaxDroneRange
                     && currentDroneTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
@@ -4217,7 +4234,7 @@ namespace Questor.Modules.Caching
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Does the currentTarget exist? Can it be hit?", Logging.Teal);
-                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < Settings.Instance.DroneControlRange)
+                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < Cache.Instance.MaxDroneRange)
                     {
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
@@ -4238,7 +4255,7 @@ namespace Questor.Modules.Caching
             EntityCache dronePriorityTarget = null;
             try
             {
-                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Nearest5kDistance < Settings.Instance.DroneControlRange
+                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Nearest5kDistance < Cache.Instance.MaxDroneRange
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot)
                                                                            .OrderBy(pt => pt.DronePriorityLevel)

@@ -23,7 +23,7 @@ namespace Questor.Modules.Caching
     public class EntityCache
     {
         private readonly DirectEntity _directEntity;
-        public static int EntityCacheInstances = 0;
+        //public static int EntityCacheInstances = 0;
         private DateTime ThisEntityCacheCreated = DateTime.UtcNow;
 
         public EntityCache(DirectEntity entity)
@@ -33,10 +33,10 @@ namespace Questor.Modules.Caching
             ThisEntityCacheCreated = DateTime.UtcNow;
         }
 
-        //~EntityCache()
-        //{
-        //    Interlocked.Decrement(ref EntityCacheInstances);
-        //}
+        ~EntityCache()
+        {
+            //Interlocked.Decrement(ref EntityCacheInstances);
+        }
 
         public bool BookmarkThis(string NameOfBookmark = "bookmark", string Comment = "")
         {
@@ -86,7 +86,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_groupID == null)
                         {
@@ -114,7 +114,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_categoryId == null)
                         {
@@ -142,7 +142,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_id == null)
                         {
@@ -170,7 +170,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_TypeId == null)
                         {
@@ -198,7 +198,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_followId == null)
                         {
@@ -227,7 +227,7 @@ namespace Questor.Modules.Caching
                 try
                 {
 
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -261,7 +261,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -293,7 +293,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_nearest5kDistance == null)
                         {
@@ -324,7 +324,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_shieldPct == null)
                         {
@@ -352,7 +352,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_armorPct == null)
                         {
@@ -380,7 +380,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_structurePct == null)
                         {
@@ -408,7 +408,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isNpc == null)
                         {
@@ -437,7 +437,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_velocity == null)
                         {
@@ -465,7 +465,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isTarget == null)
                         {
@@ -548,7 +548,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isPreferredPrimaryWeaponTarget == null)
                         {
@@ -583,7 +583,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isPrimaryWeaponKillPriority == null)
                         {
@@ -614,7 +614,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isPreferredDroneTarget == null)
                         {
@@ -649,7 +649,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_IsDroneKillPriority == null)
                         {
@@ -680,7 +680,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_IsTooCloseTooFastTooSmallToHit == null)
                         {
@@ -725,7 +725,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_IsReadyToShoot == null)
                         {
@@ -770,7 +770,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_IsReadyToTarget == null)
                         {
@@ -802,7 +802,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isHigherPriorityPresent == null)
                         {
@@ -840,7 +840,7 @@ namespace Questor.Modules.Caching
                                     {
                                         DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
 
-                                        if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Settings.Instance.DroneControlRange))
+                                        if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Cache.Instance.MaxDroneRange))
                                         {
                                             return true;
                                         }
@@ -848,7 +848,7 @@ namespace Questor.Modules.Caching
                                         return false;
                                     }
 
-                                    if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Settings.Instance.DroneControlRange))
+                                    if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Cache.Instance.MaxDroneRange))
                                     {
                                         _isHigherPriorityPresent = true;
                                         return _isHigherPriorityPresent ?? true;
@@ -884,7 +884,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isActiveTarget == null)
                         {
@@ -919,7 +919,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isInOptimalRange == null)
                         {
@@ -998,7 +998,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (IsInOptimalRange)
                         {
@@ -1029,11 +1029,11 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Settings.Instance.DroneControlRange > 0) //&& Cache.Instance.UseDrones)
+                        if (Cache.Instance.MaxDroneRange > 0) //&& Cache.Instance.UseDrones)
                         {
-                            if (Distance < Settings.Instance.DroneControlRange)
+                            if (Distance < Cache.Instance.MaxDroneRange)
                             {
                                 return true;
                             }
@@ -1060,7 +1060,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         if (Cache.Instance.DronePriorityTargets.All(i => i.EntityID != Id))
@@ -1087,7 +1087,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
                         {
@@ -1124,7 +1124,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(i => i.EntityID == Id))
                         {
@@ -1151,7 +1151,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_primaryWeaponPriorityLevel == null)
                         {
@@ -1185,7 +1185,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
@@ -1219,7 +1219,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isTargeting == null)
                         {
@@ -1248,7 +1248,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isTargetedBy == null)
                         {
@@ -1275,7 +1275,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         return _directEntity.IsAttacking;
                     }
@@ -1296,7 +1296,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         return _directEntity.IsEmpty;
                     }
@@ -1317,7 +1317,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         return _directEntity.HasReleased;
                     }
@@ -1338,7 +1338,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         return _directEntity.HasExploded;
                     }
@@ -1361,7 +1361,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isEwarTarget == null)
                         {
@@ -1498,7 +1498,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (Cache.Instance.WarpScrambler.Contains(Id))
                         {
@@ -1534,7 +1534,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         if (_directEntity.Attacks.Contains("effects.ModifyTargetSpeed"))
@@ -1567,7 +1567,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewEnergyNeut"))
                         {
@@ -1599,7 +1599,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_directEntity.ElectronicWarfare.Contains("electronic"))
                         {
@@ -1631,7 +1631,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewRemoteSensorDamp"))
                         {
@@ -1663,7 +1663,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewTargetPaint"))
                         {
@@ -1695,7 +1695,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         if (_directEntity.ElectronicWarfare.Contains("ewTrackingDisrupt"))
@@ -1728,7 +1728,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         return (int)((ShieldPct + ArmorPct + StructurePct) * 100);
                     }
@@ -1751,7 +1751,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isEntityIShouldKeepShooting == null)
                         {
@@ -1791,7 +1791,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isSentry == null)
                         {
@@ -1832,7 +1832,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isIgnored == null)
                         {
@@ -1879,7 +1879,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         if (GroupId == (int)Group.SpawnContainer)
@@ -1922,7 +1922,7 @@ namespace Questor.Modules.Caching
                 {
                     int result = -1;
 
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_targetValue == null)
                         {
@@ -1985,7 +1985,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isHighValueTarget == null)
                         {
@@ -2040,7 +2040,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isLowValueTarget == null)
                         {
@@ -2109,7 +2109,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return true;
+
+                        if (!HasExploded)
+                        {
+                            return _directEntity.IsValid;
+                        }
+
+                        return false;
                     }
 
                     return false;
@@ -2130,7 +2136,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isContainer == null)
                         {
@@ -2164,7 +2170,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isPlayer == null)
                         {
@@ -2191,7 +2197,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
@@ -2225,7 +2231,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= (((IsNpc || IsNpcByGroupID) || IsAttacking || Cache.Instance.InMission)
@@ -2259,7 +2265,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= (CategoryId == (int)CategoryID.Entity
@@ -2293,7 +2299,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
 
                         bool result = false;
@@ -2330,7 +2336,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         if (IsPlayer)
@@ -2419,7 +2425,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Cruiser;
@@ -2451,7 +2457,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Storyline_Cruiser;
@@ -2509,7 +2515,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Battlecruiser;
@@ -2537,7 +2543,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
@@ -2588,7 +2594,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Battleship;
@@ -2617,7 +2623,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Storyline_Battleship;
@@ -2672,7 +2678,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isLargeCollidable == null)
                         {
@@ -2705,7 +2711,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (Cache.Instance.Entities.All(t => t.Id != Id))
                         {
@@ -2738,7 +2744,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_IsBadIdea == null)
                         {
@@ -2788,7 +2794,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.FactionWarfareNPC;
@@ -2813,7 +2819,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isNpcByGroupID == null)
                         {
@@ -2992,7 +2998,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
@@ -3019,7 +3025,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (_isOnGridWithMe == null)
                         {
@@ -3048,7 +3054,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Station;
@@ -3071,7 +3077,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.CustomsOffice;
@@ -3094,7 +3100,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= CategoryId == (int)CategoryID.Celestial;
@@ -3120,7 +3126,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.AsteroidBelt;
@@ -3143,7 +3149,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Planet;
@@ -3166,7 +3172,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Moon;
@@ -3189,7 +3195,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= CategoryId == (int)CategoryID.Asteroid;
@@ -3212,7 +3218,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= TypeId == (int)TypeID.Tengu;
@@ -3236,7 +3242,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_directEntity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         bool result = false;
                         result |= GroupId == (int)Group.Plagioclase;
@@ -3272,7 +3278,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null)
+                if (_directEntity != null && _directEntity.IsValid)
                 {
                     if (!IsTarget)
                     {
@@ -3369,7 +3375,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null)
+                if (_directEntity != null && _directEntity.IsValid)
                 {
                     //if (Distance > 250001)
                     //{
@@ -3404,7 +3410,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null)
+                        if (_directEntity != null && _directEntity.IsValid)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
@@ -3428,7 +3434,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextActivateAction)
+                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextActivateAction)
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                     {
@@ -3453,7 +3459,7 @@ namespace Questor.Modules.Caching
                 {
                     Cache.Instance.Approaching = this;
 
-                    if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -3477,7 +3483,7 @@ namespace Questor.Modules.Caching
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
                     Cache.Instance.Approaching = this;
-                    if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -3501,7 +3507,7 @@ namespace Questor.Modules.Caching
             {
                 Cache.Instance.Approaching = this;
 
-                if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextOrbit)
+                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                     {
@@ -3526,7 +3532,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
@@ -3553,7 +3559,7 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextAlign)
                 {
-                    if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextAlign)
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextAlign)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -3580,7 +3586,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
@@ -3610,7 +3616,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextDockAction)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
@@ -3635,7 +3641,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null)
+                if (_directEntity != null && _directEntity.IsValid)
                 {
                     _directEntity.OpenCargo();
                     Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
@@ -3651,7 +3657,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (_directEntity != null)
+                if (_directEntity != null && _directEntity.IsValid)
                 {
                     if (IsTarget)
                     {

@@ -3436,6 +3436,7 @@ namespace Questor.Modules.Caching
             EntityIsHighValueTarget.Clear();
             EntityIsLowValueTarget.Clear();
             EntityIsLargeCollidable.Clear();
+            EntityIsSentry.Clear();
             EntityIsMiscJunk.Clear();
             EntityIsBadIdea.Clear();
             EntityIsFactionWarfareNPC.Clear();

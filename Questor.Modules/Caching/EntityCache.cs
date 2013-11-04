@@ -1885,6 +1885,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_isSentry == null)
                         {
+                            if (Cache.Instance.EntityIsSentry.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsSentry.TryGetValue(Id, out value))
+                                {
+                                    _isSentry = value;
+                                    return _isSentry ?? false;
+                                }
+                            }
+
                             bool result = false;
                             //if (GroupId == (int)Group.SentryGun) return true;
                             result |= (GroupId == (int)Group.ProtectiveSentryGun);
@@ -1898,6 +1908,7 @@ namespace Questor.Modules.Caching
                             result |= (GroupId == (int)Group.StasisWebificationBattery);
                             result |= (GroupId == (int)Group.EnergyNeutralizingBattery);
                             _isSentry = result;
+                            Cache.Instance.EntityIsSentry.Add(Id, result);
                             return _isSentry ?? false;
                         }
 

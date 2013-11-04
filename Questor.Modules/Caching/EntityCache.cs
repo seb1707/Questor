@@ -90,7 +90,20 @@ namespace Questor.Modules.Caching
                     {
                         if (_groupID == null)
                         {
+                            if (Cache.Instance.EntityGroupID.Any())
+                            {
+                                int value = 0;
+                                if (Cache.Instance.EntityGroupID.TryGetValue(Id, out value))
+                                {
+                                    _groupID = value;
+                                    return _groupID ?? 0;
+                                }    
+                            }
+
                             _groupID = _directEntity.GroupId;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.GroupID", "Adding [" + Name + "] to EntityGroupID as [" + _groupID + "]", Logging.Debug);
+                            Cache.Instance.EntityGroupID.Add(Id, (int)_groupID);
+                            return _groupID ?? _directEntity.GroupId;
                         }
 
                         return _groupID ?? _directEntity.GroupId;
@@ -162,6 +175,27 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public string MaskedId
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return Cache.Instance.MaskedID(Id);
+                    }
+
+                    return "!0!";
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return "!0!";
+                }
+            }
+        }
+
         private int? _TypeId;
 
         public int TypeId
@@ -174,7 +208,20 @@ namespace Questor.Modules.Caching
                     {
                         if (_TypeId == null)
                         {
+                            if (Cache.Instance.EntityTypeID.Any())
+                            {
+                                int value = 0;
+                                if (Cache.Instance.EntityTypeID.TryGetValue(Id, out value))
+                                {
+                                    _TypeId = value;
+                                    return _TypeId ?? 0;
+                                }    
+                            }
+
                             _TypeId = _directEntity.TypeId;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.TypeId", "Adding [" + Name + "] to EntityTypeId as [" + _TypeId + "]", Logging.Debug);
+                            Cache.Instance.EntityTypeID.Add(Id, (int)_TypeId);
+                            return _TypeId ?? _directEntity.TypeId;
                         }
 
                         return _TypeId ?? _directEntity.TypeId;
@@ -226,7 +273,6 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-
                     if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -236,10 +282,23 @@ namespace Questor.Modules.Caching
 
                         if (_name == null)
                         {
+                            if (Cache.Instance.EntityNames.Any())
+                            {
+                                string value = null;
+                                if (Cache.Instance.EntityNames.TryGetValue(Id, out value))
+                                {
+                                    _name = value;
+                                    return _name;
+                                }    
+                            }
+
                             _name = _directEntity.Name;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.Name", "Adding [" + MaskedId + "] to EntityName as [" + _name + "]", Logging.Debug);
+                            Cache.Instance.EntityNames.Add(Id, _name);
+                            return _name ?? string.Empty;
                         }
 
-                        return _name ?? _directEntity.Name ?? string.Empty;
+                        return _name;
                     }
 
                     return string.Empty;
@@ -1252,7 +1311,19 @@ namespace Questor.Modules.Caching
                     {
                         if (_isTargetedBy == null)
                         {
+                            if (Cache.Instance.EntityIsTargetingMe.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsTargetingMe.TryGetValue(Id, out value))
+                                {
+                                    _isTargetedBy = value;
+                                    return _isTargetedBy ?? false;
+                                }    
+                            }
+
                             _isTargetedBy = _directEntity.IsTargetedBy;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsTargetedby", "Adding [" + Name + "] to EntityIsTargetingMe", Logging.Debug);
+                            Cache.Instance.EntityIsTargetingMe.Add(Id, (bool)_isTargetedBy);
                             return _isTargetedBy ?? false;
                         }
 
@@ -1269,6 +1340,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isAttacking;
         public bool IsAttacking
         {
             get
@@ -1277,7 +1349,25 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsAttacking;
+                        if (_isAttacking == null)
+                        {
+                            if (Cache.Instance.EntityIsAttacking.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsAttacking.TryGetValue(Id, out value))
+                                {
+                                    _isAttacking = value;
+                                    return _isAttacking ?? false;
+                                }   
+                            }
+
+                            _isAttacking = _directEntity.IsAttacking;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsAttacking", "Adding [" + Name + "] to EntityIsAttacking", Logging.Debug);
+                            Cache.Instance.EntityIsAttacking.Add(Id, (bool)_isAttacking);
+                            return _isAttacking ?? false;
+                        }
+
+                        return _isAttacking ?? false;
                     }
 
                     return false;
@@ -1500,16 +1590,16 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Cache.Instance.WarpScrambler.Contains(Id))
+                        if (Cache.Instance.ListOfWarpScramblingEntities.Contains(Id))
                         {
                             return true;
                         }
 
                         if (_directEntity.Attacks.Contains("effects.WarpScramble"))
                         {
-                            if (!Cache.Instance.WarpScrambler.Contains(Id))
+                            if (!Cache.Instance.ListOfWarpScramblingEntities.Contains(Id))
                             {
-                                Cache.Instance.WarpScrambler.Add(Id);
+                                Cache.Instance.ListOfWarpScramblingEntities.Add(Id);
                             }
 
                             return true;
@@ -1539,11 +1629,11 @@ namespace Questor.Modules.Caching
 
                         if (_directEntity.Attacks.Contains("effects.ModifyTargetSpeed"))
                         {
-                            if (!Cache.Instance.Webbing.Contains(Id)) Cache.Instance.Webbing.Add(Id);
+                            if (!Cache.Instance.ListofWebbingEntities.Contains(Id)) Cache.Instance.ListofWebbingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.Webbing.Contains(Id))
+                        if (Cache.Instance.ListofWebbingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1571,11 +1661,11 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewEnergyNeut"))
                         {
-                            if (!Cache.Instance.Neuting.Contains(Id)) Cache.Instance.Neuting.Add(Id);
+                            if (!Cache.Instance.ListNeutralizingEntities.Contains(Id)) Cache.Instance.ListNeutralizingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.Neuting.Contains(Id))
+                        if (Cache.Instance.ListNeutralizingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1603,11 +1693,11 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity.ElectronicWarfare.Contains("electronic"))
                         {
-                            if (!Cache.Instance.Jammer.Contains(Id)) Cache.Instance.Jammer.Add(Id);
+                            if (!Cache.Instance.ListOfJammingEntities.Contains(Id)) Cache.Instance.ListOfJammingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.Jammer.Contains(Id))
+                        if (Cache.Instance.ListOfJammingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1635,11 +1725,11 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewRemoteSensorDamp"))
                         {
-                            if (!Cache.Instance.Dampening.Contains(Id)) Cache.Instance.Dampening.Add(Id);
+                            if (!Cache.Instance.ListOfDampenuingEntities.Contains(Id)) Cache.Instance.ListOfDampenuingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.Dampening.Contains(Id))
+                        if (Cache.Instance.ListOfDampenuingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1667,11 +1757,11 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity.ElectronicWarfare.Contains("ewTargetPaint"))
                         {
-                            if (!Cache.Instance.TargetPainting.Contains(Id)) Cache.Instance.TargetPainting.Add(Id);
+                            if (!Cache.Instance.ListOfTargetPaintingEntities.Contains(Id)) Cache.Instance.ListOfTargetPaintingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.TargetPainting.Contains(Id))
+                        if (Cache.Instance.ListOfTargetPaintingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1700,11 +1790,11 @@ namespace Questor.Modules.Caching
 
                         if (_directEntity.ElectronicWarfare.Contains("ewTrackingDisrupt"))
                         {
-                            if (!Cache.Instance.TrackingDisrupter.Contains(Id)) Cache.Instance.TrackingDisrupter.Add(Id);
+                            if (!Cache.Instance.ListOfTrackingDisruptingEntities.Contains(Id)) Cache.Instance.ListOfTrackingDisruptingEntities.Add(Id);
                             return true;
                         }
 
-                        if (Cache.Instance.TrackingDisrupter.Contains(Id))
+                        if (Cache.Instance.ListOfTrackingDisruptingEntities.Contains(Id))
                         {
                             return true;
                         }
@@ -1843,7 +1933,6 @@ namespace Questor.Modules.Caching
                             //    _isIgnored = true;
                             //    return _isIgnored ?? true;
                             //}
-
                             if (Cache.Instance.IgnoreTargets.Any())
                             {
                                 _isIgnored = Cache.Instance.IgnoreTargets.Contains(Name.Trim());
@@ -1853,13 +1942,26 @@ namespace Questor.Modules.Caching
                                     {
                                         Cache.Instance.PreferredPrimaryWeaponTarget = null;
                                     }
+                                    
+                                    if (Cache.Instance.EntityIsLowValueTarget.ContainsKey(Id))
+                                    {
+                                        Cache.Instance.EntityIsLowValueTarget.Remove(Id);
+                                    }
+
+                                    if (Cache.Instance.EntityIsHighValueTarget.ContainsKey(Id))
+                                    {
+                                        Cache.Instance.EntityIsHighValueTarget.Remove(Id);
+                                    }
                                 }
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
                                 return _isIgnored ?? false;
                             }
 
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
                             return _isIgnored ?? false;
                         }
 
+                        if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
                         return _isIgnored ?? false;
                     }
 
@@ -1989,6 +2091,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_isHighValueTarget == null)
                         {
+                            if (Cache.Instance.EntityIsHighValueTarget.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsHighValueTarget.TryGetValue(Id, out value))
+                                {
+                                    _isHighValueTarget = value;
+                                    return _isHighValueTarget ?? false;
+                                }    
+                            }
+
                             if (TargetValue != null)
                             {
                                 if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
@@ -1998,10 +2110,14 @@ namespace Questor.Modules.Caching
                                         if (IsSentry && !Settings.Instance.KillSentries)
                                         {
                                             _isHighValueTarget = false;
+                                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                                            Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
                                             return _isHighValueTarget ?? false;
                                         }
 
                                         _isHighValueTarget = true;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
                                         return _isHighValueTarget ?? true;
                                     }
 
@@ -2012,10 +2128,13 @@ namespace Questor.Modules.Caching
                                 }
 
                                 _isHighValueTarget = false;
+                                //do not cache things that may be ignored temporarily...
                                 return _isHighValueTarget ?? false;
                             }
 
                             _isHighValueTarget = false;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                            Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
                             return _isHighValueTarget ?? false;
                         }
 
@@ -2044,6 +2163,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_isLowValueTarget == null)
                         {
+                            if (Cache.Instance.EntityIsLowValueTarget.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsLowValueTarget.TryGetValue(Id, out value))
+                                {
+                                    _isLowValueTarget = value;
+                                    return _isLowValueTarget ?? false;
+                                }   
+                            }
+
                             if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
                             {
                                 if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
@@ -2051,24 +2180,33 @@ namespace Questor.Modules.Caching
                                     if (IsSentry && !Settings.Instance.KillSentries)
                                     {
                                         _isLowValueTarget = false;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
                                         return _isLowValueTarget ?? false;
                                     }
 
                                     if (TargetValue < 0 && Velocity == 0)
                                     {
                                         _isLowValueTarget = false;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
                                         return _isLowValueTarget ?? false;
                                     }
 
                                     _isLowValueTarget = true;
+                                    if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                    Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
                                     return _isLowValueTarget ?? true;
                                 }
 
                                 _isLowValueTarget = false;
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
                                 return _isLowValueTarget ?? false;
                             }
 
                             _isLowValueTarget = false;
+                            //do not cache things that may be ignored temporarily
                             return _isLowValueTarget ?? false;
                         }
 
@@ -2201,15 +2339,15 @@ namespace Questor.Modules.Caching
                     {
                         bool result = false;
                         result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
-                                    && (!IsTargeting && !IsTarget && IsTargetedBy)
-                                    && !IsContainer
                                     && CategoryId == (int)CategoryID.Entity
                                     && Distance < Cache.Instance.MaxTargetRange
+                                    && !IsLargeCollidable
+                                    && (!IsTargeting && !IsTarget && IsTargetedBy)
+                                    && !IsContainer
                                     && !IsIgnored
                                     && (!IsBadIdea || IsAttacking)
                                     && !IsEntityIShouldLeaveAlone
                                     && !IsFactionWarfareNPC
-                                    && !IsLargeCollidable
                                     && !IsStation);
 
                         return result;
@@ -2288,6 +2426,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isFrigate;
         /// <summary>
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
@@ -2301,20 +2440,37 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (_isFrigate == null)
+                        {
+                            if (Cache.Instance.EntityIsFrigate.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsFrigate.TryGetValue(Id, out value))
+                                {
+                                    _isFrigate = value;
+                                    return _isFrigate ?? false;
+                                }    
+                            }
 
-                        bool result = false;
-                        result |= GroupId == (int)Group.Frigate;
-                        result |= GroupId == (int)Group.AssaultShip;
-                        result |= GroupId == (int)Group.StealthBomber;
-                        result |= GroupId == (int)Group.ElectronicAttackShip;
-                        result |= GroupId == (int)Group.PrototypeExplorationShip;
+                            bool result = false;
+                            result |= GroupId == (int)Group.Frigate;
+                            result |= GroupId == (int)Group.AssaultShip;
+                            result |= GroupId == (int)Group.StealthBomber;
+                            result |= GroupId == (int)Group.ElectronicAttackShip;
+                            result |= GroupId == (int)Group.PrototypeExplorationShip;
 
-                        // Technically not frigs, but for our purposes they are
-                        result |= GroupId == (int)Group.Destroyer;
-                        result |= GroupId == (int)Group.Interdictor;
-                        result |= GroupId == (int)Group.Interceptor;
+                            // Technically not frigs, but for our purposes they are
+                            result |= GroupId == (int)Group.Destroyer;
+                            result |= GroupId == (int)Group.Interdictor;
+                            result |= GroupId == (int)Group.Interceptor;
 
-                        return result;
+                            _isFrigate = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsFrigate", "Adding [" + Name + "] to EntityIsFrigate as [" + _isFrigate + "]", Logging.Debug);
+                            Cache.Instance.EntityIsFrigate.Add(Id, (bool)_isFrigate);
+                            return _isFrigate ?? false;
+                        }
+
+                        return _isFrigate ?? false;
                     }
 
                     return false;
@@ -2327,6 +2483,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isNPCFrigate;
         /// <summary>
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
@@ -2338,72 +2495,90 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        if (IsPlayer)
+                        if (_isNPCFrigate == null)
                         {
-                            //
-                            // if it is a player it is by definition not an NPC
-                            //
-                            return false;
+                            if (Cache.Instance.EntityIsNPCFrigate.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCFrigate.TryGetValue(Id, out value))
+                                {
+                                    _isNPCFrigate = value;
+                                    return _isNPCFrigate ?? false;
+                                }    
+                            }
+                            
+                            bool result = false;
+                            if (IsPlayer)
+                            {
+                                //
+                                // if it is a player it is by definition not an NPC
+                                //
+                                return false;
+                            }
+                            result |= GroupId == (int)Group.Frigate;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Generic_Destroyers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_frigate;
+                            result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                            result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.deadspace_serpentis_frigate;
+                            result |= GroupId == (int)Group.mission_amarr_empire_frigate;
+                            result |= GroupId == (int)Group.mission_caldari_state_frigate;
+                            result |= GroupId == (int)Group.mission_gallente_federation_frigate;
+                            result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
+                            result |= GroupId == (int)Group.mission_khanid_frigate;
+                            result |= GroupId == (int)Group.mission_concord_frigate;
+                            result |= GroupId == (int)Group.mission_mordu_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
+                            result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
+                            result |= GroupId == (int)Group.mission_generic_frigates;
+                            result |= GroupId == (int)Group.mission_thukker_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                            result |= GroupId == (int)Group.TutorialDrone;
+                            //result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one.
+                            _isNPCFrigate = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCFrigate", "Adding [" + Name + "] to EntityIsNPCFrigate as [" + _isNPCFrigate + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCFrigate.Add(Id, (bool)_isNPCFrigate);
+                            return _isNPCFrigate ?? false;
                         }
-                        result |= GroupId == (int)Group.Frigate;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
-                        result |= GroupId == (int)Group.Mission_Generic_Destroyers;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
-                        result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
-                        result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
-                        result |= GroupId == (int)Group.asteroid_guristas_frigate;
-                        result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
-                        result |= GroupId == (int)Group.asteroid_serpentis_frigate;
-                        result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
-                        result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
-                        result |= GroupId == (int)Group.deadspace_guristas_frigate;
-                        result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
-                        result |= GroupId == (int)Group.deadspace_serpentis_frigate;
-                        result |= GroupId == (int)Group.mission_amarr_empire_frigate;
-                        result |= GroupId == (int)Group.mission_caldari_state_frigate;
-                        result |= GroupId == (int)Group.mission_gallente_federation_frigate;
-                        result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
-                        result |= GroupId == (int)Group.mission_khanid_frigate;
-                        result |= GroupId == (int)Group.mission_concord_frigate;
-                        result |= GroupId == (int)Group.mission_mordu_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                        result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
-                        result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
-                        result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
-                        result |= GroupId == (int)Group.mission_generic_frigates;
-                        result |= GroupId == (int)Group.mission_thukker_frigate;
-                        result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
-                        result |= GroupId == (int)Group.TutorialDrone;
-                        //result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one. 
-                        return result;
+
+                        return _isNPCFrigate ?? false;
                     }
 
                     return false;
@@ -2416,6 +2591,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isCruiser;
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
@@ -2427,15 +2603,33 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Cruiser;
-                        result |= GroupId == (int)Group.HeavyAssaultShip;
-                        result |= GroupId == (int)Group.Logistics;
-                        result |= GroupId == (int)Group.ForceReconShip;
-                        result |= GroupId == (int)Group.CombatReconShip;
-                        result |= GroupId == (int)Group.HeavyInterdictor;
+                        if (_isCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isCruiser = value;
+                                    return _isCruiser ?? false;
+                                }   
+                            }
 
-                        return result;
+                            bool result = false;
+                            result |= GroupId == (int)Group.Cruiser;
+                            result |= GroupId == (int)Group.HeavyAssaultShip;
+                            result |= GroupId == (int)Group.Logistics;
+                            result |= GroupId == (int)Group.ForceReconShip;
+                            result |= GroupId == (int)Group.CombatReconShip;
+                            result |= GroupId == (int)Group.HeavyInterdictor;
+
+                            _isCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsCruiser", "Adding [" + Name + "] to EntityIsCruiser as [" + _isCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsCruiser.Add(Id, (bool)_isCruiser);
+                            return _isCruiser ?? false;
+                        }
+
+                        return _isCruiser ?? false;
                     }
 
                     return false;
@@ -2448,6 +2642,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isNPCCruiser;
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
@@ -2459,41 +2654,59 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Storyline_Cruiser;
-                        result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Generic_Cruisers;
-                        result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Faction_Cruiser;
-                        result |= GroupId == (int)Group.Mission_Faction_Industrials;
-                        return result;
+                        if (_isNPCCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isNPCCruiser = value;
+                                    return _isNPCCruiser ?? false;
+                                }    
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Storyline_Cruiser;
+                            result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Cruisers;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Industrials;
+                            _isNPCCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCCruiser", "Adding [" + Name + "] to EntityIsNPCCruiser as [" + _isNPCCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCCruiser.Add(Id, (bool)_isNPCCruiser);
+                            return _isNPCCruiser ?? false;
+                        }
+
+                        return _isNPCCruiser ?? false;
                     }
 
                     return false;
@@ -2506,6 +2719,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isBattleCruiser;
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
@@ -2517,11 +2731,29 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Battlecruiser;
-                        result |= GroupId == (int)Group.CommandShip;
-                        result |= GroupId == (int)Group.StrategicCruiser; // Technically a cruiser, but hits hard enough to be a BC :)
-                        return result;
+                        if (_isBattleCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsBattleCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBattleCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isBattleCruiser = value;
+                                    return _isBattleCruiser ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Battlecruiser;
+                            result |= GroupId == (int)Group.CommandShip;
+                            result |= GroupId == (int)Group.StrategicCruiser; // Technically a cruiser, but hits hard enough to be a BC :)
+                            _isBattleCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleCruiser", "Adding [" + Name + "] to EntityIsBattleCruiser as [" + _isBattleCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBattleCruiser.Add(Id, (bool)_isBattleCruiser);
+                            return _isBattleCruiser ?? false;
+                        }
+
+                        return _isBattleCruiser ?? false;
                     }
 
                     return false;
@@ -2534,6 +2766,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isNPCBattleCruiser;
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
@@ -2545,34 +2778,52 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
-                        result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
-                        result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
-                        return result;
+                        if (_isNPCBattleCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCBattleCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCBattleCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isNPCBattleCruiser = value;
+                                    return _isNPCBattleCruiser ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
+                            _isNPCBattleCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleCruiser", "Adding [" + Name + "] to EntityIsNPCBattleCruiser as [" + _isNPCBattleCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCBattleCruiser.Add(Id, (bool)_isNPCBattleCruiser);
+                            return _isNPCBattleCruiser ?? false;
+                        }
+
+                        return _isNPCBattleCruiser ?? false;
                     }
 
                     return false;
@@ -2585,6 +2836,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+
+        private bool? _isBattleship;
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
@@ -2596,12 +2849,30 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Battleship;
-                        result |= GroupId == (int)Group.EliteBattleship;
-                        result |= GroupId == (int)Group.BlackOps;
-                        result |= GroupId == (int)Group.Marauder;
-                        return result;
+                        if (_isBattleship == null)
+                        {
+                            if (Cache.Instance.EntityIsBattleShip.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBattleShip.TryGetValue(Id, out value))
+                                {
+                                    _isBattleship = value;
+                                    return _isBattleship ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Battleship;
+                            result |= GroupId == (int)Group.EliteBattleship;
+                            result |= GroupId == (int)Group.BlackOps;
+                            result |= GroupId == (int)Group.Marauder;
+                            _isBattleship = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleShip", "Adding [" + Name + "] to EntityIsBattleShip as [" + _isBattleship + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBattleShip.Add(Id, (bool)_isBattleship);
+                            return _isBattleship ?? false;
+                        }
+
+                        return _isBattleship ?? false;
                     }
 
                     return false;
@@ -2614,6 +2885,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isNPCBattleship;
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
@@ -2625,39 +2897,57 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Storyline_Battleship;
-                        result |= GroupId == (int)Group.Storyline_Mission_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
-                        result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
-                        result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
-                        result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
-                        result |= GroupId == (int)Group.Mission_Khanid_Battleship;
-                        result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
-                        result |= GroupId == (int)Group.Mission_Mordu_Battleship;
-                        result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
-                        result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
-                        result |= GroupId == (int)Group.Mission_Generic_Battleships;
-                        result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
-                        result |= GroupId == (int)Group.Mission_Thukker_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Battleship;
-                        result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
-                        result |= GroupId == (int)Group.Mission_Faction_Battleship;
-                        return result;
+                        if (_isNPCBattleship == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCBattleShip.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCBattleShip.TryGetValue(Id, out value))
+                                {
+                                    _isNPCBattleship = value;
+                                    return _isNPCBattleship ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Storyline_Battleship;
+                            result |= GroupId == (int)Group.Storyline_Mission_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battleship;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battleship;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Mission_Generic_Battleships;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
+                            result |= GroupId == (int)Group.Mission_Faction_Battleship;
+                            _isNPCBattleship = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleShip", "Adding [" + Name + "] to EntityIsNPCBattleShip as [" + _isNPCBattleship + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCBattleShip.Add(Id, (bool)_isNPCBattleship);
+                            return _isNPCBattleship ?? false;
+                        }
+
+                        return _isNPCBattleship ?? false;
                     }
 
                     return false;
@@ -2682,6 +2972,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_isLargeCollidable == null)
                         {
+                            if (Cache.Instance.EntityIsLargeCollidable.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsLargeCollidable.TryGetValue(Id, out value))
+                                {
+                                    _isLargeCollidable = value;
+                                    return _isLargeCollidable ?? false;
+                                }   
+                            }
+
                             bool result = false;
                             result |= GroupId == (int)Group.LargeColidableObject;
                             result |= GroupId == (int)Group.LargeColidableShip;
@@ -2689,6 +2989,8 @@ namespace Questor.Modules.Caching
                             result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
                             result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
                             _isLargeCollidable = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLargeCollidableObject", "Adding [" + Name + "] to EntityIsLargeCollidableObject as [" + _isLargeCollidable + "]", Logging.Debug);
+                            Cache.Instance.EntityIsLargeCollidable.Add(Id, (bool)_isLargeCollidable);
                             return _isLargeCollidable ?? false;
                         }
 
@@ -2705,6 +3007,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isMiscJunk;
         public bool IsMiscJunk
         {
             get
@@ -2715,15 +3018,34 @@ namespace Questor.Modules.Caching
                     {
                         if (Cache.Instance.Entities.All(t => t.Id != Id))
                         {
+                            Logging.Log("IsMiscJunk", "You should never see this. The entity [" + Name + "][" + MaskedId + "] was not found in the entities list?", Logging.Debug);
                             return false;
                         }
 
-                        bool result = false;
-                        result |= GroupId == (int)Group.PlayerDrone;
-                        result |= GroupId == (int)Group.Wreck;
-                        result |= GroupId == (int)Group.AccelerationGate;
-                        result |= GroupId == (int)Group.GasCloud;
-                        return result;
+                        if (_isMiscJunk == null)
+                        {
+                            if (Cache.Instance.EntityIsMiscJunk.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsMiscJunk.TryGetValue(Id, out value))
+                                {
+                                    _isMiscJunk = value;
+                                    return _isMiscJunk ?? false;
+                                }
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.PlayerDrone;
+                            result |= GroupId == (int)Group.Wreck;
+                            result |= GroupId == (int)Group.AccelerationGate;
+                            result |= GroupId == (int)Group.GasCloud;
+                            _isMiscJunk = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsMiscJunk", "Adding [" + Name + "] to EntityIsMiscJunk as [" + _isMiscJunk + "]", Logging.Debug);
+                            Cache.Instance.EntityIsMiscJunk.Add(Id, (bool)_isMiscJunk);
+                            return _isMiscJunk ?? false;
+                        }
+
+                        return _isMiscJunk ?? false;
                     }
 
                     return false;
@@ -2750,7 +3072,18 @@ namespace Questor.Modules.Caching
                         {
                             if (Cache.Instance.Entities.All(t => t.Id != Id))
                             {
+                                Logging.Log("IsMiscJunk", "You should never see this. The entity [" + Name + "][" + MaskedId + "] was not found in the entities list?", Logging.Debug);
                                 return false;
+                            }
+
+                            if (Cache.Instance.EntityIsBadIdea.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBadIdea.TryGetValue(Id, out value))
+                                {
+                                    _IsBadIdea = value;
+                                    return _IsBadIdea ?? false;
+                                }    
                             }
 
                             bool result = false;
@@ -2772,6 +3105,8 @@ namespace Questor.Modules.Caching
                             result |= IsBattleship;
                             result |= IsPlayer;
                             _IsBadIdea =  result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBadIdea", "Adding [" + Name + "] to EntityIsBadIdea as [" + _IsBadIdea + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBadIdea.Add(Id, (bool)_IsBadIdea);
                             return _IsBadIdea ?? false;
                         }
 
@@ -2823,6 +3158,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNpcByGroupID == null)
                         {
+                            if (Cache.Instance.EntityIsNPCByGroupID.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCByGroupID.TryGetValue(Id, out value))
+                                {
+                                    _isNpcByGroupID = value;
+                                    return _isNpcByGroupID ?? false;
+                                }   
+                            }
+
                             bool result = false;
                             result |= IsLargeCollidable;
                             result |= IsSentry;
@@ -2976,6 +3321,8 @@ namespace Questor.Modules.Caching
                             result |= GroupId == (int)Group.mission_thukker_frigate;
                             result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
                             _isNpcByGroupID = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCByGroupID", "Adding [" + Name + "] to EntityIsNPCByGroupID as [" + _isNpcByGroupID + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCByGroupID.Add(Id, (bool)_isNpcByGroupID);
                             return _isNpcByGroupID ?? false;
                         }
 
@@ -2992,6 +3339,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isEntityIShouldLeaveAlone;
         public bool IsEntityIShouldLeaveAlone
         {
             get
@@ -3000,11 +3348,30 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        bool result = false;
-                        result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
-                        result |= GroupId == (int)Group.Mission_Merchant;    // Merchant, Convoy? - Dread Pirate Scarlet
-                        result |= IsOreOrIce;
-                        return result;
+                        if (_isEntityIShouldLeaveAlone == null)
+                        {
+                            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.TryGetValue(Id, out value))
+                                {
+                                    _isEntityIShouldLeaveAlone = value;
+                                    return _isEntityIShouldLeaveAlone ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
+                            result |= GroupId == (int)Group.Mission_Merchant;    // Merchant, Convoy? - Dread Pirate Scarlet
+                            result |= GroupId == (int)Group.FactionWarfareNPC;
+                            result |= IsOreOrIce;
+                            _isEntityIShouldLeaveAlone = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsEntutyIShouldLeaveAlone", "Adding [" + Name + "] to EntityIsEntutyIShouldLeaveAlone as [" + _isEntityIShouldLeaveAlone + "]", Logging.Debug);
+                            Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Add(Id, (bool)_isEntityIShouldLeaveAlone);
+                            return _isEntityIShouldLeaveAlone ?? false;
+                        }
+
+                        return _isEntityIShouldLeaveAlone ?? false;
                     }
 
                     return false;

@@ -109,6 +109,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDoneAction { get; set; }
         public bool DebugDrones { get; set; }
         public bool DebugDroneHealth { get; set; }
+        public bool DebugEntityCache { get; set; }
         public bool DebugExceptions { get; set; }
         public bool DebugFittingMgr { get; set; }
         public bool DebugFleetSupportSlave { get; set; }
@@ -747,6 +748,7 @@ namespace Questor.Modules.Lookup
             DebugDoneAction = (bool?)CharacterSettingsXml.Element("debugDoneAction") ?? (bool?)CommonSettingsXml.Element("debugDoneAction") ?? false;
             DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
             DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
+            DebugEntityCache = (bool?)CharacterSettingsXml.Element("debugEntityCache") ?? (bool?)CommonSettingsXml.Element("debugEntityCache") ?? false;
             DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;
             DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
             DebugFleetSupportSlave = (bool?)CharacterSettingsXml.Element("debugFleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("debugFleetSupportSlave") ?? false;

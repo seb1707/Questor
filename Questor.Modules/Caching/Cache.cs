@@ -304,14 +304,15 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///  Dictionary for cached EWAR target
         /// </summary>
-        public HashSet<long> WarpScrambler = new HashSet<long>();
-        public HashSet<long> Jammer = new HashSet<long>();
-        public HashSet<long> TrackingDisrupter = new HashSet<long>();
-        public HashSet<long> Neuting = new HashSet<long>();
-        public HashSet<long> TargetPainting = new HashSet<long>();
-        public HashSet<long> Dampening = new HashSet<long>();
-        public HashSet<long> Webbing = new HashSet<long>();
+        public HashSet<long> ListOfWarpScramblingEntities = new HashSet<long>();
+        public HashSet<long> ListOfJammingEntities = new HashSet<long>();
+        public HashSet<long> ListOfTrackingDisruptingEntities = new HashSet<long>();
+        public HashSet<long> ListNeutralizingEntities = new HashSet<long>();
+        public HashSet<long> ListOfTargetPaintingEntities = new HashSet<long>();
+        public HashSet<long> ListOfDampenuingEntities = new HashSet<long>();
+        public HashSet<long> ListofWebbingEntities = new HashSet<long>();
 
+        
         public void DirecteveDispose()
         {
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
@@ -937,7 +938,19 @@ namespace Questor.Modules.Caching
 
         public DateTime LastSessionChange = DateTime.UtcNow;
 
-        public bool Paused { get; set; }
+        private bool _paused;
+        public bool Paused
+        {
+            get
+            {
+                return _paused;
+            }
+            set
+            {
+                _paused = value;
+                Cache.Instance.ClearPerPocketCache();
+            }
+        }
 
         public int RepairCycleTimeThisPocket { get; set; }
 
@@ -1296,6 +1309,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _containers ?? (_containers = Entities.Where(e =>
+                           e.Distance < (double)Distances.OnGridWithMe && 
                            e.IsContainer && 
                            e.HaveLootRights && 
                           (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
@@ -1308,6 +1322,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _containers ?? (_containers = Entities.Where(e =>
+                           e.Distance < (double)Distances.OnGridWithMe &&
                            e.IsContainer &&
                           (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
@@ -1316,7 +1331,7 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Wrecks
         {
-            get { return _containers ?? (_containers = Entities.Where(e => (e.GroupId == (int)Group.Wreck)).ToList()); }
+            get { return _containers ?? (_containers = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && (e.GroupId == (int)Group.Wreck)).ToList()); }
         }
 
         public IEnumerable<EntityCache> UnlootedContainers
@@ -1324,6 +1339,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _unlootedContainers ?? (_unlootedContainers = Entities.Where(e =>
+                          e.Distance < (double)Distances.OnGridWithMe && 
                           e.IsContainer &&
                           e.HaveLootRights &&
                           (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(
@@ -1338,6 +1354,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = Entities.Where(e =>
+                          e.Distance < (double)Distances.OnGridWithMe && 
                           (e.GroupId == (int)Group.Wreck || e.GroupId == (int)Group.SecureContainer ||
                            e.GroupId == (int)Group.AuditLogSecureContainer ||
                            e.GroupId == (int)Group.FreightContainer) && !e.IsWreckEmpty).OrderBy(e => e.Distance).
@@ -1353,7 +1370,7 @@ namespace Questor.Modules.Caching
             {
                 if (_TotalTargetsandTargeting == null)
                 {
-                    _TotalTargetsandTargeting = Targets.Where(i => i.IsOnGridWithMe).Concat(Targeting.Where(i => i.IsOnGridWithMe && !i.IsTarget));
+                    _TotalTargetsandTargeting = Targets.Where(i => i.Distance < (double)Distances.OnGridWithMe).Concat(Targeting.Where(i => i.IsOnGridWithMe && !i.IsTarget));
                     return _TotalTargetsandTargeting;
                 }
 
@@ -1367,7 +1384,7 @@ namespace Questor.Modules.Caching
             {
                 if (_targets == null)
                 {
-                    _targets = Entities.Where(e => e.IsTarget).ToList();
+                    _targets = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.IsTarget).ToList();
                 }
                 
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
@@ -1386,7 +1403,7 @@ namespace Questor.Modules.Caching
             {
                 if (_targeting == null)
                 {
-                    _targeting = Entities.Where(e => e.IsTargeting || Cache.Instance.TargetingIDs.ContainsKey(e.Id)).ToList();
+                    _targeting = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.IsTargeting || Cache.Instance.TargetingIDs.ContainsKey(e.Id)).ToList();
                 }
 
                 if (_targeting.Any())
@@ -1409,12 +1426,12 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> TargetedBy
         {
-            get { return _targetedBy ?? (_targetedBy = Entities.Where(e => e.IsTargetedBy && !e.IsBadIdea).ToList()); }
+            get { return _targetedBy ?? (_targetedBy = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.CategoryId == (int)CategoryID.Entity && !e.IsLargeCollidable && e.IsTargetedBy && !e.IsBadIdea).ToList()); }
         }
 
         public IEnumerable<EntityCache> Aggressed
         {
-            get { return _aggressed ?? (_aggressed = Entities.Where(e => e.IsTargetedBy && e.IsAttacking).ToList()); }
+            get { return _aggressed ?? (_aggressed = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.CategoryId == (int)CategoryID.Entity && !e.IsLargeCollidable && e.IsTargetedBy && e.IsAttacking).ToList()); }
         }
 
         //
@@ -1435,12 +1452,11 @@ namespace Questor.Modules.Caching
                         targets.AddRange(Cache.Instance.Targets);
                         targets.AddRange(Cache.Instance.Targeting);
 
-                        _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity
+                        _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.Distance < (double)Distances.OnGridWithMe
                                                             && !e.IsIgnored 
                                                             && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
                                                             && (e.IsNpc || e.IsNpcByGroupID)
                                                             && e.Distance < Cache.Instance.MaxRange
-                                                            && e.Distance < (double)Distances.OnGridWithMe
                                                             && !e.IsContainer
                                                             && !e.IsFactionWarfareNPC
                                                             && !e.IsEntityIShouldLeaveAlone
@@ -1459,6 +1475,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+
         //
         // entities that have potentially not been locked yet
         // entities that may not be in range yet
@@ -1472,9 +1489,9 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InSpace)
                 {
                     _potentialCombatTargets = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                        && e.Distance < (int)Distances.OnGridWithMe 
                                                         && !e.IsIgnored
                                                         && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
-                                                        && e.Distance < (int)Distances.OnGridWithMe
                                                         && (e.IsNpcByGroupID || e.IsAttacking ) //|| e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
                                                         //&& !e.IsTarget
                                                         && !e.IsContainer
@@ -1493,17 +1510,11 @@ namespace Questor.Modules.Caching
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                             List<EntityCache> __entities = Entities.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            //&& (e.IsNpc || e.IsNpcByGroupID)
-                                                            //&& !e.IsTarget
                                                             && e.Distance < (int)Distances.OnGridWithMe
                                                             && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
                                                             && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                             && !e.IsMiscJunk
-                                                            && !e.IsCelestial   
-                                                            && !e.IsStation
-                                                            && !e.IsCustomsOffice
                                                             && !e.IsAsteroid
-                                                            && !e.IsAsteroidBelt
                                                             && !e.IsIgnored
                                                             )
                                                             .ToList();
@@ -1544,7 +1555,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_entities == null)
                     {
-                        return Cache.Instance.DirectEve.Entities.Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
+                        return Cache.Instance.DirectEve.Entities.Where(e => e.CategoryId != (int)CategoryID.Charge).Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
                     }
 
                     return _entities;
@@ -1555,6 +1566,33 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public Dictionary<long, string> EntityNames = new Dictionary<long, string>();
+        public Dictionary<long, int> EntityTypeID = new Dictionary<long, int>();
+        public Dictionary<long, int> EntityGroupID = new Dictionary<long, int>();
+        public Dictionary<long, long> EntityBounty = new Dictionary<long, long>();
+        public Dictionary<long, bool> EntityIsFrigate = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsNPCFrigate = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsCruiser = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsNPCCruiser = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsBattleCruiser = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsNPCBattleCruiser = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsBattleShip = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsNPCBattleShip = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsHighValueTarget = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsLowValueTarget = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsLargeCollidable = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsMiscJunk = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsBadIdea = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsFactionWarfareNPC = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsNPCByGroupID = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsEntutyIShouldLeaveAlone = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsSentry = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityHaveLootRights = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsTargetingMe = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsAttacking = new Dictionary<long, bool>();
+        public Dictionary<long, bool> EntityIsStargate = new Dictionary<long, bool>();
+
+
         public IEnumerable<EntityCache> EntitiesActivelyBeingLocked
         {
             get
@@ -1564,7 +1602,7 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                IEnumerable<EntityCache> _entitiesActivelyBeingLocked = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.IsTargeting).ToList();
+                IEnumerable<EntityCache> _entitiesActivelyBeingLocked = Cache.Instance.Entities.Where(i => i.Distance < (double)Distances.OnGridWithMe && i.IsTargeting).ToList();
                 if (_entitiesActivelyBeingLocked.Any())
                 {
                     return _entitiesActivelyBeingLocked;
@@ -1583,7 +1621,7 @@ namespace Questor.Modules.Caching
                     return new List<EntityCache>();
                 }
 
-                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.Id != Cache.Instance.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
+                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.Entities.Where(i => i.Distance < (double)Distances.OnGridWithMe && i.CategoryId != (int)CategoryID.Celestial && i.CategoryId != (int)CategoryID.Asteroid && i.IsOnGridWithMe && i.Id != Cache.Instance.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
                 if (_entitiesNotSelf.Any())
                 {
                     return _entitiesNotSelf;
@@ -1840,7 +1878,44 @@ namespace Questor.Modules.Caching
         
         public IEnumerable<EntityCache> Stargates
         {
-            get { return _stargates ?? (_stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList()); }
+            get
+            {
+                if (_stargates == null)
+                {
+                    if (Cache.Instance.EntityIsStargate.Any())
+                    {
+                        if (_stargates != null && _stargates.Any()) _stargates.Clear();
+                        if (_stargates == null) _stargates = new List<EntityCache>();
+                        foreach (KeyValuePair<long, bool> __stargate in Cache.Instance.EntityIsStargate)
+                        {
+                            _stargates.Add(Cache.Instance.Entities.FirstOrDefault(i => i.Id == __stargate.Key));
+                        }
+
+                        if (_stargates.Any()) return _stargates;
+                    }
+
+                    _stargates = Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList();
+                    foreach (EntityCache __stargate in _stargates)
+                    {
+                        if (Cache.Instance.EntityIsStargate.Any())
+                        {
+                            if (!Cache.Instance.EntityIsStargate.ContainsKey(__stargate.Id))
+                            {
+                                Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
+                                continue;
+                            }
+
+                            continue;
+                        }
+
+                        Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
+                        continue;
+                    }
+                    
+                }
+
+                return _stargates ?? null;
+            }
         }
 
         public EntityCache ClosestStargate
@@ -1851,7 +1926,7 @@ namespace Questor.Modules.Caching
         public EntityCache StargateByName(string locationName)
         {
             {
-                return _stargate ?? (_stargate = Cache.Instance.EntitiesByName(locationName).FirstOrDefault(e => e.GroupId == (int)Group.Stargate));
+                return _stargate ?? (_stargate = Cache.Instance.EntitiesByName(locationName, Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.Stargate)).FirstOrDefault(e => e.GroupId == (int)Group.Stargate));
             }
         }
 
@@ -1860,10 +1935,11 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjects ?? (_bigObjects = Entities.Where(e =>
+                       e.Distance < (double)Distances.OnGridWithMe &&
                        e.IsLargeCollidable ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
-                       e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                       e.GroupId == (int)Group.SpawnContainer
+                       ).OrderBy(t => t.Distance).ToList());
             }
         }
 
@@ -1872,6 +1948,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _gates ?? (_gates = Entities.Where(e =>
+                       e.Distance < (double)Distances.OnGridWithMe &&
                        e.GroupId == (int)Group.AccelerationGate &&
                        e.Distance < (double)Distances.OnGridWithMe).OrderBy(t => t.Distance).ToList());
             }
@@ -1882,6 +1959,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
+                       e.Distance < (double)Distances.OnGridWithMe && 
                        e.IsLargeCollidable ||
                        e.CategoryId == (int)CategoryID.Asteroid ||
                        e.GroupId == (int)Group.AccelerationGate ||
@@ -1895,6 +1973,7 @@ namespace Questor.Modules.Caching
             get
             {
                 return _objects ?? (_objects = Entities.Where(e =>
+                       e.Distance < (double)Distances.OnGridWithMe && 
                        !e.IsPlayer &&
                        e.GroupId != (int)Group.SpawnContainer &&
                        e.GroupId != (int)Group.Wreck &&
@@ -2275,9 +2354,9 @@ namespace Questor.Modules.Caching
         /// </summary>
         /// <param name = "nameToSearchFor"></param>
         /// <returns></returns>
-        public IEnumerable<EntityCache> EntitiesByName(string nameToSearchFor)
+        public IEnumerable<EntityCache> EntitiesByName(string nameToSearchFor, IEnumerable<EntityCache> EntitiesToLookThrough)
         {
-            return Cache.Instance.Entities.Where(e => e.Name.ToLower() == nameToSearchFor.ToLower()).ToList();
+            return EntitiesToLookThrough.Where(e => e.Name.ToLower() == nameToSearchFor.ToLower()).ToList();
         }
 
         /// <summary>
@@ -2429,6 +2508,7 @@ namespace Questor.Modules.Caching
                 _modulesAsItemCache = null;
                 _myShipEntity = null; 
                 _objects = null;
+                _potentialCombatTargets = null;
                 _safeSpotBookmarks = null;
                 _star = null;
                 _stations = null;
@@ -2964,7 +3044,7 @@ namespace Questor.Modules.Caching
 
         public void RemovePrimaryWeaponPriorityTargetsByName(string stringEntitiesToRemove)
         {
-            IEnumerable<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
+            IEnumerable<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (entitiesToRemove.Any())
             {
                 Logging.Log("RemovingPWPT", "removing [" + stringEntitiesToRemove + "] from the PWPT List", Logging.Debug);
@@ -2997,7 +3077,7 @@ namespace Questor.Modules.Caching
 
         public void RemovedDronePriorityTargetsByName(string stringEntitiesToRemove)
         {
-            List<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove).ToList();
+            List<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (entitiesToRemove.Any())
             {
                 Logging.Log("RemovingDPT", "removing [" + stringEntitiesToRemove + "] from the DPT List", Logging.Debug);
@@ -3056,7 +3136,7 @@ namespace Questor.Modules.Caching
 
         public void AddWarpScramblerByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).OrderBy(i => i.Distance).ToList();
             if (notTheClosest)
             {
                 entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);
@@ -3073,9 +3153,9 @@ namespace Questor.Modules.Caching
                     }
 
                     Logging.Log("AddWarpScramblerByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the WarpScrambler List", Logging.Debug);
-                    if (!Cache.Instance.WarpScrambler.Contains(entityToAdd.Id))
+                    if (!Cache.Instance.ListOfWarpScramblingEntities.Contains(entityToAdd.Id))
                     {
-                        Cache.Instance.WarpScrambler.Add(entityToAdd.Id);
+                        Cache.Instance.ListOfWarpScramblingEntities.Add(entityToAdd.Id);
                     }
                     continue;
                 }
@@ -3089,7 +3169,7 @@ namespace Questor.Modules.Caching
 
         public void AddWebifierByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
         {
-            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd).OrderBy(i => i.Distance).ToList();
+            IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).OrderBy(i => i.Distance).ToList();
             if (notTheClosest)
             {
                 entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);    
@@ -3105,9 +3185,9 @@ namespace Questor.Modules.Caching
                         continue;
                     }
                     Logging.Log("AddWebifierByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the Webifier List", Logging.Debug);
-                    if (!Cache.Instance.Webbing.Contains(entityToAdd.Id))
+                    if (!Cache.Instance.ListofWebbingEntities.Contains(entityToAdd.Id))
                     {
-                        Cache.Instance.Webbing.Add(entityToAdd.Id);
+                        Cache.Instance.ListofWebbingEntities.Add(entityToAdd.Id);
                     }
                     continue;
                 }
@@ -3330,41 +3410,78 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void ClearEWARCache()
+        public void ClearPerPocketCache()
         {
-            WarpScrambler.Clear();
-            Jammer.Clear();
-            TrackingDisrupter.Clear();
-            Neuting.Clear();
-            TargetPainting.Clear();
-            Dampening.Clear();
-            Webbing.Clear();
+            _doWeCurrentlyHaveTurretsMounted = null;
+            ListOfWarpScramblingEntities.Clear();
+            ListOfJammingEntities.Clear();
+            ListOfTrackingDisruptingEntities.Clear();
+            ListNeutralizingEntities.Clear();
+            ListOfTargetPaintingEntities.Clear();
+            ListOfDampenuingEntities.Clear();
+            ListofWebbingEntities.Clear();
+
+            EntityNames.Clear();
+            EntityTypeID.Clear();
+            EntityGroupID.Clear();
+            EntityBounty.Clear();
+            EntityIsFrigate.Clear();
+            EntityIsNPCFrigate.Clear();
+            EntityIsCruiser.Clear();
+            EntityIsNPCCruiser.Clear();
+            EntityIsBattleCruiser.Clear();
+            EntityIsNPCBattleCruiser.Clear();
+            EntityIsBattleShip.Clear();
+            EntityIsNPCBattleShip.Clear();
+            EntityIsHighValueTarget.Clear();
+            EntityIsLowValueTarget.Clear();
+            EntityIsLargeCollidable.Clear();
+            EntityIsMiscJunk.Clear();
+            EntityIsBadIdea.Clear();
+            EntityIsFactionWarfareNPC.Clear();
+            EntityIsNPCByGroupID.Clear();
+            EntityIsEntutyIShouldLeaveAlone.Clear();
+            EntityHaveLootRights.Clear();
+            EntityIsTargetingMe.Clear();
+            EntityIsAttacking.Clear();
+            EntityIsStargate.Clear();
         }
+
+        private bool? _doWeCurrentlyHaveTurretsMounted;
 
         public bool DoWeCurrentlyHaveTurretsMounted()
         {
             try
             {
-                //int ModuleNumber = 0;
-                foreach (ModuleCache m in Cache.Instance.Modules)
+                if (_doWeCurrentlyHaveTurretsMounted == null)
                 {
-                    if (m.GroupId == (int)Group.ProjectileWeapon
-                     || m.GroupId == (int)Group.EnergyWeapon
-                     || m.GroupId == (int)Group.HybridWeapon
-                        //|| m.GroupId == (int)Group.CruiseMissileLaunchers
-                        //|| m.GroupId == (int)Group.RocketLaunchers
-                        //|| m.GroupId == (int)Group.StandardMissileLaunchers
-                        //|| m.GroupId == (int)Group.TorpedoLaunchers
-                        //|| m.GroupId == (int)Group.AssaultMissilelaunchers
-                        //|| m.GroupId == (int)Group.HeavyMissilelaunchers
-                        //|| m.GroupId == (int)Group.DefenderMissilelaunchers
-                       )
+                    //int ModuleNumber = 0;
+                    foreach (ModuleCache m in Cache.Instance.Modules)
                     {
-                        return true;
+                        if (m.GroupId == (int)Group.ProjectileWeapon
+                         || m.GroupId == (int)Group.EnergyWeapon
+                         || m.GroupId == (int)Group.HybridWeapon
+                            //|| m.GroupId == (int)Group.CruiseMissileLaunchers
+                            //|| m.GroupId == (int)Group.RocketLaunchers
+                            //|| m.GroupId == (int)Group.StandardMissileLaunchers
+                            //|| m.GroupId == (int)Group.TorpedoLaunchers
+                            //|| m.GroupId == (int)Group.AssaultMissilelaunchers
+                            //|| m.GroupId == (int)Group.HeavyMissilelaunchers
+                            //|| m.GroupId == (int)Group.DefenderMissilelaunchers
+                           )
+                        {
+                            _doWeCurrentlyHaveTurretsMounted = true;
+                            return _doWeCurrentlyHaveTurretsMounted ?? true;
+                        }
+
+                        continue;
                     }
 
-                    continue;
+                    _doWeCurrentlyHaveTurretsMounted = false;
+                    return _doWeCurrentlyHaveTurretsMounted ?? false;
                 }
+
+                return _doWeCurrentlyHaveTurretsMounted ?? false;
             }
             catch (Exception exception)
             {
@@ -3450,7 +3567,7 @@ namespace Questor.Modules.Caching
                         {
                             if (PreferredPrimaryWeaponTarget == null || (PreferredPrimaryWeaponTarget != null && !PreferredPrimaryWeaponTarget.IsOnGridWithMe) || DateTime.UtcNow > Cache.Instance.NextGetBestCombatTarget)
                             {
-                                _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                                _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.Where(t => t.Distance < distance)
                                                                         .OrderByDescending(t => t.IsInOptimalRange)
                                                                         .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget && t.IsInOptimalRange)
                                                                         .ThenByDescending(t => t.IsCorrectSizeForMyWeapons)                            // Weapons should fire big targets first
@@ -3546,7 +3663,7 @@ namespace Questor.Modules.Caching
 
                     if (_bestDroneTargets.Any())
                     {
-                        _bestDroneTargets = _bestDroneTargets.Where(t => !t.IsIgnored && t.Distance < distance)
+                        _bestDroneTargets = _bestDroneTargets.Where(t => t.Distance < distance)
                                                                   .Where(t => t.Distance < Cache.Instance.MaxDroneRange)
                                                                   .OrderByDescending(t => t.isPreferredDroneTarget)
                                                                   .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
@@ -3697,67 +3814,27 @@ namespace Questor.Modules.Caching
             return null;
         }
 
-        /// <summary>
-        ///   Return the best possible target (based on current target, distance and low value first)
-        /// </summary>
-        /// <param name="_potentialTargets"></param>
-        /// <param name="distance"></param>
-        /// <param name="lowValueFirst"></param>
-        /// <param name="callingroutine"> </param>
-        /// <returns></returns>
-        public bool GetBestPrimaryWeaponTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
+        public EntityCache FindCurrentTarget()
         {
-            if (Settings.Instance.DebugDisableGetBestTarget)
-            {
-                return true;
-            }
-
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
-            
-            if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
-                return false;
-            }
-
-            NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
-
-            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
-            //{
-            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
-            //    return false;
-            //}
-
             EntityCache currentTarget = null;
-            if (Cache.Instance.CurrentWeaponTarget() != null 
+            if (Cache.Instance.CurrentWeaponTarget() != null
                 && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
                 && !Cache.Instance.CurrentWeaponTarget().IsIgnored)
             {
                 currentTarget = Cache.Instance.CurrentWeaponTarget();
             }
-            
+
             if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
             {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance/1000,0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
-                return true;
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log("FindCurrentTarget", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                return currentTarget;
             }
 
+            return currentTarget;
+        }
 
-            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
-            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
-            //and there is nothing to replace it with.
-            //if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
-            //{
-            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
-            //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
-            //}
-
-            //
-            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
-            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
-            //
-
+        public bool CheckForPrimaryWeaponPriorityTargetsInOrder(EntityCache currentTarget, double distance)
+        {
             // Do we have ANY warp scrambling entities targeted starting with currentTarget
             // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.WarpScrambler, Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
@@ -3792,6 +3869,59 @@ namespace Questor.Modules.Caching
             // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Webbing, Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList, distance) != null)
                 return true;
+
+            return false;
+        }
+
+        /// <summary>
+        ///   Return the best possible target (based on current target, distance and low value first)
+        /// </summary>
+        /// <param name="_potentialTargets"></param>
+        /// <param name="distance"></param>
+        /// <param name="lowValueFirst"></param>
+        /// <param name="callingroutine"> </param>
+        /// <returns></returns>
+        public bool GetBestPrimaryWeaponTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
+        {
+            if (Settings.Instance.DebugDisableGetBestTarget)
+            {
+                return true;
+            }
+
+            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
+            
+            if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
+            {
+                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
+                return false;
+            }
+
+            NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+
+            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            //{
+            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
+            //    return false;
+            //}
+
+            EntityCache currentTarget = FindCurrentTarget();
+            
+            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
+            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
+            //and there is nothing to replace it with.
+            //if (Cache.Instance.PreferredPrimaryWeaponTarget != null
+            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
+            //{
+            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
+            //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
+            //}
+
+            //
+            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
+            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
+            //
+
+            if (CheckForPrimaryWeaponPriorityTargetsInOrder(currentTarget, distance)) return true;
 
             //
             // if currentTarget set to something (not null) and it is actually an entity...
@@ -3862,7 +3992,6 @@ namespace Questor.Modules.Caching
                             }
                         }
                     }
-                    
                 }
 
                 #endregion Current Target Health Logging

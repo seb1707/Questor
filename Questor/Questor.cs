@@ -533,6 +533,7 @@ namespace Questor
             // Session is not ready yet, do not continue
             if (!Cache.Instance.DirectEve.Session.IsReady)
             {
+                Cache.Instance.ClearPerPocketCache();
                 return false;
             }
 
@@ -544,6 +545,7 @@ namespace Questor
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
+                Cache.Instance.ClearPerPocketCache();
                 Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
                 Cache.Instance.LastSessionChange = DateTime.UtcNow;
                 return false;

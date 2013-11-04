@@ -199,7 +199,7 @@ namespace Questor.Modules.Activities
                 target = "Acceleration Gate";
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (!targets.Any())
             {
                 if (!_waiting)
@@ -369,8 +369,8 @@ namespace Questor.Modules.Activities
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
-            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)).ToList())
-                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy && !t.IsIgnored && !t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries)).ToList()))
+            if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList())
+                || Cache.Instance.GetBestDroneTarget(DistanceToClear, false, "Drones", Cache.Instance.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                 _clearPocketTimeout = null;
 
             // Do we have a timeout?  No, set it to now + 5 seconds
@@ -646,7 +646,7 @@ namespace Questor.Modules.Activities
                 target = "Acceleration Gate";
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
@@ -706,7 +706,7 @@ namespace Questor.Modules.Activities
                 stopWhenAggressed = false;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "no entities found named [" + target + "] proceeding to next action", Logging.Teal);
@@ -1408,7 +1408,7 @@ namespace Questor.Modules.Activities
 
             bool done = items.Count == 0;
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             targets = targets.Where(i => i.IsContainer);
             if (!targets.Any())
             {
@@ -2029,7 +2029,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl", "We have moved to the next Pocket [" + Math.Round(distance / 1000, 0) + "k away]", Logging.Green);
 
                         // If we moved more then 100km, assume next Pocket
-                        Cache.Instance.ClearEWARCache();
+                        Cache.Instance.ClearPerPocketCache();
                         Cache.Instance.PocketNumber++;
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.LoadPocket;
                         Statistics.WritePocketStatistics();

@@ -1096,13 +1096,13 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
+                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
+                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
@@ -1292,13 +1292,13 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
+                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
+                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
@@ -1604,6 +1604,7 @@ namespace Questor.Modules.Combat
             // OHHHH We are still here? OK Cool lets deal with things that are already targetting me
             //
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.Distance < (double)Distances.OnGridWithMe 
+                                                            && t.CategoryId != (int)CategoryID.Asteroid
                                                             && t.IsTargetingMeAndNotYetTargeted
                                                             && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
                                                             && t.Nearest5kDistance < Cache.Instance.MaxRange)
@@ -1730,10 +1731,7 @@ namespace Questor.Modules.Combat
             // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
             // or are in the middle of attempting to aggro something
             // 
-            if (Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget 
-                                                           && !e.IsLargeCollidable
-                                                           && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries))
-                                                           ))
+            if (Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget))
             {
                 return;
             }
@@ -1746,8 +1744,7 @@ namespace Questor.Modules.Combat
             // Build a list of things not yet targeting me and not yet targetted
             //
             
-            NotYetTargetingMe = Cache.Instance.PotentialCombatTargets.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                                        && e.IsNotYetTargetingMeAndNotYetTargeted)
+            NotYetTargetingMe = Cache.Instance.PotentialCombatTargets.Where(e => e.IsNotYetTargetingMeAndNotYetTargeted)
                                                                         .OrderBy(t => t.Nearest5kDistance)
                                                                         .ToList();
 

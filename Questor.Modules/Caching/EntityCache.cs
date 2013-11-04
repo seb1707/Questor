@@ -1952,16 +1952,22 @@ namespace Questor.Modules.Caching
                                     {
                                         Cache.Instance.EntityIsHighValueTarget.Remove(Id);
                                     }
+
+                                    if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
+                                    return _isIgnored ?? true;
                                 }
-                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
+
+                                _isIgnored = false;
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
                                 return _isIgnored ?? false;
                             }
 
-                            if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
+                            _isIgnored = false;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
                             return _isIgnored ?? false;
                         }
 
-                        if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored ?? false + "]", Logging.Debug);
+                        if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
                         return _isIgnored ?? false;
                     }
 

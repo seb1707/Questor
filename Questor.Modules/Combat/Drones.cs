@@ -225,24 +225,31 @@ namespace Questor.Modules.Combat
                         // Always launch if we're scrambled
                         if (!Cache.Instance.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
                         {
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
                             launch &= Cache.Instance.UseDrones;
-
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", " launch &= Cache.Instance.UseDrones; Launch is [" + launch + "]", Logging.Debug);
                             // Are we done with this mission pocket?
                             launch &= !Cache.Instance.IsMissionPocketDone;
-
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "!Cache.Instance.IsMissionPocketDone; Launch is [" + launch + "]", Logging.Debug);
                             // If above minimums
                             launch &= Cache.Instance.ActiveShip.ShieldPercentage >= Settings.Instance.DroneMinimumShieldPct;
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ShieldPercentage; Launch is [" + launch + "]", Logging.Debug);
                             launch &= Cache.Instance.ActiveShip.ArmorPercentage >= Settings.Instance.DroneMinimumArmorPct;
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ArmorPercentage; Launch is [" + launch + "]", Logging.Debug);
                             launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= Settings.Instance.DroneMinimumCapacitorPct;
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
 
                             // yes if there are targets to kill
                             launch &= Cache.Instance.TargetedBy.Count(e => !e.IsSentry && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.TargetedBy.Count; Launch is [" + launch + "]", Logging.Debug);
 
                             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                             {
                                 launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
+                                if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Entities.Count; Launch is [" + launch + "]", Logging.Debug);
                             }
 
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
                             // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
                             if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
                             {
@@ -258,13 +265,14 @@ namespace Questor.Modules.Combat
                                 else
                                 {
                                     // Do not launch the drones until the delay has passed
+                                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "We are still in _lastRecall delay. Launch is [" + launch + "]", Logging.Debug);
                                     launch = false;
                                 }
                             }
                             else // Drones have been out for more then 30s
                                 _recallCount = 0;
                         }
-
+                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
                         if (launch)
                         {
                             // Reset launch tries

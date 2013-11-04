@@ -528,10 +528,8 @@ namespace Questor.Modules.Caching
                     {
                         if (_isTarget == null)
                         {
-                            if (Cache.Instance.Entities.Any(t => t.Id == Id))
-                            {
-                                _isTarget = _directEntity.IsTarget;
-                            }
+                            _isTarget = _directEntity.IsTarget;
+                            return _isTarget ?? false;
                         }
 
                         return _isTarget ?? _directEntity.IsTarget;
@@ -2256,21 +2254,22 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isValid;
         public bool IsValid
         {
             get
             {
                 try
                 {
-                    if (_directEntity != null && _directEntity.IsValid)
+                    if (_directEntity != null)
                     {
-
-                        if (!HasExploded)
+                        if (_isValid == null)
                         {
-                            return _directEntity.IsValid;
+                            _isValid = _directEntity.IsValid;
+                            return _isValid ?? true;
                         }
 
-                        return false;
+                        return _isValid ?? true;
                     }
 
                     return false;

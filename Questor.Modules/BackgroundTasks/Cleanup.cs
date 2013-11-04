@@ -32,7 +32,7 @@
             //Cleanup.CloseQuestor();
         }
 
-        public static bool CloseQuestor(string Reason)
+        public static bool CloseQuestor(string Reason, bool restart = false)
         {
             // 30 seconds + 1 to 60 seconds + 1 to 60 seconds before restarting (this should make each instance a bit more spread out over 2 min)
             int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMinimum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
@@ -63,7 +63,7 @@
             // Write to Session log
             if (!Statistics.WriteSessionLogClosing()) return false;
 
-            if (Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart)
+            if ((Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart) || restart)
             //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)

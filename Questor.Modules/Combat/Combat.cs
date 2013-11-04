@@ -1828,8 +1828,15 @@ namespace Questor.Modules.Combat
                 {
                     case CombatState.CheckTargets:
                         _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the outofammo state)
-                        TargetCombatants();
-                        //TargetCombatants2();
+                        if (Settings.Instance.TargetSelectionMethod == "isdp")
+                        {
+                            TargetCombatants();    
+                        }
+                        else //use new target selection method
+                        {
+                            TargetCombatants2();    
+                        }
+                        
                         break;
 
                     case CombatState.KillTargets:
@@ -1905,8 +1912,15 @@ namespace Questor.Modules.Combat
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Cache.Instance.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any() && (!Cache.Instance.InMission || Settings.Instance.SpeedTank))
                         {
-                            //Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
-                            Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
+                            if (Settings.Instance.TargetSelectionMethod == "isdp")
+                            {
+                                Cache.Instance.GetBestPrimaryWeaponTarget(Cache.Instance.MaxRange, false, "Combat");
+                            }
+                            else //use new target selection method
+                            {
+                                Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxDroneRange);
+                            }
+                            
                             i = 0;
                         }
                         

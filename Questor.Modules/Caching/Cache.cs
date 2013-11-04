@@ -1936,9 +1936,7 @@ namespace Questor.Modules.Caching
             {
                 return _bigObjects ?? (_bigObjects = Entities.Where(e =>
                        e.Distance < (double)Distances.OnGridWithMe &&
-                       e.IsLargeCollidable ||
-                       e.CategoryId == (int)CategoryID.Asteroid ||
-                       e.GroupId == (int)Group.SpawnContainer
+                       (e.IsLargeCollidable || e.CategoryId == (int)CategoryID.Asteroid || e.GroupId == (int)Group.SpawnContainer)
                        ).OrderBy(t => t.Distance).ToList());
             }
         }
@@ -1958,13 +1956,9 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e =>
-                       e.Distance < (double)Distances.OnGridWithMe && 
-                       e.IsLargeCollidable ||
-                       e.CategoryId == (int)CategoryID.Asteroid ||
-                       e.GroupId == (int)Group.AccelerationGate ||
-                       e.GroupId == (int)Group.SpawnContainer &&
-                       e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
+                return _bigObjectsAndGates ?? (_bigObjectsAndGates = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe
+                       && (e.IsLargeCollidable || e.CategoryId == (int)CategoryID.Asteroid || e.GroupId == (int)Group.AccelerationGate || e.GroupId == (int)Group.SpawnContainer)
+                       && e.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList());
             }
         }
 

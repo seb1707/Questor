@@ -161,8 +161,7 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DebugWalletBalance { get; set; }
         public bool DebugWatchForActiveWars { get; set; }
-
-
+        public string TargetSelectionMethod { get; set; } //defaults to daxten
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
@@ -805,7 +804,7 @@ namespace Questor.Modules.Lookup
             DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
             UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
             setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
-
+            TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "daxten"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
 
             //

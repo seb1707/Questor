@@ -82,6 +82,7 @@
   <defendWhileTraveling>true</defendWhileTraveling>
   <useInnerspace>true</useInnerspace>
   <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
+  <targetSelectionMethod>daxten</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->

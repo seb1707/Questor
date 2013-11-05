@@ -970,8 +970,6 @@ namespace Questor.Modules.Misc
             Logging.Log("ListCachedPocketInfo", "[" + EntityIsStargateCount + "] entries in EntityIsStargate", Logging.Yellow);
             Logging.Log("ListCachedPocketInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
             Logging.Log("ListCachedPocketInfo", "--- Note: pausing or warping / jumping will clear the above dictionaries  ---", Logging.Yellow);
-            
-            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.ListCachedPocketInfo;
             return 0;
         }
 

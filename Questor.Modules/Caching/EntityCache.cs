@@ -25,7 +25,7 @@ namespace Questor.Modules.Caching
         private readonly DirectEntity _directEntity;
         //public static int EntityCacheInstances = 0;
         private DateTime ThisEntityCacheCreated = DateTime.UtcNow;
-
+        private int DictionaryCountThreshhold = 60;
         public EntityCache(DirectEntity entity)
         {
             _directEntity = entity;
@@ -54,7 +54,7 @@ namespace Questor.Modules.Caching
                              && _PreExistingBookmark.Y == _directEntity.Y 
                              && _PreExistingBookmark.Z == _directEntity.Z)
                             {
-                                Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + Name + "] and do not need another.", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + Name + "] and do not need another.", Logging.Debug);
                                 return true;
                             }
                             continue;
@@ -90,9 +90,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_groupID == null)
                         {
-                            if (Cache.Instance.EntityGroupID.Any() && Cache.Instance.EntityGroupID.Count() > 500)
+                            if (Cache.Instance.EntityGroupID.Any() && Cache.Instance.EntityGroupID.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.GroupID", "We have [" + Cache.Instance.EntityGroupID.Count() + "] Entities in Cache.Instance.EntityGroupID", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.GroupID", "We have [" + Cache.Instance.EntityGroupID.Count() + "] Entities in Cache.Instance.EntityGroupID", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityGroupID.Any())
@@ -214,9 +214,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_TypeId == null)
                         {
-                            if (Cache.Instance.EntityTypeID.Any() && Cache.Instance.EntityTypeID.Count() > 500)
+                            if (Cache.Instance.EntityTypeID.Any() && Cache.Instance.EntityTypeID.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.TypeID", "We have [" + Cache.Instance.EntityTypeID.Count() + "] Entities in Cache.Instance.EntityTypeID", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.TypeID", "We have [" + Cache.Instance.EntityTypeID.Count() + "] Entities in Cache.Instance.EntityTypeID", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityTypeID.Any())
@@ -293,9 +293,9 @@ namespace Questor.Modules.Caching
 
                         if (_name == null)
                         {
-                            if (Cache.Instance.EntityNames.Any() && Cache.Instance.EntityNames.Count() > 500)
+                            if (Cache.Instance.EntityNames.Any() && Cache.Instance.EntityNames.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.Name", "We have [" + Cache.Instance.EntityNames.Count() + "] Entities in Cache.Instance.EntityNames", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.Name", "We have [" + Cache.Instance.EntityNames.Count() + "] Entities in Cache.Instance.EntityNames", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityNames.Any())
@@ -1325,9 +1325,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isTargetedBy == null)
                         {
-                            if (Cache.Instance.EntityIsTargetingMe.Any() && Cache.Instance.EntityIsTargetingMe.Count() > 500)
+                            if (Cache.Instance.EntityIsTargetingMe.Any() && Cache.Instance.EntityIsTargetingMe.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsTargetedBy", "We have [" + Cache.Instance.EntityIsTargetingMe.Count() + "] Entities in Cache.Instance.EntityIsTargetingMe", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsTargetedBy", "We have [" + Cache.Instance.EntityIsTargetingMe.Count() + "] Entities in Cache.Instance.EntityIsTargetingMe", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsTargetingMe.Any())
@@ -1370,9 +1370,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isAttacking == null)
                         {
-                            if (Cache.Instance.EntityIsAttacking.Any() && Cache.Instance.EntityIsAttacking.Count() > 500)
+                            if (Cache.Instance.EntityIsAttacking.Any() && Cache.Instance.EntityIsAttacking.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsAttacking", "We have [" + Cache.Instance.EntityIsAttacking.Count() + "] Entities in Cache.Instance.EntityIsAttacking", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsAttacking", "We have [" + Cache.Instance.EntityIsAttacking.Count() + "] Entities in Cache.Instance.EntityIsAttacking", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsAttacking.Any())
@@ -1909,9 +1909,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isSentry == null)
                         {
-                            if (Cache.Instance.EntityIsSentry.Any() && Cache.Instance.EntityIsSentry.Count() > 500)
+                            if (Cache.Instance.EntityIsSentry.Any() && Cache.Instance.EntityIsSentry.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsSentry", "We have [" + Cache.Instance.EntityIsSentry.Count() + "] Entities in Cache.Instance.EntityIsSentry", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsSentry", "We have [" + Cache.Instance.EntityIsSentry.Count() + "] Entities in Cache.Instance.EntityIsSentry", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsSentry.Any())
@@ -2137,9 +2137,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isHighValueTarget == null)
                         {
-                            if (Cache.Instance.EntityIsHighValueTarget.Any() && Cache.Instance.EntityIsHighValueTarget.Count() > 500)
+                            if (Cache.Instance.EntityIsHighValueTarget.Any() && Cache.Instance.EntityIsHighValueTarget.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsHighValueTarget", "We have [" + Cache.Instance.EntityIsHighValueTarget.Count() + "] Entities in Cache.Instance.EntityIsHighValueTarget", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "We have [" + Cache.Instance.EntityIsHighValueTarget.Count() + "] Entities in Cache.Instance.EntityIsHighValueTarget", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsHighValueTarget.Any())
@@ -2214,9 +2214,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isLowValueTarget == null)
                         {
-                            if (Cache.Instance.EntityIsLowValueTarget.Any() && Cache.Instance.EntityIsLowValueTarget.Count() > 500)
+                            if (Cache.Instance.EntityIsLowValueTarget.Any() && Cache.Instance.EntityIsLowValueTarget.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsLowValueTarget", "We have [" + Cache.Instance.EntityIsLowValueTarget.Count() + "] Entities in Cache.Instance.EntityIsLowValueTarget", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "We have [" + Cache.Instance.EntityIsLowValueTarget.Count() + "] Entities in Cache.Instance.EntityIsLowValueTarget", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsLowValueTarget.Any())
@@ -2499,9 +2499,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isFrigate == null)
                         {
-                            if (Cache.Instance.EntityIsFrigate.Any() && Cache.Instance.EntityIsFrigate.Count() > 500)
+                            if (Cache.Instance.EntityIsFrigate.Any() && Cache.Instance.EntityIsFrigate.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsFrigate", "We have [" + Cache.Instance.EntityIsFrigate.Count() + "] Entities in Cache.Instance.EntityIsFrigate", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsFrigate", "We have [" + Cache.Instance.EntityIsFrigate.Count() + "] Entities in Cache.Instance.EntityIsFrigate", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsFrigate.Any())
@@ -2559,9 +2559,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNPCFrigate == null)
                         {
-                            if (Cache.Instance.EntityIsNPCFrigate.Any() && Cache.Instance.EntityIsNPCFrigate.Count() > 500)
+                            if (Cache.Instance.EntityIsNPCFrigate.Any() && Cache.Instance.EntityIsNPCFrigate.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsNPCFrigate", "We have [" + Cache.Instance.EntityIsNPCFrigate.Count() + "] Entities in Cache.Instance.EntityIsNPCFrigate", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCFrigate", "We have [" + Cache.Instance.EntityIsNPCFrigate.Count() + "] Entities in Cache.Instance.EntityIsNPCFrigate", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsNPCFrigate.Any())
@@ -2672,9 +2672,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isCruiser == null)
                         {
-                            if (Cache.Instance.EntityIsCruiser.Any() && Cache.Instance.EntityIsCruiser.Count() > 500)
+                            if (Cache.Instance.EntityIsCruiser.Any() && Cache.Instance.EntityIsCruiser.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsCruiser", "We have [" + Cache.Instance.EntityIsCruiser.Count() + "] Entities in Cache.Instance.EntityIsCruiser", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsCruiser", "We have [" + Cache.Instance.EntityIsCruiser.Count() + "] Entities in Cache.Instance.EntityIsCruiser", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsCruiser.Any())
@@ -2728,9 +2728,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNPCCruiser == null)
                         {
-                            if (Cache.Instance.EntityIsNPCCruiser.Any() && Cache.Instance.EntityIsNPCCruiser.Count() > 500)
+                            if (Cache.Instance.EntityIsNPCCruiser.Any() && Cache.Instance.EntityIsNPCCruiser.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsNPCCruiser", "We have [" + Cache.Instance.EntityIsNPCCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCCruiser", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCCruiser", "We have [" + Cache.Instance.EntityIsNPCCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCCruiser", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsNPCCruiser.Any())
@@ -2810,9 +2810,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isBattleCruiser == null)
                         {
-                            if (Cache.Instance.EntityIsBattleCruiser.Any() && Cache.Instance.EntityIsBattleCruiser.Count() > 500)
+                            if (Cache.Instance.EntityIsBattleCruiser.Any() && Cache.Instance.EntityIsBattleCruiser.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsBattleCruiser", "We have [" + Cache.Instance.EntityIsBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsBattleCruiser", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleCruiser", "We have [" + Cache.Instance.EntityIsBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsBattleCruiser", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsBattleCruiser.Any())
@@ -2862,9 +2862,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNPCBattleCruiser == null)
                         {
-                            if (Cache.Instance.EntityIsNPCBattleCruiser.Any() && Cache.Instance.EntityIsNPCBattleCruiser.Count() > 500)
+                            if (Cache.Instance.EntityIsNPCBattleCruiser.Any() && Cache.Instance.EntityIsNPCBattleCruiser.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsNPCBattleCruiser", "We have [" + Cache.Instance.EntityIsNPCBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleCruiser", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleCruiser", "We have [" + Cache.Instance.EntityIsNPCBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleCruiser", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsNPCBattleCruiser.Any())
@@ -2938,9 +2938,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isBattleship == null)
                         {
-                            if (Cache.Instance.EntityIsBattleShip.Any() && Cache.Instance.EntityIsBattleShip.Count() > 500)
+                            if (Cache.Instance.EntityIsBattleShip.Any() && Cache.Instance.EntityIsBattleShip.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsBattleShip", "We have [" + Cache.Instance.EntityIsBattleShip.Count() + "] Entities in Cache.Instance.EntityIsBattleShip", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleShip", "We have [" + Cache.Instance.EntityIsBattleShip.Count() + "] Entities in Cache.Instance.EntityIsBattleShip", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsBattleShip.Any())
@@ -2991,9 +2991,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNPCBattleship == null)
                         {
-                            if (Cache.Instance.EntityIsNPCBattleShip.Any() && Cache.Instance.EntityIsNPCBattleShip.Count() > 500)
+                            if (Cache.Instance.EntityIsNPCBattleShip.Any() && Cache.Instance.EntityIsNPCBattleShip.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsNPCBattleShip", "We have [" + Cache.Instance.EntityIsNPCBattleShip.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleShip", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleShip", "We have [" + Cache.Instance.EntityIsNPCBattleShip.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleShip", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsNPCBattleShip.Any())
@@ -3069,9 +3069,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isLargeCollidable == null)
                         {
-                            if (Cache.Instance.EntityIsLargeCollidable.Any() && Cache.Instance.EntityIsLargeCollidable.Count() > 500)
+                            if (Cache.Instance.EntityIsLargeCollidable.Any() && Cache.Instance.EntityIsLargeCollidable.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsLargeCollidable", "We have [" + Cache.Instance.EntityIsLargeCollidable.Count() + "] Entities in Cache.Instance.EntityIsLargeCollidable", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLargeCollidable", "We have [" + Cache.Instance.EntityIsLargeCollidable.Count() + "] Entities in Cache.Instance.EntityIsLargeCollidable", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsLargeCollidable.Any())
@@ -3120,9 +3120,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isMiscJunk == null)
                         {
-                            if (Cache.Instance.EntityIsMiscJunk.Any() && Cache.Instance.EntityIsMiscJunk.Count() > 500)
+                            if (Cache.Instance.EntityIsMiscJunk.Any() && Cache.Instance.EntityIsMiscJunk.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsMiscJunk", "We have [" + Cache.Instance.EntityIsMiscJunk.Count() + "] Entities in Cache.Instance.EntityIsMiscJunk", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsMiscJunk", "We have [" + Cache.Instance.EntityIsMiscJunk.Count() + "] Entities in Cache.Instance.EntityIsMiscJunk", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsMiscJunk.Any())
@@ -3171,9 +3171,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_IsBadIdea == null)
                         {
-                            if (Cache.Instance.EntityIsBadIdea.Any() && Cache.Instance.EntityIsBadIdea.Count() > 500)
+                            if (Cache.Instance.EntityIsBadIdea.Any() && Cache.Instance.EntityIsBadIdea.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsBadIdea", "We have [" + Cache.Instance.EntityIsBadIdea.Count() + "] Entities in Cache.Instance.EntityIsBadIdea", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBadIdea", "We have [" + Cache.Instance.EntityIsBadIdea.Count() + "] Entities in Cache.Instance.EntityIsBadIdea", Logging.Debug);
                             }
                             
                             if (Cache.Instance.EntityIsBadIdea.Any())
@@ -3258,9 +3258,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isNpcByGroupID == null)
                         {
-                            if (Cache.Instance.EntityIsNPCByGroupID.Any() && Cache.Instance.EntityIsNPCByGroupID.Count() > 500)
+                            if (Cache.Instance.EntityIsNPCByGroupID.Any() && Cache.Instance.EntityIsNPCByGroupID.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsNPCByGroupID", "We have [" + Cache.Instance.EntityIsNPCByGroupID.Count() + "] Entities in Cache.Instance.EntityIsNPCByGroupID", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCByGroupID", "We have [" + Cache.Instance.EntityIsNPCByGroupID.Count() + "] Entities in Cache.Instance.EntityIsNPCByGroupID", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsNPCByGroupID.Any())
@@ -3455,9 +3455,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_isEntityIShouldLeaveAlone == null)
                         {
-                            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any() && Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() > 500)
+                            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any() && Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() > DictionaryCountThreshhold)
                             {
-                                Logging.Log("Entitycache.IsEntutyIShouldLeaveAlone", "We have [" + Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() + "] Entities in Cache.Instance.EntityIsEntutyIShouldLeaveAlone", Logging.Debug);
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsEntutyIShouldLeaveAlone", "We have [" + Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() + "] Entities in Cache.Instance.EntityIsEntutyIShouldLeaveAlone", Logging.Debug);
                             }
 
                             if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any())

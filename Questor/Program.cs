@@ -283,7 +283,7 @@ namespace Questor
             CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == Logging._character);
             if (schedule == null)
             {
-                Logging.Log("Startup", "Error - character not found!", Logging.Red);
+                Logging.Log("Startup", "Error - character [" + Logging._character + "] not found in Schedules.xml!", Logging.Red);
                 return;
             }
 

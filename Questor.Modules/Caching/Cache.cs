@@ -1426,12 +1426,12 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> TargetedBy
         {
-            get { return _targetedBy ?? (_targetedBy = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.CategoryId == (int)CategoryID.Entity && !e.IsLargeCollidable && e.IsTargetedBy && !e.IsBadIdea).ToList()); }
+            get { return _targetedBy ?? (_targetedBy = Cache.Instance.Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.IsTargetedBy && !e.IsBadIdea).ToList()); }
         }
 
         public IEnumerable<EntityCache> Aggressed
         {
-            get { return _aggressed ?? (_aggressed = Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.CategoryId == (int)CategoryID.Entity && !e.IsLargeCollidable && e.IsTargetedBy && e.IsAttacking).ToList()); }
+            get { return _aggressed ?? (_aggressed = Cache.Instance.Entities.Where(e => e.Distance < (double)Distances.OnGridWithMe && e.IsAttacking).ToList()); }
         }
 
         //

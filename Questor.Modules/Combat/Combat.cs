@@ -1865,15 +1865,23 @@ namespace Questor.Modules.Combat
                         EntityCache killTarget = null;
                         if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                         {
-                            if (Cache.Instance.Entities.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
+                            if (Cache.Instance.Targets.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                             {
-                                killTarget = Cache.Instance.Entities.FirstOrDefault(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id);    
+                                killTarget = Cache.Instance.Targets.FirstOrDefault(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id);    
                             }
                             else
                             {
                                 //Logging.Log("Combat.Killtargets", "Unable to find the PreferredPrimaryWeaponTarget in the Entities list... PPWT.Name[" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] PPWTID [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "]", Logging.Debug);
                                 //Cache.Instance.PreferredPrimaryWeaponTarget = null;
                                 //Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
+                            }
+                        }
+
+                        if (killTarget == null)
+                        {
+                            if (Cache.Instance.Targets.Any(i => !i.IsContainer && !i.IsBadIdea))
+                            {
+                                killTarget = Cache.Instance.Targets.Where(i => !i.IsContainer && !i.IsBadIdea).OrderByDescending(i => i.IsInOptimalRange).ThenByDescending(i => i.IsCorrectSizeForMyWeapons).ThenBy(i => i.Distance).FirstOrDefault();
                             }
                         }
 

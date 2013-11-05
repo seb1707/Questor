@@ -60,6 +60,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListLootHangarItems", ListLootHangarItems);
                 LavishScript.Commands.AddCommand("ListLootHangar", ListLootHangarItems);
                 LavishScript.Commands.AddCommand("ListLootContainerItems", ListLootContainerItems);
+                LavishScript.Commands.AddCommand("ListCachedPocketInfo", ListCachedPocketInfoInnerspaceCommand);
                 LavishScript.Commands.AddCommand("AddWarpScramblerByName", AddWarpScramblerByName);
                 LavishScript.Commands.AddCommand("AddWarpScrambler", AddWarpScramblerByName);
                 LavishScript.Commands.AddCommand("AddWebifierByName", AddWebifierByName);
@@ -124,6 +125,7 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListTargets                                  - Logs ListTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListClassInstanceInfo                        - Logs Class Instance Info", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListCachedPocketInfo                         - Logs Cached Pocket Information", Logging.White);
             return 0;
         }
 
@@ -161,6 +163,20 @@ namespace Questor.Modules.Misc
             _States.CurrentStatisticsState = StatisticsState.ListClassInstanceInfo;
             return 0;
         }
+
+        private static int ListCachedPocketInfoInnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListCachedPocketInfo - Lists Cached Pocket Info (Size of Dictionaries)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommandsState.ListCachedPocketInfo", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.ListCachedPocketInfo;
+            return 0;
+        }
+        
 
         private static int ListTargetedandTargeting(string[] args)
         {
@@ -738,6 +754,228 @@ namespace Questor.Modules.Misc
             return true;
         }
 
+        private static int ListCachedPocketInfo()
+        {
+            Logging.Log("ListCachedPocketInfo", "Entering InnerspaceCommandsState.ListCachedPocketInfo", Logging.Debug);
+            Logging.Log("ListCachedPocketInfo", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            
+            int ListofWebbingEntitiesCount = 0;
+            if (Cache.Instance.ListofWebbingEntities.Any())
+            {
+                ListofWebbingEntitiesCount = Cache.Instance.ListofWebbingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListofWebbingEntitiesCount + "] entries in ListofWebbingEntities", Logging.Yellow);
+
+            int ListOfDampenuingEntitiesCount = 0;
+            if (Cache.Instance.ListOfDampenuingEntities.Any())
+            {
+                ListOfDampenuingEntitiesCount = Cache.Instance.ListOfDampenuingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListOfDampenuingEntitiesCount + "] entries in ListOfDampenuingEntities", Logging.Yellow);
+
+            int ListOfJammingEntitiesCount = 0;
+            if (Cache.Instance.ListOfJammingEntities.Any())
+            {
+                ListOfJammingEntitiesCount = Cache.Instance.ListOfJammingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListOfJammingEntitiesCount + "] entries in ListOfJammingEntities", Logging.Yellow);
+
+            int ListOfTargetPaintingEntitiesCount = 0;
+            if (Cache.Instance.ListOfTargetPaintingEntities.Any())
+            {
+                ListOfTargetPaintingEntitiesCount = Cache.Instance.ListOfTargetPaintingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListOfTargetPaintingEntitiesCount + "] entries in ListOfTargetPaintingEntities", Logging.Yellow);
+
+            int ListOfTrackingDisruptingEntitiesCount = 0;
+            if (Cache.Instance.ListOfTrackingDisruptingEntities.Any())
+            {
+                ListOfTrackingDisruptingEntitiesCount = Cache.Instance.ListOfTrackingDisruptingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListOfTargetPaintingEntitiesCount + "] entries in ListOfTrackingDisruptingEntities", Logging.Yellow);
+
+            int ListOfWarpScramblingEntitiesCount = 0;
+            if (Cache.Instance.ListOfWarpScramblingEntities.Any())
+            {
+                ListOfWarpScramblingEntitiesCount = Cache.Instance.ListOfWarpScramblingEntities.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + ListOfWarpScramblingEntitiesCount + "] entries in ListOfWarpScramblingEntities", Logging.Yellow);
+
+            int EntityNamesCount = 0;
+            if (Cache.Instance.EntityNames.Any())
+            {
+                EntityNamesCount = Cache.Instance.EntityNames.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityNamesCount + "] entries in EntityNames", Logging.Yellow);
+
+            int EntityTypeIDCount = 0;
+            if (Cache.Instance.EntityTypeID.Any())
+            {
+                EntityTypeIDCount = Cache.Instance.EntityTypeID.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityTypeIDCount + "] entries in EntityTypeID", Logging.Yellow);
+
+            int EntityGroupIDCount = 0;
+            if (Cache.Instance.EntityGroupID.Any())
+            {
+                EntityGroupIDCount = Cache.Instance.EntityGroupID.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityGroupIDCount + "] entries in EntityGroupID", Logging.Yellow);
+
+            int EntityIsFrigateCount = 0;
+            if (Cache.Instance.EntityIsFrigate.Any())
+            {
+                EntityIsFrigateCount = Cache.Instance.EntityIsFrigate.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsFrigateCount + "] entries in EntityIsFrigate", Logging.Yellow);
+
+            int EntityIsNPCFrigateCount = 0;
+            if (Cache.Instance.EntityIsNPCFrigate.Any())
+            {
+                EntityIsNPCFrigateCount = Cache.Instance.EntityIsNPCFrigate.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsNPCFrigateCount + "] entries in EntityIsNPCFrigate", Logging.Yellow);
+
+            int EntityIsCruiserCount = 0;
+            if (Cache.Instance.EntityIsCruiser.Any())
+            {
+                EntityIsCruiserCount = Cache.Instance.EntityIsCruiser.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsCruiserCount + "] entries in EntityIsCruiser", Logging.Yellow);
+
+            int EntityIsNPCCruiserCount = 0;
+            if (Cache.Instance.EntityIsNPCCruiser.Any())
+            {
+                EntityIsNPCCruiserCount = Cache.Instance.EntityIsNPCCruiser.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsNPCCruiserCount + "] entries in EntityIsNPCCruiser", Logging.Yellow);
+
+            int EntityIsBattleCruiserCount = 0;
+            if (Cache.Instance.EntityIsBattleCruiser.Any())
+            {
+                EntityIsBattleCruiserCount = Cache.Instance.EntityIsBattleCruiser.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsBattleCruiserCount + "] entries in EntityIsBattleCruiser", Logging.Yellow);
+
+            int EntityIsNPCBattleCruiserCount = 0;
+            if (Cache.Instance.EntityIsNPCBattleCruiser.Any())
+            {
+                EntityIsNPCBattleCruiserCount = Cache.Instance.EntityIsNPCBattleCruiser.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsNPCBattleCruiserCount + "] entries in EntityIsNPCBattleCruiser", Logging.Yellow);
+
+            int EntityIsBattleShipCount = 0;
+            if (Cache.Instance.EntityIsBattleShip.Any())
+            {
+                EntityIsBattleShipCount = Cache.Instance.EntityIsBattleShip.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsBattleShipCount + "] entries in EntityIsBattleShip", Logging.Yellow);
+
+            int EntityIsNPCBattleShipCount = 0;
+            if (Cache.Instance.EntityIsNPCBattleShip.Any())
+            {
+                EntityIsNPCBattleShipCount = Cache.Instance.EntityIsNPCBattleShip.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsNPCBattleShipCount + "] entries in EntityIsNPCBattleShip", Logging.Yellow);
+
+            int EntityIsHighValueTargetCount = 0;
+            if (Cache.Instance.EntityIsHighValueTarget.Any())
+            {
+                EntityIsHighValueTargetCount = Cache.Instance.EntityIsHighValueTarget.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsHighValueTargetCount + "] entries in EntityIsHighValueTarget", Logging.Yellow);
+
+            int EntityIsLowValueTargetCount = 0;
+            if (Cache.Instance.EntityIsLowValueTarget.Any())
+            {
+                EntityIsLowValueTargetCount = Cache.Instance.EntityIsLowValueTarget.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsLowValueTargetCount + "] entries in EntityIsLowValueTarget", Logging.Yellow);
+
+            int EntityIsLargeCollidableCount = 0;
+            if (Cache.Instance.EntityIsLargeCollidable.Any())
+            {
+                EntityIsLargeCollidableCount = Cache.Instance.EntityIsLargeCollidable.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsLargeCollidableCount + "] entries in EntityIsLargeCollidable", Logging.Yellow);
+
+            int EntityIsSentryCount = 0;
+            if (Cache.Instance.EntityIsSentry.Any())
+            {
+                EntityIsSentryCount = Cache.Instance.EntityIsSentry.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsSentryCount + "] entries in EntityIsSentry", Logging.Yellow);
+
+            int EntityIsMiscJunkCount = 0;
+            if (Cache.Instance.EntityIsMiscJunk.Any())
+            {
+                EntityIsMiscJunkCount = Cache.Instance.EntityIsMiscJunk.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsMiscJunkCount + "] entries in EntityIsMiscJunk", Logging.Yellow);
+
+            int EntityIsBadIdeaCount = 0;
+            if (Cache.Instance.EntityIsBadIdea.Any())
+            {
+                EntityIsBadIdeaCount = Cache.Instance.EntityIsBadIdea.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsBadIdeaCount + "] entries in EntityIsBadIdea", Logging.Yellow);
+
+            int EntityIsFactionWarfareNPCCount = 0;
+            if (Cache.Instance.EntityIsFactionWarfareNPC.Any())
+            {
+                EntityIsFactionWarfareNPCCount = Cache.Instance.EntityIsFactionWarfareNPC.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsFactionWarfareNPCCount + "] entries in EntityIsFactionWarfareNPC", Logging.Yellow);
+
+            int EntityIsNPCByGroupIDCount = 0;
+            if (Cache.Instance.EntityIsNPCByGroupID.Any())
+            {
+                EntityIsNPCByGroupIDCount = Cache.Instance.EntityIsNPCByGroupID.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsNPCByGroupIDCount + "] entries in EntityIsNPCByGroupID", Logging.Yellow);
+
+            int EntityIsEntutyIShouldLeaveAloneCount = 0;
+            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any())
+            {
+                EntityIsEntutyIShouldLeaveAloneCount = Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsEntutyIShouldLeaveAloneCount + "] entries in EntityIsEntutyIShouldLeaveAlone", Logging.Yellow);
+
+            int EntityHaveLootRightsCount = 0;
+            if (Cache.Instance.EntityHaveLootRights.Any())
+            {
+                EntityHaveLootRightsCount = Cache.Instance.EntityHaveLootRights.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityHaveLootRightsCount + "] entries in EntityHaveLootRights", Logging.Yellow);
+
+            int EntityIsTargetingMeCount = 0;
+            if (Cache.Instance.EntityIsTargetingMe.Any())
+            {
+                EntityIsTargetingMeCount = Cache.Instance.EntityIsTargetingMe.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsTargetingMeCount + "] entries in EntityIsTargetingMe", Logging.Yellow);
+
+            int EntityIsAttackingCount = 0;
+            if (Cache.Instance.EntityIsAttacking.Any())
+            {
+                EntityIsAttackingCount = Cache.Instance.EntityIsAttacking.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsAttackingCount + "] entries in EntityIsAttacking", Logging.Yellow);
+
+            int EntityIsStargateCount = 0;
+            if (Cache.Instance.EntityIsStargate.Any())
+            {
+                EntityIsStargateCount = Cache.Instance.EntityIsStargate.Count();
+            }
+            Logging.Log("ListCachedPocketInfo", "[" + EntityIsStargateCount + "] entries in EntityIsStargate", Logging.Yellow);
+            Logging.Log("ListCachedPocketInfo", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);
+            Logging.Log("ListCachedPocketInfo", "--- Note: pausing or warping / jumping will clear the above dictionaries  ---", Logging.Yellow);
+            
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.ListCachedPocketInfo;
+            return 0;
+        }
+
+
         public void ProcessState()
         {
             switch (_States.CurrentInnerspaceCommandsState)
@@ -769,6 +1007,15 @@ namespace Questor.Modules.Misc
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.AddPWPT", Logging.Debug);
                         InnerspaceCommands.AddPrimaryWeaponPriorityTargetsByName(AddThese);
+                    }
+                    break;
+
+                case InnerspaceCommandsState.ListCachedPocketInfo:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.ListCachedPocketInfo", Logging.Debug);
+                        InnerspaceCommands.ListCachedPocketInfo();
                     }
                     break;
 

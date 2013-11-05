@@ -7,6 +7,7 @@
         ListPrimaryWeaponPriorityTargets,
         AddPWPT,
         AddDPT,
+        ListCachedPocketInfo,
         Done
     }
 }

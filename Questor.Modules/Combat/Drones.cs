@@ -241,8 +241,8 @@ namespace Questor.Modules.Combat
                             if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
 
                             // yes if there are targets to kill
-                            launch &= Cache.Instance.TargetedBy.Count(e => e.Distance < Cache.Instance.MaxDroneRange && !e.IsSentry && e.IsAttacking) > 0;
-                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.TargetedBy.Count; Launch is [" + launch + "] MaxDroneRange [" + Cache.Instance.MaxDroneRange + "] DroneControlrange [" + Settings.Instance.DroneControlRange + "] TargetingRange [" + Cache.Instance.MaxTargetRange + "]", Logging.Debug);
+                            launch &= Cache.Instance.Aggressed.Count(e => e.Distance < Cache.Instance.MaxDroneRange && !e.IsSentry) > 0;
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Aggressed.Count; Launch is [" + launch + "] MaxDroneRange [" + Cache.Instance.MaxDroneRange + "] DroneControlrange [" + Settings.Instance.DroneControlRange + "] TargetingRange [" + Cache.Instance.MaxTargetRange + "]", Logging.Debug);
 
                             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                             {

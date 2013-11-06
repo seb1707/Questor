@@ -379,7 +379,12 @@ namespace Questor.Modules.Combat
                                                                && (e.IsNpc || e.IsNpcByGroupID)
                                                                && e.Distance < Cache.Instance.MaxDroneRange) == 0)
                         {
-                            Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within [" + Cache.Instance.MaxDroneRange + "] DroneControlRange Is [" + Settings.Instance.DroneControlRange + "] Targeting Range Is [" + Cache.Instance.MaxTargetRange + "] We have [" + Cache.Instance.TargetedBy + "] total things targeting us", Logging.Magenta);
+                            int TargtedByCount = 0;
+                            if (Cache.Instance.TargetedBy.Any())
+                            {
+                                TargtedByCount = Cache.Instance.TargetedBy.Count();
+                            }
+                            Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within [" + Cache.Instance.MaxDroneRange + "] DroneControlRange Is [" + Settings.Instance.DroneControlRange + "] Targeting Range Is [" + Cache.Instance.MaxTargetRange + "] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
                             Recall = true;
                         }
 

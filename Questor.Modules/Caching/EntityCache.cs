@@ -1353,24 +1353,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isAttacking == null)
                         {
-                            if (Cache.Instance.EntityIsAttacking.Any() && Cache.Instance.EntityIsAttacking.Count() > DictionaryCountThreshhold)
-                            {
-                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsAttacking", "We have [" + Cache.Instance.EntityIsAttacking.Count() + "] Entities in Cache.Instance.EntityIsAttacking", Logging.Debug);
-                            }
-
-                            if (Cache.Instance.EntityIsAttacking.Any())
-                            {
-                                bool value = false;
-                                if (Cache.Instance.EntityIsAttacking.TryGetValue(Id, out value))
-                                {
-                                    _isAttacking = value;
-                                    return _isAttacking ?? false;
-                                }   
-                            }
-
                             _isAttacking = _directEntity.IsAttacking;
-                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsAttacking", "Adding [" + Name + "] to EntityIsAttacking", Logging.Debug);
-                            Cache.Instance.EntityIsAttacking.Add(Id, (bool)_isAttacking);
                             return _isAttacking ?? false;
                         }
 

@@ -963,13 +963,6 @@ namespace Questor.Modules.Misc
             }
             Logging.Log("ListCachedPocketInfo", "[" + EntityHaveLootRightsCount + "] entries in EntityHaveLootRights", Logging.Yellow);
 
-            int EntityIsAttackingCount = 0;
-            if (Cache.Instance.EntityIsAttacking.Any())
-            {
-                EntityIsAttackingCount = Cache.Instance.EntityIsAttacking.Count();
-            }
-            Logging.Log("ListCachedPocketInfo", "[" + EntityIsAttackingCount + "] entries in EntityIsAttacking", Logging.Yellow);
-
             int EntityIsStargateCount = 0;
             if (Cache.Instance.EntityIsStargate.Any())
             {

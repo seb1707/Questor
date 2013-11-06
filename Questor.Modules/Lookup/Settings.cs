@@ -138,6 +138,7 @@ namespace Questor.Modules.Lookup
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
         public bool DebugOverLoadWeapons { get; set; }
+        public bool DebugPanic { get; set; }
         public bool DebugPerformance { get; set; }
         public bool DebugPotentialCombatTargets { get; set; }
         public bool DebugPreferredPrimaryWeaponTarget { get; set; }
@@ -776,6 +777,7 @@ namespace Questor.Modules.Lookup
             DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
             DebugOnframe = (bool?)CharacterSettingsXml.Element("debugOnframe") ?? (bool?)CommonSettingsXml.Element("debugOnframe") ?? false;
             DebugOverLoadWeapons = (bool?)CharacterSettingsXml.Element("debugOverLoadWeapons") ?? (bool?)CommonSettingsXml.Element("debugOverLoadWeapons") ?? false;
+            DebugPanic = (bool?)CharacterSettingsXml.Element("debugPanic") ?? (bool?)CommonSettingsXml.Element("debugPanic") ?? false;
             DebugPerformance = (bool?)CharacterSettingsXml.Element("debugPerformance") ?? (bool?)CommonSettingsXml.Element("debugPerformance") ?? false;                                     //enables more console logging having to do with the sub-states within each state
             DebugPotentialCombatTargets = (bool?)CharacterSettingsXml.Element("debugPotentialCombatTargets") ?? (bool?)CommonSettingsXml.Element("debugPotentialCombatTargets") ?? false;
             DebugPreferredPrimaryWeaponTarget = (bool?)CharacterSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? (bool?)CommonSettingsXml.Element("debugPreferredPrimaryWeaponTarget") ?? false;

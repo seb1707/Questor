@@ -963,13 +963,6 @@ namespace Questor.Modules.Misc
             }
             Logging.Log("ListCachedPocketInfo", "[" + EntityHaveLootRightsCount + "] entries in EntityHaveLootRights", Logging.Yellow);
 
-            int EntityIsTargetingMeCount = 0;
-            if (Cache.Instance.EntityIsTargetingMe.Any())
-            {
-                EntityIsTargetingMeCount = Cache.Instance.EntityIsTargetingMe.Count();
-            }
-            Logging.Log("ListCachedPocketInfo", "[" + EntityIsTargetingMeCount + "] entries in EntityIsTargetingMe", Logging.Yellow);
-
             int EntityIsAttackingCount = 0;
             if (Cache.Instance.EntityIsAttacking.Any())
             {

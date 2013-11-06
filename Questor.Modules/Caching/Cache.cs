@@ -1588,7 +1588,6 @@ namespace Questor.Modules.Caching
         public Dictionary<long, bool> EntityIsEntutyIShouldLeaveAlone = new Dictionary<long, bool>();
         public Dictionary<long, bool> EntityIsSentry = new Dictionary<long, bool>();
         public Dictionary<long, bool> EntityHaveLootRights = new Dictionary<long, bool>();
-        public Dictionary<long, bool> EntityIsTargetingMe = new Dictionary<long, bool>();
         public Dictionary<long, bool> EntityIsAttacking = new Dictionary<long, bool>();
         public Dictionary<long, bool> EntityIsStargate = new Dictionary<long, bool>();
 
@@ -3437,7 +3436,6 @@ namespace Questor.Modules.Caching
             EntityIsNPCByGroupID.Clear();
             EntityIsEntutyIShouldLeaveAlone.Clear();
             EntityHaveLootRights.Clear();
-            EntityIsTargetingMe.Clear();
             EntityIsAttacking.Clear();
             EntityIsStargate.Clear();
         }

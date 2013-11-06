@@ -1325,24 +1325,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isTargetedBy == null)
                         {
-                            if (Cache.Instance.EntityIsTargetingMe.Any() && Cache.Instance.EntityIsTargetingMe.Count() > DictionaryCountThreshhold)
-                            {
-                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsTargetedBy", "We have [" + Cache.Instance.EntityIsTargetingMe.Count() + "] Entities in Cache.Instance.EntityIsTargetingMe", Logging.Debug);
-                            }
-
-                            if (Cache.Instance.EntityIsTargetingMe.Any())
-                            {
-                                bool value = false;
-                                if (Cache.Instance.EntityIsTargetingMe.TryGetValue(Id, out value))
-                                {
-                                    _isTargetedBy = value;
-                                    return _isTargetedBy ?? false;
-                                }    
-                            }
-
                             _isTargetedBy = _directEntity.IsTargetedBy;
-                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsTargetedby", "Adding [" + Name + "] to EntityIsTargetingMe", Logging.Debug);
-                            Cache.Instance.EntityIsTargetingMe.Add(Id, (bool)_isTargetedBy);
                             return _isTargetedBy ?? false;
                         }
 

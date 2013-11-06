@@ -38,6 +38,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
                 //LavishScript.Commands.AddCommand("FindEntities", FindEntitiesNamed);
+                LavishScript.Commands.AddCommand("ListEntitiesThatHaveUsLocked", ListEntitiesThatHaveUsLockedInnerspaceCommand);
                 LavishScript.Commands.AddCommand("ListAllEntities", ListAllEntities);
                 LavishScript.Commands.AddCommand("ListEntities", ListAllEntities);
                 LavishScript.Commands.AddCommand("Entities", ListAllEntities);
@@ -124,6 +125,7 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListPrimaryWeaponPriorityTargets             - Logs PrimaryWeaponPriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListDronePriorityTargets                     - Logs DronePriorityTargets", Logging.White);
             Logging.Log("InnerspaceCommands", "ListTargets                                  - Logs ListTargets", Logging.White);
+            Logging.Log("InnerspaceCommands", "ListEntitiesThatHaveUsLocked                 - Logs ListEntitiesThatHaveUsLocked", Logging.White);
             Logging.Log("InnerspaceCommands", "ListClassInstanceInfo                        - Logs Class Instance Info", Logging.White);
             Logging.Log("InnerspaceCommands", "ListCachedPocketInfo                         - Logs Cached Pocket Information", Logging.White);
             return 0;
@@ -516,11 +518,24 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("Statistics", "Entering StatisticsState.LogAllEntities", Logging.Debug);
+            Logging.Log("InnerspaceCommand", "Entering InnerspaceCommandState.LogAllEntities", Logging.Debug);
             _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.LogAllEntities;
             return 0;
         }
 
+        private static int ListEntitiesThatHaveUsLockedInnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "ListEntitiesThatHaveUsLocked - Logs Entities on grid that have us targeted", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommand", "Entering InnerspaceCommandState.ListEntitiesThatHaveUsLocked", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.ListEntitiesThatHaveUsLocked;
+            return 0;
+        }
+        
         private static int ListLowValueTargets(string[] args)
         {
             if (args.Length != 1)
@@ -987,6 +1002,15 @@ namespace Questor.Modules.Misc
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.LogAllEntities", Logging.Debug);
                         InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                    }
+                    break;
+
+                case InnerspaceCommandsState.ListEntitiesThatHaveUsLocked:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.ListEntitiesThatHaveUsLocked", Logging.Debug);
+                        InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsTargetedBy).ToList());
                     }
                     break;
 

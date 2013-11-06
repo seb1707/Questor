@@ -4,6 +4,7 @@
     {
         Idle,
         LogAllEntities,
+        ListEntitiesThatHaveUsLocked,
         ListPrimaryWeaponPriorityTargets,
         AddPWPT,
         AddDPT,

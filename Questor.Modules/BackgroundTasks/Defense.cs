@@ -397,13 +397,26 @@ namespace Questor.Modules.BackgroundTasks
                 activate |= module.GroupId == (int)Group.TrackingComputer;
                 activate |= module.GroupId == (int)Group.ECCM;
 
-                if (!activate)
-                    continue;
-
                 ModuleNumber++;
 
-                if (module.IsActive | module.InLimboState)
+                if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] Module TypeID [" + module.TypeId + "] GroupId [" + module.GroupId + "] Found", Logging.Debug);
+                if (!activate)
+                {
+                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is not activatable, proceed to next module", Logging.Debug);
                     continue;
+                }
+
+                if (module.IsActive)
+                {
+                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is already active", Logging.Debug);
+                    continue;
+                }
+
+                if (module.InLimboState)
+                {
+                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is in LimboState (likely being activated or decativated already)", Logging.Debug);
+                    continue;
+                }
 
                 if (module.GroupId == (int)Group.CloakingDevice)
                 {
@@ -428,17 +441,27 @@ namespace Questor.Modules.BackgroundTasks
                     // if capacitor is really really low, do not make it worse
                     //
                     if (Cache.Instance.ActiveShip.Capacitor < 45)
+                    {
+                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 45 UNITS of cap: do not make it worse by turning on the hardeners", Logging.Debug);
                         continue;
+                    }
 
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                    {
+                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 3% of cap: do not make it worse by turning on the hardeners", Logging.Debug);
                         continue;
+                    }
 
                     //
                     // if total capacitor is really low, do not run stuff unless we are targeted by something
                     // this should only kick in when using frigates as the combatship
                     //
-                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Cache.Instance.TargetedBy.Any() && Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Cache.Instance.TargetedBy.Any() &&
+                        Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                    {
+                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 400 units total cap and nothing is targeting you yet, no need for hardeners yet.", Logging.Debug);
                         continue;
+                    }
                 }
                 //
                 // at this point the module should be active but is not: activate it, set the delay and return. The process will resume on the next tick

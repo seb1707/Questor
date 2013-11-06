@@ -804,20 +804,20 @@ namespace Questor.Modules.Caching
                         {
                             if (!HasExploded && IsTarget && !IsIgnored)
                             {
-                                if (_directEntity.Distance < Cache.Instance.MaxRange)
-                                {
-                                    if (Cache.Instance.Entities.Any(t => t.Id == Id))
-                                    {
+                                //if (_directEntity.Distance < Cache.Instance.MaxRange)
+                                //{
+                                    //if (Cache.Instance.Entities.Any(t => t.Id == Id))
+                                    //{
                                         _IsReadyToShoot = true;
                                         return _IsReadyToShoot ?? true;
-                                    }
+                                    //}
 
-                                    _IsReadyToShoot = false;
-                                    return _IsReadyToShoot ?? false;
-                                }
+                                    //_IsReadyToShoot = false;
+                                    //return _IsReadyToShoot ?? false;
+                                //}
 
-                                _IsReadyToShoot = false;
-                                return _IsReadyToShoot ?? false;
+                                //_IsReadyToShoot = false;
+                                //return _IsReadyToShoot ?? false;
                             }
                         }
 
@@ -3755,6 +3755,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
+                {
+                    return false;
+                }
+
                 if (_directEntity != null && _directEntity.IsValid)
                 {
                     if (!IsTarget)
@@ -3804,38 +3809,36 @@ namespace Questor.Modules.Caching
 
                                             if (_directEntity.LockTarget())
                                             {
+                                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                                                 Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
                                                 return true;
                                             }
 
                                             Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed (unknown reason)", Logging.White);
+                                            return false; 
                                         }
 
                                         Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed: target was not in Entities List", Logging.White);
+                                        return false;
                                     }
 
                                     Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget aborted: target is already being targeted", Logging.White);
+                                    return false;
                                 }
-                                else
-                                {
-                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
-                                }
+                                
+                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
+                                return false;
                             }
-                            else
-                            {
-                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
-                            }
+                            
+                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
+                            return false;
                         }
-                        else
-                        {
-                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already dead!", Logging.White);
-                        }
+                        
+                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already dead!", Logging.White);
+                        return false;
                     }
-                    else
-                    {
-                        Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
-                    }
-
+                    
+                    Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
                     return false;
                 }
 

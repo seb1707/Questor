@@ -280,9 +280,9 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // We are jammed, we do not need to log (Combat does this already)
-            if (Cache.Instance.MaxLockedTargets == 0)
+            if (Cache.Instance.MaxLockedTargets == 0 || Cache.Instance.Targets.Any() && Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
             {
-                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Cache.Instance.MaxLockedTargets == 0)", Logging.Teal);
+                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Cache.Instance.MaxLockedTargets == 0) || Cache.Instance.Targets.Any() && Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets", Logging.Teal);
                 return;
             }
 

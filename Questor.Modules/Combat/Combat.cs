@@ -40,6 +40,8 @@ namespace Questor.Modules.Combat
         //private static DateTime _lastReloadAll;
         private static int _reloadAllIteration;
 
+        private static IEnumerable<EntityCache> __highValueTargets;
+        private static IEnumerable<EntityCache> __lowValueTargets;
         private static IEnumerable<EntityCache> __highValueTargetsTargeted;
         private static IEnumerable<EntityCache> __lowValueTargetsTargeted;
         private static int maxHighValueTargets;
@@ -1096,17 +1098,31 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
+                __highValueTargets = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsHighValueTarget)).ToList();
+                __highValueTargetsTargeted = __highValueTargets.Where(i => i.IsTarget || i.IsTargeting);
             }
             catch (NullReferenceException) { }
+
+            int __highValueTargetsTargetedCount = 0;
+            if (__highValueTargetsTargeted.Any())
+            {
+                __highValueTargetsTargetedCount = __highValueTargetsTargeted.Count();
+            }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
+                __lowValueTargets = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsLowValueTarget)).ToList();
+                __lowValueTargetsTargeted = __lowValueTargets.Where(i => i.IsTarget || i.IsTargeting);
             }
             catch (NullReferenceException) { }
 
-            int targetsTargeted = __highValueTargetsTargeted.Count() + __lowValueTargetsTargeted.Count();
+            int __lowValueTargetsTargetedCount = 0;
+            if (__lowValueTargetsTargeted.Any())
+            {
+                __lowValueTargetsTargetedCount = __lowValueTargetsTargeted.Count();
+            }
+
+            int targetsTargeted = __highValueTargetsTargetedCount + __lowValueTargetsTargetedCount;
             #endregion
 
             #region Targeting using priority
@@ -1169,7 +1185,7 @@ namespace Questor.Modules.Combat
                 
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Target a weapon target)", Logging.Debug);
                 EntityCache toTarget = primaryWeaponTargetsToLock.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
-                if (Cache.Instance.UseDrones)
+                if ((!__highValueTargets.Any() || __highValueTargetsTargetedCount >= maxHighValueTargets) && (__lowValueTargets.Any() || __lowValueTargetsTargetedCount <= maxHighValueTargets))
                 {
                     // If we targeted all highValueTargets already take a lowvaluetarget
                     if (toTarget == null)
@@ -1179,11 +1195,15 @@ namespace Questor.Modules.Combat
                     }    
                 }
 
-                if (toTarget != null && totalTargets < maxTotalTargets)
+                if (toTarget != null && totalTargets < Cache.Instance.MaxLockedTargets)
                 {
-                    Logging.Log("Combat", "Lock Target [" + toTarget.Name + "][" + Math.Round(toTarget.Distance/1000,2) + "k][" + Cache.Instance.MaskedID(toTarget.Id) + "] PreferredPWPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "] PreferedDPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTargetID) + "]", Logging.Green);
+                    Logging.Log("Combat", "Lock Target [" + toTarget.Name + "][" + Math.Round(toTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(toTarget.Id) + "] PreferredPWPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "] PreferedDPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTargetID) + "]", Logging.Green);
                     toTarget.LockTarget("Combat");
                     return;
+                }
+                else
+                {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants2","We have [" + totalTargets + "] Locked Targets and a Max Number Of Total Targets of [" + Cache.Instance.MaxLockedTargets + "]",Logging.Debug);
                 }
             }
             #endregion
@@ -1202,10 +1222,6 @@ namespace Questor.Modules.Combat
             {
                 return;
             }
-
-            maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
-            maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
-            //maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
 
             #region Debugging for listing possible targets
             if (Settings.Instance.DebugTargetCombatants)

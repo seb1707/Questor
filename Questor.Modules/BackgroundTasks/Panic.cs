@@ -210,7 +210,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
                         {
                             // Only check for cap-panic while in a mission, not while doing anything else
-                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, capacitor [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumCapacitorPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
 
                             //Questor.panic_attempts_this_mission;
                             Cache.Instance.PanicAttemptsThisMission++;
@@ -221,7 +221,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (Cache.Instance.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                         {
-                            Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, shield [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumShieldPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;
@@ -230,7 +230,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (Cache.Instance.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                         {
-                            Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, armor [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumArmorPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;
@@ -342,7 +342,7 @@ namespace Questor.Modules.BackgroundTasks
                     // Once we have warped off 500km, assume we are "safer"
                     if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distances.PanicDistanceToConsiderSafelyWarpedOff)
                     {
-                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Cache.Instance.ActiveShip.TypeName + "] My ShipName [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.White);
+                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Logging.Yellow + Cache.Instance.ActiveShip.TypeName + Logging.White + "] My ShipName [" + Logging.Yellow + Cache.Instance.ActiveShip.GivenName + Logging.White + "]", Logging.White);
                         _States.CurrentPanicState = PanicState.Panicking;
                     }
 
@@ -373,7 +373,7 @@ namespace Questor.Modules.BackgroundTasks
 
                             if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
-                                Logging.Log("Panic", "Warping to [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 Cache.Instance.IsMissionPocketDone = true;
                                 station.WarpToAndDock();
                             }
@@ -390,7 +390,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                             {
-                                Logging.Log("Panic", "Docking with [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Docking with [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 station.Dock();
                             }
 
@@ -484,7 +484,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                             {
-                                Logging.Log("Panic", "Warping to [" + Cache.Instance.Star.Name + "][" + Math.Round((Cache.Instance.Star.Distance/1000)/149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 Cache.Instance.Star.WarpTo();
                                 return;
                             }

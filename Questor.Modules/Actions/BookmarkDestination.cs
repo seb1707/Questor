@@ -132,14 +132,14 @@ namespace Questor.Modules.Actions
             // This bookmark has no x / y / z, assume we are there.
             if (bookmark.X == -1 || bookmark.Y == -1 || bookmark.Z == -1)
             {
-                Logging.Log("QuestorManager.BookmarkDestination", "Arrived at the bookmark [" + bookmark.Title + "][No XYZ]", Logging.White);
+                Logging.Log("QuestorManager.BookmarkDestination", "Arrived at the bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][No XYZ]", Logging.White);
                 return true;
             }
 
             double distance = Cache.Instance.DistanceFromMe(bookmark.X ?? 0, bookmark.Y ?? 0, bookmark.Z ?? 0);
             if (distance < warpDistance)
             {
-                Logging.Log("QuestorManager.BookmarkDestination", "Arrived at the bookmark [" + bookmark.Title + "]", Logging.White);
+                Logging.Log("QuestorManager.BookmarkDestination", "Arrived at the bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "]", Logging.White);
                 return true;
             }
 
@@ -148,10 +148,10 @@ namespace Questor.Modules.Actions
 
             if (Cache.Instance.GateInGrid() && (distance / 1000) < (int)Distances.MaxPocketsDistanceKm)
             {
-                Logging.Log("QuestorManager.BookmarkDestination", "Bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "].", Logging.White);
+                Logging.Log("QuestorManager.BookmarkDestination", "Bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][" + Logging.Yellow + Math.Round((distance / 1000) / 149598000, 2) + Logging.White + "] AU away. Which is [" + Logging.Yellow + Math.Round((distance / 1000), 2) + Logging.White + "].", Logging.White);
             }
 
-            Logging.Log("QuestorManager.BookmarkDestination", "Warping to bookmark [" + bookmark.Title + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "]", Logging.White);
+            Logging.Log("QuestorManager.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "]", Logging.White);
 
             bookmark.WarpTo();
             nextAction = DateTime.UtcNow.AddSeconds(30);

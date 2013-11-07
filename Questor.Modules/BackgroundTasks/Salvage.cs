@@ -62,7 +62,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
                     {
-                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.White);
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
                         closestWreck.WarpTo();
                     }
                 }
@@ -70,7 +70,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
                     {
-                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + closestWreck.Name + "] which is [" + Math.Round(closestWreck.Distance / 1000, 0) + "k away]", Logging.White);
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
                         closestWreck.Approach();
                     }
                 }
@@ -82,7 +82,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         NavigateOnGrid.StopMyShip();
-                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Math.Round(closestWreck.Distance, 0) + "] is in scooprange + [" + (int)Distances.SafeScoopRange + "] and we were approaching", Logging.White);
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Logging.Yellow + Math.Round(closestWreck.Distance, 0) + Logging.White + "] is in scooprange + [" + (int)Distances.SafeScoopRange + "] and we were approaching", Logging.White);
                     }
                 }
             }

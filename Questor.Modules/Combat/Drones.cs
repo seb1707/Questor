@@ -102,14 +102,9 @@ namespace Questor.Modules.Combat
             // Find the first active weapon's target
             //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
 
-            int PotentialCombatTargetsCount = 0;
-            if (Cache.Instance.PotentialCombatTargets.Any())
-            {
-                PotentialCombatTargetsCount = Cache.Instance.PotentialCombatTargets.Count();
-            }
-            if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: MaxDroneRange [" + Cache.Instance.MaxDroneRange + "] PotentialCombatTargetsCount [" + PotentialCombatTargetsCount + "] );", Logging.Debug);
+            if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: MaxDroneRange [" + Cache.Instance.MaxDroneRange + "]);", Logging.Debug);
             // Return best possible low value target
-            Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
+            Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones");
 
             EntityCache DroneToShoot = Cache.Instance.PreferredDroneTarget;
 

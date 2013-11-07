@@ -105,7 +105,7 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: MaxDroneRange [" + Cache.Instance.MaxDroneRange + "]);", Logging.Debug);
             // Return best possible low value target
 
-            if (Cache.Instance.PreferredDroneTarget == null)
+            if (Cache.Instance.PreferredDroneTarget == null || !Cache.Instance.PreferredDroneTarget.IsFrigate)
             {
                 Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones");    
             }

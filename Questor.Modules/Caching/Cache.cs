@@ -4074,7 +4074,7 @@ namespace Questor.Modules.Caching
                                                                            .ThenByDescending(pt => pt.IsEwarTarget)
                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
                                                                            .ThenByDescending(pt => pt.TargetValue)
-                                                                           .ThenBy(pt => pt.Distance)
+                                                                           .ThenBy(pt => pt.Nearest5kDistance)
                                                                            .FirstOrDefault();
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
@@ -4136,7 +4136,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsInOptimalRange)
                     .ThenByDescending(pt => pt.TargetValue) //highest value first
                     .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Distance)
+                    .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();
             }
             #endregion
@@ -4155,7 +4155,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
                     .ThenBy(pt => pt.TargetValue) //lowest value first
                     .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Distance)
+                    .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();
             }
             #endregion
@@ -4259,7 +4259,7 @@ namespace Questor.Modules.Caching
             }
 
             if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
-            
+
             if (DateTime.UtcNow < NextGetBestDroneTarget)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
@@ -4268,12 +4268,12 @@ namespace Questor.Modules.Caching
 
             NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
 
-            if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
-                return false;
-            }
-            
+            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
+            //{
+            //    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
+            //    return false;
+            //}
+
             EntityCache currentDroneTarget = null;
             if (Cache.Instance.PreferredDroneTarget != null)
             {
@@ -4357,8 +4357,8 @@ namespace Questor.Modules.Caching
                 // Is our current target any other drone priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
-                if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot 
-                                                        && pt.Nearest5kDistance < Cache.Instance.MaxRange 
+                if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot
+                                                        && pt.Nearest5kDistance < Cache.Instance.MaxRange
                                                         && pt.Id == currentDroneTarget.Id
                                                         && !currentDroneTarget.IsHigherPriorityPresent))
                 {
@@ -4374,9 +4374,7 @@ namespace Questor.Modules.Caching
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
-                if (currentDroneTarget.IsReadyToShoot
-                    && currentDroneTarget.Nearest5kDistance < Cache.Instance.MaxDroneRange
-                    && currentDroneTarget.ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                if (currentDroneTarget.IsEntityIShouldKeepShooting)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
@@ -4385,7 +4383,7 @@ namespace Questor.Modules.Caching
                 }
 
                 #endregion Is our current target already in armor? keep shooting the same target if so...
-                
+
                 #region If none of the above matches, does our current target meet the conditions of being hittable and in range
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
@@ -4479,7 +4477,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            #region Get the closest high value target 
+            #region Get the closest high value target
             //
             // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
             //
@@ -4491,13 +4489,13 @@ namespace Questor.Modules.Caching
                     .OrderByDescending(t => !t.IsNPCFrigate)
                     .ThenByDescending(t => t.IsTargetedBy)
                     .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Distance)
+                    .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();
             }
             #endregion
 
             #region prefer to gran a lowvaluetarget, if none avail use a high value target
-            if (lowValueTarget != null || highValueTarget != null )
+            if (lowValueTarget != null || highValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking use High Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestDroneTarget)
@@ -4525,7 +4523,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
                     Logging.Log("GetBestDroneTarget (Drones): none", "*** ALL LOCKED/LOCKING TARGETS LISTED BELOW", Logging.Debug);
-                    int LockedTargetNumber = 0; 
+                    int LockedTargetNumber = 0;
                     foreach (EntityCache __target in Targets)
                     {
                         LockedTargetNumber++;
@@ -4548,7 +4546,7 @@ namespace Questor.Modules.Caching
                     foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
                     {
                         potentialCombatTargetNumber++;
-                        Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
+                        Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
                     }
                     Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
                     Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);

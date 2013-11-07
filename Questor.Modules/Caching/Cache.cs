@@ -4250,6 +4250,7 @@ namespace Questor.Modules.Caching
         {
             if (Settings.Instance.DebugDisableGetBestTarget || !Cache.Instance.UseDrones)
             {
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "!Cache.Instance.UseDrones - drones are disabled currently", Logging.Teal);
                 return true;
             }
 

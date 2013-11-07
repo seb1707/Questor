@@ -3738,7 +3738,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (!IsTargeting)
                                     {
-                                        if (Cache.Instance.Entities.Any(i => i.Id == Id))
+                                        if (Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Id))
                                         {
                                             // If the bad idea is attacking, attack back
                                             if (IsBadIdea && !IsAttacking)
@@ -3754,7 +3754,7 @@ namespace Questor.Modules.Caching
                                             }
 
                                             // Remove the target info (its been targeted)
-                                            foreach (EntityCache target in Cache.Instance.Entities.Where(e => e.IsTarget && Cache.Instance.TargetingIDs.ContainsKey(e.Id)))
+                                            foreach (EntityCache target in Cache.Instance.EntitiesOnGrid.Where(e => e.IsTarget && Cache.Instance.TargetingIDs.ContainsKey(e.Id)))
                                             {
                                                 Cache.Instance.TargetingIDs.Remove(target.Id);
                                             }

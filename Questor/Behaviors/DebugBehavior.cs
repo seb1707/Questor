@@ -557,14 +557,14 @@ namespace Questor.Behaviors
                 case DebugBehaviorState.LogCombatTargets:
                     //combat targets
                     //List<EntityCache> combatentitiesInList =  Cache.Instance.Entities.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer && t.Distance < Cache.Instance.MaxRange && !Cache.Instance.IgnoreTargets.Contains(t.Name.Trim())).ToList();
-                    List<EntityCache> combatentitiesInList = Cache.Instance.Entities.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer).ToList();
+                    List<EntityCache> combatentitiesInList = Cache.Instance.EntitiesOnGrid.Where(t => t.IsNpc && !t.IsBadIdea && t.CategoryId == (int)CategoryID.Entity && !t.IsContainer).ToList();
                     Statistics.EntityStatistics(combatentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DebugBehaviorState.LogDroneTargets:
                     //drone targets
-                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && !e.IsLargeCollidable).ToList();
+                    List<EntityCache> droneentitiesInList = Cache.Instance.EntitiesOnGrid.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && !e.IsLargeCollidable).ToList();
                     Statistics.EntityStatistics(droneentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
@@ -592,7 +592,7 @@ namespace Questor.Behaviors
 
                 case DebugBehaviorState.LogCansAndWrecks:
                     //Asteroid Belts
-                    List<EntityCache> cansandWrecksInList = Cache.Instance.Entities.Where(e => !e.IsSentry && e.GroupId == (int)Group.CargoContainer && e.GroupId == (int)Group.Wreck).ToList();
+                    List<EntityCache> cansandWrecksInList = Cache.Instance.EntitiesOnGrid.Where(e => !e.IsSentry && e.GroupId == (int)Group.CargoContainer && e.GroupId == (int)Group.Wreck).ToList();
                     Statistics.EntityStatistics(cansandWrecksInList);
                     Cache.Instance.Paused = true;
                     break;

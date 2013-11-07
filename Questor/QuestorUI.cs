@@ -1399,7 +1399,7 @@ namespace Questor
         private void bttnLogEntitiesOnGrid_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Starting Statistics.EntityStatistics(Cache.Instance.Entities); Routine.", Logging.Debug);
-            Statistics.EntityStatistics(Cache.Instance.Entities);
+            Statistics.EntityStatistics(Cache.Instance.EntitiesOnGrid);
         }
 
         private void bttnLogContainersOnGrid_Click(object sender, EventArgs e)

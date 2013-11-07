@@ -178,7 +178,7 @@ namespace Questor.Modules.Activities
         {
 
             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Log Entities on Grid.", Logging.Teal);
-            if (!Statistics.EntityStatistics(Cache.Instance.Entities)) return;
+            if (!Statistics.EntityStatistics(Cache.Instance.EntitiesOnGrid)) return;
             Nextaction();
             return;
         }
@@ -199,7 +199,7 @@ namespace Questor.Modules.Activities
                 target = "Acceleration Gate";
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
             if (!targets.Any())
             {
                 if (!_waiting)
@@ -423,14 +423,18 @@ namespace Questor.Modules.Activities
                 EntityCache ClosestPotentialCombatTarget = null;
 
                 if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestWeaponTargets(DistanceToClear);", Logging.Debug);
-                
+
+                // Target
                 if (Settings.Instance.TargetSelectionMethod == "isdp")
                 {
-                    Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "Combat");
+                    if (Cache.Instance.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat"))
+                        _clearPocketTimeout = null;
+
                 }
                 else //use new target selection method
                 {
-                    Cache.Instance.__GetBestWeaponTargets(DistanceToClear);
+                    if (Cache.Instance.__GetBestWeaponTargets(DistanceToClear).Any())
+                        _clearPocketTimeout = null;
                 }
                 
                 //
@@ -671,7 +675,7 @@ namespace Questor.Modules.Activities
                 target = "Acceleration Gate";
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
@@ -731,7 +735,7 @@ namespace Questor.Modules.Activities
                 stopWhenAggressed = false;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
             if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "no entities found named [" + target + "] proceeding to next action", Logging.Teal);
@@ -1125,9 +1129,9 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            List<EntityCache> killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderBy(t => t.Nearest5kDistance).ToList();
+            List<EntityCache> killTargets = Cache.Instance.EntitiesOnGrid.Where(e => targetNames.Contains(e.Name)).OrderBy(t => t.Nearest5kDistance).ToList();
 
-            if (notTheClosest) killTargets = Cache.Instance.Entities.Where(e => e.IsOnGridWithMe && targetNames.Contains(e.Name)).OrderByDescending(t => t.Nearest5kDistance).ToList();
+            if (notTheClosest) killTargets = Cache.Instance.EntitiesOnGrid.Where(e => targetNames.Contains(e.Name)).OrderByDescending(t => t.Nearest5kDistance).ToList();
             
             if (!killTargets.Any() || killTargets.Count() <= numberToIgnore)
             {
@@ -1463,7 +1467,7 @@ namespace Questor.Modules.Activities
 
             bool done = items.Count == 0;
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.Entities.Where(i => i.Distance < (int)Distances.OnGridWithMe)).ToList();
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
             targets = targets.Where(i => i.IsContainer);
             if (!targets.Any())
             {

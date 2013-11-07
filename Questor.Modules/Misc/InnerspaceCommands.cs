@@ -313,11 +313,11 @@ namespace Questor.Modules.Misc
         {
             try
             {
-                if (Cache.Instance.Entities.Any())
+                if (Cache.Instance.EntitiesOnGrid.Any())
                 {
-                    if (Cache.Instance.Entities.Any(i => i.Name == stringEntitiesToAdd))
+                    if (Cache.Instance.EntitiesOnGrid.Any(i => i.Name == stringEntitiesToAdd))
                     {
-                        IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.Entities.Where(i => i.Name == stringEntitiesToAdd).ToList();
+                        IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesOnGrid.Where(i => i.Name == stringEntitiesToAdd).ToList();
                         if (entitiesToAdd.Any())
                         {
 
@@ -335,15 +335,15 @@ namespace Questor.Modules.Misc
                     }
 
                     int EntitiesOnGridCount = 0;
-                    if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
+                    if (Cache.Instance.EntitiesOnGrid.Any())
                     {
-                        EntitiesOnGridCount = Cache.Instance.Entities.Count(i => i.IsOnGridWithMe);
+                        EntitiesOnGridCount = Cache.Instance.EntitiesOnGrid.Count(i => i.IsOnGridWithMe);
                     }
 
                     int EntitiesCount = 0;
-                    if (Cache.Instance.Entities.Any())
+                    if (Cache.Instance.EntitiesOnGrid.Any())
                     {
-                        EntitiesCount = Cache.Instance.Entities.Count();
+                        EntitiesCount = Cache.Instance.EntitiesOnGrid.Count();
                     }
 
                     Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found. [" + EntitiesOnGridCount + "] entities on grid [" + EntitiesCount + "] entities", Logging.Debug);
@@ -987,7 +987,7 @@ namespace Questor.Modules.Misc
                     {
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.LogAllEntities", Logging.Debug);
-                        InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                        InnerspaceCommands.LogEntities(Cache.Instance.EntitiesOnGrid.ToList());
                     }
                     break;
 
@@ -996,7 +996,7 @@ namespace Questor.Modules.Misc
                     {
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.ListEntitiesThatHaveUsLocked", Logging.Debug);
-                        InnerspaceCommands.LogEntities(Cache.Instance.Entities.Where(i => i.IsTargetedBy).ToList());
+                        InnerspaceCommands.LogEntities(Cache.Instance.EntitiesOnGrid.Where(i => i.IsTargetedBy).ToList());
                     }
                     break;
 

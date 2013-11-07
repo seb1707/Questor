@@ -107,7 +107,7 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTargetID != null)
             {
-                EntityCache DroneToShoot = Cache.Instance.Entities.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
+                EntityCache DroneToShoot = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
 
                 if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)
                 {
@@ -246,7 +246,7 @@ namespace Questor.Modules.Combat
 
                             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                             {
-                                launch &= Cache.Instance.Entities.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
+                                launch &= Cache.Instance.EntitiesOnGrid.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < Cache.Instance.MaxDroneRange) > 0;
                                 if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Entities.Count; Launch is [" + launch + "]", Logging.Debug);
                             }
 

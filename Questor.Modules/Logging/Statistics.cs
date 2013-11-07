@@ -238,7 +238,7 @@ namespace Questor.Modules.Logging
         public static bool ListClassInstanceInfo()
         {
             Logging.Log("debug", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.Entities.Any())
+            if (Cache.Instance.EntitiesOnGrid.Any())
             {
                 //Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
                 Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
@@ -939,7 +939,7 @@ namespace Questor.Modules.Logging
                     {
                         _States.CurrentStatisticsState = StatisticsState.Idle;
                         Logging.Log("Statistics", "StatisticsState.LogAllEntities", Logging.Debug);
-                        Statistics.LogEntities(Cache.Instance.Entities.Where(i => i.IsOnGridWithMe).ToList());
+                        Statistics.LogEntities(Cache.Instance.EntitiesOnGrid.ToList());
                     }
                     _States.CurrentStatisticsState = StatisticsState.Idle;
                     break;
@@ -1043,11 +1043,11 @@ namespace Questor.Modules.Logging
                 case StatisticsState.PocketObjectStatistics:
                     if (!Cache.Instance.InWarp)
                     {
-                        if (Cache.Instance.Entities.Any())
+                        if (Cache.Instance.EntitiesOnGrid.Any())
                         {
                             _States.CurrentStatisticsState = StatisticsState.Idle;
                             Logging.Log("Statistics", "StatisticsState.PocketObjectStatistics", Logging.Debug);
-                            Statistics.PocketObjectStatistics(Cache.Instance.Entities.Where(I => I.IsOnGridWithMe).ToList(), true);
+                            Statistics.PocketObjectStatistics(Cache.Instance.EntitiesOnGrid.ToList(), true);
                         }
                     }
                     break;

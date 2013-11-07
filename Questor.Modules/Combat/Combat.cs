@@ -1105,7 +1105,7 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargets = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsHighValueTarget)).ToList();
+                __highValueTargets = Cache.Instance.EntitiesOnGrid.Where(t => t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsHighValueTarget)).ToList();
                 __highValueTargetsTargeted = __highValueTargets.Where(i => i.IsTarget || i.IsTargeting);
             }
             catch (NullReferenceException) { }
@@ -1118,7 +1118,7 @@ namespace Questor.Modules.Combat
 
             try
             {
-                __lowValueTargets = Cache.Instance.Entities.Where(t => t.Distance < (double)Distances.OnGridWithMe && t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsLowValueTarget)).ToList();
+                __lowValueTargets = Cache.Instance.EntitiesOnGrid.Where(t => t.CategoryId != (int)CategoryID.Asteroid && t.CategoryId == (int)CategoryID.Entity && (t.IsLowValueTarget)).ToList();
                 __lowValueTargetsTargeted = __lowValueTargets.Where(i => i.IsTarget || i.IsTargeting);
             }
             catch (NullReferenceException) { }
@@ -1133,7 +1133,7 @@ namespace Questor.Modules.Combat
             #endregion
 
             #region Targeting using priority
-            if (Cache.Instance.Entities.Any(i => i.IsOnGridWithMe))
+            if (Cache.Instance.EntitiesOnGrid.Any())
             {
                 IEnumerable<EntityCache> primaryWeaponTargetsToLock = Cache.Instance.__GetBestWeaponTargets((double) Distances.OnGridWithMe).Take(maxHighValueTargets); //.ToList();
                 int primaryWeaponTargetsToTargetCount = 0;
@@ -1166,8 +1166,8 @@ namespace Questor.Modules.Combat
                     droneTargetsToLock = primaryWeaponTargetsToLock;
                     //droneTargetsToLock = droneTargetsToLock.ToList();
                 }
-                
-                IEnumerable<EntityCache> activeTargets = Cache.Instance.Entities.Where(e => (e.IsTarget && !e.HasExploded)); //.ToList();
+
+                IEnumerable<EntityCache> activeTargets = Cache.Instance.EntitiesOnGrid.Where(e => (e.IsTarget && !e.HasExploded)); //.ToList();
                 int activeTargetsCount = 0;
                 if (activeTargets.Any())
                 {
@@ -1188,7 +1188,7 @@ namespace Questor.Modules.Combat
                     }
                 }
 
-                int totalTargets = Cache.Instance.Entities.Count(e => (e.IsTargeting || e.IsTarget));
+                int totalTargets = Cache.Instance.EntitiesOnGrid.Count(e => (e.IsTargeting || e.IsTarget));
                 
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Target a weapon target)", Logging.Debug);
                 EntityCache toTarget = primaryWeaponTargetsToLock.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
@@ -1315,13 +1315,13 @@ namespace Questor.Modules.Combat
             // Get lists of the current high and low value targets
             try
             {
-                __highValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
+                __highValueTargetsTargeted = Cache.Instance.EntitiesOnGrid.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsHighValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
             try
             {
-                __lowValueTargetsTargeted = Cache.Instance.Entities.Where(t => t.Distance < (int)Distances.OnGridWithMe && (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
+                __lowValueTargetsTargeted = Cache.Instance.EntitiesOnGrid.Where(t => (t.IsTarget || t.IsTargeting) && (t.IsLowValueTarget)).ToList();
             }
             catch (NullReferenceException) { }
 
@@ -1478,7 +1478,7 @@ namespace Questor.Modules.Combat
                 if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.PreferredPrimaryWeaponTarget != null)", Logging.Debug);
-                    if (Cache.Instance.Entities.Any(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
+                    if (Cache.Instance.EntitiesOnGrid.Any(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))
                     {
                         if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants", "if (Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTarget.Id))", Logging.Debug);
                         
@@ -1555,7 +1555,7 @@ namespace Questor.Modules.Combat
                 }
 
                 if (Cache.Instance.PreferredDroneTarget != null
-                    && Cache.Instance.Entities.Any(I => I.Id == Cache.Instance.PreferredDroneTarget.Id)
+                    && Cache.Instance.EntitiesOnGrid.Any(I => I.Id == Cache.Instance.PreferredDroneTarget.Id)
                     && Cache.Instance.UseDrones
                     && Cache.Instance.PreferredDroneTarget.IsReadyToTarget
                     && Cache.Instance.PreferredDroneTarget.Distance < Cache.Instance.WeaponRange
@@ -1643,7 +1643,7 @@ namespace Questor.Modules.Combat
 
             int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));
 
-            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveLowValue + "] :::  highValueTargetingMe [" + highValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveHighValue + "] LCOs [" + Cache.Instance.Entities.Count(e => e.IsLargeCollidable) + "]", Logging.Debug);
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "TargetingMe [" + TargetingMe.Count() + "] lowValueTargetingMe [" + lowValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveLowValue + "] :::  highValueTargetingMe [" + highValueTargetingMe.Count() + "] targeted [" + LockedTargetsThatHaveHighValue + "] LCOs [" + Cache.Instance.EntitiesOnGrid.Count(e => e.IsLargeCollidable) + "]", Logging.Debug);
 
             // High Value
             if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: foreach (EntityCache entity in highValueTargetingMe)", Logging.Debug);

@@ -334,7 +334,7 @@ namespace Questor.Behaviors
                 case MiningState.Mine:
 
                     EntityCache asteroid =
-                        Cache.Instance.Entities.Where(i =>
+                        Cache.Instance.EntitiesOnGrid.Where(i =>
                             i.Distance < 65000
                             && (
                                 i.Name.ToLower().Contains("kernite")
@@ -344,7 +344,7 @@ namespace Questor.Behaviors
                     if (asteroid == null)
                     {
                         asteroid =
-                        Cache.Instance.Entities.Where(i =>
+                        Cache.Instance.EntitiesOnGrid.Where(i =>
                             i.Distance < 65000
                             && (
                                 i.Name.ToLower().Contains("plagioclase")
@@ -355,7 +355,7 @@ namespace Questor.Behaviors
                     if (asteroid == null)
                     {
                         asteroid =
-                        Cache.Instance.Entities.Where(i =>
+                        Cache.Instance.EntitiesOnGrid.Where(i =>
                             i.Distance < 65000
                             && (
                                 i.Name.ToLower().Contains("pyroxeres")
@@ -366,7 +366,7 @@ namespace Questor.Behaviors
                     if (asteroid == null)
                     {
                         asteroid =
-                        Cache.Instance.Entities.Where(i =>
+                        Cache.Instance.EntitiesOnGrid.Where(i =>
                             i.Distance < 65000
                             && (
                                 i.Name.ToLower().Contains("scordite")
@@ -377,7 +377,7 @@ namespace Questor.Behaviors
                     if (asteroid == null)
                     {
                         asteroid =
-                        Cache.Instance.Entities.Where(i =>
+                        Cache.Instance.EntitiesOnGrid.Where(i =>
                             i.Distance < 65000
                             && (
                                 i.Name.ToLower().Contains("veldspar")

@@ -104,12 +104,12 @@ namespace Questor.Modules.BackgroundTasks
                         EntityCache structure = null;
                         if (!string.IsNullOrEmpty(Cache.Instance.OrbitEntityNamed))
                         {
-                            structure = Cache.Instance.Entities.Where(i => i.Name.Contains(Cache.Instance.OrbitEntityNamed)).OrderBy(t => t.Distance).FirstOrDefault();
+                            structure = Cache.Instance.EntitiesOnGrid.Where(i => i.Name.Contains(Cache.Instance.OrbitEntityNamed)).OrderBy(t => t.Distance).FirstOrDefault();
                         }
 
                         if (structure == null)
                         {
-                            structure = Cache.Instance.Entities.Where(i => i.Name.Contains("Gate")).OrderBy(t => t.Distance).FirstOrDefault();
+                            structure = Cache.Instance.EntitiesOnGrid.Where(i => i.Name.Contains("Gate")).OrderBy(t => t.Distance).FirstOrDefault();
                         }
 
                         if (Settings.Instance.OrbitStructure && structure != null)
@@ -319,7 +319,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject", "We are not approaching nor orbiting", Logging.Teal);
                             bool orbitStructure = Settings.Instance.OrbitStructure;
-                            EntityCache structure = Cache.Instance.Entities.Where(i => i.IsLargeCollidable || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
+                            EntityCache structure = Cache.Instance.EntitiesOnGrid.Where(i => i.IsLargeCollidable || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
 
                             if (orbitStructure && structure != null)
                             {

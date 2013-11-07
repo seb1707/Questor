@@ -186,6 +186,16 @@ namespace Questor.Modules.Activities
             //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.Teal);
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "]", Logging.Teal);
+
+            if (waypoint > 6000000) // this MUST be a station
+            {
+                //insert code to handle station destinations here
+            }
+
+            if (waypoint < 6000000) // this isnt a station, probably a system
+            {
+                //useful?a
+            }
             DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[waypoint];
 
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)

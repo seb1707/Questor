@@ -47,6 +47,7 @@ namespace Questor.Modules.Combat
         private static int maxHighValueTargets;
         private static int maxLowValueTargets;
         private static int maxTotalTargets;
+        private static int maxTargetingSlotsAvailable;
         public static int CombatInstances = 0;
         private static int i = 0;
 
@@ -55,6 +56,7 @@ namespace Questor.Modules.Combat
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
             maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
+            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets
 
             Interlocked.Increment(ref CombatInstances);
         }
@@ -1012,7 +1014,12 @@ namespace Questor.Modules.Combat
 
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
-            
+            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets;
+            if (Settings.Instance.MaximumWreckTargets > 0 && Cache.Instance.MaxLockedTargets >= 5)
+            {
+                maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets - Settings.Instance.MaximumWreckTargets;
+            }
+
             #region Debugging for listing possible targets
             if (Settings.Instance.DebugTargetCombatants)
             {
@@ -1195,7 +1202,7 @@ namespace Questor.Modules.Combat
                     }    
                 }
 
-                if (toTarget != null && totalTargets < Cache.Instance.MaxLockedTargets)
+                if (toTarget != null && totalTargets < maxTargetingSlotsAvailable)
                 {
                     Logging.Log("Combat", "Lock Target [" + toTarget.Name + "][" + Math.Round(toTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(toTarget.Id) + "] PreferredPWPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "] PreferedDPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTargetID) + "]", Logging.Green);
                     toTarget.LockTarget("Combat");

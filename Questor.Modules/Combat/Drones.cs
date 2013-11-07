@@ -161,7 +161,7 @@ namespace Questor.Modules.Combat
                     if (DroneToShoot.IsActiveTarget)
                     {
                         // Save target id (so we do not constantly switch)
-                        Cache.Instance.LastDroneTargetID = Cache.Instance.PreferredDroneTarget.Id;
+                        Cache.Instance.LastDroneTargetID = DroneToShoot.Id;
 
                         // Engage target
                         Logging.Log("Drones", "Engaging [ " + Cache.Instance.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + Cache.Instance.MaskedID(DroneToShoot.Id) + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);

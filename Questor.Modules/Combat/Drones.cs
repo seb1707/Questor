@@ -285,7 +285,7 @@ namespace Questor.Modules.Combat
                     break;
 
                 case DroneState.Launch:
-
+                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.Launch", "LaunchAllDrones", Logging.Debug);
                     // Launch all drones
                     Recall = false;
                     _launchTimeout = DateTime.UtcNow;
@@ -294,10 +294,11 @@ namespace Questor.Modules.Combat
                     break;
 
                 case DroneState.Launching:
-
+                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.Launching", "Entering Launching State...", Logging.Debug);
                     // We haven't launched anything yet, keep waiting
                     if (!Cache.Instance.ActiveDrones.Any())
                     {
+                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.Launching", "No Drones in space yet. waiting", Logging.Debug);
                         if (DateTime.UtcNow.Subtract(_launchTimeout).TotalSeconds > 10)
                         {
                             // Relaunch if tries < 5
@@ -343,9 +344,8 @@ namespace Questor.Modules.Combat
                     break;
 
                 case DroneState.Fighting:
-
-                    // Should we recall our drones? This is a possible list of reasons why we should
-
+                    if (Settings.Instance.DebugDrones) Logging.Log("Drones.Fighting", "Should we recall our drones? This is a possible list of reasons why we should", Logging.Debug);
+                    
                     if (!Cache.Instance.ActiveDrones.Any())
                     {
                         Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);

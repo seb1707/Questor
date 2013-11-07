@@ -105,6 +105,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDisableSalvage { get; set; }
         public bool DebugDisableTargetCombatants { get; set; }
         public bool DebugDisableGetBestTarget { get; set; }
+        public bool DebugDisableGetBestDroneTarget { get; set; }
         public bool DebugDisableNavigateIntoRange { get; set; }
         public bool DebugDoneAction { get; set; }
         public bool DebugDrones { get; set; }
@@ -741,6 +742,8 @@ namespace Questor.Modules.Lookup
             DebugDisableCombat = (bool?)CharacterSettingsXml.Element("debugDisableCombat") ?? (bool?)CommonSettingsXml.Element("debugDisableCombat") ?? false;
             DebugDisableDrones = (bool?)CharacterSettingsXml.Element("debugDisableDrones") ?? (bool?)CommonSettingsXml.Element("debugDisableDrones") ?? false;
             DebugDisablePanic = (bool?)CharacterSettingsXml.Element("debugDisablePanic") ?? (bool?)CommonSettingsXml.Element("debugDisablePanic") ?? false;
+            DebugDisableGetBestTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false;
+            DebugDisableGetBestDroneTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestDroneTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false; 
             DebugDisableSalvage = (bool?)CharacterSettingsXml.Element("debugDisableSalvage") ?? (bool?)CommonSettingsXml.Element("debugDisableSalvage") ?? false;
             DebugDisableGetBestTarget = (bool?)CharacterSettingsXml.Element("debugDisableGetBestTarget") ?? (bool?)CommonSettingsXml.Element("debugDisableGetBestTarget") ?? false;
             DebugDisableTargetCombatants = (bool?)CharacterSettingsXml.Element("debugDisableTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugDisableTargetCombatants") ?? false;

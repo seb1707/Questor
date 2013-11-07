@@ -4252,7 +4252,7 @@ namespace Questor.Modules.Caching
 
         public bool GetBestDroneTarget(double distance, bool highValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
         {
-            if (Settings.Instance.DebugDisableGetBestTarget || !Cache.Instance.UseDrones)
+            if (Settings.Instance.DebugDisableGetBestDroneTarget || !Cache.Instance.UseDrones)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "!Cache.Instance.UseDrones - drones are disabled currently", Logging.Teal);
                 return true;
@@ -4266,7 +4266,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(800);
+            NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(2000);
 
             //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
             //{

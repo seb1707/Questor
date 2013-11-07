@@ -107,9 +107,9 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.PreferredDroneTarget == null || !Cache.Instance.PreferredDroneTarget.IsFrigate)
             {
-                Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones");    
-            }
-
+                Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones");
+            }    
+            
             EntityCache DroneToShoot = Cache.Instance.PreferredDroneTarget;
 
             if (DroneToShoot == null)

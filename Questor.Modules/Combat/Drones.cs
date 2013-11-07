@@ -102,14 +102,30 @@ namespace Questor.Modules.Combat
             // Find the first active weapon's target
             //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
 
+            int PotentialCombatTargetsCount = 0;
+            if (Cache.Instance.PotentialCombatTargets.Any())
+            {
+                PotentialCombatTargetsCount = Cache.Instance.PotentialCombatTargets.Count();
+            }
+            if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: MaxDroneRange [" + Cache.Instance.MaxDroneRange + "] PotentialCombatTargetsCount [" + PotentialCombatTargetsCount + "] );", Logging.Debug);
             // Return best possible low value target
             Cache.Instance.GetBestDroneTarget(Cache.Instance.MaxDroneRange, !Cache.Instance.DronesKillHighValueTargets, "Drones", Cache.Instance.PotentialCombatTargets.ToList());
 
-            if (Cache.Instance.PreferredDroneTargetID != null)
-            {
-                EntityCache DroneToShoot = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
+            EntityCache DroneToShoot = Cache.Instance.PreferredDroneTarget;
 
-                if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)
+            if (DroneToShoot == null)
+            {
+                if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: PreferredDroneTarget is null, picking a target using a simple ruleset...", Logging.Debug);
+                if (Cache.Instance.Targets.Any(i => !i.IsContainer && !i.IsBadIdea))
+                {
+                    DroneToShoot = Cache.Instance.Targets.Where(i => !i.IsContainer && !i.IsBadIdea && i.Distance < Cache.Instance.MaxDroneRange).OrderByDescending(i => i.IsWarpScramblingMe).ThenByDescending(i => i.IsFrigate).ThenBy(i => i.Distance).FirstOrDefault();
+                }
+            }
+
+            if (DroneToShoot != null)
+            {
+
+                if (DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
 
@@ -119,7 +135,7 @@ namespace Questor.Modules.Combat
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (!DroneToShoot.IsTarget)", Logging.Debug);
                         return;
                     }
-                    
+
                     if (DroneToShoot.IsBadIdea) //&& !DroneToShoot.IsAttacking)
                     {
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot.IsBadIdea && !DroneToShoot.IsAttacking) return;", Logging.Debug);

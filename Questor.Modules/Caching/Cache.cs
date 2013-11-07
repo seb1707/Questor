@@ -185,35 +185,39 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_preferredDroneTarget == null)
+                if (Cache.Instance._preferredDroneTarget == null)
                 {
-                    _preferredDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == PreferredDroneTargetID);
-                    return _preferredDroneTarget ?? null;
+                    if (Cache.Instance.PreferredDroneTargetID != null)
+                    {
+                        Cache.Instance._preferredDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
+                        return Cache.Instance._preferredDroneTarget ?? null;
+                    }
                 }
 
-                return _preferredDroneTarget;
+                return Cache.Instance._preferredDroneTarget;
             }
             set
             {
                 if (value == null)
                 {
-                    if (_preferredDroneTarget != null)
+                    if (Cache.Instance._preferredDroneTarget != null)
                     {
-                        _preferredDroneTarget = null;
-                        PreferredDroneTargetID = null;
+                        Cache.Instance._preferredDroneTarget = null;
+                        Cache.Instance.PreferredDroneTargetID = null;
                         Logging.Log("PreferredPrimaryWeaponTarget.Set", "[ null ]", Logging.Debug);
+                        return;
                     }
                 }
                 else
                 {
-                    if (_preferredDroneTarget != null && _preferredDroneTarget.Id != value.Id)
+                    if (Cache.Instance._preferredDroneTarget != null && _preferredDroneTarget.Id != value.Id)
                     {
-                        _preferredDroneTarget = value;
-                        PreferredDroneTargetID = value.Id;
+                        Cache.Instance._preferredDroneTarget = value;
+                        Cache.Instance.PreferredDroneTargetID = value.Id;
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", value + " [" + Cache.Instance.MaskedID(value.Id) + "]", Logging.Debug);
+                        return;
                     }
                 }
-                
             }
         }
 

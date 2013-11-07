@@ -1583,7 +1583,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_entities == null)
                     {
-                        return Cache.Instance.DirectEve.Entities.Where(e => e.CategoryId != (int)CategoryID.Charge).Select(i => new EntityCache(i)).Where(e => e.IsValid).ToList();
+                        return Cache.Instance.DirectEve.Entities.Where(e => e.IsValid && e.CategoryId != (int)CategoryID.Charge).Select(i => new EntityCache(i)).ToList();
                     }
 
                     return _entities;
@@ -1638,22 +1638,27 @@ namespace Questor.Modules.Caching
             }
         }
 
+        /// <summary>
+        ///   Entities cache (all entities within 256km) //cleared in InvalidateCache 
+        /// </summary>
+        private List<EntityCache> _entitiesNotSelf;
+
         public IEnumerable<EntityCache> EntitiesNotSelf
         {
             get
             {
-                if (!InSpace)
+                if (_entitiesNotSelf == null)
                 {
-                    return new List<EntityCache>();
+                    _entitiesNotSelf = Cache.Instance.EntitiesOnGrid.Where(i => i.CategoryId != (int)CategoryID.Asteroid && i.Id != Cache.Instance.ActiveShip.ItemId).ToList();
+                    if (_entitiesNotSelf.Any())
+                    {
+                        return _entitiesNotSelf;
+                    }
+
+                    return new List<EntityCache>();    
                 }
 
-                IEnumerable<EntityCache> _entitiesNotSelf = Cache.Instance.EntitiesOnGrid.Where(i => i.CategoryId != (int)CategoryID.Celestial && i.CategoryId != (int)CategoryID.Asteroid && i.IsOnGridWithMe && i.Id != Cache.Instance.ActiveShip.ItemId && i.Distance < Cache.Instance.MaxRange).ToList();
-                if (_entitiesNotSelf.Any())
-                {
-                    return _entitiesNotSelf;
-                }
-
-                return new List<EntityCache>();
+                return _entitiesNotSelf;
             }
         }
 
@@ -2508,6 +2513,7 @@ namespace Questor.Modules.Caching
                 _containerInSpace = null;
                 _containers = null;
                 _entities = null;
+                _entitiesNotSelf = null;
                 _entitiesOnGrid = null;
                 _entitiesById.Clear();
                 _gates = null;

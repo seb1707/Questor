@@ -94,9 +94,10 @@ namespace Questor.Modules.Logging
             // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
             // we now filter sensitive info by default
             //
-            Cache.Instance.ExtConsole += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");               //Questor GUI Console Log
-            Cache.Instance.ConsoleLog += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");               //In memory Console Log
             Cache.Instance.ConsoleLogRedacted += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+            Cache.Instance.ExtConsole += Cache.Instance.ConsoleLogRedacted;
+            Cache.Instance.ConsoleLog += Cache.Instance.ConsoleLogRedacted;
+            plainLogLine = FilterColorsFromLogs(line);
 
             if (Settings.Instance.SaveConsoleLog)
             {
@@ -140,10 +141,10 @@ namespace Questor.Modules.Logging
                 if (Cache.Instance.ConsoleLogOpened)
                 {
                     if (Settings.Instance.ConsoleLogFile != null) File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog);               //Write In Memory Console log to File
-                    Cache.Instance.ConsoleLog = null;
+                    //Cache.Instance.ConsoleLog = null;
 
                     if (Settings.Instance.ConsoleLogFileRedacted != null) File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
-                    Cache.Instance.ConsoleLogRedacted = null;
+                    //Cache.Instance.ConsoleLogRedacted = null;
                 }
             }
         }

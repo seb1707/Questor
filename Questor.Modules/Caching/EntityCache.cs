@@ -3472,10 +3472,14 @@ namespace Questor.Modules.Caching
                     {
                         if (_isOnGridWithMe == null)
                         {
-                            bool result = false;
-                            result |= Distance < (double)Distances.OnGridWithMe;
-                            _isOnGridWithMe = result;
-                            return result;
+                            if (Distance < (double) Distances.OnGridWithMe)
+                            {
+                                _isOnGridWithMe = true;
+                                return _isOnGridWithMe ?? true;
+                            }
+
+                            _isOnGridWithMe = false;
+                            return _isOnGridWithMe ?? false;
                         }
 
                         return _isOnGridWithMe ?? false;

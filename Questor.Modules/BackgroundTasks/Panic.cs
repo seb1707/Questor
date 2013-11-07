@@ -210,7 +210,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
                         {
                             // Only check for cap-panic while in a mission, not while doing anything else
-                            Logging.Log("Panic", "Start panicking, capacitor [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumCapacitorPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
 
                             //Questor.panic_attempts_this_mission;
                             Cache.Instance.PanicAttemptsThisMission++;
@@ -221,7 +221,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (Cache.Instance.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
                         {
-                            Logging.Log("Panic", "Start panicking, shield [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumShieldPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;
@@ -230,7 +230,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (Cache.Instance.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
                         {
-                            Logging.Log("Panic", "Start panicking, armor [" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] below [" + Logging.White + Settings.Instance.MinimumArmorPct + Logging.Red + "%] S[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + Logging.Red + "%] A[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + Logging.Red + "%] C[" + Logging.White + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
                             Cache.Instance.PanicAttemptsThisMission++;
                             Cache.Instance.PanicAttemptsThisPocket++;
                             _States.CurrentPanicState = PanicState.StartPanicking;

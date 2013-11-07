@@ -1434,35 +1434,40 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                //List<EntityCache>
-                if (Cache.Instance.InSpace)
+                if (_combatTargets == null)
                 {
-                    if (_combatTargets == null)
+                    //List<EntityCache>
+                    if (Cache.Instance.InSpace)
                     {
-                        List<EntityCache> targets = new List<EntityCache>();
-                        targets.AddRange(Cache.Instance.Targets);
-                        targets.AddRange(Cache.Instance.Targeting);
+                        if (_combatTargets == null)
+                        {
+                            List<EntityCache> targets = new List<EntityCache>();
+                            targets.AddRange(Cache.Instance.Targets);
+                            targets.AddRange(Cache.Instance.Targeting);
 
-                        _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.Distance < (double)Distances.OnGridWithMe
-                                                            && !e.IsIgnored 
-                                                            && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
-                                                            && (e.IsNpc || e.IsNpcByGroupID)
-                                                            && e.Distance < Cache.Instance.MaxRange
-                                                            && !e.IsContainer
-                                                            && !e.IsFactionWarfareNPC
-                                                            && !e.IsEntityIShouldLeaveAlone
-                                                            && !e.IsBadIdea
-                                                            && !e.IsCelestial
-                                                            && !e.IsAsteroid)
-                                                            .ToList();
+                            _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.Distance < (double)Distances.OnGridWithMe
+                                                                && !e.IsIgnored
+                                                                && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                                && (e.IsNpc || e.IsNpcByGroupID)
+                                                                && e.Distance < Cache.Instance.MaxRange
+                                                                && !e.IsContainer
+                                                                && !e.IsFactionWarfareNPC
+                                                                && !e.IsEntityIShouldLeaveAlone
+                                                                && !e.IsBadIdea
+                                                                && !e.IsCelestial
+                                                                && !e.IsAsteroid)
+                                                                .ToList();
+
+                            return _combatTargets;
+                        }
 
                         return _combatTargets;
                     }
 
-                    return _combatTargets;
+                    return Cache.Instance.Targets.ToList(); 
                 }
 
-                return Cache.Instance.Targets.ToList();
+                return _combatTargets;
             }
         }
 
@@ -1476,63 +1481,68 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                //List<EntityCache>
-                if (Cache.Instance.InSpace)
+                if (_potentialCombatTargets == null)
                 {
-                    _potentialCombatTargets = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                        && !e.IsIgnored
-                                                        && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
-                                                        && (e.IsNpcByGroupID || e.IsAttacking ) //|| e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
-                                                        //&& !e.IsTarget
-                                                        && !e.IsContainer
-                                                        && !e.IsFactionWarfareNPC
-                                                        && !e.IsEntityIShouldLeaveAlone
-                                                        && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
-                                                        && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
-                                                        && !e.IsMiscJunk
-                                                        && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
-                                                        )
-                                                        .ToList();
-
-                    if (Settings.Instance.DebugPotentialCombatTargets)
+                    //List<EntityCache>
+                    if (Cache.Instance.InSpace)
                     {
-                        if (!_potentialCombatTargets.Any())
-                        {
-                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                            List<EntityCache> __entities = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
+                        _potentialCombatTargets = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                            && !e.IsIgnored
+                                                            && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                            && (e.IsNpcByGroupID || e.IsAttacking) //|| e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
+                            //&& !e.IsTarget
+                                                            && !e.IsContainer
+                                                            && !e.IsFactionWarfareNPC
+                                                            && !e.IsEntityIShouldLeaveAlone
+                                                            && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
                                                             && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
                                                             && !e.IsMiscJunk
-                                                            && !e.IsAsteroid
-                                                            && !e.IsIgnored
+                                                            && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
                                                             )
                                                             .ToList();
 
-                            int _entitiescount = 0;
-
-                            if (__entities.Any())
+                        if (Settings.Instance.DebugPotentialCombatTargets)
+                        {
+                            if (!_potentialCombatTargets.Any())
                             {
-                                _entitiescount = __entities.Count();
-                                Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities below", Logging.Debug);
-                                int i = 0;
-                                foreach (EntityCache t in __entities)
+                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                List<EntityCache> __entities = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
+                                                                && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
+                                                                && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
+                                                                && !e.IsMiscJunk
+                                                                && !e.IsAsteroid
+                                                                && !e.IsIgnored
+                                                                )
+                                                                .ToList();
+
+                                int _entitiescount = 0;
+
+                                if (__entities.Any())
                                 {
-                                    i++;
-                                    Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "] IsNPC [" + t.IsNpc +  "] IsNPCByGroupID [" + t.IsNpcByGroupID +  "]", Logging.Debug);
-                                    continue;
+                                    _entitiescount = __entities.Count();
+                                    Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities below", Logging.Debug);
+                                    int i = 0;
+                                    foreach (EntityCache t in __entities)
+                                    {
+                                        i++;
+                                        Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "] IsNPC [" + t.IsNpc + "] IsNPCByGroupID [" + t.IsNpcByGroupID + "]", Logging.Debug);
+                                        continue;
+                                    }
+
+                                    Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities above", Logging.Debug);
                                 }
 
-                                Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities above", Logging.Debug);
+                                if (Settings.Instance.DebugPotentialCombatTargets) Logging.Log("Cache.potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
                             }
-
-                            if (Settings.Instance.DebugPotentialCombatTargets) Logging.Log("Cache.potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
                         }
+
+                        return _potentialCombatTargets;
                     }
 
-                    return _potentialCombatTargets;
+                    return new List<EntityCache>();
                 }
 
-                return new List<EntityCache>();
+                return _potentialCombatTargets;
             }
         }
 
@@ -1995,35 +2005,46 @@ namespace Questor.Modules.Caching
             get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
         }
 
+
+
+        private List<PriorityTarget> _primaryWeaponPriorityTargetsPerFrameCaching;
+        
         private List<PriorityTarget> _primaryWeaponPriorityTargets;
         
         public List<PriorityTarget> PrimaryWeaponPriorityTargets
         {
             get
             {
-                //
-                // remove targets that no longer exist
-                //
-                if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
+                if (_primaryWeaponPriorityTargetsPerFrameCaching == null)
                 {
-                    foreach (PriorityTarget _primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets) 
+                    //
+                    // remove targets that no longer exist
+                    //
+                    if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                     {
-                        if (Cache.Instance.EntitiesOnGrid.All(i => i.Id != _primaryWeaponPriorityTarget.EntityID))
+                        foreach (PriorityTarget _primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets)
                         {
-                            Logging.Log("PrimaryWeaponPriorityTargets", "Remove Target that is no longer in the Entities list [" + _primaryWeaponPriorityTarget.Name + "]ID[" + Cache.Instance.MaskedID(_primaryWeaponPriorityTarget.EntityID) + "] PriorityLevel [" + _primaryWeaponPriorityTarget.PrimaryWeaponPriority + "]", Logging.Debug);
-                            _primaryWeaponPriorityTargets.Remove(_primaryWeaponPriorityTarget);
-                            break;
+                            if (Cache.Instance.EntitiesOnGrid.All(i => i.Id != _primaryWeaponPriorityTarget.EntityID))
+                            {
+                                Logging.Log("PrimaryWeaponPriorityTargets", "Remove Target that is no longer in the Entities list [" + _primaryWeaponPriorityTarget.Name + "]ID[" + Cache.Instance.MaskedID(_primaryWeaponPriorityTarget.EntityID) + "] PriorityLevel [" + _primaryWeaponPriorityTarget.PrimaryWeaponPriority + "]", Logging.Debug);
+                                _primaryWeaponPriorityTargets.Remove(_primaryWeaponPriorityTarget);
+                                break;
+                            }
                         }
+
+                        _primaryWeaponPriorityTargetsPerFrameCaching = _primaryWeaponPriorityTargets;
+                        return _primaryWeaponPriorityTargets;
                     }
 
+                    //
+                    // initialize a fresh list - to be filled in during panic (updated every tick)
+                    //
+                    _primaryWeaponPriorityTargets = new List<PriorityTarget>();
+                    _primaryWeaponPriorityTargetsPerFrameCaching = _primaryWeaponPriorityTargets;
                     return _primaryWeaponPriorityTargets;
                 }
 
-                //
-                // initialize a fresh list - to be filled in during panic (updated every tick)
-                //
-                _primaryWeaponPriorityTargets = new List<PriorityTarget>();
-                return _primaryWeaponPriorityTargets;
+                return _primaryWeaponPriorityTargetsPerFrameCaching;
             }
             set
             {
@@ -2504,6 +2525,7 @@ namespace Questor.Modules.Caching
                 _myShipEntity = null; 
                 _objects = null;
                 _potentialCombatTargets = null;
+                _primaryWeaponPriorityTargetsPerFrameCaching = null;
                 _safeSpotBookmarks = null;
                 _star = null;
                 _stations = null;

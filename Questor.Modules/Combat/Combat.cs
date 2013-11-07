@@ -56,7 +56,7 @@ namespace Questor.Modules.Combat
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
             maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
-            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets
+            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets;
 
             Interlocked.Increment(ref CombatInstances);
         }

@@ -142,7 +142,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Is our current target still the same and is the last Engage command no longer then 15s ago?
-                    if (Cache.Instance.LastDroneTargetID == Cache.Instance.PreferredDroneTargetID && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
+                    if (Cache.Instance.LastDroneTargetID == DroneToShoot.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
                     {
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)", Logging.Debug);
                         return;
@@ -194,12 +194,13 @@ namespace Questor.Modules.Combat
         public static void ProcessState()
         {
             if (_nextDroneAction > DateTime.UtcNow || Settings.Instance.DebugDisableDrones) return;
-            
-            _nextDroneAction = DateTime.UtcNow.AddMilliseconds(400);
+
+            if (Settings.Instance.DebugDrones) Logging.Log("Drones.ProcessState", "Entering Drones.ProcessState", Logging.Debug);
+            _nextDroneAction = DateTime.UtcNow.AddMilliseconds(800);
 
             if (Cache.Instance.InStation ||                             // There is really no combat in stations (yet)
                 !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
-                Cache.Instance.ActiveShip.Entity == null ||   // What? No ship entity?
+                Cache.Instance.MyShipEntity == null ||   // What? No ship entity?
                 Cache.Instance.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
                 !Cache.Instance.UseDrones                               // if UseDrones is false
                 )
@@ -214,7 +215,7 @@ namespace Questor.Modules.Combat
                 return;
             }
 
-            if (!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp)
+            if ((!Cache.Instance.ActiveDrones.Any() && Cache.Instance.InWarp) || !Cache.Instance.EntitiesOnGrid.Any())
             {
                 Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                 _States.CurrentDroneState = DroneState.Idle;
@@ -355,7 +356,7 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    //TargetingCache.CurrentDronesTarget = null;
+                    Cache.Instance.LastDroneTargetID = 0;
                     break;
 
                 case DroneState.Fighting:
@@ -558,7 +559,7 @@ namespace Questor.Modules.Combat
                     {
                         _lastRecall = DateTime.UtcNow;
                         Recall = false;
-                        //TargetingCache.CurrentDronesTarget = null;
+                        Cache.Instance.LastDroneTargetID = 0;
                         _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
@@ -587,7 +588,8 @@ namespace Questor.Modules.Combat
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         return;
                     }
-                    //TargetingCache.CurrentDronesTarget = null;
+                    
+                    Cache.Instance.LastDroneTargetID = 0;
                     break;
             }
 

@@ -95,8 +95,6 @@ namespace Questor.Modules.Logging
             // we now filter sensitive info by default
             //
             Cache.Instance.ConsoleLogRedacted += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
-            Cache.Instance.ExtConsole += Cache.Instance.ConsoleLogRedacted;
-            Cache.Instance.ConsoleLog += Cache.Instance.ConsoleLogRedacted;
             plainLogLine = FilterColorsFromLogs(line);
 
             if (Settings.Instance.SaveConsoleLog)

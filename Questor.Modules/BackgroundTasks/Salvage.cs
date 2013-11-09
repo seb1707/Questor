@@ -114,11 +114,17 @@ namespace Questor.Modules.BackgroundTasks
 
             int tractorsProcessedThisTick = 0;
             ModuleNumber = 0;
-            for (int i = tractorBeams.Count - 1; i >= 0; i--)
+
+            foreach (ModuleCache tractorBeam in tractorBeams)
             {
                 ModuleNumber++;
-                ModuleCache tractorBeam = tractorBeams[i];
-                if (!tractorBeam.IsActive && !tractorBeam.IsDeactivating || tractorBeam.InLimboState)
+                if (tractorBeam.IsActive)
+                    continue;
+
+                if (tractorBeam.InLimboState)
+                    continue;
+
+                if ( !tractorBeam.IsActive && !tractorBeam.IsDeactivating)
                     continue;
 
                 EntityCache wreck = wrecks.FirstOrDefault(w => w.Id == tractorBeam.TargetId);
@@ -159,11 +165,9 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
-                // Remove the tractor beam as a possible beam to activate
-                tractorBeams.RemoveAt(i);
                 wrecks.RemoveAll(w => w.Id == tractorBeam.TargetId);
             }
-
+            
             foreach (EntityCache wreck in wrecks)
             {
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s

@@ -994,7 +994,7 @@ namespace Questor.Behaviors
                                     {
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are after mission salvaging again because it has been at least [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
-                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
+                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
                                         Statistics.Instance.StartedSalvaging = DateTime.UtcNow;
 
                                         //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
@@ -1011,13 +1011,13 @@ namespace Questor.Behaviors
                                     if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                                     {
                                         Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Settings.Instance.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
-                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
+                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
                                         Statistics.Instance.StartedSalvaging = DateTime.UtcNow;
                                     }
                                     else
                                     {
                                         Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last after mission salvaging session was [" + Math.Round(DateTime.UtcNow.Subtract(Statistics.Instance.FinishedSalvaging).TotalMinutes, 0) + "min] ago ", Logging.White);
-                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
+                                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
                                         Statistics.Instance.StartedSalvaging = DateTime.UtcNow;
                                     }
                                 }
@@ -1031,6 +1031,13 @@ namespace Questor.Behaviors
                             return;
                         }
                     }
+                    break;
+
+                case CombatMissionsBehaviorState.CheckBookmarkAge:
+                    Logging.Log("CombatMissionsBehaviorState", "Checking for any old bookmarks that may still need to be removed.", Logging.White);
+                    if (!Cache.Instance.DeleteUselessSalvageBookmarks("RemoveOldBookmarks")) return;
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
+                    Statistics.Instance.StartedSalvaging = DateTime.UtcNow;
                     break;
 
                 case CombatMissionsBehaviorState.BeginAfterMissionSalvaging:

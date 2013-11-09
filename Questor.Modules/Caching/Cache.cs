@@ -7214,37 +7214,7 @@ namespace Questor.Modules.Caching
             //
             // remove all salvage bookmarks over 48hrs old - they have long since been rendered useless
             //
-            try
-            {
-                //Delete bookmarks older than 2 hours.
-                DateTime bmExpirationDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofSalvageBookmarksToExpire);
-                List<DirectBookmark> uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
-
-                DirectBookmark uselessSalvageBookmark = uselessSalvageBookmarks.FirstOrDefault();
-                if (uselessSalvageBookmark != null)
-                {
-                    _bookmarkDeletionAttempt++;
-                    if (_bookmarkDeletionAttempt <= AfterMissionSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
-                    {
-                        Logging.Log(module, "removing salvage bookmark that aged more than [" + Settings.Instance.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
-                        uselessSalvageBookmark.Delete();
-                        return false;
-                    }
-
-                    if (_bookmarkDeletionAttempt > AfterMissionSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
-                    {
-                        Logging.Log(module, "error removing bookmark!" + uselessSalvageBookmark.Title, Logging.White);
-                        _States.CurrentQuestorState = QuestorState.Error;
-                        return false;
-                    }
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Cache.DeleteBookmarksOnGrid", "Delete old unprocessed salvage bookmarks: exception generated:" + ex.Message, Logging.White);
-            }
+            DeleteUselessSalvageBookmarks(module);
 
             List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                    OrderBy(b => b.CreatedOn));
@@ -7272,6 +7242,50 @@ namespace Questor.Modules.Caching
             _bookmarkDeletionAttempt = 0;
             Cache.Instance.NextSalvageTrip = DateTime.UtcNow;
             Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
+            return true;
+        }
+
+        public bool DeleteUselessSalvageBookmarks(string module)
+        {
+            if (DateTime.UtcNow < NextBookmarkDeletionAttempt)
+            {
+                return false;
+            }
+
+            NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
+
+            try
+            {
+                //Delete bookmarks older than 2 hours.
+                DateTime bmExpirationDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofSalvageBookmarksToExpire);
+                List<DirectBookmark> uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
+
+                DirectBookmark uselessSalvageBookmark = uselessSalvageBookmarks.FirstOrDefault();
+                if (uselessSalvageBookmark != null)
+                {
+                    _bookmarkDeletionAttempt++;
+                    if (_bookmarkDeletionAttempt <= uselessSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
+                    {
+                        Logging.Log(module, "removing a salvage bookmark that aged more than [" + Settings.Instance.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
+                        uselessSalvageBookmark.Delete();
+                        return false;
+                    }
+
+                    if (_bookmarkDeletionAttempt > uselessSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
+                    {
+                        Logging.Log(module, "error removing bookmark!" + uselessSalvageBookmark.Title, Logging.White);
+                        _States.CurrentQuestorState = QuestorState.Error;
+                        return false;
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Cache.DeleteBookmarksOnGrid", "Delete old unprocessed salvage bookmarks: exception generated:" + ex.Message, Logging.White);
+            }
+
             return true;
         }
 

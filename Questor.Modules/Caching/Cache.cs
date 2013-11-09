@@ -2549,13 +2549,14 @@ namespace Questor.Modules.Caching
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
 
-                if (QuestorJustStarted && InvalidateCacheQuestorJustStartedFlag)
-                {
-                    InvalidateCacheQuestorJustStartedFlag = false;
-                    if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("Cache.InvalidateCache", "QuestorJustStarted: initializing", Logging.Debug);
-                    _primaryWeaponPriorityEntities = null;
-                    _dronePriorityEntities = null;
-                    _preferredPrimaryWeaponTarget = null;
+                _primaryWeaponPriorityEntities = null;
+                _dronePriorityEntities = null;
+                _preferredPrimaryWeaponTarget = null;
+                    
+                //if (QuestorJustStarted && InvalidateCacheQuestorJustStartedFlag)
+                //{
+                //    InvalidateCacheQuestorJustStartedFlag = false;
+                //     if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("Cache.InvalidateCache", "QuestorJustStarted: initializing", Logging.Debug);
                     if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
                     {
                         _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
@@ -2565,7 +2566,7 @@ namespace Questor.Modules.Caching
                     {
                         _dronePriorityTargets.ForEach(pt => pt.ClearCache());
                     }
-                }
+                //}
             }
             catch (Exception exception)
             {

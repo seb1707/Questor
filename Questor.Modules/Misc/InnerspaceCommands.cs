@@ -465,6 +465,23 @@ namespace Questor.Modules.Misc
                 }
             }
             Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
+            Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
+            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+            {
+                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
+            }
+
+            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+            {
+                int icount = 0;
+                foreach (EntityCache PrimaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityEntities)
+                {
+                    icount++;
+                    Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityEntity.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "][" + PrimaryWeaponPriorityEntity.MaskedId + "]", Logging.Debug);
+                    //Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityEntity.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityEntity.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
+                }
+            }
+            Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             return true;
         }
 

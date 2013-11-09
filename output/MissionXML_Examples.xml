@@ -135,12 +135,12 @@
           <parameter name="timeout" value="1200"></parameter>
       </action> 
       
-      <action name="Done"/> <!-- end of mission: gotobase -->
+      <action name="Done"/> <!-- end of mission: GoToBase -->
       
       <action name="SalvageBookmark" />
       
       <action name="Activate">
-        <parameter name="optional" value="false" /> <!-- if true and we cant find the target to avtivate we assume the mission is done -->
+        <parameter name="optional" value="false" /> <!-- if true and we cant find the target to activate we assume the mission is done -->
         <parameter name="target" value="Acceleration Gate" />
       </action>
     </pocket>

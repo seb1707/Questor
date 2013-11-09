@@ -116,17 +116,23 @@ namespace Questor.Modules.BackgroundTasks
             int tractorsProcessedThisTick = 0;
             ModuleNumber = 0;
 
+
+            //
+            // Deactivate tractorbeams
+            //
             foreach (ModuleCache tractorBeam in tractorBeams)
             {
                 ModuleNumber++;
                 if (tractorBeam.IsActive)
                 {
+                    tractorBeams.Remove(tractorBeam);
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "[" + ModuleNumber + "] Tractorbeam is: IsActive [" + tractorBeam.IsActive + "]. Continue" , Logging.Debug);
                     continue;
                 }
                     
                 if (tractorBeam.InLimboState)
                 {
+                    tractorBeams.Remove(tractorBeam);
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "[" + ModuleNumber + "] Tractorbeam is: InLimboState [" + tractorBeam.InLimboState + "] IsDeactivating [" + tractorBeam.IsDeactivating + "] IsActivatable [" + tractorBeam.IsActivatable + "] IsOnline [" + tractorBeam.IsOnline + "] IsGoingOnline [" + tractorBeam.IsGoingOnline + "]. Continue", Logging.Debug);
                     continue;
                 }
@@ -162,6 +168,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (tractorBeam.IsActive && (wreck == null || (wreck.Distance <= (int)Distances.SafeScoopRange && !currentWreckUnlooted)))
                 {
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams", "[" + ModuleNumber + "] Tractorbeam: IsActive [" + tractorBeam.IsActive + "] and the wreck [" + wreck.Name + "] is in SafeScoopRange [" + Math.Round(wreck.Distance/1000,0) + "]", Logging.Teal);
+                    tractorBeams.Remove(tractorBeam); 
                     tractorBeam.Click();
                     tractorsProcessedThisTick++;
                     Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
@@ -177,13 +184,19 @@ namespace Questor.Modules.BackgroundTasks
 
                 wrecks.RemoveAll(w => w.Id == tractorBeam.TargetId);
             }
-            
+
+
+            //
+            // Activate tractorbeams
+            //
+            int WreckNumber = 0;
             foreach (EntityCache wreck in wrecks)
             {
+                WreckNumber++;
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
                 if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we shouldnt tractor it.
                 {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams", "Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: dont tractor a wreck that is moving" , Logging.Log());
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: dont tractor a wreck that is moving" , Logging.Debug);
                     continue;
                 }
 
@@ -195,18 +208,35 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (tractorBeams.Count == 0) return;
 
-                ModuleCache tractorBeam = tractorBeams[0];
-                tractorBeams.RemoveAt(0);
-                tractorBeam.Activate(wreck.Id);
-                tractorsProcessedThisTick++;
-
-                Logging.Log("Salvage", "Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
-                Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                foreach (ModuleCache tractorBeam in tractorBeams)
                 {
+                    ModuleNumber++;
+                    if (tractorBeam.IsActive)
+                    {
+                        if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "[" + ModuleNumber + "] Tractorbeam is: IsActive [" + tractorBeam.IsActive + "]. Continue", Logging.Debug);
+                        continue;
+                    }
+
+                    if (tractorBeam.InLimboState)
+                    {
+                        if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams", "[" + ModuleNumber + "] Tractorbeam is: InLimboState [" + tractorBeam.InLimboState + "] IsDeactivating [" + tractorBeam.IsDeactivating + "] IsActivatable [" + tractorBeam.IsActivatable + "] IsOnline [" + tractorBeam.IsOnline + "] IsGoingOnline [" + tractorBeam.IsGoingOnline + "]. Continue", Logging.Debug);
+                        continue;
+                    }
+
+                    tractorBeams.Remove(tractorBeam);
+                    tractorBeam.Activate(wreck.Id);
+                    tractorsProcessedThisTick++;
+
+                    Logging.Log("Salvage", "[" + WreckNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
+                    Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                    if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
+                    {
+                        return;
+                    }
+
                     continue;
                 }
-
+                
                 return;
             }
         }

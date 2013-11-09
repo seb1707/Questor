@@ -171,7 +171,7 @@ namespace Questor.Modules.BackgroundTasks
             foreach (EntityCache wreck in wrecks)
             {
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
-                if ((int)wreck.Velocity != 0 && wreck.Velocity < 10000)
+                if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we shouldnt tractor it.
                 {
                     continue;
                 }

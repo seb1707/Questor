@@ -380,8 +380,6 @@ namespace Questor.Modules.Activities
             //        _clearPocketTimeout = null;
             //}
 
-            
-
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
 
@@ -466,7 +464,7 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(); [" + Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Name + "]", Logging.Debug);
                     ClosestPotentialCombatTarget = Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 }
-                
+
                 if (ClosestPotentialCombatTarget != null && (ClosestPotentialCombatTarget.Distance > Cache.Instance.MaxRange || !ClosestPotentialCombatTarget.IsInOptimalRange))
                 {
                     if (!Cache.Instance.IsApproachingOrOrbiting(ClosestPotentialCombatTarget.Id))
@@ -474,11 +472,10 @@ namespace Questor.Modules.Activities
                         NavigateOnGrid.NavigateIntoRange(ClosestPotentialCombatTarget, "combatMissionControl", true);
                     }
                 }
-                
+
                 _clearPocketTimeout = null;
             }
             //Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.potentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).ToList(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
-
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
@@ -524,7 +521,7 @@ namespace Questor.Modules.Activities
             //    if (Cache.Instance.__GetBestWeaponTargets(DistanceToClear).Any())
             //        _clearPocketTimeout = null;
             //}
-            
+
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
             {
@@ -577,7 +574,7 @@ namespace Questor.Modules.Activities
             //    if (Cache.Instance.__GetBestWeaponTargets(DistanceToClear, Cache.Instance.combatTargets.Where(t => t.IsTargetedBy)).Any())
             //        _clearPocketTimeout = null;
             //}
-            
+
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
             {
@@ -752,7 +749,7 @@ namespace Questor.Modules.Activities
             //else //use new target selection method
             //{
             //    Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxRange);
-            //}  
+            //}
 
             if (closest != null)
             {
@@ -993,8 +990,6 @@ namespace Questor.Modules.Activities
             //        _clearPocketTimeout = null;
             //}
 
-            
-
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue)
             {
@@ -1220,7 +1215,7 @@ namespace Questor.Modules.Activities
             }
             else //Do not break aggression on attackers (attack normally)
             {
-                
+
                 //
                 // check to see if we have priority targets (ECM, warp scramblers, etc, and let combat process those first)
                 //
@@ -1245,7 +1240,6 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl.Kill","Exception [" + ex + "]",Logging.Debug);
                     } 
                 }
-
 
                 if (primaryWeaponPriorityTarget != null && primaryWeaponPriorityTarget.IsOnGridWithMe)
                 {
@@ -1436,8 +1430,6 @@ namespace Questor.Modules.Activities
             //    if (Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe, Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()).Any())
             //        _clearPocketTimeout = null;
             //}
-
-            
 
             // Do we have a timeout?  No, set it to now + 5 seconds
             if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);

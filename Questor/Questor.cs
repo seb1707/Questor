@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using Questor.Modules.Actions;
-
 namespace Questor
 {
     using System;
@@ -20,6 +18,7 @@ namespace Questor
     using System.Linq;
     using DirectEve;
     using global::Questor.Behaviors;
+    using global::Questor.Modules.Actions;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;

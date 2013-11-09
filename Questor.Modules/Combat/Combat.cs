@@ -1951,7 +1951,7 @@ namespace Questor.Modules.Combat
                             //{
                             //    Cache.Instance.__GetBestWeaponTargets(Cache.Instance.MaxDroneRange);
                             //}
-                            
+
                             i = 0;
                         }
                         

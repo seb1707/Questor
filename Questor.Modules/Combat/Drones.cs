@@ -45,7 +45,7 @@ namespace Questor.Modules.Combat
         private static int _lastDroneCount;
         private static DateTime _lastEngageCommand;
         private static DateTime _lastRecallCommand;
-        
+
         private static int _recallCount;
         private static DateTime _lastLaunch;
         private static DateTime _lastRecall;
@@ -361,7 +361,7 @@ namespace Questor.Modules.Combat
 
                 case DroneState.Fighting:
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.Fighting", "Should we recall our drones? This is a possible list of reasons why we should", Logging.Debug);
-                    
+
                     if (!Cache.Instance.ActiveDrones.Any())
                     {
                         Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);
@@ -588,7 +588,7 @@ namespace Questor.Modules.Combat
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         return;
                     }
-                    
+
                     Cache.Instance.LastDroneTargetID = 0;
                     break;
             }

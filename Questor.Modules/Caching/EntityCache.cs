@@ -8,13 +8,12 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Threading;
-
 namespace Questor.Modules.Caching
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using DirectEve;
     //using System.Collections.Generic;
     using global::Questor.Modules.Lookup;

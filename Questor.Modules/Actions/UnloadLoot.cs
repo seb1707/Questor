@@ -255,7 +255,6 @@ namespace Questor.Modules.Actions
                 }
                 catch (NullReferenceException) { }
                 return false;
-
             }
             catch (Exception ex)
             {

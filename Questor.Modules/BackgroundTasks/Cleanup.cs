@@ -713,7 +713,7 @@
                                 FoundDuelInvitation = true;
                                 FoundDuelInvitationTime = DateTime.UtcNow;
                             }
-                            
+
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&

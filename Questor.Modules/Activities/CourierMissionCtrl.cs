@@ -101,7 +101,6 @@ namespace Questor.Modules.Activities
                     missionItem = "Encoded Data Chip"; //not correct here
                     break;
 
-
                 default:
                     missionItem = "Encoded Data Chip"; //likely not correct - add an entry above for the courier mission in question
                     break;

@@ -1029,7 +1029,7 @@ namespace Questor.Modules.Actions
                         _States.CurrentArmState = ArmState.Cleanup;
                         return;
                     }
-                    
+
                     if (Cache.Instance.ModulesAsItemCache == null)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (Cache.Instance.ModulesAsItemCache == null) Note: without ModulesAsItemCache we cant know if we need cap boosters or not ", Logging.White);
@@ -1250,6 +1250,13 @@ namespace Questor.Modules.Actions
                     // load mining crystals
                     //
                     #region load mining crystals
+
+                    //if (Cache.Instance.Modules.Count(i => i.IsTurret && i.MaxCharges == 0) > 0) //civilian guns of all types
+                    //{
+                    //    Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
+                    //    _States.CurrentArmState = ArmState.Cleanup;
+                    //    return;
+                    //}
 
                     if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
 

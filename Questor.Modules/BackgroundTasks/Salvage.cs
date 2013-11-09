@@ -298,14 +298,6 @@ namespace Questor.Modules.BackgroundTasks
             // Check for cargo containers
             foreach (EntityCache wreck in wreckTargets)
             {
-                //if (wreck.IsIgnored)
-                //{
-                //    Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] on the ignore list, ignoring.", Logging.White);
-                //    wreck.UnlockTarget("Salvage");
-                //    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                //    continue;
-                //}
-
                 if (!Cache.Instance.SalvageAll)
                 {
                     if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId) && (wreck.Distance < (int)Distances.SafeScoopRange || wreck.IsWreckEmpty))

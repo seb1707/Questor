@@ -82,7 +82,7 @@
   <defendWhileTraveling>true</defendWhileTraveling>
   <useInnerspace>true</useInnerspace>
   <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
-  <targetSelectionMethod>daxten</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
+  <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->
@@ -374,11 +374,9 @@
   <minimumAmmoCharges>6</minimumAmmoCharges>
   <!-- Amount of cap booster you want to carry with you, when using a cap injector in fitting-->
   <capacitorInjectorToLoad>15</capacitorInjectorToLoad>
-  <armLoadCapBoosters>false</armLoadCapBoosters>
-  
   <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasors, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
-  
+
   <!--  BOTH distance and speed have to be met before the NPC Frigate will be removed from the PrimaryWeapons PriorityTarget List... (under the distance, over the speed) -->
   <!--  If you wish to effectively turn this off you can set the speedTargetsShouldBeIgnoredByMainWeapons to a very high number like: 9999999 -->
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
@@ -422,10 +420,10 @@
   <addWarpScramblersToDronePriorityTargetList>true</addWarpScramblersToDronePriorityTargetList>
   <!-- Use Drones on Targets that use Webifiers, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addWebifiersToDronePriorityTargetList>true</addWebifiersToDronePriorityTargetList>
- 
+
   <!-- This logs to the console (and console log) the current PrimaryWeapon and Drone priorityTargets every x seconds, whatever you specify -->
   <listPriorityTargetsEveryXSeconds>300</listPriorityTargetsEveryXSeconds>
- 
+
   <!-- MaxRange we should use NOS / Neuts -->
   <NosDistance>38000</NosDistance>
   
@@ -562,24 +560,24 @@
   <emailSMTPPort>25</emailSMTPPort> <!-- port to use for outgoing mail (smtp) -->
   <emailAddressToSendAlerts></emailAddressToSendAlerts> <!-- email address to send these alert emails to: i.e. QuestorEmailAlerts@myEmailServerDomain.org -->
   <emailEnableSSL>false</emailEnableSSL> <!-- enable SSL encryption (if needed for the email server you are using) --> 
-  
+
   <loadQuestorDebugInnerspaceCommandAlias>1</loadQuestorDebugInnerspaceCommandAlias>
   <loadQuestorDebugInnerspaceCommand>dotnet q1 questor.exe</loadQuestorDebugInnerspaceCommand>
   <unLoadQuestorDebugInnerspaceCommandAlias>2</unLoadQuestorDebugInnerspaceCommandAlias>
   <unLoadQuestorDebugInnerspaceCommand>dotnet -unload q1</unLoadQuestorDebugInnerspaceCommand>
-  
+
   <standingsNeededToAccessLevel1Agent>-11</standingsNeededToAccessLevel1Agent>
   <standingsNeededToAccessLevel2Agent>1</standingsNeededToAccessLevel2Agent>
   <standingsNeededToAccessLevel3Agent>3</standingsNeededToAccessLevel3Agent>
   <standingsNeededToAccessLevel4Agent>5</standingsNeededToAccessLevel4Agent>
   <standingsNeededToAccessLevel5Agent>7</standingsNeededToAccessLevel5Agent>
-  
+
   <!--                                                        -->
   <!-- SKILL TRAINING SETTINGS       -->
   <!--                                                        -->
   <!-- If there is another toon on this account training at the moment this should be false -->
   <thisToonShouldBeTrainingSkills>true</thisToonShouldBeTrainingSkills>
-  
+
   <!--                                                          -->
   <!-- MISSION BLACKLIST SETTINGS  -->
   <!--                                                          -->

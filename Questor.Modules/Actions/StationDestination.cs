@@ -114,7 +114,7 @@ namespace Questor.Modules.Actions
 
                 return false;
             }
-            
+
             if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)

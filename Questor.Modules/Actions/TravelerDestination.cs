@@ -213,7 +213,7 @@ namespace Questor.Modules.Actions
 
                 return false;
             }
-            
+
             if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
@@ -225,7 +225,7 @@ namespace Questor.Modules.Actions
 
                 return false;
             }
-            
+
             if (DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
                 Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + station.Name + Logging.Green + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);

@@ -311,7 +311,6 @@ namespace Questor.Modules.Caching
         public HashSet<long> ListOfDampenuingEntities = new HashSet<long>();
         public HashSet<long> ListofWebbingEntities = new HashSet<long>();
 
-        
         public void DirecteveDispose()
         {
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
@@ -926,7 +925,8 @@ namespace Questor.Modules.Caching
         public DateTime LastUpdateOfSessionRunningTime;
         public DateTime NextInSpaceorInStation;
         public DateTime NextTimeCheckAction = DateTime.UtcNow;
-        
+        public DateTime NextQMJobCheckAction = DateTime.UtcNow;
+
         public DateTime LastFrame = DateTime.UtcNow;
         public DateTime LastSessionIsReady = DateTime.UtcNow;
         public DateTime LastLogMessage = DateTime.UtcNow;
@@ -1307,7 +1307,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _containers ?? (_containers = EntitiesOnGrid.Where(e =>
+                return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer && 
                            e.HaveLootRights && 
                           (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
@@ -1319,7 +1319,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _containers ?? (_containers = EntitiesOnGrid.Where(e =>
+                return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer &&
                           (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
@@ -1328,14 +1328,14 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Wrecks
         {
-            get { return _containers ?? (_containers = EntitiesOnGrid.Where(e => (e.GroupId == (int)Group.Wreck)).ToList()); }
+            get { return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e => (e.GroupId == (int)Group.Wreck)).ToList()); }
         }
 
         public IEnumerable<EntityCache> UnlootedContainers
         {
             get
             {
-                return _unlootedContainers ?? (_unlootedContainers = EntitiesOnGrid.Where(e =>
+                return _unlootedContainers ?? (_unlootedContainers = Cache.Instance.EntitiesOnGrid.Where(e =>
                           e.IsContainer &&
                           e.HaveLootRights &&
                           (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(
@@ -1349,7 +1349,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = EntitiesOnGrid.Where(e =>
+                return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = Cache.Instance.EntitiesOnGrid.Where(e =>
                           (e.GroupId == (int)Group.Wreck || e.GroupId == (int)Group.SecureContainer ||
                            e.GroupId == (int)Group.AuditLogSecureContainer ||
                            e.GroupId == (int)Group.FreightContainer) && !e.IsWreckEmpty).OrderBy(e => e.Distance).
@@ -1365,7 +1365,7 @@ namespace Questor.Modules.Caching
             {
                 if (_TotalTargetsandTargeting == null)
                 {
-                    _TotalTargetsandTargeting = Targets.Concat(Targeting.Where(i => !i.IsTarget));
+                    _TotalTargetsandTargeting = Cache.Instance.Targets.Concat(Cache.Instance.Targeting.Where(i => !i.IsTarget));
                     return _TotalTargetsandTargeting;
                 }
 
@@ -1379,7 +1379,7 @@ namespace Questor.Modules.Caching
             {
                 if (_targets == null)
                 {
-                    _targets = EntitiesOnGrid.Where(e => e.IsTarget).ToList();
+                    _targets = Cache.Instance.EntitiesOnGrid.Where(e => e.IsTarget).ToList();
                 }
                 
                 // Remove the target info from the TargetingIDs Queue (its been targeted)
@@ -1398,7 +1398,7 @@ namespace Questor.Modules.Caching
             {
                 if (_targeting == null)
                 {
-                    _targeting = EntitiesOnGrid.Where(e => e.IsTargeting || Cache.Instance.TargetingIDs.ContainsKey(e.Id)).ToList();
+                    _targeting = Cache.Instance.EntitiesOnGrid.Where(e => e.IsTargeting || Cache.Instance.TargetingIDs.ContainsKey(e.Id)).ToList();
                 }
 
                 if (_targeting.Any())
@@ -1474,7 +1474,6 @@ namespace Questor.Modules.Caching
                 return _combatTargets;
             }
         }
-
 
         //
         // entities that have potentially not been locked yet
@@ -1659,7 +1658,7 @@ namespace Questor.Modules.Caching
                         return _entitiesNotSelf;
                     }
 
-                    return new List<EntityCache>();    
+                    return new List<EntityCache>();
                 }
 
                 return _entitiesNotSelf;
@@ -1717,11 +1716,11 @@ namespace Questor.Modules.Caching
                             if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Cache.Instance.DirectEve.ActiveShip.Entity is null", Logging.Debug);
                             return false;
                         }
-                        
+
                         if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "NOT InStation is False", Logging.Debug);
                         return false;
                     }
-                    
+
                     if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "InSpace is False", Logging.Debug);
                     return false;
                 }
@@ -1910,7 +1909,7 @@ namespace Questor.Modules.Caching
         {
             get { return _jumpBridges ?? (_jumpBridges = Cache.Instance.Entities.Where(e => e.GroupId == (int)Group.JumpBridge).ToList()); }
         }
-        
+
         public IEnumerable<EntityCache> Stargates
         {
             get
@@ -2090,7 +2089,7 @@ namespace Questor.Modules.Caching
                 return _primaryWeaponPriorityEntities;
             }
         }
-        
+
         private List<PriorityTarget> _dronePriorityTargets;
 
         public List<PriorityTarget> DronePriorityTargets
@@ -2210,6 +2209,7 @@ namespace Questor.Modules.Caching
                 {
                     return FirstAgentMission;
                 }
+
                 return null;
             }
 
@@ -2226,6 +2226,7 @@ namespace Questor.Modules.Caching
                     FirstAgentMission = myAgentMissionList.FirstOrDefault();
                     return FirstAgentMission;
                 }
+
                 return null;
             }
             catch (Exception exception)
@@ -2502,7 +2503,6 @@ namespace Questor.Modules.Caching
                 // this list of variables is cleared every pulse.
                 //
                 _activeDrones = null;
-                //_activeship = null;
                 _agent = null;
                 _aggressed = null;
                 _ammoHangar = null;
@@ -2996,7 +2996,7 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("AddPrimaryWeaponPriorityTarget", "Exception [" + ex + "]", Logging.Debug);
             }
-            
+
             return;
         }
 
@@ -3153,7 +3153,7 @@ namespace Questor.Modules.Caching
                     Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + " m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "] we have [" + DronePriorityTargetCount + "] other DronePriorityTargets", Logging.Teal);
                     _dronePriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, DronePriority = priority });
                 }
-                
+
                 return;
             }
 
@@ -3168,7 +3168,7 @@ namespace Questor.Modules.Caching
             {
                 entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);
             } 
-            
+
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)
@@ -3201,7 +3201,7 @@ namespace Questor.Modules.Caching
             {
                 entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);    
             }
-            
+
             if (entitiesToAdd.Any())
             {
                 foreach (EntityCache entityToAdd in entitiesToAdd)
@@ -3392,7 +3392,7 @@ namespace Questor.Modules.Caching
                                     //Bad bad bad
                                     Cache.Instance.RouteIsAllHighSecBool = false;
                                     return true;
-                                }    
+                                }
                             }
 
                             Logging.Log("CheckifRouteIsAllHighSec", "Jump number [" + _system + "of" + currentPath.Count() + "] in the route came back as null, we could not get the system name or sec level", Logging.Debug);
@@ -3427,7 +3427,7 @@ namespace Questor.Modules.Caching
                         return maskedID;
                     }    
                 }
-                
+
                 return "!0!";
             }
             catch (Exception exception)
@@ -5855,7 +5855,7 @@ namespace Questor.Modules.Caching
                             return null;
                         }
 
-                        return null;    
+                        return null;
                     }
 
                     return _lootContainer;
@@ -5886,7 +5886,7 @@ namespace Questor.Modules.Caching
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.HighTierLootContainer))", Logging.Teal);
-                    
+
                     DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
                     if (firstLootContainer != null)
                     {

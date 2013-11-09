@@ -10,26 +10,21 @@ function compilesolution {
         $project,
         $msBuildOption
         )
-#  Write-Host ""
-#  Write-Host "-----------------------------------------------------------------"       
+   
   Write-Host "Staring to build project: " -NoNewline
   Write-Host "[$($project)]" -ForegroundColor DarkYellow -BackgroundColor Black
-#  Write-Host "-----------------------------------------------------------------"
-
   $results=Invoke-Expression "$($msBuildexEcutable) .\$($project)\$($project).csproj /p:configuration=$($msBuildOption) /target:Clean';'Build /flp:logfile="".\DebugLogs\$($project)Compile.log"""
-  #Write-Host $results
-  if ($results -contains "Build succeeded.") {
+  if ($LastExitCode -eq 0) {
     Write-Host "Build succeeded, 0 Error(s)" -ForegroundColor DarkGreen 
     write-Host "-----------------------------------------------------------------"
     $global:goodbuilds++
-  }
+    }
   else {
     Write-Host "There were ERRORS while compiling project: " -ForegroundColor Red -NoNewline
     Write-Host "[$($project)]" -NoNewline
     Write-Host " check log for errors: " -ForegroundColor Red -NoNewline 
     Write-Host "[DebugLogs\$($project)Errors.log]" -ForegroundColor Yellow 
     write-Host "-----------------------------------------------------------------"
-    #Write-Host $results
     $global:badbuilds++
   }
   

@@ -1072,6 +1072,11 @@ namespace Questor.Modules.Actions
                 return;
             }
 
+            if (!Cache.Instance.Windows.Any())
+            {
+                return;
+            }
+
             foreach (DirectWindow window in Cache.Instance.Windows)
             {
                 if (window.Name == "modal")

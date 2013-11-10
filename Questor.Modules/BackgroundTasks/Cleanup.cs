@@ -1,4 +1,6 @@
-﻿namespace Questor.Modules.BackgroundTasks
+﻿using System.Linq;
+
+namespace Questor.Modules.BackgroundTasks
 {
     using System;
     using System.Globalization;
@@ -287,6 +289,11 @@
             if (DateTime.UtcNow < _lastCleanupAction.AddMilliseconds(500))
                 return false;
 
+            if (!Cache.Instance.Windows.Any())
+            {
+                return false;
+            }
+
             _lastCleanupAction = DateTime.UtcNow;
 
             //
@@ -454,9 +461,9 @@
                         return;
                     }
 
-                    if (Cache.Instance.Windows == null)
+                    if (Cache.Instance.Windows == null || !Cache.Instance.Windows.Any())
                     {
-                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null", Logging.White);
+                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null or empty", Logging.White);
                         _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;

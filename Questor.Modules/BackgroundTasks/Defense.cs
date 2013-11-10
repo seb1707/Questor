@@ -771,7 +771,6 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
                 
-
                 //
                 // Should we activate the module
                 //

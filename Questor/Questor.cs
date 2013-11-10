@@ -33,7 +33,7 @@ namespace Questor
         private readonly QuestorfrmMain _mParent;
         private readonly Defense _defense;
 
-        private DateTime _lastPulse;
+        private DateTime _lastQuestorPulse;
         private static DateTime _nextQuestorAction = DateTime.UtcNow.AddHours(-1);
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
         private readonly CombatHelperBehavior _combatHelperBehavior;
@@ -59,7 +59,7 @@ namespace Questor
         public Questor(QuestorfrmMain form1)
         {
             _mParent = form1;
-            _lastPulse = DateTime.UtcNow;
+            _lastQuestorPulse = DateTime.UtcNow;
 
             _defense = new Defense();
             _combatMissionsBehavior = new CombatMissionsBehavior();
@@ -492,12 +492,12 @@ namespace Questor
             Cache.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+            if (DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1000ms
             {
                 return false;
             }
 
-            _lastPulse = DateTime.UtcNow;
+            _lastQuestorPulse = DateTime.UtcNow;
 
             if (Cache.Instance.SessionState != "Quitting")
             {

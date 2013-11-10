@@ -2185,12 +2185,12 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (Cache.Instance.InSpace || Cache.Instance.InStation)
+                    if (Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20)))
                     {
                         return _windows ?? (_windows = DirectEve.Windows);
                     }
 
-                    return null;
+                    return new List<DirectWindow>();
                 }
                 catch (Exception exception)
                 {
@@ -2356,6 +2356,11 @@ namespace Questor.Modules.Caching
             DirectWindow WindowToFind = null;
             try
             {
+                if (!Cache.Instance.Windows.Any())
+                {
+                    return null;
+                }
+
                 // Special cases
                 if (name == "Local")
                 {
@@ -7301,6 +7306,11 @@ namespace Questor.Modules.Caching
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 //Logging.Log(module, "Waiting...", Logging.Orange);
+                return false;
+            }
+
+            if (!Cache.Instance.Windows.Any())
+            {
                 return false;
             }
 

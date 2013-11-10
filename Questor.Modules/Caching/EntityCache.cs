@@ -2250,6 +2250,11 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
+                    if (!Cache.Instance.Windows.Any())
+                    {
+                        return null;
+                    }
+
                     return Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.ItemId == Id);
                 }
                 catch (Exception exception)
@@ -4031,11 +4036,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpTo)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
                     {
-                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                        if (_directEntity != null && _directEntity.IsValid)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
@@ -4063,15 +4068,10 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
                     {
-                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextDockAction)
+                        if (_directEntity != null && _directEntity.IsValid)
                         {
-                            if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
-                            {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
-                            }
-
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                             _directEntity.Dock();

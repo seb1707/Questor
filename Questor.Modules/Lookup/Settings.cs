@@ -152,6 +152,7 @@ namespace Questor.Modules.Lookup
         public bool DebugSettings { get; set; }
         public bool DebugShipTargetValues { get; set; }
         public bool DebugSkillTraining { get; set; }
+        public bool DebugSpeedMod { get; set; }
         public bool DebugStatistics { get; set; }
         public bool DebugStorylineMissions { get; set; }
         public bool DebugTargetCombatants { get; set; }
@@ -793,6 +794,7 @@ namespace Questor.Modules.Lookup
             DebugSettings = (bool?)CharacterSettingsXml.Element("debugSettings") ?? (bool?)CommonSettingsXml.Element("debugSettings") ?? false;
             DebugShipTargetValues = (bool?)CharacterSettingsXml.Element("debugShipTargetValues") ?? (bool?)CommonSettingsXml.Element("debugShipTargetValues") ?? false;
             DebugSkillTraining = (bool?)CharacterSettingsXml.Element("debugSkillTraining") ?? (bool?)CommonSettingsXml.Element("debugSkillTraining") ?? false;
+            DebugSpeedMod = (bool?)CharacterSettingsXml.Element("debugSpeedMod") ?? (bool?)CommonSettingsXml.Element("debugSpeedMod") ?? false;
             DebugStates = (bool?)CharacterSettingsXml.Element("debugStates") ?? (bool?)CommonSettingsXml.Element("debugStates") ?? false;                                               //enables more console logging having to do with the time it takes to execute each state
             DebugStatistics = (bool?)CharacterSettingsXml.Element("debugStatistics") ?? (bool?)CommonSettingsXml.Element("debugStatistics") ?? false;
             DebugStorylineMissions = (bool?)CharacterSettingsXml.Element("debugStorylineMissions") ?? (bool?)CommonSettingsXml.Element("debugStorylineMissions") ?? false;

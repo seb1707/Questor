@@ -710,7 +710,7 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        private void ActivateAfterburner()
+        private void ActivateSpeedMod()
         {
             if (DateTime.UtcNow < Cache.Instance.NextAfterburnerAction) //if we just did something wait a fraction of a second
                 return;
@@ -726,43 +726,91 @@ namespace Questor.Modules.BackgroundTasks
                 if (module.InLimboState)
                     continue;
 
-                // Should we activate the module
-                bool activate = Cache.Instance.IsApproachingOrOrbiting(0);
-                activate &= !module.IsActive;
-
+                //
                 // Should we deactivate the module?
-                bool deactivate = !Cache.Instance.IsApproaching(0);
-                deactivate &= module.IsActive;
-                deactivate &= ((!Cache.Instance.EntitiesOnGrid.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60)) || !Settings.Instance.SpeedTank);
+                //
+                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + module.IsActive + "]", Logging.Debug);
 
-                // This only applies when not speed tanking
-                if (!Settings.Instance.SpeedTank && Cache.Instance.IsApproachingOrOrbiting(0))
+                if (module.IsActive)
                 {
-                    // Activate if target is far enough
-                    if (Cache.Instance.Approaching != null)
+                    bool deactivate = false; 
+                    
+                    if (!Cache.Instance.IsApproaching(0))
                     {
-                        activate &= Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance;
+                        deactivate = true;
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
+                    }
+                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60))
+                    {
+                        deactivate = true;
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
+                    }
+                    else if (!Settings.Instance.SpeedTank)
+                    {
+                        // This only applies when not speed tanking
+                        if (Cache.Instance.IsApproachingOrOrbiting(0) && Cache.Instance.Approaching != null)
+                        {
+                            // Deactivate if target is too close
+                            if (Cache.Instance.Approaching.Distance < Settings.Instance.MinimumPropulsionModuleDistance)
+                            {
+                                deactivate = true;
+                                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching... and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within [" + Math.Round((double)Settings.Instance.MinimumPropulsionModuleDistance / 1000, 0) + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                            }
+                        }
+                    }
+                    else if (Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor)
+                    {
+                        deactivate = true;
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Capacitor is at [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is below MinimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                    }
 
-                        // Deactivate if target is too close
-                        deactivate |= Cache.Instance.Approaching.Distance < Settings.Instance.MinimumPropulsionModuleDistance;    
+                    if (deactivate)
+                    {
+                        module.Click();
+                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                     }
                 }
+                
 
-                // If we have less then x% cap, do not activate the module
-                //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
-                activate &= Cache.Instance.ActiveShip.CapacitorPercentage > Settings.Instance.MinimumPropulsionModuleCapacitor;
-                deactivate |= Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor;
+                //
+                // Should we activate the module
+                //
 
-                if (activate && !module.IsActive)
+                if (!module.IsActive && !module.InLimboState)
                 {
-                    module.Click();
-                    Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
+                    bool activate = false;
+
+                    if (Cache.Instance.IsApproachingOrOrbiting(0) && Cache.Instance.Approaching != null)
+                    {
+                        // Activate if target is far enough
+                        if (Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance)
+                        {
+                            activate = true;
+                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within MinimumPropulsionModuleDistance [" + Settings.Instance.MinimumPropulsionModuleDistance + "] Activate [" + activate + "]", Logging.Debug);
+                        }
+
+                        if (Settings.Instance.SpeedTank)
+                        {
+                            activate = true;
+                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching or orbiting: Activate [" + activate + "]", Logging.Debug);      
+                        }
+                    }    
+                    
+                    // If we have less then x% cap, do not activate the module
+                    //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor)
+                    {
+                        activate = false;
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] CapacitorPercentage is [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is less than MinimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "] Activate [" + activate + "]", Logging.Debug);
+                    }
+
+                    if (activate)
+                    {
+                        module.Click();
+                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
+                    }
                 }
-                else if (deactivate && module.IsActive)
-                {
-                    module.Click();
-                    Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
-                }
+               
                 return;
             }
         }
@@ -864,7 +912,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            ActivateAfterburner();
+            ActivateSpeedMod();
         }
     }
 }

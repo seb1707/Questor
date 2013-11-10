@@ -733,9 +733,9 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (module.IsActive)
                 {
-                    bool deactivate = false; 
-                    
-                    if (!Cache.Instance.IsApproaching(0))
+                    bool deactivate = false;
+
+                    if (!Cache.Instance.IsApproachingOrOrbiting(0))
                     {
                         deactivate = true;
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);

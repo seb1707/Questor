@@ -47,7 +47,7 @@ namespace Questor.Modules.Actions
         private static DateTime _lastArmAction;
 
         private static int bringItemQuantity;
-        private static int bringOptionalItemQuantity;
+        //private static int bringOptionalItemQuantity;
         // Bleh, we don't want this here, can we move it to cache?
         public static long AgentId { get; set; }
 
@@ -202,9 +202,10 @@ namespace Questor.Modules.Actions
                     CustomFittingFound = false;
                     WaitForFittingToLoad = false;
                     _bringItemMoved = false;
-                    bringItemQuantity = Math.Max(Cache.Instance.BringMissionItemQuantity, 1);
+                    bringItemQuantity = (int)Cache.Instance.BringMissionItemQuantity;
                     CheckCargoForBringItem = true;
-                    bringOptionalItemQuantity = Math.Max(Cache.Instance.BringOptionalMissionItemQuantity, 1);
+                    //bringOptionalItemQuantity = (int)Cache.Instance.BringOptionalMissionItemQuantity;
+                    if (Settings.Instance.DebugArm) Logging.Log("Arm.Begin", "Cache.Instance.BringOptionalMissionItemQuantity is [" + Cache.Instance.BringOptionalMissionItemQuantity + "]", Logging.Debug);
                     _bringoptionalItemMoved = false;
                     CheckCargoForOptionalBringItem = true;
                     capsMoved = false;
@@ -947,38 +948,39 @@ namespace Questor.Modules.Actions
                         if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
                         if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
 
-                        IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+                        IEnumerable<DirectItem> cargoItems = new List<DirectItem>();
+                        cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase));
 
-                        DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
-                                                Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem) ??
-                                                Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringOptionalItem);
+                        DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase)) ??
+                                                Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase)) ??
+                                                Cache.Instance.LootHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase));
 
-                        if (CheckCargoForOptionalBringItem)
-                        {
-                            //
-                            // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
-                            //
-                            foreach (DirectItem bringOptionalItemInCargo in cargoItems)
-                            {
-                                bringOptionalItemQuantity -= bringOptionalItemInCargo.Quantity;
-                                Logging.Log("Arm.MoveItems", "Bring Optional Item: we found [" + bringOptionalItemInCargo + "][" + bringOptionalItemInCargo.Quantity + "] already in the cargo, we need [" + bringOptionalItemQuantity + "] more.", Logging.Teal);
-                                if (bringOptionalItemQuantity <= 0)
-                                {
-                                    //
-                                    // if we already have enough bringOptionalItems in our cargoHold then we are done
-                                    //
-                                    Logging.Log("Arm.MoveItems", "Bring Optional Item: we have all the bring optional items we need.", Logging.Teal);
-                                    _bringoptionalItemMoved = true;
-                                    retryCount = 0;
-                                    CheckCargoForOptionalBringItem = false;
-                                    return;
-                                }
-
-                                continue;
-                            }
-
-                            CheckCargoForOptionalBringItem = false;
-                        }
+                        //if (CheckCargoForOptionalBringItem && cargoItems.Any())
+                        //{
+                        //    //
+                        //    // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+                        //    //
+                        //    foreach (DirectItem bringOptionalItemInCargo in cargoItems)
+                        //    {
+                        //        Cache.Instance.BringOptionalMissionItemQuantity -= bringOptionalItemInCargo.Quantity;
+                        //        Logging.Log("Arm.MoveItems", "Bring Optional Item: we found [" + bringOptionalItemInCargo + "][" + bringOptionalItemInCargo.Quantity + "] already in the cargo, we need [" + Cache.Instance.BringOptionalMissionItemQuantity + "] more.", Logging.Teal);
+                        //        if (Cache.Instance.BringOptionalMissionItemQuantity <= 0)
+                        //        {
+                        //            //
+                        //            // if we already have enough bringOptionalItems in our cargoHold then we are done
+                        //            //
+                        //            Logging.Log("Arm.MoveItems", "Bring Optional Item: we have all the bring optional items we need.", Logging.Teal);
+                        //            _bringoptionalItemMoved = true;
+                        //            retryCount = 0;
+                        //            CheckCargoForOptionalBringItem = false;
+                        //            return;
+                        //        }
+                        //
+                        //        continue;
+                        //    }
+                        //
+                        //    CheckCargoForOptionalBringItem = false;
+                        //}
 
                         if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                         {
@@ -989,13 +991,14 @@ namespace Questor.Modules.Actions
                                 return;
                             }
 
-                            int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Stacksize, bringOptionalItemQuantity);
+                            int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Stacksize, Cache.Instance.BringOptionalMissionItemQuantity);
+                            if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "hangarItem.StackSize [" + hangarItem.Stacksize + "] bringOptionalItemQuantity [" + Cache.Instance.BringOptionalMissionItemQuantity + "] moveOptionalMissionItemQuantity [" + moveOptionalMissionItemQuantity + "]", Logging.Debug);
                             moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
-                            Logging.Log("Arm.MoveItems", "Moving Bring Optional Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
+                            Logging.Log("Arm.MoveItems", "Moving [" + moveOptionalMissionItemQuantity + "] Bring Optional Item(s) of [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
                             Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveOptionalMissionItemQuantity);
 
-                            bringOptionalItemQuantity -= moveOptionalMissionItemQuantity;
-                            if (bringOptionalItemQuantity < 1)
+                            Cache.Instance.BringOptionalMissionItemQuantity -= moveOptionalMissionItemQuantity;
+                            if (Cache.Instance.BringOptionalMissionItemQuantity < 1)
                             {
                                 Logging.Log("Arm.MoveItems", "Bring Optional Item: we have all the bring optional items we need. [bringOptionalItemQuantity is now 0]", Logging.Teal);
                                 _bringoptionalItemMoved = true;

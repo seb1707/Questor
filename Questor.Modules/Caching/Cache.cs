@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using LavishSettingsAPI;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -2257,7 +2259,7 @@ namespace Questor.Modules.Caching
 
         public string BringOptionalMissionItem { get; private set; }
 
-        public int BringOptionalMissionItemQuantity { get; private set; }
+        public int BringOptionalMissionItemQuantity { get; set; }
 
         /// <summary>
         ///   Range for warp to mission bookmark
@@ -2886,12 +2888,16 @@ namespace Questor.Modules.Caching
                 {
                     BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
                     BringMissionItem = BringMissionItem.ToLower();
+                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "bring XML [" + xdoc.Root.Element("bring") + "] BringMissionItem [" + BringMissionItem + "]", Logging.Debug);
                     BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
-                    BringMissionItemQuantity = BringMissionItemQuantity;
+                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "bringquantity XML [" + xdoc.Root.Element("bringquantity") + "] BringMissionItemQuantity [" + BringMissionItemQuantity + "]", Logging.Debug);
+                    
                     BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
                     BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
+                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "trytobring XML [" + xdoc.Root.Element("trytobring") + "] BringOptionalMissionItem [" + BringOptionalMissionItem + "]", Logging.Debug);
                     BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
-                    BringOptionalMissionItemQuantity = BringOptionalMissionItemQuantity;
+                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "trytobringquantity XML [" + xdoc.Root.Element("trytobringquantity") + "] BringOptionalMissionItemQuantity [" + BringOptionalMissionItemQuantity + "]", Logging.Debug); 
+                    
                 }
 
                 //load fitting setting from the mission file

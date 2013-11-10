@@ -14,8 +14,8 @@ namespace Questor.Modules.BackgroundTasks
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
-    using global::Questor.Modules.Actions;
-    using global::Questor.Modules.Activities;
+    //using global::Questor.Modules.Actions;
+    //using global::Questor.Modules.Activities;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
@@ -31,7 +31,7 @@ namespace Questor.Modules.BackgroundTasks
 
         private DateTime _resumeTime;
         private DateTime _nextWarpScrambledWarning = DateTime.UtcNow;
-        private DateTime _lastPulse;
+        private DateTime _nextPanicProcessState;
 
         private DateTime _lastWarpScrambled = DateTime.UtcNow;
         private DateTime _lastPriorityTargetLogging = DateTime.UtcNow;
@@ -45,9 +45,10 @@ namespace Questor.Modules.BackgroundTasks
         public void ProcessState()
         {
             // Only pulse state changes every 500ms
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 500) //default: 500ms
+            if (DateTime.UtcNow < _nextPanicProcessState || Settings.Instance.DebugDisablePanic) //default: 500ms
                 return;
-            _lastPulse = DateTime.UtcNow;
+
+            _nextPanicProcessState = DateTime.UtcNow.AddMilliseconds(500);
 
             switch (_States.CurrentPanicState)
             {
@@ -57,8 +58,8 @@ namespace Questor.Modules.BackgroundTasks
                     // below is the reasons we will start the panic state(s) - if the below is not met do nothing
                     //
                     if (Cache.Instance.InSpace &&
-                        Cache.Instance.DirectEve.ActiveShip.Entity != null &&
-                        !Cache.Instance.DirectEve.ActiveShip.Entity.IsCloaked)
+                        Cache.Instance.ActiveShip.Entity != null &&
+                        !Cache.Instance.ActiveShip.Entity.IsCloaked)
                     {
                         _States.CurrentPanicState = PanicState.Normal;
                         return;
@@ -70,289 +71,239 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         _States.CurrentPanicState = PanicState.Idle;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
+
+                    if (Cache.Instance.ActiveShip.Entity != null)
                     {
-                        _lastNormalX = Cache.Instance.DirectEve.ActiveShip.Entity.X;
-                        _lastNormalY = Cache.Instance.DirectEve.ActiveShip.Entity.Y;
-                        _lastNormalZ = Cache.Instance.DirectEve.ActiveShip.Entity.Z;
+                        _lastNormalX = Cache.Instance.ActiveShip.Entity.X;
+                        _lastNormalY = Cache.Instance.ActiveShip.Entity.Y;
+                        _lastNormalZ = Cache.Instance.ActiveShip.Entity.Z;
                     }
-                    if (Cache.Instance.DirectEve.ActiveShip.Entity == null)
+
+                    if (Cache.Instance.ActiveShip.Entity == null)
                         return;
 
                     if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
                         return;
 
-                    if ((long)Cache.Instance.DirectEve.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
+                    if ((long)Cache.Instance.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
                         return;
 
                     if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
                     {
                         Logging.Log("Cache", "Your corp is involved in a war, Starting panic!", Logging.Orange);
                         _States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
-                    }
-
-                    if (!Cache.Instance.InMission && Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
-                    {
-                        Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
-                        _States.CurrentPanicState = PanicState.BookmarkMyWreck;
-                        //_States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
-                    }
-
-                    if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.DirectEve.ActiveShip.GroupId != 31)
-                    {
-                        // Only check for cap-panic while in a mission, not while doing anything else
-                        Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
-
-                        //Questor.panic_attempts_this_mission;
-                        Cache.Instance.PanicAttemptsThisMission++;
-                        Cache.Instance.PanicAttemptsThisPocket++;
-                        _States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
-                    }
-
-                    if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
-                    {
-                        Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
-                        Cache.Instance.PanicAttemptsThisMission++;
-                        Cache.Instance.PanicAttemptsThisPocket++;
-                        _States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
-                    }
-
-                    if (Cache.Instance.InSpace && Cache.Instance.DirectEve.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
-                    {
-                        Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
-                        Cache.Instance.PanicAttemptsThisMission++;
-                        Cache.Instance.PanicAttemptsThisPocket++;
-                        _States.CurrentPanicState = PanicState.StartPanicking;
-                        return;
-                    }
-
-                    BookmarkMyWreckAttempts = 1; // reset to 1 when we are known to not be in a pod anymore
-
-                    _delayedResume = false;
-                    if (Cache.Instance.InMission)
-                    {
-                        if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
-                        {
-                            Logging.Log("Panic", "You are in a Capsule, you must have died in a mission :(", Logging.Red);
-                            _States.CurrentPanicState = PanicState.BookmarkMyWreck;
-                        }
-
-                        int frigates = Cache.Instance.EntitiesNotSelf.Count(e => e.IsFrigate && e.IsPlayer);
-                        int cruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsCruiser && e.IsPlayer);
-                        int battlecruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattlecruiser && e.IsPlayer);
-                        int battleships = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattleship && e.IsPlayer);
-                        if (Settings.Instance.FrigateInvasionLimit > 0 && frigates >= Settings.Instance.FrigateInvasionLimit)
-                        {
-                            _delayedResume = true;
-
-                            Cache.Instance.PanicAttemptsThisMission++;
-                            Cache.Instance.PanicAttemptsThisPocket++;
-                            _States.CurrentPanicState = PanicState.StartPanicking;
-                            Logging.Log("Panic", "Start panicking, mission invaded by [" + frigates + "] frigates", Logging.Red);
-                        }
-
-                        if (Settings.Instance.CruiserInvasionLimit > 0 && cruisers >= Settings.Instance.CruiserInvasionLimit)
-                        {
-                            _delayedResume = true;
-
-                            Cache.Instance.PanicAttemptsThisMission++;
-                            Cache.Instance.PanicAttemptsThisPocket++;
-                            _States.CurrentPanicState = PanicState.StartPanicking;
-                            Logging.Log("Panic", "Start panicking, mission invaded by [" + cruisers + "] cruisers", Logging.Red);
-                        }
-
-                        if (Settings.Instance.BattlecruiserInvasionLimit > 0 && battlecruisers >= Settings.Instance.BattlecruiserInvasionLimit)
-                        {
-                            _delayedResume = true;
-
-                            Cache.Instance.PanicAttemptsThisMission++;
-                            Cache.Instance.PanicAttemptsThisPocket++;
-                            _States.CurrentPanicState = PanicState.StartPanicking;
-                            Logging.Log("Panic", "Start panicking, mission invaded by [" + battlecruisers + "] battlecruisers", Logging.Red);
-                        }
-
-                        if (Settings.Instance.BattleshipInvasionLimit > 0 && battleships >= Settings.Instance.BattleshipInvasionLimit)
-                        {
-                            _delayedResume = true;
-
-                            Cache.Instance.PanicAttemptsThisMission++;
-                            Cache.Instance.PanicAttemptsThisPocket++;
-                            _States.CurrentPanicState = PanicState.StartPanicking;
-                            Logging.Log("Panic", "Start panicking, mission invaded by [" + battleships + "] battleships", Logging.Red);
-                        }
-
-                        if (_delayedResume)
-                        {
-                            _randomDelay = (Settings.Instance.InvasionRandomDelay > 0 ? _random.Next(Settings.Instance.InvasionRandomDelay) : 0);
-                            _randomDelay += Settings.Instance.InvasionMinimumDelay;
-                            foreach (EntityCache enemy in Cache.Instance.EntitiesNotSelf.Where(e => e.IsPlayer))
-                            {
-                                Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + enemy.Velocity + "]", Logging.Red);
-                            }
-                        }
+                        //return;
                     }
 
                     if (Cache.Instance.InSpace)
                     {
-                        EntityCache EntityIsWarpScramblingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
-                        if (EntityIsWarpScramblingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWarpScramblingMe.Name))
+                        if (!Cache.Instance.InMission && Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         {
-                            //
-                            // Warp Scrambling targets
-                            //
-                            //
-                            // This is here just for consistency, commented out for now as I can think of no reason to ever allow us to NOT add warp scramblers to the drone priority target list
-                            //
-
-                            //if (Settings.Instance.AddWarpScramblersToDronePriorityTargetList)
-                            //{
-                                Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic");    
-                            //}
-                            
-                            //
-                            // if we have AddWarpScramblersToPrimaryWeaponsPriorityTargetList set to true then only use primary weapons onwarp scramblers if the scrambler is not a frigate (rare)
-                            //
-                            if ((Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList) || !EntityIsWarpScramblingMe.IsFrigate)
-                            {
-                                //Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
-                            }
+                            Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
+                            _States.CurrentPanicState = PanicState.BookmarkMyWreck;
+                            //_States.CurrentPanicState = PanicState.StartPanicking;
+                            return;
                         }
 
-                        if (Settings.Instance.SpeedTank)
+                        if (Cache.Instance.TargetedBy.Any())
                         {
-                            EntityCache EntityIsWebbingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWebbingMe);
-                            if (EntityIsWebbingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWebbingMe.Name))
+                            if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been locked by [" + Cache.Instance.TargetedBy.Count() + "] Entities", Logging.Debug);
+                            List<EntityCache> EntitiesThatAreWarpScramblingMe = Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe).ToList();
+                            if (EntitiesThatAreWarpScramblingMe.Any())
+                            {
+                                if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been warp scrambled by [" + EntitiesThatAreWarpScramblingMe.Count() + "] Entities", Logging.Debug);
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWarpScramblingMe, PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                            }
+
+                            if (Settings.Instance.SpeedTank)
+                            {
+                                List<EntityCache> EntitiesThatAreWebbingMe = Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe).ToList();
+                                if (EntitiesThatAreWebbingMe.Any())
+                                {
+                                    if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been webbed by [" + EntitiesThatAreWebbingMe.Count() + "] Entities", Logging.Debug);
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList);
+                                }
+
+                                List<EntityCache> EntitiesThatAreTargetPaintingMe = Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe).ToList();
+                                if (EntitiesThatAreTargetPaintingMe.Any())
+                                {
+                                    if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been target painted by [" + EntitiesThatAreTargetPaintingMe.Count() + "] Entities", Logging.Debug);
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTargetPaintingMe, PrimaryWeaponPriority.TargetPainting, "Panic", Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList);
+                                }
+                            }
+
+                            List<EntityCache> EntitiesThatAreNeutralizingMe = Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe).ToList();
+                            if (EntitiesThatAreNeutralizingMe.Any())
+                            {
+                                if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been neuted by [" + EntitiesThatAreNeutralizingMe.Count() + "] Entities", Logging.Debug);
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            List<EntityCache> EntitiesThatAreJammingMe = Cache.Instance.TargetedBy.Where(t => t.IsJammingMe).ToList();
+                            if (EntitiesThatAreJammingMe.Any())
+                            {
+                                if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been ECMd by [" + EntitiesThatAreJammingMe.Count() + "] Entities", Logging.Debug);
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            List<EntityCache> EntitiesThatAreSensorDampeningMe = Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe).ToList();
+                            if (EntitiesThatAreSensorDampeningMe.Any())
+                            {
+                                if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been Sensor Damped by [" + EntitiesThatAreSensorDampeningMe.Count() + "] Entities", Logging.Debug);
+                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
+                                Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreSensorDampeningMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList);
+                            }
+
+                            if (Cache.Instance.Modules.Any(m => m.IsTurret))
                             {
                                 //
-                                // Webbing targets
+                                // tracking disrupting targets
                                 //
-                                if (EntityIsWebbingMe.IsFrigate && Settings.Instance.AddWebifiersToDronePriorityTargetList)
+                                List<EntityCache> EntitiesThatAreTrackingDisruptingMe = Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe).ToList();
+                                if (EntitiesThatAreTrackingDisruptingMe.Any())
                                 {
-                                    Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), DronePriority.PriorityKillTarget, "Panic");
-                                }
-
-                                if (Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList)
-                                {
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWebbingMe), PrimaryWeaponPriority.Webbing, "Panic");    
-                                }
-                                
-                            }
-
-                            EntityCache EntityIsTargetPaintingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTargetPaintingMe);
-                            if (EntityIsTargetPaintingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsTargetPaintingMe.Name))
-                            {
-                                //
-                                // Target Painting targets
-                                //
-                                if (EntityIsTargetPaintingMe.IsFrigate && Settings.Instance.AddTargetPaintersToDronePriorityTargetList)
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), DronePriority.PriorityKillTarget, "Panic");
-                                }
-
-                                if (Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList)
-                                {
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTargetPaintingMe), PrimaryWeaponPriority.TargetPainting, "Panic");    
-                                }
-                            }    
-                        }
-
-                        EntityCache EntityIsNeutralizingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsNeutralizingMe);
-                        if (EntityIsNeutralizingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsNeutralizingMe.Name))
-                        {
-                            //
-                            // Neutralizing targets
-                            //
-                            if (EntityIsNeutralizingMe.IsFrigate && Settings.Instance.AddNeutralizersToDronePriorityTargetList)
-                            {
-                                Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), DronePriority.PriorityKillTarget, "Panic");
-                            }
-
-                            if (Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList)
-                            {
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsNeutralizingMe), PrimaryWeaponPriority.Neutralizing, "Panic");    
-                            }
-                        }
-
-                        EntityCache EntityIsJammingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsJammingMe);
-                        if (EntityIsJammingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsJammingMe.Name))
-                        {
-                            //
-                            // ECM targets
-                            //
-                            if (EntityIsJammingMe.IsFrigate && Settings.Instance.AddNeutralizersToDronePriorityTargetList)
-                            {
-                                Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), DronePriority.PriorityKillTarget, "Panic");
-                            }
-
-                            if (Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList)
-                            {
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsJammingMe), PrimaryWeaponPriority.Jamming, "Panic");    
-                            }
-                        }
-
-                        EntityCache EntityIsSensorDampeningMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsSensorDampeningMe);
-                        if (EntityIsSensorDampeningMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsSensorDampeningMe.Name))
-                        {
-                            //
-                            // Sensor Dampening targets
-                            //
-                            if (EntityIsSensorDampeningMe.IsFrigate && Settings.Instance.AddDampenersToDronePriorityTargetList)
-                            {
-                                Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), DronePriority.PriorityKillTarget, "Panic");
-                            }
-                            
-                            if (Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList)
-                            {
-                                Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsSensorDampeningMe), PrimaryWeaponPriority.Dampening, "Panic");    
-                            }
-                        }
-                        
-                        if (Cache.Instance.Modules.Any(m => m.IsTurret))
-                        {
-                            //
-                            // tracking disrupting targets
-                            //
-                            EntityCache EntityIsTrackingDisruptingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
-                            if (EntityIsTrackingDisruptingMe != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsTrackingDisruptingMe.Name))
-                            {
-                                if (EntityIsTrackingDisruptingMe.IsFrigate && Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList)
-                                {
-                                    Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe), DronePriority.PriorityKillTarget, "Panic");
-                                }
-
-                                if (Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList)
-                                {
-                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsTrackingDisruptingMe), PrimaryWeaponPriority.TrackingDisrupting, "Panic");    
+                                    if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been Tracking Disrupted by [" + EntitiesThatAreTrackingDisruptingMe.Count() + "] Entities", Logging.Debug);
+                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
+                                    Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTrackingDisruptingMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList);
                                 }
                             }
                         }
 
-                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalMinutes) > 5)
+                        if (Math.Round(DateTime.UtcNow.Subtract(_lastPriorityTargetLogging).TotalSeconds) > Settings.Instance.ListPriorityTargetsEveryXSeconds)
                         {
                             _lastPriorityTargetLogging = DateTime.UtcNow;
 
                             icount = 1;
-                            foreach (EntityCache target in Cache.Instance.DronePriorityTargets)
+                            foreach (EntityCache target in Cache.Instance.DronePriorityEntities)
                             {
                                 icount++;
-                                Logging.Log("Panic.ListDronePriorityTargets", "[" + icount  + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                Logging.Log("Panic.ListDronePriorityTargets", "[" + icount + "][" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
                                 continue;
                             }
 
                             icount = 1;
-                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityTargets)
+                            foreach (EntityCache target in Cache.Instance.PrimaryWeaponPriorityEntities)
                             {
                                 icount++;
-                                Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
+                                Logging.Log("Panic.ListPrimaryWeaponPriorityTargets", "[" + icount + "][" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] WARP[" + target.IsWarpScramblingMe + "] ECM[" + target.IsJammingMe + "] Damp[" + target.IsSensorDampeningMe + "] TP[" + target.IsTargetPaintingMe + "] NEUT[" + target.IsNeutralizingMe + "]", Logging.Teal);
                                 continue;
                             }
                         }
+
+                        if (Cache.Instance.ActiveShip.ArmorPercentage < 100)
+                        {
+                            Cache.Instance.NeedRepair = true;
+                            //
+                            // do not return here, we are just setting a flag for use by arm to repair or not repair...
+                            //
+                        }
+                        else 
+                        {
+                            Cache.Instance.NeedRepair = false;
+                        }
+
+                        if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
+                        {
+                            // Only check for cap-panic while in a mission, not while doing anything else
+                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + Settings.Instance.MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+
+                            //Questor.panic_attempts_this_mission;
+                            Cache.Instance.PanicAttemptsThisMission++;
+                            Cache.Instance.PanicAttemptsThisPocket++;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
+                            return;
+                        }
+
+                        if (Cache.Instance.ActiveShip.ShieldPercentage < Settings.Instance.MinimumShieldPct)
+                        {
+                            Logging.Log("Panic", "Start panicking, shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + Settings.Instance.MinimumShieldPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Cache.Instance.PanicAttemptsThisMission++;
+                            Cache.Instance.PanicAttemptsThisPocket++;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
+                            return;
+                        }
+
+                        if (Cache.Instance.ActiveShip.ArmorPercentage < Settings.Instance.MinimumArmorPct)
+                        {
+                            Logging.Log("Panic", "Start panicking, armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + Settings.Instance.MinimumArmorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                            Cache.Instance.PanicAttemptsThisMission++;
+                            Cache.Instance.PanicAttemptsThisPocket++;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
+                            return;
+                        }
+
+                        BookmarkMyWreckAttempts = 1; // reset to 1 when we are known to not be in a pod anymore
+
+                        _delayedResume = false;
+                        if (Cache.Instance.InMission)
+                        {
+                            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
+                            {
+                                Logging.Log("Panic", "You are in a Capsule, you must have died in a mission :(", Logging.Red);
+                                _States.CurrentPanicState = PanicState.BookmarkMyWreck;
+                            }
+
+                            int frigates = Cache.Instance.EntitiesNotSelf.Count(e => e.IsFrigate && e.IsPlayer);
+                            int cruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsCruiser && e.IsPlayer);
+                            int battlecruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattlecruiser && e.IsPlayer);
+                            int battleships = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattleship && e.IsPlayer);
+                            if (Settings.Instance.FrigateInvasionLimit > 0 && frigates >= Settings.Instance.FrigateInvasionLimit)
+                            {
+                                _delayedResume = true;
+
+                                Cache.Instance.PanicAttemptsThisMission++;
+                                Cache.Instance.PanicAttemptsThisPocket++;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + frigates + "] frigates", Logging.Red);
+                            }
+
+                            if (Settings.Instance.CruiserInvasionLimit > 0 && cruisers >= Settings.Instance.CruiserInvasionLimit)
+                            {
+                                _delayedResume = true;
+
+                                Cache.Instance.PanicAttemptsThisMission++;
+                                Cache.Instance.PanicAttemptsThisPocket++;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + cruisers + "] cruisers", Logging.Red);
+                            }
+
+                            if (Settings.Instance.BattlecruiserInvasionLimit > 0 && battlecruisers >= Settings.Instance.BattlecruiserInvasionLimit)
+                            {
+                                _delayedResume = true;
+
+                                Cache.Instance.PanicAttemptsThisMission++;
+                                Cache.Instance.PanicAttemptsThisPocket++;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battlecruisers + "] battlecruisers", Logging.Red);
+                            }
+
+                            if (Settings.Instance.BattleshipInvasionLimit > 0 && battleships >= Settings.Instance.BattleshipInvasionLimit)
+                            {
+                                _delayedResume = true;
+
+                                Cache.Instance.PanicAttemptsThisMission++;
+                                Cache.Instance.PanicAttemptsThisPocket++;
+                                _States.CurrentPanicState = PanicState.StartPanicking;
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battleships + "] battleships", Logging.Red);
+                            }
+
+                            if (_delayedResume)
+                            {
+                                _randomDelay = (Settings.Instance.InvasionRandomDelay > 0 ? _random.Next(Settings.Instance.InvasionRandomDelay) : 0);
+                                _randomDelay += Settings.Instance.InvasionMinimumDelay;
+                                foreach (EntityCache enemy in Cache.Instance.EntitiesNotSelf.Where(e => e.IsPlayer))
+                                {
+                                    Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + Math.Round(enemy.Velocity, 0) + "]", Logging.Red);
+                                }
+                            }
+                        }
                     }
+                   
                     break;
 
                 // NOTE: The difference between Panicking and StartPanicking is that the bot will move to "Panic" state once in warp & Panicking
@@ -366,19 +317,10 @@ namespace Questor.Modules.BackgroundTasks
                     //
 
                     EntityCache EntityIsWarpScramblingMeWhilePanicing = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
-                    if (EntityIsWarpScramblingMeWhilePanicing != null && !Cache.Instance.IgnoreTargets.Contains(EntityIsWarpScramblingMeWhilePanicing.Name))
+                    if (EntityIsWarpScramblingMeWhilePanicing != null)
                     {
-                        Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic");
-                            
-                        //
-                        // if we have AddWarpScramblersToPrimaryWeaponsPriorityTargetList set to true then only use primary weapons onwarp scramblers if the scrambler is not a frigate (rare)
-                        //
-                        if ((Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList && !Cache.Instance.PrimaryWeaponPriorityTargets.Contains(EntityIsWarpScramblingMeWhilePanicing))
-                            || !EntityIsWarpScramblingMeWhilePanicing.IsFrigate)
-                        {
-                            //Logging.Log("Panic", "Adding [" + EntityIsWarpScramblingMe.Name + "] as a PrimaryWeaponPriorityTarget", Logging.White);
-                            Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic");
-                        }
+                        Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                        Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList);
                     }
                     
                     // Failsafe, in theory would/should never happen
@@ -392,14 +334,15 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.InStation)
                     {
                         Logging.Log("Panic", "Entered a station, lower panic mode", Logging.White);
+                        Settings.Instance.LoadSettings();
                         _States.CurrentPanicState = PanicState.Panic;
                         return;
                     }
 
                     // Once we have warped off 500km, assume we are "safer"
-                    if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distance.PanicDistanceToConsiderSafelyWarpedOff)
+                    if (_States.CurrentPanicState == PanicState.StartPanicking && Cache.Instance.DistanceFromMe(_lastNormalX, _lastNormalY, _lastNormalZ) > (int)Distances.PanicDistanceToConsiderSafelyWarpedOff)
                     {
-                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Cache.Instance.DirectEve.ActiveShip.TypeName + "] My ShipName [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.White);
+                        Logging.Log("Panic", "We have warped off:  My ShipType: [" + Logging.Yellow + Cache.Instance.ActiveShip.TypeName + Logging.White + "] My ShipName [" + Logging.Yellow + Cache.Instance.ActiveShip.GivenName + Logging.White + "]", Logging.White);
                         _States.CurrentPanicState = PanicState.Panicking;
                     }
 
@@ -409,17 +352,17 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Cache.Instance.InWarp)
                         {
-                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityTargets);
-                            Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityTargets);
+                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
+                            Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
                             break;
                         }
 
-                        if (station.Distance > (int)Distance.WarptoDistance)
+                        if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjectsandGates.FirstOrDefault(),"Panic");
-                            if (Cache.Instance.DronePriorityTargets.Any(pt => pt.IsWarpScramblingMe) || Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.IsWarpScramblingMe))
+                            if (Cache.Instance.DronePriorityEntities.Any(pt => pt.IsWarpScramblingMe) || Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.IsWarpScramblingMe))
                             {
-                                EntityCache WarpScrambledBy = Cache.Instance.DronePriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe) ?? Cache.Instance.PrimaryWeaponPriorityTargets.FirstOrDefault(pt => pt.IsWarpScramblingMe);
+                                EntityCache WarpScrambledBy = Cache.Instance.DronePriorityEntities.FirstOrDefault(pt => pt.IsWarpScramblingMe) ?? Cache.Instance.PrimaryWeaponPriorityEntities.FirstOrDefault(pt => pt.IsWarpScramblingMe);
                                 if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
                                 {
                                     _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
@@ -430,24 +373,24 @@ namespace Questor.Modules.BackgroundTasks
 
                             if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
-                                Logging.Log("Panic", "Warping to [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                station.WarpToAndDock();
+                                station.WarpTo();
                             }
                             else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 
-                            //if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                            //if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                             //{
                             //    Logging.Log("Panic", "You are in a Capsule, you must have died :(", Logging.Red);
                             //}
                             return;
                         }
 
-                        if (station.Distance < (int)Distance.DockingRange)
+                        if (station.Distance < (int)Distances.DockingRange)
                         {
                             if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                             {
-                                Logging.Log("Panic", "Docking with [" + station.Name + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Docking with [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 station.Dock();
                             }
 
@@ -484,43 +427,49 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log("Panic", "No station found in local?", Logging.Red);
                         }
 
-                        List<DirectBookmark> SafeSpotBookmarksInLocal = new List<DirectBookmark>(Cache.Instance.SafeSpotBookmarks
-                                                                        .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
-                                                                        .OrderBy(b => b.CreatedOn));
-
-                        
-                        DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distance.OnGridWithMe);
-                        if (offridSafeSpotBookmark != null)
+                        if (Cache.Instance.SafeSpotBookmarks.Any() && Cache.Instance.SafeSpotBookmarks.Any(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId))
                         {
-                            if (Cache.Instance.InWarp) return;
+                            List<DirectBookmark> SafeSpotBookmarksInLocal = new List<DirectBookmark>(Cache.Instance.SafeSpotBookmarks
+                                                                            .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
+                                                                            .OrderBy(b => b.CreatedOn));
 
-                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                            DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distances.OnGridWithMe);
+                            if (offridSafeSpotBookmark != null)
                             {
-                                Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
-                                //This runs every 'tick' so we should see it every 1.5 seconds or so
-                                _lastWarpScrambled = DateTime.UtcNow;
+                                if (Cache.Instance.InWarp)
+                                {
+                                    _States.CurrentPanicState = PanicState.Panic;
+                                    return;
+                                }
+
+                                if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                                {
+                                    Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
+                                    //This runs every 'tick' so we should see it every 1.5 seconds or so
+                                    _lastWarpScrambled = DateTime.UtcNow;
+                                    return;
+                                }
+
+                                if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                                {
+                                    double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
+                                                                                        offridSafeSpotBookmark.Y ?? 0,
+                                                                                        offridSafeSpotBookmark.Z ?? 0);
+                                    Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((DistanceToBm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                    offridSafeSpotBookmark.WarpTo();
+                                    return;
+                                }
+
+                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 return;
                             }
-
-                            if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
-                            //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
-                            {
-                                double distancetobm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
-                                                                                    offridSafeSpotBookmark.Y ?? 0,
-                                                                                    offridSafeSpotBookmark.Z ?? 0);
-                                Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((distancetobm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
-                                offridSafeSpotBookmark.WarpTo();
-                                return;
-                            }
-
-                            Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
-                            return;
                         }
 
                         // What is this you say?  No star?
                         if (Cache.Instance.Star == null) return;
 
-                        if (Cache.Instance.Star.Distance > (int) Distance.WeCanWarpToStarFromHere)
+                        if (Cache.Instance.Star.Distance > (int) Distances.WeCanWarpToStarFromHere)
                         {
                             if (Cache.Instance.InWarp) return;
 
@@ -535,7 +484,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                             {
-                                Logging.Log("Panic", "Warping to [" + Cache.Instance.Star.Name + "][" + Math.Round((Cache.Instance.Star.Distance/1000)/149598000, 2) + " AU away]", Logging.Red);
+                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 Cache.Instance.Star.WarpTo();
                                 return;
                             }
@@ -546,6 +495,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     Logging.Log("Panic", "At the star, lower panic mode", Logging.Red);
+                    Settings.Instance.LoadSettings();
                     _States.CurrentPanicState = PanicState.Panic;
                     break;
 
@@ -577,7 +527,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // Do not resume until you're no longer in a capsule
-                    if (Cache.Instance.DirectEve.ActiveShip.GroupId == (int)Group.Capsule)
+                    if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         break;
 
                     if (Cache.Instance.InStation)
@@ -590,9 +540,9 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;
                     }
 
-                    bool isSafe = Cache.Instance.DirectEve.ActiveShip.CapacitorPercentage > Settings.Instance.SafeCapacitorPct;
-                    isSafe &= Cache.Instance.DirectEve.ActiveShip.ShieldPercentage > Settings.Instance.SafeShieldPct;
-                    isSafe &= Cache.Instance.DirectEve.ActiveShip.ArmorPercentage > Settings.Instance.SafeArmorPct;
+                    bool isSafe = Cache.Instance.ActiveShip.CapacitorPercentage >= Settings.Instance.SafeCapacitorPct;
+                    isSafe &= Cache.Instance.ActiveShip.ShieldPercentage >= Settings.Instance.SafeShieldPct;
+                    isSafe &= Cache.Instance.ActiveShip.ArmorPercentage >= Settings.Instance.SafeArmorPct;
                     if (isSafe)
                     {
                         if (Cache.Instance.InSpace)

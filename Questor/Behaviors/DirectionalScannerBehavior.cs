@@ -26,12 +26,12 @@ namespace Questor.Behaviors
 {
     public class DirectionalScannerBehavior
     {
-        private readonly Arm _arm;
-        private readonly Combat _combat;
-        private readonly Drones _drones;
+        //private readonly Arm _arm;
+        //private readonly Combat _combat;
+        //private readonly Drones _drones;
 
         private readonly Panic _panic;
-        private readonly Salvage _salvage;
+        //private readonly Salvage _salvage;
         public DateTime LastAction;
         public static long AgentID;
         private readonly Stopwatch _watch;
@@ -48,10 +48,10 @@ namespace Questor.Behaviors
 
         public DirectionalScannerBehavior()
         {
-            _salvage = new Salvage();
-            _combat = new Combat();
-            _drones = new Drones();
-            _arm = new Arm();
+            //_salvage = new Salvage();
+            //_combat = new Combat();
+            //_drones = new Drones();
+            //_arm = new Arm();
             _panic = new Panic();
             _watch = new Stopwatch();
 
@@ -123,17 +123,17 @@ namespace Questor.Behaviors
             }
             else
             {
-                _arm.AgentId = agent.AgentId;
+                Arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
 
         public void ApplyDirectionalScannerSettings()
         {
-            _salvage.Ammo = Settings.Instance.Ammo;
-            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            _salvage.LootEverything = Settings.Instance.LootEverything;
+            Salvage.Ammo = Settings.Instance.Ammo;
+            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            Salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -164,7 +164,7 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -286,7 +286,7 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.Traveler:
                     Cache.Instance.OpenWrecks = false;
-                    List<long> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
+                    List<int> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
                         // happens if autopilot is not set and this QuestorState is chosen manually
@@ -345,13 +345,13 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
-                        if (station.Distance > (int)Distance.WarptoDistance)
+                        if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpToAndDock();
+                            station.WarpTo();
                             if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.GotoNearestStation) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
                             break;
                         }
@@ -381,103 +381,101 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScanHalfanAU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScanhalfanAU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScanHalfanAUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScanHalfanAUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScanHalfanAUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan1AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan1AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan1AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 1).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan1AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 1).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan1AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan5AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan5AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan5AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 5).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan5AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 5).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan5AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan10AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan10AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan10AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 10).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan10AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 10).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan10AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan15AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan15AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan15AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 15).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan15AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 15).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan15AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan20AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan20AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan20AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 20).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan20AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 20).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan20AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScan50AU:
                     Logging.Log("DirectionalScannerBehavior", "PVPDirectionalScan50AU - Starting", Logging.White);
-                    List<EntityCache> pvpDirectionalScan50AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 50).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pvpDirectionalScan50AUentitiesInList = Cache.Instance.Entities.Where(t => t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 50).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pvpDirectionalScan50AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScanHalfanAU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScanhalfanAU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScanHalfanAUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScanHalfanAUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScanHalfanAUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan1AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan1AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan1AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 1).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan1AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 1).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan1AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan5AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan5AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan5AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 5).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan5AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 5).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan5AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan10AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan10AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan10AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 10).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan10AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 10).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan10AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan15AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan15AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan15AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 15).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan15AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 15).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan15AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan20AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan20AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan20AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 20).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan20AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 20).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan20AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
 
                 case DirectionalScannerBehaviorState.PVEDirectionalScan50AU:
                     Logging.Log("DirectionalScannerBehavior", "PVEDirectionalScan50AU - Starting", Logging.White);
-                    List<EntityCache> pveDirectionalScan50AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distance.DirectionalScannerCloseRange * 50).OrderBy(t => t.Distance).ToList();
+                    List<EntityCache> pveDirectionalScan50AUentitiesInList = Cache.Instance.Entities.Where(t => !t.IsPlayer && t.Distance < (double)Distances.DirectionalScannerCloseRange * 50).OrderBy(t => t.Distance).ToList();
                     Statistics.EntityStatistics(pveDirectionalScan50AUentitiesInList);
                     Cache.Instance.Paused = true;
                     break;
-
-
 
                 case DirectionalScannerBehaviorState.LogCombatTargets:
                     //combat targets
@@ -489,7 +487,7 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.LogDroneTargets:
                     //drone targets
-                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && e.GroupId != (int)Group.LargeColidableStructure).ToList();
+                    List<EntityCache> droneentitiesInList = Cache.Instance.Entities.Where(e => e.IsNpc && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && !e.IsContainer && !e.IsSentry && !e.IsLargeCollidable).ToList();
                     Statistics.EntityStatistics(droneentitiesInList);
                     Cache.Instance.Paused = true;
                     break;

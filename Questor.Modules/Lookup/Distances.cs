@@ -9,7 +9,7 @@
 // -------------------------------------------------------------------------------
 namespace Questor.Modules.Lookup
 {
-    public enum Distance : long
+    public enum Distances : long
     {
         ScoopRange = 2490,
         SafeScoopRange = ScoopRange - 700,
@@ -29,7 +29,7 @@ namespace Questor.Modules.Lookup
         MissionWarpLimit = 150000000, // Mission bookmarks have a 1.000.000 distance warp-to limit (changed it to 150.000.000 as there are some bugged missions around)
         PanicDistanceToConsiderSafelyWarpedOff = 500000,
         WeCanWarpToStarFromHere = 500000000,
-        OnGridWithMe = 250000, //250k by default - (used by after mission salvaging)
+        OnGridWithMe = 250000, //250k by default
         //AU = 149598000000, // 1 AU - 1 Astronomical Unit = 149 598 000 000 meters
         DirectionalScannerCloseRange = 2147483647,
         MaxPocketsDistanceKm = 70000,

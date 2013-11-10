@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Globalization;
+
 namespace QuestorManager
 {
     using System;
@@ -40,7 +42,7 @@ namespace QuestorManager
         private object _destination;
         private object _extrDestination;
         private int _jumps;
-        private readonly DirectEve _directEve;
+        //private readonly DirectEve _directEve;
 
         private object _previousDestination;
         private int _previousJumps;
@@ -97,9 +99,43 @@ namespace QuestorManager
             ItemsToSell = new List<ItemCache>();
             ItemsToSellUnsorted = new List<ItemCache>();
             ItemsToRefine = new List<ItemCache>();
-            _directEve = new DirectEve();
-            Cache.Instance.DirectEve = _directEve;
+            
+            #region Load DirectEVE
+            //
+            // Load DirectEVE
+            //
 
+            try
+            {
+                if (Cache.Instance.DirectEve == null)
+                {
+                    //
+                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // 
+                    //
+                    //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
+                    //while (Cache.Instance.DirectEve == null)
+                    //{
+                    //    System.Threading.Thread.Sleep(50); //this pauses forever...
+                    //}   
+                    Cache.Instance.DirectEve = new DirectEve();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
+            }
+            #endregion Load DirectEVE
+            
             //
             // Invtypes.xml
             //
@@ -141,7 +177,7 @@ namespace QuestorManager
             }
 
             RefreshAvailableXMLJobs();
-            _directEve.OnFrame += OnFrame;
+            Cache.Instance.DirectEve.OnFrame += OnFrame;
 
             //if (Settings.Instance.UseInnerspace)
             //{
@@ -176,483 +212,491 @@ namespace QuestorManager
 
         public void OnFrame(object sender, EventArgs e)
         {
-            Cache.Instance.LastFrame = DateTime.UtcNow;
-
-            // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+            try
             {
-                return;
-            }
-            _lastPulse = DateTime.UtcNow;
+                Cache.Instance.LastFrame = DateTime.UtcNow;
 
-            // Session is not ready yet, do not continue
-            if (!Cache.Instance.DirectEve.Session.IsReady) return;
-
-            if (Cache.Instance.DirectEve.Session.IsReady)
-            {
-                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
-            }
-
-            // We are not in space or station, don't do shit yet!
-            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
-            {
-                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                Cache.Instance.LastSessionChange = DateTime.UtcNow;
-                return;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation) return;
-
-            // New frame, invalidate old cache
-            Cache.Instance.InvalidateCache();
-
-            // Update settings (settings only load if character name changed)
-            if (!Settings.Instance.DefaultSettingsLoaded)
-            {
-                Settings.Instance.LoadSettings();
-            }
-            CharacterName = Cache.Instance.DirectEve.Me.Name;
-
-            // Check 3D rendering
-            if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
-            {
-                Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
-            }
-
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
-            {
-                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
-            }
-
-            // We always check our defense state if we're in space, regardless of questor state
-            // We also always check panic
-            if (Cache.Instance.InSpace)
-            {
-                if (!Cache.Instance.DoNotBreakInvul)
+                // Only pulse state changes every 1.5s
+                if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
                 {
-                    _defense.ProcessState();
+                    return;
                 }
-            }
+                _lastPulse = DateTime.UtcNow;
 
-            if (Cache.Instance.Paused)
-            {
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                Cache.Instance.GotoBaseNow = false;
-                Cache.Instance.SessionState = string.Empty;
-                return;
-            }
+                // Session is not ready yet, do not continue
+                if (!Cache.Instance.DirectEve.Session.IsReady) return;
 
-            //if (Cache.Instance.SessionState == "Quitting")
-            //{
-            //    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
-            //    {
-            //        BeginClosingQuestor();
-            //    }
-            //}
+                if (Cache.Instance.DirectEve.Session.IsReady)
+                {
+                    Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                }
 
-            // Start _cleanup.ProcessState
-            // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
-            //
-            _cleanup.ProcessState();
+                // We are not in space or station, don't do shit yet!
+                if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
+                {
+                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
+                    Cache.Instance.LastSessionChange = DateTime.UtcNow;
+                    return;
+                }
 
-            if (Settings.Instance.DebugStates) Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);
+                if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation) return;
 
-            // Done
-            // Cleanup State: ProcessState
+                // New frame, invalidate old cache
+                Cache.Instance.InvalidateCache();
 
-            // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp) return;
+                // Update settings (settings only load if character name changed)
+                if (!Settings.Instance.DefaultSettingsLoaded)
+                {
+                    Settings.Instance.LoadSettings();
+                }
+                CharacterName = Cache.Instance.DirectEve.Me.Name;
 
-            InitializeTraveler();
+                // Check 3D rendering
+                if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
+                {
+                    Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
+                }
 
-            if (_lpstoreRe)
-            {
-                ResfreshLPI();
-            }
+                if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
+                {
+                    Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
+                    Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
+                }
 
-            if (_requiredCom)
-            {
-                Required();
-            }
-
-            Text = "Questor Manager [" + Cache.Instance.DirectEve.Me.Name + "]";
-
-            if (_paused)
-            {
-                return;
-            }
-
-            switch (State)
-            {
-                case QuestormanagerState.Idle:
-
-                    if (_start)
+                // We always check our defense state if we're in space, regardless of questor state
+                // We also always check panic
+                if (Cache.Instance.InSpace)
+                {
+                    if (!Cache.Instance.DoNotBreakInvul)
                     {
-                        Logging.Log("QuestorManager", "Start", Logging.White);
-                        State = QuestormanagerState.NextAction;
+                        _defense.ProcessState();
                     }
+                }
 
-                    break;
+                if (Cache.Instance.Paused)
+                {
+                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                    Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                    Cache.Instance.GotoBaseNow = false;
+                    Cache.Instance.SessionState = string.Empty;
+                    return;
+                }
 
-                case QuestormanagerState.NextAction:
+                //if (Cache.Instance.SessionState == "Quitting")
+                //{
+                //    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                //    {
+                //        BeginClosingQuestor();
+                //    }
+                //}
 
-                    if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 3)
-                        break;
+                // Start _cleanup.ProcessState
+                // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
+                //
+                _cleanup.ProcessState();
 
-                    if (LstTask.Items.Count <= 0)
-                    {
-                        Logging.Log("QuestorManager", "Finish", Logging.White);
-                        LblStatus.Text = "Finish";
-                        BttnStart.Text = "Start";
-                        State = QuestormanagerState.Idle;
-                        _start = false;
-                        break;
-                    }
+                if (Settings.Instance.DebugStates) Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);
 
-                    if ("QuestorManager" == LstTask.Items[0].Text)
-                    {
-                        _destination = LstTask.Items[0].Tag;
-                        if (_destination == null || _destination.Equals(""))
-                            _destination = Cache.Instance.BookmarksByLabel(LstTask.Items[0].SubItems[1].Text)[0];
-                        Logging.Log("manager", "Destination: " + _destination, Logging.White);
-                        State = QuestormanagerState.Traveler;
-                        break;
-                    }
+                // Done
+                // Cleanup State: ProcessState
 
-                    if ("CmdLine" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.CmdLine;
-                        break;
-                    }
+                // When in warp there's nothing we can do, so ignore everything
+                if (Cache.Instance.InSpace && Cache.Instance.InWarp) return;
 
-                    if ("BuyLPI" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.BuyLPI;
-                        break;
-                    }
+                InitializeTraveler();
 
-                    if ("ValueDump" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.ValueDump;
-                        break;
-                    }
+                if (_lpstoreRe)
+                {
+                    ResfreshLPI();
+                }
 
-                    if ("MakeShip" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.MakeShip;
-                        break;
-                    }
+                if (_requiredCom)
+                {
+                    Required();
+                }
 
-                    if ("Drop" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.Drop;
-                        break;
-                    }
+                Text = "Questor Manager [" + Cache.Instance.DirectEve.Me.Name + "]";
 
-                    if ("Grab" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.Grab;
-                        break;
-                    }
+                if (_paused)
+                {
+                    return;
+                }
 
-                    if ("Buy" == LstTask.Items[0].Text || "BuyOrder" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.Buy;
-                        break;
-                    }
+                switch (State)
+                {
+                    case QuestormanagerState.Idle:
 
-                    if ("Sell" == LstTask.Items[0].Text || "SellOrder" == LstTask.Items[0].Text)
-                    {
-                        LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
-                        State = QuestormanagerState.Sell;
-                        break;
-                    }
-
-                    break;
-
-                case QuestormanagerState.CmdLine:
-
-                    if (Settings.Instance.UseInnerspace)
-                    {
-                        Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
-                        LavishScript.ExecuteCommand(LstTask.Items[0].SubItems[1].Text);
-                    }
-                    else
-                    {
-                        Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
-                        Logging.Log("QuestorManager", "CmdLine: Error: command skipped: UseInnerspace is false", Logging.White);
-                    }
-
-                    LstTask.Items.Remove(LstTask.Items[0]);
-                    _lastAction = DateTime.UtcNow;
-                    State = QuestormanagerState.NextAction;
-
-                    break;
-
-                case QuestormanagerState.BuyLPI:
-
-                    if (_States.CurrentBuyLPIState == BuyLPIState.Idle)
-                    {
-                        _buylpi.Item = Convert.ToInt32(LstTask.Items[0].Tag);
-                        _buylpi.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
-                        Logging.Log("QuestorManager", "BuyLPI: Begin", Logging.White);
-                        _States.CurrentBuyLPIState = BuyLPIState.Begin;
-                    }
-
-                    _buylpi.ProcessState();
-
-                    if (_States.CurrentBuyLPIState == BuyLPIState.Done)
-                    {
-                        Logging.Log("QuestorManager", "BuyLPI: Done", Logging.White);
-                        _States.CurrentBuyLPIState = BuyLPIState.Idle;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.ValueDump:
-
-                    if (chkUpdateMineral.Checked)
-                    {
-                        chkUpdateMineral.Checked = false;
-                        _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
-                    }
-
-                    if (_States.CurrentValueDumpState == ValueDumpState.Idle)
-                    {
-                        Logging.Log("QuestorManager", "ValueDump: Begin", Logging.White);
-                        _States.CurrentValueDumpState = ValueDumpState.Begin;
-                    }
-
-                    _valuedump.ProcessState();
-
-                    if (_States.CurrentValueDumpState == ValueDumpState.Done)
-                    {
-                        Logging.Log("QuestorManager", "ValueDump: Done", Logging.White);
-                        _States.CurrentValueDumpState = ValueDumpState.Idle;
-                        ProcessItems();
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.MakeShip:
-
-                    if (!Cache.Instance.OpenShipsHangar("QuestorManager")) break;
-
-                    //Logging.Log("QuestorManager", "MakeShip: ShipName: [" + Cache.Instance.DirectEve.ActiveShip.GivenName + "]", Logging.White);
-                    //Logging.Log("QuestorManager", "MakeShip: ShipFind: [" + LstTask.Items[0].SubItems[1].Text + "]", Logging.White);
-
-                    if (Cache.Instance.DirectEve.ActiveShip.GivenName == LstTask.Items[0].SubItems[1].Text)
-                    {
-                        Logging.Log("QuestorManager", "MakeShip: Ship: [" + LstTask.Items[0].SubItems[1].Text + "] already active", Logging.White);
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        State = QuestormanagerState.NextAction;
-                        break;
-                    }
-
-                    if (DateTime.UtcNow > _lastAction)
-                    {
-                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                        foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == LstTask.Items[0].SubItems[1].Text))
+                        if (_start)
                         {
-                            Logging.Log("QuestorManager", "MakeShip: Making [" + ship.GivenName + "] active", Logging.White);
+                            Logging.Log("QuestorManager", "Start", Logging.White);
+                            State = QuestormanagerState.NextAction;
+                        }
 
-                            ship.ActivateShip();
+                        break;
+
+                    case QuestormanagerState.NextAction:
+
+                        if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 3)
+                            break;
+
+                        if (LstTask.Items.Count <= 0)
+                        {
+                            Logging.Log("QuestorManager", "Finish", Logging.White);
+                            LblStatus.Text = "Finish";
+                            BttnStart.Text = "Start";
+                            State = QuestormanagerState.Idle;
+                            _start = false;
+                            break;
+                        }
+
+                        if ("QuestorManager" == LstTask.Items[0].Text)
+                        {
+                            _destination = LstTask.Items[0].Tag;
+                            if (_destination == null || _destination.Equals(""))
+                                _destination = Cache.Instance.BookmarksByLabel(LstTask.Items[0].SubItems[1].Text)[0];
+                            Logging.Log("manager", "Destination: " + _destination, Logging.White);
+                            State = QuestormanagerState.Traveler;
+                            break;
+                        }
+
+                        if ("CmdLine" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.CmdLine;
+                            break;
+                        }
+
+                        if ("BuyLPI" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.BuyLPI;
+                            break;
+                        }
+
+                        if ("ValueDump" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.ValueDump;
+                            break;
+                        }
+
+                        if ("MakeShip" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.MakeShip;
+                            break;
+                        }
+
+                        if ("Drop" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.Drop;
+                            break;
+                        }
+
+                        if ("Grab" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.Grab;
+                            break;
+                        }
+
+                        if ("Buy" == LstTask.Items[0].Text || "BuyOrder" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.Buy;
+                            break;
+                        }
+
+                        if ("Sell" == LstTask.Items[0].Text || "SellOrder" == LstTask.Items[0].Text)
+                        {
+                            LblStatus.Text = LstTask.Items[0].Text + ":-:" + LstTask.Items[0].SubItems[1].Text;
+                            State = QuestormanagerState.Sell;
+                            break;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.CmdLine:
+
+                        if (Settings.Instance.UseInnerspace)
+                        {
+                            Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
+                            LavishScript.ExecuteCommand(LstTask.Items[0].SubItems[1].Text);
+                        }
+                        else
+                        {
+                            Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
+                            Logging.Log("QuestorManager", "CmdLine: Error: command skipped: UseInnerspace is false", Logging.White);
+                        }
+
+                        LstTask.Items.Remove(LstTask.Items[0]);
+                        _lastAction = DateTime.UtcNow;
+                        State = QuestormanagerState.NextAction;
+
+                        break;
+
+                    case QuestormanagerState.BuyLPI:
+
+                        if (_States.CurrentBuyLPIState == BuyLPIState.Idle)
+                        {
+                            _buylpi.Item = Convert.ToInt32(LstTask.Items[0].Tag);
+                            _buylpi.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
+                            Logging.Log("QuestorManager", "BuyLPI: Begin", Logging.White);
+                            _States.CurrentBuyLPIState = BuyLPIState.Begin;
+                        }
+
+                        _buylpi.ProcessState();
+
+                        if (_States.CurrentBuyLPIState == BuyLPIState.Done)
+                        {
+                            Logging.Log("QuestorManager", "BuyLPI: Done", Logging.White);
+                            _States.CurrentBuyLPIState = BuyLPIState.Idle;
                             LstTask.Items.Remove(LstTask.Items[0]);
                             _lastAction = DateTime.UtcNow;
                             State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.ValueDump:
+
+                        if (chkUpdateMineral.Checked)
+                        {
+                            chkUpdateMineral.Checked = false;
+                            _States.CurrentValueDumpState = ValueDumpState.CheckMineralPrices;
+                        }
+
+                        if (_States.CurrentValueDumpState == ValueDumpState.Idle)
+                        {
+                            Logging.Log("QuestorManager", "ValueDump: Begin", Logging.White);
+                            _States.CurrentValueDumpState = ValueDumpState.Begin;
+                        }
+
+                        _valuedump.ProcessState();
+
+                        if (_States.CurrentValueDumpState == ValueDumpState.Done)
+                        {
+                            Logging.Log("QuestorManager", "ValueDump: Done", Logging.White);
+                            _States.CurrentValueDumpState = ValueDumpState.Idle;
+                            ProcessItems();
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.MakeShip:
+
+                        if (!Cache.Instance.OpenShipsHangar("QuestorManager")) break;
+
+                        //Logging.Log("QuestorManager", "MakeShip: ShipName: [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.White);
+                        //Logging.Log("QuestorManager", "MakeShip: ShipFind: [" + LstTask.Items[0].SubItems[1].Text + "]", Logging.White);
+
+                        if (Cache.Instance.ActiveShip.GivenName == LstTask.Items[0].SubItems[1].Text)
+                        {
+                            Logging.Log("QuestorManager", "MakeShip: Ship: [" + LstTask.Items[0].SubItems[1].Text + "] already active", Logging.White);
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            State = QuestormanagerState.NextAction;
                             break;
                         }
-                    }
 
-                    break;
-
-                case QuestormanagerState.Buy:
-
-                    if (_States.CurrentBuyState == BuyState.Idle)
-                    {
-                        if (LstTask.Items[0].Text == "BuyOrder")
-                            _buy.useOrders = true;
-                        _buy.Item = Convert.ToInt32(LstTask.Items[0].Tag);
-                        _buy.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
-                        Logging.Log("QuestorManager", "Buy: Begin", Logging.White);
-                        _States.CurrentBuyState = BuyState.Begin;
-                    }
-
-                    _buy.ProcessState();
-
-                    if (_States.CurrentBuyState == BuyState.Done)
-                    {
-                        Logging.Log("QuestorManager", "Buy: Done", Logging.White);
-                        _States.CurrentBuyState = BuyState.Idle;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.Sell:
-
-                    _sell.Item = Convert.ToInt32(LstTask.Items[0].Tag);
-                    _sell.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
-
-                    if (_States.CurrentSellState == SellState.Idle)
-                    {
-                        Logging.Log("QuestorManager", "Sell: Begin", Logging.White);
-                        _States.CurrentSellState = SellState.Begin;
-                    }
-
-                    _sell.ProcessState();
-
-                    if (_States.CurrentSellState == SellState.Done)
-                    {
-                        Logging.Log("QuestorManager", "Sell: Done", Logging.White);
-                        _States.CurrentSellState = SellState.Idle;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.Drop:
-
-                    _drop.Item = Convert.ToInt32(LstTask.Items[0].Tag);
-                    _drop.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
-                    _drop.DestinationHangarName = LstTask.Items[0].SubItems[3].Text;
-
-                    if (_States.CurrentDropState == DropState.Idle)
-                    {
-                        Logging.Log("QuestorManager", "Drop: Begin", Logging.White);
-                        _States.CurrentDropState = DropState.Begin;
-                    }
-
-                    _drop.ProcessState();
-
-                    if (_States.CurrentDropState == DropState.Done)
-                    {
-                        Logging.Log("QuestorManager", "Drop: Done", Logging.White);
-                        _States.CurrentDropState = DropState.Idle;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.Grab:
-
-                    _grab.Item = Convert.ToInt32(LstTask.Items[0].Tag);
-                    _grab.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
-                    _grab.Hangar = LstTask.Items[0].SubItems[3].Text;
-
-                    if (_States.CurrentGrabState == GrabState.Idle)
-                    {
-                        Logging.Log("QuestorManager", "Grab: Begin", Logging.White);
-                        _States.CurrentGrabState = GrabState.Begin;
-                    }
-
-                    _grab.ProcessState();
-
-                    if (_States.CurrentGrabState == GrabState.Done)
-                    {
-                        Logging.Log("QuestorManager", "Grab: Done", Logging.White);
-                        _States.CurrentGrabState = GrabState.Idle;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    break;
-
-                case QuestormanagerState.Traveler:
-
-                    // We are warping
-                    if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.ActiveShip.Entity != null && Cache.Instance.DirectEve.ActiveShip.Entity.IsWarping)
-                        return;
-
-                    TravelerDestination travelerDestination = Traveler.Destination;
-                    if (_destination == null)
-                    {
-                        travelerDestination = null;
-                    }
-
-                    if (_destination is DirectBookmark)
-                    {
-                        if (!(travelerDestination is BookmarkDestination) || (travelerDestination as BookmarkDestination).BookmarkId != (_destination as DirectBookmark).BookmarkId)
+                        if (DateTime.UtcNow > _lastAction)
                         {
-                            travelerDestination = new BookmarkDestination(_destination as DirectBookmark);
-                        }
-                    }
+                            List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
+                            foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName == LstTask.Items[0].SubItems[1].Text))
+                            {
+                                Logging.Log("QuestorManager", "MakeShip: Making [" + ship.GivenName + "] active", Logging.White);
 
-                    if (_destination is DirectSolarSystem)
-                    {
-                        if (!(travelerDestination is SolarSystemDestination) || (travelerDestination as SolarSystemDestination).SolarSystemId != (_destination as DirectSolarSystem).Id)
-                        {
-                            travelerDestination = new SolarSystemDestination((_destination as DirectSolarSystem).Id);
-                        }
-                    }
-
-                    if (_destination is DirectStation)
-                    {
-                        if (!(travelerDestination is StationDestination) || (travelerDestination as StationDestination).StationId != (_destination as DirectStation).Id)
-                        {
-                            travelerDestination = new StationDestination((_destination as DirectStation).Id);
-                        }
-                    }
-
-                    // Check to see if destination changed, since changing it will set the traveler to Idle
-                    if (Traveler.Destination != travelerDestination)
-                    {
-                        Traveler.Destination = travelerDestination;
-                    }
-
-                    Traveler.ProcessState();
-
-                    // Record number of jumps
-                    _jumps = Cache.Instance.DirectEve.Navigation.GetDestinationPath().Count;
-
-                    // Arrived at destination
-                    if (_destination != null && _States.CurrentTravelerState == TravelerState.AtDestination)
-                    {
-                        Logging.Log("QuestorManager", "Arrived at destination", Logging.White);
-
-                        Traveler.Destination = null;
-                        _destination = null;
-                        LstTask.Items.Remove(LstTask.Items[0]);
-                        _lastAction = DateTime.UtcNow;
-                        State = QuestormanagerState.NextAction;
-                    }
-
-                    // An error occurred, reset traveler
-                    if (_States.CurrentTravelerState == TravelerState.Error)
-                    {
-                        if (Traveler.Destination != null)
-                        {
-                            Logging.Log("QuestorManager", "Stopped traveling, QuestorManager threw an error...", Logging.White);
+                                ship.ActivateShip();
+                                LstTask.Items.Remove(LstTask.Items[0]);
+                                _lastAction = DateTime.UtcNow;
+                                State = QuestormanagerState.NextAction;
+                                break;
+                            }
                         }
 
-                        _destination = null;
-                        Traveler.Destination = null;
-                        _start = false;
-                        State = QuestormanagerState.Idle;
-                    }
-                    break;
+                        break;
+
+                    case QuestormanagerState.Buy:
+
+                        if (_States.CurrentBuyState == BuyState.Idle)
+                        {
+                            if (LstTask.Items[0].Text == "BuyOrder")
+                                _buy.useOrders = true;
+                            _buy.Item = Convert.ToInt32(LstTask.Items[0].Tag);
+                            _buy.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
+                            Logging.Log("QuestorManager", "Buy: Begin", Logging.White);
+                            _States.CurrentBuyState = BuyState.Begin;
+                        }
+
+                        _buy.ProcessState();
+
+                        if (_States.CurrentBuyState == BuyState.Done)
+                        {
+                            Logging.Log("QuestorManager", "Buy: Done", Logging.White);
+                            _States.CurrentBuyState = BuyState.Idle;
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.Sell:
+
+                        _sell.Item = Convert.ToInt32(LstTask.Items[0].Tag);
+                        _sell.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
+
+                        if (_States.CurrentSellState == SellState.Idle)
+                        {
+                            Logging.Log("QuestorManager", "Sell: Begin", Logging.White);
+                            _States.CurrentSellState = SellState.Begin;
+                        }
+
+                        _sell.ProcessState();
+
+                        if (_States.CurrentSellState == SellState.Done)
+                        {
+                            Logging.Log("QuestorManager", "Sell: Done", Logging.White);
+                            _States.CurrentSellState = SellState.Idle;
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.Drop:
+
+                        _drop.Item = Convert.ToInt32(LstTask.Items[0].Tag);
+                        _drop.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
+                        _drop.DestinationHangarName = LstTask.Items[0].SubItems[3].Text;
+
+                        if (_States.CurrentDropState == DropState.Idle)
+                        {
+                            Logging.Log("QuestorManager", "Drop: Begin", Logging.White);
+                            _States.CurrentDropState = DropState.Begin;
+                        }
+
+                        _drop.ProcessState();
+
+                        if (_States.CurrentDropState == DropState.Done)
+                        {
+                            Logging.Log("QuestorManager", "Drop: Done", Logging.White);
+                            _States.CurrentDropState = DropState.Idle;
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.Grab:
+
+                        _grab.Item = Convert.ToInt32(LstTask.Items[0].Tag);
+                        _grab.Unit = Convert.ToInt32(LstTask.Items[0].SubItems[2].Text);
+                        _grab.Hangar = LstTask.Items[0].SubItems[3].Text;
+
+                        if (_States.CurrentGrabState == GrabState.Idle)
+                        {
+                            Logging.Log("QuestorManager", "Grab: Begin", Logging.White);
+                            _States.CurrentGrabState = GrabState.Begin;
+                        }
+
+                        _grab.ProcessState();
+
+                        if (_States.CurrentGrabState == GrabState.Done)
+                        {
+                            Logging.Log("QuestorManager", "Grab: Done", Logging.White);
+                            _States.CurrentGrabState = GrabState.Idle;
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        break;
+
+                    case QuestormanagerState.Traveler:
+
+                        // We are warping
+                        if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.IsWarping)
+                            return;
+
+                        TravelerDestination travelerDestination = Traveler.Destination;
+                        if (_destination == null)
+                        {
+                            travelerDestination = null;
+                        }
+
+                        if (_destination is DirectBookmark)
+                        {
+                            if (!(travelerDestination is BookmarkDestination) || (travelerDestination as BookmarkDestination).BookmarkId != (_destination as DirectBookmark).BookmarkId)
+                            {
+                                travelerDestination = new BookmarkDestination(_destination as DirectBookmark);
+                            }
+                        }
+
+                        if (_destination is DirectSolarSystem)
+                        {
+                            if (!(travelerDestination is SolarSystemDestination) || (travelerDestination as SolarSystemDestination).SolarSystemId != (_destination as DirectSolarSystem).Id)
+                            {
+                                travelerDestination = new SolarSystemDestination((_destination as DirectSolarSystem).Id);
+                            }
+                        }
+
+                        if (_destination is DirectStation)
+                        {
+                            if (!(travelerDestination is StationDestination) || (travelerDestination as StationDestination).StationId != (_destination as DirectStation).Id)
+                            {
+                                travelerDestination = new StationDestination((_destination as DirectStation).Id);
+                            }
+                        }
+
+                        // Check to see if destination changed, since changing it will set the traveler to Idle
+                        if (Traveler.Destination != travelerDestination)
+                        {
+                            Traveler.Destination = travelerDestination;
+                        }
+
+                        Traveler.ProcessState();
+
+                        // Record number of jumps
+                        _jumps = Cache.Instance.DirectEve.Navigation.GetDestinationPath().Count;
+
+                        // Arrived at destination
+                        if (_destination != null && _States.CurrentTravelerState == TravelerState.AtDestination)
+                        {
+                            Logging.Log("QuestorManager", "Arrived at destination", Logging.White);
+
+                            Traveler.Destination = null;
+                            _destination = null;
+                            LstTask.Items.Remove(LstTask.Items[0]);
+                            _lastAction = DateTime.UtcNow;
+                            State = QuestormanagerState.NextAction;
+                        }
+
+                        // An error occurred, reset traveler
+                        if (_States.CurrentTravelerState == TravelerState.Error)
+                        {
+                            if (Traveler.Destination != null)
+                            {
+                                Logging.Log("QuestorManager", "Stopped traveling, QuestorManager threw an error...", Logging.White);
+                            }
+
+                            _destination = null;
+                            Traveler.Destination = null;
+                            _start = false;
+                            State = QuestormanagerState.Idle;
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorManager", "Exception, [" + ex + "]", Logging.White);
+                return;
             }
         }
 
@@ -1040,7 +1084,7 @@ namespace QuestorManager
 
         private void FrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
-            _directEve.Dispose();
+            Cache.Instance.DirectEve.Dispose();
         }
 
         private void UpdateMineralPricesButton_Click(object sender, EventArgs e)
@@ -1273,7 +1317,7 @@ namespace QuestorManager
         public void ResfreshLPI()
         {
             _lpstoreRe = false;
-            DirectLoyaltyPointStoreWindow lpstore = _directEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
             if (lpstore == null)
             {
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
@@ -1434,8 +1478,8 @@ namespace QuestorManager
                                 {
                                     ListViewItem listItem = new ListViewItem("BuyOrder");
                                     listItem.SubItems.Add(item.Name);
-                                    listItem.Tag = item.Id.ToString();
-                                    listItem.SubItems.Add(surplus.ToString());
+                                    listItem.Tag = item.Id.ToString(CultureInfo.InvariantCulture);
+                                    listItem.SubItems.Add(surplus.ToString(CultureInfo.InvariantCulture));
                                     LstTask.Items.Add(listItem);
                                     count++;
                                 }
@@ -1445,6 +1489,28 @@ namespace QuestorManager
                 }
             }
             System.Windows.Forms.MessageBox.Show("Added " + count + " Tasks to your list.");
+        }
+
+        private void StartQuestor_Click(object sender, EventArgs e)
+        {
+            string questorPath = Path.Combine(Settings.Instance.Path, "Questor.exe");
+            if (File.Exists(questorPath))
+            {
+                if (Settings.Instance.UseInnerspace)
+                {
+                    Logging.Log("QuestorManagerUI", "Launching [ dotnet q1 questor.exe ]", Logging.White);
+                    LavishScript.ExecuteCommand("dotnet q1 questor.exe");
+                    Application.Exit();
+                }
+                else
+                {
+                    Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ] - fix me", Logging.White);
+                }
+            }
+            else
+            {
+                Logging.Log("QuestorUI", "Unable to launch Questor from [" + questorPath + "] file not found", Logging.Orange);
+            }
         }
     }
 }

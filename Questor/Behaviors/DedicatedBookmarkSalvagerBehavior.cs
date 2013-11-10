@@ -26,10 +26,10 @@ namespace Questor.Behaviors
 {
     public class DedicatedBookmarkSalvagerBehavior
     {
-        private readonly Arm _arm;
+        //private readonly Arm _arm;
         private readonly Panic _panic;
         private readonly Statistics _statistics;
-        private readonly Salvage _salvage;
+        //private readonly Salvage _salvage;
         private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private DateTime _nextBookmarksrefresh = DateTime.UtcNow;
@@ -53,9 +53,9 @@ namespace Questor.Behaviors
 
         public DedicatedBookmarkSalvagerBehavior()
         {
-            _salvage = new Salvage();
+            //_salvage = new Salvage();
             _unloadLoot = new UnloadLoot();
-            _arm = new Arm();
+            //_arm = new Arm();
             _panic = new Panic();
             _statistics = new Statistics();
             _watch = new Stopwatch();
@@ -114,22 +114,22 @@ namespace Questor.Behaviors
             }
             else
             {
-                _arm.AgentId = agent.AgentId;
+                Arm.AgentId = agent.AgentId;
                 _statistics.AgentID = agent.AgentId;
                 AgentID = agent.AgentId;
-                _salvage.Ammo = Settings.Instance.Ammo;
-                _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-                _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-                _salvage.LootEverything = Settings.Instance.LootEverything;
+                Salvage.Ammo = Settings.Instance.Ammo;
+                Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+                Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+                Salvage.LootEverything = Settings.Instance.LootEverything;
             }
         }
 
         public void ApplySalvageSettings()
         {
-            _salvage.Ammo = Settings.Instance.Ammo;
-            _salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            _salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            _salvage.LootEverything = Settings.Instance.LootEverything;
+            Salvage.Ammo = Settings.Instance.Ammo;
+            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
+            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
+            Salvage.LootEverything = Settings.Instance.LootEverything;
         }
 
         private void BeginClosingQuestor()
@@ -160,7 +160,7 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    var station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -365,7 +365,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoBase:
-
+                    Cache.Instance.CurrentlyShouldBeSalvaging = false;
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "DedicatedBookmarkSalvagerBehaviorState.GotoBase");
                     if (Settings.Instance.DebugGotobase) Logging.Log("DedicatedBookmarkSalvagerBehavior", "GotoBase: Traveler.TravelHome()", Logging.White);
@@ -462,7 +462,7 @@ namespace Questor.Behaviors
                         if (_States.CurrentArmState == ArmState.Idle)
                             _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
-                        _arm.ProcessState();
+                        Arm.ProcessState();
                     }
                     if (_States.CurrentArmState == ArmState.Done || Cache.Instance.InSpace)
                     {
@@ -512,7 +512,7 @@ namespace Questor.Behaviors
                         }
                         Logging.Log("DedicatedBookmarkSalvagerBehavior.Salvager", "Salvaging at first oldest bookmarks created on: " + bookmark.CreatedOn.ToString(), Logging.White);
 
-                        var bookmarksInLocal = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
+                        List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(_afterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
                                                                                OrderBy(b => b.CreatedOn));
                         DirectBookmark localBookmark = bookmarksInLocal.FirstOrDefault();
                         if (localBookmark != null)
@@ -569,16 +569,17 @@ namespace Questor.Behaviors
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.Salvage:
-                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: attempting to open cargo hold", Logging.White);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage::: attempting to open cargo hold", Logging.White);
                     if (!Cache.Instance.OpenCargoHold("DedicatedSalvageBehavior: Salvage")) break;
-                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage: done opening cargo hold", Logging.White);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedBookmarkSalvagerBehavior", "salvage::: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
+                    Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
-                    const int distanceToCheck = (int)Distance.OnGridWithMe;
+                    const int distanceToCheck = (int)Distances.OnGridWithMe;
 
                     // is there any NPCs within distanceToCheck?
-                    EntityCache deadlyNPC = Cache.Instance.Entities.Where(t => t.Distance < distanceToCheck && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && t.GroupId != (int)Group.LargeColidableStructure).OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache deadlyNPC = Cache.Instance.EntitiesOnGrid.Where(t => t.Distance < distanceToCheck && !t.IsEntityIShouldLeaveAlone && !t.IsContainer && t.IsNpc && t.CategoryId == (int)CategoryID.Entity && !t.IsLargeCollidable).OrderBy(t => t.Distance).FirstOrDefault();
 
                     if (deadlyNPC != null)
                     {
@@ -599,13 +600,15 @@ namespace Questor.Behaviors
                         return;
                     }
 
-                    if (!Cache.Instance.OpenCargoHold("DedicatedBookmarkSalvageBehavior: Salvage")) break;
-
-                    if (Cache.Instance.CargoHold.IsValid && (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity) < Settings.Instance.ReserveCargoCapacity)
+                    if (Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < Settings.Instance.ReserveCargoCapacity + 10)
                     {
                         Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We are full, go to base to unload", Logging.White);
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
                         break;
+                    }
+                    else if (Cache.Instance.CurrentShipsCargo.IsValid)
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("DedicatedSalvager", "CurrentCapacity [" + Cache.Instance.CurrentShipsCargo.Capacity + "] UsedCapacity [" + Cache.Instance.CurrentShipsCargo.UsedCapacity + "][" + Settings.Instance.ReserveCargoCapacity + "]", Logging.Debug);
                     }
 
                     if (!Cache.Instance.UnlootedContainers.Any())
@@ -632,11 +635,11 @@ namespace Questor.Behaviors
                     try
                     {
                         // Overwrite settings, as the 'normal' settings do not apply
-                        _salvage.MaximumWreckTargets = Math.Min(Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets, Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                        _salvage.ReserveCargoCapacity = 80;
-                        _salvage.LootEverything = true;
-                        _salvage.ProcessState();
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.DirectEve.ActiveShip.MaxLockedTargets);
+                        Salvage.MaximumWreckTargets = Cache.Instance.MaxLockedTargets;
+                        Salvage.ReserveCargoCapacity = 80;
+                        Salvage.LootEverything = true;
+                        Salvage.ProcessState();
+                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
                         //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
                         //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
                     }

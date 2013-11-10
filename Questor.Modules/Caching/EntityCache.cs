@@ -11,7 +11,9 @@
 namespace Questor.Modules.Caching
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using DirectEve;
     //using System.Collections.Generic;
     using global::Questor.Modules.Lookup;
@@ -20,227 +22,1107 @@ namespace Questor.Modules.Caching
     public class EntityCache
     {
         private readonly DirectEntity _directEntity;
-
+        //public static int EntityCacheInstances = 0;
+        private DateTime ThisEntityCacheCreated = DateTime.UtcNow;
+        private int DictionaryCountThreshhold = 250;
         public EntityCache(DirectEntity entity)
         {
             _directEntity = entity;
+            //Interlocked.Increment(ref EntityCacheInstances);
+            ThisEntityCacheCreated = DateTime.UtcNow;
         }
+
+        ~EntityCache()
+        {
+            //Interlocked.Decrement(ref EntityCacheInstances);
+        }
+
+        public bool BookmarkThis(string NameOfBookmark = "bookmark", string Comment = "")
+        {
+            try
+            {
+                if (Cache.Instance.BookmarksByLabel(NameOfBookmark).Any(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId))
+                {
+                    List<DirectBookmark> PreExistingBookmarks = Cache.Instance.BookmarksByLabel(NameOfBookmark);
+                    if (PreExistingBookmarks.Any())
+                    {
+                        foreach (DirectBookmark _PreExistingBookmark in PreExistingBookmarks)
+                        {
+
+                            if (_PreExistingBookmark.X == _directEntity.X 
+                             && _PreExistingBookmark.Y == _directEntity.Y 
+                             && _PreExistingBookmark.Z == _directEntity.Z)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.BookmarkThis", "We already have a bookmark for [" + Name + "] and do not need another.", Logging.Debug);
+                                return true;
+                            }
+                            continue;
+                        }
+                    }
+                }
+
+                if (IsLargeCollidable || IsStation || IsAsteroid || IsAsteroidBelt)
+                {
+                    Cache.Instance.DirectEve.BookmarkEntity(_directEntity, NameOfBookmark, Comment, 0, false);
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+            }
+            
+            return false;
+        }
+
+        private int? _groupID;
 
         public int GroupId
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.GroupId;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_groupID == null)
+                        {
+                            if (Cache.Instance.EntityGroupID.Any() && Cache.Instance.EntityGroupID.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.GroupID", "We have [" + Cache.Instance.EntityGroupID.Count() + "] Entities in Cache.Instance.EntityGroupID", Logging.Debug);
+                            }
 
-                return 0;
+                            if (Cache.Instance.EntityGroupID.Any())
+                            {
+                                int value = 0;
+                                if (Cache.Instance.EntityGroupID.TryGetValue(Id, out value))
+                                {
+                                    _groupID = value;
+                                    return _groupID ?? 0;
+                                }    
+                            }
+
+                            _groupID = _directEntity.GroupId;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.GroupID", "Adding [" + Name + "] to EntityGroupID as [" + _groupID + "]", Logging.Debug);
+                            
+                            Cache.Instance.EntityGroupID.Add(Id, (int)_groupID);
+                            return _groupID ?? _directEntity.GroupId;
+                        }
+
+                        return _groupID ?? _directEntity.GroupId;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private int? _categoryId;
 
         public int CategoryId
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.CategoryId;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_categoryId == null)
+                        {
+                            _categoryId = _directEntity.CategoryId;
+                        }
 
-                return 0;
+                        return _categoryId ?? _directEntity.CategoryId;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private long? _id;
 
         public long Id
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Id;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_id == null)
+                        {
+                            _id = _directEntity.Id;
+                        }
 
-                return 0;
+                        return _id ?? _directEntity.Id;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        public string MaskedId
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return Cache.Instance.MaskedID(Id);
+                    }
+
+                    return "!0!";
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return "!0!";
+                }
+            }
+        }
+
+        private int? _TypeId;
 
         public int TypeId
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.TypeId;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_TypeId == null)
+                        {
+                            if (Cache.Instance.EntityTypeID.Any() && Cache.Instance.EntityTypeID.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.TypeID", "We have [" + Cache.Instance.EntityTypeID.Count() + "] Entities in Cache.Instance.EntityTypeID", Logging.Debug);
+                            }
 
-                return 0;
+                            if (Cache.Instance.EntityTypeID.Any())
+                            {
+                                int value = 0;
+                                if (Cache.Instance.EntityTypeID.TryGetValue(Id, out value))
+                                {
+                                    _TypeId = value;
+                                    return _TypeId ?? 0;
+                                }    
+                            }
+
+                            _TypeId = _directEntity.TypeId;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.TypeId", "Adding [" + Name + "] to EntityTypeId as [" + _TypeId + "]", Logging.Debug);
+                            Cache.Instance.EntityTypeID.Add(Id, (int)_TypeId);
+                            return _TypeId ?? _directEntity.TypeId;
+                        }
+
+                        return _TypeId ?? _directEntity.TypeId;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private long? _followId;
 
         public long FollowId
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.FollowId;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_followId == null)
+                        {
+                            _followId = _directEntity.FollowId;
+                        }
 
-                return 0;
+                        return _followId ?? _directEntity.FollowId;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private string _name;
 
         public string Name
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Name ?? string.Empty;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
 
-                return string.Empty;
+                        if (_name == null)
+                        {
+                            if (Cache.Instance.EntityNames.Any() && Cache.Instance.EntityNames.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.Name", "We have [" + Cache.Instance.EntityNames.Count() + "] Entities in Cache.Instance.EntityNames", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityNames.Any())
+                            {
+                                string value = null;
+                                if (Cache.Instance.EntityNames.TryGetValue(Id, out value))
+                                {
+                                    _name = value;
+                                    return _name;
+                                }    
+                            }
+
+                            _name = _directEntity.Name;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.Name", "Adding [" + MaskedId + "] to EntityName as [" + _name + "]", Logging.Debug);
+                            Cache.Instance.EntityNames.Add(Id, _name);
+                            return _name ?? string.Empty;
+                        }
+
+                        return _name;
+                    }
+
+                    return string.Empty;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return string.Empty;
+                }
+
             }
         }
+
+        private double? _distance;
 
         public double Distance
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Distance;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        if (_distance == null)
+                        {
+                            _distance = _directEntity.Distance;
+                        }
 
-                return 0;
+                        return _distance ?? _directEntity.Distance;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private double? _nearest5kDistance;
+
+        public double Nearest5kDistance
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_nearest5kDistance == null)
+                        {
+                            if (Distance > 0 && Distance < 900000000)
+                            {
+                                _nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                            }
+                        }
+
+                        return _nearest5kDistance ?? Distance;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldPct;
 
         public double ShieldPct
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ShieldPct;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldPct == null)
+                        {
+                            _shieldPct = _directEntity.ShieldPct;
+                        }
 
-                return 0;
+                        return _shieldPct ?? _directEntity.ShieldPct;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private double? _armorPct;
 
         public double ArmorPct
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ArmorPct;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorPct == null)
+                        {
+                            _armorPct = _directEntity.ArmorPct;
+                        }
 
-                return 0;
+                        return _armorPct ?? _directEntity.ArmorPct;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private double? _structurePct;
 
         public double StructurePct
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.StructurePct;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_structurePct == null)
+                        {
+                            _structurePct = _directEntity.StructurePct;
+                        }
 
-                return 0;
+                        return _structurePct ?? _directEntity.StructurePct;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private bool? _isNpc;
 
         public bool IsNpc
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsNpc;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNpc == null)
+                        {
+                            _isNpc = _directEntity.IsNpc;
+                        }
 
-                return false;
+                        return _isNpc ?? _directEntity.IsNpc;
+
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private double? _velocity;
 
         public double Velocity
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Velocity;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_velocity == null)
+                        {
+                            _velocity = _directEntity.Velocity;
+                        }
 
-                return 0;
+                        return _velocity ?? _directEntity.Velocity;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private bool? _isTarget;
 
         public bool IsTarget
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsTarget;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isTarget == null)
+                        {
+                            _isTarget = _directEntity.IsTarget;
+                            return _isTarget ?? false;
+                        }
+
+                        return _isTarget ?? _directEntity.IsTarget;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isCorrectSizeForMyWeapons;
+
+        public bool IsCorrectSizeForMyWeapons
+        {
+            get
+            {
+                try
+                {
+                    if (_isCorrectSizeForMyWeapons == null)
+                    {
+                        if (Cache.Instance.MyShipEntity.IsFrigate)
+                        {
+                            if (IsFrigate)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
+                        }
+
+                        if (Cache.Instance.MyShipEntity.IsCruiser)
+                        {
+                            if (IsCruiser)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
+                        }
+
+                        if (Cache.Instance.MyShipEntity.IsBattlecruiser || Cache.Instance.MyShipEntity.IsBattleship)
+                        {
+                            if (IsBattleship || IsBattlecruiser)
+                            {
+                                _isCorrectSizeForMyWeapons = true;
+                                return _isCorrectSizeForMyWeapons ?? true;
+                            }
+                        }
+
+                        return false;
+                    }
+
+                    return _isCorrectSizeForMyWeapons ?? false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                }
 
                 return false;
             }
+
         }
+
+        private bool? _isPreferredPrimaryWeaponTarget;
+
+        public bool isPreferredPrimaryWeaponTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isPreferredPrimaryWeaponTarget == null)
+                        {
+                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id == Id)
+                            {
+                                _isPreferredPrimaryWeaponTarget = true;
+                                return _isPreferredPrimaryWeaponTarget ?? true;
+                            }
+
+                            _isPreferredPrimaryWeaponTarget = false;
+                            return _isPreferredPrimaryWeaponTarget ?? false;
+                        }
+
+                        return _isPreferredPrimaryWeaponTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isPrimaryWeaponKillPriority;
+
+        public bool IsPrimaryWeaponKillPriority
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isPrimaryWeaponKillPriority == null)
+                        {
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == Id))
+                            {
+                                _isPrimaryWeaponKillPriority = true;
+                            }
+                        }
+
+                        return _isPrimaryWeaponKillPriority ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isPreferredDroneTarget;
+
+        public bool isPreferredDroneTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isPreferredDroneTarget == null)
+                        {
+                            if (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.PreferredDroneTarget.Id == _directEntity.Id)
+                            {
+                                _isPreferredDroneTarget = true;
+                                return _isPreferredDroneTarget ?? true;
+                            }
+
+                            _isPreferredDroneTarget = false;
+                            return _isPreferredDroneTarget ?? true;
+                        }
+
+                        return _isPreferredDroneTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _IsDroneKillPriority;
+
+        public bool IsDroneKillPriority
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_IsDroneKillPriority == null)
+                        {
+                            if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
+                            {
+                                _IsDroneKillPriority = true;
+                            }
+                        }
+
+                        return _IsDroneKillPriority ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _IsTooCloseTooFastTooSmallToHit;
+
+        public bool IsTooCloseTooFastTooSmallToHit
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_IsTooCloseTooFastTooSmallToHit == null)
+                        {
+                            if (IsNPCFrigate || IsFrigate)
+                            {
+                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && Cache.Instance.UseDrones)
+                                {
+                                    if (Distance < Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons
+                                     && Velocity > Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons)
+                                    {
+                                        _IsTooCloseTooFastTooSmallToHit = true;
+                                        return _IsTooCloseTooFastTooSmallToHit ?? true;
+                                    }
+
+                                    _IsTooCloseTooFastTooSmallToHit = false;
+                                    return _IsTooCloseTooFastTooSmallToHit ?? false;
+                                }
+
+                                _IsTooCloseTooFastTooSmallToHit = false;
+                                return _IsTooCloseTooFastTooSmallToHit ?? false;
+                            }
+                        }
+
+                        return _IsTooCloseTooFastTooSmallToHit ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _IsReadyToShoot;
+
+        public bool IsReadyToShoot
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_IsReadyToShoot == null)
+                        {
+                            if (!HasExploded && IsTarget && !IsIgnored)
+                            {
+                                //if (_directEntity.Distance < Cache.Instance.MaxRange)
+                                //{
+                                    //if (Cache.Instance.Entities.Any(t => t.Id == Id))
+                                    //{
+                                        _IsReadyToShoot = true;
+                                        return _IsReadyToShoot ?? true;
+                                    //}
+
+                                    //_IsReadyToShoot = false;
+                                    //return _IsReadyToShoot ?? false;
+                                //}
+
+                                //_IsReadyToShoot = false;
+                                //return _IsReadyToShoot ?? false;
+                            }
+                        }
+
+                        return _IsReadyToShoot ?? false;
+                    }
+
+                    if (Settings.Instance.DebugIsReadyToShoot) Logging.Log("IsReadyToShoot", "_directEntity is null or invalid", Logging.Debug);
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _IsReadyToTarget;
+
+        public bool IsReadyToTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_IsReadyToTarget == null)
+                        {
+                            if (!HasExploded && !IsTarget && !IsTargeting)
+                            {
+                                _IsReadyToTarget = true;
+                                return _IsReadyToTarget ?? true;
+                            }
+                        }
+
+                        return _IsReadyToTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isHigherPriorityPresent;
+
+        public bool IsHigherPriorityPresent
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isHigherPriorityPresent == null)
+                        {
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any() || Cache.Instance.DronePriorityTargets.Any())
+                            {
+                                if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+                                {
+                                    if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
+                                    {
+                                        PrimaryWeaponPriority _currentPrimaryWeaponPriority = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.PrimaryWeaponPriorityLevel).FirstOrDefault();
+
+                                        if (!Cache.Instance.PrimaryWeaponPriorityEntities.All(pt => pt.PrimaryWeaponPriorityLevel < _currentPrimaryWeaponPriority && pt.Distance < Cache.Instance.MaxRange))
+                                        {
+                                            _isHigherPriorityPresent = true;
+                                            return _isHigherPriorityPresent ?? true;
+                                        }
+
+                                        _isHigherPriorityPresent = false;
+                                        return _isHigherPriorityPresent ?? false;
+                                    }
+
+                                    if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(e => e.Distance < Cache.Instance.MaxRange))
+                                    {
+                                        _isHigherPriorityPresent = true;
+                                        return _isHigherPriorityPresent ?? true;
+                                    }
+
+                                    _isHigherPriorityPresent = false;
+                                    return _isHigherPriorityPresent ?? false;
+                                }
+
+                                if (Cache.Instance.DronePriorityTargets.Any())
+                                {
+                                    if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                                    {
+                                        DronePriority _currentEntityDronePriority = Cache.Instance.DronePriorityEntities.Where(t => t.Id == _directEntity.Id).Select(pt => pt.DronePriorityLevel).FirstOrDefault();
+
+                                        if (!Cache.Instance.DronePriorityEntities.All(pt => pt.DronePriorityLevel < _currentEntityDronePriority && pt.Distance < Cache.Instance.MaxDroneRange))
+                                        {
+                                            return true;
+                                        }
+
+                                        return false;
+                                    }
+
+                                    if (Cache.Instance.DronePriorityEntities.Any(e => e.Distance < Cache.Instance.MaxDroneRange))
+                                    {
+                                        _isHigherPriorityPresent = true;
+                                        return _isHigherPriorityPresent ?? true;
+                                    }
+
+                                    _isHigherPriorityPresent = false;
+                                    return _isHigherPriorityPresent ?? false;
+                                }
+
+                                _isHigherPriorityPresent = false;
+                                return _isHigherPriorityPresent ?? false;
+                            }
+                        }
+
+                        return _isHigherPriorityPresent ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isActiveTarget;
 
         public bool IsActiveTarget
         {
             get
             {
-                if (_directEntity != null)
+                try
                 {
-                    if (_directEntity.IsTarget)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsActiveTarget;        
-                    }
-                }
+                        if (_isActiveTarget == null)
+                        {
+                            if (_directEntity.IsActiveTarget)
+                            {
+                                _isActiveTarget = true;
+                                return _isActiveTarget ?? true;
+                            }
 
-                return false;
+                            _isActiveTarget = false;
+                            return _isActiveTarget ?? false;
+                        }
+
+                        return _isActiveTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private bool? _isInOptimalRange;
 
         public bool IsInOptimalRange
         {
             get
             {
-                if (_directEntity != null)
+                try
                 {
-                    if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0 )
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Settings.Instance.OptimalRange == 0)
+                        if (_isInOptimalRange == null)
                         {
-                            Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
+                            if (Settings.Instance.SpeedTank && Settings.Instance.OrbitDistance != 0)
+                            {
+                                if (Settings.Instance.OptimalRange == 0)
+                                {
+                                    Cache.Instance.OptimalRange = Settings.Instance.OrbitDistance + 5000;
+                                }
+                            }
+
+                            if (Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                            {
+                                double optimal = 0;
+
+                                if (Cache.Instance.OptimalRange != 0)
+                                {
+                                    optimal = Cache.Instance.OptimalRange;
+                                }
+                                else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them isnt != 0, that is the idea, if its 0 we sure as hell dont want to use it as the optimal
+                                {
+                                    optimal = Settings.Instance.OptimalRange;
+                                }
+
+                                if (optimal > Cache.Instance.ActiveShip.MaxTargetRange)
+                                {
+                                    optimal = Cache.Instance.ActiveShip.MaxTargetRange - 500;
+                                }
+
+                                if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //Lasers, Projectile, and Hybrids
+                                {
+                                    if (Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
+                                    {
+                                        if (Distance < (optimal * 1.5) && Distance < Cache.Instance.ActiveShip.MaxTargetRange)
+                                        {
+                                            _isInOptimalRange = true;
+                                            return _isInOptimalRange ?? true;
+                                        }
+                                    }
+                                }
+                                else //missile boats - use max range
+                                {
+                                    optimal = Cache.Instance.MaxRange;
+                                    if (Distance < optimal)
+                                    {
+                                        _isInOptimalRange = true;
+                                        return _isInOptimalRange ?? true;
+                                    }
+                                }
+
+                                _isInOptimalRange = false;
+                                return _isInOptimalRange ?? false;
+                            }
+
+                            // If you have no optimal you have to assume the entity is within Optimal... (like missiles)
+                            _isInOptimalRange = true;
+                            return _isInOptimalRange ?? true;
                         }
+
+                        return _isInOptimalRange ?? false;
                     }
 
-                    if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0 || Settings.Instance.OptimalRange != 0)
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsInOptimalRangeOrNothingElseAvail
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        double optimal = 0;
-                        
-                        if (Cache.Instance.InMission && Cache.Instance.OptimalRange != 0)
+                        if (IsInOptimalRange)
                         {
-                            optimal = Cache.Instance.OptimalRange;
+                            return true;
                         }
-                        else if (Settings.Instance.OptimalRange != 0)
+
+                        if (!Cache.Instance.Targets.Any())
                         {
-                            optimal = Settings.Instance.OptimalRange;
+                            return true;
                         }
-                        
-                        if (!Cache.Instance.DoWeCurrentlyHaveTurretsMounted()) //if we do not have turrets mounted then optimal range is whatever is less weapons range or targeting range.
-                        {
-                            //
-                            // missile boats
-                            //
-                            optimal = Cache.Instance.MaxRange;
-                            if (_directEntity.Distance < optimal)
-                            {
-                                return true;
-                            }
-                        }
-                        else //Lasers, Projectile, and Hybrids
-                        {
-                            if (_directEntity.Distance > Settings.Instance.InsideThisRangeIsHardToTrack)
-                            {
-                                if (_directEntity.Distance < (optimal * 1.5))
-                                {
-                                    return true;
-                                }
-                            }    
-                        }
-                        
+
                         return false;
                     }
 
-                    return true;
+                    return false;
                 }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
 
-                return false;
+        public bool IsInDroneRange
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (Cache.Instance.MaxDroneRange > 0) //&& Cache.Instance.UseDrones)
+                        {
+                            if (Distance < Cache.Instance.MaxDroneRange)
+                            {
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -248,17 +1130,63 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
+                try
                 {
-                    if (Cache.Instance.DronePriorityTargets.All(i => i.Id != _directEntity.Id))
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
+
+                        if (Cache.Instance.DronePriorityTargets.All(i => i.EntityID != Id))
+                        {
+                            return false;
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsPriorityWarpScrambler
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
+                        {
+                            if (PrimaryWeaponPriorityLevel == PrimaryWeaponPriority.WarpScrambler)
+                            {
+                                return true;
+                            }
+                        }
+
+                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == Id))
+                        {
+                            if (DronePriorityLevel == DronePriority.WarpScrambler)
+                            {
+                                return true;
+                            }
+                        }
+
                         return false;
                     }
 
-                    return true;
+                    return false;
                 }
-
-                return false;
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -266,50 +1194,178 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
+                try
                 {
-                    if (Cache.Instance.PrimaryWeaponPriorityTargets.All(i => i.Id != _directEntity.Id))
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(i => i.EntityID == Id))
+                        {
+                            return true;
+                        }
+
                         return false;
                     }
 
-                    return true;
+                    return false;
                 }
-
-                return false;
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private PrimaryWeaponPriority? _primaryWeaponPriorityLevel;
+        public PrimaryWeaponPriority PrimaryWeaponPriorityLevel
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_primaryWeaponPriorityLevel == null)
+                        {
+                            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt.EntityID == Id))
+                            {
+                                _primaryWeaponPriorityLevel = Cache.Instance.PrimaryWeaponPriorityTargets.Where(t => t.Entity.IsTarget && t.EntityID == Id)
+                                                                                                                            .Select(pt => pt.PrimaryWeaponPriority)
+                                                                                                                            .FirstOrDefault();
+                                return _primaryWeaponPriorityLevel ?? PrimaryWeaponPriority.NotUsed;
+                            }
+
+                            return PrimaryWeaponPriority.NotUsed;
+                        }
+
+                        return _primaryWeaponPriorityLevel ?? PrimaryWeaponPriority.NotUsed;
+                    }
+
+                    return PrimaryWeaponPriority.NotUsed;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return PrimaryWeaponPriority.NotUsed;
+                }
+            }
+        }
+
+        public DronePriority DronePriorityLevel
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+
+                        if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == _directEntity.Id))
+                        {
+                            DronePriority currentTargetPriority = Cache.Instance.DronePriorityTargets.Where(t => t.Entity.IsTarget
+                                                                                                                        && t.EntityID == Id)
+                                                                                                                        .Select(pt => pt.DronePriority)
+                                                                                                                        .FirstOrDefault();
+
+                            return currentTargetPriority;
+                        }
+
+                        return DronePriority.NotUsed;
+                    }
+
+                    return DronePriority.NotUsed;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return DronePriority.NotUsed;
+                }
+            }
+        }
+
+        private bool? _isTargeting;
 
         public bool IsTargeting
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsTargeting;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isTargeting == null)
+                        {
+                            _isTargeting = _directEntity.IsTargeting;
+                            return _isTargeting ?? false;
+                        }
 
-                return false;
+                        return _isTargeting ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private bool? _isTargetedBy;
 
         public bool IsTargetedBy
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsTargetedBy;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isTargetedBy == null)
+                        {
+                            _isTargetedBy = _directEntity.IsTargetedBy;
+                            return _isTargetedBy ?? false;
+                        }
 
-                return false;
+                        return _isTargetedBy ?? false; 
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isAttacking;
         public bool IsAttacking
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsAttacking;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isAttacking == null)
+                        {
+                            _isAttacking = _directEntity.IsAttacking;
+                            return _isAttacking ?? false;
+                        }
 
-                return false;
+                        return _isAttacking ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -317,10 +1373,20 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.IsEmpty;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return _directEntity.IsEmpty;
+                    }
 
-                return false;
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -328,10 +1394,20 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.HasReleased;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return _directEntity.HasReleased;
+                    }
 
-                return false;
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -339,10 +1415,159 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.HasExploded;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return _directEntity.HasExploded;
+                    }
 
-                return false;
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isEwarTarget;
+
+        public bool IsEwarTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isEwarTarget == null)
+                        {
+                            bool result = false;
+                            result |= IsWarpScramblingMe;
+                            result |= IsWebbingMe;
+                            result |= IsNeutralizingMe;
+                            result |= IsJammingMe;
+                            result |= IsSensorDampeningMe;
+                            result |= IsTargetPaintingMe;
+                            result |= IsTrackingDisruptingMe;
+                            _isEwarTarget = result;
+                            return _isEwarTarget ?? false;
+                        }
+
+                        return _isEwarTarget ?? false;
+                    }
+
+                    return _isEwarTarget ?? false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public DronePriority IsActiveDroneEwarType
+        {
+            get
+            {
+                try
+                {
+                    if (IsWarpScramblingMe)
+                    {
+                        return DronePriority.WarpScrambler;
+                    }
+
+                    if (IsWebbingMe)
+                    {
+                        return DronePriority.Webbing;
+                    }
+
+                    if (IsNeutralizingMe)
+                    {
+                        return DronePriority.PriorityKillTarget;
+                    }
+
+                    if (IsJammingMe)
+                    {
+                        return DronePriority.PriorityKillTarget;
+                    }
+
+                    if (IsSensorDampeningMe)
+                    {
+                        return DronePriority.PriorityKillTarget;
+                    }
+
+                    if (IsTargetPaintingMe)
+                    {
+                        return DronePriority.PriorityKillTarget;
+                    }
+
+                    if (IsTrackingDisruptingMe)
+                    {
+                        return DronePriority.PriorityKillTarget;
+                    }
+
+                    return DronePriority.NotUsed;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return DronePriority.NotUsed;
+                }
+            }
+        }
+
+        public PrimaryWeaponPriority IsActivePrimaryWeaponEwarType
+        {
+            get
+            {
+                try
+                {
+                    if (IsWarpScramblingMe)
+                    {
+                        return PrimaryWeaponPriority.WarpScrambler;
+                    }
+
+                    if (IsWebbingMe)
+                    {
+                        return PrimaryWeaponPriority.Webbing;
+                    }
+
+                    if (IsNeutralizingMe)
+                    {
+                        return PrimaryWeaponPriority.Neutralizing;
+                    }
+
+                    if (IsJammingMe)
+                    {
+                        return PrimaryWeaponPriority.Jamming;
+                    }
+
+                    if (IsSensorDampeningMe)
+                    {
+                        return PrimaryWeaponPriority.Dampening;
+                    }
+
+                    if (IsTargetPaintingMe)
+                    {
+                        return PrimaryWeaponPriority.TargetPainting;
+                    }
+
+                    if (IsTrackingDisruptingMe)
+                    {
+                        return PrimaryWeaponPriority.TrackingDisrupting;
+                    }
+
+                    return PrimaryWeaponPriority.NotUsed;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return PrimaryWeaponPriority.NotUsed;
+                }
             }
         }
 
@@ -350,10 +1575,35 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Attacks.Contains("effects.WarpScramble");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (Cache.Instance.ListOfWarpScramblingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
 
-                return false;
+                        if (_directEntity.Attacks.Contains("effects.WarpScramble"))
+                        {
+                            if (!Cache.Instance.ListOfWarpScramblingEntities.Contains(Id))
+                            {
+                                Cache.Instance.ListOfWarpScramblingEntities.Add(Id);
+                            }
+
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -361,10 +1611,32 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.Attacks.Contains("effects.ModifyTargetSpeed");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
 
-                return false;
+                        if (_directEntity.Attacks.Contains("effects.ModifyTargetSpeed"))
+                        {
+                            if (!Cache.Instance.ListofWebbingEntities.Contains(Id)) Cache.Instance.ListofWebbingEntities.Add(Id);
+                            return true;
+                        }
+
+                        if (Cache.Instance.ListofWebbingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -372,10 +1644,31 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ElectronicWarfare.Contains("ewEnergyNeut");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_directEntity.ElectronicWarfare.Contains("ewEnergyNeut"))
+                        {
+                            if (!Cache.Instance.ListNeutralizingEntities.Contains(Id)) Cache.Instance.ListNeutralizingEntities.Add(Id);
+                            return true;
+                        }
 
-                return false;
+                        if (Cache.Instance.ListNeutralizingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -383,10 +1676,31 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ElectronicWarfare.Contains("electronic");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_directEntity.ElectronicWarfare.Contains("electronic"))
+                        {
+                            if (!Cache.Instance.ListOfJammingEntities.Contains(Id)) Cache.Instance.ListOfJammingEntities.Add(Id);
+                            return true;
+                        }
 
-                return false;
+                        if (Cache.Instance.ListOfJammingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -394,10 +1708,31 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ElectronicWarfare.Contains("ewRemoteSensorDamp");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_directEntity.ElectronicWarfare.Contains("ewRemoteSensorDamp"))
+                        {
+                            if (!Cache.Instance.ListOfDampenuingEntities.Contains(Id)) Cache.Instance.ListOfDampenuingEntities.Add(Id);
+                            return true;
+                        }
 
-                return false;
+                        if (Cache.Instance.ListOfDampenuingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -405,10 +1740,31 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ElectronicWarfare.Contains("ewTargetPaint");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_directEntity.ElectronicWarfare.Contains("ewTargetPaint"))
+                        {
+                            if (!Cache.Instance.ListOfTargetPaintingEntities.Contains(Id)) Cache.Instance.ListOfTargetPaintingEntities.Add(Id);
+                            return true;
+                        }
 
-                return false;
+                        if (Cache.Instance.ListOfTargetPaintingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -416,10 +1772,32 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return _directEntity.ElectronicWarfare.Contains("ewTrackingDisrupt");
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
 
-                return false;
+                        if (_directEntity.ElectronicWarfare.Contains("ewTrackingDisrupt"))
+                        {
+                            if (!Cache.Instance.ListOfTrackingDisruptingEntities.Contains(Id)) Cache.Instance.ListOfTrackingDisruptingEntities.Add(Id);
+                            return true;
+                        }
+
+                        if (Cache.Instance.ListOfTrackingDisruptingEntities.Contains(Id))
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -427,29 +1805,184 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directEntity != null)
-                    return (int)((_directEntity.ShieldPct + _directEntity.ArmorPct + _directEntity.StructurePct) * 100);
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        return (int)((ShieldPct + ArmorPct + StructurePct) * 100);
+                    }
 
-                return 0;
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
             }
         }
+
+        private bool? _isEntityIShouldKeepShooting;
+
+        public bool IsEntityIShouldKeepShooting
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isEntityIShouldKeepShooting == null)
+                        {
+                            //
+                            // Is our current target already in armor? keep shooting the same target if so...
+                            //
+                            if (IsReadyToShoot
+                                && IsInOptimalRange && !IsLargeCollidable
+                                && (((!IsFrigate && !IsNPCFrigate) || !IsTooCloseTooFastTooSmallToHit))
+                                    && ArmorPct * 100 < Settings.Instance.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage)
+                            {
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                                _isEntityIShouldKeepShooting = true;
+                                return _isEntityIShouldKeepShooting ?? true;
+                            }
+                        }
+
+                        return _isEntityIShouldKeepShooting ?? false;
+                    }
+                    
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Exception: [" + ex + "]", Logging.Debug);
+                }
+
+                return false;
+            }
+        }
+
+        private bool? _isSentry;
 
         public bool IsSentry
         {
             get
             {
-                if (GroupId == (int)Group.SentryGun) return true;
-                if (GroupId == (int)Group.ProtectiveSentryGun) return true;
-                if (GroupId == (int)Group.MobileSentryGun) return true;
-                if (GroupId == (int)Group.DestructibleSentryGun) return true;
-                if (GroupId == (int)Group.MobileMissileSentry) return true;
-                if (GroupId == (int)Group.MobileProjectileSentry) return true;
-                if (GroupId == (int)Group.MobileLaserSentry) return true;
-                if (GroupId == (int)Group.MobileHybridSentry) return true;
-                if (GroupId == (int)Group.DeadspaceOverseersSentry) return true;
-                if (GroupId == (int)Group.StasisWebificationBattery) return true;
-                if (GroupId == (int)Group.EnergyNeutralizingBattery) return true;
-                return false;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isSentry == null)
+                        {
+                            if (Cache.Instance.EntityIsSentry.Any() && Cache.Instance.EntityIsSentry.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsSentry", "We have [" + Cache.Instance.EntityIsSentry.Count() + "] Entities in Cache.Instance.EntityIsSentry", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsSentry.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsSentry.TryGetValue(Id, out value))
+                                {
+                                    _isSentry = value;
+                                    return _isSentry ?? false;
+                                }
+                            }
+
+                            bool result = false;
+                            //if (GroupId == (int)Group.SentryGun) return true;
+                            result |= (GroupId == (int)Group.ProtectiveSentryGun);
+                            result |= (GroupId == (int)Group.MobileSentryGun);
+                            result |= (GroupId == (int)Group.DestructibleSentryGun);
+                            result |= (GroupId == (int)Group.MobileMissileSentry);
+                            result |= (GroupId == (int)Group.MobileProjectileSentry);
+                            result |= (GroupId == (int)Group.MobileLaserSentry);
+                            result |= (GroupId == (int)Group.MobileHybridSentry);
+                            result |= (GroupId == (int)Group.DeadspaceOverseersSentry);
+                            result |= (GroupId == (int)Group.StasisWebificationBattery);
+                            result |= (GroupId == (int)Group.EnergyNeutralizingBattery);
+                            _isSentry = result;
+                            Cache.Instance.EntityIsSentry.Add(Id, result);
+                            return _isSentry ?? false;
+                        }
+
+                        return _isSentry ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isIgnored;
+
+        public bool IsIgnored
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isIgnored == null)
+                        {
+                            //IsIgnoredRefreshes++;
+                            //if (Cache.Instance.Entities.All(t => t.Id != _directEntity.Id))
+                            //{
+                            //    IsIgnoredRefreshes = IsIgnoredRefreshes + 1000;
+                            //    _isIgnored = true;
+                            //    return _isIgnored ?? true;
+                            //}
+                            if (Cache.Instance.IgnoreTargets.Any())
+                            {
+                                _isIgnored = Cache.Instance.IgnoreTargets.Contains(Name.Trim());
+                                if ((bool)_isIgnored)
+                                {
+                                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.Id != Id)
+                                    {
+                                        Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                                    }
+                                    
+                                    if (Cache.Instance.EntityIsLowValueTarget.ContainsKey(Id))
+                                    {
+                                        Cache.Instance.EntityIsLowValueTarget.Remove(Id);
+                                    }
+
+                                    if (Cache.Instance.EntityIsHighValueTarget.ContainsKey(Id))
+                                    {
+                                        Cache.Instance.EntityIsHighValueTarget.Remove(Id);
+                                    }
+
+                                    if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
+                                    return _isIgnored ?? true;
+                                }
+
+                                _isIgnored = false;
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
+                                return _isIgnored ?? false;
+                            }
+
+                            _isIgnored = false;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
+                            return _isIgnored ?? false;
+                        }
+
+                        if (Settings.Instance.DebugEntityCache) Logging.Log("EntityCache.IsIgnored", "[" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] isIgnored [" + _isIgnored + "]", Logging.Debug);
+                        return _isIgnored ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -457,113 +1990,533 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (GroupId == (int)Group.SpawnContainer)
-                    return true;
-
-                if (_directEntity != null)
+                try
                 {
-                    bool haveLootRights = false;
-                    if (Cache.Instance.DirectEve.ActiveShip.Entity != null)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        haveLootRights |= _directEntity.CorpId == Cache.Instance.DirectEve.ActiveShip.Entity.CorpId;
-                        haveLootRights |= _directEntity.OwnerId == Cache.Instance.DirectEve.ActiveShip.Entity.CharId;
-                        //
-                        // It would be nice if this were eventually extended to detect and include 'abandoned' wrecks (blue ones). 
-                        // I do not yet know what attributed actually change when that happens. We should collect some data. 
-                        //
+
+                        if (GroupId == (int)Group.SpawnContainer)
+                        {
+                            return true;
+                        }
+
+                        bool result = false;
+                        if (Cache.Instance.ActiveShip.Entity != null)
+                        {
+                            result |= _directEntity.CorpId == Cache.Instance.ActiveShip.Entity.CorpId;
+                            result |= _directEntity.OwnerId == Cache.Instance.ActiveShip.Entity.CharId;
+                            //
+                            // It would be nice if this were eventually extended to detect and include 'abandoned' wrecks (blue ones). 
+                            // I do not yet know what attributed actually change when that happens. We should collect some data. 
+                            //
+                            return result;
+                        }
+
+                        return false;
                     }
 
-                    return haveLootRights;
+                    return false;
                 }
-
-                return false;
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private int? _targetValue;
 
         public int? TargetValue
         {
             get
             {
-                ShipTargetValue value = null;
-
                 try
                 {
-                    value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                    int result = -1;
+
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_targetValue == null)
+                        {
+                            ShipTargetValue value = null;
+
+                            try
+                            {
+                                value = Cache.Instance.ShipTargetValues.FirstOrDefault(v => v.GroupId == GroupId);
+                            }
+                            catch (Exception exception)
+                            {
+                                if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
+                            }
+
+                            if (value == null)
+                            {
+
+                                if (IsNPCBattleship)
+                                {
+                                    _targetValue = 4;
+                                }
+                                else if (IsNPCBattlecruiser)
+                                {
+                                    _targetValue = 3;
+                                }
+                                else if (IsNPCCruiser)
+                                {
+                                    _targetValue = 2;
+                                }
+                                else if (IsNPCFrigate)
+                                {
+                                    _targetValue = 0;
+                                }
+
+                                return _targetValue ?? -1;
+                            }
+
+                            _targetValue = value.TargetValue;
+                            return _targetValue;
+                        }
+
+                        return _targetValue ?? -1;
+                    }
+
+                    return result;
                 }
                 catch (Exception exception)
                 {
-                    if (Settings.Instance.DebugShipTargetValues) Logging.Log("TargetValue", "exception [" + exception + "]", Logging.Debug);
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return -1;
                 }
+            }
+        }
 
-                if (value == null)
+        private bool? _isHighValueTarget;
+
+        public bool IsHighValueTarget
+        {
+            get
+            {
+                try
                 {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isHighValueTarget == null)
+                        {
+                            if (Cache.Instance.EntityIsHighValueTarget.Any() && Cache.Instance.EntityIsHighValueTarget.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "We have [" + Cache.Instance.EntityIsHighValueTarget.Count() + "] Entities in Cache.Instance.EntityIsHighValueTarget", Logging.Debug);
+                            }
 
-                    if (IsNPCBattleship) return 4;
-                    if (IsNPCBattlecruiser) return 3;
-                    if (IsNPCCruiser) return 2;
-                    if (IsNPCFrigate) return 0;
-                    return 2;
+                            if (Cache.Instance.EntityIsHighValueTarget.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsHighValueTarget.TryGetValue(Id, out value))
+                                {
+                                    _isHighValueTarget = value;
+                                    return _isHighValueTarget ?? false;
+                                }    
+                            }
+
+                            if (TargetValue != null)
+                            {
+                                if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
+                                {
+                                    if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
+                                    {
+                                        if (IsSentry && !Settings.Instance.KillSentries && !IsEwarTarget)
+                                        {
+                                            _isHighValueTarget = false;
+                                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                                            Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
+                                            return _isHighValueTarget ?? false;
+                                        }
+
+                                        _isHighValueTarget = true;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
+                                        return _isHighValueTarget ?? true;
+                                    }
+
+                                    //if (IsLargeCollidable)
+                                    //{
+                                    //    return true;
+                                    //}    
+                                }
+
+                                _isHighValueTarget = false;
+                                //do not cache things that may be ignored temporarily...
+                                return _isHighValueTarget ?? false;
+                            }
+
+                            _isHighValueTarget = false;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
+                            Cache.Instance.EntityIsHighValueTarget.Add(Id, (bool)_isHighValueTarget);
+                            return _isHighValueTarget ?? false;
+                        }
+
+                        return _isHighValueTarget ?? false;
+                    }
+
+                    return false;
                 }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
 
-                return value.TargetValue;
+        private bool? _isLowValueTarget;
+
+        public bool IsLowValueTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isLowValueTarget == null)
+                        {
+                            if (Cache.Instance.EntityIsLowValueTarget.Any() && Cache.Instance.EntityIsLowValueTarget.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "We have [" + Cache.Instance.EntityIsLowValueTarget.Count() + "] Entities in Cache.Instance.EntityIsLowValueTarget", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsLowValueTarget.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsLowValueTarget.TryGetValue(Id, out value))
+                                {
+                                    _isLowValueTarget = value;
+                                    return _isLowValueTarget ?? false;
+                                }   
+                            }
+
+                            if (!IsIgnored || !IsContainer || !IsBadIdea || !IsCustomsOffice || !IsFactionWarfareNPC || !IsPlayer)
+                            {
+                                if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
+                                {
+                                    if (IsSentry && !Settings.Instance.KillSentries && !IsEwarTarget)
+                                    {
+                                        _isLowValueTarget = false;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
+                                        return _isLowValueTarget ?? false;
+                                    }
+
+                                    if (TargetValue < 0 && Velocity == 0)
+                                    {
+                                        _isLowValueTarget = false;
+                                        if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                        Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
+                                        return _isLowValueTarget ?? false;
+                                    }
+
+                                    _isLowValueTarget = true;
+                                    if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                    Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
+                                    return _isLowValueTarget ?? true;
+                                }
+
+                                _isLowValueTarget = false;
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);
+                                Cache.Instance.EntityIsLowValueTarget.Add(Id, (bool)_isLowValueTarget);
+                                return _isLowValueTarget ?? false;
+                            }
+
+                            _isLowValueTarget = false;
+                            //do not cache things that may be ignored temporarily
+                            return _isLowValueTarget ?? false;
+                        }
+
+                        return _isLowValueTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
         public DirectContainerWindow CargoWindow
         {
-            get { return Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.ItemId == Id); }
+            get
+            {
+                try
+                {
+                    if (!Cache.Instance.Windows.Any())
+                    {
+                        return null;
+                    }
+
+                    return Cache.Instance.Windows.OfType<DirectContainerWindow>().FirstOrDefault(w => w.ItemId == Id);
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
+            }
         }
 
+        private bool? _isValid;
         public bool IsValid
         {
             get
             {
-                if (_directEntity == null)
-                    return false;
+                try
+                {
+                    if (_directEntity != null)
+                    {
+                        if (_isValid == null)
+                        {
+                            _isValid = _directEntity.IsValid;
+                            return _isValid ?? true;
+                        }
 
-                return _directEntity.IsValid;
+                        return _isValid ?? true;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private bool? _isContainer;
 
         public bool IsContainer
         {
             get
             {
-                if (GroupId == (int)Group.Wreck) return true;
-                if (GroupId == (int)Group.CargoContainer) return true;
-                if (GroupId == (int)Group.SpawnContainer) return true;
-                if (GroupId == (int)Group.MissionContainer) return true;
-                return false;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isContainer == null)
+                        {
+                            bool result = false;
+                            result |= (GroupId == (int)Group.Wreck);
+                            result |= (GroupId == (int)Group.CargoContainer);
+                            result |= (GroupId == (int)Group.SpawnContainer);
+                            result |= (GroupId == (int)Group.MissionContainer);
+                            result |= (GroupId == (int)Group.DeadSpaceOverseersBelongings);
+                            _isContainer = result;
+                            return _isContainer ?? false;
+                        }
+
+                        return _isContainer ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isPlayer;
+
         public bool IsPlayer
         {
-            get { return _directEntity.IsPc; }
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isPlayer == null)
+                        {
+                            _isPlayer = _directEntity.IsPc;
+                            return _isPlayer ?? false;
+                        }
+
+                        return _isPlayer ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
         }
 
+        public bool IsTargetingMeAndNotYetTargeted
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= (((IsNpc || IsNpcByGroupID) || IsAttacking)
+                                    && CategoryId == (int)CategoryID.Entity
+                                    && Distance < Cache.Instance.MaxTargetRange
+                                    && !IsLargeCollidable
+                                    && (!IsTargeting && !IsTarget && IsTargetedBy)
+                                    && !IsContainer
+                                    && !IsIgnored
+                                    && (!IsBadIdea || IsAttacking)
+                                    && !IsEntityIShouldLeaveAlone
+                                    && !IsFactionWarfareNPC
+                                    && !IsStation);
+
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsNotYetTargetingMeAndNotYetTargeted
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= (((IsNpc || IsNpcByGroupID) || IsAttacking || Cache.Instance.InMission)
+                                    && (!IsTargeting && !IsTarget)
+                                    && !IsContainer
+                                    && CategoryId == (int)CategoryID.Entity
+                                    && Distance < Cache.Instance.MaxTargetRange
+                                    && !IsIgnored
+                                    && (!IsBadIdea || IsAttacking)
+                                    && !IsEntityIShouldLeaveAlone
+                                    && !IsFactionWarfareNPC
+                                    && !IsLargeCollidable
+                                    && !IsStation);
+
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsTargetWeCanShootButHaveNotYetTargeted
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= (CategoryId == (int)CategoryID.Entity
+                                    && !IsTarget
+                                    && !IsTargeting
+                                    && Distance < Cache.Instance.MaxTargetRange
+                                    && !IsIgnored
+                                    && !IsStation);
+
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isFrigate;
         /// <summary>
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
+        /// 
+
         public bool IsFrigate
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Frigate;
-                result |= GroupId == (int)Group.AssaultShip;
-                result |= GroupId == (int)Group.StealthBomber;
-                result |= GroupId == (int)Group.ElectronicAttackShip;
-                result |= GroupId == (int)Group.PrototypeExplorationShip;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isFrigate == null)
+                        {
+                            if (Cache.Instance.EntityIsFrigate.Any() && Cache.Instance.EntityIsFrigate.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsFrigate", "We have [" + Cache.Instance.EntityIsFrigate.Count() + "] Entities in Cache.Instance.EntityIsFrigate", Logging.Debug);
+                            }
 
-                // Technically not frigs, but for our purposes they are
-                result |= GroupId == (int)Group.Destroyer;
-                result |= GroupId == (int)Group.Interdictor;
-                result |= GroupId == (int)Group.Interceptor;
-                return result;
+                            if (Cache.Instance.EntityIsFrigate.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsFrigate.TryGetValue(Id, out value))
+                                {
+                                    _isFrigate = value;
+                                    return _isFrigate ?? false;
+                                }    
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Frigate;
+                            result |= GroupId == (int)Group.AssaultShip;
+                            result |= GroupId == (int)Group.StealthBomber;
+                            result |= GroupId == (int)Group.ElectronicAttackShip;
+                            result |= GroupId == (int)Group.PrototypeExplorationShip;
+
+                            // Technically not frigs, but for our purposes they are
+                            result |= GroupId == (int)Group.Destroyer;
+                            result |= GroupId == (int)Group.Interdictor;
+                            result |= GroupId == (int)Group.Interceptor;
+
+                            _isFrigate = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsFrigate", "Adding [" + Name + "] to EntityIsFrigate as [" + _isFrigate + "]", Logging.Debug);
+                            Cache.Instance.EntityIsFrigate.Add(Id, (bool)_isFrigate);
+                            return _isFrigate ?? false;
+                        }
+
+                        return _isFrigate ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isNPCFrigate;
         /// <summary>
         /// Frigate includes all elite-variants - this does NOT need to be limited to players, as we check for players specifically everywhere this is used
         /// </summary>
@@ -571,65 +2524,112 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
-                result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
-                result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
-                result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
-                result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
-                result |= GroupId == (int)Group.Mission_Generic_Destroyers;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
-                result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
-                result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
-                result |= GroupId == (int)Group.asteroid_guristas_frigate;
-                result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
-                result |= GroupId == (int)Group.asteroid_serpentis_frigate;
-                result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
-                result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
-                result |= GroupId == (int)Group.deadspace_guristas_frigate;
-                result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
-                result |= GroupId == (int)Group.deadspace_serpentis_frigate;
-                result |= GroupId == (int)Group.mission_amarr_empire_frigate;
-                result |= GroupId == (int)Group.mission_caldari_state_frigate;
-                result |= GroupId == (int)Group.mission_gallente_federation_frigate;
-                result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
-                result |= GroupId == (int)Group.mission_khanid_frigate;
-                result |= GroupId == (int)Group.mission_concord_frigate;
-                result |= GroupId == (int)Group.mission_mordu_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate2;
-                result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
-                result |= GroupId == (int)Group.mission_generic_frigates;
-                result |= GroupId == (int)Group.mission_thukker_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNPCFrigate == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCFrigate.Any() && Cache.Instance.EntityIsNPCFrigate.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCFrigate", "We have [" + Cache.Instance.EntityIsNPCFrigate.Count() + "] Entities in Cache.Instance.EntityIsNPCFrigate", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsNPCFrigate.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCFrigate.TryGetValue(Id, out value))
+                                {
+                                    _isNPCFrigate = value;
+                                    return _isNPCFrigate ?? false;
+                                }    
+                            }
+                            
+                            bool result = false;
+                            if (IsPlayer)
+                            {
+                                //
+                                // if it is a player it is by definition not an NPC
+                                //
+                                return false;
+                            }
+                            result |= GroupId == (int)Group.Frigate;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Generic_Destroyers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_frigate;
+                            result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                            result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.deadspace_serpentis_frigate;
+                            result |= GroupId == (int)Group.mission_amarr_empire_frigate;
+                            result |= GroupId == (int)Group.mission_caldari_state_frigate;
+                            result |= GroupId == (int)Group.mission_gallente_federation_frigate;
+                            result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
+                            result |= GroupId == (int)Group.mission_khanid_frigate;
+                            result |= GroupId == (int)Group.mission_concord_frigate;
+                            result |= GroupId == (int)Group.mission_mordu_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
+                            result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
+                            result |= GroupId == (int)Group.mission_generic_frigates;
+                            result |= GroupId == (int)Group.mission_thukker_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                            result |= GroupId == (int)Group.TutorialDrone;
+                            //result |= Name.Contains("Spider Drone"); //we *really* need to find out the GroupID of this one.
+                            _isNPCFrigate = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCFrigate", "Adding [" + Name + "] to EntityIsNPCFrigate as [" + _isNPCFrigate + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCFrigate.Add(Id, (bool)_isNPCFrigate);
+                            return _isNPCFrigate ?? false;
+                        }
+
+                        return _isNPCFrigate ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isCruiser;
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
@@ -637,17 +2637,55 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Cruiser;
-                result |= GroupId == (int)Group.HeavyAssaultShip;
-                result |= GroupId == (int)Group.Logistics;
-                result |= GroupId == (int)Group.ForceReconShip;
-                result |= GroupId == (int)Group.CombatReconShip;
-                result |= GroupId == (int)Group.HeavyInterdictor;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsCruiser.Any() && Cache.Instance.EntityIsCruiser.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsCruiser", "We have [" + Cache.Instance.EntityIsCruiser.Count() + "] Entities in Cache.Instance.EntityIsCruiser", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isCruiser = value;
+                                    return _isCruiser ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Cruiser;
+                            result |= GroupId == (int)Group.HeavyAssaultShip;
+                            result |= GroupId == (int)Group.Logistics;
+                            result |= GroupId == (int)Group.ForceReconShip;
+                            result |= GroupId == (int)Group.CombatReconShip;
+                            result |= GroupId == (int)Group.HeavyInterdictor;
+
+                            _isCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsCruiser", "Adding [" + Name + "] to EntityIsCruiser as [" + _isCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsCruiser.Add(Id, (bool)_isCruiser);
+                            return _isCruiser ?? false;
+                        }
+
+                        return _isCruiser ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isNPCCruiser;
         /// <summary>
         /// Cruiser includes all elite-variants
         /// </summary>
@@ -655,43 +2693,81 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Storyline_Cruiser;
-                result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
-                result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
-                result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
-                result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
-                result |= GroupId == (int)Group.Mission_Generic_Cruisers;
-                result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
-                result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
-                result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
-                result |= GroupId == (int)Group.Mission_Faction_Cruiser;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNPCCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCCruiser.Any() && Cache.Instance.EntityIsNPCCruiser.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCCruiser", "We have [" + Cache.Instance.EntityIsNPCCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCCruiser", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsNPCCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isNPCCruiser = value;
+                                    return _isNPCCruiser ?? false;
+                                }    
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Storyline_Cruiser;
+                            result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Cruisers;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Industrials;
+                            _isNPCCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCCruiser", "Adding [" + Name + "] to EntityIsNPCCruiser as [" + _isNPCCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCCruiser.Add(Id, (bool)_isNPCCruiser);
+                            return _isNPCCruiser ?? false;
+                        }
+
+                        return _isNPCCruiser ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isBattleCruiser;
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
@@ -699,14 +2775,51 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Battlecruiser;
-                result |= GroupId == (int)Group.CommandShip;
-                result |= GroupId == (int)Group.StrategicCruiser; // Technically a cruiser, but hits hard enough to be a BC :)
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isBattleCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsBattleCruiser.Any() && Cache.Instance.EntityIsBattleCruiser.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleCruiser", "We have [" + Cache.Instance.EntityIsBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsBattleCruiser", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsBattleCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBattleCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isBattleCruiser = value;
+                                    return _isBattleCruiser ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Battlecruiser;
+                            result |= GroupId == (int)Group.CommandShip;
+                            result |= GroupId == (int)Group.StrategicCruiser; // Technically a cruiser, but hits hard enough to be a BC :)
+                            _isBattleCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleCruiser", "Adding [" + Name + "] to EntityIsBattleCruiser as [" + _isBattleCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBattleCruiser.Add(Id, (bool)_isBattleCruiser);
+                            return _isBattleCruiser ?? false;
+                        }
+
+                        return _isBattleCruiser ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isNPCBattleCruiser;
         /// <summary>
         /// Battlecruiser includes all elite-variants
         /// </summary>
@@ -714,37 +2827,75 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNPCBattleCruiser == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCBattleCruiser.Any() && Cache.Instance.EntityIsNPCBattleCruiser.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleCruiser", "We have [" + Cache.Instance.EntityIsNPCBattleCruiser.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleCruiser", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsNPCBattleCruiser.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCBattleCruiser.TryGetValue(Id, out value))
+                                {
+                                    _isNPCBattleCruiser = value;
+                                    return _isNPCBattleCruiser ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
+                            _isNPCBattleCruiser = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleCruiser", "Adding [" + Name + "] to EntityIsNPCBattleCruiser as [" + _isNPCBattleCruiser + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCBattleCruiser.Add(Id, (bool)_isNPCBattleCruiser);
+                            return _isNPCBattleCruiser ?? false;
+                        }
+
+                        return _isNPCBattleCruiser ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+
+        private bool? _isBattleship;
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
@@ -752,15 +2903,52 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Battleship;
-                result |= GroupId == (int)Group.EliteBattleship;
-                result |= GroupId == (int)Group.BlackOps;
-                result |= GroupId == (int)Group.Marauder;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isBattleship == null)
+                        {
+                            if (Cache.Instance.EntityIsBattleShip.Any() && Cache.Instance.EntityIsBattleShip.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleShip", "We have [" + Cache.Instance.EntityIsBattleShip.Count() + "] Entities in Cache.Instance.EntityIsBattleShip", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsBattleShip.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBattleShip.TryGetValue(Id, out value))
+                                {
+                                    _isBattleship = value;
+                                    return _isBattleship ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Battleship;
+                            result |= GroupId == (int)Group.EliteBattleship;
+                            result |= GroupId == (int)Group.BlackOps;
+                            result |= GroupId == (int)Group.Marauder;
+                            _isBattleship = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBattleShip", "Adding [" + Name + "] to EntityIsBattleShip as [" + _isBattleship + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBattleShip.Add(Id, (bool)_isBattleship);
+                            return _isBattleship ?? false;
+                        }
+
+                        return _isBattleship ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isNPCBattleship;
         /// <summary>
         /// Battleship includes all elite-variants
         /// </summary>
@@ -768,65 +2956,241 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Storyline_Battleship;
-                result |= GroupId == (int)Group.Storyline_Mission_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
-                result |= GroupId == (int)Group.Mission_Khanid_Battleship;
-                result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
-                result |= GroupId == (int)Group.Mission_Mordu_Battleship;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
-                result |= GroupId == (int)Group.Mission_Generic_Battleships;
-                result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
-                result |= GroupId == (int)Group.Mission_Thukker_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
-                result |= GroupId == (int)Group.Mission_Faction_Battleship;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNPCBattleship == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCBattleShip.Any() && Cache.Instance.EntityIsNPCBattleShip.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleShip", "We have [" + Cache.Instance.EntityIsNPCBattleShip.Count() + "] Entities in Cache.Instance.EntityIsNPCBattleShip", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsNPCBattleShip.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCBattleShip.TryGetValue(Id, out value))
+                                {
+                                    _isNPCBattleship = value;
+                                    return _isNPCBattleship ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Storyline_Battleship;
+                            result |= GroupId == (int)Group.Storyline_Mission_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battleship;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battleship;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Mission_Generic_Battleships;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
+                            result |= GroupId == (int)Group.Mission_Faction_Battleship;
+                            _isNPCBattleship = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCBattleShip", "Adding [" + Name + "] to EntityIsNPCBattleShip as [" + _isNPCBattleship + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCBattleShip.Add(Id, (bool)_isNPCBattleship);
+                            return _isNPCBattleship ?? false;
+                        }
+
+                        return _isNPCBattleship ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
-        /// <summary>
-        /// A bad idea to attack these targets
-        /// </summary>
+        private bool? _isLargeCollidable;
+
+        public bool IsLargeCollidable
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isLargeCollidable == null)
+                        {
+                            if (Cache.Instance.EntityIsLargeCollidable.Any() && Cache.Instance.EntityIsLargeCollidable.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLargeCollidable", "We have [" + Cache.Instance.EntityIsLargeCollidable.Count() + "] Entities in Cache.Instance.EntityIsLargeCollidable", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsLargeCollidable.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsLargeCollidable.TryGetValue(Id, out value))
+                                {
+                                    _isLargeCollidable = value;
+                                    return _isLargeCollidable ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.LargeColidableObject;
+                            result |= GroupId == (int)Group.LargeColidableShip;
+                            result |= GroupId == (int)Group.LargeColidableStructure;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
+                            _isLargeCollidable = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLargeCollidableObject", "Adding [" + Name + "] to EntityIsLargeCollidableObject as [" + _isLargeCollidable + "]", Logging.Debug);
+                            Cache.Instance.EntityIsLargeCollidable.Add(Id, (bool)_isLargeCollidable);
+                            return _isLargeCollidable ?? false;
+                        }
+
+                        return _isLargeCollidable ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isMiscJunk;
+        public bool IsMiscJunk
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isMiscJunk == null)
+                        {
+                            if (Cache.Instance.EntityIsMiscJunk.Any() && Cache.Instance.EntityIsMiscJunk.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsMiscJunk", "We have [" + Cache.Instance.EntityIsMiscJunk.Count() + "] Entities in Cache.Instance.EntityIsMiscJunk", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsMiscJunk.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsMiscJunk.TryGetValue(Id, out value))
+                                {
+                                    _isMiscJunk = value;
+                                    return _isMiscJunk ?? false;
+                                }
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.PlayerDrone;
+                            result |= GroupId == (int)Group.Wreck;
+                            result |= GroupId == (int)Group.AccelerationGate;
+                            result |= GroupId == (int)Group.GasCloud;
+                            _isMiscJunk = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsMiscJunk", "Adding [" + Name + "] to EntityIsMiscJunk as [" + _isMiscJunk + "]", Logging.Debug);
+                            Cache.Instance.EntityIsMiscJunk.Add(Id, (bool)_isMiscJunk);
+                            return _isMiscJunk ?? false;
+                        }
+
+                        return _isMiscJunk ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _IsBadIdea;
+
         public bool IsBadIdea
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.ConcordDrone;
-                result |= GroupId == (int)Group.PoliceDrone;
-                result |= GroupId == (int)Group.CustomsOfficial;
-                result |= GroupId == (int)Group.Billboard;
-                result |= GroupId == (int)Group.Stargate;
-                result |= GroupId == (int)Group.Station;
-                result |= GroupId == (int)Group.SentryGun;
-                result |= GroupId == (int)Group.Capsule;
-                result |= GroupId == (int)Group.MissionContainer;
-                result |= IsFrigate;
-                result |= IsCruiser;
-                result |= IsBattlecruiser;
-                result |= IsBattleship;
-                result |= IsPlayer;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_IsBadIdea == null)
+                        {
+                            if (Cache.Instance.EntityIsBadIdea.Any() && Cache.Instance.EntityIsBadIdea.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBadIdea", "We have [" + Cache.Instance.EntityIsBadIdea.Count() + "] Entities in Cache.Instance.EntityIsBadIdea", Logging.Debug);
+                            }
+                            
+                            if (Cache.Instance.EntityIsBadIdea.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsBadIdea.TryGetValue(Id, out value))
+                                {
+                                    _IsBadIdea = value;
+                                    return _IsBadIdea ?? false;
+                                }    
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.ConcordDrone;
+                            result |= GroupId == (int)Group.PoliceDrone;
+                            result |= GroupId == (int)Group.CustomsOfficial;
+                            result |= GroupId == (int)Group.Billboard;
+                            result |= GroupId == (int)Group.Stargate;
+                            result |= GroupId == (int)Group.Station;
+                            result |= GroupId == (int)Group.SentryGun;
+                            result |= GroupId == (int)Group.Capsule;
+                            result |= GroupId == (int)Group.MissionContainer;
+                            result |= GroupId == (int)Group.CustomsOffice;
+                            result |= GroupId == (int)Group.GasCloud;
+                            result |= GroupId == (int)Group.ConcordBillboard;
+                            result |= IsFrigate;
+                            result |= IsCruiser;
+                            result |= IsBattlecruiser;
+                            result |= IsBattleship;
+                            result |= IsPlayer;
+                            _IsBadIdea =  result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsBadIdea", "Adding [" + Name + "] to EntityIsBadIdea as [" + _IsBadIdea + "]", Logging.Debug);
+                            Cache.Instance.EntityIsBadIdea.Add(Id, (bool)_IsBadIdea);
+                            return _IsBadIdea ?? false;
+                        }
+
+                        return _IsBadIdea ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -834,172 +3198,305 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.FactionWarfareNPC;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.FactionWarfareNPC;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
+
+        private bool? _isNpcByGroupID;
 
         public bool IsNpcByGroupID
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Storyline_Battleship;
-                result |= GroupId == (int)Group.Storyline_Mission_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
-                result |= GroupId == (int)Group.Mission_Khanid_Battleship;
-                result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
-                result |= GroupId == (int)Group.Mission_Mordu_Battleship;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
-                result |= GroupId == (int)Group.Mission_Generic_Battleships;
-                result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
-                result |= GroupId == (int)Group.Mission_Thukker_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
-                result |= GroupId == (int)Group.Mission_Faction_Battleship;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
-                result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
-                result |= GroupId == (int)Group.Storyline_Cruiser;
-                result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
-                result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
-                result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
-                result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
-                result |= GroupId == (int)Group.Mission_Generic_Cruisers;
-                result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
-                result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
-                result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
-                result |= GroupId == (int)Group.Mission_Faction_Cruiser;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
-                result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
-                result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
-                result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
-                result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
-                result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
-                result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
-                result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
-                result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
-                result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
-                result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
-                result |= GroupId == (int)Group.Mission_Generic_Destroyers;
-                result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
-                result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
-                result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
-                result |= GroupId == (int)Group.asteroid_guristas_frigate;
-                result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
-                result |= GroupId == (int)Group.asteroid_serpentis_frigate;
-                result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
-                result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
-                result |= GroupId == (int)Group.deadspace_guristas_frigate;
-                result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
-                result |= GroupId == (int)Group.deadspace_serpentis_frigate;
-                result |= GroupId == (int)Group.mission_amarr_empire_frigate;
-                result |= GroupId == (int)Group.mission_caldari_state_frigate;
-                result |= GroupId == (int)Group.mission_gallente_federation_frigate;
-                result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
-                result |= GroupId == (int)Group.mission_khanid_frigate;
-                result |= GroupId == (int)Group.mission_concord_frigate;
-                result |= GroupId == (int)Group.mission_mordu_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_frigate2;
-                result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
-                result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
-                result |= GroupId == (int)Group.mission_generic_frigates;
-                result |= GroupId == (int)Group.mission_thukker_frigate;
-                result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isNpcByGroupID == null)
+                        {
+                            if (Cache.Instance.EntityIsNPCByGroupID.Any() && Cache.Instance.EntityIsNPCByGroupID.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCByGroupID", "We have [" + Cache.Instance.EntityIsNPCByGroupID.Count() + "] Entities in Cache.Instance.EntityIsNPCByGroupID", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsNPCByGroupID.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsNPCByGroupID.TryGetValue(Id, out value))
+                                {
+                                    _isNpcByGroupID = value;
+                                    return _isNpcByGroupID ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= IsLargeCollidable;
+                            result |= IsSentry;
+                            result |= GroupId == (int)Group.DeadSpaceOverseersStructure;
+                            //result |= GroupId == (int)Group.DeadSpaceOverseersBelongings;
+                            result |= GroupId == (int)Group.Storyline_Battleship;
+                            result |= GroupId == (int)Group.Storyline_Mission_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Battleship;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battleship;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battleship;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battleship;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battleship;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battleship;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battleship;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Battleship;
+                            result |= GroupId == (int)Group.Mission_Generic_Battleships;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Battleship;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Battleship;
+                            result |= GroupId == (int)Group.Mission_Faction_Battleship;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Battlecruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Industrials;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Battlecruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_BattleCruiser;
+                            result |= GroupId == (int)Group.Storyline_Cruiser;
+                            result |= GroupId == (int)Group.Storyline_Mission_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Khanid_Cruiser;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Mordu_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Cruisers;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Thukker_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Generic_Battle_Cruisers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Cruiser;
+                            result |= GroupId == (int)Group.Mission_Faction_Cruiser;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Angel_Cartel_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Blood_Raiders_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Guristas_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Sanshas_Nation_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Serpentis_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Amarr_Empire_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Caldari_State_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Gallente_Federation_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Minmatar_Republic_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Khanid_Destroyer;
+                            result |= GroupId == (int)Group.Mission_CONCORD_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Mordu_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Angel_Cartel_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Blood_Raiders_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Guristas_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Sanshas_Nation_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Asteroid_Serpentis_Commander_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Thukker_Destroyer;
+                            result |= GroupId == (int)Group.Mission_Generic_Destroyers;
+                            result |= GroupId == (int)Group.Asteroid_Rogue_Drone_Commander_Destroyer;
+                            result |= GroupId == (int)Group.TutorialDrone;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_frigate;
+                            result |= GroupId == (int)Group.deadspace_angel_cartel_frigate;
+                            result |= GroupId == (int)Group.deadspace_blood_raiders_frigate;
+                            result |= GroupId == (int)Group.deadspace_guristas_frigate;
+                            result |= GroupId == (int)Group.Deadspace_Overseer_Frigate;
+                            result |= GroupId == (int)Group.Deadspace_Rogue_Drone_Swarm;
+                            result |= GroupId == (int)Group.deadspace_sanshas_nation_frigate;
+                            result |= GroupId == (int)Group.deadspace_serpentis_frigate;
+                            result |= GroupId == (int)Group.mission_amarr_empire_frigate;
+                            result |= GroupId == (int)Group.mission_caldari_state_frigate;
+                            result |= GroupId == (int)Group.mission_gallente_federation_frigate;
+                            result |= GroupId == (int)Group.mission_minmatar_republic_frigate;
+                            result |= GroupId == (int)Group.mission_khanid_frigate;
+                            result |= GroupId == (int)Group.mission_concord_frigate;
+                            result |= GroupId == (int)Group.mission_mordu_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_frigate;
+                            result |= GroupId == (int)Group.deadspace_rogue_drone_frigate;
+                            result |= GroupId == (int)Group.asteroid_angel_cartel_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_blood_raiders_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_guristas_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_sanshas_nation_commander_frigate;
+                            result |= GroupId == (int)Group.asteroid_serpentis_commander_frigate;
+                            result |= GroupId == (int)Group.mission_generic_frigates;
+                            result |= GroupId == (int)Group.mission_thukker_frigate;
+                            result |= GroupId == (int)Group.asteroid_rouge_drone_commander_frigate;
+                            _isNpcByGroupID = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsNPCByGroupID", "Adding [" + Name + "] to EntityIsNPCByGroupID as [" + _isNpcByGroupID + "]", Logging.Debug);
+                            Cache.Instance.EntityIsNPCByGroupID.Add(Id, (bool)_isNpcByGroupID);
+                            return _isNpcByGroupID ?? false;
+                        }
+
+                        return _isNpcByGroupID ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
+        private bool? _isEntityIShouldLeaveAlone;
         public bool IsEntityIShouldLeaveAlone
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
-                result |= GroupId == (int)Group.Mission_Merchant;    // Merchant, Convoy? - Dread Pirate Scarlet
-                return result;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isEntityIShouldLeaveAlone == null)
+                        {
+                            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any() && Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() > DictionaryCountThreshhold)
+                            {
+                                if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsEntutyIShouldLeaveAlone", "We have [" + Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Count() + "] Entities in Cache.Instance.EntityIsEntutyIShouldLeaveAlone", Logging.Debug);
+                            }
+
+                            if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Any())
+                            {
+                                bool value = false;
+                                if (Cache.Instance.EntityIsEntutyIShouldLeaveAlone.TryGetValue(Id, out value))
+                                {
+                                    _isEntityIShouldLeaveAlone = value;
+                                    return _isEntityIShouldLeaveAlone ?? false;
+                                }   
+                            }
+
+                            bool result = false;
+                            result |= GroupId == (int)Group.Merchant;            // Merchant, Convoy?
+                            result |= GroupId == (int)Group.Mission_Merchant;    // Merchant, Convoy? - Dread Pirate Scarlet
+                            result |= GroupId == (int)Group.FactionWarfareNPC;
+                            result |= IsOreOrIce;
+                            _isEntityIShouldLeaveAlone = result;
+                            if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsEntutyIShouldLeaveAlone", "Adding [" + Name + "] to EntityIsEntutyIShouldLeaveAlone as [" + _isEntityIShouldLeaveAlone + "]", Logging.Debug);
+                            Cache.Instance.EntityIsEntutyIShouldLeaveAlone.Add(Id, (bool)_isEntityIShouldLeaveAlone);
+                            return _isEntityIShouldLeaveAlone ?? false;
+                        }
+
+                        return _isEntityIShouldLeaveAlone ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isOnGridWithMe;
+
+        public bool IsOnGridWithMe
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isOnGridWithMe == null)
+                        {
+                            if (Distance < (double) Distances.OnGridWithMe)
+                            {
+                                _isOnGridWithMe = true;
+                                return _isOnGridWithMe ?? true;
+                            }
+
+                            _isOnGridWithMe = false;
+                            return _isOnGridWithMe ?? false;
+                        }
+
+                        return _isOnGridWithMe ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -1007,172 +3504,626 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= GroupId == (int)Group.Station;
-                return result;
-            }
-        }
-
-        public bool LockTarget()
-        {
-            // If the bad idea is attacking, attack back
-            if (IsBadIdea && !IsAttacking)
-            {
-                Logging.Log("EntityCache", "Attempting to target a player or concord entity! [" + Name + "]", Logging.White);
-                return false;
-            }
-
-            // Remove the target info (its been targeted)
-            foreach (EntityCache target in Cache.Instance.Entities.Where(e => e.IsTarget).Where(t => Cache.Instance.TargetingIDs.ContainsKey(t.Id)))
-            {
-                Cache.Instance.TargetingIDs.Remove(target.Id);
-            }
-
-            if (Cache.Instance.TargetingIDs.ContainsKey(Id))
-            {
-                DateTime lastTargeted = Cache.Instance.TargetingIDs[Id];
-
-                // Ignore targeting request
-                double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
-                if (seconds < 20)
+                try
                 {
-                    Logging.Log("EntityCache", "LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance /1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.Station;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                     return false;
                 }
             }
+        }
 
-            // Only add targeting id's when its actually being targeted
-            if (_directEntity != null && _directEntity.LockTarget())
+        public bool IsCustomsOffice
+        {
+            get
             {
-                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
-                return true;
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.CustomsOffice;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
             }
-            return false;
+        }
+
+        public bool IsCelestial
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= CategoryId == (int)CategoryID.Celestial;
+                        result |= CategoryId == (int)CategoryID.Station;
+                        result |= GroupId == (int)Group.Moon;
+                        result |= GroupId == (int)Group.AsteroidBelt;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsAsteroidBelt
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.AsteroidBelt;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsPlanet
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.Planet;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsMoon
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.Moon;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsAsteroid
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= CategoryId == (int)CategoryID.Asteroid;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsShipWithNoDroneBay
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= TypeId == (int)TypeID.Tengu;
+                        result |= GroupId == (int)Group.Shuttle;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsOreOrIce
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.Plagioclase;
+                        result |= GroupId == (int)Group.Spodumain;
+                        result |= GroupId == (int)Group.Kernite;
+                        result |= GroupId == (int)Group.Hedbergite;
+                        result |= GroupId == (int)Group.Arkonor;
+                        result |= GroupId == (int)Group.Bistot;
+                        result |= GroupId == (int)Group.Pyroxeres;
+                        result |= GroupId == (int)Group.Crokite;
+                        result |= GroupId == (int)Group.Jaspet;
+                        result |= GroupId == (int)Group.Omber;
+                        result |= GroupId == (int)Group.Scordite;
+                        result |= GroupId == (int)Group.Gneiss;
+                        result |= GroupId == (int)Group.Veldspar;
+                        result |= GroupId == (int)Group.Hemorphite;
+                        result |= GroupId == (int)Group.DarkOchre;
+                        result |= GroupId == (int)Group.Ice;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        public bool LockTarget(string module)
+        {
+            try
+            {
+                if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
+                {
+                    return false;
+                }
+
+                if (_directEntity != null && _directEntity.IsValid)
+                {
+                    if (!IsTarget)
+                    {
+                        if (!HasExploded)
+                        {
+                            if (Distance < Cache.Instance.MaxTargetRange)
+                            {
+                                if (Cache.Instance.Targets.Count() < Cache.Instance.MaxLockedTargets)
+                                {
+                                    if (!IsTargeting)
+                                    {
+                                        if (Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Id))
+                                        {
+                                            // If the bad idea is attacking, attack back
+                                            if (IsBadIdea && !IsAttacking)
+                                            {
+                                                Logging.Log("EntityCache.LockTarget", "[" + module + "] Attempted to target a player or concord entity! [" + Name + "] - aborting", Logging.White);
+                                                return false;
+                                            }
+
+                                            if (Distance >= 250001 || Distance > Cache.Instance.MaxTargetRange) //250k is the MAX targeting range in eve. 
+                                            {
+                                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "] which is [" + Math.Round(Distance / 1000, 2) + "k] away. Do not try to lock things that you cant possibly target", Logging.Debug);
+                                                return false;
+                                            }
+
+                                            // Remove the target info (its been targeted)
+                                            foreach (EntityCache target in Cache.Instance.EntitiesOnGrid.Where(e => e.IsTarget && Cache.Instance.TargetingIDs.ContainsKey(e.Id)))
+                                            {
+                                                Cache.Instance.TargetingIDs.Remove(target.Id);
+                                            }
+
+                                            if (Cache.Instance.TargetingIDs.ContainsKey(Id))
+                                            {
+                                                DateTime lastTargeted = Cache.Instance.TargetingIDs[Id];
+
+                                                // Ignore targeting request
+                                                double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
+                                                if (seconds < 20)
+                                                {
+                                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                                                    return false;
+                                                }
+                                            }
+                                            // Only add targeting id's when its actually being targeted
+
+                                            if (_directEntity.LockTarget())
+                                            {
+                                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                                Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
+                                                return true;
+                                            }
+
+                                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed (unknown reason)", Logging.White);
+                                            return false; 
+                                        }
+
+                                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget failed: target was not in Entities List", Logging.White);
+                                        return false;
+                                    }
+
+                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, LockTarget aborted: target is already being targeted", Logging.White);
+                                    return false;
+                                }
+                                
+                                Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, we only have [" + Cache.Instance.MaxLockedTargets + "] slots!", Logging.White);
+                                return false;
+                            }
+                            
+                            Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, my targeting range is only [" + Cache.Instance.MaxTargetRange + "]!", Logging.White);
+                            return false;
+                        }
+                        
+                        Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already dead!", Logging.White);
+                        return false;
+                    }
+                    
+                    Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
+                    return false;
+                }
+
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
         }
 
         public bool UnlockTarget(string module)
         {
-            if (_directEntity != null)
+            try
             {
-                Cache.Instance.TargetingIDs.Remove(Id);
-                _directEntity.UnlockTarget();
-                return true;
+                if (_directEntity != null && _directEntity.IsValid)
+                {
+                    //if (Distance > 250001)
+                    //{
+                    //    return false;
+                    //}
+
+                    Cache.Instance.TargetingIDs.Remove(Id);
+
+                    if (IsTarget)
+                    {
+                        _directEntity.UnlockTarget();
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                return false;
             }
-            return false;
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
         }
 
         public void Jump()
         {
-            if (_directEntity != null)
+            try
+            {
+                if (DateTime.UtcNow > Cache.Instance.NextJumpAction)
+                {
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    {
+                        if (_directEntity != null && _directEntity.IsValid)
+                        {
+                            if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                            {
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            }
 
-                //Cache.Instance._lastDockedorJumping = DateTime.UtcNow;
-                _directEntity.Jump();
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
+                            Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                            _directEntity.Jump();
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+            }
         }
 
         public void Activate()
         {
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextActivateAction)
+            try
             {
-                _directEntity.Activate();
-                Cache.Instance.LastInWarp = DateTime.UtcNow;
-                Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextActivateAction)
+                {
+                    if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
+                    _directEntity.Activate();
+                    Cache.Instance.LastInWarp = DateTime.UtcNow;
+                    Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void Approach()
         {
-            Cache.Instance.Approaching = this;
-
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+            try
             {
-                Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
-                _directEntity.Approach();
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                {
+                    Cache.Instance.Approaching = this;
+
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        _directEntity.Approach();
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void Approach(int range)
         {
-            Cache.Instance.Approaching = this;
-
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+            try
             {
-                Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
-                _directEntity.Approach(range);
+                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                {
+                    Cache.Instance.Approaching = this;
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        _directEntity.KeepAtRange(range);
+                        //_directEntity.Approach();
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void Orbit(int range)
         {
-            Cache.Instance.Approaching = this;
-
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextOrbit)
+            try
             {
-                Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
-                _directEntity.Orbit(range);
+                Cache.Instance.Approaching = this;
+
+                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
+                {
+                    if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                    {
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                    }
+                    Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(Id) + "]", Logging.Teal);
+                    Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
+                    _directEntity.Orbit(range);
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void WarpTo()
         {
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+            try
             {
-                Cache.Instance.LastInWarp = DateTime.UtcNow;
-                Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                _directEntity.WarpTo();
+                if (DateTime.UtcNow > Cache.Instance.NextWarpAction)
+                {
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    {
+                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        {
+                            if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                            {
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            }
+
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                            Cache.Instance.LastInWarp = DateTime.UtcNow;
+                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                            _directEntity.WarpTo();
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void AlignTo()
         {
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextAlign)
+            try
             {
-                Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
-                _directEntity.AlignTo();
+                if (DateTime.UtcNow > Cache.Instance.NextAlign)
+                {
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextAlign)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+
+                        Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                        Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
+                        _directEntity.AlignTo();
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void WarpToAndDock()
         {
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextWarpTo && DateTime.UtcNow > Cache.Instance.NextDockAction)
+            try
             {
-                Cache.Instance.LastInWarp = DateTime.UtcNow;
-                Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
-                _directEntity.WarpToAndDock();
+                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                {
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
+                    {
+                        if (_directEntity != null && _directEntity.IsValid)
+                        {
+                            if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                            {
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            }
+
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                            Cache.Instance.LastInWarp = DateTime.UtcNow;
+                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            _directEntity.WarpToAndDock();
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void Dock()
         {
-            if (_directEntity != null && DateTime.UtcNow > Cache.Instance.NextDockAction)
+            try
             {
-                _directEntity.Dock();
-                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                {
+                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
+                    {
+                        if (_directEntity != null && _directEntity.IsValid)
+                        {
+                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            _directEntity.Dock();
+
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void OpenCargo()
         {
-            if (_directEntity != null)
+            try
             {
-                _directEntity.OpenCargo();
-                Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                if (_directEntity != null && _directEntity.IsValid)
+                {
+                    _directEntity.OpenCargo();
+                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 
         public void MakeActiveTarget()
         {
-            if (_directEntity != null)
+            try
             {
-                if (_directEntity.IsTarget)
+                if (_directEntity != null && _directEntity.IsValid)
                 {
-                    _directEntity.MakeActiveTarget();    
+                    if (IsTarget)
+                    {
+                        _directEntity.MakeActiveTarget();
+                        Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
+                    }
+
+                    return;
                 }
 
                 return;
             }
-
-            return;
+            catch (Exception exception)
+            {
+                Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+            }
         }
     }
 }

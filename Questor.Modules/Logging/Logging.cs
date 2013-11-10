@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Threading;
+
 namespace Questor.Modules.Logging
 {
     using System;
@@ -22,6 +24,18 @@ namespace Questor.Modules.Logging
 
     public static class Logging
     {
+        public static int LoggingInstances = 0;
+
+        static Logging()
+        {
+            Interlocked.Increment(ref LoggingInstances);
+        }
+
+        //~Logging()
+        //{
+        //    Interlocked.Decrement(ref LoggingInstances);
+        //}
+
         public static DateTime DateTimeForLogs;
         //list of colors
         public const string Green = "\ag";    //traveler mission control
@@ -52,6 +66,10 @@ namespace Questor.Modules.Logging
 
         public const string DebugHangars = White;
 
+        public static string _username;
+        public static string _password;
+        public static string _character;
+
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
         public static void Log(string module, string line, string color)
@@ -72,10 +90,12 @@ namespace Questor.Modules.Logging
             InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));                            //Innerspace Console Log
             string plainLogLine = FilterColorsFromLogs(line);
 
-            //plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
-            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");               //Questor GUI Console Log
-            Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");               //In memory Console Log
-            Cache.Instance.ConsoleLogRedacted += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+            //
+            // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
+            // we now filter sensitive info by default
+            //
+            Cache.Instance.ConsoleLogRedacted += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+            plainLogLine = FilterColorsFromLogs(line);
 
             if (Settings.Instance.SaveConsoleLog)
             {
@@ -91,14 +111,14 @@ namespace Questor.Modules.Logging
                             LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
                         }
 
-                        Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
+                        Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
 
                         if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))
                         {
                             Directory.CreateDirectory(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile));
                             if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
                             {
-                                Cache.Instance.ConsoleLog += string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
                                 Cache.Instance.ConsoleLogOpened = true;
                             }
                             else
@@ -111,19 +131,29 @@ namespace Questor.Modules.Logging
                         {
                             line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
                             InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                            Cache.Instance.ExtConsole += string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                         }
                     }
                 }
 
                 if (Cache.Instance.ConsoleLogOpened)
                 {
-                    if (Settings.Instance.ConsoleLogFile != null) File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog);               //Write In Memory Console log to File
-                    Cache.Instance.ConsoleLog = null;
+                    if (Settings.Instance.ConsoleLogFile != null)
+                    {
+                        Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                        File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
+                    }
+                    //Cache.Instance.ConsoleLog = null;
 
-                    if (Settings.Instance.ConsoleLogFileRedacted != null) File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
-                    Cache.Instance.ConsoleLogRedacted = null;
+                    if (Settings.Instance.ConsoleLogFileRedacted != null) 
+                    {
+                        Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                        File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
+                    }
+                    //Cache.Instance.ConsoleLogRedacted = null;
                 }
+
+                Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
             }
         }
 
@@ -136,11 +166,14 @@ namespace Questor.Modules.Logging
                 return string.Empty;
             if (!string.IsNullOrEmpty(Settings.Instance.CharacterName))
             {
-                line = line.Replace(Settings.Instance.CharacterName, "_MyEVECharacterNameRedacted_");
-                line = line.Replace("/" + Settings.Instance.CharacterName, "/_MyEVECharacterNameRedacted_");
-                line = line.Replace("\\" + Settings.Instance.CharacterName, "\\_MyEVECharacterNameRedacted_");
-                line = line.Replace("[" + Settings.Instance.CharacterName + "]", "[_MyEVECharacterNameRedacted_]");
-                line = line.Replace(Settings.Instance.CharacterName + ".xml", "_MyEVECharacterNameRedacted_.xml");
+                line = line.Replace(Settings.Instance.CharacterName, Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("/" + Settings.Instance.CharacterName, "/" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("\\" + Settings.Instance.CharacterName, "\\" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("[" + Settings.Instance.CharacterName + "]", "[" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
+                line = line.Replace(Settings.Instance.CharacterName + ".xml", Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                line = line.Replace(Settings.Instance.CharacterSettingsPath, Settings.Instance.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
+                //line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
+                //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
             }
 
             //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
@@ -155,25 +188,21 @@ namespace Questor.Modules.Logging
             //    line = line.Replace(" " + Cache.Instance.AgentId + " ", " _MyAgentIdRedacted_ ");
             //    line = line.Replace("[" + Cache.Instance.AgentId + "]", "[_MyAgentIdRedacted_]");
             //}
-            if (!string.IsNullOrEmpty(Settings.Instance.LoginCharacter))
+            if (!String.IsNullOrEmpty(Logging._username))
             {
-                if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: LoginCharacter is [" + Settings.Instance.LoginCharacter + "]");
-                line = line.Replace(Settings.Instance.LoginCharacter, "_MyEVECharacterNameRedacted_");
+                line = line.Replace(Logging._username, Logging._username.Substring(0, 2) + "_HiddenEVELoginName_");
             }
-            if (!string.IsNullOrEmpty(Settings.Instance.LoginUsername))
+            if (!String.IsNullOrEmpty(Logging._password))
             {
-                if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: LoginUsername is [" + Settings.Instance.LoginUsername + "]");
-                line = line.Replace(Settings.Instance.LoginUsername, "_MyLoginUserNameRedacted_");
+                line = line.Replace(Logging._password, "_HiddenPassword_");
             }
             if (!string.IsNullOrEmpty(Environment.UserName))
             {
-                if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: Environment.Username is [" + Environment.UserName + "]");
                 line = line.Replace("\\" + Environment.UserName + "\\", "\\_MyWindowsLoginNameRedacted_\\");
                 line = line.Replace("/" + Environment.UserName + "/", "/_MyWindowsLoginNameRedacted_/");
             }
             if (!string.IsNullOrEmpty(Environment.UserDomainName))
             {
-                if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: Environment.UserDomainName is [" + Environment.UserDomainName + "]");
                 line = line.Replace(Environment.UserDomainName, "_MyWindowsDomainNameRedacted_");
             }
             return line;

@@ -1,4 +1,6 @@
-﻿namespace Questor.Modules.BackgroundTasks
+﻿using System.Linq;
+
+namespace Questor.Modules.BackgroundTasks
 {
     using System;
     using System.Globalization;
@@ -21,6 +23,8 @@
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorFlag = true;
+        private bool FoundDuelInvitation = false;
+        private DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
 
         public static void BeginClosingQuestor()
         {
@@ -30,10 +34,10 @@
             //Cleanup.CloseQuestor();
         }
 
-        public static bool CloseQuestor()
+        public static bool CloseQuestor(string Reason, bool restart = false)
         {
             // 30 seconds + 1 to 60 seconds + 1 to 60 seconds before restarting (this should make each instance a bit more spread out over 2 min)
-            int secRestart = (300 * 1) + Cache.Instance.RandomNumber(10, 600) + Cache.Instance.RandomNumber(10, 600);
+            int secRestart = Cache.Instance.RandomNumber(Time.Instance.ReLogDelayMinimum_seconds * 10, Time.Instance.ReLogDelayMaximum_seconds * 10);
 
             // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
             // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 
@@ -61,7 +65,7 @@
             // Write to Session log
             if (!Statistics.WriteSessionLogClosing()) return false;
 
-            if (Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart)
+            if ((Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart) || restart)
             //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
@@ -285,6 +289,11 @@
             if (DateTime.UtcNow < _lastCleanupAction.AddMilliseconds(500))
                 return false;
 
+            if (!Cache.Instance.Windows.Any())
+            {
+                return false;
+            }
+
             _lastCleanupAction = DateTime.UtcNow;
 
             //
@@ -380,18 +389,10 @@
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100) || Settings.Instance.DebugDisableCleanup) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
             _lastCleanupProcessState = DateTime.UtcNow;
-
-            // When in warp there's nothing we can do, so ignore everything
-            if (Cache.Instance.InWarp)
-            {
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
-                _States.CurrentSalvageState = SalvageState.Idle;
-                return;
-            }
 
             if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
             {
@@ -401,6 +402,14 @@
 
             if (Cache.Instance.InSpace)
             {
+                // When in warp there's nothing we can do, so ignore everything
+                if (Cache.Instance.InWarp)
+                {
+                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
+                    _States.CurrentSalvageState = SalvageState.Idle;
+                    return;
+                }
+
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
                 if (DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(10))
                 {
@@ -448,13 +457,13 @@
                         Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White);
                         Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                         Cache.Instance.SessionState = "Quitting";
-                        Cleanup.CloseQuestor();
+                        Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                         return;
                     }
 
-                    if (Cache.Instance.Windows == null)
+                    if (Cache.Instance.Windows == null || !Cache.Instance.Windows.Any())
                     {
-                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null", Logging.White);
+                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null or empty", Logging.White);
                         _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
@@ -588,6 +597,8 @@
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
+                                sayOk |= window.Html.Contains("You have already selected a character for this session.");
+                                sayOk |= window.Html.Contains("If you decline or fail a mission from an agent");
 
                                 //
                                 // Not Enough Shelf Space
@@ -611,7 +622,7 @@
                                 Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                                 Cache.Instance.SessionState = "Quitting";
-                                Cleanup.CloseQuestor();
+                                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                                 return;
                             }
 
@@ -626,7 +637,7 @@
                                 Cache.Instance.SessionState = "Quitting";
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
-                                Cleanup.CloseQuestor();
+                                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                                 return;
                             }
 
@@ -691,14 +702,31 @@
                                 continue;
                             }
                         }
+
                         if (Cache.Instance.InSpace)
                         {
+                            if (FoundDuelInvitation && window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                if (DateTime.UtcNow > FoundDuelInvitationTime.AddSeconds(Cache.Instance.RandomNumber(4, 25)))
+                                {
+                                    //window.AnswerModal("yes");
+                                    //window.Close();
+                                    FoundDuelInvitation = true;
+                                }
+                            }
+                            
+                            if (window.IsDialog && window.IsModal && window.Caption == "Duel Invitation")
+                            {
+                                FoundDuelInvitation = true;
+                                FoundDuelInvitationTime = DateTime.UtcNow;
+                            }
+
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
                                 if (Settings.Instance.UseDrones &&
-                                   (Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Shuttle &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.Industrial &&
-                                    Cache.Instance.DirectEve.ActiveShip.GroupId != (int)Group.TransportShip &&
+                                   (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial &&
+                                    Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip &&
                                     _droneBayClosingAttempts <= 1))
                                 {
                                     _lastCleanupAction = DateTime.UtcNow;
@@ -714,11 +742,12 @@
                             }
                         }
                     }
+
                     _States.CurrentCleanupState = CleanupState.CleanupTasks;
                     break;
 
                 case CleanupState.CleanupTasks:
-                    if (Settings.Instance.EVEMemoryManager)
+                    if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
                         {
@@ -745,13 +774,13 @@
                     {
                         Logging.Log("Cleanup", "DebugInfo:  Settings.Instance.CharacterName [" + Settings.Instance.CharacterName + "]", Logging.White);
                         Logging.Log("Cleanup", "DebugInfo: Cache.Instance.DirectEve.Me.Name [" + Cache.Instance.DirectEve.Me.Name + "]", Logging.White);
-
+                        Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                         Logging.Log("Cleanup", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                         Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                         Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                         Cache.Instance.SessionState = "Quitting";
                         _States.CurrentQuestorState = QuestorState.CloseQuestor;
-                        Cleanup.CloseQuestor();
+                        Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                         return;
                     }
 

@@ -63,12 +63,12 @@ namespace Questor.Modules.Lookup
             StopTime3Specified = false;
             StartTime3Specified = false;
 
-            var startxml1 = (string)element.Attribute("start");
-            var stopxml1 = (string)element.Attribute("stop");
-            var startxml2 = (string)element.Attribute("start2");
-            var stopxml2 = (string)element.Attribute("stop2");
-            var startxml3 = (string)element.Attribute("start3");
-            var stopxml3 = (string)element.Attribute("stop3");
+            string startxml1 = (string)element.Attribute("start");
+            string stopxml1 = (string)element.Attribute("stop");
+            string startxml2 = (string)element.Attribute("start2");
+            string stopxml2 = (string)element.Attribute("stop2");
+            string startxml3 = (string)element.Attribute("start3");
+            string stopxml3 = (string)element.Attribute("stop3");
             DateTime startTime1 = DateTime.MaxValue;
             DateTime stopTime1 = DateTime.MinValue;
             DateTime startTime2 = DateTime.MaxValue;

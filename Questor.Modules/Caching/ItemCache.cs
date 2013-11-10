@@ -8,6 +8,10 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
+using System;
+using System.Linq;
+using Questor.Modules.States;
+
 namespace Questor.Modules.Caching
 {
     using System.Collections.Generic;
@@ -141,12 +145,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (GroupID == 313) return true; // Drugs
-                if (GroupID == 282) return true; // Toxic Waste
-                if (GroupID == 283) return true; // Slaves
-                if (GroupID == 280) return true; // Small Arms
-                if (GroupID == 284) return true; // Ectoplasm
-                return false;
+                bool result = false;
+                result |= (GroupID == (int)Group.Drugs);
+                result |= (GroupID == (int)Group.ToxicWaste);
+                result |= (TypeId == (int)TypeID.Slaves);
+                result |= (TypeId == (int)TypeID.Small_Arms);
+                result |= (TypeId == (int)TypeID.Ectoplasm);
+                //result |= (TypeId == (int)TypeID.AIMEDs);
+                return result;
             }
         }
 
@@ -223,9 +229,63 @@ namespace Questor.Modules.Caching
             get { return TypeId == 30497 || TypeId == 15331; }
         }
 
-        public bool IsMissionItem
+        public bool IsCommonMissionItem
         {   //Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810
             get { return TypeId == 28260 || TypeId == 3814 || TypeId == 2076 || TypeId == 25373 || TypeId == 3810; }
+        }
+
+        public bool InjectSkillBook
+        {   //Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810
+            get
+            {
+                if (_directItem.GroupId == (int)Group.SkillBooks)
+                {
+                    _directItem.InjectSkill();    
+                }
+                
+                return false;
+            }
+        }
+
+        public bool DoesNotRequireAmmo
+        {
+            get
+            {
+                if (TypeId == (int)TypeID.CivilianGatlingPulseLaser) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingAutocannon) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingRailgun) return true;
+                if (TypeId == (int)TypeID.CivilianLightElectronBlaster) return true;
+                return false;
+            }
+        }
+
+        public bool IsTurret
+        {
+            get
+            {
+                if (GroupId == (int)Group.EnergyWeapon) return true;
+                if (GroupId == (int)Group.ProjectileWeapon) return true;
+                if (GroupId == (int)Group.HybridWeapon) return true;
+                return false;
+            }
+        }
+
+        public bool IsMissionItem
+        {
+            get
+            {
+                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                {
+                    if (Cache.Instance.MissionItems.Contains((Name ?? string.Empty).ToLower()))
+                    {
+                        return true;
+                    }
+
+                    return false;   
+                }
+
+                return false;
+            }
         }
 
         public bool IsLootForShipFitting
@@ -285,7 +345,7 @@ namespace Questor.Modules.Caching
                 {
                     if (InvType.MinSell == null)
                     {
-                        return null;
+                        return 1;
                     }
 
                     return InvType.MedianSell / InvType.Volume;

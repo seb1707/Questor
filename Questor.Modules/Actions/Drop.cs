@@ -99,15 +99,15 @@
                             if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Item TypeID is [" + Item + "]",Logging.Debug);
                             
                             int iCount = 1;
-                            foreach (DirectItem ItemTest in Cache.Instance.CargoHold.Items)
+                            foreach (DirectItem ItemTest in Cache.Instance.CurrentShipsCargo.Items)
                             {
                                 iCount++;
                                 if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "[" + iCount + "] ItemName: [" + ItemTest.TypeName + "]", Logging.Debug);
                             }
 
-                            if (Cache.Instance.CargoHold.Items.Any(i => i.TypeId == Item))
+                            if (Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == Item))
                             {
-                                dropItem = Cache.Instance.CargoHold.Items.FirstOrDefault(i => i.TypeId == Item);
+                                dropItem = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == Item);
                                 if (dropItem != null)
                                 {
                                     if (Settings.Instance.DebugQuestorManager) Logging.Log("DropItem", "dropItem = [" + dropItem.TypeName + "]", Logging.Debug);
@@ -133,7 +133,7 @@
                     try
                     {
                         if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Item = [" + Item + "]", Logging.Debug);
-                        dropItem = Cache.Instance.CargoHold.Items.FirstOrDefault(i => (i.TypeId == Item));
+                        dropItem = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => (i.TypeId == Item));
                         if (dropItem != null)
                         {
                             if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Unit = [" + Unit + "]", Logging.Debug);
@@ -156,7 +156,7 @@
                     if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: AllItems", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
 
-                    List<DirectItem> allItem = Cache.Instance.CargoHold.Items;
+                    List<DirectItem> allItem = Cache.Instance.CurrentShipsCargo.Items;
                     if (allItem != null)
                     {
                         if (dropHangar != null) dropHangar.Add(allItem);

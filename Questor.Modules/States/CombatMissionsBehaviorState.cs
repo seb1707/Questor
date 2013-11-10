@@ -21,6 +21,7 @@
         CompleteMission,
         Statistics,
         UnloadLoot,
+        CheckBookmarkAge,
         BeginAfterMissionSalvaging,
         GotoSalvageBookmark,
         SalvageUseGate,

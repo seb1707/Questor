@@ -90,7 +90,7 @@
                     if (!Cache.Instance.OpenCargoHold("Grab")) break;
 
                     Logging.Log("Grab", "Opening Cargo Hold", Logging.White);
-                    _freeCargoCapacity = Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity;
+                    _freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
                     _States.CurrentGrabState = Item == 00 ? GrabState.AllItems : GrabState.MoveItems;
 
                     break;
@@ -113,7 +113,7 @@
                                     //{
                                     //    Logging.Log("Grab", "Items: " + item.TypeName, Logging.White);
                                     //}
-                                    Cache.Instance.CargoHold.Add(grabItems, grabItems.Quantity);
+                                    Cache.Instance.CurrentShipsCargo.Add(grabItems, grabItems.Quantity);
                                     _freeCargoCapacity -= totalVolum;
                                     Logging.Log("Grab.MoveItems", "Moving all the items", Logging.White);
                                     _lastAction = DateTime.UtcNow;
@@ -137,7 +137,7 @@
                                 double totalVolum = Unit * grabItem.Volume;
                                 if (_freeCargoCapacity >= totalVolum)
                                 {
-                                    Cache.Instance.CargoHold.Add(grabItem, Unit);
+                                    Cache.Instance.CurrentShipsCargo.Add(grabItem, Unit);
                                     _freeCargoCapacity -= totalVolum;
                                     Logging.Log("Grab.MoveItems", "Moving item", Logging.White);
                                     _lastAction = DateTime.UtcNow;
@@ -166,7 +166,7 @@
                         {
                             foreach (DirectItem item in allItem)
                             {
-                                if (Cache.Instance.DirectEve.ActiveShip.ItemId == item.ItemId)
+                                if (Cache.Instance.ActiveShip.ItemId == item.ItemId)
                                 {
                                     allItem.Remove(item);
                                     continue;
@@ -176,14 +176,14 @@
 
                                 if (_freeCargoCapacity >= totalVolum)
                                 {
-                                    Cache.Instance.CargoHold.Add(item);
+                                    Cache.Instance.CurrentShipsCargo.Add(item);
                                     _freeCargoCapacity -= totalVolum;
                                 }
                                 else
                                 {
                                     // we are out of room, should we do a partial item move?
                                     double quantityWeCanFit = _freeCargoCapacity / item.Volume;
-                                    Cache.Instance.CargoHold.Add(item, (int)quantityWeCanFit);
+                                    Cache.Instance.CurrentShipsCargo.Add(item, (int)quantityWeCanFit);
 
                                     //we are now "full" and should go "home" or "market" (how do we decide where to go ffs?)
                                 }

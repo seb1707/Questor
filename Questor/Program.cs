@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
 //    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
 //
@@ -36,9 +36,7 @@ namespace Questor
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
         public static DateTime AppStarted = DateTime.UtcNow;
-        private static string _username;
-        private static string _password;
-        public static string _character;
+        public static DateTime NextSlotActivate = DateTime.UtcNow;
         private static string _scriptFile;
         private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
@@ -56,6 +54,7 @@ namespace Questor
         private const int RandStartDelay = 30; //Random startup delay in minutes
         private static readonly Random R = new Random();
         public static bool StopTimeSpecified; //false;
+        private static int ServerStatusCheck = 0;
 
         private static DateTime _nextPulse;
         public static DateTime StartTime = DateTime.MaxValue;
@@ -76,14 +75,14 @@ namespace Questor
         private static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
-            var p = new OptionSet {
+            OptionSet p = new OptionSet {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
                 "Options:",
-                {"u|user=", "the {USER} we are logging in as.", v => _username = v},
-                {"p|password=", "the user's {PASSWORD}.", v => _password = v},
-                {"c|character=", "the {CHARACTER} to use.", v => _character = v},
+                {"u|user=", "the {USER} we are logging in as.", v => Logging._username = v},
+                {"p|password=", "the user's {PASSWORD}.", v => Logging._password = v},
+                {"c|character=", "the {CHARACTER} to use.", v => Logging._character = v},
                 {"s|script=", "a {SCRIPT} file to execute before login.", v => _scriptFile = v},
                 {"t|scriptAfterLogin=", "a {SCRIPT} file to execute after login.", v => _scriptAfterLoginFile = v},
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
@@ -121,7 +120,7 @@ namespace Questor
                 _chantlingScheduler = true;
             }
 
-            if (_chantlingScheduler && string.IsNullOrEmpty(_character))
+            if (_chantlingScheduler && string.IsNullOrEmpty(Logging._character))
             {
                 Logging.Log("Startup", "Error: to use chantling's scheduler, you also need to provide a character name!", Logging.Red);
                 return;
@@ -130,7 +129,7 @@ namespace Questor
             //
             // login using info from schedules.xml
             //
-            if (_chantlingScheduler && !string.IsNullOrEmpty(_character))
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character))
             {
                 LoginUsingScheduler();
             }
@@ -138,68 +137,10 @@ namespace Questor
             //
             // direct login, no schedules.xml
             //
-            if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password) && !string.IsNullOrEmpty(_character))
+            if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
                 _readyToStart = true;
             }
-
-
-            #region Load ISXStealth
-            //
-            // IsxStealth
-            //
-            try
-            {
-                //
-                // load IsxStealth Here
-                //
-                bool SafetyScriptRan = false;
-                if (File.Exists(Path.Combine(InnerSpaceAPI.InnerSpace.Path, "scripts/StartingQuestorSafetyScript.iss")))
-                {
-                    //
-                    // note that "StartingQuestorSafetyScript.iss" is hard coded because we cant (dont?) load the settings xml this early in the process.
-                    //
-                    LavishScript.ExecuteCommand("Echo [${Time}] Loading [" + "StartingQuestorSafetyScript.iss" + "]");
-                    LavishScript.ExecuteCommand("runscript " + "StartingQuestorSafetyScript.iss");
-                    LavishScript.ExecuteCommand("Echo [${Time}] Done Loading [" + "StartingQuestorSafetyScript.iss" + "] Did it work?");
-
-                    SafetyScriptRan = true;
-                    // continue while script runs. note: (we do NOT check to verify that it loaded!)
-                    while (Cache.Instance.DirectEve == null && DateTime.UtcNow < AppStarted.AddSeconds(2)) //wait a few seconds
-                    {
-                        System.Threading.Thread.Sleep(50); //this runs while we wait for ISXStealth to run (we do NOT check to verify that it loaded!) Is this pause even necessary?
-                    }
-                }
-                else
-                {
-                    Logging.Log("Startup", "StartingQuestorSafetyScript - unable to find [" + "StartingQuestorSafetyScript.iss" + "]", Logging.White);
-                }
-
-                Logging.Log("Startup", "StartingQuestorSafetyScript - 3", Logging.White);
-
-                if (!SafetyScriptRan)
-                {
-                    Logging.Log("Startup", "SafetyScriptRan is [" + SafetyScriptRan.ToString() + "], halting", Logging.Debug);
-                    while (Cache.Instance.DirectEve == null)
-                    {
-                        System.Threading.Thread.Sleep(50); //this pauses forever...
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", "Error on Loading IsxStealth", Logging.Orange);
-                Logging.Log("Startup", string.Format("IsxStealth: Exception {0}...", ex), Logging.White);
-                Cache.Instance.CloseQuestorCMDLogoff = false;
-                Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading IsxStealth";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor();
-            }
-
-            #endregion Load IsxStealth
 
             #region Load DirectEVE
             //
@@ -211,7 +152,8 @@ namespace Questor
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has all cloaking disabled, you should use isxstealth!
+                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
                     //while (Cache.Instance.DirectEve == null)
@@ -231,7 +173,8 @@ namespace Questor
                 Settings.Instance.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor();
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
+                return;
             }
             #endregion Load DirectEVE
 
@@ -319,7 +262,7 @@ namespace Questor
         private static void LoginUsingScheduler()
         {
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _character = _character.Replace("\"", "");  // strip quotation marks if any are present
+            Logging._character = Logging._character.Replace("\"", "");  // strip quotation marks if any are present
 
             CharSchedules = new List<CharSchedule>();
             if (path != null)
@@ -337,10 +280,10 @@ namespace Questor
             //
             // chantling scheduler
             //
-            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == _character);
+            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == Logging._character);
             if (schedule == null)
             {
-                Logging.Log("Startup", "Error - character not found!", Logging.Red);
+                Logging.Log("Startup", "Error - character [" + Logging._character + "] not found in Schedules.xml!", Logging.Red);
                 return;
             }
 
@@ -350,8 +293,8 @@ namespace Questor
                 return;
             }
 
-            _username = schedule.LoginUserName;
-            _password = schedule.LoginPassWord;
+            Logging._username = schedule.LoginUserName;
+            Logging._password = schedule.LoginPassWord;
             Logging.Log("Startup", "User: " + schedule.LoginUserName + " Name: " + schedule.ScheduleCharacterName, Logging.White);
 
             if (schedule.StartTimeSpecified)
@@ -485,7 +428,7 @@ namespace Questor
                 return;
             }
 
-            if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta)
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_readyToStarta)
             {
                 //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
                 return;
@@ -509,7 +452,7 @@ namespace Questor
             // We should not get any windows
             if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
-                foreach (var window in Cache.Instance.DirectEve.Windows)
+                foreach (DirectWindow window in Cache.Instance.DirectEve.Windows)
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
@@ -594,6 +537,8 @@ namespace Questor
                             //
                             // Modal Dialogs the need "yes" pressed
                             //
+                            //sayYes |= window.Html.Contains("There is a new build available. Would you like to download it now");
+                            //sayOk |= window.Html.Contains("The update has been downloaded. The client will now close and the update process begin");
                             sayOk |= window.Html.Contains("The transport has not yet been connected, or authentication was not successful");
 
                             //Logging.Log("[Startup] (2) close is: " + close);
@@ -730,8 +675,18 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
-                Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
-                _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                if (ServerStatusCheck <= 6)
+                {
+                    Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
+                    ServerStatusCheck++;
+                    _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                    return;
+                }
+                ServerStatusCheck = 0;
+                Cache.Instance.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
+                Logging.Log("Startup", Cache.Instance.ReasonToStopQuestor, Logging.Red);
+                Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
                 return;
             }
 
@@ -746,8 +701,8 @@ namespace Questor
 
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)
                 {
-                    Logging.Log("Startup", "Login account [" + _username + "]", Logging.White);
-                    Cache.Instance.DirectEve.Login.Login(_username, _password);
+                    Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
+                    Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
@@ -756,20 +711,21 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 20)
+                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
-                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != _character && System.String.Compare(slot.CharName, _character, System.StringComparison.OrdinalIgnoreCase) != 0)
+                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != Logging._character && System.String.Compare(slot.CharName, Logging._character, System.StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             continue;
                         }
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
+                        NextSlotActivate = DateTime.UtcNow.AddSeconds(30);
                         slot.Activate();
                         return;
                     }
-                    Logging.Log("Startup", "Character id/name [" + _character + "] not found, retrying in 10 seconds", Logging.White);
+                    Logging.Log("Startup", "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds", Logging.White);
                 }
             }
         }
@@ -780,6 +736,12 @@ namespace Questor
             Logging.Log("Startup", "Timer elapsed.  Starting now.", Logging.White);
             _readyToStart = true;
             _readyToStarta = true;
+        }
+
+        public static int RandomNumber(int min, int max)
+        {
+            Random random = new Random();
+            return random.Next(min, max);
         }
     }
 }

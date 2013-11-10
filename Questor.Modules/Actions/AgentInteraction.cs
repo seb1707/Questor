@@ -24,7 +24,7 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
-    public class AgentInteraction
+    public static class AgentInteraction
     {
         public const string RequestMission = "Request Mission";
         public const string ViewMission = "View Mission";
@@ -36,22 +36,22 @@ namespace Questor.Modules.Actions
         public const string Delay = "Delay";
         public const string Quit = "Quit";
 
-        public string MissionName;
+        public static string MissionName;
 
-        private bool _agentStandingsCheckFlag;  //false;
-        private bool _waitingOnAgentResponse;
-        private bool _waitingOnMission;
-        private bool loadedAmmo = false;
+        private static bool _agentStandingsCheckFlag;  //false;
+        private static bool _waitingOnAgentResponse;
+        private static bool _waitingOnMission;
+        private static bool loadedAmmo = false;
 
-        private DateTime _agentWindowTimeStamp = DateTime.MinValue;
-        private DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
-        private DateTime _nextAgentAction;
-        private DateTime _waitingOnAgentResponseTimer = DateTime.UtcNow;
-        private DateTime _waitingOnMissionTimer = DateTime.UtcNow;
+        private static DateTime _agentWindowTimeStamp = DateTime.MinValue;
+        private static DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
+        private static DateTime _nextAgentAction;
+        private static DateTime _waitingOnAgentResponseTimer = DateTime.UtcNow;
+        private static DateTime _waitingOnMissionTimer = DateTime.UtcNow;
 
-        private int LoyaltyPointCounter;
+        private static int LoyaltyPointCounter;
 
-        public AgentInteraction()
+        static AgentInteraction()
         {
             AmmoToLoad = new List<Ammo>();
         }
@@ -63,19 +63,19 @@ namespace Questor.Modules.Actions
             get { return Cache.Instance.DirectEve.GetAgentById(AgentId); }
         }
 
-        public bool ForceAccept { get; set; }
+        public static bool ForceAccept { get; set; }
 
         public static AgentInteractionPurpose Purpose { get; set; }
 
-        public List<Ammo> AmmoToLoad { get; private set; }
+        public static List<Ammo> AmmoToLoad { get; private set; }
 
-        private void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+        private static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
         {
             AmmoToLoad.Clear();
             AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
         }
 
-        private void MyStandingsAreTooLowSwitchAgentsOrPause()
+        private static void MyStandingsAreTooLowSwitchAgentsOrPause()
         {
             Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
             Cache.Instance.AgentCorpEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.CorpId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
@@ -102,7 +102,7 @@ namespace Questor.Modules.Actions
             Cache.Instance.Paused = true;
         }
 
-        private void StartConversation(string module)
+        private static void StartConversation(string module)
         {
             Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
             Cache.Instance.AgentCorpEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.CorpId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
@@ -110,6 +110,26 @@ namespace Questor.Modules.Actions
 
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe,Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe,Cache.Instance.AgentFactionEffectiveStandingtoMe));
             AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+
+            Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
+
+            //
+            // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
+            //
+            if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
+            {
+                if (((float)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
+                {
+                    if (!_agentStandingsCheckFlag)
+                    {
+                        _agentStandingsCheckTimeOut = DateTime.UtcNow.AddSeconds(15);
+                        _agentStandingsCheckFlag = true;
+                    }
+                    _nextAgentAction = DateTime.UtcNow.AddSeconds(5);
+                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).Seconds, 0) + " sec]", Logging.Yellow);
+                    return;
+                }
+            }
 
             switch (Agent.Level)
             {
@@ -162,26 +182,6 @@ namespace Questor.Modules.Actions
                     break;
             }
 
-            Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
-
-            //
-            // Standings Check: if this is a totally new agent this check will timeout after 20 seconds
-            //
-            if (DateTime.UtcNow < _agentStandingsCheckTimeOut)
-            {
-                if (((int)Cache.Instance.StandingUsedToAccessAgent == (float)0.00) && (AgentId == Cache.Instance.AgentId))
-                {
-                    if (!_agentStandingsCheckFlag)
-                    {
-                        _agentStandingsCheckTimeOut = DateTime.UtcNow.AddSeconds(15);
-                        _agentStandingsCheckFlag = true;
-                    }
-                    _nextAgentAction = DateTime.UtcNow.AddSeconds(5);
-                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).Seconds, 0) + " sec]", Logging.Yellow);
-                    return;
-                }
-            }
-
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
             if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -198,7 +198,7 @@ namespace Questor.Modules.Actions
             return;
         }
 
-        private void ReplyToAgent(string module)
+        private static void ReplyToAgent(string module)
         {
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
@@ -349,7 +349,7 @@ namespace Questor.Modules.Actions
             }
         }
 
-        public void LoadMissionXMLData()
+        public static void LoadMissionXMLData()
         {
             Logging.Log("AgentInteraction", "Loading mission xml [" + MissionName + "] from [" + Cache.Instance.MissionXmlPath + "]", Logging.Yellow);
             Cache.Instance.MissionXMLIsAvailable = true;
@@ -403,7 +403,7 @@ namespace Questor.Modules.Actions
 
         }
 
-        private void GetDungeonId(string html)
+        private static void GetDungeonId(string html)
         {
             HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
             missionHtml.LoadHtml(html);
@@ -428,16 +428,16 @@ namespace Questor.Modules.Actions
             }
         }
 
-        private void GetFactionName(string html)
+        private static void GetFactionName(string html)
         {
             Statistics.SaveMissionHTMLDetails(html, MissionName);
             // We are going to check damage types
-            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
-                var logo = logoMatch.Groups["factionlogo"].Value;
+                string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
                 string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
@@ -524,15 +524,15 @@ namespace Questor.Modules.Actions
             return;
         }
 
-        private DamageType GetMissionDamageType(string html)
+        private static DamageType GetMissionDamageType(string html)
         {
             // We are going to check damage types
-            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
-                var logo = logoMatch.Groups["factionlogo"].Value;
+                string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
                 XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
@@ -551,7 +551,7 @@ namespace Questor.Modules.Actions
             return DamageType.EM;
         }
 
-        private void WaitForMission(string module)
+        private static void WaitForMission(string module)
         {
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
@@ -680,15 +680,16 @@ namespace Questor.Modules.Actions
                 case "In the Midst of Deadspace (2 of 5)":            //lvl4 courier
                 case "Pot and Kettle - Delivery (3 of 5)":            //lvl4 courier
                 case "Technological Secrets (2 of 3)":                //lvl4 courier
-                case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Portal to War (3 of 5)":                        //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - The Interrogation (2 of 10)": //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - Possible Leads (4 of 10)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Guristas Strike - The Flu Outbreak (6 of 10)":  //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - The Interrogation (2 of 10)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - Possible Leads (4 of 10)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
-                case "Angel Strike - The Flu Outbreak (6 of 10)":     //lvl3 courier - this likely needs to be corrected to be the correct mission name
+                case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier
+                case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier
+                case "Portal to War (3 of 5)":                        //lvl3 courier
+                case "Guristas Strike - The Interrogation (2 of 10)": //lvl3 courier
+                case "Guristas Strike - Possible Leads (4 of 10)":    //lvl3 courier
+                case "Guristas Strike - The Flu Outbreak (6 of 10)":  //lvl3 courier
+                case "Angel Strike - The Interrogation (2 of 10)":    //lvl3 courier
+                case "Angel Strike - Possible Leads (4 of 10)":       //lvl3 courier
+                case "Angel Strike - The Flu Outbreak (6 of 10)":     //lvl3 courier
+                case "Interstellar Railroad (2 of 4)":                //lvl1 courier
                     Cache.Instance.CourierMission = true;
                     break;
 
@@ -772,7 +773,7 @@ namespace Questor.Modules.Actions
             }
         }
 
-        private void AcceptMission(string module)
+        private static void AcceptMission(string module)
         {
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
@@ -807,7 +808,7 @@ namespace Questor.Modules.Actions
             _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
         }
 
-        private void DeclineMission(string module)
+        private static void DeclineMission(string module)
         {
             // If we are doing an ammo check then Decline Mission is an end-state!
             if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -846,8 +847,8 @@ namespace Questor.Modules.Actions
                     Logging.Log("AgentInteraction", "Agent decline timer detected. Current standings: " + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + ". Minimum standings: " + Math.Round(Settings.Instance.MinAgentBlackListStandings, 2), Logging.Yellow);
                 }
 
-                var hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
-                var minuteRegex = new Regex("\\s(?<minute>\\d+)\\sminute");
+                Regex hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
+                Regex minuteRegex = new Regex("\\s(?<minute>\\d+)\\sminute");
                 Match hourMatch = hourRegex.Match(html);
                 Match minuteMatch = minuteRegex.Match(html);
                 int hours = 0;
@@ -963,11 +964,11 @@ namespace Questor.Modules.Actions
             Statistics.Instance.MissionCompletionErrors = 0;
         }
 
-        public bool CheckFaction()
+        public static bool CheckFaction()
         {
             DirectAgentWindow agentWindow = Agent.Window;
             string html = agentWindow.Objective;
-            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
@@ -984,7 +985,7 @@ namespace Questor.Modules.Actions
                     Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
-                        var factionName = ((string)faction.Attribute("name"));
+                        string factionName = ((string)faction.Attribute("name"));
                         Cache.Instance.FactionName = factionName;
                         Logging.Log("AgentInteraction", "Mission enemy faction: " + factionName, Logging.Yellow);
                         if (Settings.Instance.FactionBlacklist.Any(m => m.ToLower() == factionName.ToLower()))
@@ -1034,7 +1035,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        public void CloseConversation()
+        public static void CloseConversation()
         {
             if (DateTime.UtcNow < _nextAgentAction)
             {
@@ -1059,7 +1060,7 @@ namespace Questor.Modules.Actions
             Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId, true);
         }
 
-        public void ProcessState()
+        public static void ProcessState()
         {
             if (!Cache.Instance.InStation)
             {
@@ -1067,6 +1068,11 @@ namespace Questor.Modules.Actions
             }
 
             if (Cache.Instance.InSpace)
+            {
+                return;
+            }
+
+            if (!Cache.Instance.Windows.Any())
             {
                 return;
             }

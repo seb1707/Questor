@@ -14,7 +14,7 @@ namespace Questor.Modules.Activities
     {
         //private DateTime _nextCourierAction;
         //private readonly Traveler _traveler;
-        private readonly AgentInteraction _agentInteraction;
+        //private readonly AgentInteraction _agentInteraction;
         private int moveItemRetryCounter;
         private DateTime _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddDays(-30);
         /// <summary>
@@ -25,12 +25,12 @@ namespace Questor.Modules.Activities
         public CourierMissionCtrl()
         {
             //_traveler = new Traveler();
-            _agentInteraction = new AgentInteraction();
+            //_agentInteraction = new AgentInteraction();
         }
 
         private bool GotoMissionBookmark(long agentId, string title)
         {
-            var destination = Traveler.Destination as MissionBookmarkDestination;
+            MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
                 Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
 
@@ -85,6 +85,10 @@ namespace Questor.Modules.Activities
                     missionItem = "DNA Sample"; //typeid: 13288	 groupID: 314
                     break;
 
+                case "Interstellar Railroad (2 of 4)":                //lvl1 courier
+                    missionItem = "Reports"; //not correct here
+                    break;
+
                 case "New Frontiers - Toward a Solution (3 of 7)":    //lvl3 courier - this likely needs to be corrected to be the correct mission name
                 case "New Frontiers - Nanite Express (6 of 7)":       //lvl3 courier - this likely needs to be corrected to be the correct mission name
                 case "Portal to War (3 of 5)":                        //lvl3 courier - this likely needs to be corrected to be the correct mission name
@@ -112,7 +116,7 @@ namespace Questor.Modules.Activities
                 try
                 {
                     // We moved the item
-                    if (Cache.Instance.CargoHold.Items.Any(i => i.TypeName == missionItem))
+                    if (Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeName == missionItem))
                     {
                         moveItemRetryCounter = 0;
                         _nextCourierMissionCtrlPulse = DateTime.UtcNow.AddSeconds(3);
@@ -127,11 +131,11 @@ namespace Questor.Modules.Activities
                     {
                         from = Cache.Instance.ItemHangar;
                     }
-                    else if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    else if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                     {
                         from = Cache.Instance.AmmoHangar;
                     }
-                    else if (!string.IsNullOrEmpty(Settings.Instance.LootHangar) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    else if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                     {
                         from = Cache.Instance.LootHangar;
                     }
@@ -144,7 +148,7 @@ namespace Questor.Modules.Activities
                         //Logging.Log("CourierMissionCtrl","Unable to find [" + missionItem + "] in any of the defined hangars - pausing",Logging.Teal);
                         //Cache.Instance.Paused = true;
                     }
-                    to = Cache.Instance.CargoHold;
+                    to = Cache.Instance.CurrentShipsCargo;
                 }
                 catch (Exception exception)
                 {
@@ -155,7 +159,7 @@ namespace Questor.Modules.Activities
 
             if (_States.CurrentCourierMissionCtrlState == CourierMissionCtrlState.DropOffItem || !pickup)
             {
-                from = Cache.Instance.CargoHold;
+                from = Cache.Instance.CurrentShipsCargo;
                 to = Cache.Instance.ItemHangar;
             }
 
@@ -285,7 +289,7 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates) Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
 

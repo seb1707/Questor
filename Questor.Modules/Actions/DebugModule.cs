@@ -33,7 +33,7 @@ namespace Questor.Modules.Actions
             //if (!Cache.Instance.InSpace)
             //    return;
 
-            var windows = new List<DirectWindow>();
+            List<DirectWindow> windows = new List<DirectWindow>();
 
             foreach (DirectWindow window in windows)
             {
@@ -41,7 +41,7 @@ namespace Questor.Modules.Actions
 
                 //if (window.Name.Contains(wreck.Name))
                 //{
-                //    Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][ID: " + wreck.Id + "] on the ignore list, ignoring.");
+                //    Logging.Log("Salvage: Cargo Container [" + wreck.Name + "][" + wreck.Id + "] on the ignore list, ignoring.");
                 //    wreck.UnlockTarget();
                 //    continue;
                 //}
@@ -57,7 +57,6 @@ namespace Questor.Modules.Actions
             //if (Cache.Instance.InStation)
             //    return;
 
-            //DirectContainer cargo = Cache.Instance.DirectEve.GetShipsCargo();
             switch (_States.CurrentDebugModuleState)
             {
                 case DebugModuleState.DebugWindows:

@@ -32,10 +32,12 @@ namespace Questor.Modules.Actions
             {
                 if (_nextAction < DateTime.UtcNow)
                 {
-                    Logging.Log("QuestorManager.SolarSystemDestination", "Exiting station", Logging.White);
-
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    _nextAction = DateTime.UtcNow.AddSeconds(30);
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Logging.Log("QuestorManager.SolarSystemDestination", "Exiting station", Logging.White);
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        _nextAction = DateTime.UtcNow.AddSeconds(30);
+                    }
                 }
 
                 // We are not there yet

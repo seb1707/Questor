@@ -93,12 +93,12 @@ namespace Questor.Modules.Lookup
         private DamageType GetMissionDamageType(string html)
         {
             // We are going to check damage types
-            var logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
+            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
             Match logoMatch = logoRegex.Match(html);
             if (logoMatch.Success)
             {
-                var logo = logoMatch.Groups["factionlogo"].Value;
+                string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
                 string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");

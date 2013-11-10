@@ -1,13 +1,13 @@
 @Echo off
 cls
 :: delims is a TAB followed by a space
-(set debug=false)
+set debug=false
 ::Custom Path to innerspace if you have yours in another location
-(set InnerSpacePath=..\..\InnerSpace\)
+::set InnerSpacePath=..\..\InnerSpace\
 :: Path for 32bit OSs - likely Windows XP (but could be windows vista or windows 7, but not commonly)
-::(set InnerSpacePath=%ProgramFiles%\InnerSpace\InnerSpace.exe)
+::set InnerSpacePath=%ProgramFiles%\InnerSpace\InnerSpace.exe
 :: Path for 64bit OSs - likely windows Vista or Windows 7
-::(set InnerSpacePath=%ProgramFiles(x86)%\InnerSpace\InnerSpace.exe)
+set InnerSpacePath=%ProgramFiles(x86)%\InnerSpace\
 ::
 :: if you choose not to hard code the path above we will search the registry for your innerSpace directory
 :: 
@@ -23,7 +23,7 @@ if not exist "%InnerSpacePath%" if "%debug%"=="true" Echo.
 if not exist "%InnerSpacePath%" if "%debug%"=="true" echo [before registry] InnerSpacePath is now [ %InnerSpacePath% ] && pause
 if not exist "%InnerSpacePath%" if "%debug%"=="true" Echo.
 ::
-:: if the directory above did not exist then check the registry for where innerspace is loacted and use that
+:: if the directory above did not exist then check the registry for where innerspace is located and use that
 ::
 :registrysearch
 if "%InnerSpacePath%"=="" if "%debug%"=="true" Echo [about to query registry] InnerSpacePath is [ %InnerSpacePath% ] - trying to query known registry keys for innerspace.exe
@@ -65,6 +65,11 @@ call dequote.cmd innerspacedotnetdirectory
 popd
 
 :CopyQuestor
+@Echo.
+@Echo Starting to copy EasyHook files from [.\DirectEVE\easyhook*.*] to [.\output\]
+@Echo on
+copy /y ".\DirectEVE\easyhook*.*" ".\output\"
+
 @Echo.
 @Echo Starting to copy debug files from [.\output\*.pdb] to [%innerspacedotnetdirectory%]
 @Echo on

@@ -27,14 +27,14 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.DirectEve.ActiveShip == null)
+            if (Cache.Instance.ActiveShip == null || Cache.Instance.ActiveShip.GivenName == null)
             {
-                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.DirectEve.ActiveShip == null)", Logging.Debug);
+                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.ActiveShip == null)", Logging.Debug);
                 _nextAction = DateTime.UtcNow.AddSeconds(3);
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
             {
                 // Open the ship hangar
                 if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreparation")) return StorylineState.Arm;
@@ -48,7 +48,7 @@ namespace Questor.Storylines
                     return StorylineState.Arm;
                 }
 
-                if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
                     Logging.Log("StorylineState.Arm", "Missing TransportShip named [" + Settings.Instance.TransportShipName + "]", Logging.Debug);
                     return StorylineState.GotoAgent;
@@ -61,7 +61,6 @@ namespace Questor.Storylines
             if (!items.Any())
             {
                 if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + Settings.Instance.MaterialsForWarOreID + "] not found in ItemHangar", Logging.Debug);
-                if (!Cache.Instance.ReadyAmmoHangar("StorylineState.Arm")) return StorylineState.Arm;
                 items = Cache.Instance.AmmoHangar.Items.Where(k => k.TypeId == Settings.Instance.MaterialsForWarOreID).ToList();
                 if (!items.Any())
                 {
@@ -74,10 +73,8 @@ namespace Questor.Storylines
                 }
             }
 
-            Cache.Instance.CargoHold = Cache.Instance.DirectEve.GetShipsCargo();
-
             int oreIncargo = 0;
-            foreach (DirectItem cargoItem in Cache.Instance.CargoHold.Items.ToList())
+            foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items.ToList())
             {
                 if (cargoItem.TypeId != Settings.Instance.MaterialsForWarOreID)
                     continue;
@@ -93,13 +90,11 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
             }
 
-            if (!Cache.Instance.ReadyAmmoHangar("StorylineState.Arm")) return StorylineState.Arm;
-
             DirectItem item = items.FirstOrDefault();
             if (item != null)
             {
                 int moveOreQuantity = Math.Min(item.Stacksize, oreToLoad);
-                Cache.Instance.CargoHold.Add(item, moveOreQuantity);
+                Cache.Instance.CurrentShipsCargo.Add(item, moveOreQuantity);
                 Logging.Log("StorylineState.Arm", "Moving [" + moveOreQuantity + "] units of Ore [" + item.TypeName + "] Stacksize: [" + item.Stacksize + "] from hangar to CargoHold", Logging.White);
                 _nextAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3,6));
                 return StorylineState.Arm;  // you can only move one set of items per frame
@@ -163,12 +158,12 @@ namespace Questor.Storylines
 
             if (!Cache.Instance.OpenCargoHold("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
 
-            if (Cache.Instance.CargoHold.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
+            if (Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
             {
-                DirectItem thisOreInhangar = Cache.Instance.CargoHold.Items.FirstOrDefault(i => i.TypeId == oreid);
+                DirectItem thisOreInhangar = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == oreid);
                 if (thisOreInhangar != null)
                 {
-                    Logging.Log("MaterialsForWarPreparation", "We have [" + Cache.Instance.CargoHold.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture) + "] " + thisOreInhangar.TypeName + " in the CargoHold accepting mission", Logging.White);
+                    Logging.Log("MaterialsForWarPreparation", "We have [" + Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity).ToString(CultureInfo.InvariantCulture) + "] " + thisOreInhangar.TypeName + " in the CargoHold accepting mission", Logging.White);
                 }
 
                 // Close the market window if there is one

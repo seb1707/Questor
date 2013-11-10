@@ -73,11 +73,13 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (Cache.Instance.NextUndockAction < DateTime.UtcNow)
                 {
-                    Logging.Log("QuestorManager.StationDestination", "We're docked in the wrong station, undocking", Logging.White);
-
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
-                    return false;
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Logging.Log("QuestorManager.StationDestination", "We're docked in the wrong station, undocking", Logging.White);
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                        return false;
+                    }
                 }
 
                 // We are not there yet
@@ -93,40 +95,47 @@ namespace Questor.Modules.Actions
             if (nextAction > DateTime.UtcNow)
                 return false;
 
-            EntityCache entity = Cache.Instance.EntityByName(stationName);
-            if (entity == null)
+            EntityCache station = Cache.Instance.EntityByName(stationName);
+            if (station == null)
             {
                 // We are there but no station? Wait a bit
                 return false;
             }
 
-            if (entity.Distance < (int)Distance.DockingRange)
+            if (station.Distance < (int)Distances.DockingRange)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextDockAction)
                 {
-                    Logging.Log("StationDestination.StationDestination", "Dock at [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.White);
-                    entity.Dock();
-
+                    Logging.Log("StationDestination.StationDestination", "Dock at [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                    station.Dock();
+                    nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
+
+                return false;
             }
-            else if (entity.Distance < (int)Distance.WarptoDistance)
+
+            if (station.Distance < (int)Distances.WarptoDistance)
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Logging.Log("TravelerDestination.StationDestination", "Approaching [" + entity.Name + "] which is [" + Math.Round(entity.Distance / 1000, 0) + "k away]", Logging.White);
-                    entity.Approach();
-
+                    Logging.Log("TravelerDestination.StationDestination", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                    station.Approach();
+                    nextAction = DateTime.UtcNow.AddSeconds(30);
                     return false;
                 }
-            }
-            else
-            {
-                Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + entity.Name + "]", Logging.White);
-                entity.WarpToAndDock();
+
+                return false;
             }
 
-            nextAction = DateTime.UtcNow.AddSeconds(30);
+            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+            {
+                Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + station.Name + "]", Logging.White);
+                station.WarpTo();
+                nextAction = DateTime.UtcNow.AddSeconds(30);
+                return false;
+            }
+
             return false;
         }
     }

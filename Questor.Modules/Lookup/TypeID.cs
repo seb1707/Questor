@@ -38,11 +38,16 @@ namespace Questor.Modules.Lookup
         ScanResolutionDampeningScript = 29013,
         TargetingRangeDampeningScript = 29015,
 
-
+        CivilianGatlingPulseLaser = 3634,
+        CivilianGatlingAutocannon = 3636,
+        CivilianGatlingRailgun = 3638,
+        CivilianLightElectronBlaster = 3640,
+            
         //Minmater Rookie Ship
         //Amarr Rookie Ship
         //Caldari Rookie Ship
         //Gallente Rookie Ship
+        Tengu = 29984,
 
         //Polaris = 9856,
         //Polaris = 9855 //wtf
@@ -56,5 +61,11 @@ namespace Questor.Modules.Lookup
         Megacyte = 40,
         Morphite = 11399,
         Chalcopyrite = 27029,
+
+        AIMEDs = 28870,
+        Toxic_Waste = 282,
+        Slaves = 3721,
+        Small_Arms = 9844,
+        Ectoplasm = 3771,
     }
 }

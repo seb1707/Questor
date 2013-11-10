@@ -236,7 +236,7 @@ namespace Questor.Modules.Actions
                 {
                     if (i.Reprocess[m].HasValue && i.Reprocess[m] > 0)
                     {
-                        var d = i.Reprocess[m];
+                        double? d = i.Reprocess[m];
                         if (d != null)
                         {
                             temp += d.Value * mineralPrices[m];
@@ -468,9 +468,16 @@ namespace Questor.Modules.Actions
             }
 
             DirectOrder competitor = marketWindow.SellOrders.Where(i => i.StationId == Cache.Instance.DirectEve.Session.StationId).OrderBy(i => i.Price).FirstOrDefault();
-            double newprice = competitor.Price - 0.01;
+            if (competitor != null)
+            {
+                double newprice = competitor.Price - 0.01;
 
-            Cache.Instance.DirectEve.Sell(directItem, (int)Cache.Instance.DirectEve.Session.StationId, directItem.Quantity,newprice, duration, corp);
+                if (Cache.Instance.DirectEve.Session.StationId != null)
+                {
+                    Cache.Instance.DirectEve.Sell(directItem, (int)Cache.Instance.DirectEve.Session.StationId, directItem.Quantity,newprice, duration, corp);
+                }
+            }
+
             return true;
         }
 
@@ -796,16 +803,15 @@ namespace Questor.Modules.Actions
             else
             {
                 if (Settings.Instance.DebugValuedump) Logging.Log(module, "RefineItems: if (!refine)", Logging.Debug);
-                
+
                 if (!Cache.Instance.OpenCargoHold(module)) return false;
-                if (!Cache.Instance.ReadyAmmoHangar(module)) return false;
 
                 IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId)).ToList();
                 if (refineItems.Any())
                 {
                     Logging.Log("Arm", "Moving loot to refine to CargoHold", Logging.White);
 
-                    Cache.Instance.CargoHold.Add(refineItems);
+                    Cache.Instance.CurrentShipsCargo.Add(refineItems);
                     _lastExecute = DateTime.UtcNow;
                     return false;
                 }

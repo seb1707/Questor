@@ -17,8 +17,8 @@
         private IStoryline _storyline;
         private readonly Dictionary<string, IStoryline> _storylines;
 
-        private readonly Combat _combat;
-        private readonly AgentInteraction _agentInteraction;
+        //private readonly Combat _combat;
+        //private readonly AgentInteraction _agentInteraction;
 
         private DateTime _nextAction = DateTime.UtcNow;
         private DateTime _nextStoryLineAttempt = DateTime.UtcNow;
@@ -28,8 +28,8 @@
 
         public Storyline()
         {
-            _combat = new Combat();
-            _agentInteraction = new AgentInteraction();
+            //_combat = new Combat();
+            //_agentInteraction = new AgentInteraction();
 
             Cache.Instance.AgentBlacklist = new List<long>();
 
@@ -225,6 +225,7 @@
                                //
                                // COMBAT - CALDARI - LEVEL 1
                                //
+                               {"An End To EavesDropping".ToLower(), new GenericCombatStoryline()}, //lvl1
 
                                //
                                // COMBAT - CALDARI - LEVEL 2
@@ -379,7 +380,7 @@
                 return;
             }
 
-            var baseDestination = Traveler.Destination as StationDestination;
+            StationDestination baseDestination = Traveler.Destination as StationDestination;
             if (baseDestination == null || baseDestination.StationId != storylineagent.StationId)
             {
                 Traveler.Destination = new StationDestination(storylineagent.SolarSystemId, storylineagent.StationId, Cache.Instance.DirectEve.GetLocationName(storylineagent.StationId));
@@ -425,10 +426,9 @@
                 _highSecChecked = true;
             }
 
-            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(pt => pt != null && pt.IsValid) || Cache.Instance.DronePriorityTargets.Any(pt => pt != null && pt.IsValid))
+            if (Cache.Instance.PotentialCombatTargets.Any())
             {
-                Logging.Log("Storyline", "GotoAgent: Priority targets found, engaging!", Logging.Yellow);
-                _combat.ProcessState();
+                Combat.ProcessState();
             }
 
             Traveler.ProcessState();
@@ -474,7 +474,7 @@
                                                                                      || i.GroupId == (int)Group.MiscSpecialMissionItems
                                                                                      || i.GroupId == (int)Group.Livestock))
                 {
-                    if (Cache.Instance.CargoHold.Capacity - Cache.Instance.CargoHold.UsedCapacity - (item.Volume * item.Quantity) < 0)
+                    if (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity - (item.Volume * item.Quantity) < 0)
                     {
                         Logging.Log("Storyline", "We are full, not moving anything else", Logging.Yellow);
                         _States.CurrentStorylineState = StorylineState.Done;
@@ -482,7 +482,7 @@
                     }
 
                     Logging.Log("Storyline", "Moving [" + item.TypeName + "][" + item.ItemId + "] to cargo", Logging.Yellow);
-                    Cache.Instance.CargoHold.Add(item, item.Quantity);
+                    Cache.Instance.CurrentShipsCargo.Add(item, item.Quantity);
                     return false;
                 }
                 _nextAction = DateTime.UtcNow.AddSeconds(10);
@@ -530,7 +530,7 @@
                         AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
@@ -553,10 +553,10 @@
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
                         AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
-                        _agentInteraction.ForceAccept = true;
+                        AgentInteraction.ForceAccept = true;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
@@ -587,7 +587,7 @@
                         AgentInteraction.Purpose = AgentInteractionPurpose.CompleteMission;
                     }
 
-                    _agentInteraction.ProcessState();
+                    AgentInteraction.ProcessState();
 
                     if (Settings.Instance.DebugStates)
                         Logging.Log("AgentInteraction.State is", _States.CurrentAgentInteractionState.ToString(), Logging.White);

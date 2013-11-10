@@ -12,9 +12,11 @@ namespace Questor.Modules.Lookup
     public enum Group
     {
         Star = 6,
-        Station = 15,
-        Stargate = 10,
+        Planet = 7,
+        Moon = 8,
         AsteroidBelt = 9,
+        Stargate = 10,
+        Station = 15,
         AccelerationGate = 366,
         JumpBridge = 707,
 
@@ -58,8 +60,13 @@ namespace Questor.Modules.Lookup
         CriminalTags = 370,
         EmpireInsigniaDrops = 409,
 
+        RemoteShieldRepairer = 41,
+        RemoteArmorRepairer = 325,
+        RemoteHullRepairer = 585, 
+        WarpDisruptor = 52, 
         StasisWeb = 65,
         NOS = 68,
+        Neutralizer = 71,
         TargetPainter = 379,
 
         EnergyWeapon = 53,
@@ -80,6 +87,7 @@ namespace Questor.Modules.Lookup
 
         SentryGun = 99,                       //Protecting the weak and upholding the law
 
+        ConcordBillboard = 323,
         ProtectiveSentryGun = 180,
         MobileSentryGun = 336,
         DestructibleSentryGun = 383,
@@ -94,6 +102,8 @@ namespace Questor.Modules.Lookup
         LargeColidableStructure = 319,
         LargeColidableObject = 226,
         LargeColidableShip = 784,
+        DeadSpaceOverseersStructure = 494,
+        DeadSpaceOverseersBelongings = 496,
 
         CargoContainer = 12,
         SpawnContainer = 306,
@@ -104,9 +114,12 @@ namespace Questor.Modules.Lookup
 
         Wreck = 186,
 
+        PlayerDrone = 100,
+        
         Livestock = 283, //this includes most CommonMissionCompletionitems like Militants and Marines
         MiscSpecialMissionItems = 314, //Misc special mission items that should not be on the market and not available from random missions.
 
+        CustomsOffice = 1025,
         ConcordDrone = 301,
         PoliceDrone = 182,
         CustomsOfficial = 446,
@@ -114,6 +127,7 @@ namespace Questor.Modules.Lookup
         Merchant = 297,
         Mission_Merchant = 1006, //dread pirate scarlet
         FactionWarfareNPC = 288,
+        GasCloud = 227,
 
         Shuttle = 31,
         Industrial = 28,
@@ -181,6 +195,8 @@ namespace Questor.Modules.Lookup
         //
         // various NPCs
         //
+        Deadspace_Rogue_Drone_Swarm = 806,
+        TutorialDrone = 286,
         Storyline_Battleship = 523,
         Storyline_Mission_Battleship = 534,
         Asteroid_Angel_Cartel_Battleship = 552,
@@ -228,6 +244,7 @@ namespace Questor.Modules.Lookup
         Mission_Minmatar_Republic_Battlecruiser = 685,
         Mission_Khanid_Battlecruiser = 690,
         Mission_CONCORD_Battlecruiser = 696,
+        Mission_Faction_Industrials = 927,
         Mission_Mordu_Battlecruiser = 702,
         Asteroid_Rogue_Drone_BattleCruiser = 755,
         Asteroid_Angel_Cartel_Commander_BattleCruiser = 793,
@@ -315,13 +332,14 @@ namespace Questor.Modules.Lookup
         mission_concord_frigate = 693,
         mission_mordu_frigate = 699,
         asteroid_rouge_drone_frigate = 759,
-        asteroid_rouge_drone_frigate2 = 805,
+        deadspace_rogue_drone_frigate = 805,
         asteroid_angel_cartel_commander_frigate = 789,
         asteroid_blood_raiders_commander_frigate = 792,
         asteroid_guristas_commander_frigate = 800,
         asteroid_sanshas_nation_commander_frigate = 810,
         asteroid_serpentis_commander_frigate = 814,
         mission_generic_frigates = 818,
+        Deadspace_Overseer_Frigate = 819,
         mission_thukker_frigate = 826,
         asteroid_rouge_drone_commander_frigate = 847,
     }

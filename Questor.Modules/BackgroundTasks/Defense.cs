@@ -730,7 +730,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Should we deactivate the module?
                 //
                 if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + module.IsActive + "]", Logging.Debug);
-
+                
                 if (module.IsActive)
                 {
                     bool deactivate = false;
@@ -785,7 +785,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance)
                         {
                             activate = true;
-                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within MinimumPropulsionModuleDistance [" + Settings.Instance.MinimumPropulsionModuleDistance + "] Activate [" + activate + "]", Logging.Debug);
+                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "k] is within MinimumPropulsionModuleDistance [" + Math.Round((double)Settings.Instance.MinimumPropulsionModuleDistance/1000,2) + "] Activate [" + activate + "]", Logging.Debug);
                         }
 
                         if (Settings.Instance.SpeedTank)
@@ -809,7 +809,8 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                     }
                 }
-               
+
+                Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                 return;
             }
         }

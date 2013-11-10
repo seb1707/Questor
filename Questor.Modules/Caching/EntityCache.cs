@@ -24,7 +24,7 @@ namespace Questor.Modules.Caching
         private readonly DirectEntity _directEntity;
         //public static int EntityCacheInstances = 0;
         private DateTime ThisEntityCacheCreated = DateTime.UtcNow;
-        private int DictionaryCountThreshhold = 60;
+        private int DictionaryCountThreshhold = 250;
         public EntityCache(DirectEntity entity)
         {
             _directEntity = entity;
@@ -2123,7 +2123,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (TargetValue >= Settings.Instance.MinimumTargetValueToConsiderTargetAHighValueTarget)
                                     {
-                                        if (IsSentry && !Settings.Instance.KillSentries)
+                                        if (IsSentry && !Settings.Instance.KillSentries && !IsEwarTarget)
                                         {
                                             _isHighValueTarget = false;
                                             if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsHighValueTarget", "Adding [" + Name + "] to EntityIsHighValueTarget as [" + _isHighValueTarget + "]", Logging.Debug);
@@ -2198,7 +2198,7 @@ namespace Questor.Modules.Caching
                             {
                                 if (TargetValue != null && TargetValue <= Settings.Instance.MaximumTargetValueToConsiderTargetALowValueTarget)
                                 {
-                                    if (IsSentry && !Settings.Instance.KillSentries)
+                                    if (IsSentry && !Settings.Instance.KillSentries && !IsEwarTarget)
                                     {
                                         _isLowValueTarget = false;
                                         if (Settings.Instance.DebugEntityCache) Logging.Log("Entitycache.IsLowValueTarget", "Adding [" + Name + "] to EntityIsLowValueTarget as [" + _isLowValueTarget + "]", Logging.Debug);

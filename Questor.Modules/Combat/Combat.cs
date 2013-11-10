@@ -1039,7 +1039,7 @@ namespace Questor.Modules.Combat
                 else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
                                                                  && e.Distance < (double)Distances.OnGridWithMe
                                                                  && !e.IsIgnored
-                                                                 && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                                 && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                                                  && (e.IsNpc || e.IsNpcByGroupID)
                                                                  && !e.IsContainer
                                                                  && !e.IsFactionWarfareNPC
@@ -1249,7 +1249,8 @@ namespace Questor.Modules.Combat
                 else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
                                                                  && e.Distance < (double)Distances.OnGridWithMe 
                                                                  && !e.IsIgnored
-                                                                 && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                                 && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
+                                                                 && (e.IsNpc || e.IsNpcByGroupID)
                                                                  && (e.IsNpc || e.IsNpcByGroupID)
                                                                  && !e.IsContainer
                                                                  && !e.IsFactionWarfareNPC
@@ -1630,7 +1631,7 @@ namespace Questor.Modules.Combat
             TargetingMe = Cache.Instance.TargetedBy.Where(t => t.Distance < (double)Distances.OnGridWithMe 
                                                             && t.CategoryId != (int)CategoryID.Asteroid
                                                             && t.IsTargetingMeAndNotYetTargeted
-                                                            && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries))
+                                                            && (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries) || (t.IsSentry && t.IsEwarTarget))
                                                             && t.Nearest5kDistance < Cache.Instance.MaxRange)
                                                             .ToList();
 

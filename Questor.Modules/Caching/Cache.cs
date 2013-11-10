@@ -1451,7 +1451,7 @@ namespace Questor.Modules.Caching
 
                             _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.Distance < (double)Distances.OnGridWithMe
                                                                 && !e.IsIgnored
-                                                                && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                                && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                                                 && (e.IsNpc || e.IsNpcByGroupID)
                                                                 && e.Distance < Cache.Instance.MaxRange
                                                                 && !e.IsContainer
@@ -1491,7 +1491,7 @@ namespace Questor.Modules.Caching
                     {
                         _potentialCombatTargets = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                             && !e.IsIgnored
-                                                            && (!e.IsSentry || e.IsSentry && Settings.Instance.KillSentries)
+                                                            && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                                             && (e.IsNpcByGroupID || e.IsAttacking) //|| e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
                             //&& !e.IsTarget
                                                             && !e.IsContainer

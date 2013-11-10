@@ -257,7 +257,7 @@ namespace Questor.Modules.Combat
                             if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
 
                             // yes if there are targets to kill
-                            launch &= (Cache.Instance.Aggressed.Count(e => e.Distance < Cache.Instance.MaxDroneRange && !e.IsSentry) > 0 || Cache.Instance.Targets.Count(e => e.IsLargeCollidable) > 0);
+                            launch &= (Cache.Instance.Aggressed.Count(e => e.Distance < Cache.Instance.MaxDroneRange && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget) )) > 0 || Cache.Instance.Targets.Count(e => e.IsLargeCollidable) > 0);
                             if (Settings.Instance.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Aggressed.Count; Launch is [" + launch + "] MaxDroneRange [" + Cache.Instance.MaxDroneRange + "] DroneControlrange [" + Settings.Instance.DroneControlRange + "] TargetingRange [" + Cache.Instance.MaxTargetRange + "]", Logging.Debug);
 
                             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
@@ -391,7 +391,7 @@ namespace Questor.Modules.Combat
                     {
                         // Are we done (for now) ?
                         if (
-                            Cache.Instance.TargetedBy.Count(e => !e.IsSentry 
+                            Cache.Instance.TargetedBy.Count(e => (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                                                && (e.IsNpc || e.IsNpcByGroupID)
                                                                && e.Distance < Cache.Instance.MaxDroneRange) == 0)
                         {

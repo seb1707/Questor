@@ -1164,7 +1164,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || Settings.Instance.KillSentries) && !t.IsIgnored) > killTargets.Count(e => e.IsTargetedBy))
+            if (breakOnAttackers && Cache.Instance.TargetedBy.Count(t => (!t.IsSentry || (t.IsSentry && Settings.Instance.KillSentries) || (t.IsSentry && t.IsEwarTarget)) && !t.IsIgnored) > killTargets.Count(e => e.IsTargetedBy))
             {
                 //
                 // We are being attacked, break the kill order
@@ -1384,7 +1384,7 @@ namespace Questor.Modules.Activities
 
             //if (Settings.Instance.TargetSelectionMethod == "isdp")
             //{
-                if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
+                if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Distance).Take(1).ToList()))
                     _clearPocketTimeout = null;
             //}
             //else //use new target selection method
@@ -1422,7 +1422,7 @@ namespace Questor.Modules.Activities
 
             //if (Settings.Instance.TargetSelectionMethod == "isdp")
             //{
-                if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()))
+                if (Cache.Instance.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Cache.Instance.PotentialCombatTargets.OrderBy(t => t.Distance).Take(1).ToList()))
                     _clearPocketTimeout = null;
             //}
             //else //use new target selection method

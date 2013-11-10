@@ -225,6 +225,7 @@
                                //
                                // COMBAT - CALDARI - LEVEL 1
                                //
+                               {"An End To EavesDropping".ToLower(), new GenericCombatStoryline()}, //lvl1
 
                                //
                                // COMBAT - CALDARI - LEVEL 2

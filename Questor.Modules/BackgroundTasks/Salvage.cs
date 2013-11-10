@@ -100,8 +100,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
-            if (tractorBeams.Count == 0)
+            IEnumerable<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam);
+            if (!tractorBeams.Any())
                 return;
 
             if (Cache.Instance.InMission && Cache.Instance.InSpace && Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.TractorBeamMinimumCapacitor)
@@ -124,14 +124,14 @@ namespace Questor.Modules.BackgroundTasks
                 ModuleNumber++;
                 if (tractorBeam.IsActive)
                 {
-                    tractorBeams.Remove(tractorBeam);
+                    //tractorBeams.Remove(tractorBeam);
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam is: IsActive [" + tractorBeam.IsActive + "]. Continue", Logging.Debug);
                     continue;
                 }
                     
                 if (tractorBeam.InLimboState)
                 {
-                    tractorBeams.Remove(tractorBeam);
+                    //tractorBeams.Remove(tractorBeam);
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam is: InLimboState [" + tractorBeam.InLimboState + "] IsDeactivating [" + tractorBeam.IsDeactivating + "] IsActivatable [" + tractorBeam.IsActivatable + "] IsOnline [" + tractorBeam.IsOnline + "] IsGoingOnline [" + tractorBeam.IsGoingOnline + "]. Continue", Logging.Debug);
                     continue;
                 }
@@ -205,7 +205,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
                 }
 
-                if (tractorBeams.Count == 0) return;
+                if (!tractorBeams.Any()) return;
 
                 foreach (ModuleCache tractorBeam in tractorBeams)
                 {
@@ -222,17 +222,20 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
-                    tractorBeams.Remove(tractorBeam);
-                    tractorBeam.Activate(wreck.Id);
-                    tractorsProcessedThisTick++;
-
-                    Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
-                    Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                    if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
+                    if (DateTime.UtcNow > tractorBeam.ActivatedTimeStamp.AddSeconds(5))
                     {
-                        return;
-                    }
+                        //tractorBeams.Remove(tractorBeam);
+                        tractorBeam.Activate(wreck.Id);
+                        tractorsProcessedThisTick++;
 
+                        Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
+                        Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                        if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
+                        {
+                            return;
+                        }    
+                    }
+                    
                     continue;
                 }
                 

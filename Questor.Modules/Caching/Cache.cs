@@ -4293,20 +4293,12 @@ namespace Questor.Modules.Caching
             //}
 
             EntityCache currentDroneTarget = null;
-            if (Cache.Instance.PreferredDroneTarget != null)
-            {
-                currentDroneTarget = Cache.Instance.EntityById(Cache.Instance.LastDroneTargetID);
-            }
-            else if (Cache.Instance.Targets.Any())
-            {
-                currentDroneTarget = Cache.Instance.Targets.FirstOrDefault(i => i.IsActiveTarget);
-            }
 
-            if (currentDroneTarget != null && Cache.Instance.EntitiesOnGrid.All(i => i.Id != currentDroneTarget.Id))
+            if (Cache.Instance.LastDroneTargetID != 0)
             {
-                currentDroneTarget = null;
+                currentDroneTarget = Cache.Instance.EntityById(Cache.Instance.LastDroneTargetID);    
             }
-
+            
             if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);

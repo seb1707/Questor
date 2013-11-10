@@ -1096,7 +1096,7 @@ namespace Questor.Modules.Caching
 
         private string SelectFirstAgent()
         {
-            Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
+            Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
             AgentsList FirstAgent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
             if (FirstAgent == null)
             {
@@ -1705,8 +1705,11 @@ namespace Questor.Modules.Caching
                             {
                                 if (DirectEve.Session.IsReady)
                                 {
-                                    Cache.Instance.LastInSpace = DateTime.UtcNow;
-                                    return true;
+                                    if (Cache.Instance.Entities.Any())
+                                    {
+                                        Cache.Instance.LastInSpace = DateTime.UtcNow;
+                                        return true;    
+                                    }
                                 }
                                 
                                 if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Session is Not Ready", Logging.Debug);
@@ -1746,8 +1749,11 @@ namespace Questor.Modules.Caching
 
                     if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady)
                     {
-                        Cache.Instance.LastInStation = DateTime.UtcNow;
-                        return true;
+                        if (!Cache.Instance.Entities.Any())
+                        {
+                            Cache.Instance.LastInStation = DateTime.UtcNow;
+                            return true;
+                        }
                     }
                     return false;
                 }

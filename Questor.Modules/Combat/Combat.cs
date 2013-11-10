@@ -1430,7 +1430,7 @@ namespace Questor.Modules.Combat
 
                         foreach (EntityCache dronePriorityEntity in _dronePriorityTargets)
                         {
-                            // Have we reached the limit of high value targets?
+                            // Have we reached the limit of low value targets?
                             if (__lowValueTargetsTargeted.Count() >= maxLowValueTargets)
                             {
                                 break;

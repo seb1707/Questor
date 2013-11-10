@@ -331,7 +331,7 @@ namespace Questor.Modules.Caching
                 return;
 
             _module.Activate(entityId);
-
+            ActivatedTimeStamp = DateTime.UtcNow;
             Cache.Instance.LastModuleTargetIDs[ItemId] = entityId;
         }
 

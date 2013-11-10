@@ -131,7 +131,7 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow > Cache.Instance.NextDockAction)
             {
                 Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + station.Name + "]", Logging.White);
-                station.WarpToAndDock();
+                station.WarpTo();
                 nextAction = DateTime.UtcNow.AddSeconds(30);
                 return false;
             }

@@ -375,7 +375,7 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 Logging.Log("Panic", "Warping to [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
                                 Cache.Instance.IsMissionPocketDone = true;
-                                station.WarpToAndDock();
+                                station.WarpTo();
                             }
                             else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 

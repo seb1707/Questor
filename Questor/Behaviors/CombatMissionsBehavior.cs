@@ -1426,7 +1426,7 @@ namespace Questor.Behaviors
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpToAndDock();
+                            station.WarpTo();
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
                             break;
                         }

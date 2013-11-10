@@ -516,7 +516,7 @@ namespace Questor.Behaviors
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             Logging.Log("DebugHangarsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpToAndDock();
+                            station.WarpTo();
                             if (_States.CurrentDebugHangarBehaviorState == DebugHangarsBehaviorState.GotoNearestStation) _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Idle;
                             break;
                         }

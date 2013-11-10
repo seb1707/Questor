@@ -3828,7 +3828,8 @@ namespace Questor.Modules.Caching
                                                                                                        .OrderByDescending(pt => !pt.IsNPCFrigate)
                                                                                                        .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                                                        .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                                       .ThenBy(pt => pt.Distance)
+                                                                                                       .ThenBy(pt => pt.IsEntityIShouldKeepShooting)
+                                                                                                       .ThenBy(pt => pt.Nearest5kDistance)
                                                                                                        .FirstOrDefault();
                         }
                     }

@@ -40,7 +40,7 @@ namespace Questor.Modules.Actions
         private static bool _bringoptionalItemMoved;
         private static bool ItemsAreBeingMoved;
         private static bool CheckCargoForBringItem;
-        private static bool CheckCargoForOptionalBringItem;
+        //private static bool CheckCargoForOptionalBringItem;
         //private bool CheckCargoForAmmo;
 
         private static DateTime _lastPulse;
@@ -207,7 +207,7 @@ namespace Questor.Modules.Actions
                     //bringOptionalItemQuantity = (int)Cache.Instance.BringOptionalMissionItemQuantity;
                     if (Settings.Instance.DebugArm) Logging.Log("Arm.Begin", "Cache.Instance.BringOptionalMissionItemQuantity is [" + Cache.Instance.BringOptionalMissionItemQuantity + "]", Logging.Debug);
                     _bringoptionalItemMoved = false;
-                    CheckCargoForOptionalBringItem = true;
+                    //CheckCargoForOptionalBringItem = true;
                     capsMoved = false;
                     //ammoMoved = false;
                     retryCount = 0;

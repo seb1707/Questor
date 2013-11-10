@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Windows.Forms.VisualStyles;
+
 namespace Questor.Modules.Activities
 {
     using System;
@@ -40,6 +42,8 @@ namespace Questor.Modules.Activities
         private int openCargoRetryNumber;
         private int AttemptsToActivateGateTimer;
         private int AttemptsToGetAwayFromGate;
+        private bool ItemsHaveBeenMoved;
+        private bool CargoHoldHasBeenStacked;
 
         //private bool _targetNull;
 
@@ -65,6 +69,9 @@ namespace Questor.Modules.Activities
             Cache.Instance.MissionLoot = false;
             Cache.Instance.normalNav = true;
             Cache.Instance.onlyKillAggro = false;
+
+            ItemsHaveBeenMoved = false;
+            CargoHoldHasBeenStacked = false;
             _currentAction++;
             return;
         }
@@ -1447,103 +1454,144 @@ namespace Questor.Modules.Activities
 
         private void DropItemAction(Actions.Action action)
         {
-            Cache.Instance.DropMode = true;
-            List<string> items = action.GetParameterValues("item");
-            string target = action.GetParameterValue("target");
-
-            int quantity;
-            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
+            try
             {
-                quantity = 1;
-            }
+                Cache.Instance.DropMode = true;
+                List<string> items = action.GetParameterValues("item");
+                string target = action.GetParameterValue("target");
 
-            bool done = items.Count == 0;
-
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
-            targets = targets.Where(i => i.IsContainer);
-            if (!targets.Any())
-            {
-                Logging.Log("MissionController.DropItem", "No target name: " + targets, Logging.Orange);
-
-                // now that we have completed this action revert OpenWrecks to false
-                Cache.Instance.DropMode = false;
-                openCargoRetryNumber = 0;
-                Nextaction();
-                return;
-            }
-
-            EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
-
-            if (closest != null && closest.Distance > (int)Distances.SafeScoopRange)
-            {
-                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                int quantity;
+                if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
-                    {
-                        Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                        closest.Approach(1000);
-                    }
+                    quantity = 1;
                 }
-            }
-            else
-            {
-                if (!done)
+
+                if (!CargoHoldHasBeenStacked)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextOpenContainerInSpaceAction)
+                    Logging.Log("MissionController.DropItem", "Stack CargoHold", Logging.Orange);
+                    if (!Cache.Instance.StackCargoHold("DropItem")) return;
+                    CargoHoldHasBeenStacked = true;
+                    return;
+                }
+
+                IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
+                if (targets.Any())
+                {
+                    Logging.Log("MissionController.DropItem", "We have [" + targets.Count() + "] entities on grid that match our target by name: [" + targets.FirstOrDefault() + "]", Logging.Orange);
+                    targets = targets.Where(i => i.IsContainer || i.GroupId == (int)Group.LargeColidableObject); //some missions (like: Onslaught - lvl1) have LCOs that can hold and take cargo, note that same mission has a LCS with the same name!
+
+                    if (!targets.Any())
                     {
-                        if (openCargoRetryNumber > 5)
-                        {
-                            Logging.Log("CombatMissionCtrl", "Drop: if (openCargoRetryNumber > 5) - error", Logging.Debug);
-                            return;
-                        }
+                        Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "] that is also a container", Logging.Orange);
 
-                        if (closest != null && closest.CargoWindow == null)
-                        {
-                            openCargoRetryNumber++;
-                            Logging.Log("MissionController.DropItem", "Open Cargo", Logging.White);
-                            closest.OpenCargo();
-                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
-                            return;
-                        }
+                        // now that we have completed this action revert OpenWrecks to false
+                        Cache.Instance.DropMode = false;
+                        Nextaction();
+                        return;
+                    }
 
-                        // Get the container that is associated with the cargo container
-                        if (closest != null)
-                        {
-                            DirectContainer container = Cache.Instance.DirectEve.GetContainer(closest.Id);
+                    EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
-                            DirectItem itemsToMove = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
-                            if (itemsToMove != null)
+                    if (closest == null)
+                    {
+                        Logging.Log("MissionController.DropItem", "closest: target named [" + target.FirstOrDefault() + "] was null" + targets, Logging.Orange);
+
+                        // now that we have completed this action revert OpenWrecks to false
+                        Cache.Instance.DropMode = false;
+                        Nextaction();
+                        return;
+                    }
+
+                    if (closest.Distance > (int)Distances.SafeScoopRange)
+                    {
+                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                        {
+                            if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                             {
-                                Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
-                                container.Add(itemsToMove, quantity);
-
-                                done = container.Items.Any(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower() && (i.Quantity >= quantity));
-                                Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                                Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
+                                closest.Approach(1000);
                             }
-                            else
+                        }
+                    }
+                    else if (Cache.Instance.MyShipEntity.Velocity < 50) //nearly stopped
+                    {
+                        if (DateTime.UtcNow > Cache.Instance.NextOpenContainerInSpaceAction)
+                        {
+                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(6, 10));
+
+                            DirectContainer container = null;
+
+                            container = Cache.Instance.DirectEve.GetContainer(closest.Id);
+
+                            if (container == null)
                             {
-                                Logging.Log("MissionController.DropItem", "Error not found Items", Logging.White);
+                                Logging.Log("MissionController.DropItem", "if (container == null)", Logging.White);
+                                return;
+                            }
+
+                            if (ItemsHaveBeenMoved)
+                            {
+                                Logging.Log("MissionController.DropItem", "We have Dropped the items: ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.White);
+                                // now that we have completed this action revert OpenWrecks to false
                                 Cache.Instance.DropMode = false;
                                 Nextaction();
                                 return;
                             }
 
-                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                            if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                            {
+                                int CurrentShipsCargoItemCount = 0;
+                                CurrentShipsCargoItemCount = Cache.Instance.CurrentShipsCargo.Items.Count();
+
+                                //DirectItem itemsToMove = null;
+                                //itemsToMove = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
+                                //if (itemsToMove == null)
+                                //{
+                                //    Logging.Log("MissionController.DropItem", "CurrentShipsCargo has [" + CurrentShipsCargoItemCount + "] items. Item We are supposed to move is: [" + items.FirstOrDefault() + "]", Logging.White);
+                                //    return;
+                                //}
+
+                                int ItemNumber = 0;
+                                foreach (DirectItem CurrentShipsCargoItem in Cache.Instance.CurrentShipsCargo.Items)
+                                {
+                                    ItemNumber++;
+                                    Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: Stacksize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
+                                    if (CurrentShipsCargoItem.TypeName.ToLower() == items.FirstOrDefault().ToLower())
+                                    {
+                                        Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] container.Capacity [" + container.Capacity + "] ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.Debug);
+                                        if (!ItemsHaveBeenMoved)
+                                        {
+                                            Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
+                                            container.Add(CurrentShipsCargoItem, quantity);
+                                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                                            ItemsHaveBeenMoved = true;
+                                            return;
+                                        }
+
+                                        return;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Logging.Log("MissionController.DropItem", "No Items: Cache.Instance.CurrentShipsCargo.Items.Any()", Logging.Debug);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    Logging.Log("MissionController.DropItem", "We are done", Logging.White);
 
-                    // now that we've completed this action revert OpenWrecks to false
-                    Cache.Instance.DropMode = false;
-                    openCargoRetryNumber = 0;
-                    Nextaction();
                     return;
                 }
-            }
 
+                Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "]", Logging.Orange);
+                // now that we have completed this action revert OpenWrecks to false
+                Cache.Instance.DropMode = false;
+                Nextaction();
+                return;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("DropItemAction", "Exception: [" + exception + "]", Logging.Debug);
+            }
             return;
         }
 

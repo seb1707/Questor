@@ -2310,6 +2310,7 @@ namespace Questor.Modules.Caching
                             result |= (GroupId == (int)Group.CargoContainer);
                             result |= (GroupId == (int)Group.SpawnContainer);
                             result |= (GroupId == (int)Group.MissionContainer);
+                            result |= (GroupId == (int)Group.DeadSpaceOverseersBelongings);
                             _isContainer = result;
                             return _isContainer ?? false;
                         }

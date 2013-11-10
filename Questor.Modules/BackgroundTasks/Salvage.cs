@@ -116,7 +116,6 @@ namespace Questor.Modules.BackgroundTasks
             int tractorsProcessedThisTick = 0;
             ModuleNumber = 0;
 
-
             //
             // Deactivate tractorbeams
             //
@@ -168,7 +167,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (tractorBeam.IsActive && (wreck == null || (wreck.Distance <= (int)Distances.SafeScoopRange && !currentWreckUnlooted)))
                 {
                     if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: IsActive [" + tractorBeam.IsActive + "] and the wreck [" + wreck.Name + "] is in SafeScoopRange [" + Math.Round(wreck.Distance / 1000, 0) + "]", Logging.Teal);
-                    tractorBeams.Remove(tractorBeam); 
+                    //tractorBeams.Remove(tractorBeam);
                     tractorBeam.Click();
                     tractorsProcessedThisTick++;
                     Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);

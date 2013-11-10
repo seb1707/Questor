@@ -4295,7 +4295,7 @@ namespace Questor.Modules.Caching
             EntityCache currentDroneTarget = null;
             if (Cache.Instance.PreferredDroneTarget != null)
             {
-                currentDroneTarget = Cache.Instance.PreferredDroneTarget;
+                currentDroneTarget = Cache.Instance.EntityById(Cache.Instance.LastDroneTargetID);
             }
             else if (Cache.Instance.Targets.Any())
             {

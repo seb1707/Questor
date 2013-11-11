@@ -90,7 +90,7 @@
                                //
                                // COURIER/DELIVERY - CALDARI - LEVEL 1
                                //
-                               //{"A Fathers Love".ToLower(), new GenericCourier()}, //lvl1
+                               {"A Fathers Love".ToLower(), new GenericCourier()}, //lvl1 note: 300m3 needed
                                //{"A Greener World".ToLower(), new GenericCourier()}, //lvl1
                                //{"Eradication".ToLower(), new GenericCourier()}, //lvl1
                                //{"Evacuation".ToLower(), new GenericCourier()}, //lvl1

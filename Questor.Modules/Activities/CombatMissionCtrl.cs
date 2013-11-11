@@ -39,7 +39,7 @@ namespace Questor.Modules.Activities
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
-        private int openCargoRetryNumber;
+        //private int openCargoRetryNumber;
         private int AttemptsToActivateGateTimer;
         private int AttemptsToGetAwayFromGate;
         private bool ItemsHaveBeenMoved;
@@ -1049,7 +1049,7 @@ namespace Questor.Modules.Activities
             Nextaction();
             return;
         }
-
+        
         private void AddWebifierByNameAction(Actions.Action action)
         {
             bool notTheClosest;

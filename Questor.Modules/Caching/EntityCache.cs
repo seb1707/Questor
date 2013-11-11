@@ -1014,6 +1014,37 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isCurrentDroneTarget;
+
+        public bool IsCurrentDroneTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isCurrentDroneTarget == null)
+                        {
+                            if (Id == Cache.Instance.LastDroneTargetID)
+                            {
+                                _isCurrentDroneTarget = true;
+                            }
+                        }
+
+                        return _isCurrentDroneTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
         private bool? _isInOptimalRange;
 
         public bool IsInOptimalRange

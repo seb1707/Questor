@@ -3827,6 +3827,7 @@ namespace Questor.Modules.Caching
                             target = Cache.Instance.DronePriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && (pt.Distance < Distance) && pt.IsActiveDroneEwarType == priorityType)
                                                                                                 || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
                                                                                                        .OrderByDescending(pt => !pt.IsNPCFrigate)
+                                                                                                       .ThenByDescending(pt => pt.IsCurrentDroneTarget)
                                                                                                        .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                                                        .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
                                                                                                        .ThenBy(pt => pt.IsEntityIShouldKeepShooting)

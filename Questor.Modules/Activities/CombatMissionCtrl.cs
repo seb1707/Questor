@@ -1458,7 +1458,7 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.DropMode = true;
                 List<string> items = action.GetParameterValues("item");
-                string target = action.GetParameterValue("target");
+                string targetName = action.GetParameterValue("target");
 
                 int quantity;
                 if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
@@ -1474,15 +1474,15 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
-                if (targets.Any())
+                IEnumerable<EntityCache> targetEntities = Cache.Instance.EntitiesByName(targetName, Cache.Instance.EntitiesOnGrid.ToList());
+                if (targetEntities.Any())
                 {
-                    Logging.Log("MissionController.DropItem", "We have [" + targets.Count() + "] entities on grid that match our target by name: [" + targets.FirstOrDefault() + "]", Logging.Orange);
-                    targets = targets.Where(i => i.IsContainer || i.GroupId == (int)Group.LargeColidableObject); //some missions (like: Onslaught - lvl1) have LCOs that can hold and take cargo, note that same mission has a LCS with the same name!
+                    Logging.Log("MissionController.DropItem", "We have [" + targetEntities.Count() + "] entities on grid that match our target by name: [" + targetName.FirstOrDefault() + "]", Logging.Orange);
+                    targetEntities = targetEntities.Where(i => i.IsContainer || i.GroupId == (int)Group.LargeColidableObject); //some missions (like: Onslaught - lvl1) have LCOs that can hold and take cargo, note that same mission has a LCS with the same name!
 
-                    if (!targets.Any())
+                    if (!targetEntities.Any())
                     {
-                        Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "] that is also a container", Logging.Orange);
+                        Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targetEntities.FirstOrDefault() + "] that is also a container", Logging.Orange);
 
                         // now that we have completed this action revert OpenWrecks to false
                         Cache.Instance.DropMode = false;
@@ -1490,11 +1490,11 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache closest = targetEntities.OrderBy(t => t.Distance).FirstOrDefault();
 
                     if (closest == null)
                     {
-                        Logging.Log("MissionController.DropItem", "closest: target named [" + target.FirstOrDefault() + "] was null" + targets, Logging.Orange);
+                        Logging.Log("MissionController.DropItem", "closest: target named [" + targetName.FirstOrDefault() + "] was null" + targetEntities, Logging.Orange);
 
                         // now that we have completed this action revert OpenWrecks to false
                         Cache.Instance.DropMode = false;
@@ -1562,7 +1562,10 @@ namespace Questor.Modules.Activities
                                         if (!ItemsHaveBeenMoved)
                                         {
                                             Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
-                                            container.Add(CurrentShipsCargoItem, quantity);
+                                            //
+                                            // THIS IS NOT WORKING - EXCEPTION/ERROR IN CLIENT... 
+                                            //
+                                            //container.Add(CurrentShipsCargoItem, quantity);
                                             Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
                                             ItemsHaveBeenMoved = true;
                                             return;

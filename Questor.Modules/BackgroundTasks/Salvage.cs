@@ -320,7 +320,7 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private static void TargetWrecks()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
+            if (DateTime.UtcNow < Cache.Instance.NextTargetAction || !Cache.Instance.OpenWrecks)
             {
                 if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: Cache.Instance.NextTargetAction is still in the future, waiting", Logging.Teal);
                 return;

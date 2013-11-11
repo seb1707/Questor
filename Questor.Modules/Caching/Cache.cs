@@ -4317,46 +4317,6 @@ namespace Questor.Modules.Caching
             //}
 
             //
-            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
-            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
-            //
-
-            // Do we have ANY warp scrambling entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY ECM entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToDroneTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY tracking disrupting entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Neutralizing entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Target Painting entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Webbing entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            //
             // if currentTarget set to something (not null) and it is actually an entity...
             //
             if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
@@ -4411,6 +4371,46 @@ namespace Questor.Modules.Caching
                 }
                 #endregion
             }
+
+            //
+            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
+            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
+            //
+
+            // Do we have ANY warp scrambling entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToDronePriorityTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY ECM entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToDroneTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY tracking disrupting entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY Neutralizing entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToDronePriorityTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY Target Painting entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToDronePriorityTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToDronePriorityTargetList, distance) != null)
+                return true;
+
+            // Do we have ANY Webbing entities targeted starting with currentTarget
+            // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToDronePriorityTargetList, distance) != null)
+                return true;
 
             #region Get the closest drone priority target
             //

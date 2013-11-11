@@ -771,6 +771,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }    
                             }
                         }
+
                         Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
                     }
                     else

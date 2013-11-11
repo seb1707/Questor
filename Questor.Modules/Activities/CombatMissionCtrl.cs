@@ -1585,7 +1585,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "]", Logging.Orange);
+                Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targetEntities.FirstOrDefault() + "]", Logging.Orange);
                 // now that we have completed this action revert OpenWrecks to false
                 Cache.Instance.DropMode = false;
                 Nextaction();

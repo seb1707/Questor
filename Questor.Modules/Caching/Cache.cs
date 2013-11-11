@@ -3777,6 +3777,7 @@ namespace Questor.Modules.Caching
                             target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && pt.Distance < Distance && pt.IsActivePrimaryWeaponEwarType == priorityType && !pt.IsTooCloseTooFastTooSmallToHit)
                                                                                             || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.PrimaryWeaponPriorityLevel == priorityType && !pt.IsTooCloseTooFastTooSmallToHit))
                                                                                     .OrderByDescending(pt => pt.IsReadyToShoot)
+                                                                                    .ThenByDescending(pt => pt.IsCurrentTarget)
                                                                                     .ThenByDescending(pt => !pt.IsNPCFrigate)
                                                                                     .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                                     .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
@@ -3966,8 +3967,6 @@ namespace Questor.Modules.Caching
             // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
             //
 
-            if (CheckForPrimaryWeaponPriorityTargetsInOrder(currentTarget, distance)) return true;
-
             //
             // if currentTarget set to something (not null) and it is actually an entity...
             //
@@ -4077,7 +4076,8 @@ namespace Questor.Modules.Caching
                 #endregion
             }
 
-            if (currentTarget == null) 
+            if (CheckForPrimaryWeaponPriorityTargetsInOrder(currentTarget, distance)) return true;
+
             #region Get the closest primary weapon priority target
             //
             // Get the closest primary weapon priority target

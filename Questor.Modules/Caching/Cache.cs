@@ -3981,8 +3981,9 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Priority", Logging.Teal);
                 if (PrimaryWeaponPriorityEntities.Any(pt => pt.IsReadyToShoot 
-                                                        && pt.Distance < Cache.Instance.MaxRange 
-                                                        && pt.Id == currentTarget.Id
+                                                        && pt.Distance < Cache.Instance.MaxRange
+                                                        && pt.IsCurrentTarget
+                                                        && pt.IsEntityIShouldKeepShooting
                                                         && !currentTarget.IsHigherPriorityPresent
                                                         && (!currentTarget.IsNPCFrigate 
                                                             || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))))
@@ -4076,6 +4077,7 @@ namespace Questor.Modules.Caching
                 #endregion
             }
 
+            if (currentTarget == null) 
             #region Get the closest primary weapon priority target
             //
             // Get the closest primary weapon priority target
@@ -4089,6 +4091,7 @@ namespace Questor.Modules.Caching
                                                                             && p.IsReadyToShoot
                                                                             && ((!p.IsNPCFrigate && !p.IsFrigate ) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
                                                                            .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                           .ThenByDescending(pt =>  pt.IsCurrentTarget)
                                                                            .ThenByDescending(pt => pt.IsInOptimalRange)
                                                                            .ThenByDescending(pt => pt.IsEwarTarget)
                                                                            .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)

@@ -983,6 +983,37 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isCurrentTarget;
+
+        public bool IsCurrentTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isCurrentTarget == null)
+                        {
+                            if (Cache.Instance.CurrentWeaponTarget() != null)
+                            {
+                                _isCurrentTarget = true;
+                            }
+                        }
+
+                        return _isCurrentTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
         private bool? _isInOptimalRange;
 
         public bool IsInOptimalRange

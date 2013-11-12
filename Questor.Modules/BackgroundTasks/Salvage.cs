@@ -222,7 +222,7 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
-                    if (DateTime.UtcNow > tractorBeam.ActivatedTimeStamp.AddSeconds(5))
+                    if (DateTime.UtcNow > tractorBeam.ActivatedTimeStamp.AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
                     {
                         //tractorBeams.Remove(tractorBeam);
                         tractorBeam.Activate(wreck.Id);

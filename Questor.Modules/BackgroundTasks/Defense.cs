@@ -740,7 +740,7 @@ namespace Questor.Modules.BackgroundTasks
                         deactivate = true;
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60))
+                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
                     {
                         deactivate = true;
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);

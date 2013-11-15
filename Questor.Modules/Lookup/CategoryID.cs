@@ -32,5 +32,6 @@ namespace Questor.Modules.Lookup
         Structure = 23,
         Reaction = 24,
         Asteroid = 25,
+        
     }
 }

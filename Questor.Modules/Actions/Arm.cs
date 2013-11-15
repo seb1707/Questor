@@ -48,7 +48,7 @@ namespace Questor.Modules.Actions
 
         private static int bringItemQuantity;
         //private static int bringOptionalItemQuantity;
-        // Bleh, we don't want this here, can we move it to cache?
+        // we don't want this here, can we move it to cache?
         public static long AgentId { get; set; }
 
         public static List<Ammo> AmmoToLoad { get; private set; }
@@ -114,7 +114,7 @@ namespace Questor.Modules.Actions
                 }
                 else
                 {
-                    Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Mangar at all!  Disabling fitting manager.", Logging.Orange);
+                    Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Manager at all!  Disabling fitting manager.", Logging.Orange);
                     DefaultFittingChecked = true;
                     DefaultFittingFound = false;
                     return true;
@@ -587,7 +587,7 @@ namespace Questor.Modules.Actions
 
                             if (!Cache.Instance.OpenFittingManagerWindow("Arm.LoadFitting")) return;
 
-                            Logging.Log("Arm.LoadFitting", "Looking for fitting " + Cache.Instance.Fitting, Logging.White);
+                            Logging.Log("Arm.LoadFitting", "Looking for saved fitting named: [" + Cache.Instance.Fitting + " ]", Logging.White);
 
                             foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
                             {
@@ -596,7 +596,7 @@ namespace Questor.Modules.Actions
                                 if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
                                 {
                                     Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                                    Logging.Log("Arm.LoadFitting", "Found fitting [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Logging.Log("Arm.LoadFitting", "Found saved fitting named: [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
 
                                     //switch to the requested fitting for the current mission
                                     fitting.Fit();

@@ -4028,9 +4028,9 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId+ "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                     }
-                    Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(Id) + "]", Logging.Teal);
+                    Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     _directEntity.Orbit(range);
                 }

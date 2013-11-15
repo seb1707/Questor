@@ -195,7 +195,7 @@ namespace Questor.Modules.BackgroundTasks
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
                 if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we should not tractor it.
                 {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams.Activating", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: dont tractor a wreck that is moving", Logging.Debug);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams.Activating", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: do not tractor a wreck that is moving", Logging.Debug);
                     continue;
                 }
 
@@ -792,7 +792,7 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
-                //add cont proceed thistick
+                //add cont proceed this tick
                 //if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
                 //{
                 //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.White);

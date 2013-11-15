@@ -133,7 +133,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
 
-                            // this needs a counter and an abort after 10 tries or so... or itll keep checking the cargo for a script that may not exist
+                            // this needs a counter and an abort after 10 tries or so... or it will keep checking the cargo for a script that may not exist
                             // every second we are in space!
                             if (scriptToLoad != null)
                             {
@@ -532,7 +532,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         //if (module.Damage > DamageThresholdToStopOverloading)
                         //{
-                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Diable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
+                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Disable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
                         //    return module.ToggleOverload;
                         //    return false;
                         //}
@@ -878,7 +878,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we havent moved yet after jumping or undocking... waiting.", Logging.White);
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
                 //
                 // we reset this datetime stamp to -7 days when we jump, and set it to DateTime.UtcNow when we move (to deactivate jump cloak!)
                 // once we have moved (warp, orbit, dock, etc) this should be false and before that it will be true

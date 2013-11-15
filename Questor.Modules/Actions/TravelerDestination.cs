@@ -33,6 +33,7 @@ namespace Questor.Modules.Actions
     public class SolarSystemDestination : TravelerDestination
     {
         private DateTime _nextSolarSystemAction;
+        private static int _undockAttempts = 0;
 
         public SolarSystemDestination(long solarSystemId)
         {
@@ -121,9 +122,9 @@ namespace Questor.Modules.Actions
                 // We are in a station, but not the correct station!
                 if (DateTime.UtcNow > Cache.Instance.NextUndockAction)
                 {
-                    if (_undockAttempts > 10)
+                    if (_undockAttempts + Cache.Instance.RandomNumber(0, 4) > 10) //If we are having to retry at all there is likely something very wrong. Make it non-obvious if we do have to restart by restarting at diff intervals.
                     {
-                        Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, we have tried to undock [" + _undockAttempts + "] times - and it is evidentally not working (lag?) - restarting Questor (and EVE)", Logging.Green);
+                        Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, we have tried to undock [" + _undockAttempts + "] times - and it is evidentially not working (lag?) - restarting Questor (and EVE)", Logging.Green);
                         Cache.Instance.SessionState = "Quitting"; //this will perform a graceful restart
                     }
 
@@ -152,7 +153,7 @@ namespace Questor.Modules.Actions
                         //else Logging.Log("TravelerDestination.StationDestination: UndockPrefix is not configured");
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                         _undockAttempts++;
-                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds + Cache.Instance.RandomNumber(0, 20));
                         return false;
                     }
 
@@ -240,6 +241,7 @@ namespace Questor.Modules.Actions
     public class BookmarkDestination : TravelerDestination
     {
         private DateTime _nextBookmarkAction;
+        private static int _undockAttempts = 0;
 
         public BookmarkDestination(DirectBookmark bookmark)
         {
@@ -285,31 +287,44 @@ namespace Questor.Modules.Actions
                 if (bookmark.ItemId.HasValue && bookmark.ItemId == Cache.Instance.DirectEve.Session.StationId)
                     return true;
 
-                if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                // We are in a station, but not the correct station!
+                if (DateTime.UtcNow > Cache.Instance.NextUndockAction)
                 {
-                    // We are apparently in a station that is incorrect
-                    Logging.Log("TravelerDestination.BookmarkDestination", "This is not the destination station, undocking", Logging.Green);
+                    if (_undockAttempts + Cache.Instance.RandomNumber(0, 4) > 10) //If we are having to retry at all there is likely something very wrong. Make it non-obvious if we do have to restart by restarting at diff intervals.
+                    {
+                        Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, we have tried to undock [" + _undockAttempts + "] times - and it is evidentially not working (lag?) - restarting Questor (and EVE)", Logging.Green);
+                        Cache.Instance.SessionState = "Quitting"; //this will perform a graceful restart
+                    }
 
-                    //if (!string.IsNullOrEmpty(Settings.Instance.UndockPrefix))
-                    //{
-                    //    var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix).OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
-                    //    //var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).OrderByDescending(b => b.CreatedOn).Where(b => b.Title.Contains(Settings.Instance.UndockPrefix)); //this does not handle more than one station undock bookmark per system and WILL likely warp to the wrong bm in that case
-                    //    //var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.Title.Contains(Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0)) && b.Title.Contains(Settings.Instance.UndockPrefix));
-                    //    if (bookmarks != null && bookmarks.Count() > 0)
-                    //    {
-                    //        undockBookmark = bookmarks.FirstOrDefault();
-                    //        if (undockBookmark.X == null || undockBookmark.Y == null || undockBookmark.Z == null)
-                    //        {
-                    //            Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark [" + undockBookmark.Title + "] is unusable: it has no coords");
-                    //            undockBookmark = null;
-                    //        }
-                    //        else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark [" + undockBookmark.Title + "] is usable: it has coords");
-                    //    }
-                    //    else Logging.Log("TravelerDestination.BookmarkDestination","you do not have an undock bookmark that contains [" + Settings.Instance.UndockPrefix + "] in local");
-                    //}
-                    //else Logging.Log("TravelerDestination.BookmarkDestination","UndockPrefix is not configured");
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                    nextAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    {
+                        Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, undocking from [" + Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0) + "]", Logging.Green);
+
+                        //if (!string.IsNullOrEmpty(Settings.Instance.UndockPrefix))
+                        //{
+                        //    var bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix).OrderByDescending(b => b.CreatedOn).Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                        //    //var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).Where(b => b.Title.Contains(Settings.Instance.UndockPrefix)); //this does not handle more than one station undock bookmark per system and WILL likely warp to the wrong bm in that case
+                        //    //var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).Where(b => b.Title.Contains(Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0)) && b.Title.Contains(Settings.Instance.UndockPrefix));
+                        //    //var bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.Title.Contains(Cache.Instance.DirectEve.GetLocationName(Cache.Instance.DirectEve.Session.StationId ?? 0)) && b.Title.Contains(Settings.Instance.UndockPrefix));
+                        //    if (bookmarks != null && bookmarks.Count() > 0)
+                        //    {
+                        //        localUndockBookmark = bookmarks.FirstOrDefault();
+                        //        if (localUndockBookmark.X == null || localUndockBookmark.Y == null || localUndockBookmark.Z == null)
+                        //        {
+                        //            Logging.Log("TravelerDestination.StationDestination: undock bookmark [" + localUndockBookmark.Title + "] is unusable: it has no coords");
+                        //            localUndockBookmark = null;
+                        //        }
+                        //        else Logging.Log("TravelerDestination.StationDestination: undock bookmark [" + localUndockBookmark.Title + "] is usable: it has coords");
+                        //   }
+                        //    else Logging.Log("TravelerDestination.StationDestination: you do not have an undock bookmark that has the prefix: " + Settings.Instance.UndockPrefix + " in local"); //+ Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
+                        //}
+                        //else Logging.Log("TravelerDestination.StationDestination: UndockPrefix is not configured");
+                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        _undockAttempts++;
+                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds + Cache.Instance.RandomNumber(0, 20));
+                        return false;
+                    }
+
                     return false;
                 }
                 return false;
@@ -414,6 +429,7 @@ namespace Questor.Modules.Actions
     public class MissionBookmarkDestination : TravelerDestination
     {
         private DateTime _nextMissionBookmarkAction;
+        private static int _undockAttempts = 0;
 
         public MissionBookmarkDestination(DirectAgentMissionBookmark bookmark)
         {

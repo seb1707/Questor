@@ -193,7 +193,7 @@ namespace Questor.Modules.BackgroundTasks
             {
                 WreckNumber++;
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
-                if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we shouldnt tractor it.
+                if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we should not tractor it.
                 {
                     if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams.Activating", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: dont tractor a wreck that is moving", Logging.Debug);
                     continue;
@@ -230,17 +230,27 @@ namespace Questor.Modules.BackgroundTasks
 
                         Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
                         Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                        if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
-                        {
-                            return;
-                        }    
+                        break; //we do not need any more tractors on this wreck
                     }
-                    
-                    continue;
+
+                    return;
                 }
-                
-                return;
+
+                if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
+                {
+                    //
+                    // if we have processed 'enough' wrecks this tick, return
+                    //
+                    return;
+                }
+
+                //
+                // move on to the next wreck
+                //
+                continue;
             }
+
+            return;
         }
 
         /// <summary>

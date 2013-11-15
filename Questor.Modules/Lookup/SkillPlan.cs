@@ -59,12 +59,12 @@ namespace Questor.Modules.Lookup
             //if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
 
             // List its items
-            IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+            IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
             if (!items.Any())
             {
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in ItemHangar", Logging.Debug);
                 //if (!Cache.Instance.ReadyAmmoHangar("DoWehaveSkillBook")) return false;
-                items = Cache.Instance.AmmoHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+                items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                 if (!items.Any())
                 {
                     if(Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in AmmoHangar", Logging.Debug);
@@ -260,11 +260,11 @@ namespace Questor.Modules.Lookup
                     //
                     if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
 
-                    IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+                    IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                     if (!items.Any())
                     {
                         if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in ItemHangar", Logging.Debug);
-                        items = Cache.Instance.AmmoHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+                        items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                         if (!items.Any())
                         {
                             if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar", Logging.Debug);
@@ -408,11 +408,11 @@ namespace Questor.Modules.Lookup
                 //
                 if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
 
-                IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+                IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                 if (!items.Any())
                 {
                     if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in ItemHangar", Logging.Debug);
-                    items = Cache.Instance.AmmoHangar.Items.Where(k => k.GroupId == (int)Group.SkillBooks).ToList();
+                    items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                     if (!items.Any())
                     {
                         if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar", Logging.Debug);

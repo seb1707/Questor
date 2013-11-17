@@ -614,7 +614,7 @@ namespace Questor.Modules.Caching
                     }
                     else
                     {
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is involved in a war, be carefull", Logging.Orange);
+                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is involved in a war, be careful", Logging.Orange);
                     }
 
                     return _isCorpInWar;
@@ -681,7 +681,7 @@ namespace Questor.Modules.Caching
         public int OrbitDistance { get; set; }
 
         /// <summary>
-        ///   Current OptimalRange during the mission (effected by ewar)
+        ///   Current OptimalRange during the mission (effected by e-war)
         /// </summary>
         public int OptimalRange { get; set; }
 
@@ -3554,7 +3554,7 @@ namespace Questor.Modules.Caching
                     _currentWeaponTarget = Cache.Instance.EntityById(weapon.TargetId);
 
                     //
-                    // in a perfect world we'd always use the same guns / missiles across the board, for those that dont this will at least come up with sane numbers
+                    // in a perfect world we'd always use the same guns / missiles across the board, for those that do not this will at least come up with sane numbers
                     //
                     if (OptimalOfWeapon <= 1)
                     {
@@ -3620,7 +3620,7 @@ namespace Questor.Modules.Caching
                                                                         .ThenByDescending(t => t.IsTargetedBy)                                         // if something does not target us it's not too interesting
                                                                         .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                           // WarpScram over Webs over any other EWAR
                                                                         .ThenByDescending(t => t.Id == currentWeaponId)                                // Lets keep shooting
-                                                                        .ThenByDescending(t => t.Id == preferredTargetId)                              // Keep the preferred target so we dont switch our targets too often
+                                                                        .ThenByDescending(t => t.Id == preferredTargetId)                              // Keep the preferred target so we do not switch our targets too often
                                                                         .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget)   // Shoot targets that are in armor!
                                                                         .ThenBy(t => t.Nearest5kDistance);
 
@@ -3710,13 +3710,13 @@ namespace Questor.Modules.Caching
                         _bestDroneTargets = _bestDroneTargets.Where(t => t.Distance < distance)
                                                                   .Where(t => t.Distance < Cache.Instance.MaxDroneRange)
                                                                   .OrderByDescending(t => t.isPreferredDroneTarget)
-                                                                  .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
-                                                                  .ThenByDescending(t => t.DronePriorityLevel)
                                                                   .ThenByDescending(t => t.IsTargetedBy)                                      // if something does not target us it's not too interesting
                                                                   .ThenByDescending(t => t.IsTarget || t.IsTargeting)                         // is the entity already targeted?
                                                                   .ThenByDescending(t => t.Id == Cache.Instance.LastDroneTargetID)            // Keep current target
-                                                                  .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we dont switch our targets too often
-                                                                  .ThenByDescending(t => t.IsEntityIShouldKeepShooting && t.IsLowValueTarget) // Shoot targets that are in armor!
+                                                                  .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we do not switch our targets too often
+                                                                  .ThenByDescending(t => t.IsEntityIShouldKeepShootingWithDrones)             // Shoot targets that are in armor!
+                                                                  .ThenByDescending(t => t.DronePriorityLevel)
+                                                                  .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || (Settings.Instance.DronesKillHighValueTargets && t.IsBattleship))
                                                                   .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                                   .ThenBy(t => t.Nearest5kDistance);
 
@@ -3828,9 +3828,9 @@ namespace Questor.Modules.Caching
                                                                                                 || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
                                                                                                        .OrderByDescending(pt => !pt.IsNPCFrigate)
                                                                                                        .ThenByDescending(pt => pt.IsCurrentDroneTarget)
-                                                                                                       .ThenByDescending(pt => pt.IsInOptimalRange)
+                                                                                                       .ThenByDescending(pt => pt.IsInDroneRange)
+                                                                                                       .ThenBy(pt => pt.IsEntityIShouldKeepShootingWithDrones)
                                                                                                        .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                                       .ThenBy(pt => pt.IsEntityIShouldKeepShooting)
                                                                                                        .ThenBy(pt => pt.Nearest5kDistance)
                                                                                                        .FirstOrDefault();
                         }
@@ -4219,7 +4219,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            #region If we dont have a high value target but we do have a low value target
+            #region If we do not have a high value target but we do have a low value target
             if (lowValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking use Low Value", Logging.Teal);
@@ -4231,7 +4231,7 @@ namespace Questor.Modules.Caching
             #endregion
 
             if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
-            #region If we didnt find anything at all (wtf!?!?)
+            #region If we did not find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestTarget)
             {
                 if (Cache.Instance.Targets.Any())
@@ -4342,14 +4342,14 @@ namespace Questor.Modules.Caching
                     Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
-                #endregion Is our current target any other primary weapon priority target?
+                #endregion Is our current target any other drone priority target?
 
                 #region Is our current target already in armor? keep shooting the same target if so...
                 //
                 // Is our current target already in armor? keep shooting the same target if so...
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
-                if (currentDroneTarget.IsEntityIShouldKeepShooting)
+                if (currentDroneTarget.IsEntityIShouldKeepShootingWithDrones)
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
@@ -4509,7 +4509,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            #region prefer to gran a lowvaluetarget, if none avail use a high value target
+            #region prefer to grab a lowvaluetarget, if none avail use a high value target
             if (lowValueTarget != null || highValueTarget != null)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking use High Value", Logging.Teal);
@@ -4531,7 +4531,7 @@ namespace Questor.Modules.Caching
             #endregion
 
             if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget: none", "Could not determine a suitable Drone target", Logging.Debug);
-            #region If we didnt find anything at all (wtf!?!?)
+            #region If we did not find anything at all (wtf!?!?)
             if (Settings.Instance.DebugGetBestDroneTarget)
             {
                 if (Cache.Instance.Targets.Any())
@@ -6729,7 +6729,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (GetShipsDroneBayAttempts > 10) //we her havent located a dronebay in over 10 attempts, we are not going to
+                if (GetShipsDroneBayAttempts > 10) //we her have not located a dronebay in over 10 attempts, we are not going to
                 {
                     Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.DebugHangars);
                     return true;
@@ -7321,7 +7321,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
             {
-                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existant repair facility.", Logging.Orange);
+                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
                 return true;
             }
 
@@ -7434,7 +7434,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
             {
-                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existant repair facility.", Logging.Orange);
+                Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
                 return true;
             }
 

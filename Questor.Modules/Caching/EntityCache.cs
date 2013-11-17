@@ -1924,6 +1924,47 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isEntityIShouldKeepShootingWithDrones;
+
+        public bool IsEntityIShouldKeepShootingWithDrones
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isEntityIShouldKeepShootingWithDrones == null)
+                        {
+                            //
+                            // Is our current target already in armor? keep shooting the same target if so...
+                            //
+                            if (IsReadyToShoot
+                                && IsInDroneRange 
+                                && !IsLargeCollidable
+                                && ((IsFrigate || IsNPCFrigate) || Settings.Instance.DronesKillHighValueTargets)
+                                && ShieldPct * 100 < 80)
+                            {
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("EntityCache.IsEntityIShouldKeepShootingWithDrones", "[" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + " GroupID [" + GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                                _isEntityIShouldKeepShootingWithDrones = true;
+                                return _isEntityIShouldKeepShootingWithDrones ?? true;
+                            }
+                        }
+
+                        return _isEntityIShouldKeepShootingWithDrones ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("EntityCache.IsEntityIShouldKeepShooting", "Exception: [" + ex + "]", Logging.Debug);
+                }
+
+                return false;
+            }
+        }
+
         private bool? _isSentry;
 
         public bool IsSentry

@@ -303,7 +303,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            Cache.Instance.OpenWrecks = false;
+            if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
 
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
@@ -447,7 +447,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            Cache.Instance.OpenWrecks = false;
+            if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
 
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:      Cache.Instance.AgentStationId [" + Cache.Instance.AgentStationID + "]", Logging.White);
             if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation:  Cache.Instance.AgentSolarSystemId [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
@@ -542,7 +542,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            Cache.Instance.OpenWrecks = false;
+            if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
 
             /*
             if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)

@@ -378,7 +378,7 @@ namespace Questor.Behaviors
 
                     if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) return;
                     Cache.Instance.SalvageAll = true;
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                     if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {
@@ -498,7 +498,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatHelperBehaviorState.Traveler:
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     List<int> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {

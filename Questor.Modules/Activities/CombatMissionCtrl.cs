@@ -1609,7 +1609,7 @@ namespace Questor.Modules.Activities
 
                 // if we are not generally looting we need to re-enable the opening of wrecks to
                 // find this LootItems we are looking for
-                if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                 int quantity;
                 if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
@@ -1738,7 +1738,7 @@ namespace Questor.Modules.Activities
 
             // if we are not generally looting we need to re-enable the opening of wrecks to
             // find this LootItems we are looking for
-            if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+            if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
             Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
             if (!Settings.Instance.LootEverything)
@@ -2086,6 +2086,9 @@ namespace Questor.Modules.Activities
                     // Reset pocket information
                     _currentAction = 0;
                     Cache.Instance.IsMissionPocketDone = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
+                    if (!Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    
                     Cache.Instance.IgnoreTargets.Clear();
                     Statistics.PocketObjectStatistics(Cache.Instance.Objects.ToList());
                     _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;

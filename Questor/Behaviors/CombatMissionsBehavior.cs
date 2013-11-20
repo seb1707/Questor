@@ -1068,7 +1068,7 @@ namespace Questor.Behaviors
                         }
                     }
 
-                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     if (_States.CurrentArmState == ArmState.Idle)
                         _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
@@ -1116,7 +1116,7 @@ namespace Questor.Behaviors
                     if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
-                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
                     EntityCache deadlyNPC = Cache.Instance.PotentialCombatTargets.FirstOrDefault();
@@ -1216,7 +1216,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.SalvageUseGate:
-                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                     if (Cache.Instance.AccelerationGates == null || !Cache.Instance.AccelerationGates.Any())
                     {
@@ -1266,7 +1266,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.SalvageNextPocket:
-                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
                     if (distance > (int)Distances.NextPocketDistance)
                     {

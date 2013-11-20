@@ -378,7 +378,7 @@ namespace Questor.Behaviors
 
                     if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) return;
                     Cache.Instance.SalvageAll = true;
-                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                     if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {

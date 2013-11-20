@@ -136,7 +136,7 @@ namespace Questor.Modules.Activities
                 DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                 if (bookmark != null)
                 {
-                    Logging.Log("CombatMissionCtrl", "salvaging bookmark forthis pocket is done [" + bookmark.Title + "]", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl", "salvaging bookmark for this pocket is done [" + bookmark.Title + "]", Logging.Teal);
                     return true;
                 }
 
@@ -222,7 +222,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl",
                                     "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error",
                                     Logging.Teal);
-                        if (optional) //if this action has the optional paramater defined as true then we are done if we cant find the gate
+                        if (optional) //if this action has the optional parameter defined as true then we are done if we cant find the gate
                         {
                             DoneAction();
                         }
@@ -336,7 +336,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (closest.Distance > (int)Distances.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
+                if (closest.Distance > (int)Distances.WarptoDistance)//we must be outside warpto distance, but we are likely in a DeadSpace so align to the target
                 {
                     // We cant warp if we have drones out - but we are aligning not warping so we do not care
                     //if (Cache.Instance.ActiveDrones.Count() > 0)
@@ -1150,7 +1150,7 @@ namespace Questor.Modules.Activities
                     {
                         if (target.IsTargetedBy && target.IsAttacking)
                         {
-                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "UN-Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater (and kill action being complete)", Logging.Teal);
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "UN-Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers parameter (and kill action being complete)", Logging.Teal);
                             Cache.Instance.IgnoreTargets.Remove(target.Name.Trim());
                         }
                     }
@@ -1165,7 +1165,7 @@ namespace Questor.Modules.Activities
                 {
                     if (target.IsTargetedBy && target.IsAttacking)
                     {
-                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
+                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers parameter", Logging.Teal);
                         Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
                     }    
                 }
@@ -1264,7 +1264,7 @@ namespace Questor.Modules.Activities
                         }
                     }
                     //
-                    // getbesttarget below will choose to assign prioritytargets over preferred targets, so we might as well wait... (and not approach the wrong target)
+                    // GetBestTarget below will choose to assign PriorityTargets over preferred targets, so we might as well wait... (and not approach the wrong target)
                     //
                 }
                 else 
@@ -1555,7 +1555,7 @@ namespace Questor.Modules.Activities
                                 foreach (DirectItem CurrentShipsCargoItem in Cache.Instance.CurrentShipsCargo.Items)
                                 {
                                     ItemNumber++;
-                                    Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: Stacksize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
+                                    Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: StackSize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
                                     if (CurrentShipsCargoItem.TypeName.ToLower() == items.FirstOrDefault().ToLower())
                                     {
                                         Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] container.Capacity [" + container.Capacity + "] ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.Debug);

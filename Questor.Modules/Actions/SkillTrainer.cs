@@ -8,8 +8,8 @@ using Questor.Modules.States;
 namespace Questor.Modules.Actions
 {
     using System;
-    using System.Collections.Generic;
-    using System.Windows.Forms;
+    //using System.Collections.Generic;
+    //using System.Windows.Forms;
     using Questor.Modules.Logging;
     
     public static class SkillTrainerClass

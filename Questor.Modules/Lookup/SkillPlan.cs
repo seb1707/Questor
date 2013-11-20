@@ -108,7 +108,7 @@ namespace Questor.Modules.Lookup
                 {
                     //
                     // can we assume that the skill plan file being read is is from EveMon (thus valid)?
-                    // can we verify that the file we are reading is infact a skill plan!?! 
+                    // can we verify that the file we are reading is in fact a skill plan!?! 
                     // err maybe we need to verify that each line contains a skill? 
                     //
                     string line;

@@ -4300,7 +4300,8 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.EntitiesOnGrid.Any(i => i.IsCurrentDroneTarget))
             {
-                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsCurrentDroneTarget);    
+                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsCurrentDroneTarget);
+
             }
             
             if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
@@ -4324,7 +4325,7 @@ namespace Questor.Modules.Caching
             //
             if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
             {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentDroneTarget", "We have a target, testing conditions", Logging.Teal);
+                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentDroneTarget", "We have a currentTarget [" + currentDroneTarget.Name + "][" + currentDroneTarget.MaskedId + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k], testing conditions", Logging.Teal);
 
                 #region Is our current target any other drone priority target?
                 //
@@ -4350,7 +4351,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
                 if (currentDroneTarget.IsEntityIShouldKeepShootingWithDrones)
                 {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
+                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 80% shields, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
                     Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;

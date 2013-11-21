@@ -15,7 +15,7 @@
       <damagetype>EM</damagetype>
 	  <action name="LogWhatIsOnGrid"</> <!-- logs the details of all on grid entities to the console log -->
 
-	  <action name="ActivateBastion"> <!-- initiate movement to the "target" and fight only those NPCs that target you while you are on the way, process no other actions until you reach the target-->
+	  <action name="ActivateBastion">
         <parameter name="DeactivateAfterSeconds" value="5" /> <!-- time in seconds before we deactivate bastion mode, keep in mind they have a 60 sec cycle time -->
       </action>
 	  

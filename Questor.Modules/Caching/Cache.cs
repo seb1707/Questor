@@ -4297,9 +4297,9 @@ namespace Questor.Modules.Caching
 
             EntityCache currentDroneTarget = null;
 
-            if (Cache.Instance.LastDroneTargetID != 0)
+            if (Cache.Instance.EntitiesOnGrid.Any(i => i.IsCurrentDroneTarget))
             {
-                currentDroneTarget = Cache.Instance.EntityById(Cache.Instance.LastDroneTargetID);    
+                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsCurrentDroneTarget);    
             }
             
             if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
@@ -4331,7 +4331,7 @@ namespace Questor.Modules.Caching
                 //
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
                 if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot
-                                                        && pt.Nearest5kDistance < Cache.Instance.MaxRange
+                                                        && pt.Nearest5kDistance < Cache.Instance.MaxDroneRange
                                                         && pt.Id == currentDroneTarget.Id
                                                         && !currentDroneTarget.IsHigherPriorityPresent))
                 {

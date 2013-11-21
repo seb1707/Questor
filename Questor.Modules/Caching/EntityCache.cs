@@ -3998,6 +3998,16 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                     }
+
+                    //we cant move in bastion mode, do not try
+                    List<ModuleCache> bastionModules = null;
+                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                    if (bastionModules.Any(i => i.IsActive))
+                    {
+                        Logging.Log("EntityCache.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate Gate", Logging.Debug);
+                        return;
+                    }
+
                     _directEntity.Activate();
                     Cache.Instance.LastInWarp = DateTime.UtcNow;
                     Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
@@ -4023,6 +4033,16 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
+
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                        if (bastionModules.Any(i => i.IsActive))
+                        {
+                            Logging.Log("EntityCache.Approach", "BastionMode is active, we cannot move, aborting attempt to Approach", Logging.Debug);
+                            return;
+                        }
+
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
                     }
@@ -4047,6 +4067,16 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
+
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                        if (bastionModules.Any(i => i.IsActive))
+                        {
+                            Logging.Log("EntityCache.Approach", "BastionMode is active, we cannot move, aborting attempt to Approach", Logging.Debug);
+                            return;
+                        }
+
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
                         //_directEntity.Approach();
@@ -4071,6 +4101,16 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId+ "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                     }
+
+                    //we cant move in bastion mode, do not try
+                    List<ModuleCache> bastionModules = null;
+                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                    if (bastionModules.Any(i => i.IsActive))
+                    {
+                        Logging.Log("EntityCache.Orbit", "BastionMode is active, we cannot move, aborting attempt to Orbit", Logging.Debug);
+                        return;
+                    }
+
                     Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     _directEntity.Orbit(range);
@@ -4094,7 +4134,16 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.WarpTo", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            }
+
+                            //we cant move in bastion mode, do not try
+                            List<ModuleCache> bastionModules = null;
+                            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                            if (bastionModules.Any(i => i.IsActive))
+                            {
+                                Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
+                                return;
                             }
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;

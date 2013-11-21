@@ -192,6 +192,19 @@ namespace Questor.Modules.Activities
 
         private void ActivateAction(Actions.Action action)
         {
+            if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
+                return;
+
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
+
             bool optional;
             if (!bool.TryParse(action.GetParameterValue("optional"), out optional))
             {
@@ -658,6 +671,16 @@ namespace Questor.Modules.Activities
             if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
                 return;
 
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.MoveToBackground", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
+
             if (Cache.Instance.NormalApproach)
             {
                 Cache.Instance.NormalApproach = false;
@@ -705,6 +728,16 @@ namespace Questor.Modules.Activities
         {
             if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
                 return;
+
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.MoveTo", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
 
             if (Cache.Instance.NormalApproach)
             {

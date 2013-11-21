@@ -933,6 +933,42 @@ namespace Questor.Modules.Activities
             _waitingSince = DateTime.UtcNow;
             return;
         }
+        private void ActivateBastionAction(Actions.Action action)
+        {
+            bool _done = false;
+
+            if (Cache.Instance.Modules.Any())
+            {
+                List<ModuleCache> bastionModules = null;
+                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                if (!bastionModules.Any() || bastionModules.Any(i => i.IsActive))
+                {
+                    _done = true;
+                }    
+            }
+            
+            if (_done)
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ActivateBastion Action completed.", Logging.Teal);
+
+                // Nothing has targeted us in the specified timeout
+                _waiting = false;
+                Nextaction();
+                return;
+            }
+
+            // Default timeout is 60 seconds
+            int DeactivateAfterSeconds;
+            if (!int.TryParse(action.GetParameterValue("DeactivateAfterSeconds"), out DeactivateAfterSeconds))
+            {
+                DeactivateAfterSeconds = 5;
+            }
+            Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
+            
+            // Start waiting
+            if (!Combat.ActivateBastion()) return;
+            return;
+        }
 
         private void DebuggingWait(Actions.Action action)
         {
@@ -1948,9 +1984,9 @@ namespace Questor.Modules.Activities
                     LootItemAction(action);
                     break;
 
-                //case ActionState.PutItem:
-                //    PutItemAction(action);
-                //    break;
+                case ActionState.ActivateBastion:
+                    ActivateBastionAction(action);
+                    break;
 
                 case ActionState.DropItem:
                     DropItemAction(action);

@@ -758,7 +758,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.GotoBase:
-                    Cache.Instance.IsMissionPocketDone = true; //pulls drones if we arent scrambled
+                    Cache.Instance.IsMissionPocketDone = true; //pulls drones if we are not scrambled
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
 

@@ -40,5 +40,6 @@ namespace Questor.Modules.States
         Done,
         SalvageBookmark,
         DebuggingWait,
+        ActivateBastion,
     }
 }

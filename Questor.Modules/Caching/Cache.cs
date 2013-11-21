@@ -920,6 +920,7 @@ namespace Questor.Modules.Caching
         public DateTime NextSkillTrainerProcessState;
         public DateTime NextSkillTrainerAction = DateTime.MinValue;
         public DateTime NextBastionAction { get; set; }
+        public DateTime NextBastionModeDeactivate { get; set; }
 
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;

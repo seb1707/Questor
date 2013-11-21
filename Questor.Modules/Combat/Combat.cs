@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Runtime.Remoting;
 using System.Threading;
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
@@ -800,16 +801,17 @@ namespace Questor.Modules.Combat
             }
         }
 
-        private static void ActivateBastion(EntityCache target)
+        public static bool ActivateBastion(bool activate = false)
         {
             if (DateTime.UtcNow < Cache.Instance.NextBastionAction) //if we just did something wait a fraction of a second
-                return;
-
-            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) return; //do not activate bastion mode unless we have targets to shoot
+                return false;
 
             List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+            if (!bastionModules.Any()) return true;
+            if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return true;
 
-            if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return;
+            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) return false; //do not activate bastion mode unless we have targets to shoot
+            
             // Find the first active weapon
             // Assist this weapon
             _weaponNumber = 0;
@@ -819,35 +821,42 @@ namespace Questor.Modules.Combat
 
                 if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "[" + _weaponNumber + "] BastionModule: IsActive [" + bastionMod.IsActive + "] IsDeactivating [" + bastionMod.IsDeactivating + "] InLimboState [" + bastionMod.InLimboState + "] Duration [" + bastionMod.Duration + "] TypeId [" + bastionMod.TypeId + "]", Logging.Debug);
 
+                //
+                // Deactivate (if needed)
+                //
                 // Are we on the right target?
-                if (bastionMod.IsActive && !bastionMod.IsDeactivating)
+                if (bastionMod.IsActive && !bastionMod.IsDeactivating && DateTime.UtcNow > Cache.Instance.NextBastionModeDeactivate)
                 {
                     if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive and Is not yet deactivating (we only want one cycle), attempting to Click...", Logging.Debug);
                     bastionMod.Click();
-                    continue;
+                    return true;
                 }
 
                 if (bastionMod.IsActive)
                 {
                     if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive: assuming it is deactivating on the next cycle.", Logging.Debug);
-                    continue;
+                    return true;
                 }
+
+                //
+                // Activate (if needed)
+                //
 
                 // Are we deactivating?
                 if (bastionMod.IsDeactivating)
                     continue;
 
-                
-                if (CanActivate(bastionMod, target, false))
+                if (activate)
                 {
                     Logging.Log("Combat", "Activating bastion [" + _weaponNumber + "]", Logging.Teal);
                     bastionMod.Click();
                     Cache.Instance.NextBastionAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 20));
-                    return;
+                    return true;    
                 }
             }
-        }
 
+            return true; //if we got  this far we have done all we can do.
+        }
 
         private static void ActivateWarpDisruptor(EntityCache target)
         {
@@ -1970,6 +1979,8 @@ namespace Questor.Modules.Combat
                             if (killTarget.IsReadyToShoot)
                             {
                                 i++;
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Bastion", Logging.Debug);
+                                ActivateBastion(); //by default this will deactivate bastion when needed, but NOT activate it, activation needs activate = true
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Painters", Logging.Debug);
                                 ActivateTargetPainters(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Webs", Logging.Debug);

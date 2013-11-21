@@ -56,28 +56,52 @@ namespace Questor.Modules.Lookup
 
         public static bool InjectSkillBook(string skillNameToFind)
         {
-            //if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
+            //"To learn that skill requires having already learned the following skills"
+            //00:38:14 [Questor] --------------------------------------------------
+            //00:38:14 [Questor] Debug_Window.Name: [modal]
+            //00:38:14 [Questor] Debug_Window.Caption: []
+            //00:38:14 [Questor] Debug_Window.Type: [form.MessageBox]
+            //00:38:14 [Questor] Debug_Window.IsModal: [True]
+            //00:38:14 [Questor] Debug_Window.IsDialog: [True]
+            //00:38:14 [Questor] Debug_Window.Id: []
+            //00:38:14 [Questor] Debug_Window.IsKillable: [True]
+            //00:38:14 [Questor] Debug_Window.Html: [To learn that skill requires having already learned the following skills: Marketing : Level 2.]
 
             // List its items
             IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-            if (!items.Any())
+            if (items.Any())
             {
-                if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in ItemHangar", Logging.Debug);
-                //if (!Cache.Instance.ReadyAmmoHangar("DoWehaveSkillBook")) return false;
-                items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-                if (!items.Any())
+                //SkillBookToInject.
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] found in ItemHangar", Logging.Debug);
+                DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeName == skillNameToFind);
+                if (SkillBookToInject != null)
                 {
-                    if(Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in AmmoHangar", Logging.Debug);
-                    return false;
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
+                    SkillBookToInject.InjectSkill();
+                    return true;
                 }
+                
+                return false;
+            }
+            
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in ItemHangar, trying AmmoHangar", Logging.Debug);
+            items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
+            if (items.Any())
+            {
+                //SkillBookToInject.
+                DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeName == skillNameToFind);
+                if (SkillBookToInject != null)
+                {
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
+                    SkillBookToInject.InjectSkill();
+                    return true;
+                }
+
+                return false;
             }
 
-            DirectItem SkillBookToInject = items.FirstOrDefault(s => s.GivenName == skillNameToFind);
-            if (SkillBookToInject == null) return false;
-            
-            //SkillBookToInject.
-            SkillBookToInject.InjectSkill();    
-            return true;
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in AmmoHangar, not found in any hangar", Logging.Debug);
+            return false;
         }
 
         public static bool ImportSkillPlan()
@@ -178,6 +202,7 @@ namespace Questor.Modules.Lookup
                 if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalDays < 1)
                 {
                     Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
+                    if (!InjectSkillsThatAreReadyToInject()) return false;
                     if (!AddPlannedSkillToQueue("SkillPlan")) return false;
                     if (iCount > 30) return true; //this should only happen if the actual adding of items to the skill queue fails.
                     return true;
@@ -246,53 +271,7 @@ namespace Questor.Modules.Lookup
                     //if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillTrainer", "CharacterSheet: [" + skill.Key + "] has not been learned. we need the skillbook injected.", Logging.White);
                     continue;
                 }
-
-                if (!PlannedSkillInjected)
-                {
-                    if (injectSkillBookAttempts >= 5)
-                    {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] if (injectSkillBookAttempts >= 5)", Logging.Debug);
-                        continue;
-                    }
-
-                    //
-                    // This skill in the skill plan is not yet injected into the current characters head.
-                    //
-                    if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
-
-                    IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-                    if (!items.Any())
-                    {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in ItemHangar", Logging.Debug);
-                        items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-                        if (!items.Any())
-                        {
-                            if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar", Logging.Debug);
-                            _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
-                            continue;
-                        }
-                    }
-
-                    DirectItem SkillBookToInject = items.FirstOrDefault(s => s.GivenName == skill.Key);
-                    if (SkillBookToInject == null) continue;
-
-                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
-                    PlannedSkillInjected = true;
-                    SkillBookToInject.InjectSkill();
-                    //"To learn that skill requires having already learned the following skills"
-                    //00:38:14 [Questor] --------------------------------------------------
-                    //00:38:14 [Questor] Debug_Window.Name: [modal]
-                    //00:38:14 [Questor] Debug_Window.Caption: []
-                    //00:38:14 [Questor] Debug_Window.Type: [form.MessageBox]
-                    //00:38:14 [Questor] Debug_Window.IsModal: [True]
-                    //00:38:14 [Questor] Debug_Window.IsDialog: [True]
-                    //00:38:14 [Questor] Debug_Window.Id: []
-                    //00:38:14 [Questor] Debug_Window.IsKillable: [True]
-                    //00:38:14 [Questor] Debug_Window.Html: [To learn that skill requires having already learned the following skills: Marketing : Level 2.]
-                    injectSkillBookAttempts++;
-                    return false;
-                }
-
+                
                 continue;
             }
             //
@@ -383,7 +362,7 @@ namespace Questor.Modules.Lookup
 
                 //MyCharacterSheetSkills.Where(v => v.TypeName == skill.Key && v.Level < skill.Value && !v.InTraining);
 
-                if (MyCharacterSheetSkills.Any(i => i.GivenName != skill.Key))
+                if (MyCharacterSheetSkills.Any(i => i.TypeName != skill.Key))
                 {
                     //List<DirectInvType> AllSkills = Cache.Instance.DirectEve.Skills.AllSkills;
                     //DirectInvType _prerequisites = AllSkills.FirstOrDefault(i => i.TypeName == "Drones");
@@ -393,50 +372,49 @@ namespace Questor.Modules.Lookup
                     // we do not yet check to make sure that it is a valid thing to do to try to inject this skill
                     // make sure your skill plan is correct ffs!
                     //
-                    if(!InjectSkillBook(skill.Key)) return false;
-                }
+                    if (injectSkillBookAttempts >= 2)
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] if (injectSkillBookAttempts >= 5)", Logging.Debug);
+                        continue;
+                    }
 
-                
-                if (injectSkillBookAttempts >= 5)
-                {
-                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] if (injectSkillBookAttempts >= 5)", Logging.Debug);
+                    //
+                    // This skill in the skill plan is not yet injected into the current characters head.
+                    //
+                    
+                    IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
+                    if (items.Any())
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] found in ItemHangar", Logging.Debug);
+                        if (!SkillPlan.InjectSkillBook(skill.Key))
+                        {
+                            injectSkillBookAttempts++;
+                            continue;
+                        }
+
+                        continue;
+                    }
+                    
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in ItemHangar, trying AmmoHangar", Logging.Debug);
+                    items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int) CategoryID.Skill).ToList();
+
+                    if (items.Any())
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] found in AmmoHangar", Logging.Debug);
+                        if (!SkillPlan.InjectSkillBook(skill.Key))
+                        {
+                            injectSkillBookAttempts++;
+                            continue;
+                        }
+
+                        continue;
+                    }
+                        
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar, not found in any hangar", Logging.Debug);
+                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
                     continue;
                 }
 
-                //
-                // This skill in the skill plan is not yet injected into the current characters head.
-                //
-                if (!Cache.Instance.OpenItemsHangar("DoWehaveSkillBook")) return false;
-
-                IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-                if (!items.Any())
-                {
-                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in ItemHangar", Logging.Debug);
-                    items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
-                    if (!items.Any())
-                    {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar", Logging.Debug);
-                        _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
-                        continue;
-                    }
-                }
-
-                DirectItem SkillBookToInject = items.FirstOrDefault(s => s.GivenName == skill.Key);
-                if (SkillBookToInject == null) continue;
-
-                _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
-                SkillBookToInject.InjectSkill();
-                //"To learn that skill requires having already learned the following skills"
-                //00:38:14 [Questor] --------------------------------------------------
-                //00:38:14 [Questor] Debug_Window.Name: [modal]
-                //00:38:14 [Questor] Debug_Window.Caption: []
-                //00:38:14 [Questor] Debug_Window.Type: [form.MessageBox]
-                //00:38:14 [Questor] Debug_Window.IsModal: [True]
-                //00:38:14 [Questor] Debug_Window.IsDialog: [True]
-                //00:38:14 [Questor] Debug_Window.Id: []
-                //00:38:14 [Questor] Debug_Window.IsKillable: [True]
-                //00:38:14 [Questor] Debug_Window.Html: [To learn that skill requires having already learned the following skills: Marketing : Level 2.]
-                injectSkillBookAttempts++;
                 continue;
             }
 

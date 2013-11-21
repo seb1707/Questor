@@ -800,6 +800,55 @@ namespace Questor.Modules.Combat
             }
         }
 
+        private static void ActivateBastion(EntityCache target)
+        {
+            if (DateTime.UtcNow < Cache.Instance.NextBastionAction) //if we just did something wait a fraction of a second
+                return;
+
+            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) return; //do not activate bastion mode unless we have targets to shoot
+
+            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+
+            if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return;
+            // Find the first active weapon
+            // Assist this weapon
+            _weaponNumber = 0;
+            foreach (ModuleCache bastionMod in bastionModules)
+            {
+                _weaponNumber++;
+
+                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "[" + _weaponNumber + "] BastionModule: IsActive [" + bastionMod.IsActive + "] IsDeactivating [" + bastionMod.IsDeactivating + "] InLimboState [" + bastionMod.InLimboState + "] Duration [" + bastionMod.Duration + "] TypeId [" + bastionMod.TypeId + "]", Logging.Debug);
+
+                // Are we on the right target?
+                if (bastionMod.IsActive && !bastionMod.IsDeactivating)
+                {
+                    if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive and Is not yet deactivating (we only want one cycle), attempting to Click...", Logging.Debug);
+                    bastionMod.Click();
+                    continue;
+                }
+
+                if (bastionMod.IsActive)
+                {
+                    if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive: assuming it is deactivating on the next cycle.", Logging.Debug);
+                    continue;
+                }
+
+                // Are we deactivating?
+                if (bastionMod.IsDeactivating)
+                    continue;
+
+                
+                if (CanActivate(bastionMod, target, false))
+                {
+                    Logging.Log("Combat", "Activating bastion [" + _weaponNumber + "]", Logging.Teal);
+                    bastionMod.Click();
+                    Cache.Instance.NextBastionAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 20));
+                    return;
+                }
+            }
+        }
+
+
         private static void ActivateWarpDisruptor(EntityCache target)
         {
             if (DateTime.UtcNow < Cache.Instance.NextWarpDisruptorAction) //if we just did something wait a fraction of a second

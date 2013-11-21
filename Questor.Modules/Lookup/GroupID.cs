@@ -68,6 +68,7 @@ namespace Questor.Modules.Lookup
         NOS = 68,
         Neutralizer = 71,
         TargetPainter = 379,
+        Bastion = 515,
 
         EnergyWeapon = 53,
         ProjectileWeapon = 55,

@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -22,6 +24,10 @@ namespace Questor.Modules.BackgroundTasks
                 //if It has not been at least 60 seconds since we last session changed do not do anything
                 if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                     return;
+
+                //we cant move in bastion mode, do not try
+                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                if (bastionModules.Any(i => i.IsActive)) return;
 
                 //
                 // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -83,6 +89,10 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (DateTime.UtcNow > Cache.Instance.NextOrbit)
             {
+                //we cant move in bastion mode, do not try
+                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                if (bastionModules.Any(i => i.IsActive)) return;
+
                 if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
                 if (Cache.Instance.OrbitDistance == 0)
                 {
@@ -168,6 +178,10 @@ namespace Questor.Modules.BackgroundTasks
                 return;
 
             NextNavigateIntoRange = DateTime.UtcNow.AddSeconds(5);
+
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+            if (bastionModules.Any(i => i.IsActive)) return;
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);
 
@@ -315,6 +329,10 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                        if (bastionModules.Any(i => i.IsActive)) return;
+
                         Logging.Log(module, "StartOrbiting: Target in range", Logging.Teal);
                         if (!Cache.Instance.IsApproachingOrOrbiting(target.Id))
                         {

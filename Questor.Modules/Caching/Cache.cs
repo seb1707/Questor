@@ -3983,10 +3983,7 @@ namespace Questor.Modules.Caching
                 if (PrimaryWeaponPriorityEntities.Any(pt => pt.IsReadyToShoot 
                                                         && pt.Distance < Cache.Instance.MaxRange
                                                         && pt.IsCurrentTarget
-                                                        && pt.IsEntityIShouldKeepShooting
-                                                        && !currentTarget.IsHigherPriorityPresent
-                                                        && (!currentTarget.IsNPCFrigate 
-                                                            || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit))))
+                                                        && !currentTarget.IsHigherPriorityPresent))
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;

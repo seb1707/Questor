@@ -26,7 +26,8 @@ namespace Questor.Modules.BackgroundTasks
                     return;
 
                 //we cant move in bastion mode, do not try
-                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                List<ModuleCache> bastionModules = null;
+                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (bastionModules.Any(i => i.IsActive)) return;
 
                 //
@@ -90,7 +91,8 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow > Cache.Instance.NextOrbit)
             {
                 //we cant move in bastion mode, do not try
-                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                List<ModuleCache> bastionModules = null;
+                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (bastionModules.Any(i => i.IsActive)) return;
 
                 if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
@@ -180,7 +182,8 @@ namespace Questor.Modules.BackgroundTasks
             NextNavigateIntoRange = DateTime.UtcNow.AddSeconds(5);
 
             //we cant move in bastion mode, do not try
-            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (bastionModules.Any(i => i.IsActive)) return;
 
             if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange Started", Logging.White);
@@ -330,7 +333,8 @@ namespace Questor.Modules.BackgroundTasks
                     if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
                         //we cant move in bastion mode, do not try
-                        List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                         if (bastionModules.Any(i => i.IsActive)) return;
 
                         Logging.Log(module, "StartOrbiting: Target in range", Logging.Teal);

@@ -114,7 +114,7 @@ namespace Questor.Modules.Combat
 
             if (DroneToShoot == null)
             {
-                if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: PreferredDroneTarget is null, picking a target using a simple ruleset...", Logging.Debug);
+                if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: PreferredDroneTarget is null, picking a target using a simple rule set...", Logging.Debug);
                 if (Cache.Instance.Targets.Any(i => !i.IsContainer && !i.IsBadIdea))
                 {
                     DroneToShoot = Cache.Instance.Targets.Where(i => !i.IsContainer && !i.IsBadIdea && i.Distance < Cache.Instance.MaxDroneRange).OrderByDescending(i => i.IsWarpScramblingMe).ThenByDescending(i => i.IsFrigate).ThenBy(i => i.Distance).FirstOrDefault();
@@ -123,12 +123,11 @@ namespace Questor.Modules.Combat
 
             if (DroneToShoot != null)
             {
-
                 if (DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)
                 {
                     if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
 
-                     // Nothing to engage yet, probably retargeting
+                     // Nothing to engage yet, probably re-targeting
                     if (!DroneToShoot.IsTarget)
                     {
                         if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (!DroneToShoot.IsTarget)", Logging.Debug);

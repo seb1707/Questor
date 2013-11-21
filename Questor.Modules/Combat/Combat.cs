@@ -806,7 +806,8 @@ namespace Questor.Modules.Combat
             if (DateTime.UtcNow < Cache.Instance.NextBastionAction) //if we just did something wait a fraction of a second
                 return false;
 
-            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (!bastionModules.Any()) return true;
             if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return true;
 

@@ -940,7 +940,7 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.Modules.Any())
             {
                 List<ModuleCache> bastionModules = null;
-                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion).ToList();
+                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (!bastionModules.Any() || bastionModules.Any(i => i.IsActive))
                 {
                     _done = true;
@@ -965,7 +965,7 @@ namespace Questor.Modules.Activities
             }
             Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
             
-            // Start waiting
+            // Start bastion mode
             if (!Combat.ActivateBastion()) return;
             return;
         }

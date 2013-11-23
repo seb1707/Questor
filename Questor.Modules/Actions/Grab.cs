@@ -35,7 +35,7 @@
 
             if (_States.CurrentGrabState != States.GrabState.WaitForItems)
             {
-                //if (!Cache.Instance.OpenItemsHangar("Grab")) return;
+                if (Cache.Instance.ItemHangar == null) return;
                 if (!Cache.Instance.OpenShipsHangar("Grab")) return;
 
                 if ("Local Hangar" == Hangar)

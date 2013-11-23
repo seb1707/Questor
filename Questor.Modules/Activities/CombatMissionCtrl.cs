@@ -146,7 +146,7 @@ namespace Questor.Modules.Activities
                     // if we have bookmarks but there is no bookmark on grid we need to continue and create the salvage bookmark.
                     //
                 }
-                
+
                 // No, create a bookmark
                 string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
                 Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
@@ -1125,7 +1125,7 @@ namespace Questor.Modules.Activities
             Nextaction();
             return;
         }
-        
+
         private void AddWebifierByNameAction(Actions.Action action)
         {
             bool notTheClosest;
@@ -1671,6 +1671,7 @@ namespace Questor.Modules.Activities
             {
                 Logging.Log("DropItemAction", "Exception: [" + exception + "]", Logging.Debug);
             }
+
             return;
         }
 

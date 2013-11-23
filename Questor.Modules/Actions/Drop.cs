@@ -50,7 +50,7 @@
                     
                     if (DestinationHangarName == "Local Hangar")
                     {
-                        //if (!Cache.Instance.OpenItemsHangar("Drop")) return;
+                        if (Cache.Instance.ItemHangar == null) return;
                         dropHangar = Cache.Instance.ItemHangar;
                     }
                     else if (DestinationHangarName == "Ship Hangar")
@@ -81,7 +81,6 @@
 
                     Logging.Log("Drop", "Opening Cargo Hold", Logging.White);
                     _States.CurrentDropState = Item == 00 ? DropState.AllItems : DropState.MoveItems;
-
                     break;
 
                 case DropState.MoveItems:

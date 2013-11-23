@@ -5235,7 +5235,7 @@ namespace Questor.Modules.Caching
             }
             return false;
         }
-        
+
         public bool StackShipsHangar(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -6830,7 +6830,7 @@ namespace Questor.Modules.Caching
                 _lpStore = value;
             }
         }
-        
+
         public bool CloseLPStore(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
@@ -6916,7 +6916,7 @@ namespace Questor.Modules.Caching
                 _fittingManagerWindow = value;
             }
         }
-        
+
         public bool CloseFittingManager(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
@@ -7407,6 +7407,7 @@ namespace Questor.Modules.Caching
                 }
 
                 if (!Cache.Instance.OpenShipsHangar(module)) return false;
+                if (Cache.Instance.ItemHangar == null) return false;
                 if (Settings.Instance.UseDrones)
                 {
                     if (!Cache.Instance.OpenDroneBay(module)) {return false;}

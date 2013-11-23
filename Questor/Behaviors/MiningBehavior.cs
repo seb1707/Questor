@@ -462,7 +462,6 @@ namespace Questor.Behaviors
                         Logging.Log("Miner:MineAsteroid", "We are full, but drones are busy. Drone state: " + _States.CurrentDroneState.ToString(), Logging.White);
                     }
 
-
                     if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Distance to Asteroid is: " + _targetAsteroid.Distance, Logging.White);
 
                     if (_targetAsteroid.Distance < 10000)
@@ -471,7 +470,6 @@ namespace Questor.Behaviors
                         {
                             if (_asteroidBookmarkForID != _targetAsteroid.Id)
                             {
-
                                 DirectBookmark asteroidShortcutBM = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
 
                                 if (asteroidShortcutBM != null)

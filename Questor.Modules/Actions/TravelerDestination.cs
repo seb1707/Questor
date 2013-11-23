@@ -282,7 +282,7 @@ namespace Questor.Modules.Actions
         {
             DirectBookmark bookmark = Cache.Instance.BookmarkById(BookmarkId);
             bool arrived = PerformFinalDestinationTask(bookmark, 150000);
-            
+
             return arrived;
         }
 
@@ -408,7 +408,7 @@ namespace Questor.Modules.Actions
                     AgentId = -1;
                     Title = null;
                     SolarSystemId = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-                    
+
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.ReasonToStopQuestor = "TravelerDestination.MissionBookmarkDestination: Invalid mission bookmark! - Lag?! Closing EVE";

@@ -378,6 +378,7 @@ namespace Questor.Behaviors
                     {
                         break;
                     }
+
                     //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
                     Salvage.MoveIntoRangeOfWrecks();
                     try

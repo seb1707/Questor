@@ -574,7 +574,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "SpeedTank is true and OpenWrecks is false [" + containerEntity.Id + "]", Logging.White);
                     continue;
                 }
-                
+
                 // Don't even try to open a wreck if you are specified LootEverything as false and you are not processing a loot action
                 //      this is currently commented out as it would keep Golems and other non-speed tanked ships from looting the field as they cleared
                 //      missions, but NOT stick around after killing things to clear it ALL. Looteverything==false does NOT mean loot nothing

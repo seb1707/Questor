@@ -153,6 +153,8 @@ namespace BuyLPI
                 return;
             }
 
+            if (Cache.Instance.ItemHangar == null) return;
+
             if (Cache.Instance.LPStore == null)
             {
                 _nextAction = DateTime.UtcNow.AddMilliseconds(WaitMillis);

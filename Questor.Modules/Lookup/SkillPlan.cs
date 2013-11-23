@@ -83,7 +83,7 @@ namespace Questor.Modules.Lookup
                 
                 return false;
             }
-            
+
             if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in ItemHangar, trying AmmoHangar", Logging.Debug);
             items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
             if (items.Any())
@@ -271,7 +271,7 @@ namespace Questor.Modules.Lookup
                     //if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillTrainer", "CharacterSheet: [" + skill.Key + "] has not been learned. we need the skillbook injected.", Logging.White);
                     continue;
                 }
-                
+
                 continue;
             }
             //
@@ -409,7 +409,7 @@ namespace Questor.Modules.Lookup
 
                         continue;
                     }
-                        
+
                     if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar, not found in any hangar", Logging.Debug);
                     _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
                     continue;

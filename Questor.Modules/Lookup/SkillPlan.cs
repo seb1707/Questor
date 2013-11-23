@@ -222,7 +222,7 @@ namespace Questor.Modules.Lookup
             //int i = 1;
             foreach (KeyValuePair<string, int> skill in mySkillPlan)
             {
-                bool PlannedSkillInjected = false;
+                //bool PlannedSkillInjected = false;
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "SkillPlan: skill [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
 
                 //MyCharacterSheetSkills.Where(v => v.TypeName == skill.Key && v.Level < skill.Value && !v.InTraining);
@@ -232,7 +232,7 @@ namespace Questor.Modules.Lookup
                 {
                     if (knownskill.TypeName == skill.Key)
                     {
-                        PlannedSkillInjected = true;
+                        //PlannedSkillInjected = true;
                         if (knownskill.Level < skill.Value)
                         {
                             if (!knownskill.InTraining)

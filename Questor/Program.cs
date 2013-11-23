@@ -86,7 +86,7 @@ namespace Questor
                 {"s|script=", "a {SCRIPT} file to execute before login.", v => _scriptFile = v},
                 {"t|scriptAfterLogin=", "a {SCRIPT} file to execute after login.", v => _scriptAfterLoginFile = v},
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
-                {"x|chantling", "use chantling's scheduler", v => _chantlingScheduler = v != null},
+                {"x|chantling|scheduler", "use scheduler (thank you chantling!)", v => _chantlingScheduler = v != null},
                 {"n|loginNow", "Login using info in scheduler", v => _loginNowIgnoreScheduler = v != null},
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
                 };
@@ -152,7 +152,7 @@ namespace Questor
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
@@ -220,7 +220,7 @@ namespace Questor
             try
             {
                 //
-                // do not dispose here as we want to use the same directeve instance later in the main program
+                // do not dispose here as we want to use the same DirectEve instance later in the main program
                 //
                 //_directEve.Dispose();
                 Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
@@ -334,7 +334,7 @@ namespace Questor
             }
 
             //
-            // if we havent found a worksable schedule yet assume schedule 1 is correct. what we want.
+            // if we have not found a workable schedule yet assume schedule 1 is correct. what we want.
             //
             if (schedule.StartTimeSpecified && StartTime == DateTime.MaxValue)
             {
@@ -436,7 +436,7 @@ namespace Questor
 
             if (_humanInterventionRequired)
             {
-                //Logging.Log("Startup", "Onframe: _humanInterventionRequired is true (this will spam every second or so)", Logging.Orange);
+                //Logging.Log("Startup", "OnFrame: _humanInterventionRequired is true (this will spam every second or so)", Logging.Orange);
                 return;
             }
 
@@ -456,7 +456,7 @@ namespace Questor
                 {
                     if (string.IsNullOrEmpty(window.Html))
                         continue;
-                    Logging.Log("Startup", "windowtitles:" + window.Name + "::" + window.Html, Logging.White);
+                    Logging.Log("Startup", "WindowTitles:" + window.Name + "::" + window.Html, Logging.White);
 
                     //
                     // Close these windows and continue

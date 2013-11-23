@@ -440,7 +440,7 @@ namespace Questor.Behaviors
 
                     //check if we're full
 
-                    if (!Cache.Instance.OpenCargoHold("Miner: Check cargohold capacity")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null) return;
                     //if (!Cache.Instance.OpenInventoryWindow("Salvage")) return;
 
                     //should I check Cache.Instance.ActiveDrones.Any() instead?
@@ -489,13 +489,13 @@ namespace Questor.Behaviors
 
                         if (Cache.Instance.Targeting.Contains(_targetAsteroid))
                         {
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Targetting asteroid.", Logging.White);
+                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Targeting asteroid.", Logging.White);
                             return;
                             //wait
                         }
                         else if (Cache.Instance.Targets.Contains(_targetAsteroid))
                         {
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid Targetted.", Logging.White);
+                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid Targeted.", Logging.White);
                             //if(!_targetAsteroid.IsActiveTarget) _targetAsteroid.MakeActiveTarget();
                             List<ModuleCache> miningTools = Cache.Instance.Modules.Where(m => MiningToolGroupIDs.Contains(m.GroupId)).ToList();
 
@@ -534,9 +534,9 @@ namespace Questor.Behaviors
                             }
                         } //mine
                         else
-                        { //asteroid is not targetted
+                        { //asteroid is not targeted
 
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid not targetted.", Logging.White);
+                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid not targeted.", Logging.White);
                             if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
                                 return;
 
@@ -555,7 +555,7 @@ namespace Questor.Behaviors
                             {
                                 // Clear targeting list as it does not apply
                                 Cache.Instance.TargetingIDs.Clear();
-                                Logging.Log("Mining", "We are no longer jammed, retargeting", Logging.Teal);
+                                Logging.Log("Mining", "We are no longer jammed, ReTargeting", Logging.Teal);
                             }
                             _isJammed = false;
 
@@ -572,9 +572,9 @@ namespace Questor.Behaviors
                             Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
                                 + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
                                 + "] _targetRoid.Id [" + _targetAsteroid.Id
-                                + "] targetting me count [" + Combat.TargetingMe.Count
+                                + "] targeting me count [" + Combat.TargetingMe.Count
                                 + "]", Logging.White);
-                        //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check combatstate instead.
+                        //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check CombatState instead.
                         if (//Cache.Instance.Approaching.TargetValue == null
                             //|| (Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
                             velocity <= 0 && !Cache.Instance.TargetedBy.Any()

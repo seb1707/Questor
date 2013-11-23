@@ -32,7 +32,6 @@ namespace BuyLPI
         private static int? _quantity;
         private static int? _totalQuantityOfOrders;
         private static DateTime _done = DateTime.UtcNow.AddDays(10);
-        private static DirectEve _directEve;
         private static DateTime _lastPulse;
         private static Cleanup _cleanup;
 
@@ -83,9 +82,8 @@ namespace BuyLPI
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Starting BuyLPI... - innerspace Echo"));
             Logging.Log("BuyLPI", "Starting BuyLPI...", Logging.White);
             _cleanup = new Cleanup();
-            _directEve = new DirectEve();
-            Cache.Instance.DirectEve = _directEve;
-            _directEve.OnFrame += OnFrame;
+            Cache.Instance.DirectEve = new DirectEve();
+            Cache.Instance.DirectEve.OnFrame += OnFrame;
 
             // Sleep until we're done
             while (_done.AddSeconds(5) > DateTime.UtcNow)
@@ -93,7 +91,7 @@ namespace BuyLPI
                 Thread.Sleep(50);
             }
 
-            _directEve.Dispose();
+            Cache.Instance.DirectEve.Dispose();
             Logging.Log("BuyLPI", "BuyLPI finished.", Logging.White);
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "BuyLPI: Finished 2"));
         }
@@ -155,17 +153,10 @@ namespace BuyLPI
                 return;
             }
 
-            if (!Cache.Instance.OpenItemsHangar("BuyLPI")) return;
-
-            if (!Cache.Instance.OpenLPStore("BuyLPI")) return;
-
             if (Cache.Instance.LPStore == null)
             {
                 _nextAction = DateTime.UtcNow.AddMilliseconds(WaitMillis);
-                _directEve.ExecuteCommand(DirectCmd.OpenLpstore);
-
-                Logging.Log("BuyLPI", "Opening loyalty point store", Logging.White);
-                return;
+                 return;
             }
 
             // Wait for the amount of LP to change
@@ -204,9 +195,9 @@ namespace BuyLPI
             }
 
             // Check ISK
-            if (_directEve.Me.Wealth < offer.IskCost)
+            if (Cache.Instance.DirectEve.Me.Wealth < offer.IskCost)
             {
-                Logging.Log("BuyLPI", "Not enough ISK left: you have [" + Math.Round(_directEve.Me.Wealth, 0) + "] and you need [" + offer.IskCost + "]", Logging.White);
+                Logging.Log("BuyLPI", "Not enough ISK left: you have [" + Math.Round(Cache.Instance.DirectEve.Me.Wealth, 0) + "] and you need [" + offer.IskCost + "]", Logging.White);
                 _done = DateTime.UtcNow;
                 return;
             }

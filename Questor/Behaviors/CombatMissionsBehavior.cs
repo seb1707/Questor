@@ -621,7 +621,6 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.WarpOutStation:
                     DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
 
-                    //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (warpOutBookmark == null)
@@ -1108,12 +1107,15 @@ namespace Questor.Behaviors
                     }
 
                     if (Settings.Instance.DebugStates)
+                    {
                         Logging.Log("Traveler.State is ", _States.CurrentTravelerState.ToString(), Logging.White);
+                    }
+
                     break;
 
                 case CombatMissionsBehaviorState.Salvage:
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: attempting to open cargo hold", Logging.White);
-                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null) return;
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
                     if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
@@ -1379,9 +1381,11 @@ namespace Questor.Behaviors
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.LastOrDefault())
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.AllBookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
+                        {
                             Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
+                        }
                         else
                         {
                             Logging.Log("CombatMissionsBehavior.Traveler", "Destination: [" + Cache.Instance.DirectEve.Navigation.GetLocation(destination.Last()).Name + "]", Logging.White);

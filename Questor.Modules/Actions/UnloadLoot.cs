@@ -83,7 +83,7 @@ namespace Questor.Modules.Actions
 
                 try
                 {
-                    if (!Cache.Instance.OpenCargoHold("UnloadLoot.MoveAmmo")) return false;
+                    if (Cache.Instance.CurrentShipsCargo == null) return false;
 
                     if (Cache.Instance.CurrentShipsCargo.Window.Type == "form.ActiveShipCargo")
                     {
@@ -180,7 +180,7 @@ namespace Questor.Modules.Actions
                                 if (commonMissionCompletionItemsToMove.Any())
                                 {
                                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot", "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
-                                    if (!Cache.Instance.OpenItemsHangar("UnloadLoot.MoveAmmo")) return false;
+                                    if (Cache.Instance.ItemHangar == null) return false;
                                     Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
                                     Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
                                     AmmoIsBeingMoved = true;
@@ -225,7 +225,7 @@ namespace Questor.Modules.Actions
                                 if (scriptsToMove.Any())
                                 {
                                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (scriptsToMove.Any())", Logging.White);
-                                    if (!Cache.Instance.OpenItemsHangar("UnloadLoot.MoveAmmo")) return false;
+                                    if (Cache.Instance.ItemHangar == null) return false;
                                     Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
                                     AmmoIsBeingMoved = true;
                                     Cache.Instance.ItemHangar.Add(scriptsToMove);
@@ -301,7 +301,7 @@ namespace Questor.Modules.Actions
                 return true;
             }
 
-            if (!Cache.Instance.OpenCargoHold("UnloadLoot")) return false;
+            if (Cache.Instance.CurrentShipsCargo == null) return false;
 
             if (Cache.Instance.CurrentShipsCargo.IsValid)
             {

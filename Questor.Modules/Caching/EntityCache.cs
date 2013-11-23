@@ -459,6 +459,7 @@ namespace Questor.Modules.Caching
                         if (_structurePct == null)
                         {
                             _structurePct = _directEntity.StructurePct;
+                            return _structurePct ?? _directEntity.StructurePct;
                         }
 
                         return _structurePct ?? _directEntity.StructurePct;
@@ -487,6 +488,7 @@ namespace Questor.Modules.Caching
                         if (_isNpc == null)
                         {
                             _isNpc = _directEntity.IsNpc;
+                            return _isNpc ?? _directEntity.IsNpc;
                         }
 
                         return _isNpc ?? _directEntity.IsNpc;
@@ -516,6 +518,7 @@ namespace Questor.Modules.Caching
                         if (_velocity == null)
                         {
                             _velocity = _directEntity.Velocity;
+                            return _velocity ?? _directEntity.Velocity;
                         }
 
                         return _velocity ?? _directEntity.Velocity;
@@ -662,7 +665,11 @@ namespace Questor.Modules.Caching
                             if (Cache.Instance.PrimaryWeaponPriorityTargets.Any(e => e.Entity.Id == Id))
                             {
                                 _isPrimaryWeaponKillPriority = true;
+                                return _isPrimaryWeaponKillPriority ?? false;
                             }
+
+                            _isPrimaryWeaponKillPriority = false;
+                            return _isPrimaryWeaponKillPriority ?? false;
                         }
 
                         return _isPrimaryWeaponKillPriority ?? false;
@@ -728,7 +735,11 @@ namespace Questor.Modules.Caching
                             if (Cache.Instance.DronePriorityTargets.Any(e => e.Entity.Id == _directEntity.Id))
                             {
                                 _IsDroneKillPriority = true;
+                                return _IsDroneKillPriority ?? false;
                             }
+
+                            _IsDroneKillPriority = false;
+                            return _IsDroneKillPriority ?? false;
                         }
 
                         return _IsDroneKillPriority ?? false;
@@ -851,6 +862,9 @@ namespace Questor.Modules.Caching
                                 _IsReadyToTarget = true;
                                 return _IsReadyToTarget ?? true;
                             }
+
+                            _IsReadyToTarget = false;
+                            return _IsReadyToTarget ?? false;
                         }
 
                         return _IsReadyToTarget ?? false;
@@ -998,7 +1012,11 @@ namespace Questor.Modules.Caching
                             if (Cache.Instance.CurrentWeaponTarget() != null)
                             {
                                 _isCurrentTarget = true;
+                                return _isCurrentTarget ?? true;
                             }
+
+                            _isCurrentTarget = false;
+                            return _isCurrentTarget ?? false;
                         }
 
                         return _isCurrentTarget ?? false;
@@ -1029,7 +1047,11 @@ namespace Questor.Modules.Caching
                             if (Id == Cache.Instance.LastDroneTargetID)
                             {
                                 _isCurrentDroneTarget = true;
+                                return _isCurrentDroneTarget ?? true;
                             }
+
+                            _isCurrentDroneTarget = false;
+                            return _isCurrentDroneTarget ?? false;
                         }
 
                         return _isCurrentDroneTarget ?? false;
@@ -1073,7 +1095,7 @@ namespace Questor.Modules.Caching
                                 {
                                     optimal = Cache.Instance.OptimalRange;
                                 }
-                                else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them isnt != 0, that is the idea, if its 0 we sure as hell dont want to use it as the optimal
+                                else if (Settings.Instance.OptimalRange != 0) //do we really need this condition? we cant even get in here if one of them is not != 0, that is the idea, if its 0 we sure as hell do not want to use it as the optimal
                                 {
                                     optimal = Settings.Instance.OptimalRange;
                                 }
@@ -1102,6 +1124,9 @@ namespace Questor.Modules.Caching
                                         _isInOptimalRange = true;
                                         return _isInOptimalRange ?? true;
                                     }
+
+                                    _isInOptimalRange = false;
+                                    return _isInOptimalRange ?? false;
                                 }
 
                                 _isInOptimalRange = false;
@@ -1229,6 +1254,8 @@ namespace Questor.Modules.Caching
                             {
                                 return true;
                             }
+
+                            //return false; //check for drone priority targets too!
                         }
 
                         if (Cache.Instance.DronePriorityTargets.Any(pt => pt.EntityID == Id))
@@ -1237,6 +1264,8 @@ namespace Questor.Modules.Caching
                             {
                                 return true;
                             }
+
+                            return false;
                         }
 
                         return false;
@@ -2872,7 +2901,7 @@ namespace Questor.Modules.Caching
 
         private bool? _isBattleCruiser;
         /// <summary>
-        /// Battlecruiser includes all elite-variants
+        /// BattleCruiser includes all elite-variants
         /// </summary>
         public bool IsBattlecruiser
         {
@@ -2924,7 +2953,7 @@ namespace Questor.Modules.Caching
 
         private bool? _isNPCBattleCruiser;
         /// <summary>
-        /// Battlecruiser includes all elite-variants
+        /// BattleCruiser includes all elite-variants
         /// </summary>
         public bool IsNPCBattlecruiser
         {
@@ -3791,6 +3820,30 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsShipWithNoCargoBay
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= GroupId == (int)Group.Capsule;
+                        //result |= GroupId == (int)Group.Shuttle;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
         public bool IsOreOrIce
         {
             get
@@ -3879,7 +3932,7 @@ namespace Questor.Modules.Caching
                                                 double seconds = DateTime.UtcNow.Subtract(lastTargeted).TotalSeconds;
                                                 if (seconds < 20)
                                                 {
-                                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can retarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
+                                                    Logging.Log("EntityCache.LockTarget", "[" + module + "] tried to lock [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, can reTarget in [" + Math.Round(20 - seconds, 0) + "]", Logging.White);
                                                     return false;
                                                 }
                                             }
@@ -3916,7 +3969,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
                     
-                    Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget req has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
+                    Logging.Log("EntityCache.LockTarget", "[" + module + "] LockTarget request has been ignored for [" + Name + "][" + Math.Round(Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(Id) + "][" + Cache.Instance.Targets.Count() + "] targets already, target is already locked!", Logging.White);
                     return false;
                 }
 

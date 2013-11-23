@@ -189,7 +189,7 @@ namespace ValueDump
 
                 case ValueDumpState.GetItems:
                     if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.GetItems:", Logging.Debug);
-                    if (!Cache.Instance.OpenItemsHangar("ValueDump")) break;
+                    if (Cache.Instance.ItemHangar == null) return;
                     Logging.Log("ValueDump", "Loading hangar items", Logging.White);
 
                     // Clear out the old

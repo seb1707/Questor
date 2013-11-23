@@ -49,7 +49,7 @@ namespace Questor.Storylines
         }
 
         /// <summary>
-        ///   There are no pre-accept actions
+        ///   There are no actions before you accept the mission
         /// </summary>
         /// <param name="storyline"></param>
         /// <returns></returns>
@@ -83,9 +83,9 @@ namespace Questor.Storylines
         private bool MoveItem(bool pickup)
         {
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("TransactionDataDelivery")) return false;
+            if (Cache.Instance.ItemHangar == null) return false;
 
-            if (!Cache.Instance.OpenCargoHold("TransactionDataDelivery")) return false;
+            if (Cache.Instance.CurrentShipsCargo == null) return false;
 
             // 314 == Transaction And Salary Logs (all different versions)
             const int groupId = 314;

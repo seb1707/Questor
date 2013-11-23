@@ -58,9 +58,9 @@ namespace Questor.Modules.Activities
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
+            //if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
 
-            if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
+            //if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
             string missionItem;
 
             switch (Cache.Instance.Mission.Name)
@@ -69,12 +69,12 @@ namespace Questor.Modules.Activities
                     missionItem = "Encoded Data Chip";
                     break;
 
-                case "In the Midst of Deadspace (2 of 5)":            //lvl4 courier
+                case "In the Midst of DeadSpace (2 of 5)":            //lvl4 courier
                     missionItem = "Amarr Light Marines";
                     break;
 
                 case "Pot and Kettle - Delivery (3 of 5)":            //lvl4 courier
-                    missionItem = "Large EMP Smartbomb I";
+                    missionItem = "Large EMP SmartBomb I";
                     break;
 
                 case "Pot and Kettle - Making Amends (5 of 5)":       //lvl4 courier
@@ -277,7 +277,7 @@ namespace Questor.Modules.Activities
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
-                        if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have ben docked for at least a few seconds
+                        if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have been docked for at least a few seconds
                         {
                             return;
                         }

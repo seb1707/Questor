@@ -35,7 +35,7 @@
 
             if (_States.CurrentGrabState != States.GrabState.WaitForItems)
             {
-                if (!Cache.Instance.OpenItemsHangar("Grab")) return;
+                //if (!Cache.Instance.OpenItemsHangar("Grab")) return;
                 if (!Cache.Instance.OpenShipsHangar("Grab")) return;
 
                 if ("Local Hangar" == Hangar)
@@ -62,7 +62,7 @@
 
                     if ("Local Hangar" == Hangar)
                     {
-                        if (!Cache.Instance.OpenItemsHangar("Drop")) return;
+                        if (Cache.Instance.ItemHangar == null) return;
                     }
                     else if ("Ship Hangar" == Hangar)
                     {
@@ -87,7 +87,7 @@
 
                 case GrabState.OpenCargo:
 
-                    if (!Cache.Instance.OpenCargoHold("Grab")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null) return;
 
                     Logging.Log("Grab", "Opening Cargo Hold", Logging.White);
                     _freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;

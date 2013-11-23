@@ -703,7 +703,7 @@ namespace Questor.Modules.Caching
                 {
                     if ((Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10)))
                     {
-                        if (Cache.Instance.MyShipEntity.IsShipWithNoCargoBay)
+                        if (Cache.Instance.MyShipEntity != null && Cache.Instance.MyShipEntity.IsShipWithNoCargoBay)
                         {
                             return null;
                         }

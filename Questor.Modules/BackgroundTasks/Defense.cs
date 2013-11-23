@@ -605,7 +605,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 // Module is either for Cap or Tank recharging, so we look at these separated (or random things will happen, like cap recharging when we need to repair but cap is near max) 
                 // Cap recharging
-                bool inCombat = Cache.Instance.TargetedBy.Any();
+                bool inCombat = Cache.Instance.EntitiesOnGrid.Any(i => i.IsTargetedBy) || Cache.Instance.PotentialCombatTargets.Any();
                 if (!module.IsActive && inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
                 {
                     module.Click();

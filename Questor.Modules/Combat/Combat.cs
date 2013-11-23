@@ -1925,7 +1925,11 @@ namespace Questor.Modules.Combat
 
                     case CombatState.KillTargets:
 
-                        if (Cache.Instance.CurrentShipsCargo == null) return;
+                        if (Cache.Instance.CurrentShipsCargo == null)
+                        {
+                            Logging.Log("Combat.KillTargets", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                            return;
+                        }
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
                         if (Settings.Instance.DebugPreferredPrimaryWeaponTarget || Settings.Instance.DebugKillTargets)

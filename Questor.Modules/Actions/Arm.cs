@@ -841,7 +841,12 @@ namespace Questor.Modules.Actions
                     if (!_bringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
-                        if (Cache.Instance.CurrentShipsCargo == null) return;
+                        if (Cache.Instance.CurrentShipsCargo == null)
+                        {
+                            Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                            return;
+                        }
+
                         if (Cache.Instance.ItemHangar == null) return;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
@@ -945,7 +950,12 @@ namespace Questor.Modules.Actions
                     if (!_bringoptionalItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
-                        if (Cache.Instance.CurrentShipsCargo == null) return;
+                        if (Cache.Instance.CurrentShipsCargo == null)
+                        {
+                            Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                            return;
+                        }
+
                         if (Cache.Instance.ItemHangar == null) return;
 
                         IEnumerable<DirectItem> cargoItems = new List<DirectItem>();
@@ -1042,7 +1052,11 @@ namespace Questor.Modules.Actions
                     {
                         if ((Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector)) || Settings.Instance.ArmLoadCapBoosters)
                         {
-                            if (Cache.Instance.CurrentShipsCargo == null) return;
+                            if (Cache.Instance.CurrentShipsCargo == null)
+                            {
+                                Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                                return;
+                            }
 
                             int capsIncargo = 0;
                             foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items)
@@ -1088,7 +1102,11 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     //
                     // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
@@ -1261,7 +1279,11 @@ namespace Questor.Modules.Actions
                     //    return;
                     //}
 
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     //
                     // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
@@ -1355,7 +1377,11 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction)
                         break;
 
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.WaitForItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     if (Cache.Instance.CurrentShipsCargo.Items.Count == 0) return;
 

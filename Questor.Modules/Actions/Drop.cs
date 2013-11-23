@@ -76,8 +76,12 @@
 
                 case DropState.OpenCargo:
                     if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: OpenCargo", Logging.Debug);
-                    
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("OpenCargo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     Logging.Log("Drop", "Opening Cargo Hold", Logging.White);
                     _States.CurrentDropState = Item == 00 ? DropState.AllItems : DropState.MoveItems;
@@ -87,7 +91,11 @@
 
                     if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: MoveItems", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     DirectItem dropItem;
 

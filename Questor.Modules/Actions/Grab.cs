@@ -87,7 +87,11 @@
 
                 case GrabState.OpenCargo:
 
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     Logging.Log("Grab", "Opening Cargo Hold", Logging.White);
                     _freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;

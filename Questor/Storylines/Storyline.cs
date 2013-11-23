@@ -463,7 +463,11 @@
             }
 
             // Yes, open the ships cargo
-            if (Cache.Instance.CurrentShipsCargo == null) return false;
+            if (Cache.Instance.CurrentShipsCargo == null)
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("BringSpoilsOfWar", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                return false;
+            }
 
             // If we are not moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)

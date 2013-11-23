@@ -703,74 +703,79 @@ namespace Questor.Modules.Caching
                 {
                     if ((Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10)))
                     {
-                        if (Cache.Instance.MyShipEntity != null && Cache.Instance.MyShipEntity.IsShipWithNoCargoBay)
+                        if (Cache.Instance.MyShipEntity != null)
                         {
-                            return null;
-                        }
-
-                        if (_currentShipsCargo == null)
-                        {
-                            if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                            if (Cache.Instance.MyShipEntity.IsShipWithNoCargoBay)
                             {
-                                Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                                _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                                return null;
                             }
-                        }
-
-                        if (_currentShipsCargo != null)
-                        {
-                            if (Cache.Instance._currentShipsCargo.Window == null)
+                            
+                            if (_currentShipsCargo == null)
                             {
-                                // No?, then command it to open if we have not already tried to open it very recently
                                 if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
                                 {
-                                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                    _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
                                 }
-
-                                _currentShipsCargo = null;
-                                return _currentShipsCargo;
                             }
 
-                            if (!Cache.Instance._currentShipsCargo.Window.IsReady)
+                            if (_currentShipsCargo != null)
                             {
-                                Logging.Log("CurrentShipsCargo", "cargo window is not ready", Logging.White);
-                                _currentShipsCargo = null;
-                                return _currentShipsCargo;
-                            }
-
-                            if (!Cache.Instance._currentShipsCargo.Window.IsPrimary())
-                            {
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
-                                Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-
-                                if (_currentShipsCargo != null)
+                                if (Cache.Instance._currentShipsCargo.Window == null)
                                 {
+                                    // No?, then command it to open if we have not already tried to open it very recently
+                                    if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                    {
+                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                                    }
+
+                                    _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
 
-                                return null;
-                            }
-
-                            if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
-                            {
-                                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                if (!Cache.Instance._currentShipsCargo.Window.IsReady)
                                 {
-                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
-                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                                    Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
+                                    Logging.Log("CurrentShipsCargo", "cargo window is not ready", Logging.White);
+                                    _currentShipsCargo = null;
+                                    return _currentShipsCargo;
                                 }
 
-                                _currentShipsCargo = null;
+                                if (!Cache.Instance._currentShipsCargo.Window.IsPrimary())
+                                {
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
+                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+
+                                    if (_currentShipsCargo != null)
+                                    {
+                                        return _currentShipsCargo;
+                                    }
+
+                                    return null;
+                                }
+
+                                if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
+                                {
+                                    if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                    {
+                                        if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
+                                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                        Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
+                                    }
+
+                                    _currentShipsCargo = null;
+                                    return _currentShipsCargo;
+                                }
+
                                 return _currentShipsCargo;
                             }
 
+                            //
+                            // this might be null here, that is ok, if its null now it will likely not be null in a few seconds (iterations), we should be checking for null elsewhere and not freaking out =) 
+                            //
                             return _currentShipsCargo;
                         }
 
-                        //
-                        // this might be null here, that is ok, if its null now it will likely not be null in a few seconds (iterations), we should be checking for null elsewhere and not freaking out =) 
-                        //
-                        return _currentShipsCargo;
+                        return null;
                     }
                 }
                 catch (Exception exception)

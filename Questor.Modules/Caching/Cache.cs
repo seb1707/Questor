@@ -712,11 +712,7 @@ namespace Questor.Modules.Caching
                             
                             if (_currentShipsCargo == null)
                             {
-                                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
-                                {
-                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                                    _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
-                                }
+                                _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
                             }
 
                             if (_currentShipsCargo != null)
@@ -724,8 +720,9 @@ namespace Questor.Modules.Caching
                                 if (Cache.Instance._currentShipsCargo.Window == null)
                                 {
                                     // No?, then command it to open if we have not already tried to open it very recently
-                                    if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                    if (DateTime.UtcNow > Cache.Instance.NextOpenCurrentShipsCargoWindowAction)
                                     {
+                                        Cache.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                                     }
 
@@ -743,8 +740,7 @@ namespace Questor.Modules.Caching
                                 if (!Cache.Instance._currentShipsCargo.Window.IsPrimary())
                                 {
                                     if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
-                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-
+                                    
                                     if (_currentShipsCargo != null)
                                     {
                                         return _currentShipsCargo;
@@ -957,6 +953,7 @@ namespace Questor.Modules.Caching
         public DateTime NextDroneBayAction { get; set; }
         public DateTime NextOpenHangarAction { get; set; }
         public DateTime NextOpenCargoAction { get; set; }
+        public DateTime NextOpenCurrentShipsCargoWindowAction { get; set; }
         public DateTime NextMakeActiveTargetAction { get; set; }
         public DateTime NextArmAction { get; set; }
         public DateTime NextSalvageAction { get; set; }

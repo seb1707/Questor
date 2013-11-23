@@ -724,8 +724,12 @@ namespace Questor.Modules.Caching
                                     {
                                         Cache.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                                        if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
+                                        _currentShipsCargo = null;
+                                        return _currentShipsCargo;
                                     }
 
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCurrentShipsCargoWindowAction).Seconds + "sec]", Logging.Debug);
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
@@ -743,21 +747,26 @@ namespace Questor.Modules.Caching
                                     
                                     if (_currentShipsCargo != null)
                                     {
+                                        //if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is not null", Logging.Debug);
                                         return _currentShipsCargo;
                                     }
 
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null!?", Logging.Debug);
                                     return null;
                                 }
 
-                                if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
+                                if (Cache.Instance._currentShipsCargo.Window.IsPrimary())
                                 {
                                     if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
                                     {
                                         if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
                                         Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                                        Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
+                                        Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
+                                        _currentShipsCargo = null;
+                                        return _currentShipsCargo;
                                     }
 
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).Seconds + "sec]", Logging.Debug);
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
@@ -765,18 +774,30 @@ namespace Questor.Modules.Caching
                                 return _currentShipsCargo;
                             }
 
-                            //
-                            // this might be null here, that is ok, if its null now it will likely not be null in a few seconds (iterations), we should be checking for null elsewhere and not freaking out =) 
-                            //
+                            if (_currentShipsCargo == null)
+                            {
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);    
+                            }
+                            
                             return _currentShipsCargo;
                         }
 
+                        int EntityCount = 0;
+                        if (Cache.Instance.Entities.Any())
+                        {
+                            EntityCount = Cache.Instance.Entities.Count();
+                        }
+
+                        if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.MyShipEntity is null: We have a total of [" + EntityCount + "] entities available at the moment.", Logging.Debug);
                         return null;
                     }
+
+                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "We are IsSpace [" + Cache.Instance.InSpace + "] InStation [" + Cache.Instance.InStation + "] UnDocked for [" + DateTime.UtcNow.Subtract(LastInStation).Seconds + "] sec, Docked for [" + DateTime.UtcNow.Subtract(LastInSpace).Seconds + "] sec", Logging.Debug);
+                    return null;
                 }
                 catch (Exception exception)
                 {
-                    Logging.Log("ReadyCargoHold", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
+                    Logging.Log("CurrentShipsCargo", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
                     return null;
                 }
 

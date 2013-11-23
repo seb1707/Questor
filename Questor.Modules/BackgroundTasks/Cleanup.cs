@@ -65,7 +65,56 @@ namespace Questor.Modules.BackgroundTasks
             // Write to Session log
             if (!Statistics.WriteSessionLogClosing()) return false;
 
-            if ((Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart) || restart)
+            /*
+            if (QMJob != "none")
+            {
+                if (Settings.Instance.UseInnerspace)
+                {
+                    //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkInnerspaceProfile is ["+ CloseQuestorCMDUplinkInnerspaceProfile.tostring() +"]");
+                    if (_closeQuestorCMDUplink)
+                    {
+                        Logging.Log("Questor", "Starting a timer in the innerspace uplink to start QuestorManager in this innerspace session", Logging.White);
+
+                        //
+                        // start QuestorManager with job specified
+                        //
+
+                        //
+                        // stop questor (will be restarted by QuestorManager when ready)
+                        //
+
+                        //LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.Instance.CharacterName + "'s Questor is starting a timedcommand to start QuestorManager in a moment");
+                        //LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
+                        //LavishScript.ExecuteCommand("uplink exec timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
+
+                        //Logging.Log("Questor", "Done: quitting this session so the new innerspace session can take over", Logging.White);
+                        //Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.White);
+                        _closeQuestorCMDUplink = false;
+                        CloseQuestorDelay = DateTime.UtcNow.AddSeconds(Time.Instance.CloseQuestorDelayBeforeExit_seconds);
+                    }
+
+                    if (!_closeQuestor10SecWarningDone)
+                    {
+                        _closeQuestor10SecWarningDone = true;
+                        Logging.Log("Questor", "Exiting eve in [" + Time.Instance.CloseQuestorDelayBeforeExit_seconds + "] seconds", Logging.White);
+                        return false;
+                    }
+
+                    if (DateTime.UtcNow > CloseQuestorDelay)
+                    {
+                        Logging.Log("Questor", "Exiting eve now.", Logging.White);
+                        Cache.Instance.DirecteveDispose();
+                        Process.GetCurrentProcess().Kill();
+                        Environment.Exit(0);
+                    }
+                    return false;
+                }
+            }
+            
+            else 
+            */
+            //if (Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart)
+
             //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
@@ -503,17 +552,17 @@ namespace Questor.Modules.BackgroundTasks
 
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
 
-                                //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-                                //{
+                                if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+                                {
                                     //
                                     // we do not care about fitting errors when using the BackgroundBehavior
                                     //
-                                //    sayOk |= window.Html.Contains("Not all the items could be fitted");
-                                //}
-                                //else
-                                //{
+                                    sayOk |= window.Html.Contains("Not all the items could be fitted");
+                                }
+                                else
+                                {
                                     pause |= window.Html.Contains("Not all the items could be fitted");   
-                                //}
+                                }
 
                                 pause |= window.Html.Contains("Cannot move");
 

@@ -32,7 +32,9 @@ namespace Questor
     {
         private readonly QuestorfrmMain _mParent;
         private readonly Defense _defense;
-
+        private readonly Master _master;
+        private readonly ManageFleet _manageFleet;
+        
         private DateTime _lastQuestorPulse;
         private static DateTime _nextQuestorAction = DateTime.UtcNow.AddHours(-1);
         private readonly CombatMissionsBehavior _combatMissionsBehavior;
@@ -41,7 +43,7 @@ namespace Questor
         private readonly DirectionalScannerBehavior _directionalScannerBehavior;
         private readonly DebugHangarsBehavior _debugHangarsBehavior;
         private readonly MiningBehavior _miningBehavior;
-
+        private readonly BackgroundBehavior _backgroundbehavior;
         private readonly InnerspaceCommands _innerspaceCommands;
         private readonly Statistics _statistics;
         //private readonly BackgroundBehavior _backgroundbehavior;
@@ -62,13 +64,15 @@ namespace Questor
             _lastQuestorPulse = DateTime.UtcNow;
 
             _defense = new Defense();
+            _master = new Master();
+            _manageFleet = new ManageFleet();
             _combatMissionsBehavior = new CombatMissionsBehavior();
             _combatHelperBehavior = new CombatHelperBehavior();
             _dedicatedBookmarkSalvagerBehavior = new DedicatedBookmarkSalvagerBehavior();
             _directionalScannerBehavior = new DirectionalScannerBehavior();
             _debugHangarsBehavior = new DebugHangarsBehavior();
             _miningBehavior = new MiningBehavior();
-            //_backgroundbehavior = new BackgroundBehavior();
+            _backgroundbehavior = new BackgroundBehavior();
             _cleanup = new Cleanup();
             _watch = new Stopwatch();
             _innerspaceCommands = new InnerspaceCommands();
@@ -292,6 +296,32 @@ namespace Questor
                 Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
         }
 
+        public static void QMJobs()
+        {
+            if (DateTime.UtcNow < Cache.Instance.NextQMJobCheckAction)
+                return;
+
+            //if (Settings.Instance.ProcessQMJobs)
+            //{
+                //
+                // reasons to run a QuestorManager task...
+                //
+
+                //
+                // low on ammo
+                //
+
+
+                //
+                // bring loot to market (every x missions?)
+                //
+                
+            //}
+
+            Cache.Instance.NextQMJobCheckAction = DateTime.UtcNow.AddMinutes(5);
+            Logging.Log("Questor", "Checking: Number of missions completed this session [" + Cache.Instance.MissionsThisSession + "]", Logging.White);            
+        }
+
         public static bool SkillQueueCheck()
         {
             if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
@@ -412,8 +442,8 @@ namespace Questor
         {
             if (_States.CurrentQuestorState == QuestorState.Mining ||
                 _States.CurrentQuestorState == QuestorState.CombatHelperBehavior ||
-                _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+                _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior ||
+                _States.CurrentQuestorState == QuestorState.BackgroundBehavior)
             {
                 if (Settings.Instance.DebugWalletBalance) Logging.Log("Questor.WalletCheck", "QuestorState is [" + _States.CurrentQuestorState.ToString() + "] which does not use WalletCheck", Logging.White);
                 return;
@@ -431,7 +461,6 @@ namespace Questor
             if (Settings.Instance.DebugWalletBalance)
             {
                 Logging.Log("Questor.WalletCheck", String.Format("DEBUG: Wallet Balance [ {0} ] has been checked.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.Yellow);
-
             }
 
             //Settings.Instance.WalletBalanceChangeLogOffDelay = 2;  //used for debugging purposes
@@ -602,6 +631,8 @@ namespace Questor
                 }
                 DebugPerformanceStopandDisplayTimer("Defense.ProcessState");
             }
+            if (Settings.Instance.FleetSupportMaster) _master.ProcessState();
+            if (Settings.Instance.FleetSupportMaster && Settings.Instance.CharacterNamesForMasterToInviteToFleet.Any()) _manageFleet.ProcessState();
 
             if (Cache.Instance.Paused || DateTime.UtcNow < _nextQuestorAction)
             {
@@ -733,7 +764,7 @@ namespace Questor
 
                         case "custom":
                             Logging.Log("Questor", "Start Custom Behavior", Logging.White);
-                            //_States.CurrentQuestorState = QuestorState.BackgroundBehavior;
+                            _States.CurrentQuestorState = QuestorState.BackgroundBehavior;
                             break;
 
                         case "directionalscanner":
@@ -839,13 +870,13 @@ namespace Questor
                     }
                     break;
 
-                //case QuestorState.BackgroundBehavior:
+                case QuestorState.BackgroundBehavior:
 
                     //
                     // QuestorState will stay here until changed externally by the behavior we just kicked into starting
                     //
-                    //_backgroundbehavior.ProcessState();
-                    //break;
+                    _backgroundbehavior.ProcessState();
+                    break;
             }
         }
     }

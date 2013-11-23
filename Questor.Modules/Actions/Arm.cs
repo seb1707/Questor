@@ -645,8 +645,8 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior
-                        //_States.CurrentQuestorState == QuestorState.BackgroundBehavior 
+                    if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior || 
+                        _States.CurrentQuestorState == QuestorState.BackgroundBehavior 
                         //_States.CurrentQuestorState == QuestorState.Mining 
                        )
                     {

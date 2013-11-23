@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\BackgroundBehavior .cs" />
     <Compile Include="Behaviors\CombatHelperBehavior.cs" />
     <Compile Include="Behaviors\CombatMissionsBehavior.cs" />
     <Compile Include="Behaviors\DebugBehavior.cs" />

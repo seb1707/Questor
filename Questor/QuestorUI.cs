@@ -132,10 +132,10 @@ namespace Questor
                 //
                 // right column
                 //
-                CombatMissionCtrlStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(CombatMissionCtrlState)))
+                ManageFleetStateComboBox.Items.Clear();
+                foreach (string text in Enum.GetNames(typeof(ManageFleetState)))
                 {
-                    CombatMissionCtrlStateComboBox.Items.Add(text);
+                    ManageFleetStateComboBox.Items.Add(text);
                 }
 
                 StorylineStateComboBox.Items.Clear();
@@ -166,6 +166,18 @@ namespace Questor
                 foreach (string text in Enum.GetNames(typeof(AgentInteractionState)))
                 {
                     AgentInteractionStateComboBox.Items.Add(text);
+                }
+
+                MasterStateComboBox.Items.Clear();
+                foreach (string text in Enum.GetNames(typeof(MasterState)))
+                {
+                    MasterStateComboBox.Items.Add(text);
+                }
+
+                SlaveStateComboBox.Items.Clear();
+                foreach (string text in Enum.GetNames(typeof(SlaveState)))
+                {
+                    SlaveStateComboBox.Items.Add(text);
                 }
             }
         }
@@ -269,7 +281,7 @@ namespace Questor
                         //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
                         //ActiveDronesData.Text = Cache.Instance.ActiveDrones.Count().ToString();                   //causes problems / crashes
-                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
+                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inWarp from the UI?
                         //{
                         //    _nextWreckUpdate = DateTime.UtcNow.AddSeconds(10);
                             //WrecksData.Text = Cache.Instance.Wrecks.Count().ToString(CultureInfo.InvariantCulture);
@@ -431,6 +443,11 @@ namespace Questor
                 //    }
                 //}
             }
+
+            //if (Settings.Instance.FleetSupportSlave) Slave.AddPriorityTargets(TargetNumber, TargetID, Settings.Instance.FleetName);
+
+            //Logging.Log("QuestorUI", "MasterToSlaveTargetingInfo:", Logging.White);
+            return;
         }
 
         private void UpdateUiTick(object sender, EventArgs e)
@@ -527,13 +544,13 @@ namespace Questor
                 }
             }
 
-            //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-            //{
-            //    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentBackgroundBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-            //    {
-            //        BehaviorComboBox.SelectedItem = _States.CurrentBackgroundBehaviorState.ToString();
-            //    }
-            //}
+            if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+            {
+                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentBackgroundBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                {
+                    BehaviorComboBox.SelectedItem = _States.CurrentBackgroundBehaviorState.ToString();
+                }
+            }
 
             if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.DamageType.ToString() && !DamageTypeComboBox.DroppedDown)
             {
@@ -579,9 +596,9 @@ namespace Questor
             //
             // Right Group
             //
-            if ((string)CombatMissionCtrlStateComboBox.SelectedItem != _States.CurrentCombatMissionCtrlState.ToString() && !CombatMissionCtrlStateComboBox.DroppedDown)
+            if ((string)ManageFleetStateComboBox.SelectedItem != text && !ManageFleetStateComboBox.DroppedDown)
             {
-                CombatMissionCtrlStateComboBox.SelectedItem = _States.CurrentCombatMissionCtrlState.ToString();
+                ManageFleetStateComboBox.SelectedItem = _States.CurrentManageFleetState.ToString();
             }
 
             if ((string)StorylineStateComboBox.SelectedItem != _States.CurrentStorylineState.ToString() && !StorylineStateComboBox.DroppedDown)
@@ -608,6 +625,16 @@ namespace Questor
             if ((string)AgentInteractionStateComboBox.SelectedItem != _States.CurrentAgentInteractionState.ToString() && !AgentInteractionStateComboBox.DroppedDown)
             {
                 AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
+            }
+
+            if ((string)MasterStateComboBox.SelectedItem != _States.CurrentMasterState.ToString() && !MasterStateComboBox.DroppedDown)
+            {
+                MasterStateComboBox.SelectedItem = _States.CurrentMasterState.ToString();
+            }
+
+            if ((string)SlaveStateComboBox.SelectedItem != _States.CurrentSlaveState.ToString() && !SlaveStateComboBox.DroppedDown)
+            {
+                SlaveStateComboBox.SelectedItem = _States.CurrentSlaveState.ToString();
             }
 
             //if (Settings.Instance.CharacterMode.ToLower() == "dps" || Settings.Instance.CharacterMode.ToLower() == "combat missions")
@@ -963,11 +990,11 @@ namespace Questor
             {
                 _States.CurrentMiningState = (MiningState)Enum.Parse(typeof(MiningState), BehaviorComboBox.Text);
             }
-            //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-            //{
-            //    _States.CurrentBackgroundBehaviorState = (BackgroundBehaviorState)Enum.Parse(typeof(BackgroundBehaviorState), BehaviorComboBox.Text);
-            //    //_States.LavishEvent_QuestorCombatMissionsBehaviorState();
-            //}
+            if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+            {
+                _States.CurrentBackgroundBehaviorState = (BackgroundBehaviorState)Enum.Parse(typeof(BackgroundBehaviorState), BehaviorComboBox.Text);
+                //_States.LavishEvent_QuestorCombatMissionsBehaviorState();
+            }
 
             try
             {
@@ -976,14 +1003,14 @@ namespace Questor
 
                 //DeclinedTimeData.Text = Cache.Instance.CurrentAgent.DeclineTimer;
                 //
-                // greylist info
+                // GreyList info
                 //
                 MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
                 LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
                 greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
 
                 //
-                // blacklist info
+                // BlackList info
                 //
                 MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
                 LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
@@ -996,6 +1023,21 @@ namespace Questor
             }
         }
 
+        private void ManageFleetComboBoxSelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentManageFleetState = (ManageFleetState)Enum.Parse(typeof(ManageFleetState), ManageFleetStateComboBox.Text);
+        }
+
+        private void MasterStateComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentMasterState = (MasterState)Enum.Parse(typeof(MasterState), MasterStateComboBox.Text);
+        }
+
+        private void SlaveStateComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _States.CurrentSlaveState = (SlaveState)Enum.Parse(typeof(SlaveState), SlaveStateComboBox.Text);
+        }
+        
         private void PanicStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             _States.CurrentPanicState = (PanicState)Enum.Parse(typeof(PanicState), PanicStateComboBox.Text);
@@ -1148,7 +1190,7 @@ namespace Questor
         private void ReloadAllClick(object sender, EventArgs e)
         {
             Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it shoud return to the configured behavior", Logging.Teal);
+            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it should return to the configured behavior", Logging.Teal);
             _States.CurrentQuestorState = QuestorState.DebugReloadAll;
         }
 

@@ -68,7 +68,10 @@
     <Compile Include="Actions\Market.cs" />
     <Compile Include="Actions\SkillTrainer.cs" />
     <Compile Include="Alerts\Email.cs" />
+    <Compile Include="BackgroundTasks\ManageFleet.cs" />
+    <Compile Include="BackgroundTasks\Master.cs" />
     <Compile Include="BackgroundTasks\NavigateOnGrid.cs" />
+    <Compile Include="BackgroundTasks\Slave.cs" />
     <Compile Include="Caching\ItemCacheMarket.cs" />
     <Compile Include="Lookup\InvTypeMarket.cs" />
     <Compile Include="Lookup\MiningCrystals.cs" />

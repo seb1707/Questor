@@ -227,6 +227,8 @@
             this.label19 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.MasterStateComboBox = new System.Windows.Forms.ComboBox();
+            this.labelmasterState = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -240,6 +242,8 @@
             this.CombatStateComboBox = new System.Windows.Forms.ComboBox();
             this.PanicStateComboBox = new System.Windows.Forms.ComboBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.SlaveStateComboBox = new System.Windows.Forms.ComboBox();
+            this.labelSlaveState = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.AgentInteractionStateComboBox = new System.Windows.Forms.ComboBox();
             this.TravelerStateComboBox = new System.Windows.Forms.ComboBox();
@@ -247,7 +251,7 @@
             this.UnloadStateComboBox = new System.Windows.Forms.ComboBox();
             this.ArmStateComboBox = new System.Windows.Forms.ComboBox();
             this.StorylineStateComboBox = new System.Windows.Forms.ComboBox();
-            this.CombatMissionCtrlStateComboBox = new System.Windows.Forms.ComboBox();
+            this.ManageFleetStateComboBox = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -2549,6 +2553,8 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.MasterStateComboBox);
+            this.panel2.Controls.Add(this.labelmasterState);
             this.panel2.Controls.Add(this.label18);
             this.panel2.Controls.Add(this.label16);
             this.panel2.Controls.Add(this.label15);
@@ -2565,6 +2571,25 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(257, 236);
             this.panel2.TabIndex = 154;
+            // 
+            // MasterStateComboBox
+            // 
+            this.MasterStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MasterStateComboBox.FormattingEnabled = true;
+            this.MasterStateComboBox.Location = new System.Drawing.Point(112, 199);
+            this.MasterStateComboBox.Name = "MasterStateComboBox";
+            this.MasterStateComboBox.Size = new System.Drawing.Size(130, 21);
+            this.MasterStateComboBox.TabIndex = 168;
+            this.MasterStateComboBox.SelectedIndexChanged += new System.EventHandler(this.MasterStateComboBox_SelectedIndexChanged);
+            // 
+            // labelmasterState
+            // 
+            this.labelmasterState.AutoSize = true;
+            this.labelmasterState.Location = new System.Drawing.Point(37, 199);
+            this.labelmasterState.Name = "labelmasterState";
+            this.labelmasterState.Size = new System.Drawing.Size(70, 13);
+            this.labelmasterState.TabIndex = 167;
+            this.labelmasterState.Text = "Master State:";
             // 
             // label18
             // 
@@ -2688,6 +2713,8 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.SlaveStateComboBox);
+            this.panel1.Controls.Add(this.labelSlaveState);
             this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.AgentInteractionStateComboBox);
             this.panel1.Controls.Add(this.TravelerStateComboBox);
@@ -2695,7 +2722,7 @@
             this.panel1.Controls.Add(this.UnloadStateComboBox);
             this.panel1.Controls.Add(this.ArmStateComboBox);
             this.panel1.Controls.Add(this.StorylineStateComboBox);
-            this.panel1.Controls.Add(this.CombatMissionCtrlStateComboBox);
+            this.panel1.Controls.Add(this.ManageFleetStateComboBox);
             this.panel1.Controls.Add(this.label13);
             this.panel1.Controls.Add(this.label12);
             this.panel1.Controls.Add(this.label7);
@@ -2705,6 +2732,25 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(263, 236);
             this.panel1.TabIndex = 153;
+            // 
+            // SlaveStateComboBox
+            // 
+            this.SlaveStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.SlaveStateComboBox.FormattingEnabled = true;
+            this.SlaveStateComboBox.Location = new System.Drawing.Point(131, 199);
+            this.SlaveStateComboBox.Name = "SlaveStateComboBox";
+            this.SlaveStateComboBox.Size = new System.Drawing.Size(130, 21);
+            this.SlaveStateComboBox.TabIndex = 170;
+            this.SlaveStateComboBox.SelectedIndexChanged += new System.EventHandler(this.SlaveStateComboBox_SelectedIndexChanged);
+            // 
+            // labelSlaveState
+            // 
+            this.labelSlaveState.AutoSize = true;
+            this.labelSlaveState.Location = new System.Drawing.Point(48, 202);
+            this.labelSlaveState.Name = "labelSlaveState";
+            this.labelSlaveState.Size = new System.Drawing.Size(65, 13);
+            this.labelSlaveState.TabIndex = 169;
+            this.labelSlaveState.Text = "Slave State:";
             // 
             // label5
             // 
@@ -2779,23 +2825,25 @@
             this.StorylineStateComboBox.SelectedIndexChanged += new System.EventHandler(this.StorylineStateComboBoxSelectedIndexChanged);
             this.StorylineStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
-            // CombatMissionCtrlStateComboBox
+            // ManageFleetStateComboBox
             // 
-            this.CombatMissionCtrlStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CombatMissionCtrlStateComboBox.FormattingEnabled = true;
-            this.CombatMissionCtrlStateComboBox.Location = new System.Drawing.Point(130, 16);
-            this.CombatMissionCtrlStateComboBox.Name = "CombatMissionCtrlStateComboBox";
-            this.CombatMissionCtrlStateComboBox.Size = new System.Drawing.Size(130, 21);
-            this.CombatMissionCtrlStateComboBox.TabIndex = 160;
+            this.ManageFleetStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ManageFleetStateComboBox.FormattingEnabled = true;
+            this.ManageFleetStateComboBox.Location = new System.Drawing.Point(130, 16);
+            this.ManageFleetStateComboBox.Name = "ManageFleetStateComboBox";
+            this.ManageFleetStateComboBox.Size = new System.Drawing.Size(130, 21);
+            this.ManageFleetStateComboBox.TabIndex = 160;
+            this.ManageFleetStateComboBox.SelectedIndexChanged += new System.EventHandler(this.ManageFleetComboBoxSelectedIndexChanged);
+            this.ManageFleetStateComboBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisableMouseWheel);
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(1, 19);
+            this.label13.Location = new System.Drawing.Point(25, 19);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(124, 13);
+            this.label13.Size = new System.Drawing.Size(100, 13);
             this.label13.TabIndex = 159;
-            this.label13.Text = "CombatMissionCtrl State:";
+            this.label13.Text = "ManageFleet State:";
             // 
             // label12
             // 
@@ -6422,7 +6470,7 @@
         private System.Windows.Forms.ComboBox UnloadStateComboBox;
         private System.Windows.Forms.ComboBox ArmStateComboBox;
         private System.Windows.Forms.ComboBox StorylineStateComboBox;
-        private System.Windows.Forms.ComboBox CombatMissionCtrlStateComboBox;
+        private System.Windows.Forms.ComboBox ManageFleetStateComboBox;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label7;
@@ -6764,6 +6812,10 @@
         private System.Windows.Forms.Button bttnUserDefinedScript3;
         private System.Windows.Forms.Button bttnUserDefinedScript2;
         private System.Windows.Forms.Button bttnUserDefinedScript1;
+        private System.Windows.Forms.ComboBox MasterStateComboBox;
+        private System.Windows.Forms.Label labelmasterState;
+        private System.Windows.Forms.ComboBox SlaveStateComboBox;
+        private System.Windows.Forms.Label labelSlaveState;
         private System.Windows.Forms.ListBox DronePriorityTargetListBox;
         private System.Windows.Forms.ListBox PrimaryWeaponsPriorityTargetListBox;
         private System.Windows.Forms.Label lblCurrentDroneTarget;

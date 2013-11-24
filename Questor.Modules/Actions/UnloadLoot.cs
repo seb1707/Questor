@@ -83,7 +83,11 @@ namespace Questor.Modules.Actions
 
                 try
                 {
-                    if (Cache.Instance.CurrentShipsCargo == null) return false;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return false;
+                    }
 
                     if (Cache.Instance.CurrentShipsCargo.Window.Type == "form.ActiveShipCargo")
                     {
@@ -301,7 +305,11 @@ namespace Questor.Modules.Actions
                 return true;
             }
 
-            if (Cache.Instance.CurrentShipsCargo == null) return false;
+            if (Cache.Instance.CurrentShipsCargo == null)
+            {
+                Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                return false;
+            }
 
             if (Cache.Instance.CurrentShipsCargo.IsValid)
             {

@@ -26,8 +26,8 @@
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            //DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-            DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+            //DirectMarketWindow marketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            DirectMarketActionWindow sellWindow = Cache.Instance.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
 
             switch (_States.CurrentSellState)
             {
@@ -45,7 +45,7 @@
                         break;
                     _lastAction = DateTime.UtcNow;
 
-                    if (!Cache.Instance.OpenItemsHangar("Sell")) break;
+                    if (Cache.Instance.ItemHangar == null) break;
 
                     DirectItem directItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeId == Item));
                     if (directItem == null)
@@ -109,7 +109,7 @@
                 case SellState.WaitingToFinishQuickSell:
                     if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != Item)
                     {
-                        DirectWindow modal = Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.IsModal);
+                        DirectWindow modal = Cache.Instance.Windows.FirstOrDefault(w => w.IsModal);
                         if (modal != null)
                             modal.Close();
 

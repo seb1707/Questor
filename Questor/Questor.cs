@@ -773,7 +773,7 @@ namespace Questor
                     return;
 
                 case QuestorState.DebugWindows:
-                    List<DirectWindow> windows = Cache.Instance.DirectEve.Windows;
+                    List<DirectWindow> windows = Cache.Instance.Windows;
 
                     if (windows != null && windows.Any())
                     {

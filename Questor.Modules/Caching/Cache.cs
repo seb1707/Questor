@@ -699,13 +699,97 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_currentShipsCargo == null)
+                try
                 {
-                    _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
-                    return _currentShipsCargo;
-                }
+                    if ((Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10)))
+                    {
+                        if (_currentShipsCargo == null)
+                        {
+                            _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                        }
 
-                return _currentShipsCargo;
+                        if (_currentShipsCargo != null)
+                        {
+                            if (Cache.Instance._currentShipsCargo.Window == null)
+                            {
+                                // No?, then command it to open if we have not already tried to open it very recently
+                                if (DateTime.UtcNow > Cache.Instance.NextOpenCurrentShipsCargoWindowAction)
+                                {
+                                    Cache.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
+                                    _currentShipsCargo = null;
+                                    return _currentShipsCargo;
+                                }
+
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCurrentShipsCargoWindowAction).Seconds + "sec]", Logging.Debug);
+                                _currentShipsCargo = null;
+                                return _currentShipsCargo;
+                            }
+
+                            if (!Cache.Instance._currentShipsCargo.Window.IsReady)
+                            {
+                                Logging.Log("CurrentShipsCargo", "cargo window is not ready", Logging.White);
+                                _currentShipsCargo = null;
+                                return _currentShipsCargo;
+                            }
+
+                            if (!Cache.Instance._currentShipsCargo.Window.IsPrimary())
+                            {
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
+                                    
+                                if (_currentShipsCargo != null)
+                                {
+                                    //if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is not null", Logging.Debug);
+                                    return _currentShipsCargo;
+                                }
+
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null!?", Logging.Debug);
+                                return null;
+                            }
+
+                            if (Cache.Instance._currentShipsCargo.Window.IsPrimary())
+                            {
+                                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                {
+                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
+                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                    Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
+                                    _currentShipsCargo = null;
+                                    return _currentShipsCargo;
+                                }
+
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).Seconds + "sec]", Logging.Debug);
+                                _currentShipsCargo = null;
+                                return _currentShipsCargo;
+                            }
+
+                            return _currentShipsCargo;
+                        }
+
+                        if (_currentShipsCargo == null)
+                        {
+                            if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);    
+                        }
+                            
+                        return _currentShipsCargo;
+                    }
+
+                    int EntityCount = 0;
+                    if (Cache.Instance.Entities.Any())
+                    {
+                        EntityCount = Cache.Instance.Entities.Count();
+                    }
+
+                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.MyShipEntity is null: We have a total of [" + EntityCount + "] entities available at the moment.", Logging.Debug);
+                    return null;
+                   
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("CurrentShipsCargo", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
+                    return null;
+                }
             }
         }
 
@@ -870,16 +954,15 @@ namespace Questor.Modules.Caching
 
         public string _agentName = "";
 
-        public DateTime NextAgentWindowAction { get; set; }
+        public DateTime NextWindowAction { get; set; }
         public DateTime NextGetAgentMissionAction { get; set; }
         public DateTime NextOpenContainerInSpaceAction { get; set; }
-        public DateTime NextOpenJournalWindowAction { get; set; }
-        public DateTime NextOpenMarketAction { get; set; }
         public DateTime NextOpenLootContainerAction { get; set; }
         public DateTime NextOpenCorpBookmarkHangarAction { get; set; }
         public DateTime NextDroneBayAction { get; set; }
         public DateTime NextOpenHangarAction { get; set; }
         public DateTime NextOpenCargoAction { get; set; }
+        public DateTime NextOpenCurrentShipsCargoWindowAction { get; set; }
         public DateTime NextMakeActiveTargetAction { get; set; }
         public DateTime NextArmAction { get; set; }
         public DateTime NextSalvageAction { get; set; }
@@ -921,6 +1004,7 @@ namespace Questor.Modules.Caching
         public DateTime NextSkillTrainerAction = DateTime.MinValue;
         public DateTime NextBastionAction { get; set; }
         public DateTime NextBastionModeDeactivate { get; set; }
+        public DateTime NextLPStoreAction { get; set; }
 
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
         public DateTime LastWalletCheck = DateTime.UtcNow;
@@ -2450,6 +2534,39 @@ namespace Questor.Modules.Caching
             return entity;
         }
 
+        public List<DirectBookmark> _allBookmarks;
+
+        public List<DirectBookmark> AllBookmarks
+        {
+            get
+            {
+                try
+                {
+                    if (_allBookmarks == null || !_allBookmarks.Any())
+                    {
+                        if (DirectEve.Bookmarks.Any())
+                        {
+                            _allBookmarks = DirectEve.Bookmarks;
+                            return _allBookmarks;
+                        }
+
+                        return null; //there are no bookmarks to list...    
+                    }
+
+                    return _allBookmarks;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.allBookmarks", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
+            }
+            set
+            {
+                _allBookmarks = value;
+            }
+        }
+
         /// <summary>
         ///   Returns the first mission bookmark that starts with a certain string
         /// </summary>
@@ -2483,7 +2600,12 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public DirectBookmark BookmarkById(long bookmarkId)
         {
-            return DirectEve.Bookmarks.FirstOrDefault(b => b.BookmarkId == bookmarkId);
+            if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
+            {
+                return Cache.Instance.AllBookmarks.FirstOrDefault(b => b.BookmarkId == bookmarkId);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -2494,7 +2616,12 @@ namespace Questor.Modules.Caching
         public List<DirectBookmark> BookmarksByLabel(string label)
         {
             // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+            if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
+            {
+                return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -2504,7 +2631,12 @@ namespace Questor.Modules.Caching
         /// <returns></returns>
         public List<DirectBookmark> BookmarksThatContain(string label)
         {
-            return DirectEve.Bookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().Contains(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+            if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
+            {
+                return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().Contains(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -2520,6 +2652,7 @@ namespace Questor.Modules.Caching
                 _activeDrones = null;
                 _agent = null;
                 _aggressed = null;
+                _allBookmarks = null;
                 _ammoHangar = null;
                 _approaching = null;
                 _activeDrones = null;
@@ -2535,12 +2668,14 @@ namespace Questor.Modules.Caching
                 _entitiesNotSelf = null;
                 _entitiesOnGrid = null;
                 _entitiesById.Clear();
+                _fittingManagerWindow = null;
                 _gates = null;
                 _IDsinInventoryTree = null;
                 _itemHangar = null;
                 _jumpBridges = null;
                 _lootContainer = null;
                 _lootHangar = null;
+                _lpStore = null;
                 _maxLockedTargets = null;
                 _maxDroneRange = null;
                 _maxrange = null;
@@ -2560,6 +2695,7 @@ namespace Questor.Modules.Caching
                 _targeting = null;
                 _targetedBy = null;
                 _TotalTargetsandTargeting = null;
+                _undockBookmark = null;
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _windows = null;
@@ -4606,15 +4742,15 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (!InSpace && InStation)
+                if (!Cache.Instance.InSpace && Cache.Instance.InStation)
                 {
-                    if (_itemHangar == null)
+                    if (Cache.Instance._itemHangar == null)
                     {
-                        _itemHangar = Cache.Instance.DirectEve.GetItemHangar();
-                        return _itemHangar;
+                        Cache.Instance._itemHangar = Cache.Instance.DirectEve.GetItemHangar();
+                        return Cache.Instance._itemHangar;
                     }
 
-                    return _itemHangar;
+                    return Cache.Instance._itemHangar;
                 }
 
                 return null;
@@ -4637,7 +4773,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.StationItems") && w.Caption.Contains("Item hangar"));
+                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.StationItems") && w.Caption.Contains("Item hangar"));
 
                 // Is the items hangar open?
                 if (lootHangarWindow == null)
@@ -4654,33 +4790,6 @@ namespace Questor.Modules.Caching
             }
 
             return false;
-        }
-
-        public bool OpenItemsHangar(string module)
-        {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-            {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (Cache.Instance.InStation)
-                {
-                    if (Cache.Instance.ItemHangar.IsValid) return true;
-                }
-                return false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("OpenItemsHangar", "Unable to complete OpenItemsHangar [" + exception + "]", Logging.Teal);
-                return false;
-            }
         }
 
         public bool CloseItemsHangar(string module)
@@ -4978,90 +5087,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public bool OpenCargoHold(string module)
-        {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-                return false;
-            try
-            {
-                if (DateTime.UtcNow < Cache.Instance.NextOpenCargoAction)
-                {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
-                    {
-                        Logging.Log(module, "Opening CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    }
-
-                    return false;
-                }
-
-                if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
-                {
-                    if (Cache.Instance.CurrentShipsCargo.Window == null)
-                    {
-                        // No, command it to open
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
-                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                        Logging.Log(module, "Opening Cargohold of active ship: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                        return true;
-                    }
-
-                    if (!Cache.Instance.CurrentShipsCargo.Window.IsReady)
-                    {
-                        Logging.Log(module, "cargo window is not ready", Logging.White);
-                        return false;
-                    }
-
-                    if (!Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
-                    {
-                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
-                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                        return true;
-                    }
-
-                    if (Cache.Instance.CurrentShipsCargo.Window.IsPrimary())
-                    {
-                        if (Settings.Instance.DebugCargoHold) Logging.Log(module, "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
-                        Cache.Instance.CurrentShipsCargo.Window.OpenAsSecondary();
-                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                        return false;
-                    }
-
-                    return true;
-                }
-
-                return false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("ReadyCargoHold", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
-                return false;
-            }
-        }
-
-        public bool ReadyCargoHold(string module)
-        {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-                return false;
-            try
-            {
-                if (DateTime.UtcNow < Cache.Instance.NextOpenCargoAction)
-                {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
-                    {
-                        Logging.Log(module, "Opening CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    }
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("ReadyCargoHold", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
-                return false;
-            }
-        }
-
         public bool StackCargoHold(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -5220,51 +5245,6 @@ namespace Questor.Modules.Caching
                 }
             }
             return false;
-        }
-
-        public bool ReadyShipsHangar(string module)
-        {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-            {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (Cache.Instance.InStation)
-                {
-                    Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
-                    if (Cache.Instance.ShipHangar == null)
-                    {
-                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
-                        return false;
-                    }
-
-                    // Is the ShipHangar ready to be used?
-                    if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
-                    {
-                        //if (Cache.Instance.ShipHangar.Items.Any())
-                        //{
-                            //if (!OpenInventoryWindow("Cache.ReadyShipsHangar")) return false;
-
-                            //Logging.Log("ReadyShipHangar","Ship Hangar is ready to be used (no window needed)",Logging.White);
-                            return true;
-                        //}
-                        //return false;
-                    }
-                }
-                return false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("ReadyShipsHangar", "Unable to complete ReadyShipsHangar [" + exception + "]", Logging.Teal);
-                return false;
-            }
         }
 
         public bool StackShipsHangar(string module)
@@ -5549,7 +5529,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
 
             if (Cache.Instance.PrimaryInventoryWindow == null)
             {
@@ -5772,7 +5752,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation && !string.IsNullOrEmpty(window))
                 {
-                    DirectContainerWindow corpHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption == window);
+                    DirectContainerWindow corpHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption == window);
 
                     if (corpHangarWindow != null)
                     {
@@ -6006,7 +5986,7 @@ namespace Questor.Modules.Caching
 
             if (!Cache.Instance.OpenInventoryWindow(module)) return false;
 
-            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
 
             if (Cache.Instance.PrimaryInventoryWindow != null && Cache.Instance.PrimaryInventoryWindow.IsReady)
             {
@@ -6087,7 +6067,7 @@ namespace Questor.Modules.Caching
 
             if (!Cache.Instance.OpenInventoryWindow(module)) return false;
 
-            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
+            Cache.Instance.PrimaryInventoryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Name.Contains("Inventory"));
 
             if (Cache.Instance.PrimaryInventoryWindow != null && Cache.Instance.PrimaryInventoryWindow.IsReady)
             {
@@ -6163,7 +6143,7 @@ namespace Questor.Modules.Caching
             if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainerName);
+                DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainerName);
 
                 if (lootHangarWindow != null)
                 {
@@ -6302,7 +6282,7 @@ namespace Questor.Modules.Caching
                         // Is the corp loot Hangar open?
                         if (Cache.Instance.LootHangar != null)
                         {
-                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootHangarTabName));
+                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootHangarTabName));
                             if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpLootHangarSecondaryWindow != null)
@@ -6330,7 +6310,7 @@ namespace Questor.Modules.Caching
                     else if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainerName));
+                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainerName));
 
                         if (lootHangarWindow != null)
                         {
@@ -6635,7 +6615,7 @@ namespace Questor.Modules.Caching
                         // Is the corp Ammo Hangar open?
                         if (Cache.Instance.AmmoHangar != null)
                         {
-                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.AmmoHangarTabName));
+                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.AmmoHangarTabName));
                             if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpAmmoHangarSecondaryWindow != null)
@@ -6805,41 +6785,61 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public DirectLoyaltyPointStoreWindow LPStore { get; set; }
-
-        public bool OpenLPStore(string module)
+        public DirectLoyaltyPointStoreWindow _lpStore;
+        public DirectLoyaltyPointStoreWindow LPStore
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            get
             {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
-            {
-                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
-                return false;
-            }
-
-            if (!Cache.Instance.InStation)
-            {
-                Logging.Log(module, "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
-                return false;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                Cache.Instance.LPStore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
-                if (Cache.Instance.LPStore == null)
+                try
                 {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
-                    Logging.Log(module, "Opening loyalty point store", Logging.White);
-                    return false;
+                    if (Cache.Instance.InStation)
+                    {
+                        if (_lpStore == null)
+                        {
+                            if (!Cache.Instance.InStation)
+                            {
+                                Logging.Log("LPStore", "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
+                                return null;
+                            }
+
+                            if (Cache.Instance.InStation)
+                            {
+                                _lpStore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+                                
+                                if (_lpStore == null)
+                                {
+                                    if (DateTime.UtcNow > Cache.Instance.NextLPStoreAction)
+                                    {
+                                        Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
+                                        Cache.Instance.NextLPStoreAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(30, 240));
+                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
+                                        return null;    
+                                    }
+
+                                    return null;
+                                }
+
+                                return _lpStore;
+                            }
+
+                            return null;
+                        }
+
+                        return _lpStore;
+                    }
+
+                    return null;
                 }
-
-                return true;
+                catch (Exception exception)
+                {
+                    Logging.Log("LPStore", "Unable to define LPStore [" + exception + "]", Logging.Teal);
+                    return null;
+                }
             }
-
-            return false;
+            private set
+            {
+                _lpStore = value;
+            }
         }
 
         public bool CloseLPStore(string module)
@@ -6857,7 +6857,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                Cache.Instance.LPStore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+                Cache.Instance.LPStore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
                 if (Cache.Instance.LPStore != null)
                 {
                     Logging.Log(module, "Closing loyalty point store", Logging.White);
@@ -6871,74 +6871,85 @@ namespace Questor.Modules.Caching
             return true; //if we are not in station then the LP Store should have auto closed already.
         }
 
-        public DirectFittingManagerWindow FittingManagerWindow { get; set; }
-
-        public bool OpenFittingManagerWindow(string module)
+        public DirectFittingManagerWindow _fittingManagerWindow;
+        public DirectFittingManagerWindow FittingManagerWindow
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            get
             {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
-            {
-                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
-                return false;
-            }
-
-            if (!Cache.Instance.InStation)
-            {
-                Logging.Log(module, "Opening Fitting Window: We are not in station?! We can't refit with the fitting window in space, waiting...", Logging.Orange);
-                Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(10);
-                return false;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                Cache.Instance.FittingManagerWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-
-                //open it again ?
-                if (Cache.Instance.FittingManagerWindow == null)
+                try
                 {
-                    //Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
-                    Cache.Instance.DirectEve.OpenFitingManager(); //you should only have to issue this command once
-                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening fitting manager: waiting [" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    return false;
-                }
+                    if (Cache.Instance.InStation)
+                    {
+                        if (_fittingManagerWindow == null)
+                        {
+                            if (!Cache.Instance.InStation)
+                            {
+                                Logging.Log("LPStore", "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
+                                return null;
+                            }
 
-                if (Cache.Instance.FittingManagerWindow != null && (Cache.Instance.FittingManagerWindow.IsReady)) //check if it's ready
+                            if (Cache.Instance.InStation)
+                            {
+                                _fittingManagerWindow = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+
+                                if (_fittingManagerWindow == null)
+                                {
+                                    if (DateTime.UtcNow > Cache.Instance.NextWindowAction)
+                                    {
+                                        Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
+                                        Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
+                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
+                                        return null;
+                                    }
+
+                                    return null;
+                                }
+
+                                return _fittingManagerWindow;
+                            }
+
+                            return null;
+                        }
+
+                        return _fittingManagerWindow;
+                    }
+
+                    return null;
+                }
+                catch (Exception exception)
                 {
-                    Logging.Log(module, "Fitting Manager is ready.", Logging.White);
-                    return true;
+                    Logging.Log("LPStore", "Unable to define FittingManagerWindow [" + exception + "]", Logging.Teal);
+                    return null;
                 }
-
-                return false;
             }
-
-            return false;
+            private set
+            {
+                _fittingManagerWindow = value;
+            }
         }
 
         public bool CloseFittingManager(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (Settings.Instance.UseFittingManager)
             {
-                return false;
-            }
+                if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+                {
+                    return false;
+                }
+            
+                if (Cache.Instance.FittingManagerWindow != null)
+                {
+                    Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
+                    Cache.Instance.FittingManagerWindow.Close();
+                    return false;
+                }
 
-            Cache.Instance.FittingManagerWindow = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-            if (Cache.Instance.FittingManagerWindow != null)
-            {
-                Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
-                Cache.Instance.FittingManagerWindow.Close();
-                return false;
+                return true;    
             }
 
             return true;
         }
-
-        public DirectWindow AgentWindow { get; set; }
-
+        
         public bool OpenAgentWindow(string module)
         {
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
@@ -6946,7 +6957,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)
+            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
                 return false;
@@ -6955,7 +6966,7 @@ namespace Questor.Modules.Caching
             if (AgentInteraction.Agent.Window == null)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
-                Cache.Instance.NextAgentWindowAction = DateTime.UtcNow.AddSeconds(10);
+                Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
                 AgentInteraction.Agent.InteractWith();
                 return false;
             }
@@ -6983,7 +6994,7 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenJournalWindowAction)
+            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
             {
                 return false;
             }
@@ -6997,9 +7008,9 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-                    Cache.Instance.NextOpenJournalWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                     Logging.Log(module, "Opening Journal Window: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,
+                                Math.Round(Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,
                                            0) + "sec]", Logging.White);
                     return false;
                 }
@@ -7019,24 +7030,22 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenMarketAction)
+            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
             {
                 return false;
             }
 
             if (Cache.Instance.InStation)
             {
-                Cache.Instance.MarketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+                Cache.Instance.MarketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
                 
                 // Is the Market window open?
                 if (Cache.Instance.MarketWindow == null)
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
-                    Cache.Instance.NextOpenMarketAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                    Logging.Log(module, "Opening Market Window: waiting [" +
-                                Math.Round(Cache.Instance.NextOpenJournalWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,
-                                           0) + "sec]", Logging.White);
+                    Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    Logging.Log(module, "Opening Market Window: waiting [" + Math.Round(Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,0) + "sec]", Logging.White);
                     return false;
                 }
 
@@ -7053,14 +7062,14 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenMarketAction)
+            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
             {
                 return false;
             }
 
             if (Cache.Instance.InStation)
             {
-                Cache.Instance.MarketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+                Cache.Instance.MarketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
 
                 // Is the Market window open?
                 if (Cache.Instance.MarketWindow == null)
@@ -7119,6 +7128,45 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        internal static DirectBookmark _undockBookmark;
+        public DirectBookmark UndockBookmark
+        {
+            get
+            {
+                try
+                {
+                    if (_undockBookmark == null)
+                    {
+                        IEnumerable<DirectBookmark> undockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix).Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();
+                        if (undockBookmarks.Any())
+                        {
+                            _undockBookmark = undockBookmarks.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.NextPocketDistance);
+                            if (_undockBookmark != null)
+                            {
+                                return _undockBookmark;
+                            }
+
+                            return null;    
+                        }
+
+                        return null;
+                    }
+
+                    return _undockBookmark;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("UndockBookmark", "[" + exception + "]", Logging.Teal);
+                    return null;
+                }
+            }
+            internal set
+            {
+                _undockBookmark = value;
+            }
+
+        }
+        
         public IEnumerable<DirectBookmark> SafeSpotBookmarks
         {
             get
@@ -7374,7 +7422,7 @@ namespace Questor.Modules.Caching
                 }
 
                 if (!Cache.Instance.OpenShipsHangar(module)) return false;
-                if (!Cache.Instance.OpenItemsHangar(module)) return false;
+                if (Cache.Instance.ItemHangar == null) return false;
                 if (Settings.Instance.UseDrones)
                 {
                     if (!Cache.Instance.OpenDroneBay(module)) {return false;}

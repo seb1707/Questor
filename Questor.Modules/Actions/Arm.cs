@@ -81,7 +81,7 @@ namespace Questor.Modules.Actions
             DefaultFittingFound = false;
             if (!DefaultFittingChecked)
             {
-                if (!Cache.Instance.OpenFittingManagerWindow(module)) return false;
+                if (Cache.Instance.FittingManagerWindow == null) return false;
 
                 if (Cache.Instance.DefaultFitting == null)
                 {
@@ -585,7 +585,7 @@ namespace Questor.Modules.Actions
                                 return;
                             }
 
-                            if (!Cache.Instance.OpenFittingManagerWindow("Arm.LoadFitting")) return;
+                            if (Cache.Instance.FittingManagerWindow == null) return;
 
                             Logging.Log("Arm.LoadFitting", "Looking for saved fitting named: [" + Cache.Instance.Fitting + " ]", Logging.White);
 
@@ -667,7 +667,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (!Cache.Instance.OpenItemsHangar("Arm.MoveDrones")) break;
+                    if (Cache.Instance.ItemHangar == null) return;
                     if (!Cache.Instance.OpenDroneBay("Arm.MoveDrones")) return;
 
                     retryCount++;
@@ -841,8 +841,13 @@ namespace Questor.Modules.Actions
                     if (!_bringItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
-                        if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
-                        if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
+                        if (Cache.Instance.CurrentShipsCargo == null)
+                        {
+                            Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                            return;
+                        }
+
+                        if (Cache.Instance.ItemHangar == null) return;
 
                         IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
 
@@ -945,8 +950,13 @@ namespace Questor.Modules.Actions
                     if (!_bringoptionalItemMoved)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
-                        if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
-                        if (!Cache.Instance.OpenItemsHangar("Arm.MoveItems")) break;
+                        if (Cache.Instance.CurrentShipsCargo == null)
+                        {
+                            Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                            return;
+                        }
+
+                        if (Cache.Instance.ItemHangar == null) return;
 
                         IEnumerable<DirectItem> cargoItems = new List<DirectItem>();
                         cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase));
@@ -1042,7 +1052,11 @@ namespace Questor.Modules.Actions
                     {
                         if ((Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector)) || Settings.Instance.ArmLoadCapBoosters)
                         {
-                            if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                            if (Cache.Instance.CurrentShipsCargo == null)
+                            {
+                                Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                                return;
+                            }
 
                             int capsIncargo = 0;
                             foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items)
@@ -1088,7 +1102,11 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     //
                     // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
@@ -1261,7 +1279,11 @@ namespace Questor.Modules.Actions
                     //    return;
                     //}
 
-                    if (!Cache.Instance.OpenCargoHold("Arm.MoveItems")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     //
                     // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
@@ -1355,7 +1377,11 @@ namespace Questor.Modules.Actions
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction)
                         break;
 
-                    if (!Cache.Instance.OpenCargoHold("Arm.WaitForItems")) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("ArmState.WaitForItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     if (Cache.Instance.CurrentShipsCargo.Items.Count == 0) return;
 

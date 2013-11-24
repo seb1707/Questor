@@ -199,7 +199,6 @@ namespace Questor
                         CurrentTimeData1.Text = DateTime.UtcNow.ToLongTimeString();
                         CurrentTimeData2.Text = DateTime.UtcNow.ToLongTimeString();
                         NextOpenContainerInSpaceActionData.Text = Cache.Instance.NextOpenContainerInSpaceAction.ToLongTimeString();
-                        NextOpenJournalWindowActionData.Text = Cache.Instance.NextOpenJournalWindowAction.ToLongTimeString();
                         NextOpenLootContainerActionData.Text = Cache.Instance.NextOpenLootContainerAction.ToLongTimeString();
                         NextDroneBayActionData.Text = Cache.Instance.NextDroneBayAction.ToLongTimeString();
                         NextOpenHangarActionData.Text = Cache.Instance.NextOpenHangarAction.ToLongTimeString();

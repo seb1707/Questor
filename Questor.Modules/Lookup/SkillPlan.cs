@@ -83,7 +83,7 @@ namespace Questor.Modules.Lookup
                 
                 return false;
             }
-            
+
             if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillNameToFind + "] not found in ItemHangar, trying AmmoHangar", Logging.Debug);
             items = Cache.Instance.AmmoHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
             if (items.Any())
@@ -222,7 +222,7 @@ namespace Questor.Modules.Lookup
             //int i = 1;
             foreach (KeyValuePair<string, int> skill in mySkillPlan)
             {
-                bool PlannedSkillInjected = false;
+                //bool PlannedSkillInjected = false;
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "SkillPlan: skill [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
 
                 //MyCharacterSheetSkills.Where(v => v.TypeName == skill.Key && v.Level < skill.Value && !v.InTraining);
@@ -232,7 +232,7 @@ namespace Questor.Modules.Lookup
                 {
                     if (knownskill.TypeName == skill.Key)
                     {
-                        PlannedSkillInjected = true;
+                        //PlannedSkillInjected = true;
                         if (knownskill.Level < skill.Value)
                         {
                             if (!knownskill.InTraining)
@@ -271,7 +271,7 @@ namespace Questor.Modules.Lookup
                     //if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillTrainer", "CharacterSheet: [" + skill.Key + "] has not been learned. we need the skillbook injected.", Logging.White);
                     continue;
                 }
-                
+
                 continue;
             }
             //
@@ -409,7 +409,7 @@ namespace Questor.Modules.Lookup
 
                         continue;
                     }
-                        
+
                     if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] not found in AmmoHangar, not found in any hangar", Logging.Debug);
                     _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
                     continue;

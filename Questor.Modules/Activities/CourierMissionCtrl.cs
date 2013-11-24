@@ -58,9 +58,9 @@ namespace Questor.Modules.Activities
             DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("CourierMissionCtrl")) return false;
+            if (Cache.Instance.ItemHangar == null) return false;
 
-            if (!Cache.Instance.OpenCargoHold("CourierMissionCtrl")) return false;
+            if (Cache.Instance.CurrentShipsCargo == null) return false;
             string missionItem;
 
             switch (Cache.Instance.Mission.Name)
@@ -277,7 +277,7 @@ namespace Questor.Modules.Activities
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
-                        if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have ben docked for at least a few seconds
+                        if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have been docked for at least a few seconds
                         {
                             return;
                         }

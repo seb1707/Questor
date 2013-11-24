@@ -34,8 +34,8 @@ namespace QuestorManager.Actions
                 return;
             _lastAction = DateTime.UtcNow;
 
-            if (!Cache.Instance.OpenItemsHangar("BuyLPI")) return;
-            DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            if (Cache.Instance.ItemHangar == null) return;
+            DirectMarketWindow marketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
 
             switch (_States.CurrentBuyLPIState)
             {
@@ -57,7 +57,7 @@ namespace QuestorManager.Actions
 
                 case BuyLPIState.ReadyItemhangar:
 
-                    if (!Cache.Instance.OpenItemsHangar("BuyLPI")) return;
+                    if (Cache.Instance.ItemHangar == null) return;
                     if (!Cache.Instance.OpenShipsHangar("BuyLPI")) return;
 
                     _States.CurrentBuyLPIState = BuyLPIState.OpenLpStore;
@@ -65,7 +65,7 @@ namespace QuestorManager.Actions
 
                 case BuyLPIState.OpenLpStore:
 
-                    if (!Cache.Instance.OpenLPStore("BuyLPI")) return;
+                    if (Cache.Instance.LPStore == null) return;
                     _States.CurrentBuyLPIState = BuyLPIState.FindOffer;
                     break;
 

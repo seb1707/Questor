@@ -6884,7 +6884,7 @@ namespace Questor.Modules.Caching
                         {
                             if (!Cache.Instance.InStation)
                             {
-                                Logging.Log("LPStore", "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
+                                Logging.Log("FittingManager", "Opening Fitting Manager: We are not in station?! There is no Fitting Manager in space, waiting...", Logging.Orange);
                                 return null;
                             }
 
@@ -6896,7 +6896,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (DateTime.UtcNow > Cache.Instance.NextWindowAction)
                                     {
-                                        Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
+                                        Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
                                         Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
                                         return null;

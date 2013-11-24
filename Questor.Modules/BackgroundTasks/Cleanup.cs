@@ -391,7 +391,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 //
-                // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
+                // add ship hangar, items hangar, corp hangar, etc... as at least some of those may be open in space (pos?) or may someday be bugged by ccp.
                 // add repairship, lpstore, marketwindow, etc
                 //
             }

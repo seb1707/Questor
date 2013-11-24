@@ -6882,9 +6882,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_fittingManagerWindow == null)
                         {
-                            if (!Cache.Instance.InStation)
+                            if (!Cache.Instance.InStation || Cache.Instance.InSpace)
                             {
-                                Logging.Log("LPStore", "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
+                                Logging.Log("FittingManager", "Opening Fitting Manager: We are not in station?! There is no Fitting Manager in space, waiting...", Logging.Debug);
                                 return null;
                             }
 
@@ -6896,12 +6896,13 @@ namespace Questor.Modules.Caching
                                 {
                                     if (DateTime.UtcNow > Cache.Instance.NextWindowAction)
                                     {
-                                        Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
+                                        Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
                                         Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
-                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
+                                        Cache.Instance.DirectEve.OpenFitingManager();
                                         return null;
                                     }
 
+                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).Seconds + "] sec", Logging.Debug);
                                     return null;
                                 }
 
@@ -6914,11 +6915,12 @@ namespace Questor.Modules.Caching
                         return _fittingManagerWindow;
                     }
 
+                    Logging.Log("FittingManager", "Opening Fitting Manager: We are not in station?! There is no Fitting Manager in space, waiting...", Logging.Debug);
                     return null;
                 }
                 catch (Exception exception)
                 {
-                    Logging.Log("LPStore", "Unable to define FittingManagerWindow [" + exception + "]", Logging.Teal);
+                    Logging.Log("FittingManager", "Unable to define FittingManagerWindow [" + exception + "]", Logging.Teal);
                     return null;
                 }
             }

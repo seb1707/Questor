@@ -46,7 +46,7 @@ namespace ValueDump
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
@@ -59,8 +59,8 @@ namespace ValueDump
             }
             catch (Exception ex)
             {
-                Logging.Log("Valuedump", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("Valuedump", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                Logging.Log("ValueDump", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("ValueDump", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
@@ -81,17 +81,17 @@ namespace ValueDump
             {
                 if (Cache.Instance.DirectEve != null && Cache.Instance.DirectEve.HasSupportInstances())
                 {
-                    Logging.Log("Valuedump", "You have a valid directeve.lic file and have instances available", Logging.Orange);
+                    Logging.Log("ValueDump", "You have a valid directeve.lic file and have instances available", Logging.Orange);
                 }
                 else
                 {
-                    Logging.Log("Valuedump", "You have 0 Support Instances available [ Cache.Instance.DirectEve.HasSupportInstances() is false ]", Logging.Orange);
+                    Logging.Log("ValueDump", "You have 0 Support Instances available [ Cache.Instance.DirectEve.HasSupportInstances() is false ]", Logging.Orange);
                 }
 
             }
             catch (Exception exception)
             {
-                Logging.Log("Valuedump", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+                Logging.Log("ValueDump", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
             }
 
             #endregion Verify DirectEVE Support Instances
@@ -102,7 +102,7 @@ namespace ValueDump
             }
             catch (Exception ex)
             {
-                Logging.Log("Valuedump", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
+                Logging.Log("ValueDump", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
             }
         }
 

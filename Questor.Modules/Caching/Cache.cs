@@ -2542,7 +2542,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (!_allBookmarks.Any())
+                    if (_allBookmarks == null || !_allBookmarks.Any())
                     {
                         if (DirectEve.Bookmarks.Any())
                         {

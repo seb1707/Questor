@@ -643,7 +643,8 @@ namespace Questor.Modules.Actions
                     if (!Settings.Instance.UseDrones || 
                         (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle || 
                          Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial || 
-                         Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip))
+                         Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
+                         Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName))
                     {
                         _States.CurrentArmState = ArmState.MoveItems;
                         return;
@@ -802,6 +803,15 @@ namespace Questor.Modules.Actions
                     if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", " start if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
                     if (!Cache.Instance.CloseFittingManager("Arm")) return;
                     if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", " finish if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
+
+                    if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
+                         Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
+                         Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
+                         Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
+                    {
+                        _States.CurrentArmState = ArmState.Cleanup;
+                        return;
+                    }
 
                     //
                     // Check for locked items if we are already moving items

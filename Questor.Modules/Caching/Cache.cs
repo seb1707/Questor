@@ -800,8 +800,6 @@ namespace Questor.Modules.Caching
                     Logging.Log("CurrentShipsCargo", "Unable to complete ReadyCargoHold [" + exception + "]", Logging.Teal);
                     return null;
                 }
-
-                return null;
             }
         }
 

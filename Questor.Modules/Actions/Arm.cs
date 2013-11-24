@@ -81,7 +81,11 @@ namespace Questor.Modules.Actions
             DefaultFittingFound = false;
             if (!DefaultFittingChecked)
             {
-                if (Cache.Instance.FittingManagerWindow == null) return false;
+                if (Cache.Instance.FittingManagerWindow == null)
+                {
+                    Logging.Log("FindDefaultFitting", "FittingManagerWindow is null", Logging.Debug);
+                    return false;
+                }
 
                 if (Cache.Instance.DefaultFitting == null)
                 {

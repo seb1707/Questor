@@ -6785,7 +6785,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private DirectLoyaltyPointStoreWindow _lpStore;
+        public DirectLoyaltyPointStoreWindow _lpStore;
         public DirectLoyaltyPointStoreWindow LPStore
         {
             get
@@ -6857,6 +6857,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
+                Cache.Instance.LPStore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
                 if (Cache.Instance.LPStore != null)
                 {
                     Logging.Log(module, "Closing loyalty point store", Logging.White);
@@ -6883,7 +6884,7 @@ namespace Questor.Modules.Caching
                         {
                             if (!Cache.Instance.InStation)
                             {
-                                Logging.Log("FittingManagerWindow", "Opening Fitting Manager: We are not in station?! There is no Fitting Manager in space, waiting...", Logging.Orange);
+                                Logging.Log("LPStore", "Opening LP Store: We are not in station?! There is no LP Store in space, waiting...", Logging.Orange);
                                 return null;
                             }
 
@@ -6895,7 +6896,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (DateTime.UtcNow > Cache.Instance.NextWindowAction)
                                     {
-                                        Logging.Log("FittingManagerWindow", "Opening Fitting Manager", Logging.White);
+                                        Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
                                         Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
                                         return null;

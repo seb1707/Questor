@@ -6930,17 +6930,21 @@ namespace Questor.Modules.Caching
 
         public bool CloseFittingManager(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (Settings.Instance.UseFittingManager)
             {
-                return false;
-            }
+                if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+                {
+                    return false;
+                }
+            
+                if (Cache.Instance.FittingManagerWindow != null)
+                {
+                    Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
+                    Cache.Instance.FittingManagerWindow.Close();
+                    return false;
+                }
 
-            Cache.Instance.FittingManagerWindow = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-            if (Cache.Instance.FittingManagerWindow != null)
-            {
-                Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
-                Cache.Instance.FittingManagerWindow.Close();
-                return false;
+                return true;    
             }
 
             return true;

@@ -619,38 +619,50 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.WarpOutStation:
-                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
-
-                    long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-
-                    if (warpOutBookmark == null)
+                    if (!string.IsNullOrEmpty(Settings.Instance.BookmarkWarpOut))
                     {
-                        Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark", Logging.White);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                    }
-                    else if (warpOutBookmark.LocationId == solarid)
-                    {
-                        if (Traveler.Destination == null)
+                        IEnumerable<DirectBookmark> warpOutBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "");
+                        if (warpOutBookmarks != null && warpOutBookmarks.Any())
                         {
-                            Logging.Log("CombatMissionsBehavior.WarpOut", "Warp at " + warpOutBookmark.Title, Logging.White);
-                            Traveler.Destination = new BookmarkDestination(warpOutBookmark);
-                            Cache.Instance.DoNotBreakInvul = true;
-                        }
+                            DirectBookmark warpOutBookmark = warpOutBookmarks.OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
 
-                        Traveler.ProcessState();
-                        if (_States.CurrentTravelerState == TravelerState.AtDestination)
-                        {
-                            Logging.Log("CombatMissionsBehavior.WarpOut", "Safe!", Logging.White);
-                            Cache.Instance.DoNotBreakInvul = false;
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                            Traveler.Destination = null;
+                            long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+
+                            if (warpOutBookmark == null)
+                            {
+                                Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark", Logging.White);
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                            }
+                            else if (warpOutBookmark.LocationId == solarid)
+                            {
+                                if (Traveler.Destination == null)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.WarpOut", "Warp at " + warpOutBookmark.Title, Logging.White);
+                                    Traveler.Destination = new BookmarkDestination(warpOutBookmark);
+                                    Cache.Instance.DoNotBreakInvul = true;
+                                }
+
+                                Traveler.ProcessState();
+                                if (_States.CurrentTravelerState == TravelerState.AtDestination)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.WarpOut", "Safe!", Logging.White);
+                                    Cache.Instance.DoNotBreakInvul = false;
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                                    Traveler.Destination = null;
+                                }
+                            }
+                            else
+                            {
+                                Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                            }
+
+                            break;
                         }
                     }
-                    else
-                    {
-                        Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                    }
+                    
+                    Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                     break;
 
                 case CombatMissionsBehaviorState.GotoMission:

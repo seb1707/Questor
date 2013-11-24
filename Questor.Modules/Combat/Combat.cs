@@ -1897,11 +1897,27 @@ namespace Questor.Modules.Combat
 
                 try
                 {
-                    if (!Cache.Instance.Weapons.Any() && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                    if (!Cache.Instance.MyShipEntity.IsFrigate || !Cache.Instance.MyShipEntity.IsCruiser)
                     {
-                        Logging.Log("Combat", "You are not in the CombatShipName [" + Settings.Instance.CombatShipName + "] and / or the combatship has no weapons!", Logging.Red);
-                        _States.CurrentCombatState = CombatState.OutOfAmmo;
+                        //
+                        // we are not in something light and fast so assume we need weapons and assume we should be in the defined combatship
+                        //
+                        if (!Cache.Instance.Weapons.Any())
+                        {
+                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] has no weapons!", Logging.Red);
+                            _States.CurrentCombatState = CombatState.OutOfAmmo;
+                        }
+
+                        if (Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
+                        {
+                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + Settings.Instance.CombatShipName + "]", Logging.Red);
+                            _States.CurrentCombatState = CombatState.OutOfAmmo;
+                        }
                     }
+
+                    //
+                    // we are in something light and fast so assume we do not need weapons and assume we do not need to be in the defined combatship
+                    //
                 }
                 catch (Exception exception)
                 {

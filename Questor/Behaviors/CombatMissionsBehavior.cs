@@ -591,22 +591,19 @@ namespace Questor.Behaviors
                         if (Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("CombatMissionsBehavior.LocalWatch", "local is clear", Logging.White);
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WarpOutStation;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                         }
                         else
                         {
                             Logging.Log("CombatMissionsBehavior.LocalWatch", "Bad standings pilots in local: We will stay 5 minutes in the station and then we will check if it is clear again", Logging.Orange);
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch)
-                            {
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WaitingforBadGuytoGoAway;
-                            }
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WaitingforBadGuytoGoAway;
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
                     }
                     else
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WarpOutStation;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                     }
                     break;
 

@@ -21,7 +21,7 @@ namespace Questor.Modules.Misc
             if (Settings.Instance.UseInnerspace)
             {
                 //
-                // Slaves To Master
+                // Slaves To Master Requests
                 //
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceCommand);
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand);
@@ -29,7 +29,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceCommand);
                 
                 //
-                // Master To Slaves
+                // Master To Slaves Requests
                 //
                 LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceCommand);
                 LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceCommand);

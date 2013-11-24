@@ -1262,14 +1262,11 @@ namespace QuestorManager
                     {
                         ReadXML(savedjobtoload);
                     }
-
-                    //catch
-                    //{
-                    //
-                    //}
-                    finally
+                    catch(Exception exception)
                     {
+                        Logging.Log("LoadSavedTaskList", "Exception [" + exception + "]", Logging.Debug);
                     }
+                    
                     return 0;
                 }
 
@@ -1285,9 +1282,7 @@ namespace QuestorManager
             {
                 if (args.Length != 1)
                 {
-                    Logging.Log("QuestorManager",
-                                "StartProcessing - Starts Processing any already loaded task items",
-                                Logging.White);
+                    Logging.Log("QuestorManager", "StartProcessing - Starts Processing any already loaded task items", Logging.White);
                     return -1;
                 }
                 try
@@ -1295,12 +1290,9 @@ namespace QuestorManager
                     _start = true;
                     State = QuestormanagerState.Idle;
                 }
-                //catch
-                //{
-                //
-                //}
-                finally
+                catch (Exception exception)
                 {
+                    Logging.Log("StartProcessing", "Exception [" + exception + "]", Logging.Debug);
                 }
             }
 
@@ -1317,18 +1309,13 @@ namespace QuestorManager
         public void ResfreshLPI()
         {
             _lpstoreRe = false;
-            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
-            if (lpstore == null)
-            {
-                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
 
-                return;
-            }
+            if (Cache.Instance.LPStore == null) return;
 
             lstbuyLPI.Items.Clear();
 
             string[] search = txtSearchLPI.Text.Split(' ');
-            foreach (DirectLoyaltyPointOffer offer in lpstore.Offers)
+            foreach (DirectLoyaltyPointOffer offer in Cache.Instance.LPStore.Offers)
             {
                 string name = offer.TypeName;
                 if (string.IsNullOrEmpty(name))
@@ -1350,20 +1337,19 @@ namespace QuestorManager
 
         public void Required()
         {
-            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
             XDocument invTypes = XDocument.Load(Path.GetDirectoryName(Settings.Instance.Path) + "\\InvTypes.xml");
             if (invTypes.Root != null)
             {
                 IEnumerable<XElement> invType = invTypes.Root.Elements("invtype").ToList();
 
-                if (lpstore == null)
+                if (Cache.Instance.LPStore == null)
                 {
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
 
                     return;
                 }
 
-                foreach (DirectLoyaltyPointOffer offer in lpstore.Offers)
+                foreach (DirectLoyaltyPointOffer offer in Cache.Instance.LPStore.Offers)
                 {
                     if (offer.TypeName == lstbuyLPI.SelectedItems[0].Text)
                     {

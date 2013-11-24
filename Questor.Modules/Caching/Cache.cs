@@ -6898,7 +6898,7 @@ namespace Questor.Modules.Caching
                                     {
                                         Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
                                         Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
-                                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenFitting);
+                                        Cache.Instance.DirectEve.OpenFitingManager();
                                         return null;
                                     }
 

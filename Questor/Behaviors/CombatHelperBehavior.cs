@@ -248,7 +248,7 @@ namespace Questor.Behaviors
             DebugPanicstates();
 
             //
-            // the slave processstate is meant to override any Combathelper behavior (it is afterall meant to help the master kill things)
+            // the slave processstate is meant to override any CombatHelper behavior (it is after all meant to help the master kill things)
             //
             _slave.ProcessState();
             //

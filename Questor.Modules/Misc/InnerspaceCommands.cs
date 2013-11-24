@@ -14,11 +14,37 @@ namespace Questor.Modules.Misc
     public class InnerspaceCommands
     {
         //public InnerspaceCommands() { }
-        
+
+        #region Create Innerspace Commands
         public static void CreateLavishCommands()
         {
             if (Settings.Instance.UseInnerspace)
             {
+                //
+                // Slaves To Master
+                //
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceCommand);
+                
+                //
+                // Master To Slaves
+                //
+                LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_SlavesGotoBase", MasterToSlaves_SlavesGotoBase_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_DoThisMissionAction", MasterToSlaves_DoThisMissionAction_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_DoNotLootItemName", MasterToSlaves_DoNotLootItemName_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_SetAutoStart", MasterToSlaves_SetAutoStart_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceCommand);
+                
+                //LavishScript.Commands.AddCommand("MastersMissionXMLActions", MastersMissionXMLActionsInnerspaceCommand);
+                //LavishScript.Commands.AddCommand("RemoteRepairShields", RemoteRepairShieldsInnerspaceCommand);
+                //LavishScript.Commands.AddCommand("RemoteArmorRepair", RemoteArmorRepairInnerspaceCommand);
+
                 //Autostart on/off
                 LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);
                 LavishScript.Commands.AddCommand("AutoStart", SetAutoStart);
@@ -86,7 +112,9 @@ namespace Questor.Modules.Misc
                 LavishScript.ExecuteCommand("alias " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommandAlias + " " + Settings.Instance.UnLoadQuestorDebugInnerspaceCommand);  //"dotnet -unload q1");
             }
         }
+        #endregion Create Innerspace Commands
 
+        #region List Innerspace Commands
         private static int ListQuestorCommands(string[] args)
         {
             Logging.Log("InnerspaceCommands", " ", Logging.White);
@@ -128,8 +156,405 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListEntitiesThatHaveUsLocked                 - Logs ListEntitiesThatHaveUsLocked", Logging.White);
             Logging.Log("InnerspaceCommands", "ListClassInstanceInfo                        - Logs Class Instance Info", Logging.White);
             Logging.Log("InnerspaceCommands", "ListCachedPocketInfo                         - Logs Cached Pocket Information", Logging.White);
+            Logging.Log("InnerspaceCommands", "                    Slave To Master Fleet Related Innerspace Commands", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsLocationIDofMaster       - What Is the LocationID of the Master (systems and stations are both locationIDs)", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCoordofMaster            - If we are in system with the Master but not on grid we need to know how close they are.", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCurrentMissionAction     - Ask the master what action to do if we are on grid with the master.", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatAmmoShouldILoad            - This should be used during ARM...", Logging.White);
+            Logging.Log("InnerspaceCommands", "                    Master To Slave Fleet Related Innerspace Commands", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_SetDestinationLocationID      - Tell slaves where to go", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_MasterIsWarpingTo             - Tell slaves where Master is warping", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_SlavesGotoBase                - Tell slaves to set State to GotoBase", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_DoThisMissionAction           - Tell slaves to do this mission action", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_DoNotLootItemName             - Tell slaves not to loot this ItemName", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_SetAutoStart                  - Tell slaves to turn autostart on or off", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_WhereAreYou                   - Tell slaves to report locationIDs and coordinates", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_WhatAreYouShooting            - Tell slaves to report what they are shooting currently", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_ShootThisEntityID             - Tell slaves to Add masters Target as Kill Priority Target", Logging.White);
             return 0;
         }
+        #endregion List Innerspace Commands
+
+        #region Slave to Master Innerspace Commands
+        private static int SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsLocationIDofMaster - What is LocationID of Master", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsLocationIDofMaster;
+            return 0;
+        }
+
+        private static int SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCoordofMaster - What are the coordinates of Master", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsCoordofMaster;
+            return 0;
+        }
+
+        private static int SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCurrentMissionAction - What Mission Action is the Master Running (if any)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsCurrentMissionAction;
+            return 0;
+        }
+        
+        private static int SlaveToMaster_WhatAmmoShouldILoad_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatAmmoShouldILoad - What Ammo should be loaded during Arm?", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatAmmoShouldILoad;
+            return 0;
+        }
+        #endregion Slave to Master Innerspace Commands
+
+        #region Master To Slave Innerspace Commands
+        private static int MasterToSlaves_SetDestinationLocationID_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_SetDestinationLocationID - Slaves set destination to LocationID (system or station)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_SetDestinationLocationID", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_SetDestinationLocationID;
+            return 0;
+        }
+
+        private static int MasterToSlaves_MasterIsWarpingTo_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_MasterIsWarpingTo - Master is warping to EntityName (or bookmark)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_MasterIsWarpingTo", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_MasterIsWarpingTo;
+            return 0;
+        }
+
+        private static int MasterToSlaves_SlavesGotoBase_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_SlavesGotoBase - Slaves should set state to GotoBase", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_SlavesGotoBase", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_SlavesGotoBase;
+            return 0;
+        }
+
+        private static int MasterToSlaves_DoThisMissionAction_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_DoThisMissionAction - Slaves should execute this mission action", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_DoThisMissionAction", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_DoThisMissionAction;
+            return 0;
+        }
+
+        private static int MasterToSlaves_DoNotLootItemName_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_DoNotLootItemName - Slaves should not loot this ItemName", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_DoNotLootItemName", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_DoNotLootItemName;
+            return 0;
+        }
+
+        private static int MasterToSlaves_SetAutoStart_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_SetAutoStart - Slaves should Set AutoStart on or off", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_SetAutoStart", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_SetAutoStart;
+            return 0;
+        }
+
+        private static int MasterToSlaves_WhereAreYou_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_WhereAreYou - Slaves should report where they are located, LocationID and Coordinates", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_WhereAreYou", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_WhereAreYou;
+            return 0;
+        }
+
+        private static int MasterToSlaves_WhatAreYouShooting_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_WhatAreYouShooting - Slaves should report what they are shooting: Name and EntityID (if any)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_WhatAreYouShooting", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_WhatAreYouShooting;
+            return 0;
+        }
+
+        private static int MasterToSlaves_ShootThisEntityID_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_ShootThisEntityID - Slaves should Add this EntityID as a Primary Weapon Priority Kill Target (if any)", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_ShootThisEntityID", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_ShootThisEntityID;
+            return 0;
+        }
+        #endregion Master To Slave Innerspace Commands
+
+        #region Slave to Master Routines
+
+        private static bool SlaveToMaster_WhatIsLocationIDofMaster()
+        {
+            try
+            {
+                if (Settings.Instance.FleetSupportMaster)
+                {
+                    //
+                    // 
+                    //
+                }
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("SlaveToMaster_WhatIsLocationIDofMaster", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+        }
+
+        private static bool SlaveToMaster_WhatIsCoordofMaster()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("SlaveToMaster_WhatIsCoordofMaster", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool SlaveToMaster_WhatIsCurrentMissionAction()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("SlaveToMaster_WhatIsCurrentMissionAction", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool SlaveToMaster_WhatAmmoShouldILoad()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("SlaveToMaster_WhatAmmoShouldILoad", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+        
+        #endregion Slave to Master Routines
+
+        #region Master to Slave Routines
+
+        private static bool MasterToSlaves_SetDestinationLocationID()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_SetDestinationLocationID", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_MasterIsWarpingTo()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_MasterIsWarpingTo", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_SlavesGotoBase()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_SlavesGotoBase", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_DoThisMissionAction()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_DoThisMissionAction", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_DoNotLootItemName()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_DoNotLootItemName", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_SetAutoStart()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_SetAutoStart", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_WhereAreYou()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_WhereAreYou", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_WhatAreYouShooting()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_WhatAreYouShooting", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool MasterToSlaves_ShootThisEntityID()
+        {
+            try
+            {
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MasterToSlaves_ShootThisEntityID", "[" + exception + "]", Logging.Teal);
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion Master to Slave Routines
 
         private static int ListQuestorEvents(string[] args)
         {
@@ -1041,6 +1466,127 @@ namespace Questor.Modules.Misc
                         _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                         Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.ListCachedPocketInfo", Logging.Debug);
                         InnerspaceCommands.ListCachedPocketInfo();
+                    }
+                    break;
+
+                case InnerspaceCommandsState.SlaveToMaster_WhatIsLocationIDofMaster:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
+                        if (!InnerspaceCommands.SlaveToMaster_WhatIsLocationIDofMaster()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.SlaveToMaster_WhatIsCoordofMaster:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
+                        if (!InnerspaceCommands.SlaveToMaster_WhatIsCoordofMaster()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        
+                    }
+                    break;
+
+                case InnerspaceCommandsState.SlaveToMaster_WhatIsCurrentMissionAction:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
+                        if (!InnerspaceCommands.SlaveToMaster_WhatIsCurrentMissionAction()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.SlaveToMaster_WhatAmmoShouldILoad:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
+                        if (!InnerspaceCommands.SlaveToMaster_WhatAmmoShouldILoad()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_SetDestinationLocationID:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_SetDestinationLocationID", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_SetDestinationLocationID()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_MasterIsWarpingTo:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_MasterIsWarpingTo", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_MasterIsWarpingTo()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_SlavesGotoBase:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_SlavesGotoBase", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_SlavesGotoBase()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_DoThisMissionAction:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_DoThisMissionAction", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_DoThisMissionAction()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_DoNotLootItemName:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_DoNotLootItemName", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_DoNotLootItemName()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                        
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_SetAutoStart:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_SetAutoStart", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_SetAutoStart()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_WhereAreYou:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_WhereAreYou", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_WhereAreYou()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_WhatAreYouShooting:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_WhatAreYouShooting", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_WhatAreYouShooting()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
+                    }
+                    break;
+
+                case InnerspaceCommandsState.MasterToSlaves_ShootThisEntityID:
+                    if (!Cache.Instance.InWarp)
+                    {
+                        Logging.Log("InnerspaceCommands", "InnerspaceCommandsState.MasterToSlaves_ShootThisEntityID", Logging.Debug);
+                        if (!InnerspaceCommands.MasterToSlaves_ShootThisEntityID()) return;
+                        _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.Idle;
                     }
                     break;
 

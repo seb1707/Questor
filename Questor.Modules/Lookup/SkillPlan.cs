@@ -362,7 +362,7 @@ namespace Questor.Modules.Lookup
 
                 //MyCharacterSheetSkills.Where(v => v.TypeName == skill.Key && v.Level < skill.Value && !v.InTraining);
 
-                if (MyCharacterSheetSkills.Any(i => i.TypeName != skill.Key))
+                if (MyCharacterSheetSkills.All(i => i.TypeName != skill.Key))
                 {
                     //List<DirectInvType> AllSkills = Cache.Instance.DirectEve.Skills.AllSkills;
                     //DirectInvType _prerequisites = AllSkills.FirstOrDefault(i => i.TypeName == "Drones");

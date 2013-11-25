@@ -48,9 +48,17 @@ namespace Questor.Modules.Lookup
             {
                 MySkillQueue = Cache.Instance.DirectEve.Skills.MySkillQueue;
                 _nextRetrieveSkillQueueInfoAction = DateTime.UtcNow.AddSeconds(10);
+                if (MySkillQueue != null)
+                {
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is not null, continue", Logging.Debug);
+                    return true;
+                }
+
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is null, how? retry in 10 sec", Logging.Debug);
                 return true;
             }
 
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "Waiting...", Logging.Debug);
             return false;
         }
 
@@ -191,6 +199,7 @@ namespace Questor.Modules.Lookup
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);  
                 return false;
             }
+
             iCount++;
 
             if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)
@@ -207,9 +216,11 @@ namespace Questor.Modules.Lookup
                     if (iCount > 30) return true; //this should only happen if the actual adding of items to the skill queue fails.
                     return true;
                 }
+
                 Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);  
                 return true;
             }
+
             if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", " false: if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.White);  
             return false;
         }
@@ -364,24 +375,18 @@ namespace Questor.Modules.Lookup
 
                 if (MyCharacterSheetSkills.All(i => i.TypeName != skill.Key))
                 {
-                    //List<DirectInvType> AllSkills = Cache.Instance.DirectEve.Skills.AllSkills;
-                    //DirectInvType _prerequisites = AllSkills.FirstOrDefault(i => i.TypeName == "Drones");
-                    //DirectSkill _test = AllSkills.Where(i => i.TypeName == "Drones").Select(i => new DirectSkill()).ToList();
-
                     //
                     // we do not yet check to make sure that it is a valid thing to do to try to inject this skill
                     // make sure your skill plan is correct ffs!
                     //
                     if (injectSkillBookAttempts >= 2)
                     {
-                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] if (injectSkillBookAttempts >= 5)", Logging.Debug);
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skill.Key + "] if (injectSkillBookAttempts >= 2)", Logging.Debug);
                         continue;
                     }
 
-                    //
-                    // This skill in the skill plan is not yet injected into the current characters head.
-                    //
-                    
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "SkillPlan: skill [" + skill.Key + "] Is not yet injected", Logging.White);
+
                     IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.CategoryId == (int)CategoryID.Skill).ToList();
                     if (items.Any())
                     {

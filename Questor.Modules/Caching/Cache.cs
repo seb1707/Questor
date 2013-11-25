@@ -7201,12 +7201,19 @@ namespace Questor.Modules.Caching
         {
             get
             {
+                string _bookmarkprefix = Settings.Instance.BookmarkPrefix;
+                
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 {
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
+                    return Cache.Instance.BookmarksByLabel(_bookmarkprefix + " ").Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(AgedDate) < 0).ToList();
                 }
 
-                return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").ToList();
+                if (Cache.Instance.BookmarksByLabel(_bookmarkprefix + " ") != null)
+                {
+                    return Cache.Instance.BookmarksByLabel(_bookmarkprefix + " ").ToList();
+                }
+                
+                return new List<DirectBookmark>();
             }
         }
 

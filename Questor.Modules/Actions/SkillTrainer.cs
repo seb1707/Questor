@@ -71,8 +71,9 @@ namespace Questor.Modules.Actions
                 //    break;
 
                 case SkillTrainerState.CheckTrainingQueue:
-                    Logging.Log("SkillTrainer", "CheckTrainingQueue", Logging.Debug);
+                    
                     if (!SkillPlan.RetrieveSkillQueueInfo()) return;
+                    
                     if (!SkillPlan.CheckTrainingQueue("SkillTrainer")) return;
 
                     _State.CurrentSkillTrainerState = SkillTrainerState.Done;

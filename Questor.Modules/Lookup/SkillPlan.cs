@@ -84,8 +84,25 @@ namespace Questor.Modules.Lookup
                 DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeName == skillNameToFind);
                 if (SkillBookToInject != null)
                 {
-                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
-                    SkillBookToInject.InjectSkill();
+                    if (MyCharacterSheetSkills != null && !MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName || i.GivenName == SkillBookToInject.TypeName))
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
+                        SkillBookToInject.InjectSkill();
+                        return true;    
+                    }
+                    
+                    if (MyCharacterSheetSkills != null && MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName))
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  TypeName [" + SkillBookToInject.TypeName + "] is already injected, why are we trying to do so again? aborting injection attempt ", Logging.Debug);
+                        return true;
+                    }
+                    
+                    if (MyCharacterSheetSkills != null && MyCharacterSheetSkills.Any(i => i.GivenName == SkillBookToInject.TypeName))
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] is already injected, why are we trying to do so again? aborting injection attempt ", Logging.Debug);
+                        return true;
+                    }
+
                     return true;
                 }
                 

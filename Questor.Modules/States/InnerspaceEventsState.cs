@@ -1,14 +1,8 @@
 ﻿namespace Questor.Modules.States
 {
-    public enum InnerspaceCommandsState
+    public enum InnerspaceEventsState
     {
         Idle,
-        LogAllEntities,
-        ListEntitiesThatHaveUsLocked,
-        ListPrimaryWeaponPriorityTargets,
-        AddPWPT,
-        AddDPT,
-        ListCachedPocketInfo,
         SlaveToMaster_WhatIsLocationIDofMaster,
         SlaveToMaster_WhatIsCoordofMaster,
         SlaveToMaster_WhatIsCurrentMissionAction,

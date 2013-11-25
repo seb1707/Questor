@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using InnerSpaceAPI;
 
 namespace Questor.Modules.Misc
 {
@@ -23,23 +24,24 @@ namespace Questor.Modules.Misc
                 //
                 // Slaves To Master Requests
                 //
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceCommand);
-                
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceCommand);           //Master should reply: MasterToSlaves_SetDestinationLocationID
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceCommand);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceCommand);                     //Master should reply: 
+
                 //
                 // Master To Slaves Requests
                 //
-                LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_SlavesGotoBase", MasterToSlaves_SlavesGotoBase_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_DoThisMissionAction", MasterToSlaves_DoThisMissionAction_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_DoNotLootItemName", MasterToSlaves_DoNotLootItemName_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_SetAutoStart", MasterToSlaves_SetAutoStart_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceCommand);
-                LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceCommand);
+                LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceCommand);         //answer to: SlaveToMaster_WhatIsLocationIDofMaster
+                LavishScript.Commands.AddCommand("MasterToSlaves_MasterCoordinatesAre", MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand);                 //answer to: SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand
+                LavishScript.Commands.AddCommand("MasterToSlaves_DoThisMissionAction", MasterToSlaves_DoThisMissionAction_InnerspaceCommand);                   //answer to: SlaveToMaster_WhatMissionIsCurrentMissionAction
+                LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceCommand);                       //needs no response
+                LavishScript.Commands.AddCommand("MasterToSlaves_SlavesGotoBase", MasterToSlaves_SlavesGotoBase_InnerspaceCommand);                             //needs no response
+                LavishScript.Commands.AddCommand("MasterToSlaves_DoNotLootItemName", MasterToSlaves_DoNotLootItemName_InnerspaceCommand);                       //needs no response
+                LavishScript.Commands.AddCommand("MasterToSlaves_SetAutoStart", MasterToSlaves_SetAutoStart_InnerspaceCommand);                                 //needs no response
+                LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceCommand);                                   //
+                LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceCommand);                     //
+                LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceCommand);                           //needs no response
                 
                 //LavishScript.Commands.AddCommand("MastersMissionXMLActions", MastersMissionXMLActionsInnerspaceCommand);
                 //LavishScript.Commands.AddCommand("RemoteRepairShields", RemoteRepairShieldsInnerspaceCommand);
@@ -156,21 +158,29 @@ namespace Questor.Modules.Misc
             Logging.Log("InnerspaceCommands", "ListEntitiesThatHaveUsLocked                 - Logs ListEntitiesThatHaveUsLocked", Logging.White);
             Logging.Log("InnerspaceCommands", "ListClassInstanceInfo                        - Logs Class Instance Info", Logging.White);
             Logging.Log("InnerspaceCommands", "ListCachedPocketInfo                         - Logs Cached Pocket Information", Logging.White);
+            //
+            // Slaves To Master Communication
+            //
             Logging.Log("InnerspaceCommands", "                    Slave To Master Fleet Related Innerspace Commands", Logging.White);
-            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsLocationIDofMaster       - What Is the LocationID of the Master (systems and stations are both locationIDs)", Logging.White);
-            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCoordofMaster            - If we are in system with the Master but not on grid we need to know how close they are.", Logging.White);
-            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCurrentMissionAction     - Ask the master what action to do if we are on grid with the master.", Logging.White);
-            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatAmmoShouldILoad            - This should be used during ARM...", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsLocationIDofMaster       - Ask Master: What Is the LocationID of the Master (systems and stations are both locationIDs)", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCoordofMaster            - Ask Master: What x,y,z coordinates is the Master at? (assumes you are already in local)", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatIsCurrentMissionAction     - Ask Master: What is the current mission action (if on grid w master)", Logging.White);
+            Logging.Log("InnerspaceCommands", "SlaveToMaster_WhatAmmoShouldILoad            - Ask Master: What Ammo DamageType should I load during ARM...", Logging.White);
+            //
+            // Master To Slaves Communication
+            //
             Logging.Log("InnerspaceCommands", "                    Master To Slave Fleet Related Innerspace Commands", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_SetDestinationLocationID      - Tell slaves where to go", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_MasterCoordinatesAre          - Tell slaves where Master is x,y,z coordinates", Logging.White);
+            Logging.Log("InnerspaceCommands", "MasterToSlaves_DoThisMissionAction           - Tell slaves to do this mission action", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_MasterIsWarpingTo             - Tell slaves where Master is warping", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_SlavesGotoBase                - Tell slaves to set State to GotoBase", Logging.White);
-            Logging.Log("InnerspaceCommands", "MasterToSlaves_DoThisMissionAction           - Tell slaves to do this mission action", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_DoNotLootItemName             - Tell slaves not to loot this ItemName", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_SetAutoStart                  - Tell slaves to turn autostart on or off", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_WhereAreYou                   - Tell slaves to report locationIDs and coordinates", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_WhatAreYouShooting            - Tell slaves to report what they are shooting currently", Logging.White);
             Logging.Log("InnerspaceCommands", "MasterToSlaves_ShootThisEntityID             - Tell slaves to Add masters Target as Kill Priority Target", Logging.White);
+            
             return 0;
         }
         #endregion List Innerspace Commands
@@ -240,6 +250,19 @@ namespace Questor.Modules.Misc
 
             Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_SetDestinationLocationID", Logging.Debug);
             _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_SetDestinationLocationID;
+            return 0;
+        }
+
+        private static int MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceCommands", "MasterToSlaves_MasterCoordinatesAre - Masters x,y,z Coordinates are...", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.MasterToSlaves_MasterCoordinatesAre", Logging.Debug);
+            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.MasterToSlaves_MasterCoordinatesAre;
             return 0;
         }
 
@@ -354,11 +377,27 @@ namespace Questor.Modules.Misc
         {
             try
             {
-                if (Settings.Instance.FleetSupportMaster)
+                if (Settings.Instance.FleetSupportSlave)
                 {
                     //
                     // 
                     //
+                    if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(10))
+                    {
+                        int? _locationID = Cache.Instance.DirectEve.Session.LocationId;
+                        if (_locationID != null)
+                        {
+                            const string RelayToWhere = "all";
+                            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "-event EVENT_SlaveToMaster_WhatIsLocationIDofMaster";
+                            if (Settings.Instance.DebugFleetSupportMaster) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
+                            LavishScript.ExecuteCommand(LavishCommandToBroadcast);
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    return false;
                 }
 
                 return true;
@@ -423,7 +462,20 @@ namespace Questor.Modules.Misc
         {
             try
             {
+                if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(10))
+                {
+                    int? _locationID = Cache.Instance.DirectEve.Session.LocationId;
+                    if (_locationID != null)
+                    {
+                        const string RelayToWhere = "all";
+                        string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "-event BlahNewEventHere";
+                        if (Settings.Instance.DebugFleetSupportMaster) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
+                        LavishScript.ExecuteCommand(LavishCommandToBroadcast);
+                        return true;
+                    }
 
+                    return false;
+                }
             }
             catch (Exception exception)
             {
@@ -1415,8 +1467,7 @@ namespace Questor.Modules.Misc
             Logging.Log("ListCachedPocketInfo", "--- Note: pausing or warping / jumping will clear the above dictionaries  ---", Logging.Yellow);
             return 0;
         }
-
-
+        
         public void ProcessState()
         {
             switch (_States.CurrentInnerspaceCommandsState)

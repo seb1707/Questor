@@ -894,16 +894,16 @@ namespace Questor.Modules.Lookup
             //
             BattleshipInvasionLimit = (int?)CharacterSettingsXml.Element("battleshipInvasionLimit") ?? (int?)CommonSettingsXml.Element("battleshipInvasionLimit") ?? 0;
 
-            // if this number of battleships lands on grid while in a mission we will enter panic
+            // if this number of BattleShips lands on grid while in a mission we will enter panic
             BattlecruiserInvasionLimit = (int?)CharacterSettingsXml.Element("battlecruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("battlecruiserInvasionLimit") ?? 0;
 
-            // if this number of battlecruisers lands on grid while in a mission we will enter panic
+            // if this number of BattleCruisers lands on grid while in a mission we will enter panic
             CruiserInvasionLimit = (int?)CharacterSettingsXml.Element("cruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("cruiserInvasionLimit") ?? 0;
 
-            // if this number of cruisers lands on grid while in a mission we will enter panic
+            // if this number of Cruisers lands on grid while in a mission we will enter panic
             FrigateInvasionLimit = (int?)CharacterSettingsXml.Element("frigateInvasionLimit") ?? (int?)CommonSettingsXml.Element("frigateInvasionLimit") ?? 0;
 
-            // if this number of frigates lands on grid while in a mission we will enter panic
+            // if this number of Frigates lands on grid while in a mission we will enter panic
             InvasionRandomDelay = (int?)CharacterSettingsXml.Element("invasionRandomDelay") ?? (int?)CommonSettingsXml.Element("invasionRandomDelay") ?? 0; // random relay to stay docked
             InvasionMinimumDelay = (int?)CharacterSettingsXml.Element("invasionMinimumDelay") ?? (int?)CommonSettingsXml.Element("invasionMinimumDelay") ?? 0;
 
@@ -1632,9 +1632,9 @@ namespace Questor.Modules.Lookup
                 // Invasion Settings
                 //
                 BattleshipInvasionLimit = 2;
-                // if this number of battleships lands on grid while in a mission we will enter panic
+                // if this number of BattleShips lands on grid while in a mission we will enter panic
                 BattlecruiserInvasionLimit = 2;
-                // if this number of battlecruisers lands on grid while in a mission we will enter panic
+                // if this number of BattleCruisers lands on grid while in a mission we will enter panic
                 CruiserInvasionLimit = 2;
                 // if this number of cruisers lands on grid while in a mission we will enter panic
                 FrigateInvasionLimit = 2;

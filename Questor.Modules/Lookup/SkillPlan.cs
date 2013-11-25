@@ -103,6 +103,7 @@ namespace Questor.Modules.Lookup
                         return true;
                     }
 
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] could not be verified as NOT yet in your head... continue", Logging.Debug);
                     return true;
                 }
                 

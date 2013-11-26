@@ -74,14 +74,14 @@ namespace Questor.Modules.Actions
                         double distance = Cache.Instance.DistanceFromMe(Cache.Instance.UndockBookmark.X ?? 0, Cache.Instance.UndockBookmark.Y ?? 0, Cache.Instance.UndockBookmark.Z ?? 0);
                         if (distance < (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("TravelerDestination.BookmarkDestination", "Arrived at undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "]", Logging.White);
+                            Logging.Log("TravelerDestination.useInstaBookmark", "Arrived at undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "]", Logging.White);
                             Cache.Instance.UndockBookmark = null;
                             return true;
                         }
                         
                         if (distance >= (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("TravelerDestination.BookmarkDestination", "Warping to undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]", Logging.White);
+                            Logging.Log("TravelerDestination.useInstaBookmark", "Warping to undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]", Logging.White);
                             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
                             Cache.Instance.UndockBookmark.WarpTo();
                             _nextTravelerDestinationAction = DateTime.UtcNow.AddSeconds(10);

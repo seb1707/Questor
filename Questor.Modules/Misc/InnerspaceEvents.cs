@@ -32,11 +32,12 @@ namespace Questor.Modules.Misc
                 //
                 // Slaves To Master Requests
                 //
-                //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);           //Master should reply: MasterToSlaves_SetDestinationLocationID
+                //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);   //Master should reply: MasterToSlaves_SetDestinationLocationID
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
                 LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent);                     //Master should reply: 
-
+                LavishScript.Commands.AddCommand("SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets", SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
+                
                 //
                 // Master To Slaves Requests
                 //
@@ -50,7 +51,8 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceEvent);                                   //
                 LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceEvent);                     //
                 LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceEvent);                           //needs no response
-                
+                LavishScript.Commands.AddCommand("MasterToSlave_MyListOfPrimaryWeaponPriorityTargets", MasterToSlave_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
+
                 //LavishScript.Commands.AddCommand("MastersMissionXMLActions", MastersMissionXMLActionsInnerspaceCommand);
                 //LavishScript.Commands.AddCommand("RemoteRepairShields", RemoteRepairShieldsInnerspaceCommand);
                 //LavishScript.Commands.AddCommand("RemoteArmorRepair", RemoteArmorRepairInnerspaceCommand);

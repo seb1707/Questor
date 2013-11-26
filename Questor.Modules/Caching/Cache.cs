@@ -6387,7 +6387,7 @@ namespace Questor.Modules.Caching
                     if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
-                        if (!Cache.Instance.StackCorpLootHangar("Cache.StackLootHangar")) return false;
+                        if (!Cache.Instance.StackCorpLootHangar("Cache.StackCorpLootHangar")) return false;
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Finished [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         StackLoothangarAttempts = 0;
                         return true;
@@ -6396,13 +6396,15 @@ namespace Questor.Modules.Caching
                     if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                        if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
+                        //if (!Cache.Instance.StackLootContainer("Cache.StackLootContainer")) return false;
+                        Logging.Log("StackLootHangar", "We do not stack containers, you will need to do so manually. StackAll does not seem to work with Primary Inventory windows.", Logging.Teal);
+                        return true;
                         StackLoothangarAttempts = 0;
                         return true;
                     }
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "!Cache.Instance.StackItemsHangarAsLootHangar(Cache.StackLootHangar))", Logging.Teal);
-                    if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackLootHangar")) return false;
+                    if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackItemsHangarAsLootHangar")) return false;
                     StackLoothangarAttempts = 0;
                     return true;
                 }

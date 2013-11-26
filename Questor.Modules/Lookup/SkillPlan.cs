@@ -459,7 +459,7 @@ namespace Questor.Modules.Lookup
                 continue;
             }
 
-            return false;
+            return true; //if we made it to the end assume we need to continue
         }
 
         public static bool ReadMyCharacterSheetSkills()

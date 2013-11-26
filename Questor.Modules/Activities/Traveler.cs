@@ -192,7 +192,7 @@ namespace Questor.Modules.Activities
                 //insert code to handle station destinations here
             }
 
-            if (waypoint < 6000000) // this isnt a station, probably a system
+            if (waypoint < 6000000) // this is not a station, probably a system
             {
                 //useful?a
             }

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using InnerSpaceAPI;
 
@@ -12,46 +13,95 @@ namespace Questor.Modules.Misc
     using Questor.Modules.States;
     using LavishScriptAPI;
 
+
+
+
+    public class DoingEventsProperly
+    {
+        public DoingEventsProperly()
+        {
+            this.SomethingChanged += HandleSomethingChangedEvent;
+        }
+
+        public event EventHandler<PropertyChangedEventArgs> SomethingChanged = (src, ea) => { };
+
+        protected virtual void RaiseSomethingChangedEvent(PropertyChangedEventArgs e) { SomethingChanged(this, e); }
+        
+        protected virtual void HandleSomethingChangedEvent(object src, PropertyChangedEventArgs ea) { }
+
+    }
+
     public class InnerspaceEvents
     {
         //public InnerspaceCommands() { }
 
         #region Create Innerspace Events
+        public event EventHandler ;
+        public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCoordofMaster = (src, ea) => { };
+        public event EventHandler SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent;
+        public event EventHandler SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent;
+        public event EventHandler SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets;
+        
+        public event EventHandler MasterToSlaves_SetDestinationLocationID_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_MasterCoordinatesAre_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_DoThisMissionAction_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_MasterIsWarpingTo_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_SlavesGotoBase_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_DoNotLootItemName_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_SetAutoStart_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_WhereAreYou_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_WhatAreYouShooting_InnerspaceEvent;
+        public event EventHandler MasterToSlaves_ShootThisEntityID_InnerspaceEvent;
+        public event EventHandler MasterToSlave_MyListOfPrimaryWeaponPriorityTargets;
+
+
+        internal void Raise_SlaveToMaster_WhatIsCoordofMasterEvent(PropertyChangedEventArgs e)
+        {
+            SomethingChanged_SlaveToMaster_WhatIsCoordofMaster(this, e);
+        }
+
+        internal void Handle_SlaveToMaster_WhatIsCoordofMasterEvent(object src, LSEventArgs _lseventargs)
+        {
+            
+        }
+
         public InnerspaceEvents()
         {
+            SomethingChanged_SlaveToMaster_WhatIsCoordofMaster += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            
             if (Settings.Instance.UseInnerspace)
             {
                 
-                //uint InnerspaceEventID = LavishScript.Events.RegisterEvent("QuestorState");
-                //LavishScript.Events.ExecuteEvent(InnerspaceEventID, "");
-                //LavishScript.Events.AttachEventTarget(InnerspaceEventID )
-
-                //LavishScript.Events.ExecuteEvent("QuestorState", _States.CurrentQuestorState.ToString());
+                const string EventNameToRegister = "SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent";
+                uint InnerspaceEventID = LavishScript.Events.RegisterEvent(EventNameToRegister);
+                LavishScript.Events.AttachEventTarget(EventNameToRegister, Handle_SlaveToMaster_WhatIsCoordofMasterEvent);
+                
+                //var SlaveToMaster_WhatIsCoordofMaster_EventHandler += EVEOnFrame;
                 
                 
                 //
                 // Slaves To Master Requests
                 //
                 //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);   //Master should reply: MasterToSlaves_SetDestinationLocationID
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
-                LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent);                     //Master should reply: 
-                LavishScript.Commands.AddCommand("SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets", SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
+                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
+                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
+                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent);                     //Master should reply: 
+                //LavishScript.Commands.AddCommand("SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets", SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
                 
                 //
                 // Master To Slaves Requests
                 //
-                LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceEvent);         //answer to: SlaveToMaster_WhatIsLocationIDofMaster
-                LavishScript.Commands.AddCommand("MasterToSlaves_MasterCoordinatesAre", MasterToSlaves_MasterCoordinatesAre_InnerspaceEvent);                 //answer to: SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand
-                LavishScript.Commands.AddCommand("MasterToSlaves_DoThisMissionAction", MasterToSlaves_DoThisMissionAction_InnerspaceEvent);                   //answer to: SlaveToMaster_WhatMissionIsCurrentMissionAction
-                LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceEvent);                       //needs no response
-                LavishScript.Commands.AddCommand("MasterToSlaves_SlavesGotoBase", MasterToSlaves_SlavesGotoBase_InnerspaceEvent);                             //needs no response
-                LavishScript.Commands.AddCommand("MasterToSlaves_DoNotLootItemName", MasterToSlaves_DoNotLootItemName_InnerspaceEvent);                       //needs no response
-                LavishScript.Commands.AddCommand("MasterToSlaves_SetAutoStart", MasterToSlaves_SetAutoStart_InnerspaceEvent);                                 //needs no response
-                LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceEvent);                                   //
-                LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceEvent);                     //
-                LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceEvent);                           //needs no response
-                LavishScript.Commands.AddCommand("MasterToSlave_MyListOfPrimaryWeaponPriorityTargets", MasterToSlave_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
+                //LavishScript.Commands.AddCommand("MasterToSlaves_SetDestinationLocationID", MasterToSlaves_SetDestinationLocationID_InnerspaceEvent);         //answer to: SlaveToMaster_WhatIsLocationIDofMaster
+                //LavishScript.Commands.AddCommand("MasterToSlaves_MasterCoordinatesAre", MasterToSlaves_MasterCoordinatesAre_InnerspaceEvent);                 //answer to: SlaveToMaster_WhatIsCoordofMaster_InnerspaceCommand
+                //LavishScript.Commands.AddCommand("MasterToSlaves_DoThisMissionAction", MasterToSlaves_DoThisMissionAction_InnerspaceEvent);                   //answer to: SlaveToMaster_WhatMissionIsCurrentMissionAction
+                //LavishScript.Commands.AddCommand("MasterToSlaves_MasterIsWarpingTo", MasterToSlaves_MasterIsWarpingTo_InnerspaceEvent);                       //needs no response
+                //LavishScript.Commands.AddCommand("MasterToSlaves_SlavesGotoBase", MasterToSlaves_SlavesGotoBase_InnerspaceEvent);                             //needs no response
+                //LavishScript.Commands.AddCommand("MasterToSlaves_DoNotLootItemName", MasterToSlaves_DoNotLootItemName_InnerspaceEvent);                       //needs no response
+                //LavishScript.Commands.AddCommand("MasterToSlaves_SetAutoStart", MasterToSlaves_SetAutoStart_InnerspaceEvent);                                 //needs no response
+                //LavishScript.Commands.AddCommand("MasterToSlaves_WhereAreYou", MasterToSlaves_WhereAreYou_InnerspaceEvent);                                   //
+                //LavishScript.Commands.AddCommand("MasterToSlaves_WhatAreYouShooting", MasterToSlaves_WhatAreYouShooting_InnerspaceEvent);                     //
+                //LavishScript.Commands.AddCommand("MasterToSlaves_ShootMyTarget", MasterToSlaves_ShootThisEntityID_InnerspaceEvent);                           //needs no response
+                //LavishScript.Commands.AddCommand("MasterToSlave_MyListOfPrimaryWeaponPriorityTargets", MasterToSlave_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
 
                 //LavishScript.Commands.AddCommand("MastersMissionXMLActions", MastersMissionXMLActionsInnerspaceCommand);
                 //LavishScript.Commands.AddCommand("RemoteRepairShields", RemoteRepairShieldsInnerspaceCommand);
@@ -132,7 +182,7 @@ namespace Questor.Modules.Misc
         #endregion List Innerspace Commands
 
         #region Slave to Master Innerspace Commands
-        private static int SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent(string[] args)
+        private static int SlaveToMaster_WhatIsLocationIDofMaster_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -145,7 +195,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent(string[] args)
+        private static int SlaveToMaster_WhatIsCoordofMaster_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -158,7 +208,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent(string[] args)
+        private static int SlaveToMaster_WhatIsCurrentMissionAction_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -171,7 +221,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent(string[] args)
+        private static int SlaveToMaster_WhatAmmoShouldILoad_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -186,7 +236,7 @@ namespace Questor.Modules.Misc
         #endregion Slave to Master Innerspace Commands
 
         #region Master To Slave Innerspace Commands
-        private static int MasterToSlaves_SetDestinationLocationID_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_SetDestinationLocationID_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -199,7 +249,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_MasterCoordinatesAre_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_MasterCoordinatesAre_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -212,7 +262,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_MasterIsWarpingTo_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_MasterIsWarpingTo_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -225,7 +275,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_SlavesGotoBase_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_SlavesGotoBase_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -238,7 +288,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_DoThisMissionAction_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_DoThisMissionAction_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -251,7 +301,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_DoNotLootItemName_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_DoNotLootItemName_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -264,7 +314,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_SetAutoStart_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_SetAutoStart_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -277,7 +327,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_WhereAreYou_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_WhereAreYou_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -290,7 +340,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_WhatAreYouShooting_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_WhatAreYouShooting_test(string[] args)
         {
             if (args.Length != 1)
             {
@@ -303,7 +353,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int MasterToSlaves_ShootThisEntityID_InnerspaceEvent(string[] args)
+        private static int MasterToSlaves_ShootThisEntityID_test(string[] args)
         {
             if (args.Length != 1)
             {

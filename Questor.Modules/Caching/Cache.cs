@@ -7232,7 +7232,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Cache.Instance.AllBookmarks.Any())
+                if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
                 {
                     List<DirectBookmark> _SalvagingBookmarks = null;
                     DirectBookmark _SalvagingBookmark = null;

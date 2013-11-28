@@ -76,6 +76,8 @@ namespace Questor.Modules.Misc
                 uint InnerspaceEventID = LavishScript.Events.RegisterEvent(EventNameToRegister);
                 LavishScript.Events.AttachEventTarget(EventNameToRegister, Handle_SlaveToMaster_WhatIsCoordofMasterEvent);
                 
+                LavishScript.Events.ExecuteEvent(InnerspaceEventID, "omg wtf wow");
+                
                 //var SlaveToMaster_WhatIsCoordofMaster_EventHandler += EVEOnFrame;
                 
                 

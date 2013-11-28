@@ -3507,7 +3507,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                 {
                     DirectItem item = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == typeIdToFind && i.Quantity >= quantityToFind);
                     return item;    

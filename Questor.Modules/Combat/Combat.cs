@@ -1079,56 +1079,6 @@ namespace Questor.Modules.Combat
                 maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets - Settings.Instance.MaximumWreckTargets;
             }
 
-            #region Debugging for listing possible targets
-            if (Settings.Instance.DebugTargetCombatants)
-            {
-                int i = 0;
-                if (Cache.Instance.PotentialCombatTargets.Any())
-                {
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets below", Logging.Debug);
-
-                    foreach (EntityCache t in Cache.Instance.PotentialCombatTargets)
-                    {
-                        i++;
-                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                        continue;
-                    }
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
-                }
-                else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
-                                                                 && e.Distance < (double)Distances.OnGridWithMe
-                                                                 && !e.IsIgnored
-                                                                 && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                                                 && (e.IsNpc || e.IsNpcByGroupID)
-                                                                 && !e.IsContainer
-                                                                 && !e.IsFactionWarfareNPC
-                                                                 && !e.IsEntityIShouldLeaveAlone
-                                                                 && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)))
-                {
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);
-
-                    foreach (EntityCache t in Cache.Instance.EntitiesNotSelf.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                                 && e.Distance < (double)Distances.OnGridWithMe 
-                                                                 && (e.IsNpc || e.IsNpcByGroupID)
-                                                                 && !e.IsContainer
-                                                                 && !e.IsFactionWarfareNPC
-                                                                 && !e.IsEntityIShouldLeaveAlone
-                                                                 && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
-                                                                 && !e.IsIgnored))
-                    {
-                        i++;
-                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                        continue;
-                    }
-
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities above", Logging.Debug);
-                }
-            }
-            #endregion
-
             #region ECM Jamming checks
             //
             // First, can we even target?
@@ -1288,57 +1238,6 @@ namespace Questor.Modules.Combat
             {
                 return;
             }
-
-            #region Debugging for listing possible targets
-            if (Settings.Instance.DebugTargetCombatants)
-            {
-                int _i_ = 0;
-                if (Cache.Instance.PotentialCombatTargets.Any())
-                {
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets below", Logging.Debug);
-
-                    foreach (EntityCache t in Cache.Instance.PotentialCombatTargets)
-                    {
-                        _i_++;
-                        Logging.Log("Combat.TargetCombatants", "[" + _i_ + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                        continue;
-                    }
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities we consider PotentialCombatTargets above", Logging.Debug);
-                }
-                else if (Cache.Instance.EntitiesNotSelf.Any(e => e.CategoryId == (int)CategoryID.Entity
-                                                                 && e.Distance < (double)Distances.OnGridWithMe 
-                                                                 && !e.IsIgnored
-                                                                 && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                                                 && (e.IsNpc || e.IsNpcByGroupID)
-                                                                 && (e.IsNpc || e.IsNpcByGroupID)
-                                                                 && !e.IsContainer
-                                                                 && !e.IsFactionWarfareNPC
-                                                                 && !e.IsEntityIShouldLeaveAlone
-                                                                 && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)))
-                {
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (Cache.Instance.potentialCombatTargets.Any()) was false - nothing to shoot?", Logging.Debug);
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities below", Logging.Debug);
-
-                    foreach (EntityCache t in Cache.Instance.EntitiesNotSelf.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                                 && e.Distance < (double)Distances.OnGridWithMe 
-                                                                 && (e.IsNpc || e.IsNpcByGroupID)
-                                                                 && !e.IsContainer
-                                                                 && !e.IsFactionWarfareNPC
-                                                                 && !e.IsEntityIShouldLeaveAlone
-                                                                 && (!e.IsBadIdea || e.IsAttacking)
-                                                                 && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
-                                                                 && !e.IsIgnored))
-                    {
-                        i++;
-                        Logging.Log("Combat.TargetCombatants", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "]", Logging.Debug);
-                        continue;
-                    }
-
-                    Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: list of entities above", Logging.Debug);
-                }
-            }
-            #endregion
 
             #region ECM Jamming checks
             //

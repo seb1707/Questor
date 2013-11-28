@@ -78,8 +78,10 @@ namespace Questor.Modules.Activities
 
         private bool BookmarkPocketForSalvaging()
         {
+            if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Entered: BookmarkPocketForSalvaging", Logging.Debug);
             if (Settings.Instance.LootEverything && Cache.Instance.UnlootedContainers.Count() > Settings.Instance.MinimumWreckCount)
             {
+                if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] MinimumWreckCount [" + Settings.Instance.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
                 List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
                 double RangeToConsiderWrecksDuringLootAll = 0;
 
@@ -100,17 +102,18 @@ namespace Questor.Modules.Activities
                     return false;    
                 }
 
-                //
-                // if you have loot everything set to on we cant have any need for the pocket bookmarks... can we?!
-                //
+                
+                if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] We have LootEverything set to on. We cant have any need for the pocket bookmarks... can we?!", Logging.Debug);
                 return true;
             }
 
             if (Settings.Instance.CreateSalvageBookmarks)
             {
+                if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "CreateSalvageBookmarks [" + Settings.Instance.CreateSalvageBookmarks + "]", Logging.Debug);
                 // Nothing to loot
                 if (Cache.Instance.UnlootedContainers.Count() < Settings.Instance.MinimumWreckCount)
                 {
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] MinimumWreckCount [" + Settings.Instance.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
                     // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
                     // This scenario only happens when all wrecks are within tractor range and you have a salvager
                     // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
@@ -128,12 +131,13 @@ namespace Questor.Modules.Activities
                         return true;
                     }
 
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Cache.Instance.NextBookmarkPocketAttempt is in [" + Cache.Instance.NextBookmarkPocketAttempt.Subtract(DateTime.UtcNow).Seconds + "sec] waiting", Logging.Debug);
                     return false;
                 }
 
                 // Do we already have a bookmark?
                 List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                if (bookmarks.Any())
+                if (bookmarks != null && bookmarks.Any())
                 {
                     DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                     if (bookmark != null)

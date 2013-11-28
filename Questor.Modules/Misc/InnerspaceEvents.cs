@@ -35,28 +35,44 @@ namespace Questor.Modules.Misc
     {
         //public InnerspaceCommands() { }
 
-        #region Create Innerspace Events
+        #region Create Dotnet Events
         public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCoordofMaster = (src, ea) => { };
-        public event EventHandler SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent;
-        public event EventHandler SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent;
-        public event EventHandler SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets;
-        
-        public event EventHandler MasterToSlaves_SetDestinationLocationID_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_MasterCoordinatesAre_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_DoThisMissionAction_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_MasterIsWarpingTo_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_SlavesGotoBase_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_DoNotLootItemName_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_SetAutoStart_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_WhereAreYou_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_WhatAreYouShooting_InnerspaceEvent;
-        public event EventHandler MasterToSlaves_ShootThisEntityID_InnerspaceEvent;
-        public event EventHandler MasterToSlave_MyListOfPrimaryWeaponPriorityTargets;
+        public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCurrentMissionAction = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatAmmoShouldILoad = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
 
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetDestinationLocationID = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterCoordinatesAre = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoThisMissionAction = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterIsWarpingTo = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SlavesGotoBase = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoNotLootItemName = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetAutoStart = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhereAreYou = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhatAreYouShooting = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_ShootThisEntityID = (src, ea) => { };
+        public event EventHandler<LSEventArgs> SomethingChanged_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
+        #endregion Create Dotnet Events
 
+        #region Create Dotnet Event Firing Routines
         internal void Raise_SlaveToMaster_WhatIsCoordofMasterEvent(LSEventArgs _lseventargs)
         {
             SomethingChanged_SlaveToMaster_WhatIsCoordofMaster(this, _lseventargs);
+        }
+
+        internal void Raise_SlaveToMaster_WhatIsCurrentMissionAction(LSEventArgs _lseventargs)
+        {
+            SomethingChanged_SlaveToMaster_WhatIsCurrentMissionAction(this, _lseventargs);
+        }
+
+        internal void Raise_SlaveToMaster_WhatAmmoShouldILoad(LSEventArgs _lseventargs)
+        {
+            SomethingChanged_SlaveToMaster_WhatAmmoShouldILoad(this, _lseventargs);
+        }
+
+        internal void Raise_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets(LSEventArgs _lseventargs)
+        {
+            SomethingChanged_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets(this, _lseventargs);
         }
 
         internal void Handle_SlaveToMaster_WhatIsCoordofMasterEvent(object src, LSEventArgs _lseventargs)
@@ -64,9 +80,28 @@ namespace Questor.Modules.Misc
             
         }
 
+        #endregion Create Dotnet Event Firing Routines
+
         public InnerspaceEvents()
         {
+            #region When an event fires what will handle it
             SomethingChanged_SlaveToMaster_WhatIsCoordofMaster += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_SlaveToMaster_WhatIsCurrentMissionAction += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_SlaveToMaster_WhatAmmoShouldILoad += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+
+            SomethingChanged_MasterToSlaves_SetDestinationLocationID += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_MasterCoordinatesAre += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_DoThisMissionAction += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_MasterIsWarpingTo += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_SlavesGotoBase += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_DoNotLootItemName += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_SetAutoStart += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_WhereAreYou += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_WhatAreYouShooting += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlaves_ShootThisEntityID += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            SomethingChanged_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
+            #endregion When an event fires what will handle it
             
             if (Settings.Instance.UseInnerspace)
             {
@@ -111,8 +146,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("ListQuestorEvents", ListQuestorEvents);
             }
         }
-        #endregion Create Innerspace Events
-
+        
         #region List Innerspace Commands
         private static int ListQuestorCommands(string[] args)
         {

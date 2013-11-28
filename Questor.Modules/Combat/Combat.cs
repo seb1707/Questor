@@ -1618,10 +1618,18 @@ namespace Questor.Modules.Combat
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + HighValueTargetsTargetedThisCycle + "][" + highValueTargetingMeEntity.Name + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + highValueTargetingMeEntity.GroupId + "]", Logging.Debug);
                     // Have we reached the limit of high value targets?
-                    if (__highValueTargetsTargeted.Count() >= maxHighValueTargets || HighValueTargetsTargetedThisCycle >= 4)
+                    if (__highValueTargetsTargeted.Count() >= maxHighValueTargets)
                     {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted.Count() [" + __highValueTargetsTargeted.Count() + "] maxHighValueTargets [" + maxHighValueTargets + "], done for this iteration", Logging.Debug);
                         break;
                     }
+
+                    if (HighValueTargetsTargetedThisCycle >= 4)
+                    {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: HighValueTargetsTargetedThisCycle [" + HighValueTargetsTargetedThisCycle + "], done for this iteration", Logging.Debug);
+                        break;
+                    }
+
                     //We need to make sure we do not have too many low value targets filling our slots
                     if (__highValueTargetsTargeted.Count() < maxHighValueTargets && __lowValueTargetsTargeted.Count() > maxLowValueTargets)
                     {
@@ -1671,10 +1679,18 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: lowValueTargetingMe [" + LowValueTargetsTargetedThisCycle + "][" + lowValueTargetingMeEntity.Name + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 2) + "k] groupID [ " + lowValueTargetingMeEntity.GroupId + "]", Logging.Debug);
 
                     // Have we reached the limit of low value targets?
-                    if (__lowValueTargetsTargeted.Count() >= maxLowValueTargets || LowValueTargetsTargetedThisCycle >= 3)
+                    if (__lowValueTargetsTargeted.Count() >= maxLowValueTargets)
                     {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __lowValueTargetsTargeted.Count() [" + __lowValueTargetsTargeted.Count() + "] maxLowValueTargets [" + maxLowValueTargets + "], done for this iteration", Logging.Debug);
                         break;
                     }
+
+                    if (LowValueTargetsTargetedThisCycle >= 3)
+                    {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: LowValueTargetsTargetedThisCycle [" + LowValueTargetsTargetedThisCycle + "], done for this iteration", Logging.Debug);
+                        break;
+                    }
+
                     //We need to make sure we do not have too many high value targets filling our slots
                     if (__lowValueTargetsTargeted.Count() < maxLowValueTargets && __highValueTargetsTargeted.Count() > maxHighValueTargets)
                     {
@@ -1704,7 +1720,11 @@ namespace Questor.Modules.Combat
                     continue;
                 }
 
-                if (LowValueTargetsTargetedThisCycle > 1) return;
+                if (LowValueTargetsTargetedThisCycle > 1)
+                {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: if (LowValueTargetsTargetedThisCycle > 1)", Logging.Debug);
+                    return;
+                }
             }
             else
             {
@@ -1717,6 +1737,7 @@ namespace Questor.Modules.Combat
             // 
             if (Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget))
             {
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: We already have [" + Cache.Instance.PotentialCombatTargets.Count(e => e.IsTarget) + "] PotentialCombatTargets Locked. Do not aggress non aggressed NPCs until we have no targets", Logging.Debug);
                 return;
             }
 

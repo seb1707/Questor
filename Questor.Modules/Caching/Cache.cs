@@ -7232,14 +7232,35 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.FirstSalvageBookmarksInSystem)
+                if (Cache.Instance.AllBookmarks.Any())
                 {
-                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.White);
-                    return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    List<DirectBookmark> _SalvagingBookmarks = null;
+                    DirectBookmark _SalvagingBookmark = null;
+                    if (Settings.Instance.FirstSalvageBookmarksInSystem)
+                    {
+                        Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.White);
+                        _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
+                        {
+                            _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                            return _SalvagingBookmark ?? null;
+                        }
+
+                        return null;
+                    }
+
+                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first oldest bookmarks", Logging.White);
+                    _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                    if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
+                    {
+                        _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
+                        return _SalvagingBookmark ?? null;
+                    }
+
+                    return null;    
                 }
 
-                Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first oldest bookmarks", Logging.White);
-                return Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                return null;
             }
         }
 

@@ -70,6 +70,7 @@ namespace Questor.Modules.Lookup
         public bool CommonXMLExists = false;
         public bool SchedulesXMLExists = true;
         public bool EVEMemoryManager = false;
+        public int MemoryManagerTrimThreshold = 524288000;
         public bool FactionXMLExists = true;
         public bool QuestorStatisticsExists = true;
         public bool QuestorSettingsExists = true;
@@ -813,6 +814,7 @@ namespace Questor.Modules.Lookup
             setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
+            MemoryManagerTrimThreshold = (int?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (int?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
 
             //
             // Misc Settings

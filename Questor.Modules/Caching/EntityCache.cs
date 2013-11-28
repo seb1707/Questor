@@ -3940,7 +3940,7 @@ namespace Questor.Modules.Caching
 
                                             if (_directEntity.LockTarget())
                                             {
-                                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                                //Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                                                 Cache.Instance.TargetingIDs[Id] = DateTime.UtcNow;
                                                 return true;
                                             }

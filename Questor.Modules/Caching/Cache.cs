@@ -7141,10 +7141,11 @@ namespace Questor.Modules.Caching
                 {
                     if (_undockBookmark == null)
                     {
-                        IEnumerable<DirectBookmark> undockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix).Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();
-                        if (undockBookmarks.Any())
+                        IEnumerable<DirectBookmark> _undockBookmarkList = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix);
+                        if (_undockBookmarkList != null && _undockBookmarkList.Any())
                         {
-                            _undockBookmark = undockBookmarks.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.NextPocketDistance);
+                            _undockBookmarkList = _undockBookmarkList.Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();
+                            _undockBookmark = _undockBookmarkList.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.NextPocketDistance);
                             if (_undockBookmark != null)
                             {
                                 return _undockBookmark;
@@ -7257,7 +7258,7 @@ namespace Questor.Modules.Caching
                         return _SalvagingBookmark ?? null;
                     }
 
-                    return null;    
+                    return null;
                 }
 
                 return null;

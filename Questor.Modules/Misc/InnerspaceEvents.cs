@@ -36,7 +36,6 @@ namespace Questor.Modules.Misc
         //public InnerspaceCommands() { }
 
         #region Create Innerspace Events
-        public event EventHandler ;
         public event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCoordofMaster = (src, ea) => { };
         public event EventHandler SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent;
         public event EventHandler SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent;
@@ -55,9 +54,9 @@ namespace Questor.Modules.Misc
         public event EventHandler MasterToSlave_MyListOfPrimaryWeaponPriorityTargets;
 
 
-        internal void Raise_SlaveToMaster_WhatIsCoordofMasterEvent(PropertyChangedEventArgs e)
+        internal void Raise_SlaveToMaster_WhatIsCoordofMasterEvent(LSEventArgs _lseventargs)
         {
-            SomethingChanged_SlaveToMaster_WhatIsCoordofMaster(this, e);
+            SomethingChanged_SlaveToMaster_WhatIsCoordofMaster(this, _lseventargs);
         }
 
         internal void Handle_SlaveToMaster_WhatIsCoordofMasterEvent(object src, LSEventArgs _lseventargs)

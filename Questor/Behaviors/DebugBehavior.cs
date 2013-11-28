@@ -365,7 +365,7 @@ namespace Questor.Behaviors
                     Cache.Instance.SalvageAll = true;
                     Cache.Instance.OpenWrecks = true;
 
-                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null) return;
 
                     if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.Window.IsReady && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {
@@ -381,6 +381,7 @@ namespace Questor.Behaviors
                     {
                         break;
                     }
+
                     //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
                     Salvage.MoveIntoRangeOfWrecks();
                     try
@@ -470,7 +471,7 @@ namespace Questor.Behaviors
                     }
                     if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.Last())
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.AllBookmarks.Where(b => b.LocationId == destination.Last()).ToList();
                         if (bookmarks != null && bookmarks.Any())
                             Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
                         else

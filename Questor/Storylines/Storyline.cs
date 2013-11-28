@@ -90,7 +90,7 @@
                                //
                                // COURIER/DELIVERY - CALDARI - LEVEL 1
                                //
-                               //{"A Fathers Love".ToLower(), new GenericCourier()}, //lvl1
+                               {"A Fathers Love".ToLower(), new GenericCourier()}, //lvl1 note: 300m3 needed
                                //{"A Greener World".ToLower(), new GenericCourier()}, //lvl1
                                //{"Eradication".ToLower(), new GenericCourier()}, //lvl1
                                //{"Evacuation".ToLower(), new GenericCourier()}, //lvl1
@@ -448,7 +448,7 @@
             if (_nextAction > DateTime.UtcNow) return false;
 
             // Open the item hangar (should still be open)
-            if (!Cache.Instance.OpenItemsHangar("Storyline")) return false;
+            if (Cache.Instance.ItemHangar == null) return false;
 
             // Do we have anything here we want to bring home, like implants or ?
             //if (to.Items.Any(i => i.GroupId == (int)Group.MiscSpecialMissionItems || i.GroupId == (int)Group.Livestock))
@@ -463,7 +463,11 @@
             }
 
             // Yes, open the ships cargo
-            if (!Cache.Instance.OpenCargoHold("Storyline")) return false;
+            if (Cache.Instance.CurrentShipsCargo == null)
+            {
+                if (Settings.Instance.DebugUnloadLoot) Logging.Log("BringSpoilsOfWar", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                return false;
+            }
 
             // If we are not moving items
             if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)

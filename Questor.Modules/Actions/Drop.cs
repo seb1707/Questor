@@ -50,7 +50,7 @@
                     
                     if (DestinationHangarName == "Local Hangar")
                     {
-                        if (!Cache.Instance.OpenItemsHangar("Drop")) return;
+                        if (Cache.Instance.ItemHangar == null) return;
                         dropHangar = Cache.Instance.ItemHangar;
                     }
                     else if (DestinationHangarName == "Ship Hangar")
@@ -76,19 +76,26 @@
 
                 case DropState.OpenCargo:
                     if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: OpenCargo", Logging.Debug);
-                    
-                    if (!Cache.Instance.OpenCargoHold("Drop")) return;
+
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("OpenCargo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     Logging.Log("Drop", "Opening Cargo Hold", Logging.White);
                     _States.CurrentDropState = Item == 00 ? DropState.AllItems : DropState.MoveItems;
-
                     break;
 
                 case DropState.MoveItems:
 
                     if (Settings.Instance.DebugQuestorManager) Logging.Log("Drop", "Entered: MoveItems", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastAction).TotalSeconds < 2) return;
-                    if (!Cache.Instance.OpenCargoHold("Drop")) return;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
 
                     DirectItem dropItem;
 

@@ -133,7 +133,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
 
-                            // this needs a counter and an abort after 10 tries or so... or itll keep checking the cargo for a script that may not exist
+                            // this needs a counter and an abort after 10 tries or so... or it will keep checking the cargo for a script that may not exist
                             // every second we are in space!
                             if (scriptToLoad != null)
                             {
@@ -532,7 +532,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         //if (module.Damage > DamageThresholdToStopOverloading)
                         //{
-                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Diable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
+                        //    Logging.Log("Defense.Overload","Damage [" + Math.Round(module.Damage,2) + "] Disable Overloading of Module wTypeID[" + module.TypeId + "]",Logging.Debug);
                         //    return module.ToggleOverload;
                         //    return false;
                         //}
@@ -605,7 +605,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 // Module is either for Cap or Tank recharging, so we look at these separated (or random things will happen, like cap recharging when we need to repair but cap is near max) 
                 // Cap recharging
-                bool inCombat = Cache.Instance.TargetedBy.Any();
+                bool inCombat = Cache.Instance.EntitiesOnGrid.Any(i => i.IsTargetedBy) || Cache.Instance.PotentialCombatTargets.Any();
                 if (!module.IsActive && inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
                 {
                     module.Click();
@@ -730,17 +730,17 @@ namespace Questor.Modules.BackgroundTasks
                 // Should we deactivate the module?
                 //
                 if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + module.IsActive + "]", Logging.Debug);
-
+                
                 if (module.IsActive)
                 {
-                    bool deactivate = false; 
-                    
-                    if (!Cache.Instance.IsApproaching(0))
+                    bool deactivate = false;
+
+                    if (!Cache.Instance.IsApproachingOrOrbiting(0))
                     {
                         deactivate = true;
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60))
+                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
                     {
                         deactivate = true;
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
@@ -785,7 +785,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance)
                         {
                             activate = true;
-                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within MinimumPropulsionModuleDistance [" + Settings.Instance.MinimumPropulsionModuleDistance + "] Activate [" + activate + "]", Logging.Debug);
+                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "k] is within MinimumPropulsionModuleDistance [" + Math.Round((double)Settings.Instance.MinimumPropulsionModuleDistance/1000,2) + "] Activate [" + activate + "]", Logging.Debug);
                         }
 
                         if (Settings.Instance.SpeedTank)
@@ -809,7 +809,8 @@ namespace Questor.Modules.BackgroundTasks
                         Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                     }
                 }
-               
+
+                Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                 return;
             }
         }
@@ -877,7 +878,7 @@ namespace Questor.Modules.BackgroundTasks
 
             if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we havent moved yet after jumping or undocking... waiting.", Logging.White);
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
                 //
                 // we reset this datetime stamp to -7 days when we jump, and set it to DateTime.UtcNow when we move (to deactivate jump cloak!)
                 // once we have moved (warp, orbit, dock, etc) this should be false and before that it will be true

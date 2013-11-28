@@ -68,6 +68,7 @@ namespace Questor.Modules.Lookup
         NOS = 68,
         Neutralizer = 71,
         TargetPainter = 379,
+        Bastion = 515,
 
         EnergyWeapon = 53,
         ProjectileWeapon = 55,
@@ -173,7 +174,7 @@ namespace Questor.Modules.Lookup
 
         Minerals = 18,
 
-        SkillBooks = 270,
+        ScienceSkillBooks = 270,
 
         Plagioclase = 458,
         Spodumain = 461,

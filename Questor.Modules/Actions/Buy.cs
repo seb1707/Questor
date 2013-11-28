@@ -31,7 +31,7 @@
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            DirectMarketWindow marketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
 
             switch (_States.CurrentBuyState)
             {

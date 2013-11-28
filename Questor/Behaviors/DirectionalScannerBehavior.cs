@@ -300,7 +300,7 @@ namespace Questor.Behaviors
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.LastOrDefault())
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.AllBookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
                             Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
                         else

@@ -591,22 +591,19 @@ namespace Questor.Behaviors
                         if (Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("CombatMissionsBehavior.LocalWatch", "local is clear", Logging.White);
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WarpOutStation;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                         }
                         else
                         {
                             Logging.Log("CombatMissionsBehavior.LocalWatch", "Bad standings pilots in local: We will stay 5 minutes in the station and then we will check if it is clear again", Logging.Orange);
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch)
-                            {
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WaitingforBadGuytoGoAway;
-                            }
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WaitingforBadGuytoGoAway;
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
                     }
                     else
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.LocalWatch) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.WarpOutStation;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                     }
                     break;
 
@@ -619,39 +616,50 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.WarpOutStation:
-                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
-
-                    //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
-                    long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
-
-                    if (warpOutBookmark == null)
+                    if (!string.IsNullOrEmpty(Settings.Instance.BookmarkWarpOut))
                     {
-                        Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark", Logging.White);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                    }
-                    else if (warpOutBookmark.LocationId == solarid)
-                    {
-                        if (Traveler.Destination == null)
+                        IEnumerable<DirectBookmark> warpOutBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "");
+                        if (warpOutBookmarks != null && warpOutBookmarks.Any())
                         {
-                            Logging.Log("CombatMissionsBehavior.WarpOut", "Warp at " + warpOutBookmark.Title, Logging.White);
-                            Traveler.Destination = new BookmarkDestination(warpOutBookmark);
-                            Cache.Instance.DoNotBreakInvul = true;
-                        }
+                            DirectBookmark warpOutBookmark = warpOutBookmarks.OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
 
-                        Traveler.ProcessState();
-                        if (_States.CurrentTravelerState == TravelerState.AtDestination)
-                        {
-                            Logging.Log("CombatMissionsBehavior.WarpOut", "Safe!", Logging.White);
-                            Cache.Instance.DoNotBreakInvul = false;
-                            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                            Traveler.Destination = null;
+                            long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
+
+                            if (warpOutBookmark == null)
+                            {
+                                Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark", Logging.White);
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                            }
+                            else if (warpOutBookmark.LocationId == solarid)
+                            {
+                                if (Traveler.Destination == null)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.WarpOut", "Warp at " + warpOutBookmark.Title, Logging.White);
+                                    Traveler.Destination = new BookmarkDestination(warpOutBookmark);
+                                    Cache.Instance.DoNotBreakInvul = true;
+                                }
+
+                                Traveler.ProcessState();
+                                if (_States.CurrentTravelerState == TravelerState.AtDestination)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.WarpOut", "Safe!", Logging.White);
+                                    Cache.Instance.DoNotBreakInvul = false;
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                                    Traveler.Destination = null;
+                                }
+                            }
+                            else
+                            {
+                                Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
+                            }
+
+                            break;
                         }
                     }
-                    else
-                    {
-                        Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WarpOutStation) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
-                    }
+                    
+                    Logging.Log("CombatMissionsBehavior.WarpOut", "No Bookmark in System", Logging.Orange);
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoMission;
                     break;
 
                 case CombatMissionsBehaviorState.GotoMission:
@@ -758,6 +766,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.GotoBase:
+                    Cache.Instance.IsMissionPocketDone = true; //pulls drones if we are not scrambled
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
 
@@ -1067,7 +1076,7 @@ namespace Questor.Behaviors
                         }
                     }
 
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     if (_States.CurrentArmState == ArmState.Idle)
                         _States.CurrentArmState = ArmState.SwitchToSalvageShip;
 
@@ -1107,15 +1116,23 @@ namespace Questor.Behaviors
                     }
 
                     if (Settings.Instance.DebugStates)
+                    {
                         Logging.Log("Traveler.State is ", _States.CurrentTravelerState.ToString(), Logging.White);
+                    }
+
                     break;
 
                 case CombatMissionsBehaviorState.Salvage:
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: attempting to open cargo hold", Logging.White);
-                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) break;
+                    if (Cache.Instance.CurrentShipsCargo == null)
+                    {
+                        Logging.Log("CombatMissionsBehavior", "salvage:: if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                        return;
+                    }
+
                     if (Settings.Instance.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: done opening cargo hold", Logging.White);
                     Cache.Instance.SalvageAll = true;
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
                     EntityCache deadlyNPC = Cache.Instance.PotentialCombatTargets.FirstOrDefault();
@@ -1215,7 +1232,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.SalvageUseGate:
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                     if (Cache.Instance.AccelerationGates == null || !Cache.Instance.AccelerationGates.Any())
                     {
@@ -1265,7 +1282,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.SalvageNextPocket:
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
                     double distance = Cache.Instance.DistanceFromMe(_lastX, _lastY, _lastZ);
                     if (distance > (int)Distances.NextPocketDistance)
                     {
@@ -1363,7 +1380,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.Traveler:
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     List<int> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
@@ -1378,9 +1395,11 @@ namespace Questor.Behaviors
                         destination[0] = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
                     if (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.LastOrDefault())
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.AllBookmarks.Where(b => b.LocationId == destination.LastOrDefault()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
+                        {
                             Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());
+                        }
                         else
                         {
                             Logging.Log("CombatMissionsBehavior.Traveler", "Destination: [" + Cache.Instance.DirectEve.Navigation.GetLocation(destination.Last()).Name + "]", Logging.White);

@@ -39,7 +39,7 @@ namespace Questor.Modules.Activities
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
-        private int openCargoRetryNumber;
+        //private int openCargoRetryNumber;
         private int AttemptsToActivateGateTimer;
         private int AttemptsToGetAwayFromGate;
         private bool ItemsHaveBeenMoved;
@@ -65,7 +65,7 @@ namespace Questor.Modules.Activities
             Cache.Instance.NextAlign = DateTime.UtcNow;
 
             // now that we have completed this action revert OpenWrecks to false
-            Cache.Instance.OpenWrecks = false;
+            if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
             Cache.Instance.MissionLoot = false;
             Cache.Instance.normalNav = true;
             Cache.Instance.onlyKillAggro = false;
@@ -133,11 +133,18 @@ namespace Questor.Modules.Activities
 
                 // Do we already have a bookmark?
                 List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
-                if (bookmark != null)
+                if (bookmarks.Any())
                 {
-                    Logging.Log("CombatMissionCtrl", "salvaging bookmark forthis pocket is done [" + bookmark.Title + "]", Logging.Teal);
-                    return true;
+                    DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
+                    if (bookmark != null)
+                    {
+                        Logging.Log("CombatMissionCtrl", "salvaging bookmark for this pocket is done [" + bookmark.Title + "]", Logging.Teal);
+                        return true;
+                    }
+
+                    //
+                    // if we have bookmarks but there is no bookmark on grid we need to continue and create the salvage bookmark.
+                    //
                 }
 
                 // No, create a bookmark
@@ -192,6 +199,19 @@ namespace Questor.Modules.Activities
 
         private void ActivateAction(Actions.Action action)
         {
+            if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
+                return;
+
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
+
             bool optional;
             if (!bool.TryParse(action.GetParameterValue("optional"), out optional))
             {
@@ -222,7 +242,7 @@ namespace Questor.Modules.Activities
                         Logging.Log("CombatMissionCtrl",
                                     "Activate: After 30 seconds of waiting the gate is still not on grid: CombatMissionCtrlState.Error",
                                     Logging.Teal);
-                        if (optional) //if this action has the optional paramater defined as true then we are done if we cant find the gate
+                        if (optional) //if this action has the optional parameter defined as true then we are done if we cant find the gate
                         {
                             DoneAction();
                         }
@@ -336,7 +356,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (closest.Distance > (int)Distances.WarptoDistance)//we must be outside warpto distance, but we are likely in a deadspace so align to the target
+                if (closest.Distance > (int)Distances.WarptoDistance)//we must be outside warpto distance, but we are likely in a DeadSpace so align to the target
                 {
                     // We cant warp if we have drones out - but we are aligning not warping so we do not care
                     //if (Cache.Instance.ActiveDrones.Count() > 0)
@@ -658,6 +678,16 @@ namespace Questor.Modules.Activities
             if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
                 return;
 
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.MoveToBackground", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
+
             if (Cache.Instance.NormalApproach)
             {
                 Cache.Instance.NormalApproach = false;
@@ -705,6 +735,16 @@ namespace Questor.Modules.Activities
         {
             if (DateTime.UtcNow < _nextCombatMissionCtrlAction)
                 return;
+
+            //we cant move in bastion mode, do not try
+            List<ModuleCache> bastionModules = null;
+            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            if (bastionModules.Any(i => i.IsActive))
+            {
+                Logging.Log("CombatMissionCtrl.MoveTo", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
+                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(15);
+                return;
+            }
 
             if (Cache.Instance.NormalApproach)
             {
@@ -933,6 +973,42 @@ namespace Questor.Modules.Activities
             _waitingSince = DateTime.UtcNow;
             return;
         }
+        private void ActivateBastionAction(Actions.Action action)
+        {
+            bool _done = false;
+
+            if (Cache.Instance.Modules.Any())
+            {
+                List<ModuleCache> bastionModules = null;
+                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                if (!bastionModules.Any() || bastionModules.Any(i => i.IsActive))
+                {
+                    _done = true;
+                }    
+            }
+            
+            if (_done)
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "ActivateBastion Action completed.", Logging.Teal);
+
+                // Nothing has targeted us in the specified timeout
+                _waiting = false;
+                Nextaction();
+                return;
+            }
+
+            // Default timeout is 60 seconds
+            int DeactivateAfterSeconds;
+            if (!int.TryParse(action.GetParameterValue("DeactivateAfterSeconds"), out DeactivateAfterSeconds))
+            {
+                DeactivateAfterSeconds = 5;
+            }
+            Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
+            
+            // Start bastion mode
+            if (!Combat.ActivateBastion()) return;
+            return;
+        }
 
         private void DebuggingWait(Actions.Action action)
         {
@@ -1150,7 +1226,7 @@ namespace Questor.Modules.Activities
                     {
                         if (target.IsTargetedBy && target.IsAttacking)
                         {
-                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "UN-Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater (and kill action being complete)", Logging.Teal);
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "UN-Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers parameter (and kill action being complete)", Logging.Teal);
                             Cache.Instance.IgnoreTargets.Remove(target.Name.Trim());
                         }
                     }
@@ -1165,7 +1241,7 @@ namespace Questor.Modules.Activities
                 {
                     if (target.IsTargetedBy && target.IsAttacking)
                     {
-                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers paramater", Logging.Teal);
+                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Ignoring [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away] due to ignoreAttackers parameter", Logging.Teal);
                         Cache.Instance.IgnoreTargets.Add(target.Name.Trim());
                     }    
                 }
@@ -1264,7 +1340,7 @@ namespace Questor.Modules.Activities
                         }
                     }
                     //
-                    // getbesttarget below will choose to assign prioritytargets over preferred targets, so we might as well wait... (and not approach the wrong target)
+                    // GetBestTarget below will choose to assign PriorityTargets over preferred targets, so we might as well wait... (and not approach the wrong target)
                     //
                 }
                 else 
@@ -1458,7 +1534,7 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.DropMode = true;
                 List<string> items = action.GetParameterValues("item");
-                string target = action.GetParameterValue("target");
+                string targetName = action.GetParameterValue("target");
 
                 int quantity;
                 if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
@@ -1474,15 +1550,15 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
-                if (targets.Any())
+                IEnumerable<EntityCache> targetEntities = Cache.Instance.EntitiesByName(targetName, Cache.Instance.EntitiesOnGrid.ToList());
+                if (targetEntities.Any())
                 {
-                    Logging.Log("MissionController.DropItem", "We have [" + targets.Count() + "] entities on grid that match our target by name: [" + targets.FirstOrDefault() + "]", Logging.Orange);
-                    targets = targets.Where(i => i.IsContainer || i.GroupId == (int)Group.LargeColidableObject); //some missions (like: Onslaught - lvl1) have LCOs that can hold and take cargo, note that same mission has a LCS with the same name!
+                    Logging.Log("MissionController.DropItem", "We have [" + targetEntities.Count() + "] entities on grid that match our target by name: [" + targetName.FirstOrDefault() + "]", Logging.Orange);
+                    targetEntities = targetEntities.Where(i => i.IsContainer || i.GroupId == (int)Group.LargeColidableObject); //some missions (like: Onslaught - lvl1) have LCOs that can hold and take cargo, note that same mission has a LCS with the same name!
 
-                    if (!targets.Any())
+                    if (!targetEntities.Any())
                     {
-                        Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "] that is also a container", Logging.Orange);
+                        Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targetEntities.FirstOrDefault() + "] that is also a container", Logging.Orange);
 
                         // now that we have completed this action revert OpenWrecks to false
                         Cache.Instance.DropMode = false;
@@ -1490,11 +1566,11 @@ namespace Questor.Modules.Activities
                         return;
                     }
 
-                    EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
+                    EntityCache closest = targetEntities.OrderBy(t => t.Distance).FirstOrDefault();
 
                     if (closest == null)
                     {
-                        Logging.Log("MissionController.DropItem", "closest: target named [" + target.FirstOrDefault() + "] was null" + targets, Logging.Orange);
+                        Logging.Log("MissionController.DropItem", "closest: target named [" + targetName.FirstOrDefault() + "] was null" + targetEntities, Logging.Orange);
 
                         // now that we have completed this action revert OpenWrecks to false
                         Cache.Instance.DropMode = false;
@@ -1555,14 +1631,17 @@ namespace Questor.Modules.Activities
                                 foreach (DirectItem CurrentShipsCargoItem in Cache.Instance.CurrentShipsCargo.Items)
                                 {
                                     ItemNumber++;
-                                    Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: Stacksize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
+                                    Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: StackSize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
                                     if (CurrentShipsCargoItem.TypeName.ToLower() == items.FirstOrDefault().ToLower())
                                     {
                                         Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] container.Capacity [" + container.Capacity + "] ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.Debug);
                                         if (!ItemsHaveBeenMoved)
                                         {
                                             Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
-                                            container.Add(CurrentShipsCargoItem, quantity);
+                                            //
+                                            // THIS IS NOT WORKING - EXCEPTION/ERROR IN CLIENT... 
+                                            //
+                                            //container.Add(CurrentShipsCargoItem, quantity);
                                             Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
                                             ItemsHaveBeenMoved = true;
                                             return;
@@ -1582,7 +1661,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targets.FirstOrDefault() + "]", Logging.Orange);
+                Logging.Log("MissionController.DropItem", "No entity on grid named: [" + targetEntities.FirstOrDefault() + "]", Logging.Orange);
                 // now that we have completed this action revert OpenWrecks to false
                 Cache.Instance.DropMode = false;
                 Nextaction();
@@ -1592,6 +1671,7 @@ namespace Questor.Modules.Activities
             {
                 Logging.Log("DropItemAction", "Exception: [" + exception + "]", Logging.Debug);
             }
+
             return;
         }
 
@@ -1606,7 +1686,7 @@ namespace Questor.Modules.Activities
 
                 // if we are not generally looting we need to re-enable the opening of wrecks to
                 // find this LootItems we are looking for
-                Cache.Instance.OpenWrecks = true;
+                if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                 int quantity;
                 if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
@@ -1632,7 +1712,7 @@ namespace Questor.Modules.Activities
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting - we have the item(s)", Logging.Teal);
 
                     // now that we have completed this action revert OpenWrecks to false
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     Cache.Instance.MissionLoot = false;
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
                     _currentAction++;
@@ -1647,7 +1727,7 @@ namespace Questor.Modules.Activities
                 if (!containers.Any())
                 {
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting - no containers left to loot", Logging.Teal);
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     Cache.Instance.MissionLoot = false; 
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
                     _currentAction++;
@@ -1735,7 +1815,7 @@ namespace Questor.Modules.Activities
 
             // if we are not generally looting we need to re-enable the opening of wrecks to
             // find this LootItems we are looking for
-            Cache.Instance.OpenWrecks = true;
+            if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
             Cache.Instance.CurrentlyShouldBeSalvaging = true;
 
             if (!Settings.Instance.LootEverything)
@@ -1753,7 +1833,7 @@ namespace Questor.Modules.Activities
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "LootEverything:  We are done looting", Logging.Teal);
 
                     // now that we are done with this action revert OpenWrecks to false
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     Cache.Instance.MissionLoot = false;
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
 
@@ -1786,7 +1866,7 @@ namespace Questor.Modules.Activities
                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
 
                 // now that we are done with this action revert OpenWrecks to false
-                Cache.Instance.OpenWrecks = false;
+                if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                 Cache.Instance.MissionLoot = false;
                 Cache.Instance.CurrentlyShouldBeSalvaging = false;
 
@@ -1945,9 +2025,9 @@ namespace Questor.Modules.Activities
                     LootItemAction(action);
                     break;
 
-                //case ActionState.PutItem:
-                //    PutItemAction(action);
-                //    break;
+                case ActionState.ActivateBastion:
+                    ActivateBastionAction(action);
+                    break;
 
                 case ActionState.DropItem:
                     DropItemAction(action);
@@ -2083,6 +2163,9 @@ namespace Questor.Modules.Activities
                     // Reset pocket information
                     _currentAction = 0;
                     Cache.Instance.IsMissionPocketDone = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
+                    if (!Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                    
                     Cache.Instance.IgnoreTargets.Clear();
                     Statistics.PocketObjectStatistics(Cache.Instance.Objects.ToList());
                     _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.ExecutePocketActions;

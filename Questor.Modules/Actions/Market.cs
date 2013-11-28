@@ -452,7 +452,7 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+            DirectMarketWindow marketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
             if (marketWindow == null)
             {
                 Cache.Instance.OpenMarket(module);
@@ -499,7 +499,7 @@ namespace Questor.Modules.Actions
 
             if (sell)
             {
-                DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+                DirectMarketActionWindow sellWindow = Cache.Instance.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
 
                 //
                 // if we do not yet have a sell window then start the QuickSell for this item
@@ -543,7 +543,7 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow.Subtract(_lastExecute).TotalSeconds < Time.Instance.Marketbuyorderdelay_seconds)
                 return false;
 
-            DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+            DirectMarketActionWindow sellWindow = Cache.Instance.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
 
             if (sellWindow != null && (!sellWindow.OrderId.HasValue || !sellWindow.Price.HasValue || !sellWindow.RemainingVolume.HasValue))
             {
@@ -712,13 +712,13 @@ namespace Questor.Modules.Actions
 
         public static bool WaitingToFinishQuickSell(string module)
         {
-            DirectMarketActionWindow sellWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
+            DirectMarketActionWindow sellWindow = Cache.Instance.Windows.OfType<DirectMarketActionWindow>().FirstOrDefault(w => w.IsSellAction);
             if (sellWindow == null || !sellWindow.IsReady || sellWindow.Item.ItemId != _currentItem.Id)
             {
                 //
                 // this closes ANY modal window and moves on, do we want to be more discriminating?
                 //
-                DirectWindow modal = Cache.Instance.DirectEve.Windows.FirstOrDefault(w => w.IsModal);
+                DirectWindow modal = Cache.Instance.Windows.FirstOrDefault(w => w.IsModal);
                 if (modal != null)
                 {
                     modal.Close();
@@ -734,9 +734,9 @@ namespace Questor.Modules.Actions
             if (refine)
             {
                 if (Settings.Instance.DebugValuedump) Logging.Log(module, "RefineItems: if (refine)", Logging.Debug);
-                        
-                if (!Cache.Instance.OpenItemsHangar(module)) return false;
-                DirectReprocessingWindow reprocessingWindow = Cache.Instance.DirectEve.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
+
+                if (Cache.Instance.ItemHangar == null) return false;
+                DirectReprocessingWindow reprocessingWindow = Cache.Instance.Windows.OfType<DirectReprocessingWindow>().FirstOrDefault();
 
                 if (reprocessingWindow == null)
                 {
@@ -804,7 +804,7 @@ namespace Questor.Modules.Actions
             {
                 if (Settings.Instance.DebugValuedump) Logging.Log(module, "RefineItems: if (!refine)", Logging.Debug);
 
-                if (!Cache.Instance.OpenCargoHold(module)) return false;
+                if (Cache.Instance.CurrentShipsCargo == null) return false;
 
                 IEnumerable<DirectItem> refineItems = Cache.Instance.ItemHangar.Items.Where(i => ItemsToRefine.Any(r => r.Id == i.ItemId)).ToList();
                 if (refineItems.Any())

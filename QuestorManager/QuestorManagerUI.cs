@@ -110,7 +110,7 @@ namespace QuestorManager
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using easyhook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
@@ -203,9 +203,9 @@ namespace QuestorManager
 
             if (_bookmarks == null)
             {
-                // Dirty hack to load all category id's (needed because categoryid is lazy-loaded by the bookmarks call)
-                Cache.Instance.DirectEve.Bookmarks.All(b => b.CategoryId != 0);
-                _bookmarks = Cache.Instance.DirectEve.Bookmarks.OrderBy(b => b.Title).ToList();
+                // Dirty hack to load all category id's (needed because categoryId is lazy-loaded by the bookmarks call)
+                Cache.Instance.AllBookmarks.All(b => b.CategoryId != 0);
+                _bookmarks = Cache.Instance.AllBookmarks.OrderBy(b => b.Title).ToList();
                 _changed = true;
             }
         }
@@ -853,7 +853,7 @@ namespace QuestorManager
             int selIdx = lv.SelectedItems[0].Index;
             if (moveUp)
             {
-                // ignore moveup of row(0)
+                // ignore move up of row(0)
                 if (selIdx == 0)
                 {
                     return;
@@ -867,7 +867,7 @@ namespace QuestorManager
                     }
                 }
 
-                // move the subitems for the previous row
+                // move the sub items for the previous row
                 // to cache to make room for the selected row
                 for (int i = 0; i < lv.Items[selIdx].SubItems.Count; i++)
                 {
@@ -885,7 +885,7 @@ namespace QuestorManager
             }
             else
             {
-                // ignore movedown of last item
+                // ignore move down of last item
                 if (selIdx == lv.Items.Count - 1)
                 {
                     return;
@@ -899,7 +899,7 @@ namespace QuestorManager
                     }
                 }
 
-                // move the subitems for the next row
+                // move the sub items for the next row
                 // to cache so we can move the selected row down
                 for (int i = 0; i < lv.Items[selIdx].SubItems.Count; i++)
                 {
@@ -1317,7 +1317,7 @@ namespace QuestorManager
         public void ResfreshLPI()
         {
             _lpstoreRe = false;
-            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
             if (lpstore == null)
             {
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
@@ -1350,7 +1350,7 @@ namespace QuestorManager
 
         public void Required()
         {
-            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.DirectEve.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
+            DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
             XDocument invTypes = XDocument.Load(Path.GetDirectoryName(Settings.Instance.Path) + "\\InvTypes.xml");
             if (invTypes.Root != null)
             {

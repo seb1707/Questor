@@ -8,8 +8,8 @@ using Questor.Modules.States;
 namespace Questor.Modules.Actions
 {
     using System;
-    using System.Collections.Generic;
-    using System.Windows.Forms;
+    //using System.Collections.Generic;
+    //using System.Windows.Forms;
     using Questor.Modules.Logging;
     
     public static class SkillTrainerClass
@@ -71,8 +71,9 @@ namespace Questor.Modules.Actions
                 //    break;
 
                 case SkillTrainerState.CheckTrainingQueue:
-                    Logging.Log("SkillTrainer", "CheckTrainingQueue", Logging.Debug);
+                    
                     if (!SkillPlan.RetrieveSkillQueueInfo()) return;
+                    
                     if (!SkillPlan.CheckTrainingQueue("SkillTrainer")) return;
 
                     _State.CurrentSkillTrainerState = SkillTrainerState.Done;

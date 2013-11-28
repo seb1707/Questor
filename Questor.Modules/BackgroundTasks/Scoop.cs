@@ -176,11 +176,11 @@ namespace Questor.Modules.BackgroundTasks
             if (!Cache.Instance.InSpace)
                 return;
 
-            if (!Cache.Instance.OpenCargoHold("Scoop")) return;
+            if (Cache.Instance.CurrentShipsCargo == null) return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
-            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.DirectEve.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_")).ToList();
+            IEnumerable<DirectContainerWindow> lootWindows = Cache.Instance.Windows.OfType<DirectContainerWindow>().Where(w => !string.IsNullOrEmpty(w.Name) && w.Name.StartsWith("loot_")).ToList();
             foreach (DirectContainerWindow window in lootWindows)
             {
                 // The window is not ready, then continue

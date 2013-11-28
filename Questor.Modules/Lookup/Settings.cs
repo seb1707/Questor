@@ -164,7 +164,7 @@ namespace Questor.Modules.Lookup
         public bool DebugValuedump { get; set; }
         public bool DebugWalletBalance { get; set; }
         public bool DebugWatchForActiveWars { get; set; }
-        public string TargetSelectionMethod { get; set; } //defaults to daxten
+        public string TargetSelectionMethod { get; set; }
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DebugStates { get; set; }
         public bool DefendWhileTraveling { get; set; }
@@ -266,7 +266,7 @@ namespace Questor.Modules.Lookup
         public string MiningShipName { get; set; }
 
         //
-        //Use Homebookmark
+        //Use HomeBookmark
         //
         public bool UseHomebookmark { get; set; }
 
@@ -445,8 +445,8 @@ namespace Questor.Modules.Lookup
         public int TrackingLinkScript { get; private set; }
         public int SensorBoosterScript { get; private set; }
         public int SensorDampenerScript { get; private set; }
-        public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
-        public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for ourpurposes that does not matter
+        public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
+        public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
         public int CapBoosterToLoad { get; private set; } 
         //
         // OverLoad Settings (this WILL burn out modules, likely very quickly!
@@ -708,7 +708,7 @@ namespace Questor.Modules.Lookup
                 CommonSettingsXml = XDocument.Load(Settings.Instance.CharacterSettingsPath).Root;
             }
 
-            if (CommonSettingsXml == null) return; // this should never happen as we load the characters xml here if the common xml is mising. adding this does quiet some warnings though
+            if (CommonSettingsXml == null) return; // this should never happen as we load the characters xml here if the common xml is missing. adding this does quiet some warnings though
 
             if (Settings.Instance.CommonXMLExists) Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CommonSettingsPath + "] and", Logging.Green);
             Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CharacterSettingsPath + "]", Logging.Green);
@@ -894,16 +894,16 @@ namespace Questor.Modules.Lookup
             //
             BattleshipInvasionLimit = (int?)CharacterSettingsXml.Element("battleshipInvasionLimit") ?? (int?)CommonSettingsXml.Element("battleshipInvasionLimit") ?? 0;
 
-            // if this number of battleships lands on grid while in a mission we will enter panic
+            // if this number of BattleShips lands on grid while in a mission we will enter panic
             BattlecruiserInvasionLimit = (int?)CharacterSettingsXml.Element("battlecruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("battlecruiserInvasionLimit") ?? 0;
 
-            // if this number of battlecruisers lands on grid while in a mission we will enter panic
+            // if this number of BattleCruisers lands on grid while in a mission we will enter panic
             CruiserInvasionLimit = (int?)CharacterSettingsXml.Element("cruiserInvasionLimit") ?? (int?)CommonSettingsXml.Element("cruiserInvasionLimit") ?? 0;
 
-            // if this number of cruisers lands on grid while in a mission we will enter panic
+            // if this number of Cruisers lands on grid while in a mission we will enter panic
             FrigateInvasionLimit = (int?)CharacterSettingsXml.Element("frigateInvasionLimit") ?? (int?)CommonSettingsXml.Element("frigateInvasionLimit") ?? 0;
 
-            // if this number of frigates lands on grid while in a mission we will enter panic
+            // if this number of Frigates lands on grid while in a mission we will enter panic
             InvasionRandomDelay = (int?)CharacterSettingsXml.Element("invasionRandomDelay") ?? (int?)CommonSettingsXml.Element("invasionRandomDelay") ?? 0; // random relay to stay docked
             InvasionMinimumDelay = (int?)CharacterSettingsXml.Element("invasionMinimumDelay") ?? (int?)CommonSettingsXml.Element("invasionMinimumDelay") ?? 0;
 
@@ -1035,7 +1035,7 @@ namespace Questor.Modules.Lookup
                 LootEverything = (bool?)CharacterSettingsXml.Element("lootEverything") ?? (bool?)CommonSettingsXml.Element("lootEverything") ?? true;
                 UseGatesInSalvage = (bool?)CharacterSettingsXml.Element("useGatesInSalvage") ?? (bool?)CommonSettingsXml.Element("useGatesInSalvage") ?? false;
 
-                // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
+                // if our mission does not DeSpawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
                 CreateSalvageBookmarks = (bool?)CharacterSettingsXml.Element("createSalvageBookmarks") ?? (bool?)CommonSettingsXml.Element("createSalvageBookmarks") ?? false;
                 CreateSalvageBookmarksIn = (string)CharacterSettingsXml.Element("createSalvageBookmarksIn") ?? (string)CommonSettingsXml.Element("createSalvageBookmarksIn") ?? "Player";
 
@@ -1169,7 +1169,7 @@ namespace Questor.Modules.Lookup
             //
             // Script Settings - TypeIDs for the scripts you would like to use in these modules
             //
-            // 29003 Focused Warp Disruption Script   // hictor and infinipoint
+            // 29003 Focused Warp Disruption Script   // hictor and InfiniPoint
             //
             // 29007 Tracking Speed Disruption Script // tracking disruptor
             // 29005 Optimal Range Disruption Script  // tracking disruptor
@@ -1632,9 +1632,9 @@ namespace Questor.Modules.Lookup
                 // Invasion Settings
                 //
                 BattleshipInvasionLimit = 2;
-                // if this number of battleships lands on grid while in a mission we will enter panic
+                // if this number of BattleShips lands on grid while in a mission we will enter panic
                 BattlecruiserInvasionLimit = 2;
-                // if this number of battlecruisers lands on grid while in a mission we will enter panic
+                // if this number of BattleCruisers lands on grid while in a mission we will enter panic
                 CruiserInvasionLimit = 2;
                 // if this number of cruisers lands on grid while in a mission we will enter panic
                 FrigateInvasionLimit = 2;
@@ -1715,7 +1715,7 @@ namespace Questor.Modules.Lookup
                 MiningShipName = "Hulk";
 
                 //
-                // Usage of Homebookmark @ dedicated salvager
+                // Usage of HomeBookmark @ dedicated salvager
                 UseHomebookmark = false;
                 //
                 // Storage Location for Loot, Ammo, Bookmarks
@@ -1731,7 +1731,7 @@ namespace Questor.Modules.Lookup
                 //
                 LootEverything = true;
                 UseGatesInSalvage = false;
-                // if our mission does not despawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
+                // if our mission does not DeSpawn (likely someone in the mission looting our stuff?) use the gates when salvaging to get to our bookmarks
                 CreateSalvageBookmarks = false;
                 CreateSalvageBookmarksIn = "Player"; //Player or Corp
                 //other setting is "Corp"
@@ -1808,7 +1808,7 @@ namespace Questor.Modules.Lookup
                 //
                 // Script Settings - TypeIDs for the scripts you would like to use in these modules
                 //
-                // 29003 Focused Warp Disruption Script   // hictor and infinipoint
+                // 29003 Focused Warp Disruption Script   // Hictor and InfiniPoint
                 //
                 // 29007 Tracking Speed Disruption Script // tracking disruptor
                 // 29005 Optimal Range Disruption Script  // tracking disruptor

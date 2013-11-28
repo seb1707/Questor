@@ -94,7 +94,7 @@ namespace Questor.Modules.Logging
             // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
             // we now filter sensitive info by default
             //
-            Cache.Instance.ConsoleLogRedacted += String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+            Cache.Instance.ConsoleLogRedacted = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
             plainLogLine = FilterColorsFromLogs(line);
 
             if (Settings.Instance.SaveConsoleLog)

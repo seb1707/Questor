@@ -294,28 +294,32 @@ namespace Questor
 
         public static bool SkillQueueCheck()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
-                return true;
-
-            if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
+            if (!Cache.Instance.InSpace && Cache.Instance.InStation)
             {
-                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
-                if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalDays < 1)
+                if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
+                    return true;
+
+                if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
                 {
-                    Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
-                    _States.LavishEvent_SkillQueueHasRoom();
-                    _States.CurrentQuestorState = QuestorState.SkillTrainer;
-                    return false;
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
+                    if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalDays < 1)
+                    {
+                        Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
+                        _States.LavishEvent_SkillQueueHasRoom();
+                        _States.CurrentQuestorState = QuestorState.SkillTrainer;
+                        return false;
+                    }
+
+                    Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
+                    Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
+                    return true;
                 }
 
-                Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
-                Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
-                return true;
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)", Logging.White);
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Cache.Instance.DirectEve.HasSupportInstances() [" + Cache.Instance.DirectEve.HasSupportInstances() + "]", Logging.White);
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ThisToonShouldBeTrainingSkills [" + Settings.Instance.ThisToonShouldBeTrainingSkills + "]", Logging.White);    
             }
             
-            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)", Logging.White);
-            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Cache.Instance.DirectEve.HasSupportInstances() [" + Cache.Instance.DirectEve.HasSupportInstances() + "]", Logging.White);
-            if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ThisToonShouldBeTrainingSkills [" + Settings.Instance.ThisToonShouldBeTrainingSkills + "]", Logging.White);
             return true;
         }
 
@@ -632,7 +636,7 @@ namespace Questor
                     
                     if (Cache.Instance.StopBot)
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the localwatch code so that we stay in station when local is unsafe", Logging.Orange);
+                        if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the LocalWatch code so that we stay in station when local is unsafe", Logging.Orange);
                         return;
                     }
 
@@ -773,7 +777,7 @@ namespace Questor
                     return;
 
                 case QuestorState.DebugWindows:
-                    List<DirectWindow> windows = Cache.Instance.DirectEve.Windows;
+                    List<DirectWindow> windows = Cache.Instance.Windows;
 
                     if (windows != null && windows.Any())
                     {

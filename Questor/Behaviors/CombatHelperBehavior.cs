@@ -376,9 +376,9 @@ namespace Questor.Behaviors
                 case CombatHelperBehaviorState.Salvage:
                     if (!Cache.Instance.InSpace) return;
 
-                    if (!Cache.Instance.OpenCargoHold("CombatMissionsBehavior: Salvage")) return;
+                    if (Cache.Instance.CurrentShipsCargo == null) return;
                     Cache.Instance.SalvageAll = true;
-                    Cache.Instance.OpenWrecks = true;
+                    if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
 
                     if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {
@@ -498,7 +498,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatHelperBehaviorState.Traveler:
-                    Cache.Instance.OpenWrecks = false;
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     List<int> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
                     if (destination == null || destination.Count == 0)
                     {
@@ -514,7 +514,7 @@ namespace Questor.Behaviors
 
                     if (destination != null && (Traveler.Destination == null || Traveler.Destination.SolarSystemId != destination.Last()))
                     {
-                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.DirectEve.Bookmarks.Where(b => b.LocationId == destination.Last()).ToList();
+                        IEnumerable<DirectBookmark> bookmarks = Cache.Instance.AllBookmarks.Where(b => b.LocationId == destination.Last()).ToList();
                         if (bookmarks.FirstOrDefault() != null && bookmarks.Any())
                         {
                             Traveler.Destination = new BookmarkDestination(bookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault());

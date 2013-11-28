@@ -94,7 +94,7 @@ namespace Questor.Modules.Actions
 
                 case SwitchShipState.WaitForFittingWindow:
 
-                    DirectFittingManagerWindow fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+                    DirectFittingManagerWindow fittingMgr = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
 
                     //open it again ?
                     if (fittingMgr == null)
@@ -111,7 +111,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case SwitchShipState.ChoseFitting:
-                    fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+                    fittingMgr = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                     if (fittingMgr != null)
                     {
                         Logging.Log("SwitchShip", "Looking for fitting " + defaultFitting, Logging.White);
@@ -146,7 +146,7 @@ namespace Questor.Modules.Actions
                     {
                         //we should be done fitting, proceed to the next state
                         _States.CurrentSwitchShipState = SwitchShipState.Done;
-                        fittingMgr = Cache.Instance.DirectEve.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+                        fittingMgr = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
                         if (fittingMgr != null) fittingMgr.Close();
                         Logging.Log("SwitchShip", "Done fitting", Logging.White);
                     }

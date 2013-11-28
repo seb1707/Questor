@@ -238,7 +238,7 @@ namespace Questor.Modules.Caching
         {   //Zbikoki's Hacker Card 28260, Reports 3814, Gate Key 2076, Militants 25373, Marines 3810
             get
             {
-                if (_directItem.GroupId == (int)Group.SkillBooks)
+                if (_directItem.CategoryId == (int)CategoryID.Skill)
                 {
                     _directItem.InjectSkill();    
                 }

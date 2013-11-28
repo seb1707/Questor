@@ -55,7 +55,7 @@ namespace Questor.Storylines
                 }
             }
 
-            if (!Cache.Instance.OpenItemsHangar("StorylineState.Arm")) return StorylineState.Arm;
+            if (Cache.Instance.ItemHangar == null) return StorylineState.Arm;
 
             IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == Settings.Instance.MaterialsForWarOreID).ToList();
             if (!items.Any())
@@ -125,7 +125,7 @@ namespace Questor.Storylines
             int orequantity = Settings.Instance.MaterialsForWarOreQty; //999
 
             // Open the item hangar
-            if (!Cache.Instance.OpenItemsHangar("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
+            if (Cache.Instance.ItemHangar == null) return StorylineState.PreAcceptMission;
 
             //if (Cache.Instance.ItemHangar.Window == null)
             //{
@@ -156,7 +156,7 @@ namespace Questor.Storylines
                 return StorylineState.AcceptMission;
             }
 
-            if (!Cache.Instance.OpenCargoHold("MaterialsForWarPreparation")) return StorylineState.PreAcceptMission;
+            if (Cache.Instance.CurrentShipsCargo == null) return StorylineState.PreAcceptMission;
 
             if (Cache.Instance.CurrentShipsCargo.Items.Where(i => i.TypeId == oreid).Sum(i => i.Quantity) >= orequantity)
             {

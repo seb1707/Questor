@@ -17,7 +17,7 @@ namespace Questor.Modules.BackgroundTasks
         private static DateTime _lastCleanupAction;
         private DateTime _lastCleanupProcessState;
         private int _droneBayClosingAttempts;
-
+        private bool MemoryManagerHasBeenRunThisIteration;
         private static DateTime CloseQuestorDelay { get; set; }
 
         private static bool _closeQuestor10SecWarningDone;
@@ -798,7 +798,7 @@ namespace Questor.Modules.BackgroundTasks
                 case CleanupState.CleanupTasks:
                     if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextEVEMemoryManagerAction)
+                        if (!MemoryManagerHasBeenRunThisIteration && Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
                         {
                             // get the current process
                             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -806,9 +806,18 @@ namespace Questor.Modules.BackgroundTasks
                             // get the physical mem usage (this only runs between missions)
                             Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
                             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-                            Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [" + "dotnet memmanager memmanager 524288000 " + "] (500MB ceiling)", Logging.White);
-                            LavishScript.ExecuteCommand("dotnet memmanager memmanager 524288000");
-                            Cache.Instance.NextEVEMemoryManagerAction = DateTime.UtcNow.AddMinutes(5);
+                            string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.Instance.MemoryManagerTrimThreshold;
+                            Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [ " + MemoryManagerCommandToRun + " ]", Logging.White);
+                            LavishScript.ExecuteCommand(MemoryManagerCommandToRun);
+                            MemoryManagerHasBeenRunThisIteration = true;
+                        }
+
+                        if (MemoryManagerHasBeenRunThisIteration && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(300))
+                        {
+                            //
+                            // reset the flag so that MemManager.exe will run again when we are next in station.
+                            //
+                            MemoryManagerHasBeenRunThisIteration = false;
                         }
                     }
 

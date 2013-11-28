@@ -6398,8 +6398,7 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                         //if (!Cache.Instance.StackLootContainer("Cache.StackLootContainer")) return false;
                         Logging.Log("StackLootHangar", "We do not stack containers, you will need to do so manually. StackAll does not seem to work with Primary Inventory windows.", Logging.Teal);
-                        return true;
-                        StackLoothangarAttempts = 0;
+                        StackLoothangarAttempts = 0; 
                         return true;
                     }
 

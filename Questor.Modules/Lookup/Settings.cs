@@ -814,7 +814,7 @@ namespace Questor.Modules.Lookup
             setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
-            MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (int?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
+            MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
 
             //
             // Misc Settings

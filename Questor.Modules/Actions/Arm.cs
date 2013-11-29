@@ -170,6 +170,11 @@ namespace Questor.Modules.Actions
                         Cache.Instance.CloseDroneBay("Arm.Cleanup");
                     }
 
+                    if (Settings.Instance.UseFittingManager)
+                    {
+                        if (!Cache.Instance.CloseFittingManager("Arm")) return;
+                    }
+
                     if (!Cleanup.CloseInventoryWindows()) break;
                     _States.CurrentArmState = ArmState.StackAmmoHangar;
                     break;

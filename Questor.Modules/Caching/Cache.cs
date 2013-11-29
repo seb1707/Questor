@@ -4293,6 +4293,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsInOptimalRange)
                     .ThenByDescending(pt => pt.TargetValue) //highest value first
+                    .ThenByDescending(t => !t.IsCruiser)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();
@@ -6872,7 +6873,7 @@ namespace Questor.Modules.Caching
             return true; //if we are not in station then the LP Store should have auto closed already.
         }
 
-        public DirectFittingManagerWindow _fittingManagerWindow;
+        private DirectFittingManagerWindow _fittingManagerWindow;
         public DirectFittingManagerWindow FittingManagerWindow
         {
             get
@@ -6939,14 +6940,16 @@ namespace Questor.Modules.Caching
                 {
                     return false;
                 }
-            
-                if (Cache.Instance.FittingManagerWindow != null)
+
+                if (Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault() != null)
                 {
                     Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
                     Cache.Instance.FittingManagerWindow.Close();
-                    return false;
+                    Cache.Instance.FittingManagerWindow = null;
+                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
+                    return true;
                 }
-
+                
                 return true;    
             }
 

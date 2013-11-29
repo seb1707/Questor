@@ -417,8 +417,12 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                     continue;
                 }
+
+                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
+                {
+                    if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
+                }
                 
-                if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)
                 continue;
             }
             if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "completely reloaded all weapons", Logging.White);
@@ -1339,6 +1343,7 @@ namespace Questor.Modules.Combat
                             // Have we reached the limit of high value targets?
                             if (__highValueTargetsTargeted.Count() >= maxHighValueTargets)
                             {
+                                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] >= maxHighValueTargets [" + maxHighValueTargets + "]", Logging.Debug);
                                 break;
                             }
 
@@ -1352,6 +1357,7 @@ namespace Questor.Modules.Combat
                                 {
                                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                                 }
+
                                 return;
                             }
 
@@ -1392,6 +1398,7 @@ namespace Questor.Modules.Combat
                             // Have we reached the limit of low value targets?
                             if (__lowValueTargetsTargeted.Count() >= maxLowValueTargets)
                             {
+                                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] >= maxLowValueTargets [" + maxLowValueTargets + "]", Logging.Debug);
                                 break;
                             }
 
@@ -1399,14 +1406,15 @@ namespace Questor.Modules.Combat
                                 && dronePriorityEntity.IsReadyToTarget
                                 && dronePriorityEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
                                 && !dronePriorityEntity.IsIgnored
-                                && dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
+                                && dronePriorityEntity.LockTarget("TargetCombatants.DronePriorityEntity"))
                             {
-                                Logging.Log("Combat", "Targeting primary weapon priority target [" + dronePriorityEntity.Name + "][" + Cache.Instance.MaskedID(dronePriorityEntity.Id) + "][" + Math.Round(dronePriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                Logging.Log("Combat", "Targeting drone priority target [" + dronePriorityEntity.Name + "][" + Cache.Instance.MaskedID(dronePriorityEntity.Id) + "][" + Math.Round(dronePriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
                                 Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                                 if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
                                 {
                                     Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                                 }
+
                                 return;
                             }
 
@@ -1477,6 +1485,7 @@ namespace Questor.Modules.Combat
                                     {
                                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                                     }
+
                                     return;
                                 }
                             }
@@ -1546,6 +1555,7 @@ namespace Questor.Modules.Combat
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                         }
+
                         return;
                     }
                 }    
@@ -1572,10 +1582,29 @@ namespace Questor.Modules.Combat
                 lowValueSlotsreservedForPriorityTargets = 0;
             }
 
+            if (maxHighValueTargets <= 2)
+            {
+                //
+                // do not reserve targeting slots if we have none to spare
+                //
+                highValueSlotsreservedForPriorityTargets = 0;
+            }
+
+            if (maxLowValueTargets <= 2)
+            {
+                //
+                // do not reserve targeting slots if we have none to spare
+                //
+                lowValueSlotsreservedForPriorityTargets = 0;
+            }
+
+
             if ((__highValueTargetsTargeted.Count() >= maxHighValueTargets - highValueSlotsreservedForPriorityTargets)
                 && __lowValueTargetsTargeted.Count() >= maxLowValueTargets - lowValueSlotsreservedForPriorityTargets)
             {
-                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + Cache.Instance.TotalTargetsandTargeting.Count() + "]", Logging.Debug);
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: we have enough targets targeted [" + Cache.Instance.TotalTargetsandTargeting.Count() + "] __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] maxHighValueTargets [" + maxHighValueTargets + "] maxLowValueTargets [" + maxLowValueTargets + "]", Logging.Debug);
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] maxHighValueTargets [" + maxHighValueTargets + "] highValueSlotsreservedForPriorityTargets [" + highValueSlotsreservedForPriorityTargets + "]", Logging.Debug);
+                if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] maxLowValueTargets [" + maxLowValueTargets + "] lowValueSlotsreservedForPriorityTargets [" + lowValueSlotsreservedForPriorityTargets + "]", Logging.Debug);
                 //Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                 return;
             }
@@ -1595,12 +1624,16 @@ namespace Questor.Modules.Combat
                                                             .ToList();
 
             List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => (t.IsHighValueTarget))
-                                                                .OrderBy(t => t.Nearest5kDistance).ToList();
+                                                                .OrderByDescending(t => !t.IsNPCCruiser) //prefer battleships
+                                                                .ThenByDescending(t => t.IsBattlecruiser)
+                                                                .ThenByDescending(t => t.IsBattleship)
+                                                                .ThenBy(t => t.Nearest5kDistance).ToList();
 
             int LockedTargetsThatHaveHighValue = Cache.Instance.Targets.Count(t => (t.IsHighValueTarget));
 
             List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => t.IsLowValueTarget)
-                                                               .OrderBy(t => t.Nearest5kDistance).ToList();
+                                                               .OrderByDescending(t => !t.IsNPCCruiser) //prefer frigates
+                                                               .ThenBy(t => t.Nearest5kDistance).ToList();
 
             int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));
 
@@ -1633,6 +1666,7 @@ namespace Questor.Modules.Combat
                     //We need to make sure we do not have too many low value targets filling our slots
                     if (__highValueTargetsTargeted.Count() < maxHighValueTargets && __lowValueTargetsTargeted.Count() > maxLowValueTargets)
                     {
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] < maxHighValueTargets [" + maxHighValueTargets + "] && __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] > maxLowValueTargets [" + maxLowValueTargets + "], try to unlock a lowvalue target, and return.", Logging.Debug);
                         UnlockLowValueTarget("Combat.TargetCombatants", "HighValueTarget");
                         return;
                     }
@@ -1652,13 +1686,21 @@ namespace Questor.Modules.Combat
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                         }
 
-                        if (HighValueTargetsTargetedThisCycle > 2 ) return;
+                        if (HighValueTargetsTargetedThisCycle > 2)
+                        {
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: HighValueTargetsTargetedThisCycle [" + HighValueTargetsTargetedThisCycle + "] > 3, return", Logging.Debug);
+                            return;
+                        }
                     }
 
                     continue;
                 }
 
-                if (HighValueTargetsTargetedThisCycle > 1) return;
+                if (HighValueTargetsTargetedThisCycle > 1)
+                {
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: HighValueTargetsTargetedThisCycle [" + HighValueTargetsTargetedThisCycle + "] > 1, return", Logging.Debug);
+                    return;
+                }
             }
             else
             {
@@ -1714,7 +1756,11 @@ namespace Questor.Modules.Combat
                         {
                             Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                         }
-                        if (LowValueTargetsTargetedThisCycle > 2) return;
+                        if (LowValueTargetsTargetedThisCycle > 2)
+                        {
+                            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: LowValueTargetsTargetedThisCycle [" + LowValueTargetsTargetedThisCycle + "] > 2, return", Logging.Debug);
+                            return;
+                        }
                     }
 
                     continue;
@@ -1771,6 +1817,7 @@ namespace Questor.Modules.Combat
                     {
                         Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
                     }
+
                     return;
                 }
             }

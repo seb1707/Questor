@@ -49,6 +49,7 @@ namespace Questor
         private static bool _readyToStarta;
         private static bool _readyToStart;
         private static bool _humanInterventionRequired;
+        private static bool MissingEasyHookWarningGiven;
 
         static readonly System.Timers.Timer Timer = new System.Timers.Timer();
         private const int RandStartDelay = 30; //Random startup delay in minutes
@@ -140,6 +141,16 @@ namespace Questor
             if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
                 _readyToStart = true;
+            }
+
+
+            bool EasyHookExists = File.Exists(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EasyHook.dll"));
+            if (!EasyHookExists && !MissingEasyHookWarningGiven)
+            {
+                Logging.Log("Startup", "EasyHook DLL's are missing. Please copy them into the same directory as your questor.exe", Logging.Orange);
+                Logging.Log("Startup", "halting!", Logging.Orange);
+                MissingEasyHookWarningGiven = true;
+                return;
             }
 
             #region Load DirectEVE

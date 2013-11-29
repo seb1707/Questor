@@ -91,14 +91,12 @@ namespace Questor.Modules.Activities
                 }
                 else
                 {
-                    RangeToConsiderWrecksDuringLootAll = 20000;
+                    RangeToConsiderWrecksDuringLootAll = 1500;
                 }
 
                 if (Cache.Instance.UnlootedContainers.Count(w => w.Distance <= RangeToConsiderWrecksDuringLootAll) > 0)
                 {
-                    //
-                    // we probably ought to add some debug spew here 
-                    //
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "if (Cache.Instance.UnlootedContainers.Count [" + Cache.Instance.UnlootedContainers.Count() + "] (w => w.Distance <= RangeToConsiderWrecksDuringLootAll [" + RangeToConsiderWrecksDuringLootAll + "]) > 0)", Logging.Debug);
                     return false;    
                 }
 
@@ -155,7 +153,7 @@ namespace Questor.Modules.Activities
                 string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
                 Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
                 Cache.Instance.CreateBookmark(label);
-                return false;
+                return true;
             }
 
             return true;

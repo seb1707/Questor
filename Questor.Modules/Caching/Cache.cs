@@ -4293,6 +4293,7 @@ namespace Questor.Modules.Caching
                     .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
                     .ThenByDescending(t => t.IsInOptimalRange)
                     .ThenByDescending(pt => pt.TargetValue) //highest value first
+                    .ThenByDescending(t => !t.IsCruiser)
                     .ThenBy(OrderByLowestHealth())
                     .ThenBy(t => t.Nearest5kDistance)
                     .FirstOrDefault();

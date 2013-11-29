@@ -1554,7 +1554,7 @@ namespace Questor.Modules.Combat
             #endregion
          
             #region Do we have enough targets?
-            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Do we have enough targets? Locked [" + Cache.Instance.Targets + "] Locking [" + Cache.Instance.Targeting + "] Total [" + Cache.Instance.TotalTargetsandTargeting + "] Slots Total [" + Cache.Instance.MaxLockedTargets + "]", Logging.Debug);
+            if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: Do we have enough targets? Locked [" + Cache.Instance.Targets.Count() + "] Locking [" + Cache.Instance.Targeting.Count() + "] Total [" + Cache.Instance.TotalTargetsandTargeting.Count() + "] Slots Total [" + Cache.Instance.MaxLockedTargets + "]", Logging.Debug);
             //
             // OK so now that we are done dealing with preferred and priorities for now, lets see if we can target anything else
             // First lets see if we have enough targets already

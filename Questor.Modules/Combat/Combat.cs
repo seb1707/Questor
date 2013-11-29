@@ -1572,6 +1572,23 @@ namespace Questor.Modules.Combat
                 lowValueSlotsreservedForPriorityTargets = 0;
             }
 
+            if (maxHighValueTargets <= 2)
+            {
+                //
+                // do not reserve targeting slots if we have none to spare
+                //
+                highValueSlotsreservedForPriorityTargets = 0;
+            }
+
+            if (maxLowValueTargets <= 2)
+            {
+                //
+                // do not reserve targeting slots if we have none to spare
+                //
+                lowValueSlotsreservedForPriorityTargets = 0;
+            }
+
+
             if ((__highValueTargetsTargeted.Count() >= maxHighValueTargets - highValueSlotsreservedForPriorityTargets)
                 && __lowValueTargetsTargeted.Count() >= maxLowValueTargets - lowValueSlotsreservedForPriorityTargets)
             {

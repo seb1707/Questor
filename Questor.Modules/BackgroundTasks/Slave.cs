@@ -21,9 +21,9 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Slave
     {
-        private DateTime _lastSlaveProcessState;
-        private DateTime _lastSlavetoMasterIsMasterDocked;
-        private DateTime _lastSlavetoMasterQueryLocationID;
+        private static DateTime _lastSlaveProcessState;
+        private static DateTime _lastSlavetoMasterIsMasterDocked;
+        private static DateTime _lastSlavetoMasterQueryLocationID;
         public static long missionLocationID;
 
         public Slave()
@@ -42,7 +42,7 @@ namespace Questor.Modules.BackgroundTasks
             LavishScript.ExecuteCommand(LavishCommandToBroadcast);
         }
 
-        public void SlavetoMasterIsMasterDocked()
+        public static void SlavetoMasterIsMasterDocked()
         {
             _lastSlavetoMasterIsMasterDocked = DateTime.UtcNow;
             SlaveToMasterIsMasterDockedviaInnerspace();
@@ -59,7 +59,7 @@ namespace Questor.Modules.BackgroundTasks
             LavishScript.ExecuteCommand(LavishCommandToBroadcast);
         }
 
-        public void SlaveToMasterQueryDestinationLocationID()
+        public static void SlaveToMasterQueryDestinationLocationID()
         {
             if (DateTime.UtcNow > _lastSlavetoMasterQueryLocationID.AddSeconds(20))
             {
@@ -187,7 +187,7 @@ namespace Questor.Modules.BackgroundTasks
         ///   Loot any wrecks & cargo containers close by
         /// </summary>
         
-        public void ProcessState()
+        public static void ProcessState()
         {
             if (DateTime.UtcNow < _lastSlaveProcessState.AddMilliseconds(500)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;

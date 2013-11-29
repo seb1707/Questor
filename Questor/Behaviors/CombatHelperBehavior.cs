@@ -33,7 +33,7 @@ namespace Questor.Behaviors
 
         private readonly Panic _panic;
         //private readonly Salvage _salvage;
-        private readonly Slave _slave;
+        //private readonly Slave _slave;
         private readonly UnloadLoot _unloadLoot;
 
         public DateTime LastAction;
@@ -58,7 +58,7 @@ namespace Questor.Behaviors
             //_drones = new Drones();
             _panic = new Panic();
             //_salvage = new Salvage();
-            _slave = new Slave();
+            //_slave = new Slave();
             _unloadLoot = new UnloadLoot();
             _watch = new Stopwatch();
 
@@ -248,9 +248,9 @@ namespace Questor.Behaviors
             DebugPanicstates();
 
             //
-            // the slave processstate is meant to override any CombatHelper behavior (it is after all meant to help the master kill things)
+            // the slave processstate is meant to override any Combathelper behavior (it is afterall meant to help the master kill things)
             //
-            _slave.ProcessState();
+            Slave.ProcessState();
             //
             // done with slave process state
             //

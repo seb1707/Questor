@@ -1614,15 +1614,15 @@ namespace Questor.Modules.Combat
                                                             .ToList();
 
             List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => (t.IsHighValueTarget))
-                                                                .OrderBy(t => !t.IsNPCCruiser) //prefer battleships
-                                                                .ThenBy(t => t.IsBattlecruiser)
-                                                                .ThenBy(t => t.IsBattleship)
+                                                                .OrderByDescending(t => !t.IsNPCCruiser) //prefer battleships
+                                                                .ThenByDescending(t => t.IsBattlecruiser)
+                                                                .ThenByDescending(t => t.IsBattleship)
                                                                 .ThenBy(t => t.Nearest5kDistance).ToList();
 
             int LockedTargetsThatHaveHighValue = Cache.Instance.Targets.Count(t => (t.IsHighValueTarget));
 
             List<EntityCache> lowValueTargetingMe = TargetingMe.Where(t => t.IsLowValueTarget)
-                                                               .OrderBy(t => !t.IsNPCCruiser) //prefer frigates
+                                                               .OrderByDescending(t => !t.IsNPCCruiser) //prefer frigates
                                                                .ThenBy(t => t.Nearest5kDistance).ToList();
 
             int LockedTargetsThatHaveLowValue = Cache.Instance.Targets.Count(t => (t.IsLowValueTarget));

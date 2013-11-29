@@ -778,7 +778,7 @@ namespace Questor.Modules.Misc
                 foreach (EntityCache thing in things.OrderBy(i => i.Distance))
                 {
                     icount++;
-                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] isTarget [" + thing.IsTarget + "] isTargeting [" + thing.IsTargeting + "]", Logging.Debug);
                 }
             }
             Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);

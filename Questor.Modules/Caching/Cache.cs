@@ -1250,7 +1250,7 @@ namespace Questor.Modules.Caching
                     }
                     catch (Exception ex)
                     {
-                        Logging.Log("Cache.AgentId", "Unable to get agent details: trying again in a moment [" + ex.Message + "]", Logging.Debug);
+                        Logging.Log("Cache.AgentId", "Is your Agent List defined properly? Unable to get agent details for the Agent Named [" + CurrentAgent + "][" + ex.Message + "]", Logging.Debug);
                         return -1;
                     }
                 }

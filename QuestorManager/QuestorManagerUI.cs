@@ -110,7 +110,7 @@ namespace QuestorManager
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);

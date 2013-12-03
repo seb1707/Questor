@@ -211,6 +211,12 @@ namespace Questor.Modules.Actions
 
             //else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
 
+            if (Cache.Instance.Stations == null)
+            {
+                // We are there but no stations? Wait a bit
+                return false;
+            }
+
             EntityCache station = Cache.Instance.EntitiesByName(stationName, Cache.Instance.Stations).FirstOrDefault();
             if (station == null)
             {

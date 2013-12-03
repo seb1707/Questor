@@ -347,7 +347,13 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // We leave the panicking state once we actually start warping off
-                    EntityCache station = Cache.Instance.Stations.FirstOrDefault();
+
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.FirstOrDefault();    
+                    }
+                    
                     if (station != null && Cache.Instance.InSpace)
                     {
                         if (Cache.Instance.InWarp)

@@ -1976,12 +1976,39 @@ namespace Questor.Modules.Caching
 
         public IEnumerable<EntityCache> Stations
         {
-            get { return _stations ?? (_stations = Cache.Instance.Entities.Where(e => e.CategoryId == (int)CategoryID.Station).ToList()); }
+            get
+            {
+                if (_stations == null)
+                {
+                    if (Cache.Instance.Entities.Any())
+                    {
+                        _stations = Cache.Instance.Entities.Where(e => e.CategoryId == (int)CategoryID.Station).OrderBy(i => i.Distance).ToList();
+                        if (_stations.Any())
+                        {
+                            return _stations;
+                        }
+
+                        return null;
+                    }
+
+                    return null;
+                }
+
+                return _stations;   
+            }
         }
 
         public EntityCache ClosestStation
         {
-            get { return Stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Cache.Instance.Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
+            get
+            {
+                if (Stations != null &&  Stations.Any())
+                {
+                    return Stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Cache.Instance.Entities.OrderByDescending(s => s.Distance).FirstOrDefault();    
+                }
+
+                return null;
+            }
         }
 
         public EntityCache StationByName(string stationName)

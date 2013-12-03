@@ -164,7 +164,12 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    }
+
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -345,7 +350,12 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();    
+                    }
+
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)

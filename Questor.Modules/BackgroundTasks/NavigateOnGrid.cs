@@ -33,7 +33,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
                 //
-                if (Cache.Instance.ClosestStargate.Distance < 9000 || Cache.Instance.ClosestStation.Distance < 11000)
+                if ((Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.Distance < 9000) || (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.Distance < 11000))
                 {
                     //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
                     if (thisBigObject != null)

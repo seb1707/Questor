@@ -2048,7 +2048,15 @@ namespace Questor.Modules.Caching
 
         public EntityCache ClosestStargate
         {
-            get { return Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? Cache.Instance.Entities.OrderByDescending(s => s.Distance).FirstOrDefault(); }
+            get
+            {
+                if (Stargates.Any())
+                {
+                    return Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? null;
+                }
+
+                return null;
+            }
         }
 
         public EntityCache StargateByName(string locationName)

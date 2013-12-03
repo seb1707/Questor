@@ -67,7 +67,7 @@ namespace Questor.Modules.Actions
 
             if (Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10))
             {
-                if (Cache.Instance.ClosestStargate.IsOnGridWithMe || Cache.Instance.ClosestStation.IsOnGridWithMe)
+                if ((Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.IsOnGridWithMe) || (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.IsOnGridWithMe))
                 {
                     if (Cache.Instance.UndockBookmark != null)
                     {

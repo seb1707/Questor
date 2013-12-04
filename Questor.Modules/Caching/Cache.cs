@@ -3086,51 +3086,60 @@ namespace Questor.Modules.Caching
         ///   Remove targets from priority list
         /// </summary>
         /// <param name = "targets"></param>
-        public bool RemovePrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets)
-        {
-            try
-            {
-                targets = targets.ToList();
+		public bool RemovePrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets)
+		{
+			try
+			{
+				//targets = targets.ToList();
+				if(targets==null){
+					Logging.Log("RemovePrimaryWeaponPriorityTargets", " targets == NULL", Logging.Debug);
+					return false;
+				}
 
-                if (targets.Any() && _primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
-                {
-                    _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
-                    return true;
-                }
+				if (targets.Any() && _primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+				{
+					_primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+					return true;
+				}
 
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemovePrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);  
-            }
-            return false;
-        }
+				return false;
+			}
+			catch (Exception ex)
+			{
+				Logging.Log("RemovePrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+			}
+			return false;
+		}
 
         /// <summary>
         ///   Remove targets from priority list
         /// </summary>
         /// <param name = "targets"></param>
-        public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
-        {
-            try
-            {
-                targets = targets.ToList();
+		public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
+		{
+			try
+			{
+				//targets = targets.ToList();
+				if(targets==null){
+					Logging.Log("RemoveDronePriorityTargets", " targets == NULL", Logging.Debug);
+					return false;
+				}
+				
 
-                if (targets.Any() && _dronePriorityTargets != null && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
-                {
-                    _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
-                    return true;
-                }
+				if (targets.Any() && _dronePriorityTargets != null && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+				{
+					_dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
+					return true;
+				}
 
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemoveDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
-            }
-            return false;
-        }
+				return false;
+			}
+			catch (Exception ex)
+			{
+				Logging.Log("RemoveDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
+			}
+			return false;
+		}
 
         public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
         {

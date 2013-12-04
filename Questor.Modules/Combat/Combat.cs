@@ -1647,7 +1647,7 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + highValueTargetingMe.Count() + "] highValueTargetingMe targets", Logging.Debug);
 
                 int HighValueTargetsTargetedThisCycle = 1;
-                foreach (EntityCache highValueTargetingMeEntity in highValueTargetingMe.Where(t => t.IsReadyToTarget && t.Nearest5kDistance < Cache.Instance.MaxDroneRange))
+                foreach (EntityCache highValueTargetingMeEntity in highValueTargetingMe.Where(t => t.IsReadyToTarget && t.Nearest5kDistance < Cache.Instance.MaxRange))
                 {
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + HighValueTargetsTargetedThisCycle + "][" + highValueTargetingMeEntity.Name + "][" + Math.Round(highValueTargetingMeEntity.Distance / 1000, 2) + "k][groupID" + highValueTargetingMeEntity.GroupId + "]", Logging.Debug);
                     // Have we reached the limit of high value targets?
@@ -1803,23 +1803,25 @@ namespace Questor.Modules.Combat
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + NotYetTargetingMe.Count() + "] NotYetTargetingMe targets", Logging.Debug);
 
-                EntityCache TargetThisNotYetAggressiveNPC = NotYetTargetingMe.FirstOrDefault();
-                if (TargetThisNotYetAggressiveNPC != null
-                    && TargetThisNotYetAggressiveNPC.IsReadyToTarget
-                    && TargetThisNotYetAggressiveNPC.IsInOptimalRangeOrNothingElseAvail
-                    && TargetThisNotYetAggressiveNPC.Nearest5kDistance < Cache.Instance.MaxRange
-                    && !TargetThisNotYetAggressiveNPC.IsIgnored
-                    && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
-                {
-                    Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][GroupID: " + TargetThisNotYetAggressiveNPC.GroupId + "][TypeID: " + TargetThisNotYetAggressiveNPC.TypeId + "][" + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000);
-                    if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
-                    {
-                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
-                    }
+				foreach(EntityCache TargetThisNotYetAggressiveNPC in NotYetTargetingMe)
+				{
+					if (TargetThisNotYetAggressiveNPC != null
+					    && TargetThisNotYetAggressiveNPC.IsReadyToTarget
+					    && TargetThisNotYetAggressiveNPC.IsInOptimalRangeOrNothingElseAvail
+					    && TargetThisNotYetAggressiveNPC.Nearest5kDistance < Cache.Instance.MaxRange
+					    && !TargetThisNotYetAggressiveNPC.IsIgnored
+					    && TargetThisNotYetAggressiveNPC.LockTarget("TargetCombatants.TargetThisNotYetAggressiveNPC"))
+					{
+						Logging.Log("Combat", "Targeting non-aggressed NPC target [" + TargetThisNotYetAggressiveNPC.Name + "][GroupID: " + TargetThisNotYetAggressiveNPC.GroupId + "][TypeID: " + TargetThisNotYetAggressiveNPC.TypeId + "][" + Cache.Instance.MaskedID(TargetThisNotYetAggressiveNPC.Id) + "][" + Math.Round(TargetThisNotYetAggressiveNPC.Distance / 1000, 0) + "k away]", Logging.Teal);
+						Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(4000);
+						if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
+						{
+							Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
+						}
 
-                    return;
-                }
+						return;
+					}
+				}
             }
             else
             {

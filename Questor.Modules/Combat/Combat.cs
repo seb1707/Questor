@@ -1781,7 +1781,7 @@ namespace Questor.Modules.Combat
             // If we have ANY target targeted at this point return... we do not want to target anything that is not yet aggressed if we have something aggressed. 
             // or are in the middle of attempting to aggro something
             // 
-            if (Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget))
+            if (Cache.Instance.PotentialCombatTargets.Count(e => e.IsTarget) > 1)
             {
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: We already have [" + Cache.Instance.PotentialCombatTargets.Count(e => e.IsTarget) + "] PotentialCombatTargets Locked. Do not aggress non aggressed NPCs until we have no targets", Logging.Debug);
                 return;

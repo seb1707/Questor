@@ -1570,8 +1570,8 @@ namespace Questor.Modules.Combat
             // First lets see if we have enough targets already
             //
 
-            int highValueSlotsreservedForPriorityTargets = 1;
-            int lowValueSlotsreservedForPriorityTargets = 1;
+            int highValueSlotsreservedForPriorityTargets = 0;
+            int lowValueSlotsreservedForPriorityTargets = 0;
 
             if (Cache.Instance.MaxLockedTargets <= 4)
             {

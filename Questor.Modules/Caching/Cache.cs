@@ -7388,6 +7388,7 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < NextBookmarkDeletionAttempt)
             {
+                if (Settings.Instance.DebugSalvage) Logging.Log("DeleteUselessSalvageBookmarks", "NextBookmarkDeletionAttempt is still [" + NextBookmarkDeletionAttempt.Subtract(DateTime.UtcNow).Seconds + "] sec in the future... waiting", Logging.Debug);
                 return false;
             }
 

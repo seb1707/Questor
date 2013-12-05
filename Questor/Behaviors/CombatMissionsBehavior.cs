@@ -1048,7 +1048,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.CheckBookmarkAge:
-                    Logging.Log("CombatMissionsBehaviorState", "Checking for any old bookmarks that may still need to be removed.", Logging.White);
+                    if (Settings.Instance.DebugDisableCombatMissionsBehavior) Logging.Log("CombatMissionsBehaviorState", "Checking for any old bookmarks that may still need to be removed.", Logging.White);
                     if (!Cache.Instance.DeleteUselessSalvageBookmarks("RemoveOldBookmarks")) return;
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.BeginAfterMissionSalvaging;
                     Statistics.Instance.StartedSalvaging = DateTime.UtcNow;

@@ -313,13 +313,13 @@ namespace Questor.Behaviors
                         //
                         // this is used by the 'local is safe' routines - standings checks - at the moment is stops questor for the rest of the session.
                         //
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
                         return;
                     }
 
                     if (Cache.Instance.InSpace)
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
 
                         // Questor does not handle in space starts very well, head back to base to try again
                         Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
@@ -330,13 +330,13 @@ namespace Questor.Behaviors
                     
                     if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
 
                     if (Settings.Instance.AutoStart)
                     {
-                        if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugAutoStart: Autostart [" + Settings.Instance.AutoStart + "]", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugAutoStart: Autostart [" + Settings.Instance.AutoStart + "]", Logging.White);
 
                         // Don't start a new action an hour before downtime
                         if (DateTime.UtcNow.Hour == 10)

@@ -267,11 +267,30 @@ namespace Questor.Behaviors
 
                     if (Cache.Instance.StopBot)
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "if (Cache.Instance.StopBot)", Logging.White);
+                        //
+                        // this is used by the 'local is safe' routines - standings checks - at the moment is stops questor for the rest of the session.
+                        //
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
                         return;
                     }
 
-                    if (Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "if (Cache.Instance.InSpace) else", Logging.White);
+                    if (Cache.Instance.InSpace)
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
+
+                        // Questor does not handle in space starts very well, head back to base to try again
+                        Logging.Log("CombatHelperBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
+                        LastAction = DateTime.UtcNow;
+                        _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.DelayedGotoBase;
+                        break;
+                    }
+                    
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
+                    }
+
                     _States.CurrentArmState = ArmState.Idle;
                     _States.CurrentDroneState = DroneState.Idle;
                     _States.CurrentSalvageState = SalvageState.Idle;
@@ -474,7 +493,7 @@ namespace Questor.Behaviors
                     if (warpOutBookmark == null)
                     {
                         Logging.Log("BackgroundBehavior.WarpOut", "No Bookmark", Logging.White);
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.WarpOutStation) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.CombatHelper;
+                        _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.CombatHelper;
                     }
                     else if (warpOutBookmark.LocationId == solarid)
                     {
@@ -490,7 +509,7 @@ namespace Questor.Behaviors
                         {
                             Logging.Log("BackgroundBehavior.WarpOut", "Safe!", Logging.White);
                             Cache.Instance.DoNotBreakInvul = false;
-                            if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.WarpOutStation) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.CombatHelper;
+                            _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.CombatHelper;
                             Traveler.Destination = null;
                         }
                     }
@@ -510,7 +529,7 @@ namespace Questor.Behaviors
                         // happens if autopilot is not set and this QuestorState is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("CombatHelperBehavior.Traveler", "No destination?", Logging.White);
-                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Traveler) _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Error;
+                        _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Error;
                     }
                     else if (destination.Count == 1 && destination.FirstOrDefault() == 0)
                     {

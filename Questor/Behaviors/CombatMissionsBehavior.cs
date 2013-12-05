@@ -300,14 +300,6 @@ namespace Questor.Behaviors
             {
                 case CombatMissionsBehaviorState.Idle:
 
-                    _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                    _States.CurrentArmState = ArmState.Idle;
-                    _States.CurrentDroneState = DroneState.Idle;
-                    _States.CurrentSalvageState = SalvageState.Idle;
-                    _States.CurrentStorylineState = StorylineState.Idle;
-                    _States.CurrentTravelerState = TravelerState.AtDestination;
-                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
-
                     if (Cache.Instance.StopBot)
                     {
                         //
@@ -333,6 +325,14 @@ namespace Questor.Behaviors
                         if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
+
+                    _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                    _States.CurrentArmState = ArmState.Idle;
+                    _States.CurrentDroneState = DroneState.Idle;
+                    _States.CurrentSalvageState = SalvageState.Idle;
+                    _States.CurrentStorylineState = StorylineState.Idle;
+                    _States.CurrentTravelerState = TravelerState.AtDestination;
+                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
 
                     if (Settings.Instance.AutoStart)
                     {
@@ -614,9 +614,12 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.WaitingforBadGuytoGoAway:
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastLocalWatchAction).TotalMinutes < Time.Instance.WaitforBadGuytoGoAway_minutes + Cache.Instance.RandomNumber(1,3))
+                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastLocalWatchAction).TotalMinutes < Time.Instance.WaitforBadGuytoGoAway_minutes + Cache.Instance.RandomNumber(1, 3))
+                    {
+                        //TODO: Add debug logging here
                         break;
-                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.WaitingforBadGuytoGoAway) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.LocalWatch;
+                    }
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.LocalWatch;
                     break;
 
                 case CombatMissionsBehaviorState.WarpOutStation:
@@ -692,7 +695,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination)
                     {
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoMission) _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.ExecuteMission;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.ExecuteMission;
 
                         // Seeing as we just warped to the mission, start the mission controller
                         _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;

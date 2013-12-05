@@ -5192,16 +5192,22 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
                     {
-                        Logging.Log(module, "Opening CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                        Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }
                     return false;
+                }
+
+                if (Cache.Instance.CurrentShipsCargo == null || Cache.Instance.CurrentShipsCargo.Window == null)
+                {
+                    Logging.Log("CloseCargoHold", "Cargohold was not open, no need to close", Logging.White);
+                    return true;
                 }
 
                 if (Cache.Instance.InStation || Cache.Instance.InSpace) //do we need to special case pods here?
                 {
                     if (Cache.Instance.CurrentShipsCargo.Window == null)
                     {
-                        Logging.Log(module, "Cargohold is closed", Logging.White);
+                        Logging.Log("CloseCargoHold", "Cargohold is closed", Logging.White);
                         return true;
                     }
 

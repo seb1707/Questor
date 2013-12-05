@@ -866,7 +866,10 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             if (Settings.Instance.DoNotDoANYSalvagingOutsideMissionActions && !Cache.Instance.CurrentlyShouldBeSalvaging)
+            {
+                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "DoNotDoANYSalvagingOutsideMissionActions [" + Settings.Instance.DoNotDoANYSalvagingOutsideMissionActions + "] CurrentlyShouldBeSalvaging [" + Cache.Instance.CurrentlyShouldBeSalvaging + "] return;", Logging.Debug);
                 return;
+            }
 
             switch (_States.CurrentSalvageState)
             {

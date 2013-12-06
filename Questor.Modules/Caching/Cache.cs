@@ -2600,7 +2600,7 @@ namespace Questor.Modules.Caching
                         if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
                         {
                             Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
-                            if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
+                            if (Cache.Instance.DirectEve.Bookmarks.Any())
                             {
                                 _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
                                 return _allBookmarks;
@@ -2608,7 +2608,7 @@ namespace Questor.Modules.Caching
 
                             return new List<DirectBookmark>(); //there are no bookmarks to list...
                         }
-                        
+
                         return new List<DirectBookmark>(); //there are no bookmarks to list...
                     }
 

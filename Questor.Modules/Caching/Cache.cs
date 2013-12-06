@@ -1974,7 +1974,7 @@ namespace Questor.Modules.Caching
             get { return _activeDrones ?? (_activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList()); }
         }
 
-        public IEnumerable<EntityCache> Stations
+        public List<EntityCache> Stations
         {
             get
             {
@@ -1988,7 +1988,7 @@ namespace Questor.Modules.Caching
                             return _stations;
                         }
 
-                        return null;
+                        return new List<EntityCache>(); 
                     }
 
                     return null;
@@ -2021,7 +2021,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                var solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                List<DirectSolarSystem> solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
                 return solarSystems;
             }
         }
@@ -2591,7 +2591,7 @@ namespace Questor.Modules.Caching
                             return _allBookmarks;
                         }
 
-                        return null; //there are no bookmarks to list...    
+                        return new List<DirectBookmark>(); //there are no bookmarks to list...    
                     }
 
                     return _allBookmarks;
@@ -2599,7 +2599,7 @@ namespace Questor.Modules.Caching
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.allBookmarks", "Exception [" + exception + "]", Logging.Debug);
-                    return null;
+                    return new List<DirectBookmark>();;
                 }
             }
             set

@@ -225,10 +225,7 @@ namespace Questor.Behaviors
 
             if (Cache.Instance.GotoBaseNow)
             {
-                if (_States.CurrentDebugHangarBehaviorState != DebugHangarsBehaviorState.GotoBase)
-                {
-                    _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.GotoBase;
-                }
+                _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.GotoBase;
             }
             if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {

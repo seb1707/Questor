@@ -47,6 +47,7 @@ namespace QuestorManager
         private object _previousDestination;
         private int _previousJumps;
         private List<DirectStation> _stations;
+        private List<DirectBookmark> _bookmarks;
         private List<ListItems> List { get; set; }
 
         public List<ItemCache> Items { get; set; }
@@ -189,6 +190,12 @@ namespace QuestorManager
             if (_stations == null)
             {
                 _stations = Cache.Instance.DirectEve.Stations.Values.OrderBy(s => s.Name).ToList();
+                _changed = true;
+            }
+
+            if (_bookmarks == null)
+            {
+                _bookmarks = Cache.Instance.DirectEve.Bookmarks.ToList();
                 _changed = true;
             }
         }
@@ -753,7 +760,7 @@ namespace QuestorManager
             try
             {
                 SearchResults.Items.Clear();
-                SearchResults.Items.AddRange(Filter(search, Cache.Instance.AllBookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
+                SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
                 SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
                 SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
 
@@ -1183,7 +1190,7 @@ namespace QuestorManager
             }
             else if (_extrDestination == null)
             {
-                foreach (DirectBookmark item in Cache.Instance.AllBookmarks)
+                foreach (DirectBookmark item in _bookmarks)
                 {
                     if (nameDestination == item.Title)
                     {

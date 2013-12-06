@@ -461,6 +461,7 @@ namespace Questor.Modules.Caching
             NextTractorBeamAction = DateTime.UtcNow;
             NextLootAction = DateTime.UtcNow;
             NextSalvageAction = DateTime.UtcNow;
+            NextBookmarkAction = DateTime.UtcNow;
             //string line = "Cache: new cache instance being instantiated";
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, line));
             //line = string.Empty;
@@ -966,6 +967,7 @@ namespace Questor.Modules.Caching
         public DateTime NextMakeActiveTargetAction { get; set; }
         public DateTime NextArmAction { get; set; }
         public DateTime NextSalvageAction { get; set; }
+        public DateTime NextBookmarkAction { get; set; }
         public DateTime NextTractorBeamAction { get; set; }
         public DateTime NextLootAction { get; set; }
         public DateTime LastJettison { get; set; }
@@ -2595,13 +2597,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_allBookmarks == null || !_allBookmarks.Any())
                     {
-                        if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
+                        if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
                         {
-                            _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
-                            return _allBookmarks;
-                        }
+                            Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
+                            if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
+                            {
+                                _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
+                                return _allBookmarks;
+                            }
 
-                        return new List<DirectBookmark>(); //there are no bookmarks to list...    
+                            return new List<DirectBookmark>(); //there are no bookmarks to list...
+                        }
+                        
+                        return new List<DirectBookmark>(); //there are no bookmarks to list...
                     }
 
                     return _allBookmarks;

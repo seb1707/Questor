@@ -2711,7 +2711,6 @@ namespace Questor.Modules.Caching
                 _activeDrones = null;
                 _agent = null;
                 _aggressed = null;
-                _allBookmarks = null;
                 _ammoHangar = null;
                 _approaching = null;
                 _activeDrones = null;
@@ -3686,6 +3685,7 @@ namespace Questor.Modules.Caching
             EntityIsEntutyIShouldLeaveAlone.Clear();
             EntityHaveLootRights.Clear();
             EntityIsStargate.Clear();
+            _allBookmarks = null;
         }
 
         private bool? _doWeCurrentlyHaveTurretsMounted;

@@ -7391,6 +7391,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log(module, "removing salvage bookmark:" + onGridBookmark.Title, Logging.White);
                     onGridBookmark.Delete();
+                    NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 6));
                     return false;
                 }
 
@@ -7418,8 +7419,6 @@ namespace Questor.Modules.Caching
                 return false;
             }
 
-            NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
-
             try
             {
                 //Delete bookmarks older than 2 hours.
@@ -7433,6 +7432,7 @@ namespace Questor.Modules.Caching
                     if (_bookmarkDeletionAttempt <= uselessSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
                     {
                         Logging.Log(module, "removing a salvage bookmark that aged more than [" + Settings.Instance.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
+                        NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
                         uselessSalvageBookmark.Delete();
                         return false;
                     }

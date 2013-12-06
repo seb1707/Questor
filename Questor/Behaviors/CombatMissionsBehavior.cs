@@ -1174,8 +1174,8 @@ namespace Questor.Behaviors
 
                     if (!Cache.Instance.UnlootedContainers.Any())
                     {
-                        Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.White);
                         if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
+                        Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.White);
                         Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
 
                         if (!Cache.Instance.AfterMissionSalvageBookmarks.Any() && !Cache.Instance.GateInGrid())

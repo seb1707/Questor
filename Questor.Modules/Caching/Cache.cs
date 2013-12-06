@@ -3109,13 +3109,13 @@ namespace Questor.Modules.Caching
         ///   Remove targets from priority list
         /// </summary>
         /// <param name = "targets"></param>
-        public bool RemovePrimaryWeaponPriorityTargets(IEnumerable<EntityCache> targets)
+        public bool RemovePrimaryWeaponPriorityTargets(List<EntityCache> targets)
         {
             try
             {
                 targets = targets.ToList();
 
-                if (targets.Any() && _primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+                if (targets.Any() && _primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any() && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
                 {
                     _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
                     return true;
@@ -3134,13 +3134,13 @@ namespace Questor.Modules.Caching
         ///   Remove targets from priority list
         /// </summary>
         /// <param name = "targets"></param>
-        public bool RemoveDronePriorityTargets(IEnumerable<EntityCache> targets)
+        public bool RemoveDronePriorityTargets(List<EntityCache> targets)
         {
             try
             {
                 targets = targets.ToList();
 
-                if (targets.Any() && _dronePriorityTargets != null && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
+                if (targets.Any() && _dronePriorityTargets != null && _dronePriorityTargets.Any() && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
                 {
                     _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
                     return true;
@@ -3289,7 +3289,7 @@ namespace Questor.Modules.Caching
             if (entitiesToRemove.Any())
             {
                 Logging.Log("RemovingPWPT", "removing [" + stringEntitiesToRemove + "] from the PWPT List", Logging.Debug);
-                RemovePrimaryWeaponPriorityTargets(entitiesToRemove);
+                RemovePrimaryWeaponPriorityTargets(entitiesToRemove.ToList());
                 return;
             }
 
@@ -4134,7 +4134,7 @@ namespace Questor.Modules.Caching
 
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
             
-            if (DateTime.UtcNow < NextGetBestCombatTarget && Cache.Instance.PreferredPrimaryWeaponTarget != null)
+            if (DateTime.UtcNow < NextGetBestCombatTarget)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
                 return false;

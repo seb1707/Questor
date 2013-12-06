@@ -1267,9 +1267,12 @@ namespace Questor.Modules.Activities
                 
                 if (killTargets.Any())
                 {
-                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name));
-                    Cache.Instance.RemoveDronePriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name));
-
+                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList());
+                    if (Cache.Instance.UseDrones)
+                    {
+                        Cache.Instance.RemoveDronePriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList());    
+                    }
+                    
                     if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
                     {
                         foreach (EntityCache killTarget in killTargets.Where(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTargetID))

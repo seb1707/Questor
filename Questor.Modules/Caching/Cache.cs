@@ -2031,7 +2031,7 @@ namespace Questor.Modules.Caching
             get { return _jumpBridges ?? (_jumpBridges = Cache.Instance.Entities.Where(e => e.GroupId == (int)Group.JumpBridge).ToList()); }
         }
 
-        public IEnumerable<EntityCache> Stargates
+        public List<EntityCache> Stargates
         {
             get
             {
@@ -2069,13 +2069,13 @@ namespace Questor.Modules.Caching
                         //    continue;
                         //}
 
-                        return _stargates ?? null;
+                        return _stargates ?? new List<EntityCache>();
                     }
 
                     return null;
                 }
 
-                return _stargates ?? null;
+                return _stargates ?? new List<EntityCache>(); ;
             }
         }
 

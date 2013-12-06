@@ -1159,16 +1159,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        //if it is in optimal, return true, we want to shoot things that are in optimal!
                         if (IsInOptimalRange)
                         {
                             return true;
                         }
 
-                        if (!Cache.Instance.Targets.Any())
+                        //Any targets which are not the current target and is not a wreck or container
+                        if (!Cache.Instance.Targets.Any(i => i.Id != Id && !i.IsContainer)) 
                         {
                             return true;
                         }
 
+                        //something else must be available to shoot, and this entity is not in optimal, return false;
                         return false;
                     }
 

@@ -807,15 +807,22 @@ namespace Questor.Modules.Combat
 
         public static bool ActivateBastion(bool activate = false)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextBastionAction) //if we just did something wait a fraction of a second
+            if (DateTime.UtcNow < Cache.Instance.NextBastionAction)
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "NextBastionAction [" + Cache.Instance.NextBastionAction.Subtract(DateTime.UtcNow).Seconds + "] seconds, waiting...", Logging.Debug);
                 return false;
+            }
 
             List<ModuleCache> bastionModules = null;
             bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (!bastionModules.Any()) return true;
             if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return true;
 
-            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) return false; //do not activate bastion mode unless we have targets to shoot
+            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) 
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "Only activate bastion mode if we have something to shoot targeted, return;  Targets [" + Cache.Instance.Targets + "], Targeting [" + Cache.Instance.Targeting + "]", Logging.Debug);
+                return false; 
+            }
             
             // Find the first active weapon
             // Assist this weapon

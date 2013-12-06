@@ -76,12 +76,13 @@ copy /y ".\DirectEVE\easyhook*.*" ".\output\"
 copy /y ".\output\*.pdb" "%innerspacedotnetdirectory%"
 @Echo off
 @Echo.
-@Echo Rename prior Quester.exe to Questor.exe.random.questorold
-ren "%innerspacedotnetdirectory%\Questor.exe" "Questor.exe.%Random%.questorold"
+set RandomNumber=%Random%
+@Echo Rename prior Quester.exe to Questor.exe.RandomNumber.questorold
+ren "%innerspacedotnetdirectory%\Questor.exe" "Questor.exe.%RandomNumber%.questorold"
 @Echo off
 @Echo.
-@Echo Rename prior Questor.Modules.dll to Questor.Modules.dll.random.questorold
-ren "%innerspacedotnetdirectory%\Questor.Modules.dll" "Questor.Modules.dll.%Random%.questorold"
+@Echo Rename prior Questor.Modules.dll to Questor.Modules.dll.RandomNumber.questorold
+ren "%innerspacedotnetdirectory%\Questor.Modules.dll" "Questor.Modules.dll.%RandomNumber%.questorold"
 @Echo off
 @Echo.@Echo Trying to delete all .questorold files
 Del /Q "%innerspacedotnetdirectory%\*.questorold"

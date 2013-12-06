@@ -10,6 +10,7 @@
 
 using System.Runtime.Remoting;
 using System.Threading;
+using Questor.Modules.Activities;
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Caching;
 
@@ -818,10 +819,10 @@ namespace Questor.Modules.Combat
             if (!bastionModules.Any()) return true;
             if (bastionModules.Any(i => i.IsActive && i.IsDeactivating)) return true;
 
-            if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsTarget || e.IsTargeting)) 
+            if (!Cache.Instance.PotentialCombatTargets.Where(e => e.Distance < Cache.Instance.WeaponRange).Any(e => e.IsTarget || e.IsTargeting) && CombatMissionCtrl.DeactivateIfNothingTargetedWithinRange)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "Only activate bastion mode if we have something to shoot targeted, return;  Targets [" + Cache.Instance.Targets + "], Targeting [" + Cache.Instance.Targeting + "]", Logging.Debug);
-                return false; 
+                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "NextBastionModeDeactivate set to 2 sec ago: We have no targets in range and DeactivateIfNothingTargetedWithinRange [ " + CombatMissionCtrl.DeactivateIfNothingTargetedWithinRange + " ]", Logging.Debug);
+                Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(-2);
             }
             
             // Find the first active weapon

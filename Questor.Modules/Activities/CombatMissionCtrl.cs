@@ -44,6 +44,7 @@ namespace Questor.Modules.Activities
         private int AttemptsToGetAwayFromGate;
         private bool ItemsHaveBeenMoved;
         private bool CargoHoldHasBeenStacked;
+        public static bool DeactivateIfNothingTargetedWithinRange;
 
         //private bool _targetNull;
 
@@ -1006,6 +1007,12 @@ namespace Questor.Modules.Activities
                 DeactivateAfterSeconds = 5;
             }
             Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
+
+            DeactivateIfNothingTargetedWithinRange = false;
+            if (!bool.TryParse(action.GetParameterValue("DeactivateIfNothingTargetedWithinRange"), out DeactivateIfNothingTargetedWithinRange))
+            {
+                DeactivateIfNothingTargetedWithinRange = false;
+            }
             
             // Start bastion mode
             if (!Combat.ActivateBastion()) return;

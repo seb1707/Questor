@@ -351,7 +351,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                     }
 
                     if (_States.CurrentArmState == ArmState.NotEnoughDrones)
@@ -362,7 +362,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                     }
 
                     if (_States.CurrentArmState == ArmState.Done)
@@ -372,8 +372,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentArmState = ArmState.Idle;
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
-
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
                     }
                     break;
 

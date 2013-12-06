@@ -2083,9 +2083,14 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Stargates.Any())
+                if (Cache.Instance.Entities != null && Cache.Instance.Entities.Any())
                 {
-                    return Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? null;
+                    if (Cache.Instance.Stargates != null && Cache.Instance.Stargates.Any())
+                    {
+                        return Cache.Instance.Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? null;
+                    }
+
+                    return null;    
                 }
 
                 return null;

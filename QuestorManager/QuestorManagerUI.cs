@@ -762,7 +762,7 @@ namespace QuestorManager
             try
             {
                 SearchResults.Items.Clear();
-                SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
+                //SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
                 SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
                 SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
 

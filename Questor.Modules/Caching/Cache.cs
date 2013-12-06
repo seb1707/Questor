@@ -2595,9 +2595,9 @@ namespace Questor.Modules.Caching
                 {
                     if (_allBookmarks == null || !_allBookmarks.Any())
                     {
-                        if (DirectEve.Bookmarks.Any())
+                        if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
                         {
-                            _allBookmarks = DirectEve.Bookmarks;
+                            _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
                             return _allBookmarks;
                         }
 

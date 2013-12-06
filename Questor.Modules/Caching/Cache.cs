@@ -2037,36 +2037,42 @@ namespace Questor.Modules.Caching
             {
                 if (_stargates == null)
                 {
-                    if (Cache.Instance.EntityIsStargate.Any())
+                    if (Cache.Instance.Entities != null && Cache.Instance.Entities.Any())
                     {
-                        if (_stargates != null && _stargates.Any()) _stargates.Clear();
-                        if (_stargates == null) _stargates = new List<EntityCache>();
-                        foreach (KeyValuePair<long, bool> __stargate in Cache.Instance.EntityIsStargate)
-                        {
-                            _stargates.Add(Cache.Instance.Entities.FirstOrDefault(i => i.Id == __stargate.Key));
-                        }
+                        //if (Cache.Instance.EntityIsStargate.Any())
+                        //{
+                        //    if (_stargates != null && _stargates.Any()) _stargates.Clear();
+                        //    if (_stargates == null) _stargates = new List<EntityCache>();
+                        //    foreach (KeyValuePair<long, bool> __stargate in Cache.Instance.EntityIsStargate)
+                        //    {
+                        //        _stargates.Add(Cache.Instance.Entities.FirstOrDefault(i => i.Id == __stargate.Key));
+                        //    }
+                        //
+                        //    if (_stargates.Any()) return _stargates;
+                        //}
 
-                        if (_stargates.Any()) return _stargates;
+                        _stargates = Cache.Instance.Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList();
+                        //foreach (EntityCache __stargate in _stargates)
+                        //{
+                        //    if (Cache.Instance.EntityIsStargate.Any())
+                        //    {
+                        //        if (!Cache.Instance.EntityIsStargate.ContainsKey(__stargate.Id))
+                        //        {
+                        //            Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
+                        //            continue;
+                        //        }
+                        //
+                        //        continue;
+                        //    }
+                        //
+                        //    Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
+                        //    continue;
+                        //}
+
+                        return _stargates ?? null;
                     }
 
-                    _stargates = Cache.Instance.Entities.Where(e => e.GroupId == (int)Group.Stargate).ToList();
-                    foreach (EntityCache __stargate in _stargates)
-                    {
-                        if (Cache.Instance.EntityIsStargate.Any())
-                        {
-                            if (!Cache.Instance.EntityIsStargate.ContainsKey(__stargate.Id))
-                            {
-                                Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
-                                continue;
-                            }
-
-                            continue;
-                        }
-
-                        Cache.Instance.EntityIsStargate.Add(__stargate.Id, true);
-                        continue;
-                    }
-                    
+                    return null;
                 }
 
                 return _stargates ?? null;

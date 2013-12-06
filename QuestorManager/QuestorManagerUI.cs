@@ -195,7 +195,9 @@ namespace QuestorManager
 
             if (_bookmarks == null)
             {
-                _bookmarks = Cache.Instance.DirectEve.Bookmarks.ToList();
+                // Dirty hack to load all category id's (needed because categoryId is lazy-loaded by the bookmarks call)
+                Cache.Instance.DirectEve.Bookmarks.All(b => b.CategoryId != 0);
+                _bookmarks = Cache.Instance.DirectEve.Bookmarks.OrderBy(b => b.Title).ToList();
                 _changed = true;
             }
         }

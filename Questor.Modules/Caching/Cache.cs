@@ -3127,6 +3127,7 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("RemovePrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);  
             }
+
             return false;
         }
 
@@ -3152,6 +3153,7 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("RemoveDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
             }
+
             return false;
         }
 

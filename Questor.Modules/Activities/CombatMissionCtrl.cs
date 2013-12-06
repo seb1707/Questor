@@ -1262,17 +1262,23 @@ namespace Questor.Modules.Activities
                 // We are being attacked, break the kill order
                 // which involves removing the named targets as PrimaryWeaponPriorityTargets, PreferredPrimaryWeaponTarget, DronePriorityTargets, and PreferredDroneTarget
                 //
-                if (Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.ToList())) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Breaking off kill order, new spawn has arrived!", Logging.Teal);
                 targetNames.ForEach(t => Cache.Instance.IgnoreTargets.Add(t));
                 
                 if (killTargets.Any())
                 {
-                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList());
-                    if (Cache.Instance.UseDrones)
+                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.ToList());
+                
+                    if (killTargets.Any(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name))
                     {
-                        Cache.Instance.RemoveDronePriorityTargets(killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList());    
+                        List<EntityCache> PreferredPrimaryWeaponTargetsToRemove = killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList();
+                        Cache.Instance.RemovePrimaryWeaponPriorityTargets(PreferredPrimaryWeaponTargetsToRemove);
+                        if (Cache.Instance.UseDrones)
+                        {
+                            Cache.Instance.RemoveDronePriorityTargets(PreferredPrimaryWeaponTargetsToRemove);
+                        }
                     }
-                    
+
                     if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
                     {
                         foreach (EntityCache killTarget in killTargets.Where(e => e.Id == Cache.Instance.PreferredPrimaryWeaponTargetID))
@@ -1282,6 +1288,7 @@ namespace Questor.Modules.Activities
                             Cache.Instance.PreferredPrimaryWeaponTarget = null;
                         }    
                     }
+
                     if (Cache.Instance.PreferredDroneTargetID != null)
                     {
                         foreach (EntityCache killTarget in killTargets.Where(e => e.Id == Cache.Instance.PreferredDroneTargetID))

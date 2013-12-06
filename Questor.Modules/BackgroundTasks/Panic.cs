@@ -358,8 +358,12 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Cache.Instance.InWarp)
                         {
-                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities.ToList());
-                            if (Cache.Instance.UseDrones)
+                            if (Cache.Instance.PrimaryWeaponPriorityEntities != null && Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+                            {
+                                Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities.ToList());
+                            }
+
+                            if (Cache.Instance.UseDrones && Cache.Instance.DronePriorityEntities != null && Cache.Instance.DronePriorityEntities.Any())
                             {
                                 Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities.ToList());    
                             }

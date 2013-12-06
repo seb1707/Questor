@@ -493,8 +493,12 @@ namespace Questor.Modules.Combat
             // When in warp there's nothing we can do, so ignore everything
             if (Cache.Instance.InSpace && Cache.Instance.InWarp)
             {
-                Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities.ToList());
-                if (Cache.Instance.UseDrones)
+                if (Cache.Instance.PrimaryWeaponPriorityEntities != null && Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+                {
+                    Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities.ToList());
+                }
+
+                if (Cache.Instance.UseDrones && Cache.Instance.DronePriorityEntities != null && Cache.Instance.DronePriorityEntities.Any())
                 {
                     Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities.ToList());
                 }

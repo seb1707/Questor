@@ -1268,8 +1268,8 @@ namespace Questor.Modules.Activities
                 if (killTargets.Any())
                 {
                     Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets.ToList());
-                
-                    if (killTargets.Any(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name))
+
+                    if (Cache.Instance.PreferredPrimaryWeaponTarget != null && killTargets.Any(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name))
                     {
                         List<EntityCache> PreferredPrimaryWeaponTargetsToRemove = killTargets.Where(i => i.Name == Cache.Instance.PreferredPrimaryWeaponTarget.Name).ToList();
                         Cache.Instance.RemovePrimaryWeaponPriorityTargets(PreferredPrimaryWeaponTargetsToRemove);

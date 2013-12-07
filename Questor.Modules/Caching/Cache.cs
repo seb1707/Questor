@@ -2704,16 +2704,29 @@ namespace Questor.Modules.Caching
                         if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
                         {
                             Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
-                            //if (Cache.Instance.DirectEve.Bookmarks.Any())
-                            //{
-                                _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
-                                return _allBookmarks ?? new List<DirectBookmark>();
-                            //}
+                            if (DirectEve.Bookmarks.Any())
+                            {
+                                _allBookmarks = DirectEve.Bookmarks;
+                                return _allBookmarks;
+                            }
 
+                            return null; //there are no bookmarks to list...    
+                            //if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
+                            //{
+                            //    Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
+                            //    if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
+                            //    {
+                            //        _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
+                            //        return _allBookmarks;
+                            //    }
+
+                            //    return new List<DirectBookmark>(); //there are no bookmarks to list...
+                            //}
+                            //
                             //return new List<DirectBookmark>(); //there are no bookmarks to list...
                         }
 
-                        return new List<DirectBookmark>(); //there are no bookmarks to list...
+                        return null; //new List<DirectBookmark>(); //there are no bookmarks to list...
                     }
 
                     return _allBookmarks;
@@ -2847,6 +2860,7 @@ namespace Questor.Modules.Caching
                 _activeDrones = null;
                 _agent = null;
                 _aggressed = null;
+                _allBookmarks = null;
                 _ammoHangar = null;
                 _approaching = null;
                 _activeDrones = null;
@@ -3940,7 +3954,6 @@ namespace Questor.Modules.Caching
                 EntityIsEntutyIShouldLeaveAlone.Clear();
                 EntityHaveLootRights.Clear();
                 EntityIsStargate.Clear();
-                _allBookmarks = null;
             }
             catch (Exception ex)
             {
@@ -7746,8 +7759,7 @@ namespace Questor.Modules.Caching
                 //
                 DeleteUselessSalvageBookmarks(module);
 
-                List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).
-                                                                       OrderBy(b => b.CreatedOn));
+                List<DirectBookmark> bookmarksInLocal = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId).OrderBy(b => b.CreatedOn));
                 DirectBookmark onGridBookmark = bookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
                 if (onGridBookmark != null)
                 {

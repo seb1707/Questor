@@ -7756,6 +7756,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "removing salvage bookmark:" + onGridBookmark.Title, Logging.White);
                         onGridBookmark.Delete();
+                        Logging.Log(module, "after: removing salvage bookmark:" + onGridBookmark.Title, Logging.White);
                         NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 6));
                         return false;
                     }

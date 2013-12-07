@@ -2699,37 +2699,24 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (_allBookmarks == null || !_allBookmarks.Any())
+                    if (Cache.Instance._allBookmarks == null || !Cache.Instance._allBookmarks.Any())
                     {
                         if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
                         {
                             Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
                             if (DirectEve.Bookmarks.Any())
                             {
-                                _allBookmarks = DirectEve.Bookmarks;
+                                _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
                                 return _allBookmarks;
                             }
 
-                            return null; //there are no bookmarks to list...    
-                            //if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
-                            //{
-                            //    Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
-                            //    if (Cache.Instance.DirectEve.Bookmarks != null && Cache.Instance.DirectEve.Bookmarks.Any())
-                            //    {
-                            //        _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
-                            //        return _allBookmarks;
-                            //    }
-
-                            //    return new List<DirectBookmark>(); //there are no bookmarks to list...
-                            //}
-                            //
-                            //return new List<DirectBookmark>(); //there are no bookmarks to list...
+                            return null; //there are no bookmarks to list...
                         }
 
                         return null; //new List<DirectBookmark>(); //there are no bookmarks to list...
                     }
 
-                    return _allBookmarks;
+                    return Cache.Instance._allBookmarks;
                 }
                 catch (Exception exception)
                 {

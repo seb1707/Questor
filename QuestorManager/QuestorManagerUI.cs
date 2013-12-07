@@ -772,6 +772,10 @@ namespace QuestorManager
                     SearchResults.Items[0].Selected = true;
                 }
             }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.UpdateSearchResultsTick", "Exception [" + exception + "]", Logging.Debug);
+            }
             finally
             {
                 SearchResults.EndUpdate();

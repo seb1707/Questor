@@ -46,10 +46,8 @@ namespace QuestorManager
 
         private object _previousDestination;
         private int _previousJumps;
-        private List<DirectSolarSystem> _solarSystems;
         private List<DirectStation> _stations;
         private List<DirectBookmark> _bookmarks;
-
         private List<ListItems> List { get; set; }
 
         public List<ItemCache> Items { get; set; }
@@ -189,12 +187,6 @@ namespace QuestorManager
 
         private void InitializeTraveler()
         {
-            if (_solarSystems == null)
-            {
-                _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-                _changed = true;
-            }
-
             if (_stations == null)
             {
                 _stations = Cache.Instance.DirectEve.Stations.Values.OrderBy(s => s.Name).ToList();
@@ -204,8 +196,8 @@ namespace QuestorManager
             if (_bookmarks == null)
             {
                 // Dirty hack to load all category id's (needed because categoryId is lazy-loaded by the bookmarks call)
-                Cache.Instance.AllBookmarks.All(b => b.CategoryId != 0);
-                _bookmarks = Cache.Instance.AllBookmarks.OrderBy(b => b.Title).ToList();
+                Cache.Instance.DirectEve.Bookmarks.All(b => b.CategoryId != 0);
+                _bookmarks = Cache.Instance.DirectEve.Bookmarks.OrderBy(b => b.Title).ToList();
                 _changed = true;
             }
         }
@@ -699,12 +691,7 @@ namespace QuestorManager
                 return;
             }
         }
-
-        private void RefreshBookmarksClick(object sender, EventArgs e)
-        {
-            _bookmarks = null;
-        }
-
+        
         private ListViewItem[] Filter<T>(IEnumerable<string> search, IEnumerable<T> list, Func<T, string> getTitle, Func<T, string> getType)
         {
             if (list == null)
@@ -775,8 +762,8 @@ namespace QuestorManager
             try
             {
                 SearchResults.Items.Clear();
-                SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
-                SearchResults.Items.AddRange(Filter(search, _solarSystems, s => s.Name, b => "Solar System"));
+                //SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
+                SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
                 SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
 
                 // Automatically select the only item
@@ -784,6 +771,10 @@ namespace QuestorManager
                 {
                     SearchResults.Items[0].Selected = true;
                 }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.UpdateSearchResultsTick", "Exception [" + exception + "]", Logging.Debug);
             }
             finally
             {
@@ -1195,7 +1186,7 @@ namespace QuestorManager
             }
             else if (_extrDestination == null)
             {
-                foreach (DirectSolarSystem item in _solarSystems)
+                foreach (DirectSolarSystem item in Cache.Instance.SolarSystems)
                 {
                     if (nameDestination == item.Name)
                     {

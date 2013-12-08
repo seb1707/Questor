@@ -17,6 +17,7 @@
 
 	  <action name="ActivateBastion">
         <parameter name="DeactivateAfterSeconds" value="5" /> <!-- time in seconds before we deactivate bastion mode, keep in mind they have a 60 sec cycle time -->
+        <parameter name="DeactivateIfNothingTargetedWithinRange" value="true" /> <!-- default is false, run the timer out regardless of available targets, useful for multiple spawns -->
       </action>
 	  
       <action name="MoveTo"> <!-- initiate movement to the "target" and fight only those NPCs that target you while you are on the way, process no other actions until you reach the target-->

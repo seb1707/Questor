@@ -195,7 +195,7 @@ namespace Questor.Behaviors
             }
 
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //this local is safe check is useless as their is no localwatch processstate running every tick...
+            //this local is safe check is useless as their is no LocalWatch processstate running every tick...
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //If local unsafe go to base and do not start mission again
             if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentDebugBehaviorState != DebugBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
@@ -203,18 +203,21 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    }
+
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
-                        if (_States.CurrentDebugBehaviorState != DebugBehaviorState.GotoNearestStation)
-                            _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoNearestStation;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoNearestStation;
                     }
                     else
                     {
                         Logging.Log("Local not safe", "Station not found. Going back to base", Logging.White);
-                        if (_States.CurrentDebugBehaviorState != DebugBehaviorState.GotoBase)
-                            _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
                     }
                     Cache.Instance.StopBot = true;
                 }
@@ -227,10 +230,7 @@ namespace Questor.Behaviors
 
             if (Cache.Instance.GotoBaseNow)
             {
-                if (_States.CurrentDebugBehaviorState != DebugBehaviorState.GotoBase)
-                {
-                    _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
-                }
+                _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
             }
             if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
@@ -282,11 +282,30 @@ namespace Questor.Behaviors
 
                     if (Cache.Instance.StopBot)
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "if (Cache.Instance.StopBot)", Logging.White);
+                        //
+                        // this is used by the 'local is safe' routines - standings checks - at the moment is stops questor for the rest of the session.
+                        //
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
                         return;
                     }
 
-                    if (Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "if (Cache.Instance.InSpace) else", Logging.White);
+                    if (Cache.Instance.InSpace)
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
+
+                        // Questor does not handle in space starts very well, head back to base to try again
+                        Logging.Log("DebugBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
+                        LastAction = DateTime.UtcNow;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.DelayedGotoBase;
+                        break;
+                    }
+                    
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
+                    }
+
                     _States.CurrentArmState = ArmState.Idle;
                     _States.CurrentDroneState = DroneState.Idle;
                     _States.CurrentSalvageState = SalvageState.Idle;
@@ -303,7 +322,7 @@ namespace Questor.Behaviors
                         break;
 
                     Logging.Log("DebugBehavior", "Heading back to base", Logging.White);
-                    if (_States.CurrentDebugBehaviorState == DebugBehaviorState.DelayedGotoBase) _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
+                    _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
                     break;
 
                 case DebugBehaviorState.Arm:
@@ -332,7 +351,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                     }
 
                     if (_States.CurrentArmState == ArmState.NotEnoughDrones)
@@ -343,7 +362,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                     }
 
                     if (_States.CurrentArmState == ArmState.Done)
@@ -353,8 +372,7 @@ namespace Questor.Behaviors
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentArmState = ArmState.Idle;
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
-
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Arm) _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
                     }
                     break;
 
@@ -370,10 +388,7 @@ namespace Questor.Behaviors
                     if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.Window.IsReady && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
                     {
                         Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
-                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage)
-                        {
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                        }
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                         break;
                     }
 
@@ -415,9 +430,7 @@ namespace Questor.Behaviors
                         if (Settings.Instance.DebugGotobase) Logging.Log("DebugBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' GoToBase
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
-
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.GotoBase) _States.CurrentDebugBehaviorState = DebugBehaviorState.UnloadLoot;
-
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.UnloadLoot;
                         Traveler.Destination = null;
                     }
                     break;
@@ -461,7 +474,7 @@ namespace Questor.Behaviors
                         // happens if autopilot is not set and this QuestorState is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("DebugBehavior.Traveler", "No destination?", Logging.White);
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                         return;
                     }
 
@@ -493,22 +506,19 @@ namespace Questor.Behaviors
                             if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                             {
                                 Logging.Log("DebugBehavior.Traveler", "an error has occurred", Logging.White);
-                                if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler)
-                                {
-                                    _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
-                                }
+                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                                 return;
                             }
                             else if (Cache.Instance.InSpace)
                             {
                                 Logging.Log("DebugBehavior.Traveler", "Arrived at destination (in space, Questor stopped)", Logging.White);
-                                if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
+                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                                 return;
                             }
                             else
                             {
                                 Logging.Log("DebugBehavior.Traveler", "Arrived at destination", Logging.White);
-                                if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Traveler) _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
                                 return;
                             }
                         }
@@ -517,14 +527,19 @@ namespace Questor.Behaviors
 
                 case DebugBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();    
+                    }
+
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
                             Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
                             station.WarpTo();
-                            if (_States.CurrentDebugBehaviorState == DebugBehaviorState.GotoNearestStation) _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                            _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
                             break;
                         }
                         else
@@ -551,7 +566,7 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (_States.CurrentDebugBehaviorState == DebugBehaviorState.GotoNearestStation) _States.CurrentDebugBehaviorState = DebugBehaviorState.Error; //should we goto idle here?
+                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error; //should we goto idle here?
                     }
                     break;
 
@@ -599,7 +614,7 @@ namespace Questor.Behaviors
                     break;
 
                 case DebugBehaviorState.Default:
-                    if (_States.CurrentDebugBehaviorState == DebugBehaviorState.Default) _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                    _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
                     break;
             }
         }

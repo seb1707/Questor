@@ -112,7 +112,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (EntitiesThatAreWarpScramblingMe.Any())
                             {
                                 if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been warp scrambled by [" + EntitiesThatAreWarpScramblingMe.Count() + "] Entities", Logging.Debug);
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                                if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWarpScramblingMe, DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWarpScramblingMe, PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
                             }
 
@@ -122,7 +122,7 @@ namespace Questor.Modules.BackgroundTasks
                                 if (EntitiesThatAreWebbingMe.Any())
                                 {
                                     if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been webbed by [" + EntitiesThatAreWebbingMe.Count() + "] Entities", Logging.Debug);
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
+                                    if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreWebbingMe, DronePriority.Webbing, "Panic", Settings.Instance.AddWebifiersToDronePriorityTargetList);
                                     Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList);
                                 }
 
@@ -130,7 +130,7 @@ namespace Questor.Modules.BackgroundTasks
                                 if (EntitiesThatAreTargetPaintingMe.Any())
                                 {
                                     if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been target painted by [" + EntitiesThatAreTargetPaintingMe.Count() + "] Entities", Logging.Debug);
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
+                                    if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTargetPaintingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTargetPaintersToDronePriorityTargetList);
                                     Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTargetPaintingMe, PrimaryWeaponPriority.TargetPainting, "Panic", Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList);
                                 }
                             }
@@ -139,7 +139,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (EntitiesThatAreNeutralizingMe.Any())
                             {
                                 if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been neuted by [" + EntitiesThatAreNeutralizingMe.Count() + "] Entities", Logging.Debug);
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
+                                if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreNeutralizingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddNeutralizersToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
                             }
 
@@ -147,7 +147,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (EntitiesThatAreJammingMe.Any())
                             {
                                 if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been ECMd by [" + EntitiesThatAreJammingMe.Count() + "] Entities", Logging.Debug);
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
+                                if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreJammingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddECMsToDroneTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList);
                             }
 
@@ -155,7 +155,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (EntitiesThatAreSensorDampeningMe.Any())
                             {
                                 if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been Sensor Damped by [" + EntitiesThatAreSensorDampeningMe.Count() + "] Entities", Logging.Debug);
-                                Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
+                                if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreSensorDampeningMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddDampenersToDronePriorityTargetList);
                                 Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreSensorDampeningMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList);
                             }
 
@@ -168,7 +168,7 @@ namespace Questor.Modules.BackgroundTasks
                                 if (EntitiesThatAreTrackingDisruptingMe.Any())
                                 {
                                     if (Settings.Instance.DebugPanic) Logging.Log("Panic.Normal", "We have been Tracking Disrupted by [" + EntitiesThatAreTrackingDisruptingMe.Count() + "] Entities", Logging.Debug);
-                                    Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
+                                    if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(EntitiesThatAreTrackingDisruptingMe, DronePriority.PriorityKillTarget, "Panic", Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList);
                                     Cache.Instance.AddPrimaryWeaponPriorityTargets(EntitiesThatAreTrackingDisruptingMe, PrimaryWeaponPriority.Dampening, "Panic", Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList);
                                 }
                             }
@@ -319,7 +319,7 @@ namespace Questor.Modules.BackgroundTasks
                     EntityCache EntityIsWarpScramblingMeWhilePanicing = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsWarpScramblingMe);
                     if (EntityIsWarpScramblingMeWhilePanicing != null)
                     {
-                        Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
+                        if (Cache.Instance.UseDrones) Cache.Instance.AddDronePriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), DronePriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToDronePriorityTargetList);
                         Cache.Instance.AddPrimaryWeaponPriorityTargets(Cache.Instance.TargetedBy.Where(t => t.IsWarpScramblingMe), PrimaryWeaponPriority.WarpScrambler, "Panic", Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList);
                     }
                     
@@ -347,13 +347,27 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // We leave the panicking state once we actually start warping off
-                    EntityCache station = Cache.Instance.Stations.FirstOrDefault();
+
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.FirstOrDefault();    
+                    }
+                    
                     if (station != null && Cache.Instance.InSpace)
                     {
                         if (Cache.Instance.InWarp)
                         {
-                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities);
-                            Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities);
+                            if (Cache.Instance.PrimaryWeaponPriorityEntities != null && Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+                            {
+                                Cache.Instance.RemovePrimaryWeaponPriorityTargets(Cache.Instance.PrimaryWeaponPriorityEntities.ToList());
+                            }
+
+                            if (Cache.Instance.UseDrones && Cache.Instance.DronePriorityEntities != null && Cache.Instance.DronePriorityEntities.Any())
+                            {
+                                Cache.Instance.RemoveDronePriorityTargets(Cache.Instance.DronePriorityEntities.ToList());    
+                            }
+                            
                             break;
                         }
 

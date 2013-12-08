@@ -160,7 +160,12 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    }
+
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -337,22 +342,19 @@ namespace Questor.Behaviors
                         if (Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("DedicatedBookmarkSalvagerBehavior.LocalWatch", "local is clear", Logging.White);
-                            if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.LocalWatch) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
                         }
                         else
                         {
                             Logging.Log("DedicatedBookmarkSalvagerBehavior.LocalWatch", "Bad standings pilots in local: We will stay 5 minutes in the station and then we will check if it is clear again", Logging.White);
-                            if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.LocalWatch)
-                            {
-                                _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.WaitingforBadGuytoGoAway;
-                            }
+                            _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.WaitingforBadGuytoGoAway;
                             Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                             Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         }
                     }
                     else
                     {
-                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.LocalWatch) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
                     }
                     break;
 
@@ -360,8 +362,11 @@ namespace Questor.Behaviors
                     Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     if (DateTime.UtcNow.Subtract(Cache.Instance.LastLocalWatchAction).TotalMinutes < Time.Instance.WaitforBadGuytoGoAway_minutes)
+                    {
+                        //TODO: add debug logging here
                         break;
-                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.WaitingforBadGuytoGoAway) _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.LocalWatch;
+                    }
+                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.LocalWatch;
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.GotoBase:

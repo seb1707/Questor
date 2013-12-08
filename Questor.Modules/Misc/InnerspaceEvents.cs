@@ -12,10 +12,7 @@ namespace Questor.Modules.Misc
     using Questor.Modules.Lookup;
     using Questor.Modules.States;
     using LavishScriptAPI;
-
-
-
-
+    
     public class DoingEventsProperly
     {
         public DoingEventsProperly()
@@ -30,7 +27,7 @@ namespace Questor.Modules.Misc
         protected virtual void HandleSomethingChangedEvent(object src, PropertyChangedEventArgs ea) { }
 
     }
-
+    
     public class InnerspaceEvents
     {
         //public InnerspaceCommands() { }
@@ -39,39 +36,39 @@ namespace Questor.Modules.Misc
         //
         // Slave to Master
         //
-        private event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCoordofMaster = (src, ea) => { };
-        private uint SlaveToMaster_WhatIsCoordofMaster_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCurrentMissionAction = (src, ea) => { };
-        private uint SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatAmmoShouldILoad = (src, ea) => { };
-        private uint SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
-        private uint SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCoordofMaster = (src, ea) => { };
+        private static uint SlaveToMaster_WhatIsCoordofMaster_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatIsCurrentMissionAction = (src, ea) => { };
+        private static uint SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_WhatAmmoShouldILoad = (src, ea) => { };
+        private static uint SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
+        private static uint SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets_InnerspaceEventID;
         //
         // Master to Slave
         //
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetDestinationLocationID = (src, ea) => { };
-        private uint MasterToSlaves_SetDestinationLocationID_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterCoordinatesAre = (src, ea) => { };
-        private uint MasterToSlaves_MasterCoordinatesAre_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoThisMissionAction = (src, ea) => { };
-        private uint MasterToSlaves_DoThisMissionAction_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterIsWarpingTo = (src, ea) => { };
-        private uint MasterToSlaves_MasterIsWarpingTo_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SlavesGotoBase = (src, ea) => { };
-        private uint MasterToSlaves_SlavesGotoBase_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoNotLootItemName = (src, ea) => { };
-        private uint MasterToSlaves_DoNotLootItemName_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetAutoStart = (src, ea) => { };
-        private uint MasterToSlaves_SetAutoStart_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhereAreYou = (src, ea) => { };
-        private uint MasterToSlaves_WhereAreYou_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhatAreYouShooting = (src, ea) => { };
-        private uint MasterToSlaves_WhatAreYouShooting_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_ShootThisEntityID = (src, ea) => { };
-        private uint MasterToSlaves_ShootThisEntityID_InnerspaceEventID;
-        private event EventHandler<LSEventArgs> SomethingChanged_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
-        private uint MasterToSlave_MyListOfPrimaryWeaponPriorityTargets_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetDestinationLocationID = (src, ea) => { };
+        private static uint MasterToSlaves_SetDestinationLocationID_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterCoordinatesAre = (src, ea) => { };
+        private static uint MasterToSlaves_MasterCoordinatesAre_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoThisMissionAction = (src, ea) => { };
+        private static uint MasterToSlaves_DoThisMissionAction_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_MasterIsWarpingTo = (src, ea) => { };
+        private static uint MasterToSlaves_MasterIsWarpingTo_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SlavesGotoBase = (src, ea) => { };
+        private static uint MasterToSlaves_SlavesGotoBase_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_DoNotLootItemName = (src, ea) => { };
+        private static uint MasterToSlaves_DoNotLootItemName_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_SetAutoStart = (src, ea) => { };
+        private static uint MasterToSlaves_SetAutoStart_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhereAreYou = (src, ea) => { };
+        private static uint MasterToSlaves_WhereAreYou_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_WhatAreYouShooting = (src, ea) => { };
+        private static uint MasterToSlaves_WhatAreYouShooting_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlaves_ShootThisEntityID = (src, ea) => { };
+        private static uint MasterToSlaves_ShootThisEntityID_InnerspaceEventID;
+        private static event EventHandler<LSEventArgs> SomethingChanged_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets = (src, ea) => { };
+        private static uint MasterToSlave_MyListOfPrimaryWeaponPriorityTargets_InnerspaceEventID;
         #endregion Create Dotnet Events
 
         #region Create Dotnet Event Firing Routines
@@ -101,22 +98,22 @@ namespace Questor.Modules.Misc
         //
         // Slave to Master
         //
-        internal void Handle_SlaveToMaster_WhatIsCoordofMasterEvent(object src, LSEventArgs _lseventargs)
+        internal static void Handle_SlaveToMaster_WhatIsCoordofMasterEvent(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_SlaveToMaster_WhatIsCurrentMissionAction(object src, LSEventArgs _lseventargs)
+        internal static void Handle_SlaveToMaster_WhatIsCurrentMissionAction(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_SlaveToMaster_WhatAmmoShouldILoad(object src, LSEventArgs _lseventargs)
+        internal static void Handle_SlaveToMaster_WhatAmmoShouldILoad(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets(object src, LSEventArgs _lseventargs)
+        internal static void Handle_SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets(object src, LSEventArgs _lseventargs)
         {
 
         }
@@ -125,71 +122,71 @@ namespace Questor.Modules.Misc
         //
 
 
-        internal void Handle_MasterToSlaves_SetDestinationLocationID(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_SetDestinationLocationID(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_MasterCoordinatesAre(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_MasterCoordinatesAre(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_DoThisMissionAction(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_DoThisMissionAction(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_MasterIsWarpingTo(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_MasterIsWarpingTo(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_SlavesGotoBase(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_SlavesGotoBase(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_DoNotLootItemName(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_DoNotLootItemName(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_SetAutoStart(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_SetAutoStart(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_WhereAreYou(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_WhereAreYou(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_WhatAreYouShooting(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_WhatAreYouShooting(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlaves_ShootThisEntityID(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlaves_ShootThisEntityID(object src, LSEventArgs _lseventargs)
         {
 
         }
 
-        internal void Handle_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets(object src, LSEventArgs _lseventargs)
+        internal static void Handle_MasterToSlave_MyListOfPrimaryWeaponPriorityTargets(object src, LSEventArgs _lseventargs)
         {
 
         }
 
         #endregion  Create Dotnet Event Handling Routines - these are fired BY the event
 
-        internal uint CreateInnerspaceEvent(string _eventNameToRegister, EventHandler<LSEventArgs> _eventhandler)
+        internal static uint CreateInnerspaceEvent(string _eventNameToRegister, EventHandler<LSEventArgs> _eventhandler)
         {
             uint _innerspaceEventID = LavishScript.Events.RegisterEvent(_eventNameToRegister);
             LavishScript.Events.AttachEventTarget(_eventNameToRegister, _eventhandler);
             return _innerspaceEventID;
         }
 
-        public InnerspaceEvents()
+        public static void CreateInnerspaceEvents()
         {
             #region When an event fires what will handle it
             SomethingChanged_SlaveToMaster_WhatIsCoordofMaster += Handle_SlaveToMaster_WhatIsCoordofMasterEvent;
@@ -239,7 +236,7 @@ namespace Questor.Modules.Misc
                 //
                 // Slaves To Master Requests
                 //
-                //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);   //Master should reply: MasterToSlaves_SetDestinationLocationID
+                //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);     //Master should reply: MasterToSlaves_SetDestinationLocationID
                 //LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
                 //LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
                 //LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent);                     //Master should reply: 

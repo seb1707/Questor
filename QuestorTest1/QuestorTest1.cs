@@ -83,8 +83,8 @@ namespace QuestorTest1
 
             Cache.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
 
-            InnerspaceCommands.CreateLavishCommands();
-            //InnerspaceEvents.CreateLavishEvents();
+            //InnerspaceCommands.CreateLavishCommands();
+            InnerspaceEvents.CreateInnerspaceEvents();
 
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Starting BuyLPI... - innerspace Echo"));
             Logging.Log("QuestorTest1", "Starting QuestorTest1...", Logging.White);

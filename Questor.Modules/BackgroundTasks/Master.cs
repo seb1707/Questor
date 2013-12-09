@@ -109,15 +109,15 @@ namespace Questor.Modules.BackgroundTasks
         //
         // Targeting (not yet targeted)
         //
-        public static void MasterToSlaveCurrentTargetingInfo(int TargetNumber, long TargetID, string FleetName, long locationID, string TargetName)
+        public static void MasterToSlaveCurrentTargetingInfo(int TargetNumber, long TargetID, int? _fleetNumber, long locationID, string TargetName)
         {
-            MasterToSlaveCurrentTargetingInfoviaInnerspace(TargetNumber, TargetID, FleetName, locationID, TargetName);
+            MasterToSlaveCurrentTargetingInfoviaInnerspace(TargetNumber, TargetID, _fleetNumber, locationID, TargetName);
         }
 
-        private static void MasterToSlaveCurrentTargetingInfoviaInnerspace(int TargetNumber, long TargetID, string FleetName, long locationID, string TargetName)
+        private static void MasterToSlaveCurrentTargetingInfoviaInnerspace(int TargetNumber, long TargetID, int? _fleetNumber, long locationID, string TargetName)
         {
             const string RelayToWhere = "all";
-            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "MasterToSlaveTargetingInfo " + TargetNumber + " " + TargetID + " " + FleetName + " [" + TargetName + "]";
+            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "MasterToSlaveTargetingInfo " + TargetNumber + " " + TargetID + " " + _fleetNumber + " [" + TargetName + "]";
             if (Settings.Instance.DebugFleetSupportMaster) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
             LavishScript.ExecuteCommand(LavishCommandToBroadcast);
         }
@@ -125,15 +125,15 @@ namespace Questor.Modules.BackgroundTasks
         //
         // Targeted (done targeting)
         //
-        public static void MasterToSlaveCurrentTargetsInfo(int TargetNumber, long TargetID, string FleetName, long locationID, string TargetName)
+        public static void MasterToSlaveCurrentTargetsInfo(int TargetNumber, long TargetID, int? _fleetNumber, long locationID, string TargetName)
         {
-            MasterToSlaveCurrentTargetsInfoviaInnerspace(TargetNumber, TargetID, FleetName, locationID, TargetName);
+            MasterToSlaveCurrentTargetsInfoviaInnerspace(TargetNumber, TargetID, _fleetNumber, locationID, TargetName);
         }
 
-        private static void MasterToSlaveCurrentTargetsInfoviaInnerspace(int TargetNumber, long TargetID, string FleetName, long locationID, string TargetName)
+        private static void MasterToSlaveCurrentTargetsInfoviaInnerspace(int TargetNumber, long TargetID, int? _fleetNumber, long locationID, string TargetName)
         {
             const string RelayToWhere = "all";
-            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "MasterToSlaveTargetsInfo " + TargetNumber + " " + TargetID + " " + FleetName + " [" + TargetName + "]";
+            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "MasterToSlaveTargetsInfo " + TargetNumber + " " + TargetID + " " + _fleetNumber + " [" + TargetName + "]";
             if (Settings.Instance.DebugFleetSupportMaster) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
             LavishScript.ExecuteCommand(LavishCommandToBroadcast);
         }
@@ -159,7 +159,7 @@ namespace Questor.Modules.BackgroundTasks
             foreach (EntityCache target in Cache.Instance.Targeting)
             {
                 TargetNum++;
-                MasterToSlaveCurrentTargetingInfo(TargetNum, target.Id, Settings.Instance.FleetName, Cache.Instance.DirectEve.Session.SolarSystemId ?? 0, target.Name);
+                MasterToSlaveCurrentTargetingInfo(TargetNum, target.Id, Settings.Instance.FleetNumber, Cache.Instance.DirectEve.Session.SolarSystemId ?? 0, target.Name);
                 continue;
             }
 
@@ -193,7 +193,7 @@ namespace Questor.Modules.BackgroundTasks
             foreach (EntityCache target in Cache.Instance.Targets)
             {
                 TargetNum++;
-                MasterToSlaveCurrentTargetsInfo(TargetNum, target.Id, Settings.Instance.FleetName, _locationID, target.Name);
+                MasterToSlaveCurrentTargetsInfo(TargetNum, target.Id, Settings.Instance.FleetNumber, _locationID, target.Name);
                 
                 continue;
             }

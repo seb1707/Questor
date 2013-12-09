@@ -185,7 +185,7 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 if (DateTime.UtcNow > _InvitesAlreadySentToTheseCharacters[_CharacterToInvite].AddSeconds(120)) //the invite as sent over 120 sec ago, resend
                                 {
-                                    if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("ManageFleet", "[" + i + "] Inviting [" + _CharacterToInvite.Name + "] to fleet [" + Settings.Instance.FleetName + "]", Logging.Debug);
+                                    if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("ManageFleet", "[" + i + "] Inviting [" + _CharacterToInvite.Name + "] to fleet [" + Settings.Instance.FleetNumber + "]", Logging.Debug);
                                     _InvitesAlreadySentToTheseCharacters.Remove(_CharacterToInvite);
                                     _InvitesAlreadySentToTheseCharacters.Add(_CharacterToInvite, DateTime.UtcNow);
                                     Cache.Instance.DirectEve.InviteToFleet(_CharacterToInvite.CharacterId);
@@ -201,7 +201,7 @@ namespace Questor.Modules.BackgroundTasks
                             //
                             // they are not yet in fleet and  we havent yet sent them an invite to fleet. Do so now.
                             //
-                            if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("ManageFleet", "[" + i + "] Inviting [" + _CharacterToInvite.Name + "] to fleet [" + Settings.Instance.FleetName + "]", Logging.Debug);
+                            if (Settings.Instance.DebugFleetSupportMaster) Logging.Log("ManageFleet", "[" + i + "] Inviting [" + _CharacterToInvite.Name + "] to fleet [" + Settings.Instance.FleetNumber + "]", Logging.Debug);
                             _InvitesAlreadySentToTheseCharacters.Add(_CharacterToInvite, DateTime.UtcNow);
                             Cache.Instance.DirectEve.InviteToFleet(_CharacterToInvite.CharacterId);
                             return false;

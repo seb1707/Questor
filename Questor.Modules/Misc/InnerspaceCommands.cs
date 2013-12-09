@@ -62,7 +62,7 @@ namespace Questor.Modules.Misc
                 LavishScript.Commands.AddCommand("SetExitWhenIdle", SetExitWhenIdle);
                 LavishScript.Commands.AddCommand("SetQuestorStatetoCloseQuestor", SetQuestorStatetoCloseQuestor);
                 LavishScript.Commands.AddCommand("SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase", SetDedicatedBookmarkSalvagerBehaviorStatetoGotoBase);
-                LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
+                //LavishScript.Commands.AddCommand("QuestorEvents", ListQuestorEvents);
                 LavishScript.Commands.AddCommand("IfInPodSwitchToNoobShiporShuttle", IfInPodSwitchToNoobShiporShuttle);
                 LavishScript.Commands.AddCommand("SetDestToSystem", SetDestToSystem);
                 //LavishScript.Commands.AddCommand("FindEntities", FindEntitiesNamed);
@@ -607,28 +607,6 @@ namespace Questor.Modules.Misc
         }
 
         #endregion Master to Slave Routines
-
-        private static int ListQuestorEvents(string[] args)
-        {
-            Logging.Log("InnerspaceCommands", " ", Logging.White);
-            Logging.Log("InnerspaceCommands", " ", Logging.White);
-            Logging.Log("InnerspaceCommands", "Questor Events you can listen for from an innerspace script", Logging.White);
-            Logging.Log("InnerspaceCommands", " ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorIdle                                   - This Event fires when entering the QuestorState Idle ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorState                                  - This Event fires when the State changes", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorCombatMissionsBehaviorState            - This Event fires when the State changes", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorDedicatedBookmarkSalvagerBehaviorState - This Event fires when the State changes", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorAutoStartState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorExitWhenIdleState                      - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorDisable3DState                         - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorPanicState                             - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorPausedState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorDronesState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorCombatState                            - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", "QuestorTravelerState                          - This Event fires when the State changes ", Logging.White);
-            Logging.Log("InnerspaceCommands", " ", Logging.White);
-            return 0;
-        }
 
         private static int ListClassInstanceInfo(string[] args)
         {

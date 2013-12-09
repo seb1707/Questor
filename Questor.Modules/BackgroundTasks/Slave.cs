@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using LavishSettingsAPI;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -19,25 +21,24 @@ namespace Questor.Modules.BackgroundTasks
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
-    public class Slave
+    public static class Slave
     {
         private static DateTime _nextSlaveProcessState;
         private static DateTime _nextSlavetoMasterIsMasterDocked;
-        private static DateTime _nextSlavetoMasterQueryLocationID;
+        private static DateTime _nextSlaveToMaster_WhatIsLocationIDofMaster;
+        private static DateTime _nextSlaveToMaster_WhatIsCurrentMissionAction;
+        private static DateTime _nextSlaveToMaster_WhatIsCoordofMaster;
+        private static DateTime _nextSlaveToMaster_WhatAmmoShouldILoad;
+
         public static long missionLocationID;
-
-        public Slave()
-        {
-            
-        }
-
+        
         //
         // Innerspace Method
         //
         private static void SlaveToMasterIsMasterDockedviaInnerspace()
         {
             const string RelayToWhere = "all";
-            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "IsFleetSupportMasterDocked" + " " + Settings.Instance.FleetName;
+            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "IsFleetSupportMasterDocked" + " " + Settings.Instance.FleetNumber;
             if (Settings.Instance.DebugFleetSupportSlave) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
             LavishScript.ExecuteCommand(LavishCommandToBroadcast);
         }
@@ -59,7 +60,7 @@ namespace Questor.Modules.BackgroundTasks
             
         }
 
-        private static void BroadcastEventViaInnerspace(string _eventNameToTrigger, string data1 = "", string _fleetNumber = "1", string _relayToWhere = "all")
+        private static void BroadcastEventViaInnerspace(string _eventNameToTrigger, string data1 = "", int? _fleetNumber = 1, string _relayToWhere = "all")
         {
             string LavishEventToBroadcast = "uplink exec relay " + _relayToWhere + " " + "-event " + _eventNameToTrigger + " " + _fleetNumber + " " + data1;
             if (Settings.Instance.DebugFleetSupportSlave) InnerSpace.Echo(string.Format("[BroadcastEventViaInnerspace] " + LavishEventToBroadcast));
@@ -68,11 +69,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void SlaveToMasterQueryDestinationLocationID()
         {
-            if (DateTime.UtcNow > _nextSlavetoMasterQueryLocationID)
-            {
-                _nextSlavetoMasterQueryLocationID = DateTime.UtcNow.AddSeconds(20);
-                BroadcastEventViaInnerspace("all", "QueryDestinationLocationID");    
-            }
+            
         }
 
         public static bool SetDestToMissionSystem(long locationid)
@@ -145,7 +142,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Target targets passed from master that are within targeting range
         /// </summary>
-        public static bool AddPriorityTargets(long TargetNumber, long TargetID, string FleetName)
+        public static bool AddPriorityTargets(long TargetNumber, long TargetID, int _fleetNumber)
         {
             if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
             {
@@ -156,7 +153,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Settings.Instance.FleetSupportMaster) return true; //no need to add targets if we are Fleet Support Master
             if (!Settings.Instance.FleetSupportSlave) return true;  //no need to add targets if we have Fleet Support Slave == false
 
-            if (FleetName.ToLower() == Settings.Instance.FleetName.ToLower())
+            if (_fleetNumber == Settings.Instance.FleetNumber)
             {
                 EntityCache TargetEntity = Cache.Instance.Entities.FirstOrDefault(e => e.Id == TargetID);
 
@@ -265,32 +262,57 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // Broadcast SlaveToMaster_WhatIsLocationIDofMaster Event to all sessions
                     //
+                    if (DateTime.UtcNow > _nextSlaveToMaster_WhatIsLocationIDofMaster)
+                    {
+                        _nextSlaveToMaster_WhatIsLocationIDofMaster = DateTime.UtcNow.AddSeconds(20);
+                        string _eventNameToTrigger = "blah";
+                        string _data1 = "data_here";
+                        int? _fleetNumber = Settings.Instance.FleetNumber;
+                        string _relayToWhere = "all";
 
-                    _States.CurrentSlaveState = SlaveState.Idle;
+                        BroadcastEventViaInnerspace(_eventNameToTrigger, _data1, _fleetNumber, _relayToWhere);
+                        _States.CurrentSlaveState = SlaveState.Idle;
+                    }
+                    
                     break;
 
                 case SlaveState.SlaveToMaster_WhatIsCurrentMissionAction:
                     //
                     // Broadcast SlaveToMaster_WhatIsCurrentMissionAction Event to all sessions
                     //
-
-                    _States.CurrentSlaveState = SlaveState.Idle;
+                    if (DateTime.UtcNow > _nextSlaveToMaster_WhatIsCurrentMissionAction)
+                    {
+                        _nextSlaveToMaster_WhatIsCurrentMissionAction = DateTime.UtcNow.AddSeconds(20);
+                        BroadcastEventViaInnerspace("all", "QueryDestinationLocationID");
+                        _States.CurrentSlaveState = SlaveState.Idle;
+                    }
+                    
                     break;
 
                 case SlaveState.SlaveToMaster_WhatIsCoordofMaster:
                     //
                     // Broadcast SlaveToMaster_WhatIsCoordofMaster Event to all sessions
                     //
-
-                    _States.CurrentSlaveState = SlaveState.Idle;
+                    if (DateTime.UtcNow > _nextSlaveToMaster_WhatIsCoordofMaster)
+                    {
+                        _nextSlaveToMaster_WhatIsCoordofMaster = DateTime.UtcNow.AddSeconds(20);
+                        BroadcastEventViaInnerspace("all", "QueryDestinationLocationID");
+                        _States.CurrentSlaveState = SlaveState.Idle;
+                    }
+                    
                     break;
 
                 case SlaveState.SlaveToMaster_WhatAmmoShouldILoad:
                     //
                     // Broadcast SlaveToMaster_WhatAmmoShouldILoad Event to all sessions
                     //
+                    if (DateTime.UtcNow > _nextSlaveToMaster_WhatAmmoShouldILoad)
+                    {
+                        _nextSlaveToMaster_WhatAmmoShouldILoad = DateTime.UtcNow.AddSeconds(20);
+                        BroadcastEventViaInnerspace("all", "QueryDestinationLocationID");
+                        _States.CurrentSlaveState = SlaveState.Idle;
+                    }
 
-                    _States.CurrentSlaveState = SlaveState.Idle;
                     break;
 
                 default:

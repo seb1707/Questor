@@ -201,8 +201,7 @@ namespace Questor.Modules.Lookup
         public bool FleetSupportSlave { get; set; }
 
         public bool FleetSupportMaster { get; set; }
-
-        public string FleetName { get; set; }
+        public int? FleetNumber { get; set; }
         public List<string> CharacterNamesForMasterToInviteToFleet { get; set; }
 
         //
@@ -845,7 +844,7 @@ namespace Questor.Modules.Lookup
 
             FleetSupportSlave = (bool?)CharacterSettingsXml.Element("fleetSupportSlave") ?? (bool?)CommonSettingsXml.Element("fleetSupportSlave") ?? true;
             FleetSupportMaster = (bool?)CharacterSettingsXml.Element("fleetSupportMaster") ?? (bool?)CommonSettingsXml.Element("fleetSupportMaster") ?? true;
-            FleetName = (string)CharacterSettingsXml.Element("fleetName") ?? (string)CommonSettingsXml.Element("fleetName") ?? "Fleet1";
+            FleetNumber = (int?)CharacterSettingsXml.Element("fleetNumber") ?? (int?)CommonSettingsXml.Element("fleetNumber") ?? 1;
 
             //
             //CharacterNamesForMasterToInviteToFleet
@@ -1604,7 +1603,7 @@ namespace Questor.Modules.Lookup
 
                 FleetSupportSlave = false;
                 FleetSupportMaster = false;
-                FleetName = "Fleet1";
+                FleetNumber = 1;
                 CharacterNamesForMasterToInviteToFleet.Clear();
 
                 // Console Log Settings

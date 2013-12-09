@@ -41,5 +41,6 @@ namespace Questor.Modules.States
         Error,
         CloseQuestor,
         GenerateInnerspaceProfile,
+        BuyingSkill,
     }
 }

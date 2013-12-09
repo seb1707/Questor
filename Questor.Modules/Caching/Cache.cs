@@ -2134,15 +2134,6 @@ namespace Questor.Modules.Caching
                     return null;
                 }
             }
-            get
-            {
-                if (Stargates.Any())
-                {
-                    return Stargates.OrderBy(s => s.Distance).FirstOrDefault() ?? null;
-                }
-
-                return null;
-            }
         }
 
         public EntityCache StargateByName(string locationName)

@@ -196,10 +196,10 @@ namespace Questor.Modules.BackgroundTasks
         
         public static void ProcessState()
         {
-            if (DateTime.UtcNow < _lastSlaveProcessState.AddMilliseconds(500)) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _nextSlaveProcessState) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
-            _lastSlaveProcessState = DateTime.UtcNow;
+            _nextSlaveProcessState = DateTime.UtcNow.AddMilliseconds(500);
 
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)

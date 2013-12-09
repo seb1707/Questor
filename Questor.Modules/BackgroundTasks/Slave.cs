@@ -21,9 +21,9 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Slave
     {
-        private static DateTime _lastSlaveProcessState;
-        private static DateTime _lastSlavetoMasterIsMasterDocked;
-        private static DateTime _lastSlavetoMasterQueryLocationID;
+        private static DateTime _nextSlaveProcessState;
+        private static DateTime _nextSlavetoMasterIsMasterDocked;
+        private static DateTime _nextSlavetoMasterQueryLocationID;
         public static long missionLocationID;
 
         public Slave()
@@ -44,8 +44,11 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void SlavetoMasterIsMasterDocked()
         {
-            _lastSlavetoMasterIsMasterDocked = DateTime.UtcNow;
-            SlaveToMasterIsMasterDockedviaInnerspace();
+            if (DateTime.UtcNow > _nextSlavetoMasterIsMasterDocked)
+            {
+                _nextSlavetoMasterIsMasterDocked = DateTime.UtcNow.AddSeconds(10);
+                SlaveToMasterIsMasterDockedviaInnerspace();
+            }
         }
 
         //
@@ -53,18 +56,22 @@ namespace Questor.Modules.BackgroundTasks
         //
         private static void SlaveToMasterQueryDestinationLocationIDviaInnerspace()
         {
-            const string RelayToWhere = "all";
-            string LavishCommandToBroadcast = "relay " + RelayToWhere + " " + "QueryDestinationLocationID" + " " + Settings.Instance.FleetName;
-            if (Settings.Instance.DebugFleetSupportSlave) InnerSpace.Echo(string.Format("[BroadcastViaInnerspace] " + LavishCommandToBroadcast));
-            LavishScript.ExecuteCommand(LavishCommandToBroadcast);
+            
+        }
+
+        private static void BroadcastEventViaInnerspace(string _eventNameToTrigger, string data1 = "", string _fleetNumber = "1", string _relayToWhere = "all")
+        {
+            string LavishEventToBroadcast = "uplink exec relay " + _relayToWhere + " " + "-event " + _eventNameToTrigger + " " + _fleetNumber + " " + data1;
+            if (Settings.Instance.DebugFleetSupportSlave) InnerSpace.Echo(string.Format("[BroadcastEventViaInnerspace] " + LavishEventToBroadcast));
+            LavishScript.ExecuteCommand(LavishEventToBroadcast);
         }
 
         public static void SlaveToMasterQueryDestinationLocationID()
         {
-            if (DateTime.UtcNow > _lastSlavetoMasterQueryLocationID.AddSeconds(20))
+            if (DateTime.UtcNow > _nextSlavetoMasterQueryLocationID)
             {
-                _lastSlavetoMasterQueryLocationID = DateTime.UtcNow;
-                SlaveToMasterQueryDestinationLocationIDviaInnerspace();    
+                _nextSlavetoMasterQueryLocationID = DateTime.UtcNow.AddSeconds(20);
+                BroadcastEventViaInnerspace("all", "QueryDestinationLocationID");    
             }
         }
 
@@ -233,64 +240,6 @@ namespace Questor.Modules.BackgroundTasks
 
             switch (_States.CurrentSlaveState)
             {
-                case SlaveState.Begin:
-                    _States.CurrentSlaveState = SlaveState.AddPriorityTargets;
-                    break;
-
-                case SlaveState.AddPriorityTargets:
-                    //
-                    // this logic belongs in the innerspace commend we call via the master... 
-                    //
-                    // MasterToSlaveTargetingInfo
-                    // and
-                    // MasterToSlaveTargetsInfo
-                    _States.CurrentSlaveState = SlaveState.Begin;
-                    break;
-
-                case SlaveState.Done:
-                    break;
-
-                case SlaveState.TravelToMasterLocationID:
-                    if (Slave.missionLocationID == -1)
-                    {
-                        SlaveToMasterQueryDestinationLocationID();
-                        return;
-                    }
-
-                    if (!SetDestToMissionSystem(Slave.missionLocationID)) return;
-                    _States.CurrentSlaveState = SlaveState.FindMaster;
-                    break;
-
-                case SlaveState.FindMaster:
-                    if (_States.CurrentTravelerState == TravelerState.Traveling)
-                    {
-                        return;
-                    }
-
-                    //
-                    // we kinda need to know the masters target.ID so we can easily tell if they are on grid with us.
-                    // we also require a fleet be up and working at this point so we can warp to the master as needed
-                    //
-
-                    //
-                    // for now goto idle - change this later
-                    //
-                    _States.CurrentSlaveState = SlaveState.Idle;
-                    break;
-
-                case SlaveState.IsMasterDocked:
-                    if (Cache.Instance.InStation)
-                    {
-                        if (DateTime.UtcNow > _lastSlavetoMasterIsMasterDocked.AddSeconds(6))
-                        {
-                            SlavetoMasterIsMasterDocked();
-                        }
-
-                        return;
-                    }
-                   
-                    break;
-
                 case SlaveState.Idle:
                     missionLocationID = -1;
                     if (Cache.Instance.InSpace &&
@@ -303,6 +252,45 @@ namespace Questor.Modules.BackgroundTasks
                         //_States.CurrentSlaveState = SlaveState.Begin;
                         return;
                     }
+                    break;
+
+                case SlaveState.Begin:
+                    _States.CurrentSlaveState = SlaveState.AddPriorityTargets;
+                    break;
+
+                case SlaveState.Done:
+                    break;
+
+                case SlaveState.SlaveToMaster_WhatIsLocationIDofMaster:
+                    //
+                    // Broadcast SlaveToMaster_WhatIsLocationIDofMaster Event to all sessions
+                    //
+
+                    _States.CurrentSlaveState = SlaveState.Idle;
+                    break;
+
+                case SlaveState.SlaveToMaster_WhatIsCurrentMissionAction:
+                    //
+                    // Broadcast SlaveToMaster_WhatIsCurrentMissionAction Event to all sessions
+                    //
+
+                    _States.CurrentSlaveState = SlaveState.Idle;
+                    break;
+
+                case SlaveState.SlaveToMaster_WhatIsCoordofMaster:
+                    //
+                    // Broadcast SlaveToMaster_WhatIsCoordofMaster Event to all sessions
+                    //
+
+                    _States.CurrentSlaveState = SlaveState.Idle;
+                    break;
+
+                case SlaveState.SlaveToMaster_WhatAmmoShouldILoad:
+                    //
+                    // Broadcast SlaveToMaster_WhatAmmoShouldILoad Event to all sessions
+                    //
+
+                    _States.CurrentSlaveState = SlaveState.Idle;
                     break;
 
                 default:

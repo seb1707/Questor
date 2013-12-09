@@ -194,8 +194,8 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
-            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsLocationIDofMaster;
+            Logging.Log("InnerspaceCommands", "Entering SlaveState.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
+            _States.CurrentSlaveState = SlaveState.SlaveToMaster_WhatIsLocationIDofMaster;
             return 0;
         }
 
@@ -207,8 +207,8 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
-            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsCoordofMaster;
+            Logging.Log("InnerspaceCommands", "Entering SlaveState.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
+            _States.CurrentSlaveState = SlaveState.SlaveToMaster_WhatIsCoordofMaster;
             return 0;
         }
 
@@ -220,8 +220,8 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
-            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatIsCurrentMissionAction;
+            Logging.Log("InnerspaceCommands", "Entering SlaveState.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
+            _States.CurrentSlaveState = SlaveState.SlaveToMaster_WhatIsCurrentMissionAction;
             return 0;
         }
         
@@ -233,8 +233,8 @@ namespace Questor.Modules.Misc
                 return -1;
             }
 
-            Logging.Log("InnerspaceCommands", "Entering InnerspaceCommands.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
-            _States.CurrentInnerspaceCommandsState = InnerspaceCommandsState.SlaveToMaster_WhatAmmoShouldILoad;
+            Logging.Log("InnerspaceCommands", "Entering SlaveState.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
+            _States.CurrentSlaveState = SlaveState.SlaveToMaster_WhatIsCurrentMissionAction;
             return 0;
         }
         #endregion Slave to Master Innerspace Commands

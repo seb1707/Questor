@@ -9,5 +9,9 @@
         FindMaster,
         IsMasterDocked,
         Done,
+        SlaveToMaster_WhatIsLocationIDofMaster,
+        SlaveToMaster_WhatIsCoordofMaster,
+        SlaveToMaster_WhatIsCurrentMissionAction,
+        SlaveToMaster_WhatAmmoShouldILoad
     }
 }

@@ -912,8 +912,11 @@ namespace Questor.Modules.Activities
 
             if (_waiting)
             {
-                if (DateTime.UtcNow.Subtract(_waitingSince).TotalSeconds < timeout)
+                if (DateTime.UtcNow < _waitingSince.AddSeconds(timeout))
                 {
+                    //
+                    // Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Still WaitingUntilTargeted...", Logging.Debug);
+                    //
                     return;
                 }
 
@@ -925,6 +928,7 @@ namespace Questor.Modules.Activities
                 return;
             }
 
+            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Nothing has us targeted yet: waiting up to [ " + timeout + "sec] starting now.", Logging.Teal);
             // Start waiting
             _waiting = true;
             _waitingSince = DateTime.UtcNow;

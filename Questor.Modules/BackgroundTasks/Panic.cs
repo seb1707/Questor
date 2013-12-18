@@ -90,7 +90,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
                     {
-                        Logging.Log("Cache", "Your corp is involved in a war, Starting panic!", Logging.Orange);
+                        Logging.Log("Cache", "Your corp is involved in a war [" + Cache.Instance.IsCorpInWar + "] and WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "], Starting panic!", Logging.Orange);
                         _States.CurrentPanicState = PanicState.StartPanicking;
                         //return;
                     }
@@ -532,20 +532,20 @@ namespace Questor.Modules.BackgroundTasks
 
                 case PanicState.Panic:
 
-                    if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
-                    {
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.Instance.WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
-                        Cache.Instance.Paused = true;
-                        Settings.Instance.AutoStart = false;
-                        return;
-                    }
-
                     // Do not resume until you're no longer in a capsule
                     if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         break;
 
                     if (Cache.Instance.InStation)
                     {
+                        if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
+                        {
+                            if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.Instance.WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
+                            Cache.Instance.Paused = true;
+                            Settings.Instance.AutoStart = false;
+                            return;
+                        }
+
                         if (Settings.Instance.UseStationRepair)
                         {
                             if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station

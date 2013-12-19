@@ -30,6 +30,7 @@ namespace Questor.Behaviors
         private int _minerNumber = 0;
         private double _lastAsteroidPosition = 0;
         private EntityCache _targetAsteroid;
+        private long _targetAsteroidID;
         private EntityCache _currentBelt;
         private long _asteroidBookmarkForID = 0;
 
@@ -333,58 +334,36 @@ namespace Questor.Behaviors
 
                 case MiningState.Mine:
 
-                    EntityCache asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("kernite")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                    IEnumerable <EntityCache> _asteroidsOnGrid = Cache.Instance.EntitiesOnGrid.Where(i =>i.Distance < (int)Distances.OnGridWithMe && i.CategoryId == (int)CategoryID.Asteroid  ).OrderBy(i => i.Distance);
+                    IEnumerable<EntityCache> _asteroidsInRange = _asteroidsOnGrid.Where(i => i.Distance < 65000).ToList();
+                    EntityCache asteroid = null;
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int) Group.Kernite))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("plagioclase")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Kernite).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Plagioclase))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("pyroxeres")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Plagioclase).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Pyroxeres))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("scordite")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Pyroxeres).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Scordite))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("veldspar")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Scordite).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Veldspar))
+                    {
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Veldspar).OrderBy(i => i.Distance).FirstOrDefault();
+                    }
+
+                    
                     if (asteroid == null)
                     {
                         _States.CurrentMiningState = MiningState.GotoBelt;
@@ -400,7 +379,7 @@ namespace Questor.Behaviors
                     else
                     {
                         Logging.Log("Mining: ", asteroid.Name + "; " + asteroid.GroupId, Logging.White);
-                        _targetAsteroid = asteroid;
+                        _targetAsteroidID = asteroid.Id;
                         _lastApproachCommand = DateTime.UtcNow;
                         _targetAsteroid.Approach();
                         _States.CurrentMiningState = MiningState.MineAsteroid;
@@ -408,13 +387,13 @@ namespace Questor.Behaviors
                     break;
 
                 case MiningState.MineAsteroid:
-                    if (Cache.Instance.EntityById(_targetAsteroid.Id) == null)
+                    if (Cache.Instance.EntityById(_targetAsteroidID) == null)
                     {
                         //asteroid is depleted
                         _States.CurrentMiningState = MiningState.Mine;
                         return;
                     }
-                    _targetAsteroid = Cache.Instance.EntityById(_targetAsteroid.Id);
+                    _targetAsteroid = Cache.Instance.EntityById(_targetAsteroidID);
                     Combat.ProcessState();
 
                     if (Settings.Instance.DebugStates)

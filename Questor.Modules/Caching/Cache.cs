@@ -2027,14 +2027,28 @@ namespace Questor.Modules.Caching
             return station;
         }
 
+
+        public IEnumerable<DirectSolarSystem> _solarSystems;
         public IEnumerable<DirectSolarSystem> SolarSystems
         {
             get
             {
                 try
                 {
-                    List<DirectSolarSystem> solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-                    return solarSystems;
+                    //High sec: 1090
+                    //Low sec: 817
+                    //0.0: 3524 (of which 230 are not connected)
+                    //W-space: 2499
+
+                    //High sec + Low sec = Empire: 1907
+                    //Empire + 0.0 = K-space: 5431
+                    //K-space + W-space = Total: 7930
+                    if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400) 
+                    {
+                        _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();    
+                    }
+                    
+                    return _solarSystems;
                 }
                 catch (Exception exception)
                 {

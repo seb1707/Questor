@@ -375,10 +375,10 @@ namespace Questor.Behaviors
                         break;
                     }
                     
-                    Logging.Log("Mining: [", asteroid.Name + "][" + Math.Round(asteroid.Distance/1000,0) + "k] GroupID [" + asteroid.GroupId + "]", Logging.White);
+                    Logging.Log("Mining: [", "Target Rock is [" + asteroid.Name + "][" + Math.Round(asteroid.Distance/1000,0) + "k] GroupID [" + asteroid.GroupId + "]", Logging.White);
                     _targetAsteroidID = asteroid.Id;
 
-                    if (DateTime.Now > _lastApproachCommand.AddSeconds(Cache.Instance.RandomNumber(3, 6)))
+                    if (DateTime.UtcNow > _lastApproachCommand.AddSeconds(Cache.Instance.RandomNumber(3, 6)))
                     {
                         _lastApproachCommand = DateTime.UtcNow;
                         _targetAsteroid.Approach();

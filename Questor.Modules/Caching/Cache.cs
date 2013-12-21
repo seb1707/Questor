@@ -2813,7 +2813,7 @@ namespace Questor.Modules.Caching
                 // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
                 if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
                 {
-                    return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+                    return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ThenBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).ToList();
                 }
 
                 return null;

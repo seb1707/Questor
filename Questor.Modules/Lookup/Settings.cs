@@ -970,6 +970,7 @@ namespace Questor.Modules.Lookup
                 SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
                 TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
                 TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
+                MiningShipName = (string)CharacterSettingsXml.Element("miningShipName") ?? (string)CommonSettingsXml.Element("miningShipName") ?? "My Exhumer of Destruction";
             }
             catch (Exception exception)
             {

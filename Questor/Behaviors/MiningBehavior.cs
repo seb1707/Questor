@@ -269,11 +269,15 @@ namespace Questor.Behaviors
                     break;
 
                 case MiningState.GotoBelt:
-                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2) //default: 1500ms
+                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2)
+                    {
                         return;
+                    }
 
-                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
-                        break;
+                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation))
+                    {
+                        return;
+                    }
 
                     //
                     // this should goto a mining system bookmark (one of possibly many)
@@ -287,9 +291,7 @@ namespace Questor.Behaviors
                     {
                         if (Cache.Instance.EntityById(_currentBelt.Id).Distance < 65000)
                         {
-                            if (_States.CurrentMiningState == MiningState.GotoBelt)
-                                _States.CurrentMiningState = MiningState.Mine;
-
+                            _States.CurrentMiningState = MiningState.Mine;
                             Traveler.Destination = null;
                         }
                         else
@@ -299,37 +301,31 @@ namespace Questor.Behaviors
                         }
                         break;
                     }
-                    else
+                    
+                    IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.AsteroidBelt && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
+                    EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
+                    _currentBelt = belt;
+
+                    //Traveler.Destination = new MissionBookmarkDestination(belt);
+
+                    if (belt != null)
                     {
-                        IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.AsteroidBelt && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
-                        EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
-                        _currentBelt = belt;
-
-                        //Traveler.Destination = new MissionBookmarkDestination(belt);
-
-                        if (belt != null)
+                        if (belt.Distance < 35000)
                         {
-                            if (belt.Distance < 35000)
-                            {
-                                if (_States.CurrentMiningState == MiningState.GotoBelt)
-                                    _States.CurrentMiningState = MiningState.Mine;
-
-                                Traveler.Destination = null;
-                            }
-                            else
-                            {
-                                belt.WarpTo();
-                                _lastPulse = DateTime.UtcNow;
-                            }
-                            break;
+                            _States.CurrentMiningState = MiningState.Mine;
+                            Traveler.Destination = null;
                         }
                         else
                         {
-                            _States.CurrentMiningState = MiningState.GotoBase;
-                            Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
-                            BeginClosingQuestor();
+                            belt.WarpTo();
+                            _lastPulse = DateTime.UtcNow;
                         }
+                        break;
                     }
+
+                    _States.CurrentMiningState = MiningState.GotoBase;
+                    Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
+                    Settings.Instance.AutoStart = false;
                     break;
 
                 case MiningState.Mine:
@@ -366,7 +362,6 @@ namespace Questor.Behaviors
                     
                     if (asteroid == null)
                     {
-                        _States.CurrentMiningState = MiningState.GotoBelt;
                         EmptyBelts.Add(_currentBelt.Id);
                         DirectBookmark asteroidShortcutBM2 = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
 
@@ -374,15 +369,20 @@ namespace Questor.Behaviors
                         {
                             asteroidShortcutBM2.Delete();
                         }
+
                         Logging.Log("MiningBehavior", "Could not find a suitable Asteroid to mine in this belt.", Logging.White);
+                        _States.CurrentMiningState = MiningState.GotoBelt;
+                        break;
                     }
-                    else
+                    
+                    Logging.Log("Mining: [", asteroid.Name + "][" + Math.Round(asteroid.Distance/1000,0) + "k] GroupID [" + asteroid.GroupId + "]", Logging.White);
+                    _targetAsteroidID = asteroid.Id;
+
+                    if (DateTime.Now > _lastApproachCommand.AddSeconds(Cache.Instance.RandomNumber(3, 6)))
                     {
-                        Logging.Log("Mining: ", asteroid.Name + "; " + asteroid.GroupId, Logging.White);
-                        _targetAsteroidID = asteroid.Id;
                         _lastApproachCommand = DateTime.UtcNow;
                         _targetAsteroid.Approach();
-                        _States.CurrentMiningState = MiningState.MineAsteroid;
+                        _States.CurrentMiningState = MiningState.MineAsteroid;    
                     }
                     break;
 

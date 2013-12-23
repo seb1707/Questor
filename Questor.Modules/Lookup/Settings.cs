@@ -136,6 +136,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLootValue { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMaintainConsoleLogs { get; set; }
+        public bool DebugMiningBehavior { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
@@ -777,6 +778,7 @@ namespace Questor.Modules.Lookup
             DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
             DebugLootValue = (bool?)CharacterSettingsXml.Element("debugLootValue") ?? (bool?)CommonSettingsXml.Element("debugLootValue") ?? false;
             DebugMaintainConsoleLogs = (bool?)CharacterSettingsXml.Element("debugMaintainConsoleLogs") ?? (bool?)CommonSettingsXml.Element("debugMaintainConsoleLogs") ?? false;
+            DebugMiningBehavior = (bool?)CharacterSettingsXml.Element("debugMiningBehavior") ?? (bool?)CommonSettingsXml.Element("debugMiningBehavior") ?? false;
             DebugMissionFittings = (bool?)CharacterSettingsXml.Element("debugMissionFittings") ?? (bool?)CommonSettingsXml.Element("debugMissionFittings") ?? false;
             DebugMoveTo = (bool?)CharacterSettingsXml.Element("debugMoveTo") ?? (bool?)CommonSettingsXml.Element("debugMoveTo") ?? false;
             DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
@@ -1552,6 +1554,7 @@ namespace Questor.Modules.Lookup
                 DebugLootWrecks = false;
                 DebugLootValue = false;
                 DebugMaintainConsoleLogs = false;
+                DebugMiningBehavior = false;
                 DebugMissionFittings = false;
                 DebugMoveTo = false;
                 DebugNavigateOnGrid = false;

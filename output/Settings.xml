@@ -83,6 +83,7 @@
   <useInnerspace>true</useInnerspace>
   <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
   <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
+  <eveServername>Tranquility</eveServername> <!-- the US server is Tranquility, the CN server is Serenity, this is used for localization purposes -->
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->

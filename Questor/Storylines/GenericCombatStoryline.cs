@@ -248,7 +248,10 @@ namespace Questor.Storylines
                     //if (missionDestination == null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [ NULL ] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
                     if (missionDestination == null || missionDestination.AgentId != Cache.Instance.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
-                        const string nameOfBookmark = "Encounter";
+                        string nameOfBookmark ="";
+                        if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+                        if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+                        if (nameOfBookmark == "") nameOfBookmark = "Encounter";
                         Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + Cache.Instance.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.White);
                         Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
                     }

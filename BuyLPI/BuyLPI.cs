@@ -14,7 +14,6 @@ namespace BuyLPI
     using System.Linq;
     using System.Threading;
     using DirectEve;
-    //using InnerSpaceAPI;
     using System.Globalization;
     using Questor.Modules.Logging;
     using Questor.Modules.Lookup;

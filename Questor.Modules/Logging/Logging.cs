@@ -18,7 +18,6 @@ namespace Questor.Modules.Logging
     using System.Windows.Forms;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
-    //using Questor.Modules.States;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 

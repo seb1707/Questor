@@ -17,9 +17,7 @@ namespace Questor.Modules.Lookup
     using System.IO;
     using System.Reflection;
     using System.Xml.Linq;
-    using LavishScriptAPI;
     using System.Globalization;
-    using InnerSpaceAPI;
     using Questor.Modules.Actions;
     using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
@@ -1101,23 +1099,6 @@ namespace Questor.Modules.Lookup
             WalletBalanceChangeLogOffDelay = (int?)CharacterSettingsXml.Element("walletbalancechangelogoffdelay") ?? (int?)CommonSettingsXml.Element("walletbalancechangelogoffdelay") ?? 30;
             WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
             SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
-            if (UseInnerspace)
-            {
-                LavishScriptObject lavishsriptObject = LavishScript.Objects.GetObject("LavishScript");
-                if (lavishsriptObject == null)
-                {
-                    InnerSpace.Echo("Testing: object not found");
-                }
-                else
-                {
-                    /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
-                    //var version = lavishsriptObject.GetValue<float>();
-                    // //var TestISVariable = "Game"
-                    // //LavishIsBoxerCharacterSet = LavishsriptObject.
-                    //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
-                }
-            }
 
             //
             // Enable / Disable the different types of logging that are available

@@ -96,8 +96,8 @@ namespace Questor.Modules.Actions
 
 				case SkillTrainerState.GenerateInnerspaceProfile:
 					Logging.Log("SkillTrainer", "Generating Innerspace Profile for this toon: running [GenerateInnerspaceProfile.iss] from your innerspace scripts directory", Logging.Teal);
-					LavishScript.ExecuteCommand("echo runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
-					LavishScript.ExecuteCommand("runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
+                    if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("echo runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
+                    if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
 					_State.CurrentSkillTrainerState = SkillTrainerState.Idle;
 					break;
 

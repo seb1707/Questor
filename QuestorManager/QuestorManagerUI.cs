@@ -177,12 +177,11 @@ namespace QuestorManager
             RefreshAvailableXMLJobs();
             Cache.Instance.DirectEve.OnFrame += OnFrame;
 
-            //if (Settings.Instance.UseInnerspace)
-            //{
-            LavishScript.Commands.AddCommand("QMStart", StartProcessing);
-            //LavishScript.Commands.AddCommand("SetQuestorManagertoIdle", SetQuestorManagertoIdle);
-            LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
-            //}
+            if (Settings.Instance.UseInnerspace)
+            {
+                LavishScript.Commands.AddCommand("QMStart", StartProcessing);
+                LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
+            }
         }
 
         private void InitializeTraveler()

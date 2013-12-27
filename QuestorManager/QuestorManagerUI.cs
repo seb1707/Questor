@@ -192,7 +192,7 @@ namespace QuestorManager
                 _changed = true;
             }
 
-            if (_bookmarks == null)
+            if (_bookmarks == null || !_bookmarks.Any())
             {
                 // Dirty hack to load all category id's (needed because categoryId is lazy-loaded by the bookmarks call)
                 Cache.Instance.DirectEve.Bookmarks.All(b => b.CategoryId != 0);
@@ -761,10 +761,22 @@ namespace QuestorManager
             try
             {
                 SearchResults.Items.Clear();
-                //SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
-                SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
-                SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
 
+                if (_bookmarks != null && _bookmarks.Any())
+                {
+                    SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));    
+                }
+                
+                if (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
+                {
+                    SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));    
+                }
+
+                if (_stations != null && _stations.Any())
+                {
+                    SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));    
+                }
+                
                 // Automatically select the only item
                 if (SearchResults.Items.Count == 1)
                 {

@@ -28,8 +28,7 @@ namespace Questor.Modules.Caching
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
     using DirectEve;
-    //using InnerSpaceAPI;
-
+    
     public class Cache
     {
         /// <summary>

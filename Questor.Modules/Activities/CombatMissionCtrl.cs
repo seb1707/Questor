@@ -993,6 +993,11 @@ namespace Questor.Modules.Activities
                     _done = true;
                 }    
             }
+            else
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "no bastion modules fitted!", Logging.Teal);
+                _done = true;
+            }
             
             if (_done)
             {

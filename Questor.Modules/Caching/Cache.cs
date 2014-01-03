@@ -2044,7 +2044,12 @@ namespace Questor.Modules.Caching
                     //K-space + W-space = Total: 7930
                     if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400) 
                     {
-                        _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();    
+                        if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                        {
+                            _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();    
+                        }
+
+                        return null;
                     }
                     
                     return _solarSystems;

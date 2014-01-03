@@ -546,7 +546,7 @@ namespace Questor.Modules.BackgroundTasks
                             return;
                         }
 
-                        if (Settings.Instance.UseStationRepair)
+                        if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.UseStationRepair)
                         {
                             if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
                         }

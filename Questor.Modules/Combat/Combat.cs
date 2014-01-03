@@ -873,7 +873,7 @@ namespace Questor.Modules.Combat
                 if (bastionMod.IsDeactivating)
                     continue;
 
-                if (activate)
+                if (!bastionMod.IsActive)
                 {
                     Logging.Log("Combat", "Activating bastion [" + _weaponNumber + "]", Logging.Teal);
                     bastionMod.Click();

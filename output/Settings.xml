@@ -225,9 +225,7 @@
 
   <!-- Create salvage bookmarks once a pocket has been cleared and there are wrecks/cans left
        Note: All salvage bookmarks will be in this naming format:  BookmarkPrefix [time]
-       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked 
-       Warning: The bot could become slow with a lot of salvage-bookmarks, make sure that
-       after mission salvaging is enabled or that you manually delete bookmarks! -->
+       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked -->
   <createSalvageBookmarks>True</createSalvageBookmarks><!-- default is true -->
   <!-- CreateSalvageBookmarksIn is used for salvaging, Player is only needed for non-dedicated, and Corp is used for dedicated (character mode: dps is non-dedicated, salvage is -->
   <createSalvageBookmarksIn>Player</createSalvageBookmarksIn><!-- default is "Player", other option is "Corp" -->

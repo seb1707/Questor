@@ -577,7 +577,7 @@
   <!-- SKILL TRAINING SETTINGS       -->
   <!--                                                        -->
   <!-- If there is another toon on this account training at the moment this should be false -->
-  <thisToonShouldBeTrainingSkills>true</thisToonShouldBeTrainingSkills>
+  <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
 
   <!--                                                          -->
   <!-- MISSION BLACKLIST SETTINGS  -->

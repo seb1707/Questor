@@ -2042,17 +2042,22 @@ namespace Questor.Modules.Caching
                     //High sec + Low sec = Empire: 1907
                     //Empire + 0.0 = K-space: 5431
                     //K-space + W-space = Total: 7930
-                    if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400) 
+                    if ((Cache.Instance.InSpace || Cache.Instance.InStation) && Cache.Instance.LastSessionChange.AddSeconds(30) > DateTime.UtcNow)
                     {
-                        if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                        if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400)
                         {
-                            _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();    
+                            if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                            {
+                                _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                            }
+
+                            return null;
                         }
 
-                        return null;
+                        return _solarSystems;    
                     }
-                    
-                    return _solarSystems;
+
+                    return null;
                 }
                 catch (Exception exception)
                 {

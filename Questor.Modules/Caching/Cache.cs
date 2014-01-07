@@ -2046,11 +2046,16 @@ namespace Questor.Modules.Caching
                     {
                         if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400)
                         {
-                            if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                            if (Cache.Instance.DirectEve.SolarSystems.Any())
                             {
-                                _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-                            }
+                                if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                                {
+                                    _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                                }
 
+                                return null;
+                            }
+                            
                             return null;
                         }
 

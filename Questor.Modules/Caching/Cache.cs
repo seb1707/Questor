@@ -2059,9 +2059,13 @@ namespace Questor.Modules.Caching
                             return null;
                         }
 
-                        return _solarSystems;    
+                        return _solarSystems;
                     }
 
+                    return null;
+                }
+                catch (NullReferenceException) // Not sure why this happens, but seems to be no problem
+                {
                     return null;
                 }
                 catch (Exception exception)

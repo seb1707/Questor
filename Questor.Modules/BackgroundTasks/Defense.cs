@@ -735,6 +735,15 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     bool deactivate = false;
 
+                    //we cant move in bastion mode, do not try
+                    List<ModuleCache> bastionModules = null;
+                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                    if (bastionModules.Any(i => i.IsActive))
+                    {
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, deactivating speed module", Logging.Debug);
+                        deactivate = true;
+                    }
+
                     if (!Cache.Instance.IsApproachingOrOrbiting(0))
                     {
                         deactivate = true;
@@ -778,6 +787,17 @@ namespace Questor.Modules.BackgroundTasks
                 if (!module.IsActive && !module.InLimboState)
                 {
                     bool activate = false;
+
+                    //we cant move in bastion mode, do not try
+                    List<ModuleCache> bastionModules = null;
+                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                    if (bastionModules.Any(i => i.IsActive))
+                    {
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, do not attempt to activate speed module", Logging.Debug);
+                        activate = false;
+                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
+                        return;
+                    }
 
                     if (Cache.Instance.IsApproachingOrOrbiting(0) && Cache.Instance.Approaching != null)
                     {

@@ -79,6 +79,7 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugActivateBastion { get; set; }
         public bool DebugAddDronePriorityTarget { get; set; }
         public bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
@@ -721,6 +722,7 @@ namespace Questor.Modules.Lookup
             // Debug Settings
             //
             DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
+            DebugActivateBastion = (bool?)CharacterSettingsXml.Element("debugActivateBastion") ?? (bool?)CommonSettingsXml.Element("debugActivateBastion") ?? false;
             DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
             DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
             DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;

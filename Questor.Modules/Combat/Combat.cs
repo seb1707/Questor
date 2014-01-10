@@ -816,12 +816,6 @@ namespace Questor.Modules.Combat
 
         public static bool ActivateBastion(bool activate = false)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextBastionAction)
-            {
-                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "NextBastionAction [" + Cache.Instance.NextBastionAction.Subtract(DateTime.UtcNow).Seconds + "] seconds, waiting...", Logging.Debug);
-                return false;
-            }
-
             List<ModuleCache> bastionModules = null;
             bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (!bastionModules.Any()) return true;
@@ -829,16 +823,22 @@ namespace Questor.Modules.Combat
 
             if (!Cache.Instance.PotentialCombatTargets.Where(e => e.Distance < Cache.Instance.WeaponRange).Any(e => e.IsTarget || e.IsTargeting) && CombatMissionCtrl.DeactivateIfNothingTargetedWithinRange)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "NextBastionModeDeactivate set to 2 sec ago: We have no targets in range and DeactivateIfNothingTargetedWithinRange [ " + CombatMissionCtrl.DeactivateIfNothingTargetedWithinRange + " ]", Logging.Debug);
+                if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "NextBastionModeDeactivate set to 2 sec ago: We have no targets in range and DeactivateIfNothingTargetedWithinRange [ " + CombatMissionCtrl.DeactivateIfNothingTargetedWithinRange + " ]", Logging.Debug);
                 Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(-2);
             }
 
             if (_States.CurrentPanicState == PanicState.Panicking || _States.CurrentPanicState == PanicState.StartPanicking)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "NextBastionModeDeactivate set to 2 sec ago: We are in panic!", Logging.Debug);
+                if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "NextBastionModeDeactivate set to 2 sec ago: We are in panic!", Logging.Debug);
                 Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(-2);
             }
-            
+
+            if (DateTime.UtcNow < Cache.Instance.NextBastionAction)
+            {
+                if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "NextBastionAction [" + Cache.Instance.NextBastionAction.Subtract(DateTime.UtcNow).Seconds + "] seconds, waiting...", Logging.Debug);
+                return false;
+            }
+
             // Find the first active weapon
             // Assist this weapon
             _weaponNumber = 0;
@@ -846,22 +846,22 @@ namespace Questor.Modules.Combat
             {
                 _weaponNumber++;
 
-                if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "[" + _weaponNumber + "] BastionModule: IsActive [" + bastionMod.IsActive + "] IsDeactivating [" + bastionMod.IsDeactivating + "] InLimboState [" + bastionMod.InLimboState + "] Duration [" + bastionMod.Duration + "] TypeId [" + bastionMod.TypeId + "]", Logging.Debug);
+                if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "[" + _weaponNumber + "] BastionModule: IsActive [" + bastionMod.IsActive + "] IsDeactivating [" + bastionMod.IsDeactivating + "] InLimboState [" + bastionMod.InLimboState + "] Duration [" + bastionMod.Duration + "] TypeId [" + bastionMod.TypeId + "]", Logging.Debug);
 
                 //
                 // Deactivate (if needed)
                 //
                 // Are we on the right target?
-                if (bastionMod.IsActive && !bastionMod.IsDeactivating && DateTime.UtcNow > Cache.Instance.NextBastionModeDeactivate)
+                if (bastionMod.IsActive && !bastionMod.IsDeactivating)
                 {
-                    if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive and Is not yet deactivating (we only want one cycle), attempting to Click...", Logging.Debug);
+                    if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "IsActive and Is not yet deactivating (we only want one cycle), attempting to Click...", Logging.Debug);
                     bastionMod.Click();
                     return true;
                 }
 
                 if (bastionMod.IsActive)
                 {
-                    if (Settings.Instance.DebugDefense) Logging.Log("ActivateBastion", "IsActive: assuming it is deactivating on the next cycle.", Logging.Debug);
+                    if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "IsActive: assuming it is deactivating on the next cycle.", Logging.Debug);
                     return true;
                 }
 

@@ -5,6 +5,7 @@
   <!--                                                -->
   
   <debugActivateGate>false</debugActivateGate>
+  <debugActivateBastion>false</debugActivateBastion>
   <debugActivateWeapons>false</debugActivateWeapons>
   <debugAddDronePriorityTarget>false</debugAddDronePriorityTarget>
   <debugAddPrimaryWeaponPriorityTarget>false</debugAddPrimaryWeaponPriorityTarget>

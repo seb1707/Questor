@@ -648,6 +648,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.NextSalvageTrip = DateTime.UtcNow;
                             break;
                         }
+
                         Logging.Log("Salvage.LootWrecks", "We are full: we are using a behavior that does not have a supported place to auto dump loot: error!", Logging.Orange);
                         break;
                     }
@@ -778,6 +779,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.LastJettison = DateTime.UtcNow;
                                 return;
                             }
+
                             return;
                         }
 

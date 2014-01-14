@@ -1427,7 +1427,7 @@ namespace Questor.Modules.Caching
                 return _unlootedContainers ?? (_unlootedContainers = Cache.Instance.EntitiesOnGrid.Where(e =>
                           e.IsContainer &&
                           e.HaveLootRights &&
-                          (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(
+                          (!LootedContainers.Contains(e.Id))).OrderBy(
                               e => e.Distance).
                               ToList());
             }

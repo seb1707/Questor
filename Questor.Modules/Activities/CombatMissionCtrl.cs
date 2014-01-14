@@ -82,7 +82,7 @@ namespace Questor.Modules.Activities
             if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Entered: BookmarkPocketForSalvaging", Logging.Debug);
             if ((Settings.Instance.LootEverything || Settings.Instance.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion) && Cache.Instance.UnlootedContainers.Count() > Settings.Instance.MinimumWreckCount)
             {
-                if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] MinimumWreckCount [" + Settings.Instance.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
+                if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] UnLootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "LootedContainers [" + Cache.Instance.LootedContainers.Count() + "] MinimumWreckCount [" + Settings.Instance.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
                 List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
                 double RangeToConsiderWrecksDuringLootAll = 0;
 

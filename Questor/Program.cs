@@ -708,6 +708,7 @@ namespace Questor
                     Logging.Log("Startup", "DirectEVE Requires Active Support Instances to use the convenient like Auto-Login, Market Functions (Valuedump and Market involving storylines) among other features.", Logging.White);
                     Logging.Log("Startup", "Make sure you have support instances and that you have downloaded your directeve.lic file and placed it in the .net programs folder with your directeve.dll", Logging.White);
                     _humanInterventionRequired = true;
+                    return;
                 }
 
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)

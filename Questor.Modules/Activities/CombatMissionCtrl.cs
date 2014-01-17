@@ -80,27 +80,26 @@ namespace Questor.Modules.Activities
         private bool BookmarkPocketForSalvaging()
         {
             if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Entered: BookmarkPocketForSalvaging", Logging.Debug);
-            if ((Settings.Instance.LootEverything || Settings.Instance.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion) && Cache.Instance.UnlootedContainers.Count() > Settings.Instance.MinimumWreckCount)
+            double RangeToConsiderWrecksDuringLootAll = 0;
+            List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
+            if (tractorBeams.Count > 0)
+            {
+                RangeToConsiderWrecksDuringLootAll = Math.Min(tractorBeams.Min(t => t.OptimalRange), Cache.Instance.ActiveShip.MaxTargetRange);
+            }
+            else
+            {
+                RangeToConsiderWrecksDuringLootAll = 1500;
+            }
+
+            if ((Settings.Instance.LootEverything || Settings.Instance.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion) && Cache.Instance.UnlootedContainers.Count(i => i.Distance < RangeToConsiderWrecksDuringLootAll) > Settings.Instance.MinimumWreckCount)
             {
                 if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] UnLootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "LootedContainers [" + Cache.Instance.LootedContainers.Count() + "] MinimumWreckCount [" + Settings.Instance.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
-                List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
-                double RangeToConsiderWrecksDuringLootAll = 0;
-
-                if (tractorBeams.Count > 0)
+                
+                if (Cache.Instance.UnlootedContainers.Count(i => i.Distance < RangeToConsiderWrecksDuringLootAll) > 0)
                 {
-                    RangeToConsiderWrecksDuringLootAll = Math.Min(tractorBeams.Min(t => t.OptimalRange), Cache.Instance.ActiveShip.MaxTargetRange);
-                }
-                else
-                {
-                    RangeToConsiderWrecksDuringLootAll = 1500;
-                }
-
-                if (Cache.Instance.UnlootedContainers.Count(w => w.Distance <= RangeToConsiderWrecksDuringLootAll) > 0)
-                {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "if (Cache.Instance.UnlootedContainers.Count [" + Cache.Instance.UnlootedContainers.Count() + "] (w => w.Distance <= RangeToConsiderWrecksDuringLootAll [" + RangeToConsiderWrecksDuringLootAll + "]) > 0)", Logging.Debug);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "if (Cache.Instance.UnlootedContainers.Count [" + Cache.Instance.UnlootedContainers.Count(i => i.Distance < RangeToConsiderWrecksDuringLootAll) + "] (w => w.Distance <= RangeToConsiderWrecksDuringLootAll [" + RangeToConsiderWrecksDuringLootAll + "]) > 0)", Logging.Debug);
                     return false;    
                 }
-
                 
                 if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Settings.Instance.LootEverything + "] We have LootEverything set to on. We cant have any need for the pocket bookmarks... can we?!", Logging.Debug);
                 return true;
@@ -1852,7 +1851,7 @@ namespace Questor.Modules.Activities
                 if (!done)
                 {
                     // We assume that the ship's cargo will be opened somewhere else
-                    if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
+                    if (Cache.Instance.CurrentShipsCargo != null)
                         done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName));
                 }
 

@@ -7,6 +7,7 @@
         SlaveToMaster_WhatIsCoordofMaster,
         SlaveToMaster_WhatIsCurrentMissionAction,
         SlaveToMaster_WhatAmmoShouldILoad,
+        SlaveToMaster_MastersListOfPrimaryWeaponPriorityTargets,
         MasterToSlaves_SetDestinationLocationID,
         MasterToSlaves_MasterCoordinatesAre,
         MasterToSlaves_MasterIsWarpingTo,

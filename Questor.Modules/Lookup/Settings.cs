@@ -123,6 +123,7 @@ namespace Questor.Modules.Lookup
         public bool DebugHangars { get; set; }
         public bool DebugHasExploded { get; set; }
         public bool DebugIdle { get; set; }
+        public bool DebugInnerspaceEvents { get; set; }
         public bool DebugInSpace { get; set; }
         public bool DebugInStation { get; set; }
         public bool DebugInWarp { get; set; }
@@ -764,6 +765,7 @@ namespace Questor.Modules.Lookup
             DebugHangars = (bool?)CharacterSettingsXml.Element("debugHangars") ?? (bool?)CommonSettingsXml.Element("debugHangars") ?? false;
             DebugHasExploded = (bool?)CharacterSettingsXml.Element("debugHasExploded") ?? (bool?)CommonSettingsXml.Element("debugHasExploded") ?? false;
             DebugIdle = (bool?)CharacterSettingsXml.Element("debugIdle") ?? (bool?)CommonSettingsXml.Element("debugIdle") ?? false;
+            DebugInnerspaceEvents = (bool?)CharacterSettingsXml.Element("debugInnerspaceEvents") ?? (bool?)CommonSettingsXml.Element("debugInnerspaceEvents") ?? false;
             DebugInSpace = (bool?)CharacterSettingsXml.Element("debugInSpace") ?? (bool?)CommonSettingsXml.Element("debugInSpace") ?? false;
             DebugInStation = (bool?)CharacterSettingsXml.Element("debugInStation") ?? (bool?)CommonSettingsXml.Element("debugInStation") ?? false;
             DebugInWarp = (bool?)CharacterSettingsXml.Element("debugInWarp") ?? (bool?)CommonSettingsXml.Element("debugInWarp") ?? false;

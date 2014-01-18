@@ -237,10 +237,10 @@ namespace Questor.Modules.Misc
                 // Slaves To Master Requests
                 //
                 //LavishScript.Events.RegisterEvent()   ("SlaveToMaster_WhatIsLocationIDofMaster", SlaveToMaster_WhatIsLocationIDofMaster_InnerspaceEvent);     //Master should reply: MasterToSlaves_SetDestinationLocationID
-                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", SlaveToMaster_WhatIsCoordofMaster_InnerspaceEvent);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
-                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", SlaveToMaster_WhatIsCurrentMissionAction_InnerspaceEvent);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
-                //LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", SlaveToMaster_WhatAmmoShouldILoad_InnerspaceEvent);                     //Master should reply: 
-                //LavishScript.Commands.AddCommand("SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets", SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatIsCoordofMaster", QuerySlaveToMaster_WhatIsCoordofMaster);                     //Master should reply: MasterToSlaves_MasterCoordinatesAre_InnerspaceCommand
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatMissionIsCurrentMissionAction", QuerySlaveToMaster_WhatIsCurrentMissionAction);//Master should reply: MasterToSlaves_DoThisMissionAction_InnerspaceCommand
+                LavishScript.Commands.AddCommand("SlaveToMaster_WhatAmmoShouldILoad", QuerySlaveToMaster_WhatAmmoShouldILoad);                     //Master should reply: 
+                LavishScript.Commands.AddCommand("SlaveToMaster_MyListOfPrimaryWeaponPriorityTargets", QuerySlaveToMaster_MastersListOfPrimaryWeaponPriorityTargets);   //Master should reply: 
                 
                 //
                 // Master To Slaves Requests
@@ -335,7 +335,7 @@ namespace Questor.Modules.Misc
         #endregion List Innerspace Commands
 
         #region Slave to Master Innerspace Commands
-        private static int SlaveToMaster_WhatIsLocationIDofMaster_test(string[] args)
+        private static int QuerySlaveToMaster_WhatIsCoordofMaster(string[] args)
         {
             if (args.Length != 1)
             {
@@ -348,20 +348,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int SlaveToMaster_WhatIsCoordofMaster_test(string[] args)
-        {
-            if (args.Length != 1)
-            {
-                Logging.Log("InnerspaceEvents", "SlaveToMaster_WhatIsCoordofMaster - What are the coordinates of Master", Logging.White);
-                return -1;
-            }
-
-            Logging.Log("InnerspaceEvents", "Entering InnerspaceEvents.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
-            _States.CurrentInnerspaceEventsState = InnerspaceEventsState.SlaveToMaster_WhatIsCoordofMaster;
-            return 0;
-        }
-
-        private static int SlaveToMaster_WhatIsCurrentMissionAction_test(string[] args)
+        private static int QuerySlaveToMaster_WhatIsCurrentMissionAction(string[] args)
         {
             if (args.Length != 1)
             {
@@ -374,7 +361,7 @@ namespace Questor.Modules.Misc
             return 0;
         }
 
-        private static int SlaveToMaster_WhatAmmoShouldILoad_test(string[] args)
+        private static int QuerySlaveToMaster_WhatAmmoShouldILoad(string[] args)
         {
             if (args.Length != 1)
             {
@@ -386,6 +373,20 @@ namespace Questor.Modules.Misc
             _States.CurrentInnerspaceEventsState = InnerspaceEventsState.SlaveToMaster_WhatAmmoShouldILoad;
             return 0;
         }
+
+        private static int QuerySlaveToMaster_MastersListOfPrimaryWeaponPriorityTargets(string[] args)
+        {
+            if (args.Length != 1)
+            {
+                Logging.Log("InnerspaceEvents", "SlaveToMaster_MastersListOfPrimaryWeaponPriorityTargets - Query the List of Priority Targets from the master", Logging.White);
+                return -1;
+            }
+
+            Logging.Log("InnerspaceEvents", "Entering InnerspaceEvents.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
+            _States.CurrentInnerspaceEventsState = InnerspaceEventsState.SlaveToMaster_MastersListOfPrimaryWeaponPriorityTargets;
+            return 0;
+        }
+        
         #endregion Slave to Master Innerspace Commands
 
         #region Master To Slave Innerspace Commands
@@ -920,12 +921,11 @@ namespace Questor.Modules.Misc
             {
                 case InnerspaceEventsState.Idle:
                     break;
-
-
+                    
                 case InnerspaceEventsState.SlaveToMaster_WhatIsLocationIDofMaster:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsLocationIDofMaster", Logging.Debug);
                         if (!InnerspaceEvents.SlaveToMaster_WhatIsLocationIDofMaster()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -934,7 +934,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.SlaveToMaster_WhatIsCoordofMaster:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsCoordofMaster", Logging.Debug);
                         if (!InnerspaceEvents.SlaveToMaster_WhatIsCoordofMaster()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                         
@@ -944,7 +944,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.SlaveToMaster_WhatIsCurrentMissionAction:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatIsCurrentMissionAction", Logging.Debug);
                         if (!InnerspaceEvents.SlaveToMaster_WhatIsCurrentMissionAction()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -953,7 +953,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.SlaveToMaster_WhatAmmoShouldILoad:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.SlaveToMaster_WhatAmmoShouldILoad", Logging.Debug);
                         if (!InnerspaceEvents.SlaveToMaster_WhatAmmoShouldILoad()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -962,7 +962,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_SetDestinationLocationID:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SetDestinationLocationID", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SetDestinationLocationID", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_SetDestinationLocationID()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -971,7 +971,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_MasterIsWarpingTo:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_MasterIsWarpingTo", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_MasterIsWarpingTo", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_MasterIsWarpingTo()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -980,7 +980,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_SlavesGotoBase:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SlavesGotoBase", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SlavesGotoBase", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_SlavesGotoBase()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                         
@@ -990,7 +990,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_DoThisMissionAction:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_DoThisMissionAction", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_DoThisMissionAction", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_DoThisMissionAction()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                         
@@ -1000,7 +1000,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_DoNotLootItemName:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_DoNotLootItemName", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_DoNotLootItemName", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_DoNotLootItemName()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                         
@@ -1010,7 +1010,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_SetAutoStart:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SetAutoStart", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_SetAutoStart", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_SetAutoStart()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -1019,7 +1019,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_WhereAreYou:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_WhereAreYou", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_WhereAreYou", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_WhereAreYou()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -1028,7 +1028,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_WhatAreYouShooting:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_WhatAreYouShooting", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_WhatAreYouShooting", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_WhatAreYouShooting()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }
@@ -1037,7 +1037,7 @@ namespace Questor.Modules.Misc
                 case InnerspaceEventsState.MasterToSlaves_ShootThisEntityID:
                     if (!Cache.Instance.InWarp)
                     {
-                        Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_ShootThisEntityID", Logging.Debug);
+                        if (Settings.Instance.DebugInnerspaceEvents) Logging.Log("InnerspaceCommands", "InnerspaceEventsState.MasterToSlaves_ShootThisEntityID", Logging.Debug);
                         if (!InnerspaceEvents.MasterToSlaves_ShootThisEntityID()) return;
                         _States.CurrentInnerspaceEventsState = InnerspaceEventsState.Idle;
                     }

@@ -17,9 +17,7 @@ namespace Questor.Modules.Lookup
     using System.IO;
     using System.Reflection;
     using System.Xml.Linq;
-    using LavishScriptAPI;
     using System.Globalization;
-    using InnerSpaceAPI;
     using Questor.Modules.Actions;
     using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
@@ -81,6 +79,7 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugActivateBastion { get; set; }
         public bool DebugAddDronePriorityTarget { get; set; }
         public bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
@@ -137,6 +136,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLootValue { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMaintainConsoleLogs { get; set; }
+        public bool DebugMiningBehavior { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
@@ -172,7 +172,8 @@ namespace Questor.Modules.Lookup
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
-
+        public string EveServerName { get; set; }
+        
         public string CharacterToAcceptInvitesFrom { get; set; }
 
         //
@@ -721,6 +722,7 @@ namespace Questor.Modules.Lookup
             // Debug Settings
             //
             DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
+            DebugActivateBastion = (bool?)CharacterSettingsXml.Element("debugActivateBastion") ?? (bool?)CommonSettingsXml.Element("debugActivateBastion") ?? false;
             DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
             DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
             DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
@@ -778,6 +780,7 @@ namespace Questor.Modules.Lookup
             DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
             DebugLootValue = (bool?)CharacterSettingsXml.Element("debugLootValue") ?? (bool?)CommonSettingsXml.Element("debugLootValue") ?? false;
             DebugMaintainConsoleLogs = (bool?)CharacterSettingsXml.Element("debugMaintainConsoleLogs") ?? (bool?)CommonSettingsXml.Element("debugMaintainConsoleLogs") ?? false;
+            DebugMiningBehavior = (bool?)CharacterSettingsXml.Element("debugMiningBehavior") ?? (bool?)CommonSettingsXml.Element("debugMiningBehavior") ?? false;
             DebugMissionFittings = (bool?)CharacterSettingsXml.Element("debugMissionFittings") ?? (bool?)CommonSettingsXml.Element("debugMissionFittings") ?? false;
             DebugMoveTo = (bool?)CharacterSettingsXml.Element("debugMoveTo") ?? (bool?)CommonSettingsXml.Element("debugMoveTo") ?? false;
             DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
@@ -816,7 +819,7 @@ namespace Questor.Modules.Lookup
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
-
+            EveServerName = (string)CharacterSettingsXml.Element("eveServerName") ?? (string)CommonSettingsXml.Element("eveServerName") ?? "Tranquility";
             //
             // Misc Settings
             //
@@ -971,6 +974,7 @@ namespace Questor.Modules.Lookup
                 SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
                 TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
                 TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
+                MiningShipName = (string)CharacterSettingsXml.Element("miningShipName") ?? (string)CommonSettingsXml.Element("miningShipName") ?? "My Exhumer of Destruction";
             }
             catch (Exception exception)
             {
@@ -1099,23 +1103,6 @@ namespace Questor.Modules.Lookup
             WalletBalanceChangeLogOffDelay = (int?)CharacterSettingsXml.Element("walletbalancechangelogoffdelay") ?? (int?)CommonSettingsXml.Element("walletbalancechangelogoffdelay") ?? 30;
             WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
             SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
-            if (UseInnerspace)
-            {
-                LavishScriptObject lavishsriptObject = LavishScript.Objects.GetObject("LavishScript");
-                if (lavishsriptObject == null)
-                {
-                    InnerSpace.Echo("Testing: object not found");
-                }
-                else
-                {
-                    /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
-                    //var version = lavishsriptObject.GetValue<float>();
-                    // //var TestISVariable = "Game"
-                    // //LavishIsBoxerCharacterSet = LavishsriptObject.
-                    //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
-                }
-            }
 
             //
             // Enable / Disable the different types of logging that are available
@@ -1552,6 +1539,7 @@ namespace Questor.Modules.Lookup
                 DebugLootWrecks = false;
                 DebugLootValue = false;
                 DebugMaintainConsoleLogs = false;
+                DebugMiningBehavior = false;
                 DebugMissionFittings = false;
                 DebugMoveTo = false;
                 DebugNavigateOnGrid = false;

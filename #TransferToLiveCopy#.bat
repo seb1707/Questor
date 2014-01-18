@@ -127,12 +127,6 @@ if not exist "%innerspacedotnetdirectory%Schedules.xml" copy /y ".\output\Schedu
 @Echo. 
 @Echo *** only copy Skill_Prerequisites.xml if one does not already exist (it contains skill prerequisites which allows questor to determine which skills can be injected)
 if not exist "%innerspacedotnetdirectory%Skill_Prerequisites.xml" copy /y ".\output\Skill_Prerequisites.xml" "%innerspacedotnetdirectory%"
-@Echo.
-@Echo *** only copy StartingQuestorSafetyScript.iss if one does not already exist
-if not exist "%innerspacedotnetdirectory%..\scripts\StartingQuestorSafetyScript.iss" copy /y ".\output\StartingQuestorSafetyScript.iss" "%innerspacedotnetdirectory%..\scripts\"
-@Echo.
-@Echo *** only copy ISXStealth.dll if one does not already exist
-if not exist "%innerspacedotnetdirectory%..\Extensions\ISXStealth.dll" copy /y ".\ISXStealth\ISXStealth.dll" "%innerspacedotnetdirectory%..\Extensions\"
 @Echo off
 
 goto :done

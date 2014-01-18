@@ -28,8 +28,7 @@ namespace Questor.Modules.Caching
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
     using DirectEve;
-    //using InnerSpaceAPI;
-
+    
     public class Cache
     {
         /// <summary>
@@ -1428,7 +1427,7 @@ namespace Questor.Modules.Caching
                 return _unlootedContainers ?? (_unlootedContainers = Cache.Instance.EntitiesOnGrid.Where(e =>
                           e.IsContainer &&
                           e.HaveLootRights &&
-                          (!LootedContainers.Contains(e.Id) || e.GroupId == (int)Group.Wreck)).OrderBy(
+                          (!LootedContainers.Contains(e.Id))).OrderBy(
                               e => e.Distance).
                               ToList());
             }
@@ -2027,14 +2026,47 @@ namespace Questor.Modules.Caching
             return station;
         }
 
+
+        public IEnumerable<DirectSolarSystem> _solarSystems;
         public IEnumerable<DirectSolarSystem> SolarSystems
         {
             get
             {
                 try
                 {
-                    List<DirectSolarSystem> solarSystems = DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-                    return solarSystems;
+                    //High sec: 1090
+                    //Low sec: 817
+                    //0.0: 3524 (of which 230 are not connected)
+                    //W-space: 2499
+
+                    //High sec + Low sec = Empire: 1907
+                    //Empire + 0.0 = K-space: 5431
+                    //K-space + W-space = Total: 7930
+                    if ((Cache.Instance.InSpace || Cache.Instance.InStation) && Cache.Instance.LastSessionChange.AddSeconds(30) > DateTime.UtcNow)
+                    {
+                        if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400)
+                        {
+                            if (Cache.Instance.DirectEve.SolarSystems.Any())
+                            {
+                                if (Cache.Instance.DirectEve.SolarSystems.Values.Any())
+                                {
+                                    _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
+                                }
+
+                                return null;
+                            }
+                            
+                            return null;
+                        }
+
+                        return _solarSystems;
+                    }
+
+                    return null;
+                }
+                catch (NullReferenceException) // Not sure why this happens, but seems to be no problem
+                {
+                    return null;
                 }
                 catch (Exception exception)
                 {
@@ -2799,7 +2831,7 @@ namespace Questor.Modules.Caching
                 // Does not seems to refresh the Corporate Bookmark list so it's having troubles to find Corporate Bookmarks
                 if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
                 {
-                    return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ToList();
+                    return Cache.Instance.AllBookmarks.Where(b => !string.IsNullOrEmpty(b.Title) && b.Title.ToLower().StartsWith(label.ToLower())).OrderBy(f => f.LocationId).ThenBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).ToList();
                 }
 
                 return null;

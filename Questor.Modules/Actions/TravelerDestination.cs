@@ -382,8 +382,12 @@ namespace Questor.Modules.Actions
             Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + Math.Round((distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
             Cache.Instance.DoNotBreakInvul = false;
 
+            string nameOfBookmark = "";
+            if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+            if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+            if (nameOfBookmark == "") nameOfBookmark = "Encounter";
             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
-            if (Cache.Instance.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains("Encounter"))
+            if (Cache.Instance.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains(nameOfBookmark))
             {
                 Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + " At " + Cache.Instance.MissionWarpAtDistanceRange + Logging.Green + " km]", Logging.Green);
                 bookmark.WarpTo(Cache.Instance.MissionWarpAtDistanceRange * 1000);

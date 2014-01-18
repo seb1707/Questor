@@ -5,6 +5,7 @@
   <!--                                                -->
   
   <debugActivateGate>false</debugActivateGate>
+  <debugActivateBastion>false</debugActivateBastion>
   <debugActivateWeapons>false</debugActivateWeapons>
   <debugAddDronePriorityTarget>false</debugAddDronePriorityTarget>
   <debugAddPrimaryWeaponPriorityTarget>false</debugAddPrimaryWeaponPriorityTarget>
@@ -83,6 +84,7 @@
   <useInnerspace>true</useInnerspace>
   <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
   <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
+  <eveServername>Tranquility</eveServername> <!-- the US server is Tranquility, the CN server is Serenity, this is used for localization purposes -->
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->
@@ -130,7 +132,7 @@
   <!-- UseFittingManager is either true of false and allows questor to use the IN GAME EVE fitting manager to change your fits per faction/mission -->
   <UseFittingManager>true</UseFittingManager><!-- default is true -->
   <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
-  <WatchForActiveWars>true</WatchForActiveWars><!-- default is true -->
+  <watchForActiveWars>true</watchForActiveWars><!-- default is true -->
   
   <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will seach for and travel to the master (if any)-->
   <fleetSupportSlave>false</fleetSupportSlave>
@@ -224,9 +226,7 @@
 
   <!-- Create salvage bookmarks once a pocket has been cleared and there are wrecks/cans left
        Note: All salvage bookmarks will be in this naming format:  BookmarkPrefix [time]
-       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked 
-       Warning: The bot could become slow with a lot of salvage-bookmarks, make sure that
-       after mission salvaging is enabled or that you manually delete bookmarks! -->
+       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked -->
   <createSalvageBookmarks>True</createSalvageBookmarks><!-- default is true -->
   <!-- CreateSalvageBookmarksIn is used for salvaging, Player is only needed for non-dedicated, and Corp is used for dedicated (character mode: dps is non-dedicated, salvage is -->
   <createSalvageBookmarksIn>Player</createSalvageBookmarksIn><!-- default is "Player", other option is "Corp" -->
@@ -576,7 +576,7 @@
   <!-- SKILL TRAINING SETTINGS       -->
   <!--                                                        -->
   <!-- If there is another toon on this account training at the moment this should be false -->
-  <thisToonShouldBeTrainingSkills>true</thisToonShouldBeTrainingSkills>
+  <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
 
   <!--                                                          -->
   <!-- MISSION BLACKLIST SETTINGS  -->

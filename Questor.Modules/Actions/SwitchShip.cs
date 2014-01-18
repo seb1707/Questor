@@ -54,24 +54,30 @@ namespace Questor.Modules.Actions
                 case SwitchShipState.ActivateCombatShip:
                     string shipName = Settings.Instance.CombatShipName.ToLower();
 
-                    if ((!string.IsNullOrEmpty(shipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != shipName))
+                    if (Cache.Instance.ActiveShip == null || (!string.IsNullOrEmpty(shipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != shipName))
                     {
                         if (DateTime.UtcNow.Subtract(_lastSwitchShipAction).TotalSeconds > Time.Instance.SwitchShipsDelay_seconds)
                         {
                             if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
 
-                            List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                            foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
+                            if (Cache.Instance.ShipHangar != null)
                             {
-                                Logging.Log("SwitchShip", "Making [" + ship.GivenName + "] active", Logging.White);
-
-                                ship.ActivateShip();
-                                Logging.Log("SwitchShip", "Activated", Logging.White);
-                                _lastSwitchShipAction = DateTime.UtcNow;
-                                return;
+                                List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
+                                if (ships != null && ships.Any())
+                                {
+                                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
+                                    {
+                                        Logging.Log("SwitchShip", "Making [" + ship.GivenName + "] active", Logging.White);
+                                        ship.ActivateShip();
+                                        Logging.Log("SwitchShip", "Activated", Logging.White);
+                                        _lastSwitchShipAction = DateTime.UtcNow;
+                                        return;
+                                    }
+                                }
                             }
                         }
                     }
+
                     _States.CurrentSwitchShipState = Settings.Instance.UseFittingManager ? SwitchShipState.OpenFittingWindow : SwitchShipState.Cleanup;
 
                     break;

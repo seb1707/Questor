@@ -30,6 +30,7 @@ namespace Questor.Behaviors
         private int _minerNumber = 0;
         private double _lastAsteroidPosition = 0;
         private EntityCache _targetAsteroid;
+        private long _targetAsteroidID;
         private EntityCache _currentBelt;
         private long _asteroidBookmarkForID = 0;
 
@@ -60,6 +61,11 @@ namespace Questor.Behaviors
 
         public void ProcessState()
         {
+            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+                return;
+
+            _lastPulse = DateTime.UtcNow;
+
             if (Cache.Instance.SessionState == "Quitting")
             {
                 BeginClosingQuestor();
@@ -104,7 +110,7 @@ namespace Questor.Behaviors
                 _States.CurrentMiningState = MiningState.GotoBelt;
             }
 
-            if (Settings.Instance.DebugStates)
+            if (Settings.Instance.DebugMiningBehavior)
             {
                 Logging.Log("MiningBehavior", "Pre-switch", Logging.White);
             }
@@ -222,8 +228,6 @@ namespace Questor.Behaviors
 
                     Arm.ProcessState();
 
-                    if (Settings.Instance.DebugStates) Logging.Log("Arm.State", "is" + _States.CurrentArmState, Logging.White);
-
                     if (_States.CurrentArmState == ArmState.NotEnoughAmmo)
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
@@ -268,11 +272,15 @@ namespace Questor.Behaviors
                     break;
 
                 case MiningState.GotoBelt:
-                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2) //default: 1500ms
+                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2)
+                    {
                         return;
+                    }
 
-                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation)) //if we are in warp, do nothing, as nothing can actually be done until we are out of warp anyway.
-                        break;
+                    if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation))
+                    {
+                        return;
+                    }
 
                     //
                     // this should goto a mining system bookmark (one of possibly many)
@@ -286,9 +294,7 @@ namespace Questor.Behaviors
                     {
                         if (Cache.Instance.EntityById(_currentBelt.Id).Distance < 65000)
                         {
-                            if (_States.CurrentMiningState == MiningState.GotoBelt)
-                                _States.CurrentMiningState = MiningState.Mine;
-
+                            _States.CurrentMiningState = MiningState.Mine;
                             Traveler.Destination = null;
                         }
                         else
@@ -298,96 +304,67 @@ namespace Questor.Behaviors
                         }
                         break;
                     }
-                    else
+                    
+                    IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.AsteroidBelt && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
+                    EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
+                    _currentBelt = belt;
+
+                    //Traveler.Destination = new MissionBookmarkDestination(belt);
+
+                    if (belt != null)
                     {
-                        IEnumerable<EntityCache> belts = Cache.Instance.Entities.Where(i => i.GroupId == (int)Group.AsteroidBelt && !i.Name.ToLower().Contains("ice") && !EmptyBelts.Contains(i.Id));
-                        EntityCache belt = belts.OrderBy(x => x.Distance).FirstOrDefault();
-                        _currentBelt = belt;
-
-                        //Traveler.Destination = new MissionBookmarkDestination(belt);
-
-                        if (belt != null)
+                        if (belt.Distance < 35000)
                         {
-                            if (belt.Distance < 35000)
-                            {
-                                if (_States.CurrentMiningState == MiningState.GotoBelt)
-                                    _States.CurrentMiningState = MiningState.Mine;
-
-                                Traveler.Destination = null;
-                            }
-                            else
-                            {
-                                belt.WarpTo();
-                                _lastPulse = DateTime.UtcNow;
-                            }
-                            break;
+                            _States.CurrentMiningState = MiningState.Mine;
+                            Traveler.Destination = null;
                         }
                         else
                         {
-                            _States.CurrentMiningState = MiningState.GotoBase;
-                            Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
-                            BeginClosingQuestor();
+                            belt.WarpTo();
+                            _lastPulse = DateTime.UtcNow;
                         }
+                        break;
                     }
+
+                    _States.CurrentMiningState = MiningState.GotoBase;
+                    Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
+                    Settings.Instance.AutoStart = false;
                     break;
 
                 case MiningState.Mine:
 
-                    EntityCache asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("kernite")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                    IEnumerable <EntityCache> _asteroidsOnGrid = Cache.Instance.EntitiesOnGrid.Where(i =>i.Distance < (int)Distances.OnGridWithMe && i.CategoryId == (int)CategoryID.Asteroid  ).OrderBy(i => i.Distance);
+                    IEnumerable<EntityCache> _asteroidsInRange = _asteroidsOnGrid.Where(i => i.Distance < 65000).ToList();
+                    EntityCache asteroid = null;
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int) Group.Kernite))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("plagioclase")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Kernite).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Plagioclase))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("pyroxeres")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Plagioclase).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Pyroxeres))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("scordite")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Pyroxeres).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
-                    if (asteroid == null)
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Scordite))
                     {
-                        asteroid =
-                        Cache.Instance.EntitiesOnGrid.Where(i =>
-                            i.Distance < 65000
-                            && (
-                                i.Name.ToLower().Contains("veldspar")
-                                )
-                        ).OrderBy(i => i.Distance).FirstOrDefault();
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Scordite).OrderBy(i => i.Distance).FirstOrDefault();
                     }
 
+                    if (asteroid == null && _asteroidsInRange.Any(i => i.GroupId == (int)Group.Veldspar))
+                    {
+                        asteroid = _asteroidsInRange.Where(i => i.GroupId == (int)Group.Veldspar).OrderBy(i => i.Distance).FirstOrDefault();
+                    }
+
+                    
                     if (asteroid == null)
                     {
-                        _States.CurrentMiningState = MiningState.GotoBelt;
                         EmptyBelts.Add(_currentBelt.Id);
                         DirectBookmark asteroidShortcutBM2 = Cache.Instance.BookmarksByLabel("Asteroid Location").FirstOrDefault();
 
@@ -395,78 +372,65 @@ namespace Questor.Behaviors
                         {
                             asteroidShortcutBM2.Delete();
                         }
+
                         Logging.Log("MiningBehavior", "Could not find a suitable Asteroid to mine in this belt.", Logging.White);
+                        _States.CurrentMiningState = MiningState.GotoBelt;
+                        break;
                     }
-                    else
-                    {
-                        Logging.Log("Mining: ", asteroid.Name + "; " + asteroid.GroupId, Logging.White);
-                        _targetAsteroid = asteroid;
-                        _lastApproachCommand = DateTime.UtcNow;
-                        _targetAsteroid.Approach();
-                        _States.CurrentMiningState = MiningState.MineAsteroid;
-                    }
+                    
+                    Logging.Log("Mining: [", "Target Rock is [" + asteroid.Name + "][" + Math.Round(asteroid.Distance/1000,0) + "k] ID [" + asteroid.MaskedId + "] GroupID [" + asteroid.GroupId + "]", Logging.White);
+                    _targetAsteroidID = asteroid.Id;
+                    _lastApproachCommand = DateTime.UtcNow;
+                    _targetAsteroid.Approach();
+                    _States.CurrentMiningState = MiningState.MineAsteroid;    
                     break;
 
                 case MiningState.MineAsteroid:
-                    if (Cache.Instance.EntityById(_targetAsteroid.Id) == null)
+                    if (Cache.Instance.EntityById(_targetAsteroidID) == null)
                     {
-                        //asteroid is depleted
+                        Logging.Log("Mining: [", "Target Rock [" + Cache.Instance.MaskedID(_targetAsteroidID) + "] has been depleted. Searching for another target.", Logging.White);
                         _States.CurrentMiningState = MiningState.Mine;
                         return;
                     }
-                    _targetAsteroid = Cache.Instance.EntityById(_targetAsteroid.Id);
+                    _targetAsteroid = Cache.Instance.EntityById(_targetAsteroidID);
                     Combat.ProcessState();
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("MiningBehavior:MineAsteroid", "Combat processed. Combat.State is: " + _States.CurrentCombatState.ToString(), Logging.White);
-
                     Drones.ProcessState();
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("Drones.State is", _States.CurrentDroneState.ToString(), Logging.White);
-
-                    // If we are out of ammo, return to base, the mission will fail to complete and the bot will reload the ship
-                    // and try the mission again
+                    
+                    // If we are out of ammo, return to base, Arm should then grab the right ammo / crystals / drones
                     if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                     {
                         Logging.Log("Combat", "Out of Ammo!", Logging.Orange);
                         _States.CurrentMiningState = MiningState.GotoBase;
                     }
 
-                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
-                        return;
-
-                    _lastPulse = DateTime.UtcNow;
-
                     //check if we're full
 
+                    //
+                    // we really ought to be checking for and using the orehold if needed, not directly using the cargohold ffs!
+                    //
                     if (Cache.Instance.CurrentShipsCargo == null) return;
-                    //if (!Cache.Instance.OpenInventoryWindow("Salvage")) return;
-
-                    //should I check Cache.Instance.ActiveDrones.Any() instead?
-                    if (Cache.Instance.CurrentShipsCargo.IsValid
-                        && (Cache.Instance.CurrentShipsCargo.UsedCapacity >= Cache.Instance.CurrentShipsCargo.Capacity * .9)
-                        && Cache.Instance.CurrentShipsCargo.Capacity > 0
-                        && _States.CurrentDroneState == DroneState.WaitingForTargets)
+                    
+                    if (Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.UsedCapacity >= Cache.Instance.CurrentShipsCargo.Capacity * .9) && Cache.Instance.CurrentShipsCargo.Capacity > 0)
                     {
-                        Logging.Log("Miner:MineAsteroid", "We are full, go to base to unload. Capacity is: " + Cache.Instance.CurrentShipsCargo.Capacity
-                            + ", Used: " + Cache.Instance.CurrentShipsCargo.UsedCapacity, Logging.White);
-                        _States.CurrentMiningState = MiningState.GotoBase;
-                        break;
-                    }
-                    else if (Cache.Instance.CurrentShipsCargo.IsValid
-                      && (Cache.Instance.CurrentShipsCargo.UsedCapacity >= Cache.Instance.CurrentShipsCargo.Capacity * .9)
-                      && Cache.Instance.CurrentShipsCargo.Capacity > 0
-                      && _States.CurrentDroneState != DroneState.WaitingForTargets)
-                    {
-                        Logging.Log("Miner:MineAsteroid", "We are full, but drones are busy. Drone state: " + _States.CurrentDroneState.ToString(), Logging.White);
-                    }
+                        if (_States.CurrentDroneState == DroneState.WaitingForTargets)
+                        {
+                            Logging.Log("Miner:MineAsteroid", "We are full, go to base to unload. Capacity is: " + Cache.Instance.CurrentShipsCargo.Capacity + ", Used: " + Cache.Instance.CurrentShipsCargo.UsedCapacity, Logging.White);
+                            _States.CurrentMiningState = MiningState.GotoBase;
+                            break;    
+                        }
 
-                    if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Distance to Asteroid is: " + _targetAsteroid.Distance, Logging.White);
-
+                        if (_States.CurrentDroneState == DroneState.WaitingForTargets)
+                        {
+                            Logging.Log("Miner:MineAsteroid", "We are full, but drones are busy. Drone state: " + _States.CurrentDroneState.ToString(), Logging.White);
+                        }
+                    }
+                    
+                    //
+                    // do we need to make sure the rock is in targeting range? rats that damp, frigates with crap skills?, wormhole effects...
+                    //
                     if (_targetAsteroid.Distance < 10000)
                     {
-                        if (_targetAsteroid.Distance < 94000)
+                        if (_targetAsteroid.Distance < 9400)
                         {
                             if (_asteroidBookmarkForID != _targetAsteroid.Id)
                             {
@@ -487,13 +451,14 @@ namespace Questor.Behaviors
 
                         if (Cache.Instance.Targeting.Contains(_targetAsteroid))
                         {
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Targeting asteroid.", Logging.White);
+                            if (Settings.Instance.DebugMiningBehavior) Logging.Log("Miner:MineAsteroid", "Targeting asteroid.", Logging.White);
                             return;
                             //wait
                         }
-                        else if (Cache.Instance.Targets.Contains(_targetAsteroid))
+                        
+                        if (Cache.Instance.Targets.Contains(_targetAsteroid))
                         {
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid Targeted.", Logging.White);
+                            if (Settings.Instance.DebugMiningBehavior) Logging.Log("Miner:MineAsteroid", "Asteroid Targeted.", Logging.White);
                             //if(!_targetAsteroid.IsActiveTarget) _targetAsteroid.MakeActiveTarget();
                             List<ModuleCache> miningTools = Cache.Instance.Modules.Where(m => MiningToolGroupIDs.Contains(m.GroupId)).ToList();
 
@@ -520,71 +485,58 @@ namespace Questor.Behaviors
                                 if (miningTool.IsDeactivating)
                                     continue;
 
-                                //only activate one module per third of a second
-                                if (_lastModuleActivation < DateTime.UtcNow.AddMilliseconds(-350))
-                                {
-                                    _lastModuleActivation = DateTime.UtcNow;
-                                    Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
-
-                                    miningTool.Activate(_targetAsteroid.Id);
-                                    miningTool.ActivatedTimeStamp = DateTime.UtcNow;
-                                }
+                                //only activate one module per cycle
+                                _lastModuleActivation = DateTime.UtcNow;
+                                Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                miningTool.Activate(_targetAsteroid.Id);
+                                miningTool.ActivatedTimeStamp = DateTime.UtcNow;
                             }
+
+                            return;
                         } //mine
-                        else
-                        { //asteroid is not targeted
+                        
+                        //asteroid is not targeted
+                        if (Settings.Instance.DebugMiningBehavior) Logging.Log("Miner:MineAsteroid", "Asteroid not yet targeted.", Logging.White);
+                        if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
+                            return;
 
-                            if (Settings.Instance.DebugStates) Logging.Log("Miner:MineAsteroid", "Asteroid not targeted.", Logging.White);
-                            if (DateTime.UtcNow < Cache.Instance.NextTargetAction) //if we just did something wait a fraction of a second
-                                return;
-
-                            if (Cache.Instance.MaxLockedTargets == 0)
-                            {
-                                if (!_isJammed)
-                                {
-                                    Logging.Log("Mining", "We are jammed and can't target anything", Logging.Orange);
-                                }
-
-                                _isJammed = true;
-                                return;
-                            }
-
-                            if (_isJammed)
-                            {
-                                // Clear targeting list as it does not apply
-                                Cache.Instance.TargetingIDs.Clear();
-                                Logging.Log("Mining", "We are no longer jammed, ReTargeting", Logging.Teal);
-                            }
-                            _isJammed = false;
-
-                            _targetAsteroid.LockTarget("Mining.targetAsteroid");
-                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                        }
-                    } //check 10K distance
-                    else
-                    {
-                        double velocity = _lastAsteroidPosition - _targetAsteroid.Distance;
-                        _lastAsteroidPosition = _targetAsteroid.Distance;
-
-                        if (Settings.Instance.DebugStates)
-                            Logging.Log("Miner:MineAsteroid", "Distance greater than 10K. Debug are we flying there? "
-                                + "approaching.targetValue [" + (Cache.Instance.Approaching.TargetValue == null ? "null" : Cache.Instance.Approaching.TargetValue.ToString())
-                                + "] _targetRoid.Id [" + _targetAsteroid.Id
-                                + "] targeting me count [" + Combat.TargetingMe.Count
-                                + "]", Logging.White);
-                        //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check CombatState instead.
-                        if (//Cache.Instance.Approaching.TargetValue == null
-                            //|| (Cache.Instance.Approaching.TargetValue != _targetAsteroid.Id && _combat.TargetingMe.Count == 0)
-                            velocity <= 0 && !Cache.Instance.TargetedBy.Any()
-                            )
+                        if (Cache.Instance.MaxLockedTargets == 0)
                         {
-                            if (_lastApproachCommand.AddSeconds(2) < DateTime.UtcNow)
+                            if (!_isJammed)
                             {
-                                _targetAsteroid.Approach();
-                                _lastApproachCommand = DateTime.UtcNow;
+                                Logging.Log("Mining", "We are jammed and can't target anything", Logging.Orange);
                             }
+
+                            _isJammed = true;
+                            return;
                         }
+
+                        if (_isJammed)
+                        {
+                            // Clear targeting list as it does not apply
+                            Cache.Instance.TargetingIDs.Clear();
+                            Logging.Log("Mining", "We are no longer jammed, ReTargeting", Logging.Teal);
+                        }
+                        _isJammed = false;
+
+                        _targetAsteroid.LockTarget("Mining.targetAsteroid");
+                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                        return;
+                    } //check 10K distance
+                    
+                    //
+                    // not inside 10k
+                    //
+                    if (Settings.Instance.DebugMiningBehavior) Logging.Log("Miner:MineAsteroid", "Debug: Distance to Target [" + Math.Round(_targetAsteroid.Distance / 1000,2) + "] > 10K.] Id [" + _targetAsteroid.Id + "] TargetingMe [" + Combat.TargetingMe.Count() + "]", Logging.White);
+                    //this isn't working because Cache.Instance.Approaching.TargetValue always seems to return null. This will negatively impact combat since it won't orbit. Might want to check CombatState instead.
+                    if (Cache.Instance.IsApproaching(_targetAsteroidID) && !Cache.Instance.TargetedBy.Any())
+                    {
+                        //
+                        // this will only approach every 15 sec
+                        //
+                        _targetAsteroid.Approach();
                     }
+                    
 
                     break;
             } //ends MiningState switch

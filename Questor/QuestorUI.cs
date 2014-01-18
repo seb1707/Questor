@@ -1433,9 +1433,9 @@ namespace Questor
         private void bttnResizeEVEWindow_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960, Logging.White);
-            LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
+            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0, Logging.White);
-            LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
+            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
         }
 
         private void bttnLogEntitiesOnGrid_Click(object sender, EventArgs e)
@@ -1495,7 +1495,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript1 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript1 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
             }
             else
             {
@@ -1508,7 +1508,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript2 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript2 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
             }
             else
             {
@@ -1521,7 +1521,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript3 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript3 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
             }
             else
             {
@@ -1534,7 +1534,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript4 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript4 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
             }
             else
             {

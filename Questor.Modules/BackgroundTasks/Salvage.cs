@@ -360,15 +360,27 @@ namespace Questor.Modules.BackgroundTasks
             // Check for cargo containers
             foreach (EntityCache wreck in wreckTargets)
             {
-                if (!Cache.Instance.SalvageAll)
+                if (!hasSalvagers)
                 {
-                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId) && (wreck.Distance < (int)Distances.SafeScoopRange || wreck.IsWreckEmpty))
+                    if (wreck.IsWreckEmpty)
                     {
-                        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] within loot range,wreck is empty, or wreck is on our blacklist, unlocking container.", Logging.White);
+                        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is empty, unlocking container.", Logging.White);
+                        Cache.Instance.LootedContainers.Add(wreck.Id);
                         wreck.UnlockTarget("Salvage");
                         continue;
                     }
                 }
+
+                //if (!Cache.Instance.SalvageAll)
+                //{
+                //    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId))
+                //    {
+                //        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is on our blacklist, unlocking container.", Logging.White);
+                //        Cache.Instance.LootedContainers.Add(wreck.Id);
+                //        wreck.UnlockTarget("Salvage");
+                //        continue;
+                //    }
+                //}
 
                 if (hasSalvagers && wreck.GroupId != (int)Group.CargoContainer)
                 {
@@ -636,6 +648,7 @@ namespace Questor.Modules.BackgroundTasks
                             Cache.Instance.NextSalvageTrip = DateTime.UtcNow;
                             break;
                         }
+
                         Logging.Log("Salvage.LootWrecks", "We are full: we are using a behavior that does not have a supported place to auto dump loot: error!", Logging.Orange);
                         break;
                     }
@@ -766,6 +779,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.LastJettison = DateTime.UtcNow;
                                 return;
                             }
+
                             return;
                         }
 

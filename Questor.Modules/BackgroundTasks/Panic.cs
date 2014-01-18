@@ -90,7 +90,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
                     {
-                        Logging.Log("Cache", "Your corp is involved in a war, Starting panic!", Logging.Orange);
+                        Logging.Log("Cache", "Your corp is involved in a war [" + Cache.Instance.IsCorpInWar + "] and WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "], Starting panic!", Logging.Orange);
                         _States.CurrentPanicState = PanicState.StartPanicking;
                         //return;
                     }
@@ -447,14 +447,49 @@ namespace Questor.Modules.BackgroundTasks
                                                                             .Where(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId)
                                                                             .OrderBy(b => b.CreatedOn));
 
-                            DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) > (int)Distances.OnGridWithMe);
-                            if (offridSafeSpotBookmark != null)
+                            if (SafeSpotBookmarksInLocal.Any())
                             {
-                                if (Cache.Instance.InWarp)
+                                DirectBookmark offridSafeSpotBookmark = SafeSpotBookmarksInLocal.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault();
+                                if (offridSafeSpotBookmark != null)
                                 {
-                                    _States.CurrentPanicState = PanicState.Panic;
+                                    if (Cache.Instance.InWarp)
+                                    {
+                                        _States.CurrentPanicState = PanicState.Panic;
+                                        return;
+                                    }
+
+                                    if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                                    {
+                                        Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
+                                        //This runs every 'tick' so we should see it every 1.5 seconds or so
+                                        _lastWarpScrambled = DateTime.UtcNow;
+                                        return;
+                                    }
+
+                                    if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                    //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                                    {
+                                        double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
+                                                                                            offridSafeSpotBookmark.Y ?? 0,
+                                                                                            offridSafeSpotBookmark.Z ?? 0);
+                                        Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((DistanceToBm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                        offridSafeSpotBookmark.WarpTo();
+                                        return;
+                                    }
+
+                                    Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                     return;
                                 }
+                            }
+                        }
+                        else
+                        {
+                            // What is this you say?  No star?
+                            if (Cache.Instance.Star == null) return;
+
+                            if (Cache.Instance.Star.Distance > (int)Distances.WeCanWarpToStarFromHere)
+                            {
+                                if (Cache.Instance.InWarp) return;
 
                                 if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                                 {
@@ -467,11 +502,8 @@ namespace Questor.Modules.BackgroundTasks
                                 if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                                 {
-                                    double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
-                                                                                        offridSafeSpotBookmark.Y ?? 0,
-                                                                                        offridSafeSpotBookmark.Z ?? 0);
-                                    Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((DistanceToBm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
-                                    offridSafeSpotBookmark.WarpTo();
+                                    Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
+                                    Cache.Instance.Star.WarpTo();
                                     return;
                                 }
 
@@ -479,36 +511,9 @@ namespace Questor.Modules.BackgroundTasks
                                 return;
                             }
                         }
-
-                        // What is this you say?  No star?
-                        if (Cache.Instance.Star == null) return;
-
-                        if (Cache.Instance.Star.Distance > (int) Distances.WeCanWarpToStarFromHere)
-                        {
-                            if (Cache.Instance.InWarp) return;
-
-                            if (Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
-                            {
-                                Logging.Log("Panic", "We are still warp scrambled!", Logging.Red);
-                                    //This runs every 'tick' so we should see it every 1.5 seconds or so
-                                _lastWarpScrambled = DateTime.UtcNow;
-                                return;
-                            }
-
-                            if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
-                                //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
-                            {
-                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
-                                Cache.Instance.Star.WarpTo();
-                                return;
-                            }
-
-                            Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
-                            return;
-                        }
                     }
 
-                    Logging.Log("Panic", "At the star, lower panic mode", Logging.Red);
+                    Logging.Log("Panic", "At a safe location, lower panic mode", Logging.Red);
                     Settings.Instance.LoadSettings();
                     _States.CurrentPanicState = PanicState.Panic;
                     break;
@@ -532,21 +537,21 @@ namespace Questor.Modules.BackgroundTasks
 
                 case PanicState.Panic:
 
-                    if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
-                    {
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.Instance.WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
-                        Cache.Instance.Paused = true;
-                        Settings.Instance.AutoStart = false;
-                        return;
-                    }
-
                     // Do not resume until you're no longer in a capsule
                     if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                         break;
 
                     if (Cache.Instance.InStation)
                     {
-                        if (Settings.Instance.UseStationRepair)
+                        if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
+                        {
+                            if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.Instance.WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
+                            Cache.Instance.Paused = true;
+                            Settings.Instance.AutoStart = false;
+                            return;
+                        }
+
+                        if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.UseStationRepair)
                         {
                             if (!Cache.Instance.RepairItems("Repair Function")) break; //attempt to use repair facilities if avail in station
                         }

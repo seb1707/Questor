@@ -3799,6 +3799,32 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsShipWithOreHold
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= TypeId == (int)TypeID.Venture;
+                        result |= GroupId == (int)Group.MiningBarge;
+                        result |= GroupId == (int)Group.Exhumer;
+                        result |= GroupId == (int)Group.IndustrialCommandShip; // Orca
+                        result |= GroupId == (int)Group.CapitalIndustrialShip; // Rorqual
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
         public bool IsShipWithNoDroneBay
         {
             get

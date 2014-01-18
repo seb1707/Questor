@@ -677,7 +677,10 @@ namespace Questor.Behaviors
 
                     if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
                     {
-                        const string nameOfBookmark = "Encounter";
+                        string nameOfBookmark = "";
+                        if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+                        if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+                        if (nameOfBookmark == "") nameOfBookmark = "Encounter";
                         Logging.Log("CombatMissionsBehavior", "Setting Destination to 1st bookmark from AgentID: " + AgentID + " with [" + nameOfBookmark + "] in the title", Logging.White);
                         Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(AgentID, nameOfBookmark));
                         Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);

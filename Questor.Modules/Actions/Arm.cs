@@ -352,7 +352,7 @@ namespace Questor.Modules.Actions
                 case ArmState.ActivateTransportShip:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
+                    //if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
 
                     if (string.IsNullOrEmpty(Settings.Instance.TransportShipName))
                     {
@@ -385,7 +385,7 @@ namespace Questor.Modules.Actions
 
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
+                    //if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
 
                     if (string.IsNullOrEmpty(salvageshipName))
                     {

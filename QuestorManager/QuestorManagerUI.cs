@@ -822,12 +822,19 @@ namespace QuestorManager
 
         private void BttnAddTraveler_Click(object sender, EventArgs e)
         {
-            ListViewItem listItem = new ListViewItem("QuestorManager");
-            listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
-            listItem.Tag = SearchResults.SelectedItems[0].Tag;
-            listItem.SubItems.Add(" ");
-            listItem.SubItems.Add(" ");
-            LstTask.Items.Add(listItem);
+            if (SearchResults.SelectedItems[0] != null)
+            {
+                ListViewItem listItem = new ListViewItem("QuestorManager");
+                listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
+                listItem.Tag = SearchResults.SelectedItems[0].Tag;
+                listItem.SubItems.Add(" ");
+                listItem.SubItems.Add(" ");
+                LstTask.Items.Add(listItem);
+            }
+            else
+            {
+                Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems[0] is null", Logging.Debug);
+            }
         }
 
         private void BttnTaskForItemClick1(object sender, EventArgs e)

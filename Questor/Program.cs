@@ -132,6 +132,7 @@ namespace Questor
             //
             if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character))
             {
+                Cache.Instance.ScheduleCharacterName = Logging._character;
                 LoginUsingScheduler();
             }
 
@@ -140,6 +141,7 @@ namespace Questor
             //
             if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
+                Cache.Instance.ScheduleCharacterName = Logging._character;
                 _readyToStart = true;
             }
 
@@ -274,6 +276,7 @@ namespace Questor
         {
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             Logging._character = Logging._character.Replace("\"", "");  // strip quotation marks if any are present
+                   
 
             CharSchedules = new List<CharSchedule>();
             if (path != null)
@@ -425,6 +428,15 @@ namespace Questor
 
             Cache.Instance.LastFrame = DateTime.UtcNow;
             Cache.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
+
+            //if (Cache.Instance.SessionState != "Quitting")
+            //{
+            //    // Update settings (settings only load if character name changed)
+            //    if (!Settings.Instance.DefaultSettingsLoaded)
+            //    {
+            //        Settings.Instance.LoadSettings();
+            //    }
+            //}
 
             if (DateTime.UtcNow < _nextPulse)
             {

@@ -47,9 +47,6 @@ namespace Questor
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
-        public DateTime LastAction;
-        public readonly string ScheduleCharacterName = Logging._character;
-        //public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;
 
@@ -74,8 +71,7 @@ namespace Questor
             _innerspaceCommands = new InnerspaceCommands();
             _statistics = new Statistics();
 
-            ScheduleCharacterName = Logging._character;
-            Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
+            Cache.Instance.ScheduleCharacterName = Logging._character;
             Cache.Instance.NextStartupAction = DateTime.UtcNow;
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;

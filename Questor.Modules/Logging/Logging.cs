@@ -83,10 +83,15 @@ namespace Questor.Modules.Logging
 
             //}
 
+            //colorLogLine contains color and is for the InnerSpace console
             string colorLogLine = line;
 
-            //colorLogLine contains color and is for the InnerSpace console
-            if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));                            //Innerspace Console Log
+            //Logging when using Innerspace
+            //if (Cache.Instance.UseInnerspace || Settings.Instance.UseInnerspace)
+            //{
+                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+            //}
+           
             string plainLogLine = FilterColorsFromLogs(line);
 
             //

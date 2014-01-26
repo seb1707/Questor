@@ -36,6 +36,7 @@ namespace Questor.Modules.Caching
         /// </summary>
         private static Cache _instance = new Cache();
 
+        public bool UseInnerspace { get; set; }
         /// <summary>
         ///   Active Drones //cleared in InvalidateCache 
         /// </summary>

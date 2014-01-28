@@ -413,7 +413,7 @@ namespace Questor.Behaviors
                         if (Cache.Instance.GetSalvagingBookmark == null)
                         {
                             BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                            if (BookmarksThatAreNotReadyYet.Any())
+                            if (BookmarksThatAreNotReadyYet != null &&  BookmarksThatAreNotReadyYet.Any())
                             {
                                 Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Settings.Instance.AgeofBookmarksForSalvageBehavior + "] min.", Logging.White);
                             }

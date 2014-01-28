@@ -386,6 +386,27 @@ namespace Questor.Modules.Combat
 
         public static bool ReloadAll(EntityCache entity, bool force = false)
         {
+            if (Settings.Instance.DebugReloadAll)
+            {
+                if (Cache.Instance.MyShipEntity.Name == Settings.Instance.TransportShipName)
+                {
+                    Logging.Log("ReloadAll", "You are in your TransportShip named [" + Settings.Instance.TransportShipName + "], no need to reload ammo!", Logging.Debug);
+                    return true;
+                }
+
+                if (Cache.Instance.MyShipEntity.Name == Settings.Instance.TravelShipName)
+                {
+                    Logging.Log("ReloadAll", "You are in your TravelShipName named [" + Settings.Instance.TravelShipName + "], no need to reload ammo!", Logging.Debug);
+                    return true;
+                }
+
+                if (Cache.Instance.MyShipEntity.GroupId == (int)Group.Shuttle)
+                {
+                    Logging.Log("ReloadAll", "You are in a Shuttle, no need to reload ammo!", Logging.Debug);
+                    return true;
+                }
+            }
+
             _reloadAllIteration++;
             if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Entering reloadAll function (again) - it iterates through all weapon stacks [" + _reloadAllIteration + "]", Logging.White);
             if (_reloadAllIteration > 12)

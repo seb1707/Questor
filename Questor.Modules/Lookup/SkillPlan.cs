@@ -356,9 +356,9 @@ namespace Questor.Modules.Lookup
 			return false;
 		}
 		
-		public static bool SkillAlreadyQueued(KeyValuePair<string, int> skill){
-			
-			foreach (DirectSkill queuedskill in MySkillQueue)
+		public static bool SkillAlreadyQueued(KeyValuePair<string, int> skill)
+        {
+		    foreach (DirectSkill queuedskill in MySkillQueue)
 			{
 				if (queuedskill.TypeName == skill.Key && queuedskill.Level >= skill.Value)
 				{
@@ -366,11 +366,13 @@ namespace Questor.Modules.Lookup
 					return true;
 				}
 			}
+
 			if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyQueued", "Skill not in queue  [" + skill.Key + "]", Logging.White);
 			return false;
 		}
 		
-		public static bool SkillAlreadyInCharacterSheet(KeyValuePair<string, int> skill){
+		public static bool SkillAlreadyInCharacterSheet(KeyValuePair<string, int> skill)
+        {
 			foreach (DirectSkill knownskill in MyCharacterSheetSkills)
 			{
 				if (knownskill.TypeName == skill.Key)
@@ -379,13 +381,14 @@ namespace Questor.Modules.Lookup
 					return true;
 				}
 			}
+
 			if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We DON'T have this skill already injected:  [" + skill.Key + "]", Logging.White);
 			return false;
 		}
 		
-		public static bool SkillIsBelowPlannedLevel(KeyValuePair<string, int> skill){
-			
-			foreach (DirectSkill knownskill in MyCharacterSheetSkills)
+		public static bool SkillIsBelowPlannedLevel(KeyValuePair<string, int> skill)
+        {
+		    foreach (DirectSkill knownskill in MyCharacterSheetSkills)
 			{
 				if (knownskill.TypeName == skill.Key && knownskill.Level < skill.Value)
 				{
@@ -393,11 +396,13 @@ namespace Questor.Modules.Lookup
 					return true;
 				}
 			}
-			if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillIsBelowPlannedLevel", "Skill is not below planned level:  [" + skill.Key + "]", Logging.White);
+			
+            if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillIsBelowPlannedLevel", "Skill is not below planned level:  [" + skill.Key + "]", Logging.White);
 			return false;
 		}
 		
-		public static bool TrainSkillNow(KeyValuePair<string, int> skill){
+		public static bool TrainSkillNow(KeyValuePair<string, int> skill)
+        {
 			
 			foreach (DirectSkill knownskill in MyCharacterSheetSkills)
 			{
@@ -408,20 +413,27 @@ namespace Questor.Modules.Lookup
 					return true;
 				}
 			}
+
 			if (Settings.Instance.DebugSkillTraining) Logging.Log("TrainSkillNow", "This skill couldn't be trained:  [" + skill.Key + "]", Logging.White);
 			return false;
 		}
 		
-		public static int getInvTypeID(string moduleName){
-			try {
+		public static int getInvTypeID(string moduleName)
+        {
+			try 
+            {
 				
-				if (skillPreReqs == null) {
+				if (skillPreReqs == null) 
+                {
 					skillPreReqs = XDocument.Load(Settings.Instance.Path + "\\Skill_Prerequisites.xml");
 					if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites","Skill_Prerequisites.xml Loaded.", Logging.Debug);
 				}
+
 				return Convert.ToInt32(skillPreReqs.Element("document").Elements("skill").Where(i=> i.Attribute("name").Value.ToLower() == moduleName.ToLower()).Select(e=> e.Attribute("id").Value).FirstOrDefault().ToString());
 				
-			} catch (Exception e) {
+			} 
+            catch (Exception e) 
+            {
 				
 				if (Settings.Instance.DebugSkillTraining) Logging.Log("getInvTypeID", "Exception:  [" + e.Message + "]", Logging.White);
 				return 0;
@@ -433,28 +445,34 @@ namespace Questor.Modules.Lookup
 		{
 			foreach (KeyValuePair<string, int> skill in mySkillPlan)
 			{
-				//if (Settings.Instance.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Currently workign with [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
-				if (!SkillAlreadyQueued(skill) && SkillIsBelowPlannedLevel(skill) && SkillAlreadyInCharacterSheet(skill)) // notqueued && below planned level && in our charsheet
+				//if (Settings.Instance.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Currently working with [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
+				if (!SkillAlreadyQueued(skill) && SkillIsBelowPlannedLevel(skill) && SkillAlreadyInCharacterSheet(skill)) // not queued && below planned level && in our character sheet
 				{
 					TrainSkillNow(skill);
 					_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
 					return false;
 				}
 				
-				if(!SkillAlreadyInCharacterSheet(skill) && attemptsToDoSomethingWithNonInjectedSkills <= 15){	// skill not already in our charsheet
+				if(!SkillAlreadyInCharacterSheet(skill) && attemptsToDoSomethingWithNonInjectedSkills <= 15)
+                {	
+                    // skill not already in our character sheet
 					attemptsToDoSomethingWithNonInjectedSkills++;
-					Logging.Log("AddPlannedSkillToQueue","Skill " + skill.Key  + " will be bought(if in station & price < average sell * 10) and/or injected if in itemhangar",Logging.Red);
+					Logging.Log("AddPlannedSkillToQueue","Skill [" + skill.Key  + "] will be bought(if in station & price < average sell * 10) and/or injected if in itemhangar",Logging.Red);
 					buyingSkillTypeID = getInvTypeID(skill.Key);
-					if (buyingSkillTypeID != 0){
-						if (DoWeHaveThisSkillAlreadyInOurItemHangar(buyingSkillTypeID)){
+					if (buyingSkillTypeID != 0)
+                    {
+						if (DoWeHaveThisSkillAlreadyInOurItemHangar(buyingSkillTypeID))
+                        {
 							InjectSkillBook(buyingSkillTypeID);
 							return false;
-						} else {
-							if (Cache.Instance.InStation) {
-								buyingSkill = true;
-							}
-							return false;
+						} 
+                        
+						if (Cache.Instance.InStation) 
+                        {
+							buyingSkill = true;
 						}
+
+						return false;
 					}
 					return false;
 				}

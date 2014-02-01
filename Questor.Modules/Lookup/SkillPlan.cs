@@ -563,7 +563,7 @@ namespace Questor.Modules.Lookup
 			}
 			
 			if (DateTime.UtcNow > _nextRetrieveCharactersheetInfoAction) {
-				if(Settings.Instance.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "Updating Charactersheet again", Logging.Teal);
+				if(Settings.Instance.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "Updating Character sheet again", Logging.Teal);
 				MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
 				_nextRetrieveCharactersheetInfoAction.AddSeconds(13);
 				return true;

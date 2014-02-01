@@ -295,6 +295,12 @@ namespace Questor
                 if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
                     return true;
 
+                if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
+                {
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillQueueCheck", "if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady) - this really should not happen (often?)", Logging.Debug);
+                    return true;
+                }
+
                 if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
                 {
                     if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);

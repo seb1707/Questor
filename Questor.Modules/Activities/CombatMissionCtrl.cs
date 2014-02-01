@@ -526,10 +526,10 @@ namespace Questor.Modules.Activities
             int DistanceToClear;
             if (!int.TryParse(action.GetParameterValue("distance"), out DistanceToClear))
             {
-                DistanceToClear = (int)Cache.Instance.MaxRange;
+                DistanceToClear = (int)Cache.Instance.MaxRange - 1000;
             }
 
-            if (DistanceToClear != 0 && DistanceToClear != -2147483648 && DistanceToClear != 2147483647)
+            if (DistanceToClear == 0 || DistanceToClear == -2147483648 || DistanceToClear == 2147483647)
             {
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }            

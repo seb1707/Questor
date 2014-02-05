@@ -373,7 +373,8 @@ namespace Questor.Modules.Caching
                         {
                             if (Distance > 0 && Distance < 900000000)
                             {
-                                _nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                                //_nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                                _nearest5kDistance = (double)Math.Ceiling(Math.Round((Distance / 1000)) / 5.0) * 5;
                             }
                         }
 

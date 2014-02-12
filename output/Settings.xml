@@ -125,6 +125,7 @@
   
   <!-- EnableStoryLines is either true or false and enables questor to run storyline missions -->
   <enableStorylines>false</enableStorylines><!-- default is false -->
+  <declineStorylinesInsteadofBlacklistingfortheSession>false</declineStorylinesInsteadofBlacklistingfortheSession> <!-- by default questor will blacklist storylines for the session if for any reason AgentInteraction wants to decline a storyline. This setting allow one to actually decline storylines so they are removed from the journal when this occurs-->
   <MaterialsForWarOreID>20</MaterialsForWarOreID>
   <MaterialsForWarOreQty>8000</MaterialsForWarOreQty>
   <!-- UseLocalWatch is either true or false and is a feature to look at the CORP standings of OTHER corps that you have manually set in your OWN corp then decides to not leave station or run back home -->

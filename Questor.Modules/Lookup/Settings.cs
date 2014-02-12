@@ -194,6 +194,7 @@ namespace Questor.Modules.Lookup
         // Enable / Disable Major Features that do not have categories of their own below
         //
         public bool EnableStorylines { get; set; }
+        public bool DeclineStorylinesInsteadofBlacklistingfortheSession { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
 
@@ -843,6 +844,7 @@ namespace Questor.Modules.Lookup
             //
             UseFittingManager = (bool?)CharacterSettingsXml.Element("UseFittingManager") ?? (bool?)CommonSettingsXml.Element("UseFittingManager") ?? true;
             EnableStorylines = (bool?)CharacterSettingsXml.Element("enableStorylines") ?? (bool?)CommonSettingsXml.Element("enableStorylines") ?? false;
+            DeclineStorylinesInsteadofBlacklistingfortheSession = (bool?)CharacterSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? (bool?)CommonSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? false;
             UseLocalWatch = (bool?)CharacterSettingsXml.Element("UseLocalWatch") ?? (bool?)CommonSettingsXml.Element("UseLocalWatch") ?? true;
             WatchForActiveWars = (bool?)CharacterSettingsXml.Element("watchForActiveWars") ?? (bool?)CommonSettingsXml.Element("watchForActiveWars") ?? true;
 
@@ -1587,6 +1589,7 @@ namespace Questor.Modules.Lookup
                 //
                 UseFittingManager = false;
                 EnableStorylines = false;
+                DeclineStorylinesInsteadofBlacklistingfortheSession = false;
                 UseLocalWatch = false;
                 WatchForActiveWars = true;
 

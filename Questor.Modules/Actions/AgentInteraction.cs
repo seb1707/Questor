@@ -707,11 +707,13 @@ namespace Questor.Modules.Actions
                 // Is the mission offered?
                 if (Cache.Instance.Mission.State == (int)MissionState.Offered && (Cache.Instance.Mission.Type == "Mining" || Cache.Instance.Mission.Type == "Trade" || (Cache.Instance.Mission.Type == "Courier" && Cache.Instance.CourierMission)))
                 {
-                    Logging.Log("AgentInteraction", "Declining courier/mining/trade", Logging.Yellow);
-
-                    _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
-                    _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(5, 10));
-                    return;
+                    if (!Cache.Instance.Mission.Important) //do not decline courier/mining/trade storylines!
+                    {
+                        Logging.Log("AgentInteraction", "Declining courier/mining/trade", Logging.Yellow);
+                        _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
+                        _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(5, 10));
+                        return;    
+                    }
                 }
             }
 
@@ -814,12 +816,12 @@ namespace Questor.Modules.Actions
 
         private static void DeclineMission(string module)
         {
-            // If we are doing an ammo check then Decline Mission is an end-state!
-            if (Purpose == AgentInteractionPurpose.AmmoCheck)
-            {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Purpose == AgentInteractionPurpose.AmmoCheck) return", Logging.Debug);
-                return;
-            }
+            // If we are doing an ammo check then Decline Mission is an end-state! (no, it is not... wtf)
+            //if (Purpose == AgentInteractionPurpose.AmmoCheck)
+            //{
+            //    if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Purpose == AgentInteractionPurpose.AmmoCheck) return", Logging.Debug);
+            //    return;
+            //}
 
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
@@ -962,9 +964,18 @@ namespace Questor.Modules.Actions
                 _States.CurrentStorylineState = StorylineState.Idle;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
-                Statistics.Instance.MissionCompletionErrors = 0;
-                return;
+                if (Settings.Instance.DeclineStorylinesInsteadofBlacklistingfortheSession)
+                {
+                    decline.Say();
+                    _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 7));
+                    return;
+                }
+                else
+                {
+                    Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
+                    Statistics.Instance.MissionCompletionErrors = 0;
+                    return;    
+                }
             }
 
             // Decline and request a new mission

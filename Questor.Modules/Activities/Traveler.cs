@@ -187,12 +187,12 @@ namespace Questor.Modules.Activities
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "]", Logging.Teal);
 
-            if (waypoint > 6000000) // this MUST be a station
+            if (waypoint > 60000000) // this MUST be a station
             {
                 //insert code to handle station destinations here
             }
 
-            if (waypoint < 6000000) // this is not a station, probably a system
+            if (waypoint < 60000000) // this is not a station, probably a system
             {
                 //useful?a
             }

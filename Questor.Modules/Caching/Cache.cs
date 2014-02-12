@@ -3883,7 +3883,7 @@ namespace Questor.Modules.Caching
 
                     foreach (int _system in currentPath)
                     {
-                        if (_system < 6000000) // not a station
+                        if (_system < 60000000) // not a station
                         {
                             DirectSolarSystem solarSystemInRoute = Cache.Instance.DirectEve.SolarSystems[_system];
                             if (solarSystemInRoute != null)

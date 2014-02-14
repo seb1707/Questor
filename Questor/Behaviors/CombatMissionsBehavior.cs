@@ -1273,10 +1273,13 @@ namespace Questor.Behaviors
                     if (closest != null && closest.Distance < (int)Distances.WarptoDistance)
                     {
                         // Move to the target
-                        if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
+                        if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
                         {
-                            Logging.Log("CombatMissionsBehavior.Salvage", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                            closest.Approach();
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                            {
+                                Logging.Log("CombatMissionsBehavior.Salvage", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
+                                closest.Approach();    
+                            }
                         }
                     }
                     else if (closest != null)
@@ -1475,10 +1478,13 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
+                            if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
                             {
-                                Logging.Log("CombatMissionsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                station.Approach();
+                                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                    station.Approach();    
+                                }
                             }
                         }
                     }

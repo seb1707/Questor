@@ -62,23 +62,26 @@ namespace Questor.Modules.BackgroundTasks
             if (bastionModules.Any(i => i.IsActive)) return;
 
             EntityCache closestWreck = Cache.Instance.UnlootedContainers.OrderBy(o => o.Distance).FirstOrDefault();
-            if (closestWreck != null && (Math.Round(closestWreck.Distance, 0) > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id)))
+            if (closestWreck != null && (Math.Round(closestWreck.Distance, 0) > (int)Distances.SafeScoopRange))
             {
-                if (closestWreck.Distance > (int)Distances.WarptoDistance)
+                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                    if (closestWreck.Distance > (int)Distances.WarptoDistance)
                     {
-                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
-                        closestWreck.WarpTo();
+                        if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        {
+                            Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
+                            closestWreck.WarpTo();
+                        }
                     }
-                }
-                else
-                {
-                    if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closestWreck.Id))
+                    else
                     {
-                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
-                        closestWreck.Approach();
-                    }
+                        if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
+                        {
+                            Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
+                            closestWreck.Approach();
+                        }
+                    }    
                 }
             }
             else if (closestWreck != null && (closestWreck.Distance <= (int)Distances.SafeScoopRange && Cache.Instance.Approaching != null))
@@ -370,17 +373,17 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
                 }
-
-                //if (!Cache.Instance.SalvageAll)
-                //{
-                //    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId))
-                //    {
-                //        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is on our blacklist, unlocking container.", Logging.White);
-                //        Cache.Instance.LootedContainers.Add(wreck.Id);
-                //        wreck.UnlockTarget("Salvage");
-                //        continue;
-                //    }
-                //}
+                
+                if (!Cache.Instance.SalvageAll)
+                {
+                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId))
+                    {
+                        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is on our blacklist, unlocking container.", Logging.White);
+                        Cache.Instance.LootedContainers.Add(wreck.Id);
+                        wreck.UnlockTarget("Salvage");
+                        continue;
+                    }
+                }
 
                 if (hasSalvagers && wreck.GroupId != (int)Group.CargoContainer)
                 {

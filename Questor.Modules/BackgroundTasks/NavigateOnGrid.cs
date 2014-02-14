@@ -230,28 +230,34 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: OptimalRange [ " + Cache.Instance.OptimalRange + "] Current Distance to [" + target.Name + "] is [" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
 
-                        if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                        if (target.Distance > Cache.Instance.OptimalRange + (int)Distances.OptimalRangeCushion)
                         {
-                            if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            if ((Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id) || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
-                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
-                                OrbitGateorTarget(target, module);
-                                return;
-                            }
+                                if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                                {
+                                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + Math.Round(target.Distance / 1000, 0) + "]", Logging.White);
+                                    OrbitGateorTarget(target, module);
+                                    return;
+                                }
 
-                            target.Approach(Cache.Instance.OptimalRange);
-                            Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            return;
+                                target.Approach(Cache.Instance.OptimalRange);
+                                Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                return;    
+                            }
                         }
 
                         if (target.Distance <= Cache.Instance.OptimalRange)
                         {
-                            if (target.IsNPCFrigate && ((Cache.Instance.Approaching != null && Cache.Instance.Approaching.Id != target.Id) || Cache.Instance.Approaching == null) && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                             {
-                                Logging.Log(module, "Target is NPC Frigate and we got Turrets. Keeping target at Range to hit it.", Logging.Teal);
-                                target.Approach(Settings.Instance.OptimalRange);
-                                Logging.Log(module, "Initiating KeepAtRange [" + target.Name + "][at " + Math.Round((double)Settings.Instance.OptimalRange / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                                return;
+                                if ((Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id) || Cache.Instance.MyShipEntity.Velocity < 50)
+                                {
+                                    Logging.Log(module, "Target is NPC Frigate and we got Turrets. Keeping target at Range to hit it.", Logging.Teal);
+                                    target.Approach(Settings.Instance.OptimalRange);
+                                    Logging.Log(module, "Initiating KeepAtRange [" + target.Name + "][at " + Math.Round((double)Settings.Instance.OptimalRange / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                                    return;    
+                                }
                             }
                             else if (Cache.Instance.Approaching != null && Cache.Instance.MyShipEntity.Velocity != 0)
                             {
@@ -272,17 +278,21 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: using MaxRange [" + Cache.Instance.MaxRange + "] target is [" + target.Name + "][" + target.Distance + "]", Logging.White);
 
-                        if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                        if (target.Distance > Cache.Instance.MaxRange)
                         {
-                            if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
-                                if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + target.Distance + "]", Logging.White);
-                                OrbitGateorTarget(target, module);
-                                return;
+                                if (target.IsNPCFrigate && Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
+                                {
+                                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: target is NPC Frigate [" + target.Name + "][" + target.Distance + "]", Logging.White);
+                                    OrbitGateorTarget(target, module);
+                                    return;
+                                }
+
+                                target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
+                                Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.MaxRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                return;    
                             }
-                            target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
-                            Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.MaxRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            return;
                         }
 
                         //I think when approach distance will be reached ship will be stopped so this is not needed
@@ -374,11 +384,15 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // this assumes that both optimal range and missile boats both want to be within 5k of the object they asked us to navigate to
                     //
-                    if (target.Distance > Cache.Instance.MaxRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id))
+                    if (target.Distance > Cache.Instance.MaxRange)
                     {
-                        target.Approach((int)(Distances.SafeDistancefromStructure));
-                        Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                        {
+                            target.Approach((int)(Distances.SafeDistancefromStructure));
+                            Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);    
+                        }
                     }
+
                     return;
                 }
             }

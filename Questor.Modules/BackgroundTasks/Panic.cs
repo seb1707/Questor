@@ -418,7 +418,7 @@ namespace Questor.Modules.BackgroundTasks
                             
                         if (DateTime.UtcNow > Cache.Instance.NextTravelerAction)
                         {
-                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id)
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
                                 Logging.Log("Panic", "Approaching to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Red);
                                 station.Approach();

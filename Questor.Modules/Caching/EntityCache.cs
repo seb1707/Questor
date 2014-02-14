@@ -4108,8 +4108,6 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Cache.Instance.Approaching = this;
-
                     if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4128,12 +4126,14 @@ namespace Questor.Modules.Caching
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
+                        Cache.Instance.Approaching = this;
                     }
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
@@ -4143,7 +4143,6 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Cache.Instance.Approaching = this;
                     if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4162,6 +4161,7 @@ namespace Questor.Modules.Caching
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
+                        Cache.Instance.Approaching = this;
                         //_directEntity.Approach();
                     }
                 }
@@ -4169,6 +4169,7 @@ namespace Questor.Modules.Caching
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
@@ -4176,8 +4177,6 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                Cache.Instance.Approaching = this;
-
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4197,11 +4196,13 @@ namespace Questor.Modules.Caching
                     Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     _directEntity.Orbit(range);
+                    Cache.Instance.Approaching = this;
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
@@ -4242,7 +4243,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void AlignTo()
         {
             try
@@ -4267,7 +4268,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void WarpToAndDock()
         {
             try
@@ -4297,7 +4298,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void Dock()
         {
             try
@@ -4321,7 +4322,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void OpenCargo()
         {
             try

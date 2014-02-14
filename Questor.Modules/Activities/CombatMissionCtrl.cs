@@ -335,7 +335,7 @@ namespace Questor.Modules.Activities
                     // Move to the target
                     if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
-                        if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 100)
+                        if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
                             Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                             closest.Approach();
@@ -863,7 +863,7 @@ namespace Questor.Modules.Activities
 
                     if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching == null) Logging.Log("CombatMissionCtrl.MoveTo", "if (Cache.Instance.Approaching == null)", Logging.Teal);
                     if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl.MoveTo", "Cache.Instance.Approaching.Id [" + Cache.Instance.Approaching.Id + "]", Logging.Teal);
-                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 100)
+                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                     {
                         Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
                         closest.Approach();
@@ -1607,9 +1607,9 @@ namespace Questor.Modules.Activities
 
                     if (closest.Distance > (int)Distances.SafeScoopRange)
                     {
-                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
+                        if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                         {
-                            if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
                                 Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
                                 closest.Approach(1000);
@@ -1762,18 +1762,21 @@ namespace Questor.Modules.Activities
                 }
 
                 EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-                if (container != null && (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
+                if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction) 
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id))
+                    if (container.Distance > (int)Distances.SafeScoopRange)
                     {
-                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
-                        container.Approach();
+                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            container.Approach();
+                        }    
                     }
                 }
             }
             catch (Exception exception)
             {
-                Logging.Log("CombatMissionCtrl.LootItemAction","Exception logged was [" + exception +  "]",Logging.Teal);    
+                Logging.Log("CombatMissionCtrl.LootItemAction","Exception logged was [" + exception +  "]",Logging.Teal);
             }
 
             return;
@@ -1902,9 +1905,9 @@ namespace Questor.Modules.Activities
             }
 
             EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-            if (container != null && (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id)))
+            if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50))
                 {
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
                     container.Approach();

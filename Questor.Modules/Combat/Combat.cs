@@ -415,40 +415,44 @@ namespace Questor.Modules.Combat
                 return true;
             }
 
-            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons;
             _weaponNumber = 0;
-            if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "Weapons (or stacks of weapons?): [" + Cache.Instance.Weapons.Count() + "]", Logging.Orange); 
-            foreach (ModuleCache weapon in weapons)
+            if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "Weapons (or stacks of weapons?): [" + Cache.Instance.Weapons.Count() + "]", Logging.Orange);
+
+            if (Cache.Instance.Weapons.Any())
             {
-                _weaponNumber++;
-                // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
-                if (weapon.IsEnergyWeapon)
+                foreach (ModuleCache weapon in Cache.Instance.Weapons)
                 {
-                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "if (weapon.IsEnergyWeapon) continue (energy weapons do not really need to reload)", Logging.Orange);
+                    _weaponNumber++;
+                    // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
+                    if (weapon.IsEnergyWeapon)
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "if (weapon.IsEnergyWeapon) continue (energy weapons do not really need to reload)", Logging.Orange);
+                        continue;
+                    }
+
+                    if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] is busy, moving on to next weapon", Logging.White);
+                        continue;
+                    }
+
+                    if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                        continue;
+                    }
+
+                    if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
+                    {
+                        if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
+                    }
+
                     continue;
                 }
 
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
-                {
-                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] is busy, moving on to next weapon", Logging.White);
-                    continue;
-                }
-
-                if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
-                {
-                    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
-                    continue;
-                }
-
-                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
-                {
-                    if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
-                }
-                
-                continue;
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "completely reloaded all weapons", Logging.White);
             }
-            if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "completely reloaded all weapons", Logging.White);
-
+            
             //_lastReloadAll = DateTime.UtcNow;
             _reloadAllIteration = 0;
             return true;
@@ -535,6 +539,12 @@ namespace Questor.Modules.Combat
                 return;
             }
 
+            if (!Cache.Instance.Weapons.Any())
+            {
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: you have no weapons?", Logging.Teal);
+                return;
+            }
+
             //
             // Do we really want a non-mission action moving the ship around at all!! (other than speed tanking)?
             // If you are not in a mission by all means let combat actions move you around as needed
@@ -553,144 +563,157 @@ namespace Questor.Modules.Combat
             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: after navigate into range...", Logging.Teal);
 
             // Get the weapons
-            IEnumerable<ModuleCache> weapons = Cache.Instance.Weapons.ToList();
-
+            
             // TODO: Add check to see if there is better ammo to use! :)
             // Get distance of the target and compare that with the ammo currently loaded
 
             //Deactivate weapons that needs to be deactivated for this list of reasons...
             _weaponNumber = 0;
             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: Do we need to deactivate any weapons?", Logging.Teal);
-            foreach (ModuleCache weapon in weapons)
+
+            if (Cache.Instance.Weapons.Any())
             {
-                _weaponNumber++;
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: for each weapon [" + _weaponNumber + "] in weapons", Logging.Teal);
-
-                if (!weapon.IsActive)
+                foreach (ModuleCache weapon in Cache.Instance.Weapons)
                 {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + _weaponNumber + "] is not active: no need to do anything", Logging.Teal);
-                    continue;
-                }
+                    _weaponNumber++;
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: for each weapon [" + _weaponNumber + "] in weapons", Logging.Teal);
 
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + _weaponNumber + "] is reloading, deactivating or changing ammo: no need to do anything", Logging.Teal);
-                    continue;
-                }
-
-                //if (DateTime.UtcNow < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
-                //{
-                //    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: NextReload is still in the future: wait before doing anything with the weapon", Logging.teal);
-                //    return;
-                //}
-
-                // No ammo loaded
-                if (weapon.Charge == null)
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: no ammo loaded? [" + _weaponNumber + "] reload will happen elsewhere", Logging.Teal);
-                    continue;
-                }
-
-                Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
-
-                //use mission specific ammo
-                if (Cache.Instance.MissionAmmo.Count() != 0)
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: MissionAmmocount is not 0", Logging.Teal);
-                    ammo = Cache.Instance.MissionAmmo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
-                }
-
-                // How can this happen? Someone manually loaded ammo
-                if (ammo == null)
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: ammo == null [" + _weaponNumber + "] someone manually loaded ammo?", Logging.Teal);
-                    continue;
-                }
-
-                // If we have already activated warp, deactivate the weapons
-                if (!Cache.Instance.ActiveShip.Entity.IsWarping)
-                {
-                    // Target is in range
-                    if (target.Distance <= ammo.Range)
+                    if (!weapon.IsActive)
                     {
-                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.Teal);
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + _weaponNumber + "] is not active: no need to do anything", Logging.Teal);
                         continue;
                     }
+
+                    if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: weapon [" + _weaponNumber + "] is reloading, deactivating or changing ammo: no need to do anything", Logging.Teal);
+                        continue;
+                    }
+
+                    //if (DateTime.UtcNow < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
+                    //{
+                    //    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: NextReload is still in the future: wait before doing anything with the weapon", Logging.teal);
+                    //    return;
+                    //}
+
+                    // No ammo loaded
+                    if (weapon.Charge == null)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: no ammo loaded? [" + _weaponNumber + "] reload will happen elsewhere", Logging.Teal);
+                        continue;
+                    }
+
+                    Ammo ammo = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
+
+                    //use mission specific ammo
+                    if (Cache.Instance.MissionAmmo.Count() != 0)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: MissionAmmocount is not 0", Logging.Teal);
+                        ammo = Cache.Instance.MissionAmmo.FirstOrDefault(a => a.TypeId == weapon.Charge.TypeId);
+                    }
+
+                    // How can this happen? Someone manually loaded ammo
+                    if (ammo == null)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: ammo == null [" + _weaponNumber + "] someone manually loaded ammo?", Logging.Teal);
+                        continue;
+                    }
+
+                    // If we have already activated warp, deactivate the weapons
+                    if (!Cache.Instance.ActiveShip.Entity.IsWarping)
+                    {
+                        // Target is in range
+                        if (target.Distance <= ammo.Range)
+                        {
+                            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.Teal);
+                            continue;
+                        }
+                    }
+
+                    // Target is out of range, stop firing
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is out of range, stop firing", Logging.Teal);
+                    weapon.Click();
+                    return;
                 }
 
-                // Target is out of range, stop firing
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is out of range, stop firing", Logging.Teal);
-                weapon.Click();
-                return;
+                // Hack for max charges returning incorrect value
+                if (!Cache.Instance.Weapons.Any(w => w.IsEnergyWeapon))
+                {
+                    MaxCharges = Math.Max(MaxCharges, Cache.Instance.Weapons.Max(l => l.MaxCharges));
+                    MaxCharges = Math.Max(MaxCharges, Cache.Instance.Weapons.Max(l => l.CurrentCharges));
+                }
+
+                int weaponsActivatedThisTick = 0;
+                int weaponsToActivateThisTick = Cache.Instance.RandomNumber(1, 4);
+
+                // Activate the weapons (it not yet activated)))
+                _weaponNumber = 0;
+                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: activate: Do we need to activate any weapons?", Logging.Teal);
+                foreach (ModuleCache weapon in Cache.Instance.Weapons)
+                {
+                    _weaponNumber++;
+
+                    // Are we reloading, deactivating or changing ammo?
+                    if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || !target.IsTarget)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is reloading, deactivating or changing ammo", Logging.Teal);
+                        continue;
+                    }
+
+                    // Are we on the right target?
+                    if (weapon.IsActive)
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is active already", Logging.Teal);
+                        if (weapon.TargetId != target.Id && target.IsTarget)
+                        {
+                            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is shooting at the wrong target: deactivating", Logging.Teal);
+                            weapon.Click();
+                            return;
+                        }
+                        continue;
+                    }
+
+                    // No, check ammo type and if that is correct, activate weapon
+                    bool ReloadReady = ReloadAmmo(weapon, target, _weaponNumber);
+                    bool CanActivateReady = CanActivate(weapon, target, true);
+                    if (ReloadReady && CanActivateReady)
+                    {
+                        if (weaponsActivatedThisTick > weaponsToActivateThisTick)
+                        {
+                            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: if we have already activated x number of weapons return, which will wait until the next ProcessState", Logging.Teal);
+                            return;
+                        }
+
+                        if (!target.IsTarget)
+                        {
+                            Logging.Log("Combat", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "]IsTargeting[" + target.IsTargeting + "] was not locked, aborting firing as we cant shoot something that is not locked!", Logging.Debug);
+                            return;
+                        }
+
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] has the correct ammo: activate", Logging.Teal);
+                        weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
+                        Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        weapon.Activate(target.Id);
+                        Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
+
+                        //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
+                        //Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
+                        continue;
+                    }
+
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: ReloadReady [" + ReloadReady + "] CanActivateReady [" + CanActivateReady + "]", Logging.Teal);
+                }
             }
-
-            // Hack for max charges returning incorrect value
-            if (!weapons.Any(w => w.IsEnergyWeapon))
+            else
             {
-                MaxCharges = Math.Max(MaxCharges, weapons.Max(l => l.MaxCharges));
-                MaxCharges = Math.Max(MaxCharges, weapons.Max(l => l.CurrentCharges));
-            }
-
-            int weaponsActivatedThisTick = 0;
-            int weaponsToActivateThisTick = Cache.Instance.RandomNumber(1, 4);
-
-            // Activate the weapons (it not yet activated)))
-            _weaponNumber = 0;
-            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: activate: Do we need to activate any weapons?", Logging.Teal);
-            foreach (ModuleCache weapon in weapons)
-            {
-                _weaponNumber++;
-
-                // Are we reloading, deactivating or changing ammo?
-                if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || !target.IsTarget)
+                Logging.Log("Combat","ActivateWeapons: you have no weapons with groupID: [ " + Settings.Instance.WeaponGroupId + " ]",Logging.Debug);
+                i = 0;
+                foreach (ModuleCache __module in Cache.Instance.Modules.Where(i => i.IsOnline && i.IsActivatable))
                 {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is reloading, deactivating or changing ammo", Logging.Teal);
-                    continue;
+                    i++;
+                    Logging.Log("Fitted Modules", "[" + i + "] Module TypeID [ " + __module.TypeId + " ] ModuleGroupID [ " + __module.GroupId + " ] EveCentral Link [ http://eve-central.com/home/quicklook.html?typeid=" + __module.TypeId + " ]", Logging.Debug);
                 }
-
-                // Are we on the right target?
-                if (weapon.IsActive)
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is active already", Logging.Teal);
-                    if (weapon.TargetId != target.Id && target.IsTarget)
-                    {
-                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] is shooting at the wrong target: deactivating", Logging.Teal);
-                        weapon.Click();
-                        return;
-                    }
-                    continue;
-                }
-
-                // No, check ammo type and if that is correct, activate weapon
-                bool ReloadReady = ReloadAmmo(weapon, target, _weaponNumber);
-                bool CanActivateReady = CanActivate(weapon, target, true);
-                if (ReloadReady && CanActivateReady)
-                {
-                    if (weaponsActivatedThisTick > weaponsToActivateThisTick)
-                    {
-                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: if we have already activated x number of weapons return, which will wait until the next ProcessState", Logging.Teal); 
-                        return;
-                    }
-
-                    if (!target.IsTarget)
-                    {
-                        Logging.Log("Combat", "Target [" + target.Name + "][" +  Math.Round(target.Distance / 1000, 2) + "]IsTargeting[" + target.IsTargeting + "] was not locked, aborting firing as we cant shoot something that is not locked!", Logging.Debug);
-                        return;
-                    }
-
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] has the correct ammo: activate", Logging.Teal);
-                    weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
-                    Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    weapon.Activate(target.Id);
-                    Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
-
-                    //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
-                    //Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                    //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                    continue;
-                }
-                
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: ReloadReady [" + ReloadReady + "] CanActivateReady [" + CanActivateReady + "]", Logging.Teal);
             }
         }
 

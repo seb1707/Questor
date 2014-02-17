@@ -203,12 +203,11 @@ namespace Questor.Storylines
                     if (warpOutBookMark == null)
                     {
                         Logging.Log("GenericCombatStoryline.WarpOut", "No Bookmark", Logging.Orange);
-                        if (_state == GenericCombatStorylineState.WarpOutStation)
-                        {
-                            _state = GenericCombatStorylineState.GotoMission;
-                        }
+                        _state = GenericCombatStorylineState.GotoMission;
+                        break;
                     }
-                    else if (warpOutBookMark.LocationId == solarid)
+
+                    if (warpOutBookMark.LocationId == solarid)
                     {
                         if (Traveler.Destination == null)
                         {
@@ -222,21 +221,16 @@ namespace Questor.Storylines
                         {
                             Logging.Log("GenericCombatStoryline.WarpOut", "Safe!", Logging.White);
                             Cache.Instance.DoNotBreakInvul = false;
-                            if (_state == GenericCombatStorylineState.WarpOutStation)
-                            {
-                                _state = GenericCombatStorylineState.GotoMission;
-                            }
-                            Traveler.Destination = null;
-                        }
-                    }
-                    else
-                    {
-                        Logging.Log("GenericCombatStoryline.WarpOut", "o Bookmark in System", Logging.White);
-                        if (_state == GenericCombatStorylineState.WarpOutStation)
-                        {
                             _state = GenericCombatStorylineState.GotoMission;
+                            Traveler.Destination = null;
+                            break;
                         }
+
+                        break;
                     }
+                    
+                    Logging.Log("GenericCombatStoryline.WarpOut", "No Bookmark in System", Logging.White);
+                    _state = GenericCombatStorylineState.GotoMission;
                     break;
 
                 case GenericCombatStorylineState.GotoMission:

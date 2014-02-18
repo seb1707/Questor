@@ -1907,10 +1907,13 @@ namespace Questor.Modules.Activities
             EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
             if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
             {
-                if (container.Distance > (int)Distances.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50))
+                if (container.Distance > (int)Distances.SafeScoopRange)
                 {
-                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    container.Approach();
+                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                    {
+                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        container.Approach();    
+                    }
                 }
             }
 

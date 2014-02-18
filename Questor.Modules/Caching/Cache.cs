@@ -1356,26 +1356,33 @@ namespace Questor.Modules.Caching
         //
         // this CAN and should just list all possible weapon system groupIDs
         //
+
+        private IEnumerable<ModuleCache> _weapons;
         public IEnumerable<ModuleCache> Weapons
         {
             get
             {
-                if (Cache.Instance.MissionWeaponGroupId != 0)
+                if (_weapons == null)
                 {
-                    return Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
+                    if (Cache.Instance.MissionWeaponGroupId != 0)
+                    {
+                        _weapons = Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
+                    }
+
+                    _weapons = Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId); // ||
+                    //m.GroupId == (int)Group.ProjectileWeapon ||
+                    //m.GroupId == (int)Group.EnergyWeapon ||
+                    //m.GroupId == (int)Group.HybridWeapon ||
+                    //m.GroupId == (int)Group.CruiseMissileLaunchers ||
+                    //m.GroupId == (int)Group.RocketLaunchers ||
+                    //m.GroupId == (int)Group.StandardMissileLaunchers ||
+                    //m.GroupId == (int)Group.TorpedoLaunchers ||
+                    //m.GroupId == (int)Group.AssaultMissilelaunchers ||
+                    //m.GroupId == (int)Group.HeavyMissilelaunchers ||
+                    //m.GroupId == (int)Group.DefenderMissilelaunchers);    
                 }
 
-                return Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId); // ||
-                //m.GroupId == (int)Group.ProjectileWeapon ||
-                //m.GroupId == (int)Group.EnergyWeapon ||
-                //m.GroupId == (int)Group.HybridWeapon ||
-                //m.GroupId == (int)Group.CruiseMissileLaunchers ||
-                //m.GroupId == (int)Group.RocketLaunchers ||
-                //m.GroupId == (int)Group.StandardMissileLaunchers ||
-                //m.GroupId == (int)Group.TorpedoLaunchers ||
-                //m.GroupId == (int)Group.AssaultMissilelaunchers ||
-                //m.GroupId == (int)Group.HeavyMissilelaunchers ||
-                //m.GroupId == (int)Group.DefenderMissilelaunchers);
+                return _weapons;
             }
         }
 

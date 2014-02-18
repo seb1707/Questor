@@ -709,7 +709,7 @@ namespace Questor.Modules.Combat
             {
                 Logging.Log("Combat","ActivateWeapons: you have no weapons with groupID: [ " + Settings.Instance.WeaponGroupId + " ]",Logging.Debug);
                 i = 0;
-                foreach (ModuleCache __module in Cache.Instance.Modules.Where(i => i.IsOnline && i.IsActivatable))
+                foreach (ModuleCache __module in Cache.Instance.Modules.Where(e => e.IsOnline && e.IsActivatable))
                 {
                     i++;
                     Logging.Log("Fitted Modules", "[" + i + "] Module TypeID [ " + __module.TypeId + " ] ModuleGroupID [ " + __module.GroupId + " ] EveCentral Link [ http://eve-central.com/home/quicklook.html?typeid=" + __module.TypeId + " ]", Logging.Debug);

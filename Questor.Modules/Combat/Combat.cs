@@ -1938,7 +1938,7 @@ namespace Questor.Modules.Combat
                         //
                         // we are not in something light and fast so assume we need weapons and assume we should be in the defined combatship
                         //
-                        if (!Cache.Instance.Weapons.Any())
+                        if (!Cache.Instance.Weapons.Any() && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(30))
                         {
                             Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] has no weapons!", Logging.Red);
                             _States.CurrentCombatState = CombatState.OutOfAmmo;

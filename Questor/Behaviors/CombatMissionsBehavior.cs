@@ -1095,7 +1095,7 @@ namespace Questor.Behaviors
                     {
                         _States.CurrentArmState = ArmState.Idle;
                         DirectBookmark bookmark = Cache.Instance.GetSalvagingBookmark;
-                        if (bookmark == null)
+                        if (bookmark == null && Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Any())
                         {
                             bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").OrderBy(b => b.CreatedOn).FirstOrDefault();
                             if (bookmark == null)

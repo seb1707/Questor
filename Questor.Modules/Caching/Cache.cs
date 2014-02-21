@@ -2933,6 +2933,7 @@ namespace Questor.Modules.Caching
                 _undockBookmark = null;
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
+                _weapons = null;
                 _windows = null;
 
                 _primaryWeaponPriorityEntities = null;

@@ -486,6 +486,9 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            if (module.IsReloadingAmmo)
+                return false;
+
             // We have changed target, allow activation
             if (entity.Id != module.LastTargetId)
                 return true;
@@ -691,11 +694,13 @@ namespace Questor.Modules.Combat
                         }
 
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: weapon [" + _weaponNumber + "] has the correct ammo: activate", Logging.Teal);
-                        weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
-                        Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                        weapon.Activate(target.Id);
-                        Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
-
+                        if (weapon.Activate(target.Id))
+                        {
+                            weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
+                            Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
+                        }
+                        
                         //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
                         //Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
@@ -731,7 +736,7 @@ namespace Questor.Modules.Combat
             _weaponNumber = 0;
             foreach (ModuleCache painter in targetPainters)
             {
-                if (painter.ActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
+                if (painter.LastActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
                     continue;
 
                 _weaponNumber++;

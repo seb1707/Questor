@@ -465,7 +465,7 @@ namespace Questor.Behaviors
                             _minerNumber = 0;
                             foreach (ModuleCache miningTool in miningTools)
                             {
-                                if (miningTool.ActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
+                                if (miningTool.LastActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
                                     continue;
 
                                 _minerNumber++;
@@ -489,7 +489,7 @@ namespace Questor.Behaviors
                                 _lastModuleActivation = DateTime.UtcNow;
                                 Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
                                 miningTool.Activate(_targetAsteroid.Id);
-                                miningTool.ActivatedTimeStamp = DateTime.UtcNow;
+                                miningTool.LastActivatedTimeStamp = DateTime.UtcNow;
                             }
 
                             return;

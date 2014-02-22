@@ -753,34 +753,39 @@ namespace QuestorManager
             {
                 return;
             }
+
             _changed = false;
-
-            string[] search = SearchTextBox.Text.Split(' ');
-
-            SearchResults.BeginUpdate();
+            
             try
             {
-                SearchResults.Items.Clear();
+                if ((_bookmarks != null && _bookmarks.Any())
+                    || (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
+                    || (_stations != null && _stations.Any()))
+                {
+                    string[] search = SearchTextBox.Text.Split(' ');
+                    SearchResults.BeginUpdate();
+                    SearchResults.Items.Clear();
 
-                if (_bookmarks != null && _bookmarks.Any())
-                {
-                    SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));    
-                }
-                
-                if (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
-                {
-                    SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));    
-                }
+                    if (_bookmarks != null && _bookmarks.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
+                    }
 
-                if (_stations != null && _stations.Any())
-                {
-                    SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));    
-                }
-                
-                // Automatically select the only item
-                if (SearchResults.Items.Count == 1)
-                {
-                    SearchResults.Items[0].Selected = true;
+                    if (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
+                    }
+
+                    if (_stations != null && _stations.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
+                    }
+
+                    // Automatically select the only item
+                    if (SearchResults.Items.Count == 1)
+                    {
+                        SearchResults.Items[0].Selected = true;
+                    }
                 }
             }
             catch (Exception exception)

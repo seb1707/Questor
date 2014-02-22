@@ -148,7 +148,7 @@
             // UpdateSearchResults
             // 
             this.UpdateSearchResults.Enabled = true;
-            this.UpdateSearchResults.Interval = 250;
+            this.UpdateSearchResults.Interval = 500;
             this.UpdateSearchResults.Tick += new System.EventHandler(this.UpdateSearchResultsTick);
             // 
             // tabControl1

@@ -2273,6 +2273,10 @@ namespace Questor.Modules.Caching
 
                     return _primaryWeaponPriorityTargetsPerFrameCaching;
                 }
+                catch (NullReferenceException)
+                {
+                    return null;
+                }
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.PrimaryWeaponPriorityEntities", "Exception [" + exception + "]", Logging.Debug);
@@ -2315,6 +2319,10 @@ namespace Questor.Modules.Caching
                     //
                     return _primaryWeaponPriorityEntities;
                 }
+                catch (NullReferenceException)
+                {
+                    return null;
+                }
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.PrimaryWeaponPriorityEntities", "Exception [" + exception + "]", Logging.Debug);
@@ -2354,6 +2362,10 @@ namespace Questor.Modules.Caching
                     _dronePriorityTargets = new List<PriorityTarget>();
                     return _dronePriorityTargets;
                 }
+                catch (NullReferenceException)
+                {
+                    return null;
+                }
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.DronePriorityEntities", "Exception [" + exception + "]", Logging.Debug);
@@ -2390,6 +2402,10 @@ namespace Questor.Modules.Caching
                     // if we have already populated the list this frame return the list we already generated
                     //
                     return _dronePriorityEntities;
+                }
+                catch (NullReferenceException)
+                {
+                    return null;
                 }
                 catch (Exception exception)
                 {

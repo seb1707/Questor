@@ -365,7 +365,7 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (!hasSalvagers)
                 {
-                    if (wreck.IsWreckEmpty)
+                    if (wreck.IsWreckEmpty && wreck.Distance < 1500) //this is NOT ideal... the distance check was added to ensure the wreck is already close before checking to see if its looted. There seems to be an EVE (or DE?) issue in .IsWreckEmpty
                     {
                         Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is empty, unlocking container.", Logging.White);
                         Cache.Instance.LootedContainers.Add(wreck.Id);

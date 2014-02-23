@@ -86,12 +86,14 @@ namespace ValueDump
                 else
                 {
                     Logging.Log("ValueDump", "You have 0 Support Instances available [ Cache.Instance.DirectEve.HasSupportInstances() is false ]", Logging.Orange);
+                    return;
                 }
 
             }
             catch (Exception exception)
             {
                 Logging.Log("ValueDump", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+                return;
             }
 
             #endregion Verify DirectEVE Support Instances
@@ -103,6 +105,7 @@ namespace ValueDump
             catch (Exception ex)
             {
                 Logging.Log("ValueDump", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
+                return;
             }
         }
 
@@ -115,6 +118,7 @@ namespace ValueDump
             {
                 return;
             }
+
             _lastPulse = DateTime.UtcNow;
 
             // Session is not ready yet, do not continue
@@ -258,49 +262,57 @@ namespace ValueDump
 
         private void ProcessItems(bool sell)
         {
-            // Wait for the items to load
-            Logging.Log("ValueDump", "Waiting for items", Logging.White);
-            while (_States.CurrentValueDumpState != ValueDumpState.Idle)
+            try
             {
-                System.Threading.Thread.Sleep(50);
-                Application.DoEvents();
-            }
-
-            lvItems.Items.Clear();
-
-            if (Market.Items.Any())
-            {
-                foreach (ItemCacheMarket item in Market.Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
+                // Wait for the items to load
+                Logging.Log("ValueDump", "Waiting for items", Logging.White);
+                while (_States.CurrentValueDumpState != ValueDumpState.Idle)
                 {
-                    ListViewItem listItem = new ListViewItem(item.Name);
-                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.Quantity));
-                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.QuantitySold));
-                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy));
-                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.StationBuy));
+                    System.Threading.Thread.Sleep(50);
+                    Application.DoEvents();
+                }
+
+                lvItems.Items.Clear();
+
+                if (Market.Items.Any())
+                {
+                    foreach (ItemCacheMarket item in Market.Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
+                    {
+                        ListViewItem listItem = new ListViewItem(item.Name);
+                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.Quantity));
+                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.QuantitySold));
+                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy));
+                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.StationBuy));
+
+                        if (sell)
+                        {
+                            listItem.SubItems.Add(string.Format("{0:#,##0}", item.StationBuy * item.QuantitySold));
+                        }
+                        else
+                        {
+                            listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy * item.Quantity));
+                        }
+
+                        lvItems.Items.Add(listItem);
+                    }
 
                     if (sell)
                     {
-                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.StationBuy * item.QuantitySold));
+                        tbTotalMedian.Text = string.Format("{0:#,##0}", Market.Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.QuantitySold));
+                        tbTotalSold.Text = string.Format("{0:#,##0}", Market.Items.Sum(i => i.StationBuy * i.QuantitySold));
                     }
                     else
                     {
-                        listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy * item.Quantity));
+                        tbTotalMedian.Text = string.Format("{0:#,##0}", Market.Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.Quantity));
+                        tbTotalSold.Text = "";
                     }
-
-                    lvItems.Items.Add(listItem);
                 }
-
-                if (sell)
-                {
-                    tbTotalMedian.Text = string.Format("{0:#,##0}", Market.Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.QuantitySold));
-                    tbTotalSold.Text = string.Format("{0:#,##0}", Market.Items.Sum(i => i.StationBuy * i.QuantitySold));
-                }
-                else
-                {
-                    tbTotalMedian.Text = string.Format("{0:#,##0}", Market.Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.Quantity));
-                    tbTotalSold.Text = "";
-                }
-            } 
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("ValueDump.ProcessItems", "Exception: [" + exception + "]", Logging.Debug);
+            }
+             
         }
 
         private void ValueDumpUIFormClosed(object sender, FormClosedEventArgs e)

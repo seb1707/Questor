@@ -334,6 +334,7 @@ namespace Questor.Modules.Caching
         {
             if (!IsReloadingAmmo && !IsChangingAmmo)
             {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("ModuleCache.ReloadAmmo","Reloading: [" + _module.TypeName + "] with [" + charge.TypeName + "]",Logging.Debug);
                 _module.ReloadAmmo(charge);
                 LastReloadedTimeStamp = DateTime.UtcNow;    
             }
@@ -343,6 +344,7 @@ namespace Questor.Modules.Caching
         {
             if (!IsReloadingAmmo && !IsChangingAmmo)
             {
+                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("ModuleCache.ReloadAmmo", "ChangingAmmo: [" + _module.TypeName + "] changing to [" + charge.TypeName + "]", Logging.Debug);
                 _module.ChangeAmmo(charge);
                 LastChangedAmmoTimeStamp = DateTime.UtcNow;    
             }

@@ -240,7 +240,7 @@ namespace Questor.Modules.Combat
                         Cache.Instance.LastLoggingAction = DateTime.UtcNow;
                     }
 
-                    weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity);
+                    weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity.Name, entity.Distance);
                     return false;
                 }
 
@@ -335,15 +335,11 @@ namespace Questor.Modules.Combat
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
-                Logging.Log("Combat", "Reloading [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "]", Logging.Teal);
-                weapon.ReloadAmmo(charge);
-                weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + 1;
+                weapon.ReloadAmmo(charge, weaponNumber, (double)ammo.Range);
             }
             else
             {
-                Logging.Log("Combat", "Changing [" + weaponNumber + "] with [" + charge.TypeName + "][" + Math.Round((double)ammo.Range / 1000, 0) + "][TypeID: " + charge.TypeId + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.Teal);
-                weapon.ChangeAmmo(charge);
-                weapon.ReloadTimeThisMission = weapon.ReloadTimeThisMission + 1;
+                weapon.ChangeAmmo(charge, weaponNumber, (double)ammo.Range, entity.Name, entity.Distance);
             }
 
             // Return false as we are reloading ammo

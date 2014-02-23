@@ -341,11 +341,11 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void ChangeAmmo(DirectItem charge, int weaponNumber, double Range, EntityCache entity)
+        public void ChangeAmmo(DirectItem charge, int weaponNumber, double Range, String entityName = "n/a", Double entityDistance = 0)
         {
             if (!IsReloadingAmmo && !IsChangingAmmo)
             {
-                Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.Teal);    
+                Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entityName + "][" + Math.Round(entityDistance / 1000, 0) + "k]", Logging.Teal);    
                 _module.ChangeAmmo(charge);
                 LastChangedAmmoTimeStamp = DateTime.UtcNow;
                 ReloadTimeThisMission = ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;

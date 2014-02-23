@@ -332,14 +332,20 @@ namespace Questor.Modules.Caching
 
         public void ReloadAmmo(DirectItem charge)
         {
-            _module.ReloadAmmo(charge);
-            LastReloadedTimeStamp = DateTime.UtcNow;
+            if (!IsReloadingAmmo && !IsChangingAmmo)
+            {
+                _module.ReloadAmmo(charge);
+                LastReloadedTimeStamp = DateTime.UtcNow;    
+            }
         }
 
         public void ChangeAmmo(DirectItem charge)
         {
-            _module.ChangeAmmo(charge);
-            LastChangedAmmoTimeStamp = DateTime.UtcNow;
+            if (!IsReloadingAmmo && !IsChangingAmmo)
+            {
+                _module.ChangeAmmo(charge);
+                LastChangedAmmoTimeStamp = DateTime.UtcNow;    
+            }
         }
 
         public bool InLimboState

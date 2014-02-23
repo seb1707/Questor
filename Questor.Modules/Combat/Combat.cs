@@ -450,6 +450,11 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            if (module.IsActive || !module.IsActivatable)
+            {
+                return false;
+            }
+
             if (isWeapon && !entity.IsTarget)
             {
                 Logging.Log("Combat.CanActivate", "We attempted to shoot [" + entity.Name + "][" + Math.Round(entity.Distance/1000, 2) + "] which is currently not locked!", Logging.Debug);
@@ -473,7 +478,8 @@ namespace Questor.Modules.Combat
             if (isWeapon && module.CurrentCharges == MaxCharges)
                 return true;
 
-            return false;
+            // if the module is not already active, we have a target, it is in range, we are not reloading then ffs shoot it... 
+            return true;
         }
 
         public static List<EntityCache> TargetingMe { get; set; }
@@ -645,9 +651,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // No, check ammo type and if that is correct, activate weapon
-                    bool ReloadReady = ReloadAmmo(weapon, target, _weaponNumber);
-                    bool CanActivateReady = CanActivate(weapon, target, true);
-                    if (ReloadReady && CanActivateReady)
+                    if (ReloadAmmo(weapon, target, _weaponNumber) && CanActivate(weapon, target, true))
                     {
                         if (weaponsActivatedThisTick > weaponsToActivateThisTick)
                         {

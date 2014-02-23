@@ -480,17 +480,6 @@ namespace Questor.Modules.Combat
             if (isWeapon && module.CurrentCharges == MaxCharges)
                 return true;
 
-            // We haven't reloaded, insert a wait-time
-            if (_lastModuleActivation.ContainsKey(module.ItemId))
-            {
-                if (DateTime.UtcNow.Subtract(_lastModuleActivation[module.ItemId]).TotalSeconds < 3)
-                    return false;
-
-                _lastModuleActivation.Remove(module.ItemId);
-                return true;
-            }
-
-            _lastModuleActivation.Add(module.ItemId, DateTime.UtcNow);
             return false;
         }
 

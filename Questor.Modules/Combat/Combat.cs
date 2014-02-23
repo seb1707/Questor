@@ -419,9 +419,9 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    if (DateTime.UtcNow < weapon.LastReloadedTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                     {
-                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(weapon.LastReloadedTimeStamp).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                         continue;
                     }
 

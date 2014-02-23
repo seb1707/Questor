@@ -79,7 +79,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-           // Get ammo based on damage type
+            // Get ammo based on damage type
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType).ToList();
 
             // Check if we still have that ammo in our cargo
@@ -166,7 +166,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            // We have enough ammo loaded
+            // Do We have enough ammo loaded?
             if (weapon.Charge != null && weapon.Charge.TypeId == ammo.TypeId)
             {
                 if (weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges && !force)
@@ -184,7 +184,7 @@ namespace Questor.Modules.Combat
                     return true;
                 }
 
-                if (weapon.CurrentCharges >= Settings.Instance.MinimumAmmoCharges && force && weapon.CurrentCharges < weapon.MaxCharges)
+                if (force && weapon.CurrentCharges < weapon.MaxCharges)
                 {
                     //
                     // allow the reload (and log it!)

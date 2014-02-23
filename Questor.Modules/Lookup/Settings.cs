@@ -1311,7 +1311,8 @@ namespace Questor.Modules.Lookup
                 }
             }
 
-            MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 0;
+            MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 1;
+            if (MinimumAmmoCharges < 1) MinimumAmmoCharges = 1; //do not allow MinimumAmmoCharges to be set lower than 1. We always want to reload before the weapon is empty!
 
             //
             // List of Agents we should use

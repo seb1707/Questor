@@ -28,16 +28,14 @@ namespace Questor.Behaviors
         private bool PanicStateReset = false;
         private bool _isJammed = false;
         private int _minerNumber = 0;
-        private double _lastAsteroidPosition = 0;
+        //private double _lastAsteroidPosition = 0;
         private EntityCache _targetAsteroid;
         private long _targetAsteroidID;
         private EntityCache _currentBelt;
         private long _asteroidBookmarkForID = 0;
 
-        private DateTime _lastModuleActivation = DateTime.MinValue;
         private DateTime _lastPulse;
-        private DateTime _lastApproachCommand = DateTime.MinValue;
-
+        
         public MiningBehavior()
         {
             //_arm = new Arm();
@@ -380,7 +378,6 @@ namespace Questor.Behaviors
                     
                     Logging.Log("Mining: [", "Target Rock is [" + asteroid.Name + "][" + Math.Round(asteroid.Distance/1000,0) + "k] ID [" + asteroid.MaskedId + "] GroupID [" + asteroid.GroupId + "]", Logging.White);
                     _targetAsteroidID = asteroid.Id;
-                    _lastApproachCommand = DateTime.UtcNow;
                     _targetAsteroid.Approach();
                     _States.CurrentMiningState = MiningState.MineAsteroid;    
                     break;
@@ -465,7 +462,7 @@ namespace Questor.Behaviors
                             _minerNumber = 0;
                             foreach (ModuleCache miningTool in miningTools)
                             {
-                                if (miningTool.LastActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
+                                if (Cache.Instance.LastActivatedTimeStamp[miningTool.ItemId].AddSeconds(3) > DateTime.UtcNow)
                                     continue;
 
                                 _minerNumber++;
@@ -486,10 +483,8 @@ namespace Questor.Behaviors
                                     continue;
 
                                 //only activate one module per cycle
-                                _lastModuleActivation = DateTime.UtcNow;
                                 Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
                                 miningTool.Activate(_targetAsteroid.Id);
-                                miningTool.LastActivatedTimeStamp = DateTime.UtcNow;
                             }
 
                             return;

@@ -19,58 +19,14 @@ namespace Questor.Modules.Caching
     public class ModuleCache
     {
         private readonly DirectModule _module;
-        private double _reloadTimeThisMission;
-        private DateTime _lastActivatedTimeStamp;
-        private DateTime _lastReloadedTimeStamp;
-        private DateTime _lastChangedAmmoTimeStamp;
+        //private double _reloadTimeThisMission;
+        //private DateTime _lastActivatedTimeStamp;
+        //private DateTime _lastReloadedTimeStamp;
+        //private DateTime _lastChangedAmmoTimeStamp;
 
         public ModuleCache(DirectModule module, double reloadTimeThisMission = 0, DateTime activatedTimeStamp = default(DateTime))
         {
             _module = module;
-            _reloadTimeThisMission = reloadTimeThisMission;
-            _lastActivatedTimeStamp = LastActivatedTimeStamp;
-        }
-
-        public double ReloadTimeThisMission
-        {
-            get { return _reloadTimeThisMission; }
-            set
-            {
-                _reloadTimeThisMission = value;
-                return;
-            }
-        }
-
-        public DateTime LastReloadedTimeStamp
-        {
-            get { return _lastReloadedTimeStamp; }
-            set
-            {
-                _lastReloadedTimeStamp = value;
-                _reloadTimeThisMission = _reloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                return;
-            }
-        }
-
-        public DateTime LastChangedAmmoTimeStamp
-        {
-            get { return _lastChangedAmmoTimeStamp; }
-            set
-            {
-                _lastChangedAmmoTimeStamp = value;
-                _reloadTimeThisMission = _reloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                return;
-            }
-        }
-
-        public DateTime LastActivatedTimeStamp
-        {
-            get { return _lastActivatedTimeStamp; }
-            set
-            {
-                _lastActivatedTimeStamp = value;
-                return;
-            }
         }
 
         public int TypeId
@@ -224,13 +180,13 @@ namespace Questor.Modules.Caching
                     reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
                 }
 
-                if (LastReloadedTimeStamp.AddSeconds(reloadDelayToUseForThisWeapon) > DateTime.UtcNow)
+                if (DateTime.UtcNow > Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                 {
                     //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                     return true;
                 }
 
-                if (LastChangedAmmoTimeStamp.AddSeconds(reloadDelayToUseForThisWeapon) > DateTime.UtcNow)
+                if (DateTime.UtcNow > Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                 {
                     //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
                     return true;
@@ -336,8 +292,8 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("Combat", "Reloading [" + weaponNumber + "] [" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "]", Logging.Teal);
                 _module.ReloadAmmo(charge);
-                LastReloadedTimeStamp = DateTime.UtcNow;
-                ReloadTimeThisMission = ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                Cache.Instance.LastReloadedTimeStamp[ItemId] = DateTime.UtcNow;
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 
@@ -347,8 +303,8 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entityName + "][" + Math.Round(entityDistance / 1000, 0) + "k]", Logging.Teal);    
                 _module.ChangeAmmo(charge);
-                LastChangedAmmoTimeStamp = DateTime.UtcNow;
-                ReloadTimeThisMission = ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                Cache.Instance.LastChangedAmmoTimeStamp[ItemId] = DateTime.UtcNow;
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 
@@ -391,20 +347,20 @@ namespace Questor.Modules.Caching
             if (InLimboState || IsActive)
                 return false;
 
-            if (LastReloadedTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+            if (Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                 return false;
             }
 
-            if (LastChangedAmmoTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+            if (Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
             {
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
                 return false;
             }
 
             _module.Activate(entityId);
-            LastActivatedTimeStamp = DateTime.UtcNow;
+            Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
             Cache.Instance.LastModuleTargetIDs[ItemId] = entityId;
             return true;
         }

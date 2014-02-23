@@ -230,7 +230,7 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
-                    if (DateTime.UtcNow > tractorBeam.LastActivatedTimeStamp.AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
+                    if (DateTime.UtcNow > Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
                     {
                         //tractorBeams.Remove(tractorBeam);
                         tractorBeam.Activate(wreck.Id);

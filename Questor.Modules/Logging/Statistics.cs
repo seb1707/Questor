@@ -758,7 +758,7 @@ namespace Questor.Modules.Logging
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weaponNumber++;
-                Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + weapon.ReloadTimeThisMission + "]", Logging.White);
+                Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + Cache.Instance.ReloadTimePerModule[weapon.ItemId] + "]", Logging.White);
             }
             Logging.Log("Statistics", "Time Spent IN Mission: [" + Cache.Instance.TimeSpentInMission_seconds + "sec]", Logging.White);
             Logging.Log("Statistics", "Time Spent In Range: [" + Cache.Instance.TimeSpentInMissionInRange + "]", Logging.White);
@@ -914,7 +914,7 @@ namespace Questor.Modules.Logging
             Statistics.Instance.OutOfDronesCount = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
-                weapon.ReloadTimeThisMission = 0;
+                Cache.Instance.ReloadTimePerModule[weapon.ItemId] = 0;
             }
 
             Cache.Instance.PanicAttemptsThisMission = 0;

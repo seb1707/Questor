@@ -941,6 +941,26 @@ namespace Questor.Modules.Caching
         public Dictionary<long, DateTime> TargetingIDs { get; private set; }
 
         /// <summary>
+        ///   Reload time per module
+        /// </summary>
+        public Dictionary<long, long> ReloadTimePerModule { get; private set; }
+
+        /// <summary>
+        ///   Modules last reload time
+        /// </summary>
+        public Dictionary<long, DateTime> LastReloadedTimeStamp { get; private set; }
+        
+        /// <summary>
+        ///   Modules last reload time
+        /// </summary>
+        public Dictionary<long, DateTime> LastChangedAmmoTimeStamp { get; private set; }
+        
+        /// <summary>
+        ///   Modules last reload time
+        /// </summary>
+        public Dictionary<long, DateTime> LastActivatedTimeStamp { get; private set; }
+        
+        /// <summary>
         ///   Used for Drones to know that it should retract drones
         /// </summary>
         public bool IsMissionPocketDone { get; set; }

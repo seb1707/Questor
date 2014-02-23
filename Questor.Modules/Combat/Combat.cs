@@ -412,9 +412,9 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (DateTime.UtcNow < weapon.LastReloadedTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                     {
-                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(weapon.LastReloadedTimeStamp).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                         continue;
                     }
 
@@ -679,7 +679,7 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: ReloadReady [" + ReloadReady + "] CanActivateReady [" + CanActivateReady + "]", Logging.Teal);
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: ReloadReady [" + ReloadAmmo(weapon, target, _weaponNumber) + "] CanActivateReady [" + CanActivate(weapon, target, true) + "]", Logging.Teal);
                 }
             }
             else
@@ -708,7 +708,7 @@ namespace Questor.Modules.Combat
             _weaponNumber = 0;
             foreach (ModuleCache painter in targetPainters)
             {
-                if (painter.LastActivatedTimeStamp.AddSeconds(3) > DateTime.UtcNow)
+                if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(3) > DateTime.UtcNow)
                     continue;
 
                 _weaponNumber++;

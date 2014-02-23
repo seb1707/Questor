@@ -280,7 +280,7 @@ namespace Questor.Modules.BackgroundTasks
                             // Mark this item as moved
                             moveTheseItems.Add(wl.DirectItem);
 
-                            // Substract (now) free volume
+                            // Subtract (now) free volume
                             freeCargoCapacity += wl.TotalVolume;
 
                             // We freed up enough space?

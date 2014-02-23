@@ -125,7 +125,7 @@ namespace Questor.Modules.Actions
                             }
 
                             //
-                            // Add gatekeys to the list of things to move to the AmmoHangar, they are not mission completion items but are used during missions so should be avail
+                            // Add gate keys to the list of things to move to the AmmoHangar, they are not mission completion items but are used during missions so should be avail
                             // to all pilots (thus the use of the ammo hangar)
                             //
                             try

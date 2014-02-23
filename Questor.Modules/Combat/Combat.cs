@@ -1709,7 +1709,7 @@ namespace Questor.Modules.Combat
                     //We need to make sure we do not have too many low value targets filling our slots
                     if (__highValueTargetsTargeted.Count() < maxHighValueTargets && __lowValueTargetsTargeted.Count() > maxLowValueTargets)
                     {
-                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] < maxHighValueTargets [" + maxHighValueTargets + "] && __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] > maxLowValueTargets [" + maxLowValueTargets + "], try to unlock a lowvalue target, and return.", Logging.Debug);
+                        if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: __highValueTargetsTargeted [" + __highValueTargetsTargeted.Count() + "] < maxHighValueTargets [" + maxHighValueTargets + "] && __lowValueTargetsTargeted [" + __lowValueTargetsTargeted.Count() + "] > maxLowValueTargets [" + maxLowValueTargets + "], try to unlock a low value target, and return.", Logging.Debug);
                         UnlockLowValueTarget("Combat.TargetCombatants", "HighValueTarget");
                         return;
                     }

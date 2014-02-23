@@ -183,7 +183,7 @@ namespace Questor.Modules.Activities
             // Find the first waypoint
             int waypoint = _destinationRoute.FirstOrDefault();
 
-            //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.Teal);
+            //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next way-points locationName", Logging.Teal);
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "]", Logging.Teal);
 
@@ -374,7 +374,7 @@ namespace Questor.Modules.Activities
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.CloseQuestor)
             {
                 //
-                // if we got this far it is because we havent setup Settings.Instance.HomeBookmarkName yet or we do not have a
+                // if we got this far it is because we have not setup Settings.Instance.HomeBookmarkName yet or we do not have a
                 // bookmark in game with the configured prefix at the start of the name of the bookmark
                 // we will instead use the AgentID to find the station
                 //

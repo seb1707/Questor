@@ -12,9 +12,13 @@ namespace UpdateInvTypes
         [STAThread]
         private static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new UpdateInvTypesUI());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new UpdateInvTypesUI());
+            }
+            catch (Exception) { }
         }
     }
 }

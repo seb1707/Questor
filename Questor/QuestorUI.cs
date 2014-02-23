@@ -269,7 +269,7 @@ namespace Questor
                         //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
                         //ActiveDronesData.Text = Cache.Instance.ActiveDrones.Count().ToString();                   //causes problems / crashes
-                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
+                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inWarp from the UI?
                         //{
                         //    _nextWreckUpdate = DateTime.UtcNow.AddSeconds(10);
                             //WrecksData.Text = Cache.Instance.Wrecks.Count().ToString(CultureInfo.InvariantCulture);
@@ -1148,7 +1148,7 @@ namespace Questor
         private void ReloadAllClick(object sender, EventArgs e)
         {
             Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it shoud return to the configured behavior", Logging.Teal);
+            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it should return to the configured behavior", Logging.Teal);
             _States.CurrentQuestorState = QuestorState.DebugReloadAll;
         }
 

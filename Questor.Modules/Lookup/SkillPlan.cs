@@ -141,7 +141,7 @@ namespace Questor.Modules.Lookup
 							if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We don't have this prerequisite: " + preRegs.Attribute("id").Value, Logging.Debug);
 						}
 					}
-					// this is also good for skills with no pre reqs
+					// this is also good for skills with no pre requirements
 					return true;
 				}
 			}
@@ -179,7 +179,7 @@ namespace Questor.Modules.Lookup
 					buyingIterator = 0;
 					return true;
 				}
-				// only buy if we dont have it already in our itemhangar
+				// only buy if we do not have it already in our itemhangar
 				if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
 				{
 					Logging.Log("buySkill", "We already purchased this skill" + skillID, Logging.White);
@@ -234,7 +234,7 @@ namespace Questor.Modules.Lookup
 						buyingSkillTypeID = 0;
 						buyingIterator = 0;
 						// Wait for the order to go through
-						_nextRetrieveCharactersheetInfoAction = DateTime.MinValue; // ensure we get the charsheet update
+						_nextRetrieveCharactersheetInfoAction = DateTime.MinValue; // ensure we get the character sheet update
 						_nextSkillTrainingAction  = DateTime.UtcNow.AddSeconds(20);
 						return true;
 					} else {
@@ -553,7 +553,7 @@ namespace Questor.Modules.Lookup
 				return false;
 			}
 
-			int icount = 1;
+			int iCount = 1;
 
 			
 			if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
@@ -571,8 +571,8 @@ namespace Questor.Modules.Lookup
 
 			foreach (DirectSkill trainedskill in MyCharacterSheetSkills)
 			{
-				icount++;
-				//if (Settings.Instance.DebugSkillTraining) Logging.Log("Skills.MyCharacterSheetSkills", "[" + icount + "] SkillName [" + trainedskill.TypeName + "] lvl [" + trainedskill.Level + "] SkillPoints [" + trainedskill.SkillPoints + "] inTraining [" + trainedskill.InTraining + "]", Logging.Teal);
+				iCount++;
+				//if (Settings.Instance.DebugSkillTraining) Logging.Log("Skills.MyCharacterSheetSkills", "[" + iCount + "] SkillName [" + trainedskill.TypeName + "] lvl [" + trainedskill.Level + "] SkillPoints [" + trainedskill.SkillPoints + "] inTraining [" + trainedskill.InTraining + "]", Logging.Teal);
 			}
 			return true;
 		}

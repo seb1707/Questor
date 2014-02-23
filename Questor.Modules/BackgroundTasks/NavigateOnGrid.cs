@@ -144,9 +144,9 @@ namespace Questor.Modules.BackgroundTasks
 
                         //
                         // OrbitStructure is false
-                        // Speedtank is false
+                        // SpeedTank is false
                         //
-                        if (Cache.Instance.MyShipEntity.Velocity < 300) //this will spam a bit until we know what "mode" our activeship is when aligning
+                        if (Cache.Instance.MyShipEntity.Velocity < 300) //this will spam a bit until we know what "mode" our active ship is when aligning
                         {
                             if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted())
                             {
@@ -210,12 +210,12 @@ namespace Questor.Modules.BackgroundTasks
                 if (target.Distance > Cache.Instance.MaxRange && !Cache.Instance.IsApproaching(target.Id))
                 {
                     target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
-                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: Moving into weapons range before initiating orbit", Logging.Teal);
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: SpeedTank: Moving into weapons range before initiating orbit", Logging.Teal);
                     return;
                 }
                 if (target.Distance < Cache.Instance.MaxRange && !Cache.Instance.IsOrbiting(target.Id))
                 {
-                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: speedtank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
+                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: SpeedTank: orbitdistance is [" + Cache.Instance.OrbitDistance + "]", Logging.White);
                     OrbitGateorTarget(target, module);
                     return;
                 }

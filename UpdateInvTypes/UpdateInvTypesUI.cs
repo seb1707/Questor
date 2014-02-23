@@ -182,7 +182,7 @@
                         {
                             Logging.Log("UpdateInvTypes", "Skipping [" + types.Select(type => "typeid=" + type.Id) + "]", Logging.White);
                             //
-                            // todo add item to list here
+                            // ToDo add item to list here
                             //
                             Progress.Value = Progress.Value + Progress.Step;
                             _nextEVECentralQuery = DateTime.UtcNow.AddMilliseconds(300);

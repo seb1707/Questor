@@ -406,7 +406,7 @@ namespace Questor.Behaviors
                     //check if we're full
 
                     //
-                    // we really ought to be checking for and using the orehold if needed, not directly using the cargohold ffs!
+                    // we really ought to be checking for and using the OreHold if needed, not directly using the cargohold ffs!
                     //
                     if (Cache.Instance.CurrentShipsCargo == null) return;
                     

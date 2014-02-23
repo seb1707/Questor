@@ -85,7 +85,7 @@ namespace Questor.Storylines
             catch (Exception exception)
             {
                 Logging.Log("GenericCourierStoryline", "Exception thrown while attempting to switch to transport ship: [" + exception + "]", Logging.White);
-                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session because we could not switch to the configured transportship named [" + Settings.Instance.TransportShipName + "]", Logging.White);
+                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session because we could not switch to the configured TransportShip named [" + Settings.Instance.TransportShipName + "]", Logging.White);
                 return StorylineState.BlacklistAgent;
             }
 

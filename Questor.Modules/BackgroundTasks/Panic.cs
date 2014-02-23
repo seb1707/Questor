@@ -259,7 +259,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission++;
                                 Cache.Instance.PanicAttemptsThisPocket++;
                                 _States.CurrentPanicState = PanicState.StartPanicking;
-                                Logging.Log("Panic", "Start panicking, mission invaded by [" + frigates + "] frigates", Logging.Red);
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + frigates + "] Frigates", Logging.Red);
                             }
 
                             if (Settings.Instance.CruiserInvasionLimit > 0 && cruisers >= Settings.Instance.CruiserInvasionLimit)
@@ -269,7 +269,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission++;
                                 Cache.Instance.PanicAttemptsThisPocket++;
                                 _States.CurrentPanicState = PanicState.StartPanicking;
-                                Logging.Log("Panic", "Start panicking, mission invaded by [" + cruisers + "] cruisers", Logging.Red);
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + cruisers + "] Cruisers", Logging.Red);
                             }
 
                             if (Settings.Instance.BattlecruiserInvasionLimit > 0 && battlecruisers >= Settings.Instance.BattlecruiserInvasionLimit)
@@ -279,7 +279,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission++;
                                 Cache.Instance.PanicAttemptsThisPocket++;
                                 _States.CurrentPanicState = PanicState.StartPanicking;
-                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battlecruisers + "] battlecruisers", Logging.Red);
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battlecruisers + "] BattleCruisers", Logging.Red);
                             }
 
                             if (Settings.Instance.BattleshipInvasionLimit > 0 && battleships >= Settings.Instance.BattleshipInvasionLimit)
@@ -289,7 +289,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.PanicAttemptsThisMission++;
                                 Cache.Instance.PanicAttemptsThisPocket++;
                                 _States.CurrentPanicState = PanicState.StartPanicking;
-                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battleships + "] battleships", Logging.Red);
+                                Logging.Log("Panic", "Start panicking, mission invaded by [" + battleships + "] BattleShips", Logging.Red);
                             }
 
                             if (_delayedResume)

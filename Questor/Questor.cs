@@ -148,7 +148,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe lic server is down";
+                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe the DirectEVE license server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
             }
@@ -584,7 +584,7 @@ namespace Questor
         private void EVEOnFrame(object sender, EventArgs e)
         {
             if (!OnframeProcessEveryPulse()) return;
-            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);
+            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "OnFrame: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);
 
             RunOnceAfterStartup();
             RunOnceInStationAfterStartup();

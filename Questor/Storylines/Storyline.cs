@@ -411,7 +411,7 @@
                         _highSecCounter++;
                         return;
                     }
-                    Logging.Log("Storyline", "GotoAgent: Unable to determine whether route is all highsec or not. Skipping.", Logging.Yellow);
+                    Logging.Log("Storyline", "GotoAgent: Unable to determine whether route is all high security status or not. Skipping.", Logging.Yellow);
                     _States.CurrentStorylineState = StorylineState.Done;
                     _highSecCounter = 0;
                     return;

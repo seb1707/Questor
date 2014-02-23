@@ -330,23 +330,25 @@ namespace Questor.Modules.Caching
             get { return _module.OptimalRange ?? 0; }
         }
 
-        public void ReloadAmmo(DirectItem charge)
+        public void ReloadAmmo(DirectItem charge, int weaponNumber, double Range)
         {
             if (!IsReloadingAmmo && !IsChangingAmmo)
             {
-                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("ModuleCache.ReloadAmmo","Reloading: [" + _module.TypeName + "] with [" + charge.TypeName + "]",Logging.Debug);
+                Logging.Log("Combat", "Reloading [" + weaponNumber + "] [" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "]", Logging.Teal);
                 _module.ReloadAmmo(charge);
-                LastReloadedTimeStamp = DateTime.UtcNow;    
+                LastReloadedTimeStamp = DateTime.UtcNow;
+                ReloadTimeThisMission = ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 
-        public void ChangeAmmo(DirectItem charge)
+        public void ChangeAmmo(DirectItem charge, int weaponNumber, double Range, EntityCache entity)
         {
             if (!IsReloadingAmmo && !IsChangingAmmo)
             {
-                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("ModuleCache.ReloadAmmo", "ChangingAmmo: [" + _module.TypeName + "] changing to [" + charge.TypeName + "]", Logging.Debug);
+                Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entity.Name + "][" + Math.Round(entity.Distance / 1000, 0) + "k]", Logging.Teal);    
                 _module.ChangeAmmo(charge);
-                LastChangedAmmoTimeStamp = DateTime.UtcNow;    
+                LastChangedAmmoTimeStamp = DateTime.UtcNow;
+                ReloadTimeThisMission = ReloadTimeThisMission + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 

@@ -214,13 +214,23 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (LastReloadedTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+                int reloadDelayToUseForThisWeapon;
+                if (IsEnergyWeapon)
+                {
+                    reloadDelayToUseForThisWeapon = 1;
+                }
+                else
+                {
+                    reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                }
+
+                if (LastReloadedTimeStamp.AddSeconds(reloadDelayToUseForThisWeapon) > DateTime.UtcNow)
                 {
                     //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                     return true;
                 }
 
-                if (LastChangedAmmoTimeStamp.AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+                if (LastChangedAmmoTimeStamp.AddSeconds(reloadDelayToUseForThisWeapon) > DateTime.UtcNow)
                 {
                     //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
                     return true;

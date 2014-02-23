@@ -211,20 +211,12 @@ namespace Questor.Modules.Combat
             }
 
             // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
-            if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
-            {
-                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait", Logging.Orange);
-                return true;
-            }
-
             if (weapon.IsReloadingAmmo)
             {
                 if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
             }
 
-            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
-            
             try
             {
                 // Reload or change ammo
@@ -340,18 +332,9 @@ namespace Questor.Modules.Combat
             }
 
             // We are reloading, wait at least 5 seconds
-            if (LastWeaponReload.ContainsKey(weapon.ItemId) && DateTime.UtcNow < LastWeaponReload[weapon.ItemId].AddSeconds(5))
-            {
-                if (Settings.Instance.DebugReloadorChangeAmmo) Logging.Log("Combat", "ReloadEnergyWeaponAmmo: We are currently reloading: waiting", Logging.White);
-                return false;
-            }
-
             if (weapon.IsReloadingAmmo)
                 return true;
 
-            LastWeaponReload[weapon.ItemId] = DateTime.UtcNow;
-
-            
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {

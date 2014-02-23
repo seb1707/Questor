@@ -594,14 +594,17 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    // If we have already activated warp, deactivate the weapons
-                    if (!Cache.Instance.ActiveShip.Entity.IsWarping)
+                    if (weapon.CurrentCharges >= 2)
                     {
-                        // Target is in range
-                        if (target.Distance <= ammo.Range)
+                        // If we have already activated warp, deactivate the weapons
+                        if (!Cache.Instance.ActiveShip.Entity.IsWarping)
                         {
-                            if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.Teal);
-                            continue;
+                            // Target is in range
+                            if (target.Distance <= ammo.Range)
+                            {
+                                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is in range: do nothing, wait until it is dead", Logging.Teal);
+                                continue;
+                            }
                         }
                     }
 

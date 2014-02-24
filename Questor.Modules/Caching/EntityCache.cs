@@ -998,6 +998,41 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isLootTarget;
+
+        public bool IsLootTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isLootTarget == null)
+                        {
+                            if (Cache.Instance.ListofContainersToLoot.Contains(Id))
+                            {
+                                return true;
+                            }
+
+                            _isLootTarget = false;
+                            return _isLootTarget ?? false;
+                        }
+
+                        return _isLootTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+        
+
         private bool? _isCurrentTarget;
 
         public bool IsCurrentTarget

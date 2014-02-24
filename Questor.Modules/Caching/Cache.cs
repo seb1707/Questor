@@ -312,6 +312,7 @@ namespace Questor.Modules.Caching
         public HashSet<long> ListOfTargetPaintingEntities = new HashSet<long>();
         public HashSet<long> ListOfDampenuingEntities = new HashSet<long>();
         public HashSet<long> ListofWebbingEntities = new HashSet<long>();
+        public HashSet<long> ListofContainersToLoot = new HashSet<long>();
 
         public void DirecteveDispose()
         {
@@ -3999,6 +4000,7 @@ namespace Questor.Modules.Caching
                 ListOfTargetPaintingEntities.Clear();
                 ListOfDampenuingEntities.Clear();
                 ListofWebbingEntities.Clear();
+                ListofContainersToLoot.Clear();
 
                 EntityNames.Clear();
                 EntityTypeID.Clear();

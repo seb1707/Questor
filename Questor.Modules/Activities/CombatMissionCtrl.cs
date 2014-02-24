@@ -1761,6 +1761,23 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
+                //
+                // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
+                //
+                if (targetNames != null && targetNames.Any())
+                {
+                    foreach (EntityCache continerToLoot in containers)
+                    {
+                        if (continerToLoot.Name == targetNames.FirstOrDefault())
+                        {
+                            if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                            {
+                                Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                            }
+                        }
+                    }
+                }
+                
                 EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
                 if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction) 
                 {
@@ -1904,6 +1921,23 @@ namespace Questor.Modules.Activities
                 return;
             }
 
+            //
+            // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
+            //
+            if (targetNames != null && targetNames.Any())
+            {
+                foreach (EntityCache continerToLoot in containers)
+                {
+                    if (continerToLoot.Name == targetNames.FirstOrDefault())
+                    {
+                        if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                        {
+                            Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                        }
+                    }
+                }    
+            }
+            
             EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
             if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
             {

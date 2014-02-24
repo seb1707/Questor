@@ -412,7 +412,7 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(weapon.ItemId))
+                    if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(weapon.ItemId))
                     {
                         if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                         {
@@ -711,7 +711,7 @@ namespace Questor.Modules.Combat
             _weaponNumber = 0;
             foreach (ModuleCache painter in targetPainters)
             {
-                if (Cache.Instance.LastActivatedTimeStamp.ContainsKey(painter.ItemId))
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(painter.ItemId))
                 {
                     if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(3) > DateTime.UtcNow)
                     {

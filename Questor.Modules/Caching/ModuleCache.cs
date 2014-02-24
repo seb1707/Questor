@@ -180,7 +180,7 @@ namespace Questor.Modules.Caching
                     reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
                 }
 
-                if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+                if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
                 {
                     if (DateTime.UtcNow > Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
@@ -189,7 +189,7 @@ namespace Questor.Modules.Caching
                     }
                 }
 
-                if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+                if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
                 {
                     if (DateTime.UtcNow > Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
@@ -353,7 +353,7 @@ namespace Questor.Modules.Caching
             if (InLimboState || IsActive)
                 return false;
 
-            if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+            if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
             {
                 if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                 {
@@ -362,7 +362,7 @@ namespace Questor.Modules.Caching
                 }    
             }
 
-            if (Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
+            if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
             {
                 if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                 {

@@ -469,6 +469,11 @@ namespace Questor.Modules.Caching
             _entitiesthatHaveExploded = new List<EntityCache>();
             LastModuleTargetIDs = new Dictionary<long, long>();
             TargetingIDs = new Dictionary<long, DateTime>();
+            ReloadTimePerModule = new Dictionary<long, long>();
+            LastReloadedTimeStamp = new Dictionary<long, DateTime>();
+            LastChangedAmmoTimeStamp = new Dictionary<long, DateTime>();
+            LastActivatedTimeStamp = new Dictionary<long, DateTime>();
+        
             _entitiesById = new Dictionary<long, EntityCache>();
 
             //InvTypesById = new Dictionary<int, InvType>();

@@ -294,37 +294,42 @@ namespace Questor.Modules.Caching
 
         public void ReloadAmmo(DirectItem charge, int weaponNumber, double Range)
         {
-            if (!IsReloadingAmmo && !IsChangingAmmo)
+            if (IsReloadingAmmo || IsChangingAmmo)
             {
-                Logging.Log("Combat", "Reloading [" + weaponNumber + "] [" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "]", Logging.Teal);
-                _module.ReloadAmmo(charge);
-                Cache.Instance.LastReloadedTimeStamp[ItemId] = DateTime.UtcNow;
-                if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
-                {
-                    Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;    
-                }
-                else
-                {
-                    Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                }
+                return;
+            }
+            
+            Logging.Log("Combat", "Reloading [" + weaponNumber + "] [" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "]", Logging.Teal);
+            _module.ReloadAmmo(charge);
+            Cache.Instance.LastReloadedTimeStamp[ItemId] = DateTime.UtcNow;
+            if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;    
+            }
+            else
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 
         public void ChangeAmmo(DirectItem charge, int weaponNumber, double Range, String entityName = "n/a", Double entityDistance = 0)
         {
-            if (!IsReloadingAmmo && !IsChangingAmmo)
+
+            if (IsReloadingAmmo || IsChangingAmmo)
             {
-                Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entityName + "][" + Math.Round(entityDistance / 1000, 0) + "k]", Logging.Teal);    
-                _module.ChangeAmmo(charge);
-                Cache.Instance.LastChangedAmmoTimeStamp[ItemId] = DateTime.UtcNow;
-                if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
-                {
-                    Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                }
-                else
-                {
-                    Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                }
+                return;
+            }
+            
+            Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entityName + "][" + Math.Round(entityDistance / 1000, 0) + "k]", Logging.Teal);    
+            _module.ChangeAmmo(charge);
+            Cache.Instance.LastChangedAmmoTimeStamp[ItemId] = DateTime.UtcNow;
+            if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+            }
+            else
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
             }
         }
 

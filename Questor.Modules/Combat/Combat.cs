@@ -222,24 +222,12 @@ namespace Questor.Modules.Combat
                 // Reload or change ammo
                 if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId && !weapon.IsChangingAmmo)
                 {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
-                    {
-                        Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                        Cache.Instance.LastLoggingAction = DateTime.UtcNow;
-                    }
-
                     weapon.ReloadAmmo(charge, weaponNumber, (double)ammo.Range);
                     return false;
                 }
 
                 if (!weapon.IsChangingAmmo)
                 {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
-                    {
-                        Cache.Instance.TimeSpentReloading_seconds = Cache.Instance.TimeSpentReloading_seconds + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
-                        Cache.Instance.LastLoggingAction = DateTime.UtcNow;
-                    }
-
                     weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity.Name, entity.Distance);
                     return false;
                 }

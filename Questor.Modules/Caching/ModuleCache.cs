@@ -180,18 +180,24 @@ namespace Questor.Modules.Caching
                     reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
                 }
 
-                if (DateTime.UtcNow > Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
                 {
-                    //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
-                    return true;
+                    if (DateTime.UtcNow > Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    {
+                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        return true;
+                    }
                 }
 
-                if (DateTime.UtcNow > Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
                 {
-                    //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
-                    return true;
+                    if (DateTime.UtcNow > Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    {
+                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        return true;
+                    }
                 }
-
+                
                 return false;
             }
         }
@@ -347,18 +353,24 @@ namespace Questor.Modules.Caching
             if (InLimboState || IsActive)
                 return false;
 
-            if (Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+            if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
             {
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
-                return false;
+                if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                    return false;
+                }    
             }
 
-            if (Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds) > DateTime.UtcNow)
+            if (Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
             {
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
-                return false;
+                if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                    return false;
+                }    
             }
-
+            
             _module.Activate(entityId);
             Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
             Cache.Instance.LastModuleTargetIDs[ItemId] = entityId;

@@ -230,17 +230,20 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
-                    if (DateTime.UtcNow > Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
+                    if (Cache.Instance.LastActivatedTimeStamp.ContainsKey(tractorBeam.ItemId))
                     {
-                        //tractorBeams.Remove(tractorBeam);
-                        tractorBeam.Activate(wreck.Id);
-                        tractorsProcessedThisTick++;
+                        if (DateTime.UtcNow > Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
+                        {
+                            //tractorBeams.Remove(tractorBeam);
+                            tractorBeam.Activate(wreck.Id);
+                            tractorsProcessedThisTick++;
 
-                        Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
-                        Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                        break; //we do not need any more tractors on this wreck
+                            Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
+                            Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                            break; //we do not need any more tractors on this wreck
+                        }    
                     }
-
+                    
                     return;
                 }
 

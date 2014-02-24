@@ -412,12 +412,15 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    if (Cache.Instance.LastReloadedTimeStamp.ContainsKey(weapon.ItemId))
                     {
-                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
-                        continue;
+                        if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                        {
+                            if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                            continue;
+                        }    
                     }
-
+                    
                     if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                     {
                         if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
@@ -708,9 +711,14 @@ namespace Questor.Modules.Combat
             _weaponNumber = 0;
             foreach (ModuleCache painter in targetPainters)
             {
-                if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(3) > DateTime.UtcNow)
-                    continue;
-
+                if (Cache.Instance.LastActivatedTimeStamp.ContainsKey(painter.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(3) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }    
+                }
+                
                 _weaponNumber++;
 
                 // Are we on the right target?

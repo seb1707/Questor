@@ -462,9 +462,14 @@ namespace Questor.Behaviors
                             _minerNumber = 0;
                             foreach (ModuleCache miningTool in miningTools)
                             {
-                                if (Cache.Instance.LastActivatedTimeStamp[miningTool.ItemId].AddSeconds(3) > DateTime.UtcNow)
-                                    continue;
-
+                                if (Cache.Instance.LastActivatedTimeStamp.ContainsKey(miningTool.ItemId))
+                                {
+                                    if (Cache.Instance.LastActivatedTimeStamp[miningTool.ItemId].AddSeconds(3) > DateTime.UtcNow)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                
                                 _minerNumber++;
 
                                 // Are we on the right target?

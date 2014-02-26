@@ -198,13 +198,13 @@ namespace Questor.Modules.BackgroundTasks
             // Activate tractorbeams
             //
             int WreckNumber = 0;
-            foreach (EntityCache wreck in wrecks) //wrecks.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
             {
                 WreckNumber++;
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
                 if ((int)wreck.Velocity != 0) //if the wreck is already moving assume we should not tractor it.
                 {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateTractorBeams.Activating", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: do not tractor a wreck that is moving", Logging.Debug);
+                    if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Activating", "[" + WreckNumber + "] Wreck [" + wreck.Name + "][" + wreck.MaskedId + "] is already moving: do not tractor a wreck that is moving", Logging.Debug);
                     continue;
                 }
 
@@ -231,18 +231,26 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
                     }
 
+                    //
+                    // this tractor has already been activated at least once
+                    //
                     if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(tractorBeam.ItemId))
                     {
-                        if (DateTime.UtcNow > Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) && tractorBeams.Any(i => i.TargetId != wreck.Id))
+                        if (Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) > DateTime.UtcNow)
                         {
-                            //tractorBeams.Remove(tractorBeam);
-                            tractorBeam.Activate(wreck.Id);
-                            tractorsProcessedThisTick++;
-
-                            Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
-                            Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                            break; //we do not need any more tractors on this wreck
+                            continue;
                         }    
+                    }
+
+                    if (tractorBeams.Any(i => i.TargetId != wreck.Id))
+                    {
+                        //tractorBeams.Remove(tractorBeam);
+                        tractorBeam.Activate(wreck.Id);
+                        tractorsProcessedThisTick++;
+
+                        Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
+                        Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                        break; //we do not need any more tractors on this wreck    
                     }
                     
                     return;
@@ -365,7 +373,7 @@ namespace Questor.Modules.BackgroundTasks
             List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.CategoryId == (int)CategoryID.Celestial).ToList();
 
             // Check for cargo containers
-            foreach (EntityCache wreck in wreckTargets) //wreckTargets.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache wreck in wreckTargets.OrderByDescending(i => i.IsLootTarget))
             {
                 if (!hasSalvagers)
                 {
@@ -426,7 +434,7 @@ namespace Questor.Modules.BackgroundTasks
 
             int wrecksProcessedThisTick = 0;
             IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
-            foreach (EntityCache wreck in wrecks) //.Where(w => !w.IsIgnored))
+            foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
             {
                 // Its already a target, ignore it
                 if (wreck.IsTarget || wreck.IsTargeting)
@@ -560,7 +568,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
             }
             
-            foreach (EntityCache containerEntity in containersInRange) //.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))
             {
                 containersProcessedThisTick++;
 

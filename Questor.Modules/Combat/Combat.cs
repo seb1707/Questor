@@ -217,6 +217,13 @@ namespace Questor.Modules.Combat
                 return true;
             }
 
+            // We are changing ammo, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
+            if (weapon.IsChangingAmmo)
+            {
+                if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already changing ammo, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
+                return true;
+            }
+
             try
             {
                 // Reload or change ammo
@@ -316,8 +323,12 @@ namespace Questor.Modules.Combat
                 return true;
             }
 
-            // We are reloading, wait at least 5 seconds
+            // We are reloading, wait 
             if (weapon.IsReloadingAmmo)
+                return true;
+
+            // We are reloading, wait 
+            if (weapon.IsChangingAmmo)
                 return true;
 
             // Reload or change ammo
@@ -394,9 +405,27 @@ namespace Questor.Modules.Combat
                         continue;
                     }
 
-                    if (weapon.IsReloadingAmmo || weapon.IsDeactivating || weapon.IsChangingAmmo || weapon.IsActive)
+                    if (weapon.IsReloadingAmmo)
                     {
-                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] is busy, moving on to next weapon", Logging.White);
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "[" + weapon.TypeName + "][" + _weaponNumber + "] is still reloading, moving on to next weapon", Logging.White);
+                        continue;
+                    }
+
+                    if (weapon.IsDeactivating)
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "[" + weapon.TypeName + "][" + _weaponNumber + "] is still Deactivating, moving on to next weapon", Logging.White);
+                        continue;
+                    }
+
+                    if (weapon.IsChangingAmmo)
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "[" + weapon.TypeName + "][" + _weaponNumber + "] is still Changing Ammo, moving on to next weapon", Logging.White);
+                        continue;
+                    }
+
+                    if (weapon.IsActive)
+                    {
+                        if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "[" + weapon.TypeName + "][" + _weaponNumber + "] is Active, moving on to next weapon", Logging.White);
                         continue;
                     }
 
@@ -459,6 +488,12 @@ namespace Questor.Modules.Combat
             }
 
             if (module.IsReloadingAmmo)
+                return false;
+
+            if (module.IsChangingAmmo)
+                return false;
+
+            if (module.IsDeactivating)
                 return false;
 
             // We have changed target, allow activation

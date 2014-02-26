@@ -187,22 +187,13 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
                 {
-                    if (DateTime.UtcNow > Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
                         //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                         return true;
                     }
                 }
 
-                if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
-                {
-                    if (DateTime.UtcNow > Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
-                    {
-                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
-                        return true;
-                    }
-                }
-                
                 return false;
             }
         }
@@ -214,7 +205,29 @@ namespace Questor.Modules.Caching
 
         public bool IsChangingAmmo
         {
-            get { return _module.IsChangingAmmo; }
+            get
+            {
+                int reloadDelayToUseForThisWeapon;
+                if (IsEnergyWeapon)
+                {
+                    reloadDelayToUseForThisWeapon = 1;
+                }
+                else
+                {
+                    reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                }
+
+                if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
+                {
+                    if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    {
+                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public bool IsTurret

@@ -34,6 +34,11 @@ namespace Questor.Modules.Caching
             get { return _module.TypeId; }
         }
 
+        public string TypeName
+        {
+            get { return _module.TypeName; }
+        }
+
         public int GroupId
         {
             get { return _module.GroupId; }

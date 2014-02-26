@@ -161,6 +161,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (tractorBeam.TargetId == unlootedcontainer.Id)
                         {
                             currentWreckUnlooted = true;
+                            if (Settings.Instance.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "if (tractorBeam.TargetId == unlootedcontainer.Id) break;", Logging.Teal);
                             break;
                         }
                     }
@@ -197,7 +198,7 @@ namespace Questor.Modules.BackgroundTasks
             // Activate tractorbeams
             //
             int WreckNumber = 0;
-            foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache wreck in wrecks) //wrecks.OrderByDescending(i => i.IsLootTarget))
             {
                 WreckNumber++;
                 // This velocity check solves some bugs where velocity showed up as 150000000m/s
@@ -364,7 +365,7 @@ namespace Questor.Modules.BackgroundTasks
             List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.CategoryId == (int)CategoryID.Celestial).ToList();
 
             // Check for cargo containers
-            foreach (EntityCache wreck in wreckTargets.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache wreck in wreckTargets) //wreckTargets.OrderByDescending(i => i.IsLootTarget))
             {
                 if (!hasSalvagers)
                 {
@@ -559,7 +560,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
             }
             
-            foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))
+            foreach (EntityCache containerEntity in containersInRange) //.OrderByDescending(i => i.IsLootTarget))
             {
                 containersProcessedThisTick++;
 

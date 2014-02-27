@@ -554,8 +554,8 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    // Give recall command every 15 seconds
-                    if (DateTime.UtcNow.Subtract(_lastRecallCommand).TotalSeconds > 15)
+                    // Give recall command every x seconds (default is 15)
+                    if (DateTime.UtcNow.Subtract(_lastRecallCommand).TotalSeconds > Time.Instance.RecallDronesDelayBetweenRetries + Cache.Instance.RandomNumber(0,2))
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesReturnToBay);
                         _lastRecallCommand = DateTime.UtcNow;

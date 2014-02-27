@@ -239,7 +239,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (Cache.Instance.LastActivatedTimeStamp[tractorBeam.ItemId].AddSeconds(5) > DateTime.UtcNow)
                         {
                             continue;
-                        }    
+                        }
                     }
 
                     if (tractorBeams.Any(i => i.TargetId != wreck.Id))

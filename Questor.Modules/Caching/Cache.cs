@@ -444,22 +444,13 @@ namespace Questor.Modules.Caching
             NextAlign = DateTime.UtcNow;
             NextBookmarkPocketAttempt = DateTime.UtcNow;
             NextActivateAction = DateTime.UtcNow;
-            NextPainterAction = DateTime.UtcNow;
-            NextNosAction = DateTime.UtcNow;
-            NextWebAction = DateTime.UtcNow;
-            NextWeaponAction = DateTime.UtcNow;
-            NextReload = DateTime.UtcNow;
             NextTargetAction = DateTime.UtcNow;
             NextTravelerAction = DateTime.UtcNow;
             NextApproachAction = DateTime.UtcNow;
             NextRemoveBookmarkAction = DateTime.UtcNow;
             NextActivateSupportModules = DateTime.UtcNow;
-            NextRepModuleAction = DateTime.UtcNow;
-            NextAfterburnerAction = DateTime.UtcNow;
-            NextDefenseModuleAction = DateTime.UtcNow;
             LastJettison = DateTime.UtcNow;
             NextArmAction = DateTime.UtcNow;
-            NextTractorBeamAction = DateTime.UtcNow;
             NextLootAction = DateTime.UtcNow;
             NextSalvageAction = DateTime.UtcNow;
             NextBookmarkAction = DateTime.UtcNow;
@@ -997,7 +988,6 @@ namespace Questor.Modules.Caching
         public DateTime NextTractorBeamAction { get; set; }
         public DateTime NextLootAction { get; set; }
         public DateTime LastJettison { get; set; }
-        public DateTime NextDefenseModuleAction { get; set; }
         public DateTime NextAfterburnerAction { get; set; }
         public DateTime NextRepModuleAction { get; set; }
         public DateTime NextActivateSupportModules { get; set; }
@@ -1007,13 +997,6 @@ namespace Questor.Modules.Caching
         public DateTime NextWarpTo { get; set; }
         public DateTime NextTravelerAction { get; set; }
         public DateTime NextTargetAction { get; set; }
-        public DateTime NextReload { get; set; }
-        public DateTime NextWeaponAction { get; set; }
-        public DateTime NextWebAction { get; set; }
-        public DateTime NextRemoteRepairAction { get; set; }
-        public DateTime NextWarpDisruptorAction { get; set; }
-        public DateTime NextNosAction { get; set; }
-        public DateTime NextPainterAction { get; set; }
         public DateTime NextActivateAction { get; set; }
         public DateTime NextBookmarkPocketAttempt { get; set; }
         public DateTime NextAlign { get; set; }

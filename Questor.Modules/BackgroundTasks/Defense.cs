@@ -712,26 +712,28 @@ namespace Questor.Modules.BackgroundTasks
 
         private void ActivateSpeedMod()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextAfterburnerAction) //if we just did something wait a fraction of a second
-                return;
-
             ModuleNumber = 0;
-            foreach (ModuleCache module in Cache.Instance.Modules)
+            foreach (ModuleCache SpeedMod in Cache.Instance.Modules.Where(i => i.GroupId == (int)Group.Afterburner))
             {
-                if (module.GroupId != (int)Group.Afterburner)
-                    continue;
-
                 ModuleNumber++;
 
-                if (module.InLimboState)
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddSeconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
+
+                if (SpeedMod.InLimboState)
                     continue;
 
                 //
                 // Should we deactivate the module?
                 //
-                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + module.IsActive + "]", Logging.Debug);
-                
-                if (module.IsActive)
+                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
+
+                if (SpeedMod.IsActive)
                 {
                     bool deactivate = false;
 
@@ -775,8 +777,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (deactivate)
                     {
-                        module.Click();
-                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
+                        SpeedMod.Click();
                     }
                 }
                 
@@ -784,7 +785,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Should we activate the module
                 //
 
-                if (!module.IsActive && !module.InLimboState)
+                if (!SpeedMod.IsActive && !SpeedMod.InLimboState)
                 {
                     bool activate = false;
 
@@ -795,7 +796,6 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Settings.Instance.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, do not attempt to activate speed module", Logging.Debug);
                         activate = false;
-                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                         return;
                     }
 
@@ -825,12 +825,10 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (activate)
                     {
-                        module.Click();
-                        Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
+                        SpeedMod.Click();
                     }
                 }
 
-                Cache.Instance.NextAfterburnerAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds);
                 return;
             }
         }

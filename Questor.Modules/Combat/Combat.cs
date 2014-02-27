@@ -30,8 +30,6 @@ namespace Questor.Modules.Combat
     /// </summary>
     public static class Combat
     {
-        private static readonly Dictionary<long, DateTime> _lastModuleActivation = new Dictionary<long, DateTime>();
-        public static readonly Dictionary<long, DateTime> LastWeaponReload = new Dictionary<long, DateTime>();
         private static bool _isJammed;
         private static int _weaponNumber;
 
@@ -52,6 +50,8 @@ namespace Questor.Modules.Combat
         private static int maxTargetingSlotsAvailable;
         public static int CombatInstances = 0;
         private static int i = 0;
+        public static List<EntityCache> TargetingMe { get; set; }
+        public static List<EntityCache> NotYetTargetingMe { get; set; }
 
         static Combat()
         {
@@ -210,14 +210,14 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            // We are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
+            // If we are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (weapon.IsReloadingAmmo)
             {
                 if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
             }
 
-            // We are changing ammo, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
+            // If we are changing ammo, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (weapon.IsChangingAmmo)
             {
                 if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already changing ammo, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
@@ -508,9 +508,6 @@ namespace Questor.Modules.Combat
             return true;
         }
 
-        public static List<EntityCache> TargetingMe { get; set; }
-        public static List<EntityCache> NotYetTargetingMe { get; set; }
-
         /// <summary> Activate weapons
         /// </summary>
         private static void ActivateWeapons(EntityCache target)
@@ -530,12 +527,6 @@ namespace Questor.Modules.Combat
 
                 Cache.Instance.ClearPerPocketCache();
                 if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.Teal);
-                return;
-            }
-
-            if (DateTime.UtcNow < Cache.Instance.NextWeaponAction) //if we just did something wait a fraction of a second
-            {
-                if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: waiting on NextWeaponAction", Logging.Teal);
                 return;
             }
 
@@ -578,6 +569,14 @@ namespace Questor.Modules.Combat
                     _weaponNumber++;
                     if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: for each weapon [" + _weaponNumber + "] in weapons", Logging.Teal);
 
+                    if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(weapon.ItemId))
+                    {
+                        if (Cache.Instance.LastActivatedTimeStamp[weapon.ItemId].AddMilliseconds(Time.Instance.WeaponDelay_milliseconds) > DateTime.UtcNow)
+                        {
+                            continue;
+                        }
+                    }
+
                     if (!weapon.IsActive)
                     {
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: [" + weapon.TypeName + "][" + _weaponNumber + "] is not active: no need to do anything", Logging.Teal);
@@ -601,15 +600,7 @@ namespace Questor.Modules.Combat
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: [" + weapon.TypeName + "][" + _weaponNumber + "] is changing ammo: waiting", Logging.Teal);
                         continue;
                     }
-
-
-
-                    //if (DateTime.UtcNow < Cache.Instance.NextReload) //if we should not yet reload we are likely in the middle of a reload and should wait!
-                    //{
-                    //    if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: NextReload is still in the future: wait before doing anything with the weapon", Logging.teal);
-                    //    return;
-                    //}
-
+                    
                     // No ammo loaded
                     if (weapon.Charge == null)
                     {
@@ -670,6 +661,14 @@ namespace Questor.Modules.Combat
                 {
                     _weaponNumber++;
 
+                    if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(weapon.ItemId))
+                    {
+                        if (Cache.Instance.LastActivatedTimeStamp[weapon.ItemId].AddMilliseconds(Time.Instance.WeaponDelay_milliseconds) > DateTime.UtcNow)
+                        {
+                            continue;
+                        }
+                    }
+
                     // Are we reloading, deactivating or changing ammo?
                     if (weapon.IsReloadingAmmo)
                     {
@@ -728,7 +727,6 @@ namespace Questor.Modules.Combat
                         {
                             weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
                             Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            Cache.Instance.NextWeaponAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WeaponDelay_milliseconds);
                         }
                         
                         //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
@@ -756,9 +754,6 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateTargetPainters(EntityCache target)
         {
-            //if (DateTime.UtcNow < Cache.Instance.NextPainterAction) //if we just did something wait a fraction of a second
-            //    return;
-
             List<ModuleCache> targetPainters = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TargetPainter).ToList();
 
             // Find the first active weapon
@@ -768,7 +763,7 @@ namespace Questor.Modules.Combat
             {
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(painter.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(3) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }    
@@ -794,9 +789,54 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(painter, target, false))
                 {
-                    Logging.Log("Combat", "Activating painter [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    Logging.Log("Combat", "Activating [" + painter.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     painter.Activate(target.Id);
-                    Cache.Instance.NextPainterAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.PainterDelay_milliseconds);
+                    return;
+                }
+            }
+        }
+
+        /// <summary> Activate target painters
+        /// </summary>
+        private static void ActivateSensorDampeners(EntityCache target)
+        {
+            List<ModuleCache> sensorDampeners = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.SensorDampener).ToList();
+
+            // Find the first active weapon
+            // Assist this weapon
+            _weaponNumber = 0;
+            foreach (ModuleCache sensorDampener in sensorDampeners)
+            {
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(sensorDampener.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[sensorDampener.ItemId].AddSeconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
+
+                _weaponNumber++;
+
+                // Are we on the right target?
+                if (sensorDampener.IsActive)
+                {
+                    if (sensorDampener.TargetId != target.Id)
+                    {
+                        sensorDampener.Click();
+                        return;
+                    }
+
+                    continue;
+                }
+
+                // Are we deactivating?
+                if (sensorDampener.IsDeactivating)
+                    continue;
+
+                if (CanActivate(sensorDampener, target, false))
+                {
+                    Logging.Log("Combat", "Activating [" + sensorDampener.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    sensorDampener.Activate(target.Id);
                     return;
                 }
             }
@@ -806,9 +846,6 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateNos(EntityCache target)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextNosAction) //if we just did something wait a fraction of a second
-                return;
-
             List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS || m.GroupId == (int)Group.Neutralizer).ToList();
 
             //Logging.Log("Combat: we have " + noses.Count.ToString() + " Nos modules");
@@ -818,6 +855,14 @@ namespace Questor.Modules.Combat
             foreach (ModuleCache nos in noses)
             {
                 _weaponNumber++;
+
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(nos.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[nos.ItemId].AddSeconds(Time.Instance.NosDelay_milliseconds) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
 
                 // Are we on the right target?
                 if (nos.IsActive)
@@ -842,13 +887,12 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(nos, target, false))
                 {
-                    Logging.Log("Combat", "Activating Nos     [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    Logging.Log("Combat", "Activating [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                     nos.Activate(target.Id);
-                    Cache.Instance.NextNosAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.NosDelay_milliseconds);
                     return;
                 }
 
-                Logging.Log("Combat", "Cannot Activate Nos [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                Logging.Log("Combat", "Cannot Activate [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
             }
         }
 
@@ -856,9 +900,6 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateStasisWeb(EntityCache target)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextWebAction) //if we just did something wait a fraction of a second
-                return;
-
             List<ModuleCache> webs = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.StasisWeb).ToList();
 
             // Find the first active weapon
@@ -867,6 +908,14 @@ namespace Questor.Modules.Combat
             foreach (ModuleCache web in webs)
             {
                 _weaponNumber++;
+
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(web.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[web.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
 
                 // Are we on the right target?
                 if (web.IsActive)
@@ -890,9 +939,8 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(web, target, false))
                 {
-                    Logging.Log("Combat", "Activating web     [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                    Logging.Log("Combat", "Activating [" + web.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                     web.Activate(target.Id);
-                    Cache.Instance.NextWebAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WebDelay_milliseconds);
                     return;
                 }
             }
@@ -971,9 +1019,6 @@ namespace Questor.Modules.Combat
 
         private static void ActivateWarpDisruptor(EntityCache target)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextWarpDisruptorAction) //if we just did something wait a fraction of a second
-                return;
-
             List<ModuleCache> WarpDisruptors = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.WarpDisruptor).ToList();
 
             // Find the first active weapon
@@ -982,6 +1027,14 @@ namespace Questor.Modules.Combat
             foreach (ModuleCache WarpDisruptor in WarpDisruptors)
             {
                 _weaponNumber++;
+
+                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(WarpDisruptor.ItemId))
+                {
+                    if (Cache.Instance.LastActivatedTimeStamp[WarpDisruptor.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
 
                 // Are we on the right target?
                 if (WarpDisruptor.IsActive)
@@ -1005,9 +1058,8 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(WarpDisruptor, target, false))
                 {
-                    Logging.Log("Combat", "Activating WarpDisruptor [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                    Logging.Log("Combat", "Activating [" + WarpDisruptor.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                     WarpDisruptor.Activate(target.Id);
-                    Cache.Instance.NextWarpDisruptorAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.WarpDisruptorDelay_milliseconds);
                     return;
                 }
             }
@@ -1015,9 +1067,6 @@ namespace Questor.Modules.Combat
 
         private static void ActivateRemoteRepair(EntityCache target)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextRemoteRepairAction) //if we just did something wait a fraction of a second
-                return;
-
             List<ModuleCache> RemoteRepairers = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.RemoteArmorRepairer 
                                                                                || m.GroupId == (int)Group.RemoteShieldRepairer 
                                                                                || m.GroupId == (int)Group.RemoteHullRepairer
@@ -1032,6 +1081,14 @@ namespace Questor.Modules.Combat
                 foreach (ModuleCache RemoteRepairer in RemoteRepairers)
                 {
                     _weaponNumber++;
+
+                    if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(RemoteRepairer.ItemId))
+                    {
+                        if (Cache.Instance.LastActivatedTimeStamp[RemoteRepairer.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                        {
+                            continue;
+                        }
+                    }
 
                     // Are we on the right target?
                     if (RemoteRepairer.IsActive)
@@ -1055,9 +1112,8 @@ namespace Questor.Modules.Combat
 
                     if (CanActivate(RemoteRepairer, target, false))
                     {
-                        Logging.Log("Combat", "Activating RemoteRepairer [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                        Logging.Log("Combat", "Activating [" + RemoteRepairer.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                         RemoteRepairer.Activate(target.Id);
-                        Cache.Instance.NextRemoteRepairAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.RemoteRepairerDelay_milliseconds);
                         return;
                     }
                 }
@@ -2086,8 +2142,10 @@ namespace Questor.Modules.Combat
                                 ActivateWarpDisruptor(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating RemoteRepairers", Logging.Debug);
                                 ActivateRemoteRepair(killTarget);
-                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Nos", Logging.Debug);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating NOS/Neuts", Logging.Debug);
                                 ActivateNos(killTarget);
+                                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating SensorDampeners", Logging.Debug);
+                                ActivateSensorDampeners(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Weapons", Logging.Debug);
                                 ActivateWeapons(killTarget);
                                 return;

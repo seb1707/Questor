@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Diagnostics.Eventing.Reader;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -19,14 +21,12 @@ namespace Questor.Modules.Caching
     public class ModuleCache
     {
         private readonly DirectModule _module;
-        //private double _reloadTimeThisMission;
-        //private DateTime _lastActivatedTimeStamp;
-        //private DateTime _lastReloadedTimeStamp;
-        //private DateTime _lastChangedAmmoTimeStamp;
-
+        
+        private DateTime ThisModuleCacheCreated = DateTime.UtcNow;
         public ModuleCache(DirectModule module, double reloadTimeThisMission = 0, DateTime activatedTimeStamp = default(DateTime))
         {
             _module = module;
+            ThisModuleCacheCreated = DateTime.UtcNow;
         }
 
         public int TypeId
@@ -374,6 +374,14 @@ namespace Questor.Modules.Caching
             if (InLimboState)
                 return;
 
+            if (IsActivatable)
+            {
+                if (!IsActive) //it is not yet active, this click should activate it.
+                {
+                    Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                }
+            }
+            
             _module.Click();
         }
 

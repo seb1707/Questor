@@ -140,27 +140,17 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    // Is our current target still the same and is the last Engage command no longer then 15s ago?
-                    if (Cache.Instance.LastDroneTargetID == DroneToShoot.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)
+                    // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
+                    if (Cache.Instance.LastDroneTargetID == DroneToShoot.Id && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID))
                     {
-                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (_lastTarget == target.Id && DateTime.UtcNow.Subtract(_lastEngageCommand).TotalSeconds < 15)", Logging.Debug);
+                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + Cache.Instance.LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) + "])", Logging.Debug);
                         return;
                     }
 
-                    // Are we still actively shooting at the target?
-                    bool mustEngage = false;
-                    foreach (EntityCache drone in Cache.Instance.ActiveDrones)
-                    {
-                        mustEngage |= drone.FollowId != Cache.Instance.PreferredDroneTargetID;
-                    }
-
-                    if (!mustEngage)
-                    {
-                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (!mustEngage)", Logging.Debug);
-                        return;
-                    }
-
+                    //
+                    // If we got this far we need to tell the drones to do something
                     // Is the last target our current active target?
+                    //
                     if (DroneToShoot.IsActiveTarget)
                     {
                         // Save target id (so we do not constantly switch)

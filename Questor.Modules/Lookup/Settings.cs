@@ -613,8 +613,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
                     {
-                        MissionBlacklist.Add((string)BlacklistedMission);
-                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
+                        MissionBlacklist.Add(Cache.Instance.FilterPath((string)BlacklistedMission));
+                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + Cache.Instance.FilterPath((string)BlacklistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
@@ -646,8 +646,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
                     {
-                        MissionGreylist.Add((string)GreylistedMission);
-                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
+                        MissionGreylist.Add(Cache.Instance.FilterPath((string)GreylistedMission));
+                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + Cache.Instance.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);

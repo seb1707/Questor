@@ -872,7 +872,7 @@ namespace Questor.Modules.BackgroundTasks
         public void ProcessState()
         {
             // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 500) //default: 500ms
+            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 350) //default: 350ms
                 return;
             _lastPulse = DateTime.UtcNow;
 

@@ -47,7 +47,6 @@ namespace Questor.Modules.Combat
         private static int maxHighValueTargets;
         private static int maxLowValueTargets;
         private static int maxTotalTargets;
-        private static int maxTargetingSlotsAvailable;
         public static int CombatInstances = 0;
         private static int i = 0;
         public static List<EntityCache> TargetingMe { get; set; }
@@ -58,8 +57,7 @@ namespace Questor.Modules.Combat
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
             maxTotalTargets = maxHighValueTargets + maxLowValueTargets;
-            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets;
-
+            
             Interlocked.Increment(ref CombatInstances);
         }
 
@@ -640,7 +638,7 @@ namespace Questor.Modules.Combat
 
                     // Target is out of range, stop firing
                     if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: target is out of range, stop firing", Logging.Teal);
-                    weapon.Click();
+                    if (weapon.Click()) return;
                     return;
                 }
 
@@ -701,7 +699,8 @@ namespace Questor.Modules.Combat
                         if (weapon.TargetId != target.Id && target.IsTarget)
                         {
                             if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: [" + weapon.TypeName + "][" + _weaponNumber + "] is shooting at the wrong target: deactivating", Logging.Teal);
-                            weapon.Click();
+                            if (weapon.Click()) return;
+
                             return;
                         }
                         continue;
@@ -727,11 +726,9 @@ namespace Questor.Modules.Combat
                         {
                             weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
                             Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            continue;
                         }
                         
-                        //we know we are connected if we were able to get this far - update the lastknownGoodConnectedTime
-                        //Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        //Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         continue;
                     }
 
@@ -776,7 +773,8 @@ namespace Questor.Modules.Combat
                 {
                     if (painter.TargetId != target.Id)
                     {
-                        painter.Click();
+                        if (painter.Click()) return;
+
                         return;
                     }
 
@@ -789,9 +787,13 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(painter, target, false))
                 {
-                    Logging.Log("Combat", "Activating [" + painter.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    painter.Activate(target.Id);
-                    return;
+                    if (painter.Activate(target.Id))
+                    {
+                        Logging.Log("Combat", "Activating [" + painter.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        return;
+                    }
+
+                    continue;
                 }
             }
         }
@@ -822,7 +824,7 @@ namespace Questor.Modules.Combat
                 {
                     if (sensorDampener.TargetId != target.Id)
                     {
-                        sensorDampener.Click();
+                        if (sensorDampener.Click()) return;
                         return;
                     }
 
@@ -835,9 +837,13 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(sensorDampener, target, false))
                 {
-                    Logging.Log("Combat", "Activating [" + sensorDampener.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    sensorDampener.Activate(target.Id);
-                    return;
+                    if (sensorDampener.Activate(target.Id))
+                    {
+                        Logging.Log("Combat", "Activating [" + sensorDampener.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        return;    
+                    }
+
+                    continue;
                 }
             }
         }
@@ -869,7 +875,8 @@ namespace Questor.Modules.Combat
                 {
                     if (nos.TargetId != target.Id)
                     {
-                        nos.Click();
+                        if (nos.Click()) return;
+
                         return;
                     }
 
@@ -887,9 +894,13 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(nos, target, false))
                 {
-                    Logging.Log("Combat", "Activating [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    nos.Activate(target.Id);
-                    return;
+                    if (nos.Activate(target.Id))
+                    {
+                        Logging.Log("Combat", "Activating [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                        return;    
+                    }
+
+                    continue;
                 }
 
                 Logging.Log("Combat", "Cannot Activate [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -922,7 +933,8 @@ namespace Questor.Modules.Combat
                 {
                     if (web.TargetId != target.Id)
                     {
-                        web.Click();
+                        if (web.Click()) return;
+                        
                         return;
                     }
 
@@ -939,9 +951,13 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(web, target, false))
                 {
-                    Logging.Log("Combat", "Activating [" + web.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                    web.Activate(target.Id);
-                    return;
+                    if (web.Activate(target.Id))
+                    {
+                        Logging.Log("Combat", "Activating [" + web.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                        return;    
+                    }
+
+                    continue;
                 }
             }
         }
@@ -987,8 +1003,8 @@ namespace Questor.Modules.Combat
                 if (bastionMod.IsActive && !bastionMod.IsDeactivating)
                 {
                     if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "IsActive and Is not yet deactivating (we only want one cycle), attempting to Click...", Logging.Debug);
-                    bastionMod.Click();
-                    return true;
+                    if (bastionMod.Click()) return true;
+                    return false;
                 }
 
                 if (bastionMod.IsActive)
@@ -1008,9 +1024,13 @@ namespace Questor.Modules.Combat
                 if (!bastionMod.IsActive)
                 {
                     Logging.Log("Combat", "Activating bastion [" + _weaponNumber + "]", Logging.Teal);
-                    bastionMod.Click();
-                    Cache.Instance.NextBastionAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 20));
-                    return true;    
+                    if (bastionMod.Click())
+                    {
+                        Cache.Instance.NextBastionAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 20));
+                        return true;        
+                    }
+
+                    return false;
                 }
             }
 
@@ -1041,7 +1061,8 @@ namespace Questor.Modules.Combat
                 {
                     if (WarpDisruptor.TargetId != target.Id)
                     {
-                        WarpDisruptor.Click();
+                        if (WarpDisruptor.Click()) return;
+
                         return;
                     }
 
@@ -1058,9 +1079,13 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(WarpDisruptor, target, false))
                 {
-                    Logging.Log("Combat", "Activating [" + WarpDisruptor.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                    WarpDisruptor.Activate(target.Id);
-                    return;
+                    if (WarpDisruptor.Activate(target.Id))
+                    {
+                        Logging.Log("Combat", "Activating [" + WarpDisruptor.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                        return;
+                    }
+
+                    continue;
                 }
             }
         }
@@ -1095,7 +1120,8 @@ namespace Questor.Modules.Combat
                     {
                         if (RemoteRepairer.TargetId != target.Id)
                         {
-                            RemoteRepairer.Click();
+                            if (RemoteRepairer.Click()) return;
+
                             return;
                         }
 
@@ -1112,9 +1138,13 @@ namespace Questor.Modules.Combat
 
                     if (CanActivate(RemoteRepairer, target, false))
                     {
-                        Logging.Log("Combat", "Activating [" + RemoteRepairer.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
-                        RemoteRepairer.Activate(target.Id);
-                        return;
+                        if (RemoteRepairer.Activate(target.Id))
+                        {
+                            Logging.Log("Combat", "Activating [" + RemoteRepairer.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                            return;    
+                        }
+
+                        continue;
                     }
                 }
             }
@@ -1239,11 +1269,7 @@ namespace Questor.Modules.Combat
 
             maxLowValueTargets = Settings.Instance.MaximumLowValueTargets;
             maxHighValueTargets = Settings.Instance.MaximumHighValueTargets;
-            maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets;
-            if (Settings.Instance.MaximumWreckTargets > 0 && Cache.Instance.MaxLockedTargets >= 5)
-            {
-                maxTargetingSlotsAvailable = Cache.Instance.MaxLockedTargets - Settings.Instance.MaximumWreckTargets;
-            }
+            
 
             #region ECM Jamming checks
             //
@@ -1363,8 +1389,6 @@ namespace Questor.Modules.Combat
                     }
                 }
 
-                int totalTargets = Cache.Instance.EntitiesOnGrid.Count(e => (e.IsTargeting || e.IsTarget));
-                
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "Target a weapon target)", Logging.Debug);
                 EntityCache toTarget = primaryWeaponTargetsToLock.FirstOrDefault(e => !e.IsTarget && !e.IsTargeting && e.Distance < Cache.Instance.MaxTargetRange);
                 if ((!__highValueTargets.Any() || __highValueTargetsTargetedCount >= maxHighValueTargets) && (__lowValueTargets.Any() || __lowValueTargetsTargetedCount <= maxHighValueTargets))
@@ -1377,7 +1401,7 @@ namespace Questor.Modules.Combat
                     }    
                 }
 
-                if (toTarget != null && totalTargets < maxTargetingSlotsAvailable)
+                if (toTarget != null && Cache.Instance.TotalTargetsandTargetingCount < Cache.Instance.TargetingSlotsNotBeingUsedBySalvager)
                 {
                     Logging.Log("Combat", "Lock Target [" + toTarget.Name + "][" + Math.Round(toTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(toTarget.Id) + "] PreferredPWPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTargetID) + "] PreferedDPT [" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTargetID) + "]", Logging.Green);
                     toTarget.LockTarget("Combat");
@@ -1385,7 +1409,7 @@ namespace Questor.Modules.Combat
                 }
                 else
                 {
-                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants2","We have [" + totalTargets + "] Locked Targets and a Max Number Of Total Targets of [" + Cache.Instance.MaxLockedTargets + "]",Logging.Debug);
+                    if (Settings.Instance.DebugTargetCombatants) Logging.Log("TargetCombatants2", "We have [" + Cache.Instance.TotalTargetsandTargetingCount + "] Locked Targets and a Max Number Of Total Targets of [" + Cache.Instance.MaxLockedTargets + "]", Logging.Debug);
                 }
             }
             #endregion
@@ -1510,19 +1534,43 @@ namespace Questor.Modules.Combat
                             }
 
                             if (primaryWeaponPriorityEntity.Distance < Cache.Instance.MaxRange
-                                && primaryWeaponPriorityEntity.IsReadyToTarget
-                                && primaryWeaponPriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
+                                && primaryWeaponPriorityEntity.IsReadyToTarget)
                             {
-                                Logging.Log("Combat", "Targeting primary weapon priority target [" + primaryWeaponPriorityEntity.Name + "][" + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
-                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                                if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
+                                if (Cache.Instance.TotalTargetsandTargetingCount < Cache.Instance.TargetingSlotsNotBeingUsedBySalvager)
                                 {
-                                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
+                                    if (primaryWeaponPriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
+                                    {
+                                        Logging.Log("Combat", "Targeting primary weapon priority target [" + primaryWeaponPriorityEntity.Name + "][" + Cache.Instance.MaskedID(primaryWeaponPriorityEntity.Id) + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                        Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                        if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
+                                        {
+                                            Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
+                                        }
+
+                                        return;
+                                    }
                                 }
 
-                                return;
-                            }
+                                if (Cache.Instance.TotalTargetsandTargetingCount >= Cache.Instance.TargetingSlotsNotBeingUsedBySalvager)
+                                {
+                                    if (__lowValueTargetsTargeted.Any())
+                                    {
+                                        Combat.UnlockLowValueTarget("TargetCombatants", "PriorityTarget Needs to be targeted");
+                                        return;
+                                    }
 
+                                    if (__highValueTargetsTargeted.Any())
+                                    {
+                                        Combat.UnlockHighValueTarget("TargetCombatants", "PriorityTarget Needs to be targeted");
+                                        return;
+                                    }
+                                    
+                                    //
+                                    // if we have nothing to unlock just continue...
+                                    //
+                                }
+                            }
+                            
                             continue;
                         }
                     }
@@ -1567,17 +1615,36 @@ namespace Questor.Modules.Combat
                             if (dronePriorityEntity.Nearest5kDistance < Cache.Instance.MaxDroneRange
                                 && dronePriorityEntity.IsReadyToTarget
                                 && dronePriorityEntity.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance
-                                && !dronePriorityEntity.IsIgnored
-                                && dronePriorityEntity.LockTarget("TargetCombatants.DronePriorityEntity"))
+                                && !dronePriorityEntity.IsIgnored)
                             {
-                                Logging.Log("Combat", "Targeting drone priority target [" + dronePriorityEntity.Name + "][" + Cache.Instance.MaskedID(dronePriorityEntity.Id) + "][" + Math.Round(dronePriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
-                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                                if (Cache.Instance.TotalTargetsandTargeting.Any() && (Cache.Instance.TotalTargetsandTargeting.Count() >= Cache.Instance.MaxLockedTargets))
+                                if (Cache.Instance.TotalTargetsandTargetingCount < Cache.Instance.TargetingSlotsNotBeingUsedBySalvager)
                                 {
-                                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
+                                    if (dronePriorityEntity.LockTarget("TargetCombatants.PrimaryWeaponPriorityEntity"))
+                                    {
+                                        Logging.Log("Combat", "Targeting primary weapon priority target [" + dronePriorityEntity.Name + "][" + Cache.Instance.MaskedID(dronePriorityEntity.Id) + "][" + Math.Round(dronePriorityEntity.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                        return;
+                                    }
                                 }
 
-                                return;
+                                if (Cache.Instance.TotalTargetsandTargetingCount >= Cache.Instance.TargetingSlotsNotBeingUsedBySalvager)
+                                {
+                                    if (__lowValueTargetsTargeted.Any())
+                                    {
+                                        Combat.UnlockLowValueTarget("TargetCombatants", "PriorityTarget Needs to be targeted");
+                                        return;
+                                    }
+
+                                    if (__highValueTargetsTargeted.Any())
+                                    {
+                                        Combat.UnlockHighValueTarget("TargetCombatants", "PriorityTarget Needs to be targeted");
+                                        return;
+                                    }
+
+                                    Cache.Instance.NextTargetAction = DateTime.UtcNow.AddSeconds(Time.Instance.TargetsAreFullDelay_seconds);
+                                    //
+                                    // if we have nothing to unlock just continue...
+                                    //
+                                }
                             }
 
                             continue;

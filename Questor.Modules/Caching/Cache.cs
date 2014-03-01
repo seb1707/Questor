@@ -301,7 +301,7 @@ namespace Questor.Modules.Caching
         ///   Returns maxLockedTargets, the minimum between the character and the ship //cleared in InvalidateCache
         /// </summary>
         private int? _maxLockedTargets = null;
-
+        
         /// <summary>
         ///  Dictionary for cached EWAR target
         /// </summary>
@@ -1478,6 +1478,34 @@ namespace Questor.Modules.Caching
                 return _TotalTargetsandTargeting;
             }
         }
+
+        public int TotalTargetsandTargetingCount
+        {
+            get
+            {
+                if (!TotalTargetsandTargeting.Any())
+                {
+                    return 0;
+                }
+
+                return TotalTargetsandTargeting.Count();
+            }
+        }
+
+
+        public int TargetingSlotsNotBeingUsedBySalvager
+        {
+            get
+            {
+                if (Settings.Instance.MaximumWreckTargets > 0 && Cache.Instance.MaxLockedTargets >= 5)
+                {
+                    return Cache.Instance.MaxLockedTargets - Settings.Instance.MaximumWreckTargets;
+                }
+
+                return Cache.Instance.MaxLockedTargets;
+            }
+        }
+        
 
         public IEnumerable<EntityCache> Targets
         {

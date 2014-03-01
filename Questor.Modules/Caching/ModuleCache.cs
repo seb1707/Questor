@@ -369,10 +369,10 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Click()
+        public bool Click()
         {
             if (InLimboState)
-                return;
+                return false;
 
             if (IsActivatable)
             {
@@ -382,7 +382,7 @@ namespace Questor.Modules.Caching
                 }
             }
             
-            _module.Click();
+            return _module.Click();
         }
 
         public void Activate()

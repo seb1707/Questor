@@ -477,7 +477,8 @@ namespace Questor.Behaviors
                                 {
                                     if (miningTool.TargetId != _targetAsteroid.Id)
                                     {
-                                        miningTool.Click();
+                                        if (miningTool.Click()) return;
+
                                         return;
                                     }
                                     continue;
@@ -487,9 +488,14 @@ namespace Questor.Behaviors
                                 if (miningTool.IsDeactivating)
                                     continue;
 
-                                //only activate one module per cycle
-                                Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
-                                miningTool.Activate(_targetAsteroid.Id);
+                                if (miningTool.Activate(_targetAsteroid.Id))
+                                {
+                                    //only activate one module per cycle
+                                    Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                    return;
+                                }
+
+                                continue;
                             }
 
                             return;

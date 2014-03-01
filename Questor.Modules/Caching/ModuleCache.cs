@@ -369,10 +369,13 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private int ClickCountThisFrame = 0;
         public bool Click()
         {
-            if (InLimboState)
+            if (InLimboState || ClickCountThisFrame > 0)
                 return false;
+
+            ClickCountThisFrame++;
 
             if (IsActivatable)
             {
@@ -387,16 +390,22 @@ namespace Questor.Modules.Caching
 
         public void Activate()
         {
-            if (InLimboState || IsActive)
+            if (InLimboState || IsActive || ActivateCountThisFrame > 0)
                 return;
+
+            ActivateCountThisFrame++;
 
             _module.Activate();
         }
 
+        private int ActivateCountThisFrame = 0;
+
         public bool Activate(long entityId)
         {
-            if (InLimboState || IsActive)
+            if (InLimboState || IsActive || ActivateCountThisFrame > 0)
                 return false;
+
+            ActivateCountThisFrame++;
 
             if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
             {

@@ -732,6 +732,7 @@ namespace Questor.Modules.BackgroundTasks
                         // We are at our max, either make room or skip the item
                         if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
                         {
+                            Logging.Log("Salvage.LootWrecks","We Need More m3: FreeCargoCapacity [" + freeCargoCapacity + "] - [" + item.Name + "][" + item.TotalVolume + "total][" + item.Volume + "each]",Logging.Debug);
                             //
                             // I have no idea what problem this solved (a long long time ago, but its not doing anything useful that I can tell)
                             //
@@ -784,9 +785,13 @@ namespace Questor.Modules.BackgroundTasks
                             // Not enough space even if we dumped the crap
                             if ((freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) < item.TotalVolume)
                             {
-                                if (_isMissionItem)
+                                if (item.IsMissionItem)
                                 {
-                                    Logging.Log("Salvage", "Not enough space for mission item! Need [" + item.TotalVolume + "] maximum available [" + (freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) + "]", Logging.White);
+                                    Logging.Log("Salvage", "Not enough space for [" + item.Name + "] Need [" + item.TotalVolume + "] maximum available [" + (freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) + "]", Logging.White);
+                                    //
+                                    // partially loot the mission item if possible.
+                                    //
+
                                 }
                                 continue;
                             }

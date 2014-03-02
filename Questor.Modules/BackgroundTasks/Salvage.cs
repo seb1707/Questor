@@ -599,11 +599,11 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // We should not loot this container
-                if (Settings.Instance.FleetSupportSlave && Cache.Instance.ListofContainersToLoot.Contains(containerEntity.Id))
-                {
-                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We are not supposed to loot [" + containerEntity.Id + "]. Leaving it for the Master.", Logging.White);
-                    continue;
-                }
+                //if (Settings.Instance.FleetSupportSlave && Cache.Instance.ListofContainersToLoot.Contains(containerEntity.Id))
+                //{
+                //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We are not supposed to loot [" + containerEntity.Id + "]. Leaving it for the Master.", Logging.White);
+                //    continue;
+                //}
 
                 // Ignore open request within 10 seconds
                 if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.UtcNow.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
@@ -701,6 +701,16 @@ namespace Questor.Modules.BackgroundTasks
 
                         // We pick up loot depending on isk per m3
                         bool _isMissionItem = Cache.Instance.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
+
+                        if (Settings.Instance.FleetSupportSlave && !Settings.Instance.FleetSupportMaster)
+                        {
+                            if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name))
+                            {
+                                if (Settings.Instance.DebugFleetSupportSlave) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is an item specified in a lootitem action. Do not loot it here. Let the Master loot this.", Logging.Teal);
+                                Cache.Instance.LootedContainers.Add(containerEntity.Id);
+                                continue;
+                            }
+                        }
 
                         // Never pick up contraband (unless its the mission item)
                         if (item.IsContraband) //is the mission item EVER contraband?!

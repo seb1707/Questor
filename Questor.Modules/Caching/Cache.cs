@@ -313,6 +313,7 @@ namespace Questor.Modules.Caching
         public HashSet<long> ListOfDampenuingEntities = new HashSet<long>();
         public HashSet<long> ListofWebbingEntities = new HashSet<long>();
         public HashSet<long> ListofContainersToLoot = new HashSet<long>();
+        public HashSet<string> ListofMissionCompletionItemsToLoot = new HashSet<string>();
 
         public void DirecteveDispose()
         {
@@ -4012,6 +4013,7 @@ namespace Questor.Modules.Caching
                 ListOfDampenuingEntities.Clear();
                 ListofWebbingEntities.Clear();
                 ListofContainersToLoot.Clear();
+                ListofMissionCompletionItemsToLoot.Clear();
 
                 EntityNames.Clear();
                 EntityTypeID.Clear();

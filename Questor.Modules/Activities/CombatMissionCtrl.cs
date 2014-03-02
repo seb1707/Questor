@@ -1708,8 +1708,23 @@ namespace Questor.Modules.Activities
             {
                 Cache.Instance.CurrentlyShouldBeSalvaging = true;
                 Cache.Instance.MissionLoot = true;
-                List<string> items = action.GetParameterValues("item");
-                List<string> targetNames = action.GetParameterValues("target");
+                List<string> targetContainerNames = null;
+                if (action.GetParameterValues("target") != null)
+                {
+                    targetContainerNames = action.GetParameterValues("target");
+                } 
+                
+                List<string> itemsToLoot = null;
+                if (action.GetParameterValues("item") != null)
+                {
+                    itemsToLoot = action.GetParameterValues("item");
+                }
+
+                if (itemsToLoot == null)
+                {
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " *** No Item Was Specified In the LootItem Action! ***", Logging.Debug);
+                    _currentAction++;
+                }
 
                 // if we are not generally looting we need to re-enable the opening of wrecks to
                 // find this LootItems we are looking for
@@ -1721,13 +1736,13 @@ namespace Questor.Modules.Activities
                     quantity = 1;
                 }
 
-                bool done = items.Count == 0;
+                bool done = itemsToLoot.Count == 0;
                 if (!done)
                 {
                     //if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
                     if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
-                        if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (items.Contains(i.TypeName) && (i.Quantity >= quantity))))
+                        if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
                         {
                             done = true;
                         }
@@ -1764,11 +1779,11 @@ namespace Questor.Modules.Activities
                 //
                 // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
                 //
-                if (targetNames != null && targetNames.Any())
+                if (targetContainerNames != null && targetContainerNames.Any())
                 {
                     foreach (EntityCache continerToLoot in containers)
                     {
-                        if (continerToLoot.Name == targetNames.FirstOrDefault())
+                        if (continerToLoot.Name == targetContainerNames.FirstOrDefault())
                         {
                             if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
                             {
@@ -1777,8 +1792,19 @@ namespace Questor.Modules.Activities
                         }
                     }
                 }
-                
-                EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+
+                if (itemsToLoot.Any())
+                {
+                    foreach (string _itemToLoot in itemsToLoot)
+                    {
+                        if (!Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(_itemToLoot))
+                        {
+                            Cache.Instance.ListofMissionCompletionItemsToLoot.Add(_itemToLoot);
+                        }
+                    }
+                }
+
+                EntityCache container = containers.FirstOrDefault(c => targetContainerNames.Contains(c.Name)) ?? containers.FirstOrDefault();
                 if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction) 
                 {
                     if (container.Distance > (int)Distances.SafeScoopRange)

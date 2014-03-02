@@ -744,7 +744,7 @@ namespace Questor.Modules.BackgroundTasks
                             //}
 
                             // Make a list of items which are worth less
-                            List<ItemCache> worthLess;
+                            List<ItemCache> worthLess = null;
                             if (_isMissionItem)
                             {
                                 worthLess = shipsCargo;
@@ -755,7 +755,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             else
                             {
-                                worthLess = shipsCargo.Where(sc => sc.IskPerM3.HasValue).ToList();
+                                worthLess = shipsCargo.Where(sc => !sc.IsMissionItem && sc.IskPerM3.HasValue).ToList();
                             }
 
                             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)

@@ -281,6 +281,11 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
+                    if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains((Name ?? string.Empty).ToLower()))
+                    {
+                        return true;
+                    }
+
                     return false;   
                 }
 

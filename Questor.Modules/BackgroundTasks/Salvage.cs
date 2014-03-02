@@ -732,13 +732,16 @@ namespace Questor.Modules.BackgroundTasks
                         // We are at our max, either make room or skip the item
                         if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
                         {
+                            //
+                            // I have no idea what problem this solved (a long long time ago, but its not doing anything useful that I can tell)
+                            //
                             // We can't drop items in this container anyway, well get it after its salvaged
-                            if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
-                            {
-                                if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
-                                Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                                continue;
-                            }
+                            //if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
+                            //{
+                            //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
+                            //    Cache.Instance.LootedContainers.Add(containerEntity.Id);
+                            //    continue;
+                            //}
 
                             // Make a list of items which are worth less
                             List<ItemCache> worthLess;

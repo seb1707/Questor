@@ -1008,6 +1008,11 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        if (Settings.Instance.FleetSupportSlave)
+                        {
+                            return false;
+                        }
+
                         if (_isLootTarget == null)
                         {
                             if (Cache.Instance.ListofContainersToLoot.Contains(Id))

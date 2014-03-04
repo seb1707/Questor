@@ -827,25 +827,35 @@ namespace QuestorManager
 
         private void BttnAddTraveler_Click(object sender, EventArgs e)
         {
-            if (SearchResults.SelectedItems[0] != null)
+            try
             {
-                if (SearchResults.SelectedItems.Count > 0)
+                if (SearchResults != null && SearchResults.Items.Count > 0)
                 {
-                    ListViewItem listItem = new ListViewItem("QuestorManager");
-                    listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
-                    listItem.Tag = SearchResults.SelectedItems[0].Tag;
-                    listItem.SubItems.Add(" ");
-                    listItem.SubItems.Add(" ");
-                    LstTask.Items.Add(listItem);    
-                }
-                else
-                {
-                    Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems is 0", Logging.Debug);
+                    if (SearchResults.SelectedItems[0] != null)
+                    {
+                        if (SearchResults.SelectedItems.Count > 0)
+                        {
+                            ListViewItem listItem = new ListViewItem("QuestorManager");
+                            listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
+                            listItem.Tag = SearchResults.SelectedItems[0].Tag;
+                            listItem.SubItems.Add(" ");
+                            listItem.SubItems.Add(" ");
+                            LstTask.Items.Add(listItem);
+                        }
+                        else
+                        {
+                            Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems is 0", Logging.Debug);
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems[0] is null", Logging.Debug);
+                    }    
                 }
             }
-            else
+            catch (Exception exception)
             {
-                Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems[0] is null", Logging.Debug);
+                Logging.Log("QuestorManager", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 

@@ -246,22 +246,22 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
-                    if (tractorBeams.Any(i => i.TargetId != wreck.Id))
+                    if (tractorBeams.Any(i => i.TargetId == wreck.Id))
                     {
-                        //tractorBeams.Remove(tractorBeam);
-                        if (tractorBeam.Activate(wreck.Id))
-                        {
-                            tractorsProcessedThisTick++;
-
-                            Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
-                            Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                            break; //we do not need any more tractors on this wreck        
-                        }
-
                         continue;
                     }
                     
-                    return;
+                    //tractorBeams.Remove(tractorBeam);
+                    if (tractorBeam.Activate(wreck.Id))
+                    {
+                        tractorsProcessedThisTick++;
+
+                        Logging.Log("Salvage", "[" + WreckNumber + "][::" + ModuleNumber + "] Activating tractorbeam [" + ModuleNumber + "] on [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][" + wreck.MaskedId + "]", Logging.White);
+                        Cache.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                        break; //we do not need any more tractors on this wreck        
+                    }
+
+                    continue;
                 }
 
                 if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)

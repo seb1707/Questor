@@ -224,7 +224,7 @@ namespace Questor.Modules.Caching
         }
 
         public DateTime LastPreferredDroneTargetDateTime;
-        public long LastDroneTargetID;
+        public long? LastDroneTargetID = null;
 
         public string OrbitEntityNamed;
 
@@ -4005,6 +4005,9 @@ namespace Questor.Modules.Caching
             try
             {
                 _doWeCurrentlyHaveTurretsMounted = null;
+                LastTargetPrimaryWeaponsWereShooting = null;
+                LastDroneTargetID = null;
+
                 ListOfWarpScramblingEntities.Clear();
                 ListOfJammingEntities.Clear();
                 ListOfTrackingDisruptingEntities.Clear();
@@ -4014,7 +4017,7 @@ namespace Questor.Modules.Caching
                 ListofWebbingEntities.Clear();
                 ListofContainersToLoot.Clear();
                 ListofMissionCompletionItemsToLoot.Clear();
-
+                
                 EntityNames.Clear();
                 EntityTypeID.Clear();
                 EntityGroupID.Clear();
@@ -4267,7 +4270,7 @@ namespace Questor.Modules.Caching
                                                                   .OrderByDescending(t => t.isPreferredDroneTarget)
                                                                   .ThenByDescending(t => t.IsTargetedBy)                                      // if something does not target us it's not too interesting
                                                                   .ThenByDescending(t => t.IsTarget || t.IsTargeting)                         // is the entity already targeted?
-                                                                  .ThenByDescending(t => t.Id == Cache.Instance.LastDroneTargetID)            // Keep current target
+                                                                  .ThenByDescending(t => t.IsLastTargetDronesWereShooting)                    // Keep current target
                                                                   .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we do not switch our targets too often
                                                                   .ThenByDescending(t => t.IsEntityIShouldKeepShootingWithDrones)             // Shoot targets that are in armor!
                                                                   .ThenByDescending(t => t.DronePriorityLevel)
@@ -4382,7 +4385,7 @@ namespace Questor.Modules.Caching
                             target = Cache.Instance.DronePriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && (pt.Distance < Distance) && pt.IsActiveDroneEwarType == priorityType)
                                                                                                 || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
                                                                                                        .OrderByDescending(pt => !pt.IsNPCFrigate)
-                                                                                                       .ThenByDescending(pt => pt.IsCurrentDroneTarget)
+                                                                                                       .ThenByDescending(pt => pt.IsLastTargetDronesWereShooting)
                                                                                                        .ThenByDescending(pt => pt.IsInDroneRange)
                                                                                                        .ThenBy(pt => pt.IsEntityIShouldKeepShootingWithDrones)
                                                                                                        .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
@@ -4416,24 +4419,39 @@ namespace Questor.Modules.Caching
             return null;
         }
 
+        public EntityCache LastTargetPrimaryWeaponsWereShooting = null;
+
+        public EntityCache LastTargetDronesWereShooting = null;
+
         public EntityCache FindCurrentTarget()
         {
             try
             {
                 EntityCache currentTarget = null;
-                if (Cache.Instance.CurrentWeaponTarget() != null
+                //
+                // we cant do this because the target may need to be targeted again! ECM == bad
+                //
+                //if (Cache.Instance.LastTargetWeWereShooting != null && Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.LastTargetWeWereShooting.Id))
+                //{
+                //    currentTarget = Cache.Instance.LastTargetWeWereShooting;
+                //}
+
+                if (currentTarget == null)
+                {
+                    if (Cache.Instance.CurrentWeaponTarget() != null
                     && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
                     && !Cache.Instance.CurrentWeaponTarget().IsIgnored)
-                {
-                    currentTarget = Cache.Instance.CurrentWeaponTarget();
-                }
+                    {
+                        Cache.Instance.LastTargetPrimaryWeaponsWereShooting = Cache.Instance.CurrentWeaponTarget();
+                        currentTarget = Cache.Instance.LastTargetPrimaryWeaponsWereShooting;
+                    }
 
-                if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log("FindCurrentTarget", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
-                    return currentTarget;
+                    if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
+                    {
+                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("FindCurrentTarget", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                    }
                 }
-
+                
                 return currentTarget;
             }
             catch (Exception ex)
@@ -4868,9 +4886,9 @@ namespace Questor.Modules.Caching
 
             EntityCache currentDroneTarget = null;
 
-            if (Cache.Instance.EntitiesOnGrid.Any(i => i.IsCurrentDroneTarget))
+            if (Cache.Instance.EntitiesOnGrid.Any(i => i.IsLastTargetDronesWereShooting))
             {
-                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsCurrentDroneTarget);
+                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsLastTargetDronesWereShooting);
 
             }
             

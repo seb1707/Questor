@@ -1073,9 +1073,9 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private bool? _isCurrentDroneTarget;
+        private bool? _isLastTargetPrimaryWeaponsWereShooting;
 
-        public bool IsCurrentDroneTarget
+        public bool IsLastTargetPrimaryWeaponsWereShooting
         {
             get
             {
@@ -1083,19 +1083,54 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (_isCurrentDroneTarget == null)
+                        if (_isLastTargetPrimaryWeaponsWereShooting == null)
                         {
-                            if (Id == Cache.Instance.LastDroneTargetID)
+                            if (Cache.Instance.LastTargetPrimaryWeaponsWereShooting != null && Id == Cache.Instance.LastTargetPrimaryWeaponsWereShooting.Id)
                             {
-                                _isCurrentDroneTarget = true;
-                                return _isCurrentDroneTarget ?? true;
+                                _isLastTargetPrimaryWeaponsWereShooting = true;
+                                return _isLastTargetPrimaryWeaponsWereShooting ?? true;
                             }
 
-                            _isCurrentDroneTarget = false;
-                            return _isCurrentDroneTarget ?? false;
+                            _isLastTargetPrimaryWeaponsWereShooting = false;
+                            return _isLastTargetPrimaryWeaponsWereShooting ?? false;
                         }
 
-                        return _isCurrentDroneTarget ?? false;
+                        return _isLastTargetPrimaryWeaponsWereShooting ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isLastTargetDronesWereShooting;
+
+        public bool IsLastTargetDronesWereShooting
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isLastTargetDronesWereShooting == null)
+                        {
+                            if (Cache.Instance.LastDroneTargetID != null && Id == Cache.Instance.LastDroneTargetID)
+                            {
+                                _isLastTargetDronesWereShooting = true;
+                                return _isLastTargetDronesWereShooting ?? true;
+                            }
+
+                            _isLastTargetDronesWereShooting = false;
+                            return _isLastTargetDronesWereShooting ?? false;
+                        }
+
+                        return _isLastTargetDronesWereShooting ?? false;
                     }
 
                     return false;

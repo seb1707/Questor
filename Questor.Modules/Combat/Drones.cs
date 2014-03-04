@@ -141,12 +141,15 @@ namespace Questor.Modules.Combat
                     }
 
                     // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
-                    if (Cache.Instance.LastDroneTargetID == DroneToShoot.Id && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID))
+                    if (Cache.Instance.LastDroneTargetID != null)
                     {
-                        if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + Cache.Instance.LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) + "])", Logging.Debug);
-                        return;
+                        if (Cache.Instance.LastDroneTargetID == DroneToShoot.Id && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID))
+                        {
+                            if (Settings.Instance.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + Cache.Instance.LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) + "])", Logging.Debug);
+                            return;
+                        }    
                     }
-
+                    
                     //
                     // If we got this far we need to tell the drones to do something
                     // Is the last target our current active target?
@@ -345,7 +348,6 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    Cache.Instance.LastDroneTargetID = 0;
                     break;
 
                 case DroneState.Fighting:
@@ -548,7 +550,6 @@ namespace Questor.Modules.Combat
                     {
                         _lastRecall = DateTime.UtcNow;
                         Recall = false;
-                        Cache.Instance.LastDroneTargetID = 0;
                         _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
                         break;
@@ -578,7 +579,6 @@ namespace Questor.Modules.Combat
                         return;
                     }
 
-                    Cache.Instance.LastDroneTargetID = 0;
                     break;
             }
 

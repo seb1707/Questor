@@ -1517,7 +1517,8 @@ namespace Questor.Modules.Combat
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "if (!UnlockHighValueTarget(Combat.TargetCombatants, PrimaryWeaponPriorityTargets return;", Logging.Debug);
 
                     IEnumerable<EntityCache> _primaryWeaponPriorityEntities = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
-                                                                                                                     .OrderByDescending(c => c.IsInOptimalRange)
+                                                                                                                     .OrderByDescending(c => c.IsLastTargetPrimaryWeaponsWereShooting)
+                                                                                                                     .ThenBy(c => c.IsInOptimalRange)
                                                                                                                      .ThenBy(c => c.Distance);
 
                     if (_primaryWeaponPriorityEntities.Any())
@@ -1597,6 +1598,7 @@ namespace Questor.Modules.Combat
 
                     IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                          .OrderByDescending(c => c.IsInDroneRange)
+                                                                                                                         .ThenBy(c => c.IsLastTargetPrimaryWeaponsWereShooting)
                                                                                                                          .ThenBy(c => c.Nearest5kDistance);
 
                     if (_dronePriorityTargets.Any())
@@ -1854,6 +1856,8 @@ namespace Questor.Modules.Combat
 
             List<EntityCache> highValueTargetingMe = TargetingMe.Where(t => (t.IsHighValueTarget))
                                                                 .OrderByDescending(t => !t.IsNPCCruiser) //prefer battleships
+                                                                .ThenByDescending(t => t.IsBattlecruiser && t.IsLastTargetPrimaryWeaponsWereShooting)
+                                                                .ThenByDescending(t => t.IsBattleship && t.IsLastTargetPrimaryWeaponsWereShooting)
                                                                 .ThenByDescending(t => t.IsBattlecruiser)
                                                                 .ThenByDescending(t => t.IsBattleship)
                                                                 .ThenBy(t => t.Nearest5kDistance).ToList();
@@ -1944,7 +1948,7 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: [" + lowValueTargetingMe.Count() + "] lowValueTargetingMe targets", Logging.Debug);
 
                 int LowValueTargetsTargetedThisCycle = 1;
-                foreach (EntityCache lowValueTargetingMeEntity in lowValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting && t.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance))
+                foreach (EntityCache lowValueTargetingMeEntity in lowValueTargetingMe.Where(t => !t.IsTarget && !t.IsTargeting && t.Nearest5kDistance < Cache.Instance.LowValueTargetsHaveToBeWithinDistance).OrderByDescending(i => i.IsLastTargetDronesWereShooting).ThenBy(i => i.IsLastTargetPrimaryWeaponsWereShooting))
                 {
 
                     if (Settings.Instance.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "DebugTargetCombatants: lowValueTargetingMe [" + LowValueTargetsTargetedThisCycle + "][" + lowValueTargetingMeEntity.Name + "][" + Math.Round(lowValueTargetingMeEntity.Distance / 1000, 2) + "k] groupID [ " + lowValueTargetingMeEntity.GroupId + "]", Logging.Debug);

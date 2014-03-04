@@ -516,33 +516,37 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
 
-                Logging.Log("Salvage", "Locking [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "][" + Math.Round(wreck.Distance / 1000, 0) + "k away]", Logging.White);
-
-                wreck.LockTarget("Salvage");
-                wreckTargets.Add(wreck);
-                wrecksProcessedThisTick++;
-                if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.Teal);
-
-                if (Cache.Instance.MissionLoot)
+                if (wreck.LockTarget("Salvage"))
                 {
-                    if (wreckTargets.Count >= Cache.Instance.MaxLockedTargets)
+                    Logging.Log("Salvage", "Locking [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "][" + Math.Round(wreck.Distance / 1000, 0) + "k away]", Logging.White);
+                    wreckTargets.Add(wreck);
+                    wrecksProcessedThisTick++;
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage", "wrecksProcessedThisTick [" + wrecksProcessedThisTick + "]", Logging.Teal);
+
+                    if (Cache.Instance.MissionLoot)
                     {
-                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Cache.Instance.MaxLockedTargets) [" + Cache.Instance.MaxLockedTargets + "]", Logging.Teal);
-                        return;
+                        if (wreckTargets.Count >= Cache.Instance.MaxLockedTargets)
+                        {
+                            if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= Cache.Instance.MaxLockedTargets) [" + Cache.Instance.MaxLockedTargets + "]", Logging.Teal);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (wreckTargets.Count >= MaximumWreckTargets)
+                        {
+                            if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]", Logging.Teal);
+                            return;
+                        }
+                    }
+
+                    if (wrecksProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                    {
+                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", "if (wrecksProcessedThisTick [" + wrecksProcessedThisTick + "] < Settings.Instance.NumberOfModulesToActivateInCycle [" + Settings.Instance.NumberOfModulesToActivateInCycle + "])", Logging.Teal);
+                        continue;
                     }
                 }
-                else
-                    if (wreckTargets.Count >= MaximumWreckTargets)
-                    {
-                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", " wreckTargets.Count [" + wreckTargets.Count + "] >= MaximumWreckTargets [" + MaximumWreckTargets + "]", Logging.Teal);
-                        return;
-                    }
-                if (wrecksProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
-                {
-                    if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage", "if (wrecksProcessedThisTick [" + wrecksProcessedThisTick + "] < Settings.Instance.NumberOfModulesToActivateInCycle [" + Settings.Instance.NumberOfModulesToActivateInCycle + "])", Logging.Teal);
-                    continue;
-                }
-
+                
                 return;
             }
         }

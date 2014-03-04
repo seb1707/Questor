@@ -1547,7 +1547,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsEmpty;
+                        if (GroupId == (int)Group.Wreck)
+                        {
+                            return _directEntity.IsEmpty;    
+                        }
+
+                        return false;
                     }
 
                     return false;

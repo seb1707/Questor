@@ -387,16 +387,16 @@ namespace Questor.Modules.BackgroundTasks
             // Check for cargo containers
             foreach (EntityCache wreck in wreckTargets.OrderByDescending(i => i.IsLootTarget))
             {
-                if (!hasSalvagers)
-                {
-                    if (wreck.IsWreckEmpty && wreck.Distance < 1500) //this is NOT ideal... the distance check was added to ensure the wreck is already close before checking to see if its looted. There seems to be an EVE (or DE?) issue in .IsWreckEmpty
-                    {
-                        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is empty, unlocking container.", Logging.White);
-                        Cache.Instance.LootedContainers.Add(wreck.Id);
-                        wreck.UnlockTarget("Salvage");
-                        continue;
-                    }
-                }
+                //if (!hasSalvagers)
+                //{
+                //    if (wreck.IsWreckEmpty && wreck.Distance < 1500) //this is NOT ideal... the distance check was added to ensure the wreck is already close before checking to see if its looted. There seems to be an EVE (or DE?) issue in .IsWreckEmpty
+                //    {
+                //        Logging.Log("Salvage", "Cargo Container [" + wreck.Name + "][" + Math.Round(wreck.Distance / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] wreck is empty, unlocking container.", Logging.White);
+                //        Cache.Instance.LootedContainers.Add(wreck.Id);
+                //        wreck.UnlockTarget("Salvage");
+                //        continue;
+                //    }
+                //}
                 
                 if (!Cache.Instance.SalvageAll)
                 {
@@ -476,7 +476,10 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (!Cache.Instance.SalvageAll)
                 {
-                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId) && (wreck.IsWreckEmpty || wreck.Distance < (int)Distances.SafeScoopRange))
+                    //
+                    // do not tractor blacklisted wrecks
+                    //
+                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId)) //&& (wreck.Distance < (int)Distances.SafeScoopRange)) //|| wreck.IsWreckEmpty))
                     {
                         //if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId) && (wreck.IsWreckEmpty || wreck.Distance < (int)Distance.SafeScoopRange))", Logging.Teal);
                         continue;
@@ -499,11 +502,11 @@ namespace Questor.Modules.BackgroundTasks
                     }
 
                     // Ignore empty wrecks
-                    if (wreck.GroupId == (int)Group.Wreck && wreck.IsWreckEmpty)
-                    {
-                        if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: Ignoring Empty Entity ID [" + wreck.Id + "]", Logging.Teal);
-                        continue;
-                    }
+                    //if (wreck.GroupId == (int)Group.Wreck && wreck.IsWreckEmpty)
+                    //{
+                    //    if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: Ignoring Empty Entity ID [" + wreck.Id + "]", Logging.Teal);
+                    //    continue;
+                    //}
 
                     // Ignore wrecks already in loot range
                     if (wreck.Distance < (int)Distances.SafeScoopRange)
@@ -585,11 +588,11 @@ namespace Questor.Modules.BackgroundTasks
                 containersProcessedThisTick++;
 
                 // Empty wreck, ignore
-                if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
-                {
-                    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "Ignoring Empty Wreck", Logging.Teal);
-                    continue;
-                }
+                //if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
+                //{
+                //    if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "Ignoring Empty Wreck", Logging.Teal);
+                //    continue;
+                //}
 
                 // We looted this container
                 if (Cache.Instance.LootedContainers.Contains(containerEntity.Id))

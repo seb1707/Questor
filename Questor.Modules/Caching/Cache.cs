@@ -1417,7 +1417,7 @@ namespace Questor.Modules.Caching
                 return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer && 
                            e.HaveLootRights && 
-                          (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
+                          (e.GroupId != (int)Group.Wreck) && // || !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
             }
         }
@@ -1428,7 +1428,7 @@ namespace Questor.Modules.Caching
             {
                 return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer &&
-                          (e.GroupId != (int)Group.Wreck || !e.IsWreckEmpty) &&
+                          (e.GroupId != (int)Group.Wreck) && //|| !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
             }
         }
@@ -1459,7 +1459,7 @@ namespace Questor.Modules.Caching
                 return _unlootedWrecksAndSecureCans ?? (_unlootedWrecksAndSecureCans = Cache.Instance.EntitiesOnGrid.Where(e =>
                           (e.GroupId == (int)Group.Wreck || e.GroupId == (int)Group.SecureContainer ||
                            e.GroupId == (int)Group.AuditLogSecureContainer ||
-                           e.GroupId == (int)Group.FreightContainer) && !e.IsWreckEmpty).OrderBy(e => e.Distance).
+                           e.GroupId == (int)Group.FreightContainer)).OrderBy(e => e.Distance).
                           ToList());
             }
         }

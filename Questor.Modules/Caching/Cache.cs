@@ -1417,7 +1417,7 @@ namespace Questor.Modules.Caching
                 return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer && 
                            e.HaveLootRights && 
-                          (e.GroupId != (int)Group.Wreck) && // || !e.IsWreckEmpty) &&
+                          //(e.GroupId == (int)Group.Wreck && !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
             }
         }
@@ -1428,7 +1428,7 @@ namespace Questor.Modules.Caching
             {
                 return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
                            e.IsContainer &&
-                          (e.GroupId != (int)Group.Wreck) && //|| !e.IsWreckEmpty) &&
+                          //(e.GroupId == (int)Group.Wreck && !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
             }
         }
@@ -3672,7 +3672,6 @@ namespace Questor.Modules.Caching
         {
             try
             {
-
                 IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd, Cache.Instance.EntitiesOnGrid).OrderBy(i => i.Distance).ToList();
                 if (notTheClosest)
                 {

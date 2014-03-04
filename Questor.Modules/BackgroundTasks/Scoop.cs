@@ -153,8 +153,8 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
 
                     // Ignore empty wrecks
-                    if (wreck.GroupId == (int)Group.Wreck && wreck.IsWreckEmpty)
-                        continue;
+                    //if (wreck.GroupId == (int)Group.Wreck && wreck.IsWreckEmpty)
+                    //    continue;
                 }
 
                 Logging.Log("Salvage", "Locking [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "][" + Math.Round(wreck.Distance / 1000, 0) + "k away]", Logging.White);
@@ -337,8 +337,8 @@ namespace Questor.Modules.BackgroundTasks
             foreach (EntityCache containerEntity in Cache.Instance.UnlootedWrecksAndSecureCans.Where(e => e.Distance <= (int)Distances.SafeScoopRange))
             {
                 // Empty wreck, ignore
-                if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
-                    continue;
+                //if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
+                //    continue;
 
                 // We looted this container
                 if (Cache.Instance.LootedContainers.Contains(containerEntity.Id))

@@ -876,7 +876,7 @@ namespace Questor.Modules.Combat
             {
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(painter.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddSeconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[painter.ItemId].AddMilliseconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }    
@@ -927,7 +927,7 @@ namespace Questor.Modules.Combat
             {
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(sensorDampener.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[sensorDampener.ItemId].AddSeconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[sensorDampener.ItemId].AddMilliseconds(Time.Instance.PainterDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }
@@ -980,7 +980,7 @@ namespace Questor.Modules.Combat
 
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(nos.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[nos.ItemId].AddSeconds(Time.Instance.NosDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[nos.ItemId].AddMilliseconds(Time.Instance.NosDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }
@@ -1038,7 +1038,7 @@ namespace Questor.Modules.Combat
 
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(web.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[web.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[web.ItemId].AddMilliseconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }
@@ -1166,7 +1166,7 @@ namespace Questor.Modules.Combat
 
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(WarpDisruptor.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[WarpDisruptor.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[WarpDisruptor.ItemId].AddMilliseconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }
@@ -1225,7 +1225,7 @@ namespace Questor.Modules.Combat
 
                     if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(RemoteRepairer.ItemId))
                     {
-                        if (Cache.Instance.LastActivatedTimeStamp[RemoteRepairer.ItemId].AddSeconds(Time.Instance.WebDelay_milliseconds) > DateTime.UtcNow)
+                        if (Cache.Instance.LastActivatedTimeStamp[RemoteRepairer.ItemId].AddMilliseconds(Time.Instance.RemoteRepairerDelay_milliseconds) > DateTime.UtcNow)
                         {
                             continue;
                         }

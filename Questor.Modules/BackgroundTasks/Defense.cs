@@ -749,7 +749,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
                 {
-                    if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddSeconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
+                    if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
                         continue;
                     }

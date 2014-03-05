@@ -7689,7 +7689,7 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        IEnumerable<DirectBookmark> ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);
+        private IEnumerable<DirectBookmark> ListOfUndockBookmarks;
 
         internal static DirectBookmark _undockBookmarkInLocal;
         public DirectBookmark UndockBookmark
@@ -7700,7 +7700,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_undockBookmarkInLocal == null)
                     {
-
+                        if (ListOfUndockBookmarks == null) ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);
                         if (ListOfUndockBookmarks != null && ListOfUndockBookmarks.Any())
                         {
                             ListOfUndockBookmarks = ListOfUndockBookmarks.Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();

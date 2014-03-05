@@ -902,7 +902,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             // What? No ship entity?
-            if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
+            if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int) Group.Capsule)
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "no ship entity, or we are in a pod...", Logging.White);
                 _lastSessionChange = DateTime.UtcNow;
@@ -930,7 +930,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved && DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
+            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved &&
+                DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
                 //
@@ -946,14 +947,26 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
+            if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateRepairModules();", Logging.White);
             ActivateRepairModules();
+            if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateOnce();", Logging.White);
             ActivateOnce();
-            if (!OverLoadWeapons()) return; //should only run every 30 min (and likely needs to be run again on every session change)
-            
-            // this effectively disables control of speed modules when paused, which is expected behavior
-            if (Cache.Instance.Paused)
+
+            if (Cache.Instance.InWarp)
             {
+                _trackingLinkScriptAttempts = 0;
+                _sensorBoosterScriptAttempts = 0;
+                _sensorDampenerScriptAttempts = 0;
+                _trackingComputerScriptAttempts = 0;
+                _trackingDisruptorScriptAttempts = 0;
                 return;
+            }
+
+            // this allows speed mods only when not paused, which is expected behavior
+            if (!Cache.Instance.Paused)
+            {
+                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateSpeedMod();", Logging.White);
+                ActivateSpeedMod();
             }
 
             if (Cache.Instance.InWarp)
@@ -966,7 +979,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            ActivateSpeedMod();
+            return;
         }
     }
 }

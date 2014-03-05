@@ -1,4 +1,6 @@
 ﻿
+using System.Reflection;
+
 namespace Questor.Modules.Logging
 {
     using System;
@@ -103,7 +105,7 @@ namespace Questor.Modules.Logging
         {
             if (Settings.Instance.PocketObjectStatisticsLog || force)
             {
-                string currentPocketName = Cache.Instance.FilterPath("randomgrid");
+                string currentPocketName = Cache.Instance.FilterPath("Random-Grid");
                 try
                 {
                     if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
@@ -222,10 +224,10 @@ namespace Questor.Modules.Logging
             //if (Cache.Instance.Weapons != null && Cache.Instance.Weapons.Any())
             //{
             //
-            //    int icount = 0;
+            //    int iCount = 0;
             //    foreach (ModuleCache weapon in Cache.Instance.Weapons.OrderBy(i => i.TypeId).ThenBy(i => i.GroupId))
             //    {
-            //        icount++;
+            //        iCount++;
             //        Logging.Log(icount.ToString(), "TypeID [" + weapon.TypeId + "] GroupID [" + weapon.GroupId + "] isOnline [" + weapon.IsOnline + "] isActivatable [" + weapon.IsActivatable + "] IsActive [" + weapon.IsActive + "] OptimalRange [" + weapon.OptimalRange + "] Falloff [" + weapon.FallOff + "] Duration [" + weapon.Duration + "] LastReload [" + Math.Round(DateTime.UtcNow.Subtract(Combat.LastWeaponReload[weapon.ItemId]).TotalSeconds, 0) + "]", Logging.Debug);
             //    }
             //}
@@ -363,7 +365,7 @@ namespace Questor.Modules.Logging
                 return false;
             }
 
-            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.DamageType);
+            IEnumerable<Ammo> correctAmmo1 = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.MissionDamageType);
             IEnumerable<DirectItem> ammoCargo = Cache.Instance.CurrentShipsCargo.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
             try
             {
@@ -421,7 +423,7 @@ namespace Questor.Modules.Logging
                 }
                 else
                 {
-                    Logging.Log("DroneStats", "We do not use drones in this type of ship, skipping dronestats", Logging.White);
+                    Logging.Log("DroneStats", "We do not use drones in this type of ship, skipping drone stats", Logging.White);
                     Statistics.Instance.DroneLoggingCompleted = true;
                 }
             }
@@ -444,7 +446,7 @@ namespace Questor.Modules.Logging
 
             if (Settings.Instance.SessionsLog)
             {
-                if (Cache.Instance.MyWalletBalance != 0 || Cache.Instance.MyWalletBalance != -2147483648) // this hopefully resolves having negative maxint in the session logs occasionally
+                if (Cache.Instance.MyWalletBalance != 0 || Cache.Instance.MyWalletBalance != -2147483648) // this hopefully resolves having negative max int in the session logs occasionally
                 {
                     //
                     // prepare the Questor Session Log - keeps track of starts, restarts and exits, and hopefully the reasons
@@ -498,7 +500,7 @@ namespace Questor.Modules.Logging
 
             //}
 
-            if (Settings.Instance.SessionsLog) // if false we do not write a sessionlog, doubles as a flag so we don't write the sessionlog more than once
+            if (Settings.Instance.SessionsLog) // if false we do not write a session log, doubles as a flag so we don't write the session log more than once
             {
                 //
                 // prepare the Questor Session Log - keeps track of starts, restarts and exits, and hopefully the reasons
@@ -545,7 +547,7 @@ namespace Questor.Modules.Logging
 
                 Logging.Log("Statistics: WriteSessionLogClosing", "Writing to session log [ " + Settings.Instance.SessionsLogFile, Logging.White);
                 Logging.Log("Statistics: WriteSessionLogClosing", "Questor is stopping because: " + Cache.Instance.ReasonToStopQuestor, Logging.White);
-                Settings.Instance.SessionsLog = false; //so we don't write the sessionlog more than once per session
+                Settings.Instance.SessionsLog = false; //so we don't write the session log more than once per session
             }
             return true;
         }
@@ -666,7 +668,7 @@ namespace Questor.Modules.Logging
                 Logging.Log("Statistics", "2) Cache.Instance.MissionName must not be empty - we must have had a mission already this session", Logging.White);
                 Logging.Log("Statistics", "AND", Logging.White);
                 Logging.Log("Statistics", "3a Cache.Instance.mission == null - their must not be a current mission OR", Logging.White);
-                Logging.Log("Statistics", "3b Cache.Instance.mission.State != (int)MissionState.Accepted) - the missionstate is not 'Accepted'", Logging.White);
+                Logging.Log("Statistics", "3b Cache.Instance.mission.State != (int)MissionState.Accepted) - the mission state is not 'Accepted'", Logging.White);
                 Logging.Log("Statistics", " ", Logging.White);
                 Logging.Log("Statistics", " ", Logging.White);
                 Logging.Log("Statistics", "If those are all met then we get to create a log for the previous mission.", Logging.White);
@@ -758,7 +760,10 @@ namespace Questor.Modules.Logging
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weaponNumber++;
-                Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + weapon.ReloadTimeThisMission + "]", Logging.White);
+                if (Cache.Instance.ReloadTimePerModule != null && Cache.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
+                {
+                    Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + Cache.Instance.ReloadTimePerModule[weapon.ItemId] + "]", Logging.White);    
+                }
             }
             Logging.Log("Statistics", "Time Spent IN Mission: [" + Cache.Instance.TimeSpentInMission_seconds + "sec]", Logging.White);
             Logging.Log("Statistics", "Time Spent In Range: [" + Cache.Instance.TimeSpentInMissionInRange + "]", Logging.White);
@@ -783,7 +788,7 @@ namespace Questor.Modules.Logging
                 line += ((int)Statistics.Instance.FinishedMission.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";         // TimeMission
                 line += ((int)Statistics.Instance.FinishedSalvaging.Subtract(Statistics.Instance.StartedSalvaging).TotalMinutes) + ";";     // Time Doing After Mission Salvaging
                 line += ((int)DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes) + ";";                             // Total Time doing Mission
-                line += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                              // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minuts)
+                line += ((int)(Cache.Instance.MyWalletBalance - Cache.Instance.Wealth)) + ";";                                              // Isk (balance difference from start and finish of mission: is not accurate as the wallet ticks from bounty kills are every x minutes)
                 line += Statistics.Instance.LootValue + ";";                                                                                // Loot
                 line += (Cache.Instance.Agent.LoyaltyPoints - Statistics.Instance.LoyaltyPoints) + ";\r\n";                                 // LP
 
@@ -914,7 +919,10 @@ namespace Questor.Modules.Logging
             Statistics.Instance.OutOfDronesCount = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
-                weapon.ReloadTimeThisMission = 0;
+                if (Cache.Instance.ReloadTimePerModule != null && Cache.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
+                {
+                    Cache.Instance.ReloadTimePerModule[weapon.ItemId] = 0;    
+                }
             }
 
             Cache.Instance.PanicAttemptsThisMission = 0;

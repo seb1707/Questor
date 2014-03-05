@@ -89,8 +89,8 @@ namespace Questor.Modules.Actions
 
                 if (Cache.Instance.DefaultFitting == null)
                 {
-                    Cache.Instance.DefaultFitting = Settings.Instance.DefaultFitting.Fitting;
-                    Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                    Cache.Instance.DefaultFitting = Settings.Instance.DefaultFitting.FittingName;
+                    Cache.Instance.FittingToLoad = Cache.Instance.DefaultFitting;
                 }
                 if (Settings.Instance.DebugFittingMgr) Logging.Log(module, "Character Settings XML says Default Fitting is [" + Cache.Instance.DefaultFitting + "]", Logging.White);
 
@@ -168,6 +168,11 @@ namespace Questor.Modules.Actions
                     {
                         // Close the drone bay, its not required in space.
                         Cache.Instance.CloseDroneBay("Arm.Cleanup");
+                    }
+
+                    if (Settings.Instance.UseFittingManager)
+                    {
+                        if (!Cache.Instance.CloseFittingManager("Arm")) return;
                     }
 
                     if (!Cleanup.CloseInventoryWindows()) break;
@@ -347,7 +352,7 @@ namespace Questor.Modules.Actions
                 case ArmState.ActivateTransportShip:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
+                    //if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
 
                     if (string.IsNullOrEmpty(Settings.Instance.TransportShipName))
                     {
@@ -380,7 +385,7 @@ namespace Questor.Modules.Actions
 
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
                     
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
+                    //if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
 
                     if (string.IsNullOrEmpty(salvageshipName))
                     {
@@ -475,7 +480,7 @@ namespace Questor.Modules.Actions
                             {
                                 Logging.Log("Arm.ActivateCombatShip", "Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.", Logging.Orange);
                                 TryMissionShip = false;
-                                Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                                Cache.Instance.FittingToLoad = Cache.Instance.DefaultFitting;
                             }
                         }
                         else
@@ -511,11 +516,11 @@ namespace Questor.Modules.Actions
                 case ArmState.RepairShop:
                     if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
 
-                    if (Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
+                    if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
                     {
                         if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return; //attempt to use repair facilities if avail in station
                     }
-                    else if (Settings.Instance.UseStationRepair && Settings.Instance.UseDrones)
+                    else if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.UseStationRepair && Settings.Instance.UseDrones)
                     {
                         if (!Cache.Instance.RepairDrones("Arm.RepairShop [Drones]")) return; //attempt to use repair facilities if avail in station
                     }
@@ -581,8 +586,8 @@ namespace Questor.Modules.Actions
                             }
 
                             //let's check first if we need to change fitting at all
-                            Logging.Log("Arm.LoadFitting", "Fitting: " + Cache.Instance.Fitting + " - currentFit: " + Cache.Instance.CurrentFit, Logging.White);
-                            if (Cache.Instance.Fitting.Equals(Cache.Instance.CurrentFit))
+                            Logging.Log("Arm.LoadFitting", "Fitting: " + Cache.Instance.FittingToLoad + " - currentFit: " + Cache.Instance.CurrentFit, Logging.White);
+                            if (Cache.Instance.FittingToLoad.Equals(Cache.Instance.CurrentFit))
                             {
                                 Logging.Log("Arm.LoadFitting", "Current fit is now correct", Logging.White);
                                 _States.CurrentArmState = ArmState.MoveDrones;
@@ -591,13 +596,13 @@ namespace Questor.Modules.Actions
 
                             if (Cache.Instance.FittingManagerWindow == null) return;
 
-                            Logging.Log("Arm.LoadFitting", "Looking for saved fitting named: [" + Cache.Instance.Fitting + " ]", Logging.White);
+                            Logging.Log("Arm.LoadFitting", "Looking for saved fitting named: [" + Cache.Instance.FittingToLoad + " ]", Logging.White);
 
                             foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
                             {
                                 //ok found it
                                 DirectActiveShip CurrentShip = Cache.Instance.ActiveShip;
-                                if (Cache.Instance.Fitting.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
+                                if (Cache.Instance.FittingToLoad.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
                                 {
                                     Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                                     Logging.Log("Arm.LoadFitting", "Found saved fitting named: [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
@@ -626,7 +631,7 @@ namespace Questor.Modules.Actions
                                 }
 
                                 Logging.Log("Arm.LoadFitting", "Could not find fitting - switching to default", Logging.Orange);
-                                Cache.Instance.Fitting = Cache.Instance.DefaultFitting;
+                                Cache.Instance.FittingToLoad = Cache.Instance.DefaultFitting;
                                 _States.CurrentArmState = ArmState.MoveItems;
                                 return;
                             }

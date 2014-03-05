@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -16,9 +17,10 @@ namespace Questor.Modules.Caching
     using System.Threading;
     using DirectEve;
     //using System.Collections.Generic;
+    using global::Questor.Modules.Activities;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
-
+    
     public class EntityCache
     {
         private readonly DirectEntity _directEntity;
@@ -373,7 +375,8 @@ namespace Questor.Modules.Caching
                         {
                             if (Distance > 0 && Distance < 900000000)
                             {
-                                _nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                                //_nearest5kDistance = Math.Round((Distance / 1000) * 2, MidpointRounding.AwayFromZero) / 2;
+                                _nearest5kDistance = (double)Math.Ceiling(Math.Round((Distance / 1000)) / 5.0) * 5;
                             }
                         }
 
@@ -997,6 +1000,46 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private bool? _isLootTarget;
+
+        public bool IsLootTarget
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (Settings.Instance.FleetSupportSlave)
+                        {
+                            return false;
+                        }
+
+                        if (_isLootTarget == null)
+                        {
+                            if (Cache.Instance.ListofContainersToLoot.Contains(Id))
+                            {
+                                return true;
+                            }
+
+                            _isLootTarget = false;
+                            return _isLootTarget ?? false;
+                        }
+
+                        return _isLootTarget ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+        
+
         private bool? _isCurrentTarget;
 
         public bool IsCurrentTarget
@@ -1032,9 +1075,9 @@ namespace Questor.Modules.Caching
             }
         }
 
-        private bool? _isCurrentDroneTarget;
+        private bool? _isLastTargetPrimaryWeaponsWereShooting;
 
-        public bool IsCurrentDroneTarget
+        public bool IsLastTargetPrimaryWeaponsWereShooting
         {
             get
             {
@@ -1042,19 +1085,54 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (_isCurrentDroneTarget == null)
+                        if (_isLastTargetPrimaryWeaponsWereShooting == null)
                         {
-                            if (Id == Cache.Instance.LastDroneTargetID)
+                            if (Cache.Instance.LastTargetPrimaryWeaponsWereShooting != null && Id == Cache.Instance.LastTargetPrimaryWeaponsWereShooting.Id)
                             {
-                                _isCurrentDroneTarget = true;
-                                return _isCurrentDroneTarget ?? true;
+                                _isLastTargetPrimaryWeaponsWereShooting = true;
+                                return _isLastTargetPrimaryWeaponsWereShooting ?? true;
                             }
 
-                            _isCurrentDroneTarget = false;
-                            return _isCurrentDroneTarget ?? false;
+                            _isLastTargetPrimaryWeaponsWereShooting = false;
+                            return _isLastTargetPrimaryWeaponsWereShooting ?? false;
                         }
 
-                        return _isCurrentDroneTarget ?? false;
+                        return _isLastTargetPrimaryWeaponsWereShooting ?? false;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
+        private bool? _isLastTargetDronesWereShooting;
+
+        public bool IsLastTargetDronesWereShooting
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_isLastTargetDronesWereShooting == null)
+                        {
+                            if (Cache.Instance.LastDroneTargetID != null && Id == Cache.Instance.LastDroneTargetID)
+                            {
+                                _isLastTargetDronesWereShooting = true;
+                                return _isLastTargetDronesWereShooting ?? true;
+                            }
+
+                            _isLastTargetDronesWereShooting = false;
+                            return _isLastTargetDronesWereShooting ?? false;
+                        }
+
+                        return _isLastTargetDronesWereShooting ?? false;
                     }
 
                     return false;
@@ -1159,16 +1237,19 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
+                        //if it is in optimal, return true, we want to shoot things that are in optimal!
                         if (IsInOptimalRange)
                         {
                             return true;
                         }
 
-                        if (!Cache.Instance.Targets.Any())
+                        //Any targets which are not the current target and is not a wreck or container
+                        if (!Cache.Instance.Targets.Any(i => i.Id != Id && !i.IsContainer)) 
                         {
                             return true;
                         }
 
+                        //something else must be available to shoot, and this entity is not in optimal, return false;
                         return false;
                     }
 
@@ -1468,7 +1549,12 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        return _directEntity.IsEmpty;
+                        if (GroupId == (int)Group.Wreck)
+                        {
+                            return _directEntity.IsEmpty;    
+                        }
+
+                        return false;
                     }
 
                     return false;
@@ -3796,6 +3882,32 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsShipWithOreHold
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= TypeId == (int)TypeID.Venture;
+                        result |= GroupId == (int)Group.MiningBarge;
+                        result |= GroupId == (int)Group.Exhumer;
+                        result |= GroupId == (int)Group.IndustrialCommandShip; // Orca
+                        result |= GroupId == (int)Group.CapitalIndustrialShip; // Rorqual
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
         public bool IsShipWithNoDroneBay
         {
             get
@@ -4013,7 +4125,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Jump()
+        public bool Jump()
         {
             try
             {
@@ -4028,47 +4140,79 @@ namespace Questor.Modules.Caching
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
-                            Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
-                            _directEntity.Jump();
+                            if (Distance < 2500)
+                            {
+                                _directEntity.Jump();
+                                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
+                                Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                                Traveler._nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                return true;
+                            }
+
+                            Logging.Log("EntityCache.Jump", "we tried to jump through [" + Name + "] but it is [" + Math.Round(Distance / 1000, 2) + "k away][" + Cache.Instance.MaskedID(Id) + "]", Logging.White);
+                            return false;
                         }
+
+                        Logging.Log("EntityCache.Jump", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
+                        return false;
                     }
+
+                    Logging.Log("EntityCache.Jump", "We have not yet been in space for 2 seconds, waiting", Logging.White);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.Jump", "We still have [" + DateTime.UtcNow.Subtract(Cache.Instance.NextJumpAction) + "] seconds until we should jump again.", Logging.White);
+                return false;
+
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
 
-        public void Activate()
+        public bool Activate()
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextActivateAction)
+                if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
                 {
-                    if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                        if (bastionModules.Any(i => i.IsActive))
+                        {
+                            Logging.Log("EntityCache.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate Gate", Logging.Debug);
+                            return false;
+                        }
+
+                        _directEntity.Activate();
+                        Cache.Instance.LastInWarp = DateTime.UtcNow;
+                        Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                        return true;
                     }
 
-                    //we cant move in bastion mode, do not try
-                    List<ModuleCache> bastionModules = null;
-                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                    if (bastionModules.Any(i => i.IsActive))
-                    {
-                        Logging.Log("EntityCache.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate Gate", Logging.Debug);
-                        return;
-                    }
-
-                    _directEntity.Activate();
-                    Cache.Instance.LastInWarp = DateTime.UtcNow;
-                    Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                    Logging.Log("EntityCache.Activate", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.Activate", "You have another [" + Cache.Instance.NextActivateAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec before we should attempt to activate [" + Name + "], waiting.", Logging.Debug);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
 
@@ -4078,8 +4222,6 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Cache.Instance.Approaching = this;
-
                     if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4098,12 +4240,14 @@ namespace Questor.Modules.Caching
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
+                        Cache.Instance.Approaching = this;
                     }
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
@@ -4113,7 +4257,6 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    Cache.Instance.Approaching = this;
                     if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4132,6 +4275,7 @@ namespace Questor.Modules.Caching
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
+                        Cache.Instance.Approaching = this;
                         //_directEntity.Approach();
                     }
                 }
@@ -4139,6 +4283,7 @@ namespace Questor.Modules.Caching
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
@@ -4146,8 +4291,6 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                Cache.Instance.Approaching = this;
-
                 if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
                     if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
@@ -4167,15 +4310,17 @@ namespace Questor.Modules.Caching
                     Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
                     Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                     _directEntity.Orbit(range);
+                    Cache.Instance.Approaching = this;
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                Cache.Instance.Approaching = null;
             }
         }
 
-        public void WarpTo()
+        public bool WarpTo()
         {
             try
             {
@@ -4183,36 +4328,53 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        if (_directEntity != null && _directEntity.IsValid)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
                                 Logging.Log("EntityCache.WarpTo", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
-                            //we cant move in bastion mode, do not try
-                            List<ModuleCache> bastionModules = null;
-                            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                            if (bastionModules.Any(i => i.IsActive))
+                            if (Distance > (int) Distances.WarptoDistance)
                             {
-                                Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
-                                return;
+                                //we cant move in bastion mode, do not try
+                                List<ModuleCache> bastionModules = null;
+                                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                                if (bastionModules.Any(i => i.IsActive))
+                                {
+                                    Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
+                                    return false;
+                                }
+
+                                _directEntity.WarpTo();
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                                Cache.Instance.LastInWarp = DateTime.UtcNow;
+                                Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                                return true;    
                             }
 
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                            Cache.Instance.LastInWarp = DateTime.UtcNow;
-                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                            _directEntity.WarpTo();
+                            Logging.Log("EntityCache.WarpTo", "[" + Name + "] Distance [" + Math.Round(Distance / 1000, 0) + "k] is not greater then 150k away, WarpTo aborted!", Logging.Debug);
+                            return false;
                         }
+
+                        Logging.Log("EntityCache.WarpTo", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
+                        return false;
                     }
+
+                    Logging.Log("EntityCache.WarpTo", "We have not yet been in space at least 2 seconds, waiting", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.WarpTo", "Waiting [" + Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds + "] for next attempted warp.", Logging.Debug);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
-
+        
         public void AlignTo()
         {
             try
@@ -4237,12 +4399,12 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void WarpToAndDock()
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpAction)
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
                     {
@@ -4255,7 +4417,7 @@ namespace Questor.Modules.Caching
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.LastInWarp = DateTime.UtcNow;
-                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                            Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                             _directEntity.WarpToAndDock();
                         }
@@ -4267,7 +4429,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void Dock()
         {
             try
@@ -4278,10 +4440,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
+                            _directEntity.Dock();
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
-                            _directEntity.Dock();
-
                         }
                     }
                 }
@@ -4291,7 +4452,7 @@ namespace Questor.Modules.Caching
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
+        
         public void OpenCargo()
         {
             try

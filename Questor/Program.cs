@@ -49,6 +49,7 @@ namespace Questor
         private static bool _readyToStarta;
         private static bool _readyToStart;
         private static bool _humanInterventionRequired;
+        private static bool MissingEasyHookWarningGiven;
 
         static readonly System.Timers.Timer Timer = new System.Timers.Timer();
         private const int RandStartDelay = 30; //Random startup delay in minutes
@@ -91,11 +92,9 @@ namespace Questor
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
                 };
 
-            List<string> extra;
             try
             {
-                extra = p.Parse(args);
-
+                Logging._QuestorParamaters = p.Parse(args);
                 //Logging.Log(string.Format("questor: extra = {0}", string.Join(" ", extra.ToArray())));
             }
             catch (OptionException ex)
@@ -131,6 +130,7 @@ namespace Questor
             //
             if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character))
             {
+                Cache.Instance.ScheduleCharacterName = Logging._character;
                 LoginUsingScheduler();
             }
 
@@ -139,7 +139,18 @@ namespace Questor
             //
             if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
+                Cache.Instance.ScheduleCharacterName = Logging._character;
                 _readyToStart = true;
+            }
+
+
+            bool EasyHookExists = File.Exists(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EasyHook.dll"));
+            if (!EasyHookExists && !MissingEasyHookWarningGiven)
+            {
+                Logging.Log("Startup", "EasyHook DLL's are missing. Please copy them into the same directory as your questor.exe", Logging.Orange);
+                Logging.Log("Startup", "halting!", Logging.Orange);
+                MissingEasyHookWarningGiven = true;
+                return;
             }
 
             #region Load DirectEVE
@@ -152,7 +163,7 @@ namespace Questor
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
@@ -263,6 +274,7 @@ namespace Questor
         {
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             Logging._character = Logging._character.Replace("\"", "");  // strip quotation marks if any are present
+                   
 
             CharSchedules = new List<CharSchedule>();
             if (path != null)
@@ -414,6 +426,15 @@ namespace Questor
 
             Cache.Instance.LastFrame = DateTime.UtcNow;
             Cache.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
+
+            //if (Cache.Instance.SessionState != "Quitting")
+            //{
+            //    // Update settings (settings only load if character name changed)
+            //    if (!Settings.Instance.DefaultSettingsLoaded)
+            //    {
+            //        Settings.Instance.LoadSettings();
+            //    }
+            //}
 
             if (DateTime.UtcNow < _nextPulse)
             {
@@ -694,9 +715,10 @@ namespace Questor
             {
                 if (!Cache.Instance.DirectEve.HasSupportInstances())
                 {
-                    Logging.Log("Startup", "DirectEVE Requires Active Support Instances to use the convenient like Auto-Login, Market Functions (Valuedump and Market involving storylines) among other features.", Logging.White);
+                    Logging.Log("Startup", "DirectEVE Requires Active Support Instances to use the convenient like Auto-Login, Market Functions (ValueDump and Market involving storylines) among other features.", Logging.White);
                     Logging.Log("Startup", "Make sure you have support instances and that you have downloaded your directeve.lic file and placed it in the .net programs folder with your directeve.dll", Logging.White);
                     _humanInterventionRequired = true;
+                    return;
                 }
 
                 if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)

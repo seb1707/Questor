@@ -16,10 +16,10 @@ namespace Questor.Modules.Lookup
         {
             get { return _instance; }
         }
-        public int LootingDelay_milliseconds = 800;                        // Delay between loot attempts
+        public int LootingDelay_milliseconds = 800;                         // Delay between loot attempts
         public int WarpScrambledNoDelay_seconds = 10;                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
         public int RemoveBookmarkDelay_seconds = 5;                         // Delay between each removal of a bookmark
-        public int QuestorPulse_milliseconds = 1000;                        // Used to delay the next pulse, units: milliseconds. Default is 1500
+        public int QuestorPulse_milliseconds = 600;                         // Used to delay the next pulse, units: milliseconds. Default is 1500
         public int DefenceDelay_milliseconds = 1500;                        // Delay between defence actions
         public int AfterburnerDelay_milliseconds = 3500;                    //
         public int RepModuleDelay_milliseconds = 2500;                      //
@@ -49,7 +49,7 @@ namespace Questor.Modules.Lookup
         public int FittingWindowLoadFittingDelay_seconds = 7;               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
         public int WaitforItemstoMove_seconds = 1;                          // Arm state: wait for items to move, units: seconds. Default is 5
         public int CheckLocalDelay_seconds = 5;                             // Local Check for bad standings pilots, delay between checks, units: seconds. Default is 5
-        public int ReloadWeaponDelayBeforeUsable_seconds = 17;              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 22
+        public int ReloadWeaponDelayBeforeUsable_seconds = 12;              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 12
         public int BookmarkPocketRetryDelay_seconds = 20;                   // When checking to see if a bookmark needs to be made in a pocket for after mission salvaging this is the delay between retries, units: seconds. Default is 20
         public int NoGateFoundRetryDelay_seconds = 30;                      // no gate found on grid when executing the activate action, wait this long to see if it appears (lag), units: seconds. Default is 30
         public int AlignDelay_minutes = 2;                                  // Delay between the last align command and the next, units: minutes. Default is 2
@@ -78,7 +78,9 @@ namespace Questor.Modules.Lookup
         public int SkillTrainerPulse_milliseconds = 800;
         public int LoginDelayMinimum_seconds = 15;
         public int LoginDelayMaximum_seconds = 25;
-        public int ReLogDelayMinimum_seconds = 35;                    //DO NOT set this lower than 20 or so seconds!
-        public int ReLogDelayMaximum_seconds = 60;                    
+        public int ReLogDelayMinimum_seconds = 35;                          //DO NOT set this lower than 20 or so seconds!
+        public int ReLogDelayMaximum_seconds = 60;
+        public int RecallDronesDelayBetweenRetries = 15;                    //Time between recall commands for drones when attempting to pull drones
+        public int EnforcedDelayBetweenArbitraryAmmoChanges = 60;           //do not allow changing ammo before this # of seconds, default is 60.
     }
 }

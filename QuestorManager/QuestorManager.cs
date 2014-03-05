@@ -20,9 +20,13 @@ namespace QuestorManager
         [STAThread]
         private static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new QuestorManagerUI());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new QuestorManagerUI());
+            }
+            catch (Exception) { }
         }
     }
 }

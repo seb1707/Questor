@@ -518,7 +518,7 @@ namespace Questor.Modules.Actions
                 }
 
                 //
-                // what happens here if we have a sell window that is not a quicksell window? wont this hang?
+                // what happens here if we have a sell window that is not a quick sell window? wont this hang?
                 //
 
                 //

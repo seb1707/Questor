@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Diagnostics.Eventing.Reader;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -19,39 +21,22 @@ namespace Questor.Modules.Caching
     public class ModuleCache
     {
         private readonly DirectModule _module;
-        private double _reloadTimeThisMission;
-        private DateTime _activatedTimeStamp;
-
+        
+        private DateTime ThisModuleCacheCreated = DateTime.UtcNow;
         public ModuleCache(DirectModule module, double reloadTimeThisMission = 0, DateTime activatedTimeStamp = default(DateTime))
         {
             _module = module;
-            _reloadTimeThisMission = reloadTimeThisMission;
-            _activatedTimeStamp = activatedTimeStamp;
-        }
-
-        public double ReloadTimeThisMission
-        {
-            get { return _reloadTimeThisMission; }
-            set
-            {
-                _reloadTimeThisMission = value;
-                return;
-            }
-        }
-
-        public DateTime ActivatedTimeStamp
-        {
-            get { return _activatedTimeStamp; }
-            set
-            {
-                _activatedTimeStamp = value;
-                return;
-            }
+            ThisModuleCacheCreated = DateTime.UtcNow;
         }
 
         public int TypeId
         {
             get { return _module.TypeId; }
+        }
+
+        public string TypeName
+        {
+            get { return _module.TypeName; }
         }
 
         public int GroupId
@@ -188,7 +173,29 @@ namespace Questor.Modules.Caching
 
         public bool IsReloadingAmmo
         {
-            get { return _module.IsReloadingAmmo; }
+            get
+            {
+                int reloadDelayToUseForThisWeapon;
+                if (IsEnergyWeapon)
+                {
+                    reloadDelayToUseForThisWeapon = 1;
+                }
+                else
+                {
+                    reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                }
+
+                if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+                {
+                    if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    {
+                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public bool IsDeactivating
@@ -198,7 +205,29 @@ namespace Questor.Modules.Caching
 
         public bool IsChangingAmmo
         {
-            get { return _module.IsChangingAmmo; }
+            get
+            {
+                int reloadDelayToUseForThisWeapon;
+                if (IsEnergyWeapon)
+                {
+                    reloadDelayToUseForThisWeapon = 1;
+                }
+                else
+                {
+                    reloadDelayToUseForThisWeapon = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+                }
+
+                if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
+                {
+                    if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
+                    {
+                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public bool IsTurret
@@ -281,14 +310,45 @@ namespace Questor.Modules.Caching
             get { return _module.OptimalRange ?? 0; }
         }
 
-        public void ReloadAmmo(DirectItem charge)
+        public void ReloadAmmo(DirectItem charge, int weaponNumber, double Range)
         {
+            if (IsReloadingAmmo || IsChangingAmmo)
+            {
+                return;
+            }
+            
+            Logging.Log("Combat", "Reloading [" + weaponNumber + "] [" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "]", Logging.Teal);
             _module.ReloadAmmo(charge);
+            Cache.Instance.LastReloadedTimeStamp[ItemId] = DateTime.UtcNow;
+            if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;    
+            }
+            else
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+            }
         }
 
-        public void ChangeAmmo(DirectItem charge)
+        public void ChangeAmmo(DirectItem charge, int weaponNumber, double Range, String entityName = "n/a", Double entityDistance = 0)
         {
+
+            if (IsReloadingAmmo || IsChangingAmmo)
+            {
+                return;
+            }
+            
+            Logging.Log("Combat", "Changing [" + weaponNumber + "][" + _module.TypeName + "] with [" + charge.TypeName + "][" + Math.Round(Range / 1000, 0) + "] so we can hit [" + entityName + "][" + Math.Round(entityDistance / 1000, 0) + "k]", Logging.Teal);    
             _module.ChangeAmmo(charge);
+            Cache.Instance.LastChangedAmmoTimeStamp[ItemId] = DateTime.UtcNow;
+            if (Cache.Instance.ReloadTimePerModule.ContainsKey(ItemId))
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Cache.Instance.ReloadTimePerModule[ItemId] + Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+            }
+            else
+            {
+                Cache.Instance.ReloadTimePerModule[ItemId] = Time.Instance.ReloadWeaponDelayBeforeUsable_seconds;
+            }
         }
 
         public bool InLimboState
@@ -309,30 +369,66 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Click()
+        private int ClickCountThisFrame = 0;
+        public bool Click()
         {
-            if (InLimboState)
-                return;
+            if (InLimboState || ClickCountThisFrame > 0)
+                return false;
 
-            _module.Click();
+            ClickCountThisFrame++;
+
+            if (IsActivatable)
+            {
+                if (!IsActive) //it is not yet active, this click should activate it.
+                {
+                    Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                }
+            }
+            
+            return _module.Click();
         }
 
         public void Activate()
         {
-            if (InLimboState || IsActive)
+            if (InLimboState || IsActive || ActivateCountThisFrame > 0)
                 return;
+
+            ActivateCountThisFrame++;
 
             _module.Activate();
         }
 
-        public void Activate(long entityId)
-        {
-            if (InLimboState || IsActive)
-                return;
+        private int ActivateCountThisFrame = 0;
 
+        public bool Activate(long entityId)
+        {
+            if (InLimboState || IsActive || ActivateCountThisFrame > 0)
+                return false;
+
+            ActivateCountThisFrame++;
+
+            if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+            {
+                if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                    return false;
+                }    
+            }
+
+            if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
+            {
+                if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                {
+                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                    return false;
+                }    
+            }
+            
             _module.Activate(entityId);
-            ActivatedTimeStamp = DateTime.UtcNow;
+            Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
             Cache.Instance.LastModuleTargetIDs[ItemId] = entityId;
+            return true;
         }
 
         public void Deactivate()

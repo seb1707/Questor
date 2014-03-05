@@ -5,6 +5,7 @@
   <!--                                                -->
   
   <debugActivateGate>false</debugActivateGate>
+  <debugActivateBastion>false</debugActivateBastion>
   <debugActivateWeapons>false</debugActivateWeapons>
   <debugAddDronePriorityTarget>false</debugAddDronePriorityTarget>
   <debugAddPrimaryWeaponPriorityTarget>false</debugAddPrimaryWeaponPriorityTarget>
@@ -83,6 +84,7 @@
   <useInnerspace>true</useInnerspace>
   <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
   <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
+  <eveServername>Tranquility</eveServername> <!-- the US server is Tranquility, the CN server is Serenity, this is used for localization purposes -->
   
   <!--                                                -->
   <!--          MISC SETTINGS          -->
@@ -123,6 +125,7 @@
   
   <!-- EnableStoryLines is either true or false and enables questor to run storyline missions -->
   <enableStorylines>false</enableStorylines><!-- default is false -->
+  <declineStorylinesInsteadofBlacklistingfortheSession>false</declineStorylinesInsteadofBlacklistingfortheSession> <!-- by default questor will blacklist storylines for the session if for any reason AgentInteraction wants to decline a storyline. This setting allow one to actually decline storylines so they are removed from the journal when this occurs-->
   <MaterialsForWarOreID>20</MaterialsForWarOreID>
   <MaterialsForWarOreQty>8000</MaterialsForWarOreQty>
   <!-- UseLocalWatch is either true or false and is a feature to look at the CORP standings of OTHER corps that you have manually set in your OWN corp then decides to not leave station or run back home -->
@@ -130,7 +133,7 @@
   <!-- UseFittingManager is either true of false and allows questor to use the IN GAME EVE fitting manager to change your fits per faction/mission -->
   <UseFittingManager>true</UseFittingManager><!-- default is true -->
   <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
-  <WatchForActiveWars>true</WatchForActiveWars><!-- default is true -->
+  <watchForActiveWars>true</watchForActiveWars><!-- default is true -->
   
   <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will seach for and travel to the master (if any)-->
   <fleetSupportSlave>false</fleetSupportSlave>
@@ -224,9 +227,7 @@
 
   <!-- Create salvage bookmarks once a pocket has been cleared and there are wrecks/cans left
        Note: All salvage bookmarks will be in this naming format:  BookmarkPrefix [time]
-       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked 
-       Warning: The bot could become slow with a lot of salvage-bookmarks, make sure that
-       after mission salvaging is enabled or that you manually delete bookmarks! -->
+       Note: It will check all salvage bookmarks to see if the current spot has to be bookmarked -->
   <createSalvageBookmarks>True</createSalvageBookmarks><!-- default is true -->
   <!-- CreateSalvageBookmarksIn is used for salvaging, Player is only needed for non-dedicated, and Corp is used for dedicated (character mode: dps is non-dedicated, salvage is -->
   <createSalvageBookmarksIn>Player</createSalvageBookmarksIn><!-- default is "Player", other option is "Corp" -->
@@ -284,7 +285,7 @@
   <!-- EVE PROCESS AND WALLET SETTINGS -->
   <!--                                                                 -->
 
-  <!-- walletbalancechangelogoffdelay: If your characters wallet ballance does not change within this many minutes exit eve, the assumption is your toon is stuck or disconnected -->
+  <!-- walletbalancechangelogoffdelay: If your characters wallet balance does not change within this many minutes exit eve, the assumption is your toon is stuck or disconnected -->
   <walletbalancechangelogoffdelay>40</walletbalancechangelogoffdelay><!-- default is 40 -->
   <!-- EVEProcessMemoryCieling: If this instance of EVE consumes more than the stated MB of Memory close eve when in station between missions-->
   <EVEProcessMemoryCeiling>1150</EVEProcessMemoryCeiling><!-- default is 1150-->
@@ -332,11 +333,11 @@
   <MissionStats1Log>true</MissionStats1Log><!-- default is: true -->
   <!-- Enable of Disable the MissionStats2Log: more verbose that MissionStats1Log -->
   <MissionStats2Log>true</MissionStats2Log><!-- default is: true -->
-  <!-- Enable of Disable the MissionStats3Log: most verbose and is in csv format that can be opened in excel for sorting and beancounting -->
+  <!-- Enable of Disable the MissionStats3Log: most verbose and is in csv format that can be opened in excel for sorting and bean counting -->
   <MissionStats3Log>true</MissionStats3Log><!-- default is: true -->
-  <!-- Enable of Disable the PocketStatistics logs: each and every pocket of missions will generate a seperate log with completion times and other statistics for your XML tuning pleasure -->
+  <!-- Enable of Disable the PocketStatistics logs: each and every pocket of missions will generate a separate log with completion times and other statistics for your XML tuning pleasure -->
   <PocketStatistics>true</PocketStatistics><!-- default is: true -->
-  <!-- Enable of Disable the PocketObjectsStatistics logs: each and every pocket of missions will generate a seperate log with the Entity information for the 1st spawn and other static objects on grid for your XML tuning pleasure -->
+  <!-- Enable of Disable the PocketObjectsStatistics logs: each and every pocket of missions will generate a separate log with the Entity information for the 1st spawn and other static objects on grid for your XML tuning pleasure -->
   <PocketObjectStatisticsLog>true</PocketObjectStatisticsLog>
 
   <!--                                                -->
@@ -374,7 +375,7 @@
   <minimumAmmoCharges>6</minimumAmmoCharges>
   <!-- Amount of cap booster you want to carry with you, when using a cap injector in fitting-->
   <capacitorInjectorToLoad>15</capacitorInjectorToLoad>
-  <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasors, NOT the Ammo, *the weapon*) -->
+  <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasers, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
 
   <!--  BOTH distance and speed have to be met before the NPC Frigate will be removed from the PrimaryWeapons PriorityTarget List... (under the distance, over the speed) -->
@@ -388,11 +389,11 @@
   <!--                                                                            -->  
   <!--  E-War PrimaryWeapon PriorityTarget Options--> 
   <!--                                                                            -->  
-  <!-- Use PrimaryWeapons on Targets that use Sensor Dampners, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use PrimaryWeapons on Targets that use Sensor Dampeners, if you do not want to make them a primary weapons priority, set this to false. -->
   <addDampenersToPrimaryWeaponsPriorityTargetList>true</addDampenersToPrimaryWeaponsPriorityTargetList>
   <!-- Use PrimaryWeapons on Targets that use ECMs, if you do not want to make them a primary weapons priority, set this to false. -->
   <addECMsToPrimaryWeaponsPriorityTargetList>true</addECMsToPrimaryWeaponsPriorityTargetList>
-  <!-- Use PrimaryWeapons on Targets that use Neutralizers, if you do not want to make them a primary weapons priority, set this to false. -->
+  <!-- Use PrimaryWeapons on Targets that use Neuts, if you do not want to make them a primary weapons priority, set this to false. -->
   <addNeutralizersToPrimaryWeaponsPriorityTargetList>true</addNeutralizersToPrimaryWeaponsPriorityTargetList>
   <!-- Use PrimaryWeapons on Targets that use Target Painters, if you do not want to make them a primary weapons priority, set this to false. -->
   <addTargetPaintersToPrimaryWeaponsPriorityTargetList>true</addTargetPaintersToPrimaryWeaponsPriorityTargetList>
@@ -406,11 +407,11 @@
   <!--                                                                            -->  
   <!--  E-War Drone PriorityTarget Options--> 
   <!--                                                                            -->  
-  <!-- Use Drones on Targets that use Sensor Dampners, if you do not want to make them a DronePriorityTarget, set this to false. -->
+  <!-- Use Drones on Targets that use Sensor Dampeners, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addDampenersToDronePriorityTargetList>true</addDampenersToDronePriorityTargetList>
   <!-- Use Drones on Targets that use ECMs, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addECMsToDroneTargetList>true</addECMsToDroneTargetList>
-  <!-- Use Drones on Targets that use Neutralizers, if you do not want to make them a DronePriorityTarget, set this to false. -->
+  <!-- Use Drones on Targets that use Neuts, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addNeutralizersToDronePriorityTargetList>true</addNeutralizersToDronePriorityTargetList>
   <!-- Use Drones on Targets that use Target Painters, if you do not want to make them a DronePriorityTarget, set this to false. -->
   <addTargetPaintersToDronePriorityTargetList>true</addTargetPaintersToDronePriorityTargetList>
@@ -442,8 +443,8 @@
   <!-- 29005 Optimal Range Disruption Script  // tracking disruptor                          -->
   <!-- 29011 Scan Resolution Script           // sensor booster                              -->
   <!-- 29009 Targeting Range Script           // sensor booster                              -->
-  <!-- 29015 Targeting Range Dampening Script // sensor dampner                              -->
-  <!-- 29013 Scan Resolution Dampening Script // sensor dampner                              -->
+  <!-- 29015 Targeting Range Dampening Script // sensor dampener                              -->
+  <!-- 29013 Scan Resolution Dampening Script // sensor dampener                              -->
   <!-- 29001 Tracking Speed Script            // tracking enhancer and tracking computer     -->
   <!-- 28999 Optimal Range Script             // tracking enhancer and tracking computer     -->
 
@@ -473,7 +474,7 @@
   <!--      MOVEMENT SETTINGS    -->
   <!--                                                -->
 
-  <!-- in missions while moving and when traveling attempt to avoid being too close to certain objects by orbiting those objects to get way from them if needed -->
+  <!-- in missions while moving and when travelling attempt to avoid being too close to certain objects by orbiting those objects to get way from them if needed -->
   <avoidBumpingThings>true</avoidBumpingThings>
   <!-- When SpeedTank is enabled, Combat-module will try to orbit ships at orbitDistance -->
   <speedTank>false</speedTank>
@@ -576,7 +577,7 @@
   <!-- SKILL TRAINING SETTINGS       -->
   <!--                                                        -->
   <!-- If there is another toon on this account training at the moment this should be false -->
-  <thisToonShouldBeTrainingSkills>true</thisToonShouldBeTrainingSkills>
+  <thisToonShouldBeTrainingSkills>false</thisToonShouldBeTrainingSkills>
 
   <!--                                                          -->
   <!-- MISSION BLACKLIST SETTINGS  -->

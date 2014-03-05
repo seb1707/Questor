@@ -156,7 +156,7 @@ namespace Questor.Behaviors
             }
 
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //this local is safe check is useless as their is no localwatch processstate running every tick...
+            //this local is safe check is useless as their is no LocalWatch processstate running every tick...
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //If local unsafe go to base and do not start mission again
             if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentDirectionalScannerBehaviorState != DirectionalScannerBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
@@ -164,7 +164,12 @@ namespace Questor.Behaviors
                 //need to remove spam
                 if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    }
+
                     if (station != null)
                     {
                         Logging.Log("Local not safe", "Station found. Going to nearest station", Logging.White);
@@ -239,11 +244,30 @@ namespace Questor.Behaviors
 
                     if (Cache.Instance.StopBot)
                     {
-                        if (Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "if (Cache.Instance.StopBot)", Logging.White);
+                        //
+                        // this is used by the 'local is safe' routines - standings checks - at the moment is stops questor for the rest of the session.
+                        //
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
                         return;
                     }
 
-                    if (Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "if (Cache.Instance.InSpace) else", Logging.White);
+                    if (Cache.Instance.InSpace)
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
+
+                        // Questor does not handle in space starts very well, head back to base to try again
+                        Logging.Log("DirectionalScannerBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
+                        LastAction = DateTime.UtcNow;
+                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.DelayedGotoBase;
+                        break;
+                    }
+                    
+                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    {
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
+                    }
+
                     _States.CurrentArmState = ArmState.Idle;
                     _States.CurrentDroneState = DroneState.Idle;
                     _States.CurrentSalvageState = SalvageState.Idle;
@@ -260,7 +284,7 @@ namespace Questor.Behaviors
                         break;
 
                     Logging.Log("DirectionalScannerBehavior", "Heading back to base", Logging.White);
-                    if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.DelayedGotoBase) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.GotoBase;
+                    _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.GotoBase;
                     break;
 
                 case DirectionalScannerBehaviorState.GotoBase:
@@ -277,9 +301,7 @@ namespace Questor.Behaviors
                         if (Settings.Instance.DebugGotobase) Logging.Log("DirectionalScannerBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
                         Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentID, false);
-
-                        if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.GotoBase) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
-
+                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
                         Traveler.Destination = null;
                     }
                     break;
@@ -292,7 +314,7 @@ namespace Questor.Behaviors
                         // happens if autopilot is not set and this QuestorState is chosen manually
                         // this also happens when we get to destination (!?)
                         Logging.Log("DirectionalScannerBehavior.Traveler", "No destination?", Logging.White);
-                        if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Traveler) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
+                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
                         return;
                     }
 
@@ -322,22 +344,19 @@ namespace Questor.Behaviors
                             if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                             {
                                 Logging.Log("DirectionalScannerBehavior.Traveler", "an error has occurred", Logging.White);
-                                if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Traveler)
-                                {
-                                    _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
-                                }
+                                _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
                                 return;
                             }
 
                             if (Cache.Instance.InSpace)
                             {
                                 Logging.Log("DirectionalScannerBehavior.Traveler", "Arrived at destination (in space, Questor stopped)", Logging.White);
-                                if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Traveler) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
+                                _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error;
                                 return;
                             }
 
                             Logging.Log("DirectionalScannerBehavior.Traveler", "Arrived at destination", Logging.White);
-                            if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.Traveler) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                            _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
                             return;
                         }
                     }
@@ -345,14 +364,23 @@ namespace Questor.Behaviors
 
                 case DirectionalScannerBehaviorState.GotoNearestStation:
                     if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    EntityCache station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();
+                    EntityCache station = null;
+                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
+                    {
+                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();    
+                    }
+
                     if (station != null)
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpTo();
-                            if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.GotoNearestStation) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                            if (station.WarpTo())
+                            {
+                                Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                                break;
+                            }
+                            
                             break;
                         }
 
@@ -375,8 +403,9 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (_States.CurrentDirectionalScannerBehaviorState == DirectionalScannerBehaviorState.GotoNearestStation) _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error; //should we goto idle here?
+                        _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Error; //should we goto idle here?
                     }
+
                     break;
 
                 case DirectionalScannerBehaviorState.PVPDirectionalScanHalfanAU:

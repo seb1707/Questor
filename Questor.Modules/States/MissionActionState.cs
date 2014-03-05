@@ -25,6 +25,7 @@ namespace Questor.Modules.States
         AggroOnly,
         AddWarpScramblerByName,
         AddWebifierByName,
+        AddEcmNpcByName,
         Kill,
         KillOnce,
         UseDrones,

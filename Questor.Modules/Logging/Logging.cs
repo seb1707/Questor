@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Questor.Modules.Logging
@@ -18,7 +19,6 @@ namespace Questor.Modules.Logging
     using System.Windows.Forms;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
-    //using Questor.Modules.States;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 
@@ -69,6 +69,7 @@ namespace Questor.Modules.Logging
         public static string _username;
         public static string _password;
         public static string _character;
+        public static List<string> _QuestorParamaters;
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
@@ -84,10 +85,15 @@ namespace Questor.Modules.Logging
 
             //}
 
+            //colorLogLine contains color and is for the InnerSpace console
             string colorLogLine = line;
 
-            //colorLogLine contains color and is for the InnerSpace console
-            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));                            //Innerspace Console Log
+            //Logging when using Innerspace
+            //if (Cache.Instance.UseInnerspace || Settings.Instance.UseInnerspace)
+            //{
+                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+            //}
+           
             string plainLogLine = FilterColorsFromLogs(line);
 
             //
@@ -105,7 +111,7 @@ namespace Questor.Modules.Logging
                     {
                         module = "Logging";
                         line = "Writing to Daily Console Log ";
-                        if (Settings.Instance.InnerspaceGeneratedConsoleLog)
+                        if (Settings.Instance.InnerspaceGeneratedConsoleLog && Settings.Instance.UseInnerspace)
                         {
                             InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
                             LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
@@ -123,14 +129,14 @@ namespace Questor.Modules.Logging
                             }
                             else
                             {
-                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
+                                if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
                             }
                             line = "";
                         }
                         else
                         {
                             line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
+                            if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
                             Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                         }
                     }

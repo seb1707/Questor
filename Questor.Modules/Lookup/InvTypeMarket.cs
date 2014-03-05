@@ -4,8 +4,6 @@ using System.Xml.Linq;
 using System.Globalization;
 using Questor.Modules.Caching;
 
-//using Valuedump;
-
 namespace Questor.Modules.Lookup
 {
     public class InvTypeMarket

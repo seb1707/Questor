@@ -46,10 +46,8 @@ namespace QuestorManager
 
         private object _previousDestination;
         private int _previousJumps;
-        private List<DirectSolarSystem> _solarSystems;
         private List<DirectStation> _stations;
         private List<DirectBookmark> _bookmarks;
-
         private List<ListItems> List { get; set; }
 
         public List<ItemCache> Items { get; set; }
@@ -110,7 +108,7 @@ namespace QuestorManager
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
-                    // DE now has cloaking enabled using EasyHook, see forums or IRC for more info, you should use it!
+                    // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
                     // 
                     //
                     //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
@@ -179,33 +177,26 @@ namespace QuestorManager
             RefreshAvailableXMLJobs();
             Cache.Instance.DirectEve.OnFrame += OnFrame;
 
-            //if (Settings.Instance.UseInnerspace)
-            //{
-            LavishScript.Commands.AddCommand("QMStart", StartProcessing);
-            //LavishScript.Commands.AddCommand("SetQuestorManagertoIdle", SetQuestorManagertoIdle);
-            LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
-            //}
+            if (Settings.Instance.UseInnerspace)
+            {
+                LavishScript.Commands.AddCommand("QMStart", StartProcessing);
+                LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
+            }
         }
 
         private void InitializeTraveler()
         {
-            if (_solarSystems == null)
-            {
-                _solarSystems = Cache.Instance.DirectEve.SolarSystems.Values.OrderBy(s => s.Name).ToList();
-                _changed = true;
-            }
-
             if (_stations == null)
             {
                 _stations = Cache.Instance.DirectEve.Stations.Values.OrderBy(s => s.Name).ToList();
                 _changed = true;
             }
 
-            if (_bookmarks == null)
+            if (_bookmarks == null || !_bookmarks.Any())
             {
                 // Dirty hack to load all category id's (needed because categoryId is lazy-loaded by the bookmarks call)
-                Cache.Instance.AllBookmarks.All(b => b.CategoryId != 0);
-                _bookmarks = Cache.Instance.AllBookmarks.OrderBy(b => b.Title).ToList();
+                Cache.Instance.DirectEve.Bookmarks.All(b => b.CategoryId != 0);
+                _bookmarks = Cache.Instance.DirectEve.Bookmarks.OrderBy(b => b.Title).ToList();
                 _changed = true;
             }
         }
@@ -699,12 +690,7 @@ namespace QuestorManager
                 return;
             }
         }
-
-        private void RefreshBookmarksClick(object sender, EventArgs e)
-        {
-            _bookmarks = null;
-        }
-
+        
         private ListViewItem[] Filter<T>(IEnumerable<string> search, IEnumerable<T> list, Func<T, string> getTitle, Func<T, string> getType)
         {
             if (list == null)
@@ -767,23 +753,44 @@ namespace QuestorManager
             {
                 return;
             }
+
             _changed = false;
-
-            string[] search = SearchTextBox.Text.Split(' ');
-
-            SearchResults.BeginUpdate();
+            
             try
             {
-                SearchResults.Items.Clear();
-                SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
-                SearchResults.Items.AddRange(Filter(search, _solarSystems, s => s.Name, b => "Solar System"));
-                SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
-
-                // Automatically select the only item
-                if (SearchResults.Items.Count == 1)
+                if ((_bookmarks != null && _bookmarks.Any())
+                    || (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
+                    || (_stations != null && _stations.Any()))
                 {
-                    SearchResults.Items[0].Selected = true;
+                    string[] search = SearchTextBox.Text.Split(' ');
+                    SearchResults.BeginUpdate();
+                    SearchResults.Items.Clear();
+
+                    if (_bookmarks != null && _bookmarks.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, _bookmarks, b => b.Title, b => "Bookmark (" + ((CategoryID)b.CategoryId) + ")"));
+                    }
+
+                    if (Cache.Instance.SolarSystems != null && Cache.Instance.SolarSystems.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, Cache.Instance.SolarSystems, s => s.Name, b => "Solar System"));
+                    }
+
+                    if (_stations != null && _stations.Any())
+                    {
+                        SearchResults.Items.AddRange(Filter(search, _stations, s => s.Name, b => "Station"));
+                    }
+
+                    // Automatically select the only item
+                    if (SearchResults.Items.Count == 1)
+                    {
+                        SearchResults.Items[0].Selected = true;
+                    }
                 }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.UpdateSearchResultsTick", "Exception [" + exception + "]", Logging.Debug);
             }
             finally
             {
@@ -820,12 +827,40 @@ namespace QuestorManager
 
         private void BttnAddTraveler_Click(object sender, EventArgs e)
         {
-            ListViewItem listItem = new ListViewItem("QuestorManager");
-            listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
-            listItem.Tag = SearchResults.SelectedItems[0].Tag;
-            listItem.SubItems.Add(" ");
-            listItem.SubItems.Add(" ");
-            LstTask.Items.Add(listItem);
+            try
+            {
+                //if (SearchResults != null && SearchResults.Items.Count > 0)
+                //{
+                
+                //if (SearchResults != null && SearchResults.Items[0] != null)
+                //{
+                    if (SearchResults.SelectedItems[0] != null)
+                    {
+                        if (SearchResults.SelectedItems.Count > 0)
+                        {
+                            ListViewItem listItem = new ListViewItem("QuestorManager");
+                            listItem.SubItems.Add(SearchResults.SelectedItems[0].Text);
+                            listItem.Tag = SearchResults.SelectedItems[0].Tag;
+                            listItem.SubItems.Add(" ");
+                            listItem.SubItems.Add(" ");
+                            LstTask.Items.Add(listItem);
+                        }
+                        else
+                        {
+                            Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems is 0", Logging.Debug);
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems[0] is null", Logging.Debug);
+                    }    
+                //}
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("QuestorManager", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("QuestorManager", "Is this exception timing based?", Logging.Debug);
+            }
         }
 
         private void BttnTaskForItemClick1(object sender, EventArgs e)
@@ -1195,7 +1230,7 @@ namespace QuestorManager
             }
             else if (_extrDestination == null)
             {
-                foreach (DirectSolarSystem item in _solarSystems)
+                foreach (DirectSolarSystem item in Cache.Instance.SolarSystems)
                 {
                     if (nameDestination == item.Name)
                     {

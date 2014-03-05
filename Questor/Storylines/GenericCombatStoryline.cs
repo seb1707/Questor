@@ -197,18 +197,17 @@ namespace Questor.Storylines
             switch (_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
-                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (warpOutBookMark == null)
                     {
                         Logging.Log("GenericCombatStoryline.WarpOut", "No Bookmark", Logging.Orange);
-                        if (_state == GenericCombatStorylineState.WarpOutStation)
-                        {
-                            _state = GenericCombatStorylineState.GotoMission;
-                        }
+                        _state = GenericCombatStorylineState.GotoMission;
+                        break;
                     }
-                    else if (warpOutBookMark.LocationId == solarid)
+
+                    if (warpOutBookMark.LocationId == solarid)
                     {
                         if (Traveler.Destination == null)
                         {
@@ -222,21 +221,16 @@ namespace Questor.Storylines
                         {
                             Logging.Log("GenericCombatStoryline.WarpOut", "Safe!", Logging.White);
                             Cache.Instance.DoNotBreakInvul = false;
-                            if (_state == GenericCombatStorylineState.WarpOutStation)
-                            {
-                                _state = GenericCombatStorylineState.GotoMission;
-                            }
-                            Traveler.Destination = null;
-                        }
-                    }
-                    else
-                    {
-                        Logging.Log("GenericCombatStoryline.WarpOut", "o Bookmark in System", Logging.White);
-                        if (_state == GenericCombatStorylineState.WarpOutStation)
-                        {
                             _state = GenericCombatStorylineState.GotoMission;
+                            Traveler.Destination = null;
+                            break;
                         }
+
+                        break;
                     }
+                    
+                    Logging.Log("GenericCombatStoryline.WarpOut", "No Bookmark in System", Logging.White);
+                    _state = GenericCombatStorylineState.GotoMission;
                     break;
 
                 case GenericCombatStorylineState.GotoMission:
@@ -248,7 +242,10 @@ namespace Questor.Storylines
                     //if (missionDestination == null) Logging.Log("GenericCombatStoryline: missionDestination.AgentId [ NULL ] " + "and storyline.CurrentStorylineAgentId [" + storyline.CurrentStorylineAgentId + "]");
                     if (missionDestination == null || missionDestination.AgentId != Cache.Instance.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
-                        const string nameOfBookmark = "Encounter";
+                        string nameOfBookmark ="";
+                        if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+                        if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+                        if (nameOfBookmark == "") nameOfBookmark = "Encounter";
                         Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + Cache.Instance.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.White);
                         Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
                     }

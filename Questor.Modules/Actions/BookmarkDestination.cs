@@ -151,10 +151,13 @@ namespace Questor.Modules.Actions
                 Logging.Log("QuestorManager.BookmarkDestination", "Bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][" + Logging.Yellow + Math.Round((distance / 1000) / 149598000, 2) + Logging.White + "] AU away. Which is [" + Logging.Yellow + Math.Round((distance / 1000), 2) + Logging.White + "].", Logging.White);
             }
 
-            Logging.Log("QuestorManager.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "]", Logging.White);
-
-            bookmark.WarpTo();
-            nextAction = DateTime.UtcNow.AddSeconds(30);
+            if (bookmark.WarpTo())
+            {
+                Logging.Log("QuestorManager.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.White + "][" + Math.Round((distance / 1000) / 149598000, 2) + "] AU away. Which is [" + Math.Round((distance / 1000), 2) + "]", Logging.White);
+                nextAction = DateTime.UtcNow.AddSeconds(30);
+                return false;
+            }
+            
             return false;
         }
     }

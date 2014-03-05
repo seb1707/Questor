@@ -48,6 +48,16 @@ namespace Questor.Modules.Lookup
         //Caldari Rookie Ship
         //Gallente Rookie Ship
         Tengu = 29984,
+        Venture = 32880,   //groupID 25 (frigate)
+        Procurer = 17480,  //groupID 463 (Mining barge)
+        Retriever = 17478, //groupID 463 (Mining barge)
+        Covetor = 17476,   //groupID 463 (Mining barge)
+        Skiff = 22546,     //groupID 543 (Exhumer)
+        Mackinaw = 22548,  //groupID 543 (Exhumer)
+        Hulk = 22544,      //groupID 543 (Exhumer)
+        Orca = 28606,      //groupID 941 (Industrial Command Ship)
+        Rorqual = 28352,   //groupID 883 (Capital Industrial Ship)
+        
 
         //Polaris = 9856,
         //Polaris = 9855 //wtf

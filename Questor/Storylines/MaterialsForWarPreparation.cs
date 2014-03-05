@@ -95,7 +95,7 @@ namespace Questor.Storylines
             {
                 int moveOreQuantity = Math.Min(item.Stacksize, oreToLoad);
                 Cache.Instance.CurrentShipsCargo.Add(item, moveOreQuantity);
-                Logging.Log("StorylineState.Arm", "Moving [" + moveOreQuantity + "] units of Ore [" + item.TypeName + "] Stacksize: [" + item.Stacksize + "] from hangar to CargoHold", Logging.White);
+                Logging.Log("StorylineState.Arm", "Moving [" + moveOreQuantity + "] units of Ore [" + item.TypeName + "] Stack size: [" + item.Stacksize + "] from hangar to CargoHold", Logging.White);
                 _nextAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3,6));
                 return StorylineState.Arm;  // you can only move one set of items per frame
             }

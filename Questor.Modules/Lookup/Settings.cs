@@ -8,6 +8,7 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Linq;
 using System.Threading;
 
 namespace Questor.Modules.Lookup
@@ -17,9 +18,7 @@ namespace Questor.Modules.Lookup
     using System.IO;
     using System.Reflection;
     using System.Xml.Linq;
-    using LavishScriptAPI;
     using System.Globalization;
-    using InnerSpaceAPI;
     using Questor.Modules.Actions;
     using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
@@ -44,9 +43,9 @@ namespace Questor.Modules.Lookup
             Ammo = new List<Ammo>();
             ItemsBlackList = new List<int>();
             WreckBlackList = new List<int>();
-            AgentsList = new List<AgentsList>();
-            FactionFitting = new List<FactionFitting>();
-            MissionFitting = new List<MissionFitting>();
+            ListOfAgents = new List<AgentsList>();
+            ListofFactionFittings = new List<FactionFitting>();
+            ListOfMissionFittings = new List<MissionFitting>();
             MissionBlacklist = new List<string>();
             MissionGreylist = new List<string>();
             CharacterNamesForMasterToInviteToFleet = new List<string>();
@@ -81,6 +80,7 @@ namespace Questor.Modules.Lookup
         //
         public bool DebugActivateGate { get; set; }
         public bool DebugActivateWeapons { get; set; }
+        public bool DebugActivateBastion { get; set; }
         public bool DebugAddDronePriorityTarget { get; set; }
         public bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public bool DebugAgentInteractionReplyToAgent { get; set; }
@@ -136,6 +136,7 @@ namespace Questor.Modules.Lookup
         public bool DebugLootValue { get; set; }
         public bool DebugNavigateOnGrid { get; set; }
         public bool DebugMaintainConsoleLogs { get; set; }
+        public bool DebugMiningBehavior { get; set; }
         public bool DebugMissionFittings { get; set; }
         public bool DebugMoveTo { get; set; }
         public bool DebugOnframe { get; set; }
@@ -171,7 +172,8 @@ namespace Questor.Modules.Lookup
         public bool DefendWhileTraveling { get; set; }
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
-
+        public string EveServerName { get; set; }
+        
         public string CharacterToAcceptInvitesFrom { get; set; }
 
         //
@@ -193,6 +195,7 @@ namespace Questor.Modules.Lookup
         // Enable / Disable Major Features that do not have categories of their own below
         //
         public bool EnableStorylines { get; set; }
+        public bool DeclineStorylinesInsteadofBlacklistingfortheSession { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
 
@@ -295,7 +298,7 @@ namespace Questor.Modules.Lookup
 
         public string TravelToBookmarkPrefix { get; set; }
 
-        public string UndockPrefix { get; set; }
+        public string UndockBookmarkPrefix { get; set; }
         public int UndockDelay { get; set; }
         public int MinimumWreckCount { get; set; }
         public bool AfterMissionSalvaging { get; set; }
@@ -312,11 +315,6 @@ namespace Questor.Modules.Lookup
         public int TractorBeamMinimumCapacitor { get; set; }
         public int SalvagerMinimumCapacitor { get; set; }
         public bool DoNotDoANYSalvagingOutsideMissionActions { get; set; }
-
-        //
-        // undocking settings
-        //
-        public string BookmarkWarpOut { get; set; }
 
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
@@ -395,9 +393,9 @@ namespace Questor.Modules.Lookup
         //
         // Fitting Settings - if enabled
         //
-        public List<FactionFitting> FactionFitting { get; private set; }
-        public List<AgentsList> AgentsList { get; set; }
-        public List<MissionFitting> MissionFitting { get; private set; }
+        public List<FactionFitting> ListofFactionFittings { get; private set; }
+        public List<AgentsList> ListOfAgents { get; set; }
+        public List<MissionFitting> ListOfMissionFittings { get; private set; }
         public FactionFitting DefaultFitting { get; set; }
 
         //
@@ -413,6 +411,7 @@ namespace Questor.Modules.Lookup
         public int MinimumTargetValueToConsiderTargetAHighValueTarget { get; set; }
         public int MaximumTargetValueToConsiderTargetALowValueTarget { get; set; }
         public bool ArmLoadCapBoosters { get; set; }
+        public bool SelectAmmoToUseBasedOnShipSize { get; set; }
 
         public int DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage { get; set; }
 
@@ -611,8 +610,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
                     {
-                        MissionBlacklist.Add((string)BlacklistedMission);
-                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + (string)BlacklistedMission + "]", Logging.Teal);
+                        MissionBlacklist.Add(Cache.Instance.FilterPath((string)BlacklistedMission));
+                        if (Settings.Instance.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + Cache.Instance.FilterPath((string)BlacklistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
@@ -644,8 +643,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
                     {
-                        MissionGreylist.Add((string)GreylistedMission);
-                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + (string)GreylistedMission + "]", Logging.Teal);
+                        MissionGreylist.Add(Cache.Instance.FilterPath((string)GreylistedMission));
+                        if (Settings.Instance.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + Cache.Instance.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
@@ -721,6 +720,7 @@ namespace Questor.Modules.Lookup
             // Debug Settings
             //
             DebugActivateGate = (bool?)CharacterSettingsXml.Element("debugActivateGate") ?? (bool?)CommonSettingsXml.Element("debugActivateGate") ?? false;
+            DebugActivateBastion = (bool?)CharacterSettingsXml.Element("debugActivateBastion") ?? (bool?)CommonSettingsXml.Element("debugActivateBastion") ?? false;
             DebugActivateWeapons = (bool?)CharacterSettingsXml.Element("debugActivateWeapons") ?? (bool?)CommonSettingsXml.Element("debugActivateWeapons") ?? false;
             DebugAddDronePriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddDronePriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddDronePriorityTarget") ?? false;
             DebugAddPrimaryWeaponPriorityTarget = (bool?)CharacterSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? (bool?)CommonSettingsXml.Element("debugAddPrimaryWeaponPriorityTarget") ?? false;
@@ -777,6 +777,7 @@ namespace Questor.Modules.Lookup
             DebugLootWrecks = (bool?)CharacterSettingsXml.Element("debugLootWrecks") ?? (bool?)CommonSettingsXml.Element("debugLootWrecks") ?? false;
             DebugLootValue = (bool?)CharacterSettingsXml.Element("debugLootValue") ?? (bool?)CommonSettingsXml.Element("debugLootValue") ?? false;
             DebugMaintainConsoleLogs = (bool?)CharacterSettingsXml.Element("debugMaintainConsoleLogs") ?? (bool?)CommonSettingsXml.Element("debugMaintainConsoleLogs") ?? false;
+            DebugMiningBehavior = (bool?)CharacterSettingsXml.Element("debugMiningBehavior") ?? (bool?)CommonSettingsXml.Element("debugMiningBehavior") ?? false;
             DebugMissionFittings = (bool?)CharacterSettingsXml.Element("debugMissionFittings") ?? (bool?)CommonSettingsXml.Element("debugMissionFittings") ?? false;
             DebugMoveTo = (bool?)CharacterSettingsXml.Element("debugMoveTo") ?? (bool?)CommonSettingsXml.Element("debugMoveTo") ?? false;
             DebugNavigateOnGrid = (bool?)CharacterSettingsXml.Element("debugNavigateOnGrid") ?? (bool?)CommonSettingsXml.Element("debugNavigateOnGrid") ?? false;
@@ -815,7 +816,7 @@ namespace Questor.Modules.Lookup
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
-
+            EveServerName = (string)CharacterSettingsXml.Element("eveServerName") ?? (string)CommonSettingsXml.Element("eveServerName") ?? "Tranquility";
             //
             // Misc Settings
             //
@@ -840,6 +841,7 @@ namespace Questor.Modules.Lookup
             //
             UseFittingManager = (bool?)CharacterSettingsXml.Element("UseFittingManager") ?? (bool?)CommonSettingsXml.Element("UseFittingManager") ?? true;
             EnableStorylines = (bool?)CharacterSettingsXml.Element("enableStorylines") ?? (bool?)CommonSettingsXml.Element("enableStorylines") ?? false;
+            DeclineStorylinesInsteadofBlacklistingfortheSession = (bool?)CharacterSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? (bool?)CommonSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? false;
             UseLocalWatch = (bool?)CharacterSettingsXml.Element("UseLocalWatch") ?? (bool?)CommonSettingsXml.Element("UseLocalWatch") ?? true;
             WatchForActiveWars = (bool?)CharacterSettingsXml.Element("watchForActiveWars") ?? (bool?)CommonSettingsXml.Element("watchForActiveWars") ?? true;
 
@@ -920,10 +922,7 @@ namespace Questor.Modules.Lookup
             // Undock settings
             //
             UndockDelay = (int?)CharacterSettingsXml.Element("undockdelay") ?? (int?)CommonSettingsXml.Element("undockdelay") ?? 10; //Delay when undocking - not in use
-            UndockPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? "Insta";
-
-            //Undock bookmark prefix - used by traveler - not in use
-            BookmarkWarpOut = (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "";
+            UndockBookmarkPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "Insta";
 
             //
             // Location of the Questor GUI on startup (default is off the screen)
@@ -970,6 +969,7 @@ namespace Questor.Modules.Lookup
                 SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
                 TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
                 TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
+                MiningShipName = (string)CharacterSettingsXml.Element("miningShipName") ?? (string)CommonSettingsXml.Element("miningShipName") ?? "My Exhumer of Destruction";
             }
             catch (Exception exception)
             {
@@ -1099,23 +1099,6 @@ namespace Questor.Modules.Lookup
             WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
             SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
-            if (UseInnerspace)
-            {
-                LavishScriptObject lavishsriptObject = LavishScript.Objects.GetObject("LavishScript");
-                if (lavishsriptObject == null)
-                {
-                    InnerSpace.Echo("Testing: object not found");
-                }
-                else
-                {
-                    /* "LavishScript" object's ToString value is its version number, which follows the form of a typical float */
-                    //var version = lavishsriptObject.GetValue<float>();
-                    // //var TestISVariable = "Game"
-                    // //LavishIsBoxerCharacterSet = LavishsriptObject.
-                    //Logging.Log("Settings", "Testing: LavishScript Version is: " + version.ToString(CultureInfo.InvariantCulture), Logging.White);
-                }
-            }
-
             //
             // Enable / Disable the different types of logging that are available
             //
@@ -1144,6 +1127,7 @@ namespace Questor.Modules.Lookup
             DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
             SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
             ArmLoadCapBoosters = (bool?)CharacterSettingsXml.Element("armLoadCapBoosters") ?? (bool?)CommonSettingsXml.Element("armLoadCapBoosters") ?? false;
+            SelectAmmoToUseBasedOnShipSize = (bool?)CharacterSettingsXml.Element("selectAmmoToUseBasedOnShipSize") ?? (bool?)CommonSettingsXml.Element("selectAmmoToUseBasedOnShipSize") ?? false;
 
             MinimumTargetValueToConsiderTargetAHighValueTarget = (int?)CharacterSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? (int?)CommonSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? 2;
             MaximumTargetValueToConsiderTargetALowValueTarget = (int?)CharacterSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? (int?)CommonSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? 1;
@@ -1322,14 +1306,15 @@ namespace Questor.Modules.Lookup
                 }
             }
 
-            MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 0;
+            MinimumAmmoCharges = (int?)CharacterSettingsXml.Element("minimumAmmoCharges") ?? (int?)CommonSettingsXml.Element("minimumAmmoCharges") ?? 2;
+            if (MinimumAmmoCharges < 2) MinimumAmmoCharges = 2; //do not allow MinimumAmmoCharges to be set lower than 1. We always want to reload before the weapon is empty!
 
             //
             // List of Agents we should use
             //
             //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
             //{
-            AgentsList.Clear();
+            ListOfAgents.Clear();
             XElement agentList = CharacterSettingsXml.Element("agentsList") ?? CommonSettingsXml.Element("agentsList");
 
             if (agentList != null)
@@ -1339,7 +1324,7 @@ namespace Questor.Modules.Lookup
                     int i = 0;
                     foreach (XElement agent in agentList.Elements("agentList"))
                     {
-                        AgentsList.Add(new AgentsList(agent));
+                        ListOfAgents.Add(new AgentsList(agent));
                         i++;
                     }
                     if (i >= 2)
@@ -1366,21 +1351,43 @@ namespace Questor.Modules.Lookup
             //
             // Fittings chosen based on the faction of the mission
             //
-            FactionFitting.Clear();
-            XElement factionFittings = CharacterSettingsXml.Element("factionfittings") ?? CommonSettingsXml.Element("factionfittings");
+            ListofFactionFittings.Clear();
+            
             if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
+                XElement factionFittings = CharacterSettingsXml.Element("factionFittings") ?? 
+                                           CharacterSettingsXml.Element("factionfittings") ??
+                                           CommonSettingsXml.Element("factionFittings") ?? 
+                                           CommonSettingsXml.Element("factionfittings");
+
                 if (factionFittings != null)
                 {
-                    foreach (XElement factionfitting in factionFittings.Elements("factionfitting"))
+                    string factionFittingXMLElementName = "";
+                    if (factionFittings.Elements("factionFitting").Any())
                     {
-                        FactionFitting.Add(new FactionFitting(factionfitting));
+                        factionFittingXMLElementName = "factionFitting";
+                    }
+                    else
+                    {
+                        factionFittingXMLElementName = "factionfitting";
                     }
 
-                    if (FactionFitting.Exists(m => m.Faction.ToLower() == "default"))
+                    int i = 0;
+                    foreach (XElement factionfitting in factionFittings.Elements(factionFittingXMLElementName))
                     {
-                        DefaultFitting = FactionFitting.Find(m => m.Faction.ToLower() == "default");
-                        if (string.IsNullOrEmpty(DefaultFitting.Fitting))
+                        i++;
+                        ListofFactionFittings.Add(new FactionFitting(factionfitting));
+                        if (Settings.Instance.DebugFittingMgr) Logging.Log("Settings.LoadMFactionFitting", "[" + i + "] Faction Fitting [" + factionfitting + "]", Logging.Teal);
+                        
+                    }
+
+                    //
+                    // if we have no default fitting do not use fitting manager
+                    //
+                    if (ListofFactionFittings.Exists(m => m.FactionName.ToLower() == "default"))
+                    {
+                        DefaultFitting = ListofFactionFittings.Find(m => m.FactionName.ToLower() == "default");
+                        if (string.IsNullOrEmpty(DefaultFitting.FittingName))
                         {
                             UseFittingManager = false;
                             Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
@@ -1404,21 +1411,22 @@ namespace Questor.Modules.Lookup
             //
             // Fitting based on the name of the mission
             //
-            MissionFitting.Clear();
+            ListOfMissionFittings.Clear();
             XElement xmlElementMissionFittingsSection = CharacterSettingsXml.Element("missionfittings") ?? CommonSettingsXml.Element("missionfittings");
             if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
                 if (xmlElementMissionFittingsSection != null)
                 {
                     Logging.Log("Settings", "Loading Mission Fittings", Logging.White);
-                    int i = 1;
+                    int i = 0;
                     foreach (XElement missionfitting in xmlElementMissionFittingsSection.Elements("missionfitting"))
                     {
-                        MissionFitting.Add(new MissionFitting(missionfitting));
-                        if (Settings.Instance.DebugMissionFittings) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
-                        i++;
+                        i++; 
+                        ListOfMissionFittings.Add(new MissionFitting(missionfitting));
+                        if (Settings.Instance.DebugFittingMgr) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
+                        
                     }
-                    Logging.Log("Settings", "        Mission Fittings now has [" + MissionFitting.Count + "] entries", Logging.White);
+                    Logging.Log("Settings", "        Mission Fittings now has [" + ListOfMissionFittings.Count + "] entries", Logging.White);
                 }
             }
 
@@ -1551,6 +1559,7 @@ namespace Questor.Modules.Lookup
                 DebugLootWrecks = false;
                 DebugLootValue = false;
                 DebugMaintainConsoleLogs = false;
+                DebugMiningBehavior = false;
                 DebugMissionFittings = false;
                 DebugMoveTo = false;
                 DebugNavigateOnGrid = false;
@@ -1599,6 +1608,7 @@ namespace Questor.Modules.Lookup
                 //
                 UseFittingManager = false;
                 EnableStorylines = false;
+                DeclineStorylinesInsteadofBlacklistingfortheSession = false;
                 UseLocalWatch = false;
                 WatchForActiveWars = true;
 
@@ -1688,10 +1698,7 @@ namespace Questor.Modules.Lookup
                 // Undock settings
                 //
                 UndockDelay = 10; //Delay when undocking - not in use
-                UndockPrefix = "Insta";
-
-                //Undock bookmark prefix - used by traveler - not in use
-                BookmarkWarpOut = "";
+                UndockBookmarkPrefix = "Insta";
 
                 //
                 // Location of the Questor GUI on startup (default is off the screen)
@@ -1943,9 +1950,9 @@ namespace Questor.Modules.Lookup
                 Ammo.Clear();
                 ItemsBlackList.Clear();
                 WreckBlackList.Clear();
-                FactionFitting.Clear();
-                AgentsList.Clear();
-                MissionFitting.Clear();
+                ListofFactionFittings.Clear();
+                ListOfAgents.Clear();
+                ListOfMissionFittings.Clear();
 
                 //
                 // Clear the Blacklist

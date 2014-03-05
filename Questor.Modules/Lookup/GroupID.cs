@@ -85,7 +85,11 @@ namespace Questor.Modules.Lookup
         Miners = 54, // Miner I, Miner II, etc - Mining Tool GroupIDs
         StripMiners = 464, // Strip Miner I, etc - Mining Tool GroupIDs
         ModulatedStripMiners = 483, // Modulated Strip Miners, etc - Mining Tool GroupIDs
-
+        MiningBarge = 463, 
+        Exhumer = 543,
+        IndustrialCommandShip = 941,
+        CapitalIndustrialShip = 883,
+        
         SentryGun = 99,                       //Protecting the weak and upholding the law
 
         ConcordBillboard = 323,

@@ -125,7 +125,7 @@ namespace Questor.Modules.Actions
                             }
 
                             //
-                            // Add gatekeys to the list of things to move to the AmmoHangar, they are not mission completion items but are used during missions so should be avail
+                            // Add gate keys to the list of things to move to the AmmoHangar, they are not mission completion items but are used during missions so should be avail
                             // to all pilots (thus the use of the ammo hangar)
                             //
                             try
@@ -437,8 +437,14 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName) && Cache.Instance.LootContainer != null && Cache.Instance.LootContainer.IsValid)
+            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
             {
+                if (Cache.Instance.LootContainer == null)
+                {
+                    if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLoot.ProcessState", "if (Cache.Instance.LootContainer == null)", Logging.Debug);
+                    return;
+                }
+
                 PutLootHere = Cache.Instance.LootContainer;
                 PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
             }

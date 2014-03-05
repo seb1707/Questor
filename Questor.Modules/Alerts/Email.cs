@@ -11,18 +11,12 @@
 namespace Questor.Modules.Alerts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Net.Mail;
     using System.Net;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
     using Questor.Modules.Logging;
-    using Questor.Modules.States;
-    using InnerSpaceAPI;
-    using LavishScriptAPI;
-
+    
     public static class Email
     {
         public static DateTime DateTimeForLogs;

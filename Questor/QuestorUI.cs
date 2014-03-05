@@ -208,20 +208,12 @@ namespace Questor
                         NextSalvageActionData.Text = Cache.Instance.NextSalvageAction.ToLongTimeString();
                         NextLootActionData.Text = Cache.Instance.NextLootAction.ToLongTimeString();
                         LastJettisonData.Text = Cache.Instance.LastJettison.ToLongTimeString();
-                        NextDefenceModuleActionData.Text = Cache.Instance.NextDefenseModuleAction.ToLongTimeString();
-                        NextAfterburnerActionData.Text = Cache.Instance.NextAfterburnerAction.ToLongTimeString();
-                        NextRepModuleActionData.Text = Cache.Instance.NextRepModuleAction.ToLongTimeString();
                         NextActivateSupportModulesData.Text = Cache.Instance.NextActivateSupportModules.ToLongTimeString();
                         NextApproachActionData.Text = Cache.Instance.NextApproachAction.ToLongTimeString();
                         NextOrbitData.Text = Cache.Instance.NextOrbit.ToLongTimeString();
-                        NextWarpToData.Text = Cache.Instance.NextWarpTo.ToLongTimeString();
+                        NextWarpToData.Text = Cache.Instance.NextWarpAction.ToLongTimeString();
                         NextTravelerActionData.Text = Cache.Instance.NextTravelerAction.ToLongTimeString();
                         NextTargetActionData.Text = Cache.Instance.NextTargetAction.ToLongTimeString();
-                        NextReloadData.Text = Cache.Instance.NextReload.ToLongTimeString();
-                        NextWeaponActionData.Text = Cache.Instance.NextWeaponAction.ToLongTimeString();
-                        NextWebActionData.Text = Cache.Instance.NextWebAction.ToLongTimeString();
-                        NextNosActionData.Text = Cache.Instance.NextNosAction.ToLongTimeString();
-                        NextPainterActionData.Text = Cache.Instance.NextPainterAction.ToLongTimeString();
                         NextActivateActionData.Text = Cache.Instance.NextActivateAction.ToLongTimeString();
                         NextAlignData.Text = Cache.Instance.NextAlign.ToLongTimeString();
                         NextUndockActionData.Text = Cache.Instance.NextUndockAction.ToLongTimeString();
@@ -251,7 +243,7 @@ namespace Questor
                             lblUserDefinedScript4.Text = Settings.Instance.UserDefinedLavishScriptScript4Description;
                         }
 
-                        DamageTypeData.Text = Cache.Instance.DamageType.ToString();
+                        DamageTypeData.Text = Cache.Instance.MissionDamageType.ToString();
 
                         //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
                         //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
@@ -269,7 +261,7 @@ namespace Questor
                         //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
                         //ActiveDronesData.Text = Cache.Instance.ActiveDrones.Count().ToString();                   //causes problems / crashes
-                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inarp from the UI?
+                        //if (!Cache.Instance.InWarp && DateTime.UtcNow > _nextWreckUpdate)                            //this was causing exceptions we cant check inWarp from the UI?
                         //{
                         //    _nextWreckUpdate = DateTime.UtcNow.AddSeconds(10);
                             //WrecksData.Text = Cache.Instance.Wrecks.Count().ToString(CultureInfo.InvariantCulture);
@@ -535,9 +527,9 @@ namespace Questor
             //    }
             //}
 
-            if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.DamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+            if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
             {
-                DamageTypeComboBox.SelectedItem = Cache.Instance.DamageType.ToString();
+                DamageTypeComboBox.SelectedItem = Cache.Instance.MissionDamageType.ToString();
             }
 
             //
@@ -838,7 +830,7 @@ namespace Questor
 
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
-            Cache.Instance.DamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
+            Cache.Instance.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
         }
 
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)
@@ -1148,7 +1140,7 @@ namespace Questor
         private void ReloadAllClick(object sender, EventArgs e)
         {
             Cache.Instance.Paused = false;
-            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it shoud return to the configured behavior", Logging.Teal);
+            Logging.Log("QuestorUI", "ReloadAll button was pressed: changing QuestorState to ReloadAll- when done reloading it should return to the configured behavior", Logging.Teal);
             _States.CurrentQuestorState = QuestorState.DebugReloadAll;
         }
 
@@ -1390,9 +1382,9 @@ namespace Questor
         private void bttnResizeEVEWindow_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960, Logging.White);
-            LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
+            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0, Logging.White);
-            LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
+            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
         }
 
         private void bttnLogEntitiesOnGrid_Click(object sender, EventArgs e)
@@ -1452,7 +1444,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript1 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript1 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
             }
             else
             {
@@ -1465,7 +1457,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript2 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript2 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
             }
             else
             {
@@ -1478,7 +1470,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript3 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript3 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
             }
             else
             {
@@ -1491,7 +1483,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript4 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript4 + "]", Logging.Debug);
-                LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
+                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
             }
             else
             {

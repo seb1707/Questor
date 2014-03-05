@@ -76,6 +76,18 @@ copy /y ".\DirectEVE\easyhook*.*" ".\output\"
 copy /y ".\output\*.pdb" "%innerspacedotnetdirectory%"
 @Echo off
 @Echo.
+set RandomNumber=%Random%
+@Echo Rename prior Quester.exe to Questor.exe.RandomNumber.questorold
+ren "%innerspacedotnetdirectory%\Questor.exe" "Questor.exe.%RandomNumber%.questorold"
+@Echo off
+@Echo.
+@Echo Rename prior Questor.Modules.dll to Questor.Modules.dll.RandomNumber.questorold
+ren "%innerspacedotnetdirectory%\Questor.Modules.dll" "Questor.Modules.dll.%RandomNumber%.questorold"
+@Echo off
+@Echo.@Echo Trying to delete all .questorold files
+Del /Q "%innerspacedotnetdirectory%\*.questorold"
+@Echo off
+@Echo.
 @Echo Starting to copy DLL files from [.\output\*.dll] to [%innerspacedotnetdirectory%]
 @Echo on
 copy /y ".\output\*.dll" "%innerspacedotnetdirectory%"
@@ -112,12 +124,9 @@ if not exist "%innerspacedotnetdirectory%InvIgnore.xml" copy /y ".\output\InvIgn
 @Echo.
 @Echo *** only copy Schedules.xml if one does not already exist (it contains the schedule your toons will use to logoff and login if you start eve early)
 if not exist "%innerspacedotnetdirectory%Schedules.xml" copy /y ".\output\Schedules.xml" "%innerspacedotnetdirectory%"
-@Echo.
-@Echo *** only copy StartingQuestorSafetyScript.iss if one does not already exist
-if not exist "%innerspacedotnetdirectory%..\scripts\StartingQuestorSafetyScript.iss" copy /y ".\output\StartingQuestorSafetyScript.iss" "%innerspacedotnetdirectory%..\scripts\"
-@Echo.
-@Echo *** only copy ISXStealth.dll if one does not already exist
-if not exist "%innerspacedotnetdirectory%..\Extensions\ISXStealth.dll" copy /y ".\ISXStealth\ISXStealth.dll" "%innerspacedotnetdirectory%..\Extensions\"
+@Echo. 
+@Echo *** only copy Skill_Prerequisites.xml if one does not already exist (it contains skill prerequisites which allows questor to determine which skills can be injected)
+if not exist "%innerspacedotnetdirectory%Skill_Prerequisites.xml" copy /y ".\output\Skill_Prerequisites.xml" "%innerspacedotnetdirectory%"
 @Echo off
 
 goto :done

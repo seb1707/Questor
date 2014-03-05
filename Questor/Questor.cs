@@ -47,9 +47,6 @@ namespace Questor
         //private readonly BackgroundBehavior _backgroundbehavior;
         private readonly Cleanup _cleanup;
 
-        public DateTime LastAction;
-        public readonly string ScheduleCharacterName = Logging._character;
-        //public bool PanicStateReset = false;
         private bool _runOnceAfterStartupalreadyProcessed;
         private bool _runOnceInStationAfterStartupalreadyProcessed;
 
@@ -74,8 +71,7 @@ namespace Questor
             _innerspaceCommands = new InnerspaceCommands();
             _statistics = new Statistics();
 
-            ScheduleCharacterName = Logging._character;
-            Cache.Instance.ScheduleCharacterName = ScheduleCharacterName;
+            Cache.Instance.ScheduleCharacterName = Logging._character;
             Cache.Instance.NextStartupAction = DateTime.UtcNow;
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
@@ -152,7 +148,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe lic server is down";
+                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe the DirectEVE license server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
             }
@@ -299,10 +295,16 @@ namespace Questor
                 if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
                     return true;
 
+                if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
+                {
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillQueueCheck", "if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady) - this really should not happen (often?)", Logging.Debug);
+                    return true;
+                }
+
                 if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)
                 {
                     if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
-                    if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalDays < 1)
+                    if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours < 24)
                     {
                         Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
                         _States.LavishEvent_SkillQueueHasRoom();
@@ -582,7 +584,7 @@ namespace Questor
         private void EVEOnFrame(object sender, EventArgs e)
         {
             if (!OnframeProcessEveryPulse()) return;
-            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "Onframe: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);
+            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "OnFrame: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);
 
             RunOnceAfterStartup();
             RunOnceInStationAfterStartup();

@@ -153,7 +153,7 @@ namespace Questor.Modules.BackgroundTasks
                         continue;
 
                     // Ignore empty wrecks
-                    if (wreck.GroupId == (int)Group.Wreck && wreck.IsWreckEmpty)
+                    if (wreck.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
                         continue;
                 }
 
@@ -280,7 +280,7 @@ namespace Questor.Modules.BackgroundTasks
                             // Mark this item as moved
                             moveTheseItems.Add(wl.DirectItem);
 
-                            // Substract (now) free volume
+                            // Subtract (now) free volume
                             freeCargoCapacity += wl.TotalVolume;
 
                             // We freed up enough space?
@@ -337,7 +337,7 @@ namespace Questor.Modules.BackgroundTasks
             foreach (EntityCache containerEntity in Cache.Instance.UnlootedWrecksAndSecureCans.Where(e => e.Distance <= (int)Distances.SafeScoopRange))
             {
                 // Empty wreck, ignore
-                if (containerEntity.GroupId == (int)Group.Wreck && containerEntity.IsWreckEmpty)
+                if (containerEntity.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
                     continue;
 
                 // We looted this container

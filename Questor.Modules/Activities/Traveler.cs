@@ -24,30 +24,22 @@ namespace Questor.Modules.Activities
     public class Traveler
     {
         private static TravelerDestination _destination;
-        private static DateTime _nextTravelerAction;
+        public static DateTime _nextTravelerAction;
         private static DateTime _lastPulse;
         private static DateTime _nextGetLocation;
-        //private static DateTime _nextSetEVENavDestination = DateTime.MinValue;
-        //private static DateTime _nextGetDestinationPath = DateTime.MinValue;
-
+        
         private static List<int> _destinationRoute;
         public static DirectLocation _location;
         private static IEnumerable<DirectBookmark> myHomeBookmarks;
         private static string _locationName;
         private static int _locationErrors;
         private static int TravelHomeCounter;
-        //private static Combat _combat;
-        //private static Drones _drones;
-
-        //private static List<long> EVENavdestination { get; set; }
-
+        
         public DirectBookmark UndockBookmark { get; set; }
 
         public Traveler()
         {
             _lastPulse = DateTime.MinValue;
-            //_combat = new Combat();
-            //_drones = new Drones();
         }
 
         public static TravelerDestination Destination
@@ -183,16 +175,16 @@ namespace Questor.Modules.Activities
             // Find the first waypoint
             int waypoint = _destinationRoute.FirstOrDefault();
 
-            //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next waypoints locationname", Logging.Teal);
+            //if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting next way-points locationName", Logging.Teal);
             _locationName = Cache.Instance.DirectEve.Navigation.GetLocationName(waypoint);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "]", Logging.Teal);
 
-            if (waypoint > 6000000) // this MUST be a station
+            if (waypoint > 60000000) // this MUST be a station
             {
                 //insert code to handle station destinations here
             }
 
-            if (waypoint < 6000000) // this is not a station, probably a system
+            if (waypoint < 60000000) // this is not a station, probably a system
             {
                 //useful?a
             }
@@ -236,11 +228,12 @@ namespace Questor.Modules.Activities
             {
                 if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked)
                 {
-                    Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
-                    MyNextStargate.Jump();
-                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
-                    _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                    if (MyNextStargate.Jump())
+                    {
+                        Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
+                        return;
+                    }
+
                     return;
                 }
 
@@ -256,14 +249,13 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
                     return;
                 }
-
-                if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                
+                if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                 {
-                    if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    if (MyNextStargate.WarpTo())
                     {
                         Logging.Log("Traveler", "Warping to [" + Logging.Yellow + _locationName + Logging.Green + "][" + Logging.Yellow + Math.Round((MyNextStargate.Distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
-                        MyNextStargate.WarpTo();
-                        return;
+                        return;    
                     }
 
                     return;
@@ -374,7 +366,7 @@ namespace Questor.Modules.Activities
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.CloseQuestor)
             {
                 //
-                // if we got this far it is because we havent setup Settings.Instance.HomeBookmarkName yet or we do not have a
+                // if we got this far it is because we have not setup Settings.Instance.HomeBookmarkName yet or we do not have a
                 // bookmark in game with the configured prefix at the start of the name of the bookmark
                 // we will instead use the AgentID to find the station
                 //

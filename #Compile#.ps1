@@ -207,7 +207,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .exe, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .exe, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red
@@ -230,7 +230,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .dll, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .dll, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red
@@ -245,7 +245,7 @@ switch ($choice)
              $i=0
              do {
                try{
-                 Write-Host "Copy *.pdb to prodcution ... " -NoNewline
+                 Write-Host "Copy *.pdb to production ... " -NoNewline
                  Copy-Item .\output\*.pdb -Destination "$($innerpath)\$($innerspacedestdir)" -Force
                  Write-Host "[" -ForegroundColor Yellow -NoNewline
                  Write-Host " OK " -ForegroundColor Green -NoNewline
@@ -253,7 +253,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .pdb, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .pdb, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red
@@ -265,7 +265,7 @@ switch ($choice)
              }  while ($iscopied -eq $false);
 
              sleep -Milliseconds 500
-             Write-Host "Copy missing *.xml files to prodcution ... "
+             Write-Host "Copy missing *.xml files to production ... "
              sleep -Milliseconds 500
              Get-ChildItem .\output -Filter *.xml | % {
              if (!(Test-Path "$($innerpath)\$($innerspacedestdir)\$($_.name)")){
@@ -315,7 +315,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .exe, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .exe, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red
@@ -338,7 +338,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .dll, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .dll, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red
@@ -361,7 +361,7 @@ switch ($choice)
                  $iscopied = $true
                }
                catch {
-                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .pdb, prolly questor is running." , "Status" , 5)
+                 $OUTPUT= [System.Windows.Forms.MessageBox]::Show("Encountered problem while copying .pdb, questor is probably running." , "Status" , 5)
                  if ($OUTPUT -eq "RETRY" ) { Write-Host "Retrying copy!!!" -ForegroundColor Yellow} 
                  else { 
                    Write-Host "Skipping copy!!!" -ForegroundColor Red

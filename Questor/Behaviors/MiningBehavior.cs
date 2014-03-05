@@ -318,8 +318,10 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            belt.WarpTo();
-                            _lastPulse = DateTime.UtcNow;
+                            if (belt.WarpTo())
+                            {
+                                _lastPulse = DateTime.UtcNow;    
+                            }
                         }
                         break;
                     }

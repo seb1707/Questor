@@ -1020,7 +1020,6 @@ namespace Questor.Modules.Caching
         public DateTime NextRemoveBookmarkAction { get; set; }
         public DateTime NextApproachAction { get; set; }
         public DateTime NextOrbit { get; set; }
-        public DateTime NextWarpTo { get; set; }
         public DateTime NextTravelerAction { get; set; }
         public DateTime NextTargetAction { get; set; }
         public DateTime NextActivateAction { get; set; }

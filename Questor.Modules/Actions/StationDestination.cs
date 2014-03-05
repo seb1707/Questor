@@ -128,13 +128,13 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+            if (station.WarpTo())
             {
                 Logging.Log("QuestorManager.StationDestination", "Warp to and dock at [" + station.Name + "]", Logging.White);
-                station.WarpTo();
                 nextAction = DateTime.UtcNow.AddSeconds(30);
                 return false;
             }
+            
 
             return false;
         }

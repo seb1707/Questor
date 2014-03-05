@@ -211,7 +211,7 @@ namespace Questor
                         NextActivateSupportModulesData.Text = Cache.Instance.NextActivateSupportModules.ToLongTimeString();
                         NextApproachActionData.Text = Cache.Instance.NextApproachAction.ToLongTimeString();
                         NextOrbitData.Text = Cache.Instance.NextOrbit.ToLongTimeString();
-                        NextWarpToData.Text = Cache.Instance.NextWarpTo.ToLongTimeString();
+                        NextWarpToData.Text = Cache.Instance.NextWarpAction.ToLongTimeString();
                         NextTravelerActionData.Text = Cache.Instance.NextTravelerAction.ToLongTimeString();
                         NextTargetActionData.Text = Cache.Instance.NextTargetAction.ToLongTimeString();
                         NextActivateActionData.Text = Cache.Instance.NextActivateAction.ToLongTimeString();

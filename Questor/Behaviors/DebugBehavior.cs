@@ -537,9 +537,13 @@ namespace Questor.Behaviors
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpTo();
-                            _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                            if (station.WarpTo())
+                            {
+                                Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                                break;
+                            }
+                            
                             break;
                         }
                         else

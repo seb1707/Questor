@@ -385,13 +385,15 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                             }
 
-                            if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
+                            if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
-                                Logging.Log("Panic", "Warping to [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
-                                Cache.Instance.IsMissionPocketDone = true;
-                                station.WarpTo();
+                                if (station.WarpTo())
+                                {
+                                    Logging.Log("Panic", "Warping to [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
+                                    Cache.Instance.IsMissionPocketDone = true;    
+                                }
                             }
-                            else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                            else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 
                             //if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                             //{
@@ -429,8 +431,8 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log("Panic", "Already Approaching to: [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Red);
                             return;
                         }
-                                
-                        Logging.Log("Panic", "Approaching has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+
+                        Logging.Log("Panic", "Approaching has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                         return;
                     }
 
@@ -466,7 +468,7 @@ namespace Questor.Modules.BackgroundTasks
                                         return;
                                     }
 
-                                    if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                    if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                     //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                                     {
                                         double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
@@ -477,7 +479,7 @@ namespace Questor.Modules.BackgroundTasks
                                         return;
                                     }
 
-                                    Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                                    Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                     return;
                                 }
                             }
@@ -499,15 +501,19 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                if (DateTime.UtcNow > Cache.Instance.NextWarpTo || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
+                                if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 {
-                                    Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
-                                    Cache.Instance.Star.WarpTo();
+                                    if (Cache.Instance.Star.WarpTo())
+                                    {
+                                        Logging.Log("Panic", "Warping to [" + Logging.Yellow + Cache.Instance.Star.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((Cache.Instance.Star.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
+                                        return;
+                                    }
+                                    
                                     return;
                                 }
 
-                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpTo.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 return;
                             }
                         }

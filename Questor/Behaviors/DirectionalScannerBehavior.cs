@@ -374,9 +374,13 @@ namespace Questor.Behaviors
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpTo();
-                            _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                            if (station.WarpTo())
+                            {
+                                Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.Idle;
+                                break;
+                            }
+                            
                             break;
                         }
 

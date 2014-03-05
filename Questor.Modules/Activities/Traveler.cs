@@ -24,7 +24,7 @@ namespace Questor.Modules.Activities
     public class Traveler
     {
         private static TravelerDestination _destination;
-        private static DateTime _nextTravelerAction;
+        public static DateTime _nextTravelerAction;
         private static DateTime _lastPulse;
         private static DateTime _nextGetLocation;
         //private static DateTime _nextSetEVENavDestination = DateTime.MinValue;
@@ -236,11 +236,12 @@ namespace Questor.Modules.Activities
             {
                 if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked)
                 {
-                    Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
-                    MyNextStargate.Jump();
-                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
-                    _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                    if (MyNextStargate.Jump())
+                    {
+                        Logging.Log("Traveler", "Jumping to [" + Logging.Yellow + _locationName + Logging.Green + "]", Logging.Green);
+                        return;
+                    }
+
                     return;
                 }
 
@@ -256,14 +257,13 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: we are already approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
                     return;
                 }
-
-                if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                
+                if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
                 {
-                    if (Cache.Instance.InSpace && !Cache.Instance.TargetedBy.Any(t => t.IsWarpScramblingMe))
+                    if (MyNextStargate.WarpTo())
                     {
                         Logging.Log("Traveler", "Warping to [" + Logging.Yellow + _locationName + Logging.Green + "][" + Logging.Yellow + Math.Round((MyNextStargate.Distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
-                        MyNextStargate.WarpTo();
-                        return;
+                        return;    
                     }
 
                     return;

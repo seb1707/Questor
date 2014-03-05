@@ -1285,10 +1285,10 @@ namespace Questor.Behaviors
                     else if (closest != null)
                     {
                         // Probably never happens
-                        if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        if (closest.WarpTo())
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "Warping to [" + closest.Name + "] which is [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                            closest.WarpTo();
+                                
                         }
                     }
                     _lastPulse = DateTime.UtcNow.AddSeconds(10);
@@ -1462,9 +1462,13 @@ namespace Questor.Behaviors
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpTo();
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
+                            if (station.WarpTo())
+                            {
+                                Logging.Log("CombatMissionsBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Salvage;
+                                break;
+                            }
+                            
                             break;
                         }
 

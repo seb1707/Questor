@@ -248,13 +248,12 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+            if (station.WarpTo())
             {
                 Logging.Log("TravelerDestination.StationDestination", "Warp to and dock at [" + Logging.Yellow + station.Name + Logging.Green + "][" + Math.Round((station.Distance / 1000) / 149598000, 2) + " AU away]", Logging.Green);
-                station.WarpTo();
-                return false;
+                return false;    
             }
-
+            
             return false;
         }
     }

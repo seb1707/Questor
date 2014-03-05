@@ -591,9 +591,11 @@ namespace Questor.Behaviors
                     {
                         if (station.Distance > (int)Distances.WarptoDistance)
                         {
-                            Logging.Log("CombatHelperBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                            station.WarpTo();
-                            _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;
+                            if (station.WarpTo())
+                            {
+                                Logging.Log("CombatHelperBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Idle;    
+                            }
                         }
                         else
                         {

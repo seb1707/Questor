@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -16,9 +17,10 @@ namespace Questor.Modules.Caching
     using System.Threading;
     using DirectEve;
     //using System.Collections.Generic;
+    using global::Questor.Modules.Activities;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
-
+    
     public class EntityCache
     {
         private readonly DirectEntity _directEntity;
@@ -4123,7 +4125,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Jump()
+        public bool Jump()
         {
             try
             {
@@ -4138,16 +4140,37 @@ namespace Questor.Modules.Caching
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
-                            Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
-                            _directEntity.Jump();
+                            if (Distance < 2500)
+                            {
+                                _directEntity.Jump();
+                                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
+                                Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                                Traveler._nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                return true;
+                            }
+
+                            Logging.Log("EntityCache.Jump", "we tried to jump through [" + Name + "] but it is [" + Math.Round(Distance / 1000, 2) + "k away][" + Cache.Instance.MaskedID(Id) + "]", Logging.White);
+                            return false;
                         }
+
+                        Logging.Log("EntityCache.Jump", "directEntity is Null or is not Valid", Logging.White);
+                        return false;
                     }
+
+                    Logging.Log("EntityCache.Jump", "We have not yet been in space for 2 seconds, waiting", Logging.White);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.Jump", "We still have [" + DateTime.UtcNow.Subtract(Cache.Instance.NextJumpAction) + "] seconds until we should jump again.", Logging.White);
+                return false;
+
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
 
@@ -4286,7 +4309,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void WarpTo()
+        public bool WarpTo()
         {
             try
             {
@@ -4294,33 +4317,50 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
-                        if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        if (_directEntity != null && _directEntity.IsValid)
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
                                 Logging.Log("EntityCache.WarpTo", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
-                            //we cant move in bastion mode, do not try
-                            List<ModuleCache> bastionModules = null;
-                            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                            if (bastionModules.Any(i => i.IsActive))
+                            if (Distance > (int) Distances.WarptoDistance)
                             {
-                                Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
-                                return;
+                                //we cant move in bastion mode, do not try
+                                List<ModuleCache> bastionModules = null;
+                                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                                if (bastionModules.Any(i => i.IsActive))
+                                {
+                                    Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
+                                    return false;
+                                }
+
+                                _directEntity.WarpTo();
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                                Cache.Instance.LastInWarp = DateTime.UtcNow;
+                                Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                                return true;    
                             }
 
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                            Cache.Instance.LastInWarp = DateTime.UtcNow;
-                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                            _directEntity.WarpTo();
+                            Logging.Log("EntityCache.WarpTo", "[" + Name + "] Distance [" + Math.Round(Distance / 1000, 0) + "k] is not greater then 150k away, WarpTo aborted!", Logging.Debug);
+                            return false;
                         }
+
+                        Logging.Log("EntityCache.WarpTo", "DirectEntity is null or is not valid", Logging.Debug);
+                        return false;
                     }
+
+                    Logging.Log("EntityCache.WarpTo", "We have not yet been in space at least 2 seconds, waiting", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.WarpTo", "Waiting [" + Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds + "] for next attempted warp.", Logging.Debug);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
         
@@ -4353,7 +4393,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpAction)
                 {
                     if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
                     {
@@ -4366,7 +4406,7 @@ namespace Questor.Modules.Caching
 
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.LastInWarp = DateTime.UtcNow;
-                            Cache.Instance.NextWarpTo = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                            Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                             _directEntity.WarpToAndDock();
                         }

@@ -68,23 +68,29 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (closestWreck.Distance > (int)Distances.WarptoDistance)
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextWarpTo)
+                        if (closestWreck.WarpTo())
                         {
                             Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Warping to [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
-                            closestWreck.WarpTo();
+                            return;
                         }
+
+                        return;
                     }
-                    else
+                    
+                    if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
                     {
-                        if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
-                        {
-                            Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
-                            closestWreck.Approach();
-                        }
-                    }    
+                        Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
+                        closestWreck.Approach();
+                        return;
+                    }
+
+                    return;
                 }
+
+                return;
             }
-            else if (closestWreck != null && (closestWreck.Distance <= (int)Distances.SafeScoopRange && Cache.Instance.Approaching != null))
+            
+            if (closestWreck != null && (closestWreck.Distance <= (int)Distances.SafeScoopRange && Cache.Instance.Approaching != null))
             {
                 if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
                 {
@@ -92,9 +98,11 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         NavigateOnGrid.StopMyShip();
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Stop ship, ClosestWreck [" + Logging.Yellow + Math.Round(closestWreck.Distance, 0) + Logging.White + "] is in scooprange + [" + (int)Distances.SafeScoopRange + "] and we were approaching", Logging.White);
+                        return;
                     }
                 }
             }
+            return;
         }
 
         /// <summary>

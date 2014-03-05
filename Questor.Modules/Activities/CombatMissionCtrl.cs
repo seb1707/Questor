@@ -313,12 +313,14 @@ namespace Questor.Modules.Activities
 
                     if (DateTime.UtcNow > Cache.Instance.NextActivateAction || AttemptsToActivateGateTimer > 30)
                     {
-                        Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.Green);
-                        closest.Activate();
-                        AttemptsToActivateGateTimer = 0;
-                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
-                        _moveToNextPocket = DateTime.UtcNow;
-                        _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;
+                        if (closest.Activate())
+                        {
+                            Logging.Log("CombatMissionCtrl", "Activate: [" + closest.Name + "] Move to next pocket after reload command and change state to 'NextPocket'", Logging.Green);
+                            AttemptsToActivateGateTimer = 0;
+                            // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
+                            _moveToNextPocket = DateTime.UtcNow;
+                            _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.NextPocket;    
+                        }
                     }
 
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "------------------", Logging.Green);

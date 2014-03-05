@@ -1257,16 +1257,19 @@ namespace Questor.Behaviors
                     EntityCache closest = Cache.Instance.AccelerationGates.OrderBy(t => t.Distance).FirstOrDefault();
                     if (closest != null && closest.Distance < (int)Distances.DecloakRange)
                     {
-                        Logging.Log("CombatMissionsBehavior.Salvage", "Acceleration gate found - GroupID=" + closest.GroupId, Logging.White);
+                        Logging.Log("CombatMissionsBehavior.Salvage", "Gate found: [" + closest.Name + "] groupID[" + closest.GroupId + "]", Logging.White);
 
                         // Activate it and move to the next Pocket
-                        closest.Activate();
+                        if (closest.Activate())
+                        {
+                            // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
+                            Logging.Log("CombatMissionsBehavior.Salvage", "Activate [" + closest.Name + "] and change States.CurrentCombatMissionBehaviorState to 'NextPocket'", Logging.White);
 
-                        // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
-                        Logging.Log("CombatMissionsBehavior.Salvage", "Activate [" + closest.Name + "] and change States.CurrentCombatMissionBehaviorState to 'NextPocket'", Logging.White);
-
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageNextPocket;
-                        _lastPulse = DateTime.UtcNow;
+                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageNextPocket;
+                            _lastPulse = DateTime.UtcNow;
+                            return;
+                        }
+                        
                         return;
                     }
 

@@ -4155,7 +4155,7 @@ namespace Questor.Modules.Caching
                             return false;
                         }
 
-                        Logging.Log("EntityCache.Jump", "directEntity is Null or is not Valid", Logging.White);
+                        Logging.Log("EntityCache.Jump", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
                         return false;
                     }
 
@@ -4174,34 +4174,45 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Activate()
+        public bool Activate()
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextActivateAction)
+                if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
                 {
-                    if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                        if (bastionModules.Any(i => i.IsActive))
+                        {
+                            Logging.Log("EntityCache.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate Gate", Logging.Debug);
+                            return false;
+                        }
+
+                        _directEntity.Activate();
+                        Cache.Instance.LastInWarp = DateTime.UtcNow;
+                        Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                        return true;
                     }
 
-                    //we cant move in bastion mode, do not try
-                    List<ModuleCache> bastionModules = null;
-                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                    if (bastionModules.Any(i => i.IsActive))
-                    {
-                        Logging.Log("EntityCache.Activate", "BastionMode is active, we cannot move, aborting attempt to Activate Gate", Logging.Debug);
-                        return;
-                    }
-
-                    _directEntity.Activate();
-                    Cache.Instance.LastInWarp = DateTime.UtcNow;
-                    Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                    Logging.Log("EntityCache.Activate", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("EntityCache.Activate", "You have another [" + Cache.Instance.NextActivateAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec before we should attempt to activate [" + Name + "], waiting.", Logging.Debug);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
 
@@ -4346,7 +4357,7 @@ namespace Questor.Modules.Caching
                             return false;
                         }
 
-                        Logging.Log("EntityCache.WarpTo", "DirectEntity is null or is not valid", Logging.Debug);
+                        Logging.Log("EntityCache.WarpTo", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);
                         return false;
                     }
 
@@ -4429,10 +4440,9 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
+                            _directEntity.Dock();
                             Cache.Instance.WehaveMoved = DateTime.UtcNow;
                             Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
-                            _directEntity.Dock();
-
                         }
                     }
                 }

@@ -209,8 +209,11 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (target.Distance > Cache.Instance.MaxRange && !Cache.Instance.IsApproaching(target.Id))
                 {
-                    target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
-                    if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: SpeedTank: Moving into weapons range before initiating orbit", Logging.Teal);
+                    if (target.KeepAtRange((int) (Cache.Instance.MaxRange*0.8d)))
+                    {
+                        if (Settings.Instance.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: SpeedTank: Moving into weapons range before initiating orbit", Logging.Teal);    
+                    }
+
                     return;
                 }
                 if (target.Distance < Cache.Instance.MaxRange && !Cache.Instance.IsOrbiting(target.Id))
@@ -241,8 +244,11 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                target.Approach(Cache.Instance.OptimalRange);
-                                Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                if (target.KeepAtRange(Cache.Instance.OptimalRange))
+                                {
+                                    Logging.Log(module, "Using Optimal Range: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);   
+                                }
+
                                 return;    
                             }
                         }
@@ -253,9 +259,11 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 if ((Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id) || Cache.Instance.MyShipEntity.Velocity < 50)
                                 {
-                                    Logging.Log(module, "Target is NPC Frigate and we got Turrets. Keeping target at Range to hit it.", Logging.Teal);
-                                    target.Approach(Settings.Instance.OptimalRange);
-                                    Logging.Log(module, "Initiating KeepAtRange [" + target.Name + "][at " + Math.Round((double)Settings.Instance.OptimalRange / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
+                                    if (target.KeepAtRange(Settings.Instance.OptimalRange))
+                                    {
+                                        Logging.Log(module, "Target is NPC Frigate and we got Turrets. Keeping target at Range to hit it.", Logging.Teal);
+                                        Logging.Log(module, "Initiating KeepAtRange [" + target.Name + "][at " + Math.Round((double)Settings.Instance.OptimalRange / 1000, 0) + "k][ID: " + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);    
+                                    }
                                     return;    
                                 }
                             }
@@ -289,8 +297,11 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                target.Approach((int)(Cache.Instance.MaxRange * 0.8d));
-                                Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.MaxRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                if (target.KeepAtRange((int) (Cache.Instance.MaxRange*0.8d)))
+                                {
+                                    Logging.Log(module, "Using Weapons Range * 0.8d [" + Math.Round(Cache.Instance.MaxRange * 0.8d / 1000, 0) + " k]: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);                                    
+                                }
+                                
                                 return;    
                             }
                         }
@@ -388,8 +399,10 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
-                            target.Approach((int)(Distances.SafeDistancefromStructure));
-                            Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);    
+                            if (target.KeepAtRange((int) (Distances.SafeDistancefromStructure)))
+                            {
+                                Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);        
+                            }
                         }
                     }
 

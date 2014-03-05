@@ -23,8 +23,11 @@ namespace Questor.Modules.Caching
         private readonly DirectModule _module;
         
         private DateTime ThisModuleCacheCreated = DateTime.UtcNow;
-        public ModuleCache(DirectModule module, double reloadTimeThisMission = 0, DateTime activatedTimeStamp = default(DateTime))
+        public ModuleCache(DirectModule module)
         {
+            //
+            // reminder: this class and all the info within it is created (and destroyed!) each frame for each module!
+            //
             _module = module;
             ThisModuleCacheCreated = DateTime.UtcNow;
         }

@@ -29,6 +29,9 @@ namespace Questor.Modules.Caching
         private int DictionaryCountThreshhold = 250;
         public EntityCache(DirectEntity entity)
         {
+            //
+            // reminder: this class and all the info within it is created (and destroyed!) each frame for each entity!
+            //
             _directEntity = entity;
             //Interlocked.Increment(ref EntityCacheInstances);
             ThisEntityCacheCreated = DateTime.UtcNow;
@@ -4251,13 +4254,13 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Approach(int range)
+        public bool KeepAtRange(int range)
         {
             try
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -4270,15 +4273,19 @@ namespace Questor.Modules.Caching
                         if (bastionModules.Any(i => i.IsActive))
                         {
                             Logging.Log("EntityCache.Approach", "BastionMode is active, we cannot move, aborting attempt to Approach", Logging.Debug);
-                            return;
+                            return false;
                         }
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
                         Cache.Instance.Approaching = this;
-                        //_directEntity.Approach();
+                        return true;
                     }
+
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {

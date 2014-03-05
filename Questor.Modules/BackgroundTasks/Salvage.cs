@@ -512,6 +512,7 @@ namespace Questor.Modules.BackgroundTasks
                     // Ignore empty wrecks
                     if (wreck.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
                     {
+                        Cache.Instance.LootedContainers.Add(wreck.Id);
                         if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: Ignoring Empty Entity ID [" + wreck.Id + "]", Logging.Teal);
                         continue;
                     }
@@ -602,6 +603,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Empty wreck, ignore
                 if (containerEntity.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
                 {
+                    Cache.Instance.LootedContainers.Add(containerEntity.Id);
                     if (Settings.Instance.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "Ignoring Empty Wreck", Logging.Teal);
                     continue;
                 }

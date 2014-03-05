@@ -829,8 +829,11 @@ namespace QuestorManager
         {
             try
             {
-                if (SearchResults != null && SearchResults.Items.Count > 0)
-                {
+                //if (SearchResults != null && SearchResults.Items.Count > 0)
+                //{
+                
+                //if (SearchResults != null && SearchResults.Items[0] != null)
+                //{
                     if (SearchResults.SelectedItems[0] != null)
                     {
                         if (SearchResults.SelectedItems.Count > 0)
@@ -851,11 +854,12 @@ namespace QuestorManager
                     {
                         Logging.Log("QuestorManager", "BttnAddTraveler_Click: SearchResults.SelectedItems[0] is null", Logging.Debug);
                     }    
-                }
+                //}
             }
             catch (Exception exception)
             {
                 Logging.Log("QuestorManager", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("QuestorManager", "Is this exception timing based?", Logging.Debug);
             }
         }
 

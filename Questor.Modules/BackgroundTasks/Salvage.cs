@@ -370,12 +370,6 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private static void TargetWrecks()
         {
-            if (!Cache.Instance.OpenWrecks)
-            {
-                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: OpenWrecks is false, we do not need to target any wrecks.", Logging.Teal);
-                return;
-            }
-
             // We are jammed, we do not need to log (Combat does this already)
             if (Cache.Instance.MaxLockedTargets == 0 || Cache.Instance.Targets.Any() && Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
             {
@@ -391,8 +385,10 @@ namespace Questor.Modules.BackgroundTasks
 
             bool hasSalvagers = Cache.Instance.Modules.Any(m => m.GroupId == (int)Group.Salvager);
             List<EntityCache> wreckTargets = targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.CategoryId == (int)CategoryID.Celestial).ToList();
-
-            // Check for cargo containers
+            
+            //
+            // UnTarget Wrecks/Containers, etc as they get in range
+            //
             foreach (EntityCache wreck in wreckTargets.OrderByDescending(i => i.IsLootTarget))
             {
                 if (!hasSalvagers)
@@ -452,6 +448,15 @@ namespace Questor.Modules.BackgroundTasks
                 tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
             }
 
+            if (!Cache.Instance.OpenWrecks)
+            {
+                if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: OpenWrecks is false, we do not need to target any wrecks.", Logging.Teal);
+                return;
+            }
+
+            //
+            // TargetWrecks/Container, etc If needed
+            //
             int wrecksProcessedThisTick = 0;
             IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
             foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
@@ -487,8 +492,9 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // do not tractor blacklisted wrecks
                     //
-                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId))
+                    if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId) && !Cache.Instance.ListofContainersToLoot.Contains(wreck.Id))
                     {
+                        Cache.Instance.LootedContainers.Add(wreck.Id);
                         if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId)", Logging.Teal);
                         continue;
                     }

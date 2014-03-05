@@ -623,9 +623,9 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.WarpOutStation:
-                    if (!string.IsNullOrEmpty(Settings.Instance.BookmarkWarpOut))
+                    if (!string.IsNullOrEmpty(Settings.Instance.UndockBookmarkPrefix))
                     {
-                        IEnumerable<DirectBookmark> warpOutBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "");
+                        IEnumerable<DirectBookmark> warpOutBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "");
                         if (warpOutBookmarks != null && warpOutBookmarks.Any())
                         {
                             DirectBookmark warpOutBookmark = warpOutBookmarks.OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);

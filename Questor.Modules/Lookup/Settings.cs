@@ -298,7 +298,7 @@ namespace Questor.Modules.Lookup
 
         public string TravelToBookmarkPrefix { get; set; }
 
-        public string UndockPrefix { get; set; }
+        public string UndockBookmarkPrefix { get; set; }
         public int UndockDelay { get; set; }
         public int MinimumWreckCount { get; set; }
         public bool AfterMissionSalvaging { get; set; }
@@ -315,11 +315,6 @@ namespace Questor.Modules.Lookup
         public int TractorBeamMinimumCapacitor { get; set; }
         public int SalvagerMinimumCapacitor { get; set; }
         public bool DoNotDoANYSalvagingOutsideMissionActions { get; set; }
-
-        //
-        // undocking settings
-        //
-        public string BookmarkWarpOut { get; set; }
 
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
@@ -927,10 +922,7 @@ namespace Questor.Modules.Lookup
             // Undock settings
             //
             UndockDelay = (int?)CharacterSettingsXml.Element("undockdelay") ?? (int?)CommonSettingsXml.Element("undockdelay") ?? 10; //Delay when undocking - not in use
-            UndockPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? "Insta";
-
-            //Undock bookmark prefix - used by traveler - not in use
-            BookmarkWarpOut = (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "";
+            UndockBookmarkPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "Insta";
 
             //
             // Location of the Questor GUI on startup (default is off the screen)
@@ -1706,10 +1698,7 @@ namespace Questor.Modules.Lookup
                 // Undock settings
                 //
                 UndockDelay = 10; //Delay when undocking - not in use
-                UndockPrefix = "Insta";
-
-                //Undock bookmark prefix - used by traveler - not in use
-                BookmarkWarpOut = "";
+                UndockBookmarkPrefix = "Insta";
 
                 //
                 // Location of the Questor GUI on startup (default is off the screen)

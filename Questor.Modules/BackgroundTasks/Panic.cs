@@ -471,11 +471,15 @@ namespace Questor.Modules.BackgroundTasks
                                     if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                     //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                                     {
-                                        double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
-                                                                                            offridSafeSpotBookmark.Y ?? 0,
-                                                                                            offridSafeSpotBookmark.Z ?? 0);
-                                        Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((DistanceToBm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
-                                        offridSafeSpotBookmark.WarpTo();
+                                        if (offridSafeSpotBookmark.WarpTo())
+                                        {
+                                            double DistanceToBm = Cache.Instance.DistanceFromMe(offridSafeSpotBookmark.X ?? 0,
+                                                                                                offridSafeSpotBookmark.Y ?? 0,
+                                                                                                offridSafeSpotBookmark.Z ?? 0);
+                                            Logging.Log("Panic", "Warping to safespot bookmark [" + offridSafeSpotBookmark.Title + "][" + Math.Round((DistanceToBm / 1000) / 149598000, 2) + " AU away]", Logging.Red);
+                                            return;
+                                        }
+                                        
                                         return;
                                     }
 

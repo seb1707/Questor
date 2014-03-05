@@ -3011,7 +3011,6 @@ namespace Questor.Modules.Caching
                 _targeting = null;
                 _targetedBy = null;
                 _TotalTargetsandTargeting = null;
-                _undockBookmark = null;
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _weapons = null;
@@ -4067,6 +4066,7 @@ namespace Questor.Modules.Caching
                 ListofWebbingEntities.Clear();
                 ListofContainersToLoot.Clear();
                 ListofMissionCompletionItemsToLoot.Clear();
+                ListOfUndockBookmarks = null;
                 
                 EntityNames.Clear();
                 EntityTypeID.Clear();
@@ -7689,23 +7689,25 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        internal static DirectBookmark _undockBookmark;
+        IEnumerable<DirectBookmark> ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);
+
+        internal static DirectBookmark _undockBookmarkInLocal;
         public DirectBookmark UndockBookmark
         {
             get
             {
                 try
                 {
-                    if (_undockBookmark == null)
+                    if (_undockBookmarkInLocal == null)
                     {
-                        IEnumerable<DirectBookmark> _undockBookmarkList = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockPrefix);
-                        if (_undockBookmarkList != null && _undockBookmarkList.Any())
+
+                        if (ListOfUndockBookmarks != null && ListOfUndockBookmarks.Any())
                         {
-                            _undockBookmarkList = _undockBookmarkList.Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();
-                            _undockBookmark = _undockBookmarkList.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.NextPocketDistance);
-                            if (_undockBookmark != null)
+                            ListOfUndockBookmarks = ListOfUndockBookmarks.Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();
+                            _undockBookmarkInLocal = ListOfUndockBookmarks.OrderBy(i => Cache.Instance.DistanceFromMe(i.X ?? 0, i.Y ?? 0, i.Z ?? 0)).FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.NextPocketDistance);
+                            if (_undockBookmarkInLocal != null)
                             {
-                                return _undockBookmark;
+                                return _undockBookmarkInLocal;
                             }
 
                             return null;    
@@ -7714,7 +7716,7 @@ namespace Questor.Modules.Caching
                         return null;
                     }
 
-                    return _undockBookmark;
+                    return _undockBookmarkInLocal;
                 }
                 catch (Exception exception)
                 {
@@ -7724,7 +7726,7 @@ namespace Questor.Modules.Caching
             }
             internal set
             {
-                _undockBookmark = value;
+                _undockBookmarkInLocal = value;
             }
 
         }

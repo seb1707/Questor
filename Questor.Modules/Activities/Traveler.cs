@@ -27,27 +27,19 @@ namespace Questor.Modules.Activities
         public static DateTime _nextTravelerAction;
         private static DateTime _lastPulse;
         private static DateTime _nextGetLocation;
-        //private static DateTime _nextSetEVENavDestination = DateTime.MinValue;
-        //private static DateTime _nextGetDestinationPath = DateTime.MinValue;
-
+        
         private static List<int> _destinationRoute;
         public static DirectLocation _location;
         private static IEnumerable<DirectBookmark> myHomeBookmarks;
         private static string _locationName;
         private static int _locationErrors;
         private static int TravelHomeCounter;
-        //private static Combat _combat;
-        //private static Drones _drones;
-
-        //private static List<long> EVENavdestination { get; set; }
-
+        
         public DirectBookmark UndockBookmark { get; set; }
 
         public Traveler()
         {
             _lastPulse = DateTime.MinValue;
-            //_combat = new Combat();
-            //_drones = new Drones();
         }
 
         public static TravelerDestination Destination

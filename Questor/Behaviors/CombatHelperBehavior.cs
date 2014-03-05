@@ -485,7 +485,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatHelperBehaviorState.WarpOutStation:
-                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
 
                     //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;

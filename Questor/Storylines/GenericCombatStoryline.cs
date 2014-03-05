@@ -197,7 +197,7 @@ namespace Questor.Storylines
             switch (_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
-                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkWarpOut ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (warpOutBookMark == null)

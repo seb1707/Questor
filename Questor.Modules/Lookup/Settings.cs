@@ -8,6 +8,7 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Linq;
 using System.Threading;
 
 namespace Questor.Modules.Lookup
@@ -42,9 +43,9 @@ namespace Questor.Modules.Lookup
             Ammo = new List<Ammo>();
             ItemsBlackList = new List<int>();
             WreckBlackList = new List<int>();
-            AgentsList = new List<AgentsList>();
-            FactionFitting = new List<FactionFitting>();
-            MissionFitting = new List<MissionFitting>();
+            ListOfAgents = new List<AgentsList>();
+            ListofFactionFittings = new List<FactionFitting>();
+            ListOfMissionFittings = new List<MissionFitting>();
             MissionBlacklist = new List<string>();
             MissionGreylist = new List<string>();
             CharacterNamesForMasterToInviteToFleet = new List<string>();
@@ -397,9 +398,9 @@ namespace Questor.Modules.Lookup
         //
         // Fitting Settings - if enabled
         //
-        public List<FactionFitting> FactionFitting { get; private set; }
-        public List<AgentsList> AgentsList { get; set; }
-        public List<MissionFitting> MissionFitting { get; private set; }
+        public List<FactionFitting> ListofFactionFittings { get; private set; }
+        public List<AgentsList> ListOfAgents { get; set; }
+        public List<MissionFitting> ListOfMissionFittings { get; private set; }
         public FactionFitting DefaultFitting { get; set; }
 
         //
@@ -415,6 +416,7 @@ namespace Questor.Modules.Lookup
         public int MinimumTargetValueToConsiderTargetAHighValueTarget { get; set; }
         public int MaximumTargetValueToConsiderTargetALowValueTarget { get; set; }
         public bool ArmLoadCapBoosters { get; set; }
+        public bool SelectAmmoToUseBasedOnShipSize { get; set; }
 
         public int DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage { get; set; }
 
@@ -1133,6 +1135,7 @@ namespace Questor.Modules.Lookup
             DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
             SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
             ArmLoadCapBoosters = (bool?)CharacterSettingsXml.Element("armLoadCapBoosters") ?? (bool?)CommonSettingsXml.Element("armLoadCapBoosters") ?? false;
+            SelectAmmoToUseBasedOnShipSize = (bool?)CharacterSettingsXml.Element("selectAmmoToUseBasedOnShipSize") ?? (bool?)CommonSettingsXml.Element("selectAmmoToUseBasedOnShipSize") ?? false;
 
             MinimumTargetValueToConsiderTargetAHighValueTarget = (int?)CharacterSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? (int?)CommonSettingsXml.Element("minimumTargetValueToConsiderTargetAHighValueTarget") ?? 2;
             MaximumTargetValueToConsiderTargetALowValueTarget = (int?)CharacterSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? (int?)CommonSettingsXml.Element("maximumTargetValueToConsiderTargetALowValueTarget") ?? 1;
@@ -1319,7 +1322,7 @@ namespace Questor.Modules.Lookup
             //
             //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
             //{
-            AgentsList.Clear();
+            ListOfAgents.Clear();
             XElement agentList = CharacterSettingsXml.Element("agentsList") ?? CommonSettingsXml.Element("agentsList");
 
             if (agentList != null)
@@ -1329,7 +1332,7 @@ namespace Questor.Modules.Lookup
                     int i = 0;
                     foreach (XElement agent in agentList.Elements("agentList"))
                     {
-                        AgentsList.Add(new AgentsList(agent));
+                        ListOfAgents.Add(new AgentsList(agent));
                         i++;
                     }
                     if (i >= 2)
@@ -1356,21 +1359,43 @@ namespace Questor.Modules.Lookup
             //
             // Fittings chosen based on the faction of the mission
             //
-            FactionFitting.Clear();
-            XElement factionFittings = CharacterSettingsXml.Element("factionfittings") ?? CommonSettingsXml.Element("factionfittings");
+            ListofFactionFittings.Clear();
+            
             if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
+                XElement factionFittings = CharacterSettingsXml.Element("factionFittings") ?? 
+                                           CharacterSettingsXml.Element("factionfittings") ??
+                                           CommonSettingsXml.Element("factionFittings") ?? 
+                                           CommonSettingsXml.Element("factionfittings");
+
                 if (factionFittings != null)
                 {
-                    foreach (XElement factionfitting in factionFittings.Elements("factionfitting"))
+                    string factionFittingXMLElementName = "";
+                    if (factionFittings.Elements("factionFitting").Any())
                     {
-                        FactionFitting.Add(new FactionFitting(factionfitting));
+                        factionFittingXMLElementName = "factionFitting";
+                    }
+                    else
+                    {
+                        factionFittingXMLElementName = "factionfitting";
                     }
 
-                    if (FactionFitting.Exists(m => m.Faction.ToLower() == "default"))
+                    int i = 0;
+                    foreach (XElement factionfitting in factionFittings.Elements(factionFittingXMLElementName))
                     {
-                        DefaultFitting = FactionFitting.Find(m => m.Faction.ToLower() == "default");
-                        if (string.IsNullOrEmpty(DefaultFitting.Fitting))
+                        i++;
+                        ListofFactionFittings.Add(new FactionFitting(factionfitting));
+                        if (Settings.Instance.DebugFittingMgr) Logging.Log("Settings.LoadMFactionFitting", "[" + i + "] Faction Fitting [" + factionfitting + "]", Logging.Teal);
+                        
+                    }
+
+                    //
+                    // if we have no default fitting do not use fitting manager
+                    //
+                    if (ListofFactionFittings.Exists(m => m.FactionName.ToLower() == "default"))
+                    {
+                        DefaultFitting = ListofFactionFittings.Find(m => m.FactionName.ToLower() == "default");
+                        if (string.IsNullOrEmpty(DefaultFitting.FittingName))
                         {
                             UseFittingManager = false;
                             Logging.Log("Settings", "Error! No default fitting specified or fitting is incorrect.  Fitting manager will not be used.", Logging.Orange);
@@ -1394,21 +1419,22 @@ namespace Questor.Modules.Lookup
             //
             // Fitting based on the name of the mission
             //
-            MissionFitting.Clear();
+            ListOfMissionFittings.Clear();
             XElement xmlElementMissionFittingsSection = CharacterSettingsXml.Element("missionfittings") ?? CommonSettingsXml.Element("missionfittings");
             if (UseFittingManager) //no need to look for or load these settings if FittingManager is disabled
             {
                 if (xmlElementMissionFittingsSection != null)
                 {
                     Logging.Log("Settings", "Loading Mission Fittings", Logging.White);
-                    int i = 1;
+                    int i = 0;
                     foreach (XElement missionfitting in xmlElementMissionFittingsSection.Elements("missionfitting"))
                     {
-                        MissionFitting.Add(new MissionFitting(missionfitting));
-                        if (Settings.Instance.DebugMissionFittings) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
-                        i++;
+                        i++; 
+                        ListOfMissionFittings.Add(new MissionFitting(missionfitting));
+                        if (Settings.Instance.DebugFittingMgr) Logging.Log("Settings.LoadMissionFittings", "[" + i + "] Mission Fitting [" + missionfitting + "]", Logging.Teal);
+                        
                     }
-                    Logging.Log("Settings", "        Mission Fittings now has [" + MissionFitting.Count + "] entries", Logging.White);
+                    Logging.Log("Settings", "        Mission Fittings now has [" + ListOfMissionFittings.Count + "] entries", Logging.White);
                 }
             }
 
@@ -1935,9 +1961,9 @@ namespace Questor.Modules.Lookup
                 Ammo.Clear();
                 ItemsBlackList.Clear();
                 WreckBlackList.Clear();
-                FactionFitting.Clear();
-                AgentsList.Clear();
-                MissionFitting.Clear();
+                ListofFactionFittings.Clear();
+                ListOfAgents.Clear();
+                ListOfMissionFittings.Clear();
 
                 //
                 // Clear the Blacklist

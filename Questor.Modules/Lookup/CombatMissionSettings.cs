@@ -84,9 +84,9 @@ namespace Questor.Modules.Lookup
 
             if (!loadedAmmo)
             {
-                Cache.Instance.DamageType = GetMissionDamageType(html);
-                LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
-                Logging.Log("AgentInteraction", "Detected configured damage type for [" + missionName + "] is [" + Cache.Instance.DamageType + "]", Logging.Yellow);
+                Cache.Instance.MissionDamageType = GetMissionDamageType(html);
+                LoadSpecificAmmo(new[] { Cache.Instance.MissionDamageType });
+                Logging.Log("AgentInteraction", "Detected configured damage type for [" + missionName + "] is [" + Cache.Instance.MissionDamageType + "]", Logging.Yellow);
             }
         }
 

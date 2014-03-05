@@ -80,6 +80,7 @@ namespace Questor.Modules.Lookup
         public int LoginDelayMaximum_seconds = 25;
         public int ReLogDelayMinimum_seconds = 35;                          //DO NOT set this lower than 20 or so seconds!
         public int ReLogDelayMaximum_seconds = 60;
-        public int RecallDronesDelayBetweenRetries = 15;                    //Time between recall commands for drones when attempting to pull drones   
+        public int RecallDronesDelayBetweenRetries = 15;                    //Time between recall commands for drones when attempting to pull drones
+        public int EnforcedDelayBetweenArbitraryAmmoChanges = 60;           //do not allow changing ammo before this # of seconds, default is 60.
     }
 }

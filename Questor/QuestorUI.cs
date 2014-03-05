@@ -243,7 +243,7 @@ namespace Questor
                             lblUserDefinedScript4.Text = Settings.Instance.UserDefinedLavishScriptScript4Description;
                         }
 
-                        DamageTypeData.Text = Cache.Instance.DamageType.ToString();
+                        DamageTypeData.Text = Cache.Instance.MissionDamageType.ToString();
 
                         //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
                         //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
@@ -527,9 +527,9 @@ namespace Questor
             //    }
             //}
 
-            if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.DamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+            if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
             {
-                DamageTypeComboBox.SelectedItem = Cache.Instance.DamageType.ToString();
+                DamageTypeComboBox.SelectedItem = Cache.Instance.MissionDamageType.ToString();
             }
 
             //
@@ -830,7 +830,7 @@ namespace Questor
 
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
-            Cache.Instance.DamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
+            Cache.Instance.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
         }
 
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)

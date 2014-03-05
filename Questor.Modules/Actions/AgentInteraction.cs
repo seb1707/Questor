@@ -82,7 +82,7 @@ namespace Questor.Modules.Actions
             Cache.Instance.AgentFactionEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.FactionId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
 
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe, Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe, Cache.Instance.AgentFactionEffectiveStandingtoMe));
-            AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+            AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
             if (Settings.Instance.MultiAgentSupport)
             {
@@ -109,7 +109,7 @@ namespace Questor.Modules.Actions
             Cache.Instance.AgentFactionEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.FactionId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
 
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe,Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe,Cache.Instance.AgentFactionEffectiveStandingtoMe));
-            AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+            AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
             Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
 
@@ -126,7 +126,7 @@ namespace Questor.Modules.Actions
                         _agentStandingsCheckFlag = true;
                     }
                     _nextAgentAction = DateTime.UtcNow.AddSeconds(5);
-                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).Seconds, 0) + " sec]", Logging.Yellow);
+                    Logging.Log("AgentInteraction.StandingsCheck", " Agent [" + Cache.Instance.DirectEve.GetAgentById(AgentId).Name + "] Standings show as [" + Cache.Instance.StandingUsedToAccessAgent + " and must not yet be available. retrying for [" + Math.Round((double)_agentStandingsCheckTimeOut.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " sec]", Logging.Yellow);
                     return;
                 }
             }
@@ -387,11 +387,11 @@ namespace Questor.Modules.Actions
                 }
 
                 //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
-                IEnumerable<DamageType> damageTypes = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
-                if (damageTypes.Any())
+                IEnumerable<DamageType> damageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
+                if (damageTypesForThisMission.Any())
                 {
-                    Cache.Instance.DamageType = damageTypes.FirstOrDefault();
-                    LoadSpecificAmmo(damageTypes.Distinct());
+                    Cache.Instance.MissionDamageType = damageTypesForThisMission.FirstOrDefault();
+                    LoadSpecificAmmo(damageTypesForThisMission.Distinct());
                     loadedAmmo = true;
                 }
             }
@@ -546,12 +546,12 @@ namespace Questor.Modules.Actions
                     if (faction != null)
                     {
                         Cache.Instance.FactionName = (string)faction.Attribute("name");
-                        Cache.Instance.DamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                        Cache.Instance.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
                         return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
                     }
                 }
             }
-            Cache.Instance.DamageType = DamageType.EM;
+            Cache.Instance.MissionDamageType = DamageType.EM;
             return DamageType.EM;
         }
 
@@ -745,9 +745,9 @@ namespace Questor.Modules.Actions
 
                 if (!loadedAmmo)
                 {
-                    Cache.Instance.DamageType = GetMissionDamageType(html);
-                    LoadSpecificAmmo(new[] { Cache.Instance.DamageType });
-                    Logging.Log("AgentInteraction", "Detected configured damage type for [" + MissionName + "] is [" + Cache.Instance.DamageType + "]", Logging.Yellow);
+                    Cache.Instance.MissionDamageType = GetMissionDamageType(html);
+                    LoadSpecificAmmo(new[] { Cache.Instance.MissionDamageType });
+                    Logging.Log("AgentInteraction", "Detected configured damage type for [" + MissionName + "] is [" + Cache.Instance.MissionDamageType + "]", Logging.Yellow);
                 }
 
                 if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -880,7 +880,7 @@ namespace Questor.Modules.Actions
                 }
 
                 int secondsToWait = ((hours * 3600) + (minutes * 60) + 60);
-                AgentsList currentAgent = Settings.Instance.AgentsList.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+                AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
                 //
                 // standings are below the blacklist minimum 
@@ -1006,7 +1006,7 @@ namespace Questor.Modules.Actions
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
 
                     //Cache.Instance.FactionFit = "Default";
-                    Cache.Instance.Fitting = Settings.Instance.DefaultFitting.ToString();
+                    Cache.Instance.FittingToLoad = Settings.Instance.DefaultFitting.ToString();
                     Cache.Instance.FactionName = "Default";
                     if (faction != null)
                     {
@@ -1018,16 +1018,24 @@ namespace Questor.Modules.Actions
                             return true;
                         }
 
-                        if (Settings.Instance.UseFittingManager && Settings.Instance.FactionFitting.Any(m => m.Faction.ToLower() == factionName.ToLower()))
+                        if (Settings.Instance.UseFittingManager && Settings.Instance.ListofFactionFittings.Any(m => m.FactionName.ToLower() == factionName.ToLower()))
                         {
-                            FactionFitting factionFitting = Settings.Instance.FactionFitting.FirstOrDefault(m => m.Faction.ToLower() == factionName.ToLower());
-                            if (factionFitting != null)
+                            FactionFitting _factionFittingForThisMissionsFaction = Settings.Instance.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == factionName.ToLower());
+                            if (_factionFittingForThisMissionsFaction != null)
                             {
-                                Cache.Instance.FactionFit = factionFitting.Fitting;
-                                Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.Faction, Logging.Yellow);
+                                Cache.Instance.FactionFittingForThisMissionsFaction = _factionFittingForThisMissionsFaction.FittingName;
+                                //
+                                // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
+                                //
+                                if (_factionFittingForThisMissionsFaction.DroneTypeID != null)
+                                {
+                                    Cache.Instance.DroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
+                                }
+                                Logging.Log("AgentInteraction", "Faction fitting: " + _factionFittingForThisMissionsFaction.FactionName + "Using DroneTypeID [" + Cache.Instance.DroneTypeID + "]", Logging.Yellow);
                             }
                             else
                             {
+                                Cache.Instance.FactionFittingForThisMissionsFaction = null;
                                 Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + factionName + " ]", Logging.Yellow);
                             }
 
@@ -1044,11 +1052,11 @@ namespace Questor.Modules.Actions
             if (Settings.Instance.UseFittingManager)
             {
                 Cache.Instance.FactionName = "Default";
-                FactionFitting factionFitting = Settings.Instance.FactionFitting.FirstOrDefault(m => m.Faction.ToLower() == "default");
+                FactionFitting factionFitting = Settings.Instance.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == "default");
                 if (factionFitting != null)
                 {
-                    Cache.Instance.FactionFit = factionFitting.Fitting;
-                    Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.Faction, Logging.Yellow);
+                    Cache.Instance.FactionFittingForThisMissionsFaction = factionFitting.FittingName;
+                    Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.FactionName, Logging.Yellow);
                 }
                 else
                 {

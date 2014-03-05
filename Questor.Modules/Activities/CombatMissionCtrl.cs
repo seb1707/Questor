@@ -129,7 +129,7 @@ namespace Questor.Modules.Activities
                         return true;
                     }
 
-                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Cache.Instance.NextBookmarkPocketAttempt is in [" + Cache.Instance.NextBookmarkPocketAttempt.Subtract(DateTime.UtcNow).Seconds + "sec] waiting", Logging.Debug);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Cache.Instance.NextBookmarkPocketAttempt is in [" + Cache.Instance.NextBookmarkPocketAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "sec] waiting", Logging.Debug);
                     return false;
                 }
 
@@ -1143,6 +1143,39 @@ namespace Questor.Modules.Activities
             return;
         }
 
+        private void AddEcmNpcByNameAction(Actions.Action action)
+        {
+            bool notTheClosest;
+            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
+            {
+                notTheClosest = false;
+            }
+
+            int numberToIgnore;
+            if (!int.TryParse(action.GetParameterValue("numbertoignore"), out numberToIgnore))
+            {
+                numberToIgnore = 0;
+            }
+
+            List<string> targetNames = action.GetParameterValues("target");
+
+            // No parameter? Ignore kill action
+            if (!targetNames.Any())
+            {
+                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "No targets defined in AddWarpScramblerByName action!", Logging.Teal);
+                Nextaction();
+                return;
+            }
+
+            Cache.Instance.AddWarpScramblerByName(targetNames.FirstOrDefault(), numberToIgnore, notTheClosest);
+            
+            //
+            // this action is passive and only adds things to the WarpScramblers list )before they have a chance to scramble you, so you can target them early
+            //
+            Nextaction();
+            return;
+        }
+
         private void AddWebifierByNameAction(Actions.Action action)
         {
             bool notTheClosest;
@@ -2048,6 +2081,10 @@ namespace Questor.Modules.Activities
 
                 case ActionState.Done:
                     DoneAction();
+                    break;
+
+                case ActionState.AddEcmNpcByName:
+                    AddEcmNpcByNameAction(action);
                     break;
 
                 case ActionState.AddWarpScramblerByName:

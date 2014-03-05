@@ -52,7 +52,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (Settings.Instance.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).Seconds + "seconds]", Logging.White);
+                    if (Settings.Instance.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds + "seconds]", Logging.White);
                     return;
                 }
                 

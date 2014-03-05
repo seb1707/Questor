@@ -322,7 +322,7 @@ namespace Questor.Behaviors
                     
                     if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
                     {
-                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).Seconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
 

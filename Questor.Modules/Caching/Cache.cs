@@ -672,7 +672,32 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Best damage type for the mission
         /// </summary>
-        public DamageType DamageType { get; set; }
+        public DamageType MissionDamageType { get; set; }
+
+        /// <summary>
+        ///   Best damage type for this mission
+        /// </summary>
+        public DamageType FrigateDamageType { get; set; }
+
+        /// <summary>
+        ///   Best damage type for Frigates for this mission / faction
+        /// </summary>
+        public DamageType CruiserDamageType { get; set; }
+
+        /// <summary>
+        ///   Best damage type for BattleCruisers for this mission / faction
+        /// </summary>
+        public DamageType BattleCruiserDamageType { get; set; }
+
+        /// <summary>
+        ///   Best damage type for BattleShips for this mission / faction
+        /// </summary>
+        public DamageType BattleShipDamageType { get; set; }
+
+        /// <summary>
+        ///   Best damage type for LargeColidables for this mission / faction
+        /// </summary>
+        public DamageType LargeColidableDamageType { get; set; }
 
         /// <summary>
         ///   Best orbit distance for the mission
@@ -721,7 +746,7 @@ namespace Questor.Modules.Caching
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCurrentShipsCargoWindowAction).Seconds + "sec]", Logging.Debug);
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -758,7 +783,7 @@ namespace Questor.Modules.Caching
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).Seconds + "sec]", Logging.Debug);
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -891,7 +916,7 @@ namespace Questor.Modules.Caching
             get
             {
                 // Get ammo based on current damage type
-                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType).ToList();
+                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == MissionDamageType).ToList();
 
                 try
                 {
@@ -1143,7 +1168,7 @@ namespace Questor.Modules.Caching
             {
                 DirectAgentMission mission = null;
 
-                foreach (AgentsList potentialAgent in Settings.Instance.AgentsList)
+                foreach (AgentsList potentialAgent in Settings.Instance.ListOfAgents)
                 {
                     if (Cache.Instance.DirectEve.AgentMissions.Any(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name))
                     {
@@ -1157,7 +1182,7 @@ namespace Questor.Modules.Caching
                     try
                     {
                         Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
-                        var nearestAgent = Settings.Instance.AgentsList
+                        var nearestAgent = Settings.Instance.ListOfAgents
                             .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                             .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
 
@@ -1167,9 +1192,9 @@ namespace Questor.Modules.Caching
                         }
 
 
-                        if (Settings.Instance.AgentsList.OrderBy(j => j.Priorit).Any())
+                        if (Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).Any())
                         {
-                            AgentsList __HighestPriorityAgentInList = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                            AgentsList __HighestPriorityAgentInList = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
                             if (__HighestPriorityAgentInList != null)
                             {
                                 return __HighestPriorityAgentInList.Name;
@@ -1197,7 +1222,7 @@ namespace Questor.Modules.Caching
         private string SelectFirstAgent()
         {
             Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
-            AgentsList FirstAgent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+            AgentsList FirstAgent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
             if (FirstAgent == null)
             {
                 Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
@@ -1224,12 +1249,12 @@ namespace Questor.Modules.Caching
                 return SelectNearestAgent();
             }
 
-            AgentsList agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
+            AgentsList agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
             if (agent == null)
             {
                 try
                 {
-                    agent = Settings.Instance.AgentsList.OrderBy(j => j.Priorit).FirstOrDefault();
+                    agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
                 }
                 catch (Exception ex)
                 {
@@ -2572,7 +2597,7 @@ namespace Questor.Modules.Caching
         /// </summary>
         public double MissionWarpAtDistanceRange { get; set; } //in km
 
-        public string Fitting { get; set; } // stores name of the final fitting we want to use
+        public string FittingToLoad { get; set; } // stores name of the final fitting we want to use
 
         public string MissionShip { get; set; } //stores name of mission specific ship
 
@@ -2580,7 +2605,7 @@ namespace Questor.Modules.Caching
 
         public string CurrentFit { get; set; }
 
-        public string FactionFit { get; set; }
+        public string FactionFittingForThisMissionsFaction { get; set; }
 
         public string FactionName { get; set; }
 
@@ -2596,6 +2621,9 @@ namespace Questor.Modules.Caching
 
         public bool? MissionUseDrones { get; set; }
 
+        public int DroneTypeID { get; set; }
+        public int FactionDroneTypeID { get; set; }
+        
         public bool? MissionKillSentries { get; set; }
 
         public bool StopTimeSpecified = true;
@@ -3103,7 +3131,7 @@ namespace Questor.Modules.Caching
 
                                     if (pocket.Element("damagetype") != null)
                                     {
-                                        DamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
+                                        MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
                                     }
 
                                     if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
@@ -3268,58 +3296,82 @@ namespace Questor.Modules.Caching
                 return;
             }
 
-            if (string.IsNullOrEmpty(FactionName))
+            if (string.IsNullOrEmpty(Cache.Instance.FactionName))
             {
-                FactionName = "Default";
+                Cache.Instance.FactionName = "Default";
             }
 
             if (Settings.Instance.UseFittingManager)
             {
                 //Set fitting to default
-                DefaultFitting = Settings.Instance.DefaultFitting.Fitting;
-                Fitting = DefaultFitting;
-                MissionShip = "";
-                ChangeMissionShipFittings = false;
-                if (Settings.Instance.MissionFitting.Any(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())) //priority goes to mission-specific fittings
+                Cache.Instance.DefaultFitting = Settings.Instance.DefaultFitting.FittingName;
+                Cache.Instance.FittingToLoad = DefaultFitting;
+                Cache.Instance.MissionShip = "";
+                Cache.Instance.ChangeMissionShipFittings = false;
+
+                //
+                // default to using the faction fitting if defined
+                //
+                if (!string.IsNullOrEmpty(Cache.Instance.FactionFittingForThisMissionsFaction))
                 {
-                    MissionFitting missionFitting;
+                    Cache.Instance.FittingToLoad = Cache.Instance.FactionFittingForThisMissionsFaction;
+                    Cache.Instance.DroneTypeID = Cache.Instance.FactionDroneTypeID;
+                }
+                
+                if (Settings.Instance.ListOfMissionFittings.Any(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())) //priority goes to mission-specific fittings
+                {
+                    MissionFitting FittingNameTouseForThisMission;
 
                     // if we have got multiple copies of the same mission, find the one with the matching faction
-                    if (Settings.Instance.MissionFitting.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())))
+                    if (Settings.Instance.ListOfMissionFittings.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())))
                     {
-                        missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower()));
+                        FittingNameTouseForThisMission = Settings.Instance.ListOfMissionFittings.FirstOrDefault(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower()));
                     }
                     else //otherwise just use the first copy of that mission
                     {
-                        missionFitting = Settings.Instance.MissionFitting.FirstOrDefault(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower());
+                        FittingNameTouseForThisMission = Settings.Instance.ListOfMissionFittings.FirstOrDefault(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower());
                     }
 
-                    if (missionFitting != null)
+                    if (FittingNameTouseForThisMission != null)
                     {
-                        string missionFit = missionFitting.Fitting;
-                        string missionShip = missionFitting.Ship;
-                        if (!(missionFit == "" && missionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
+                        //
+                        //
+                        //
+                        // this whole thing should be reworked to use faction fittings, drones, etc and them apply mission specific stuff if avail to overwrite it.
+                        //
+                        //
+                        //
+                        Cache.Instance.MissionShip = FittingNameTouseForThisMission.Ship;
+                        //
+                        // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
+                        //
+                        if (FittingNameTouseForThisMission.DroneTypeID != null)
+                        {
+                            Cache.Instance.DroneTypeID = (int) FittingNameTouseForThisMission.DroneTypeID;
+                        }
+                        
+                        if (!(FittingNameTouseForThisMission.Fitting == "" && Cache.Instance.MissionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
                         {
                             ChangeMissionShipFittings = true;
-                            Fitting = missionFit;
+                            Cache.Instance.FittingToLoad = FittingNameTouseForThisMission.Fitting;
                         }
-                        else if (!string.IsNullOrEmpty(FactionFit))
+                        else if (!string.IsNullOrEmpty(FactionFittingForThisMissionsFaction))
                         {
-                            Fitting = FactionFit;
+                            Cache.Instance.FittingToLoad = FactionFittingForThisMissionsFaction;
                         }
 
-                        Logging.Log("Cache", "Mission: " + missionFitting.Mission + " - Faction: " + FactionName + " - Fitting: " + missionFit + " - Ship: " + missionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings, Logging.White);
-                        MissionShip = missionShip;
+                        Logging.Log("RefreshMissionItems", "Mission: " + Cache.Instance.MissionShip + " - Faction: " + Cache.Instance.FactionName + " - Fitting: " + Cache.Instance.FittingToLoad + "]", Logging.White);
+                        Logging.Log("RefreshMissionItems", "Ship: " + Cache.Instance.MissionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings + "Using DroneTypeID [" + Cache.Instance.DroneTypeID + "]", Logging.White);
                     }
                 }
-                else if (!string.IsNullOrEmpty(FactionFit)) // if no mission fittings defined, try to match by faction
+                else if (!string.IsNullOrEmpty(FactionFittingForThisMissionsFaction)) // if no mission fittings defined, try to match by faction
                 {
-                    Fitting = FactionFit;
+                    Cache.Instance.FittingToLoad = Cache.Instance.FactionFittingForThisMissionsFaction;
                 }
 
-                if (Fitting == "") // otherwise use the default
+                if (Cache.Instance.FittingToLoad == "") // otherwise use the default
                 {
-                    Fitting = DefaultFitting;
+                    Cache.Instance.FittingToLoad = DefaultFitting;
                 }
             }
 
@@ -3340,15 +3392,15 @@ namespace Questor.Modules.Caching
                 {
                     BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
                     BringMissionItem = BringMissionItem.ToLower();
-                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "bring XML [" + xdoc.Root.Element("bring") + "] BringMissionItem [" + BringMissionItem + "]", Logging.Debug);
+                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "bring XML [" + xdoc.Root.Element("bring") + "] BringMissionItem [" + BringMissionItem + "]", Logging.Debug);
                     BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
-                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "bringquantity XML [" + xdoc.Root.Element("bringquantity") + "] BringMissionItemQuantity [" + BringMissionItemQuantity + "]", Logging.Debug);
+                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "bringquantity XML [" + xdoc.Root.Element("bringquantity") + "] BringMissionItemQuantity [" + BringMissionItemQuantity + "]", Logging.Debug);
                     
                     BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
                     BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
-                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "trytobring XML [" + xdoc.Root.Element("trytobring") + "] BringOptionalMissionItem [" + BringOptionalMissionItem + "]", Logging.Debug);
+                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "trytobring XML [" + xdoc.Root.Element("trytobring") + "] BringOptionalMissionItem [" + BringOptionalMissionItem + "]", Logging.Debug);
                     BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
-                    if (Settings.Instance.DebugArm) Logging.Log("Cachwe.RefreshMissionItems", "trytobringquantity XML [" + xdoc.Root.Element("trytobringquantity") + "] BringOptionalMissionItemQuantity [" + BringOptionalMissionItemQuantity + "]", Logging.Debug); 
+                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "trytobringquantity XML [" + xdoc.Root.Element("trytobringquantity") + "] BringOptionalMissionItemQuantity [" + BringOptionalMissionItemQuantity + "]", Logging.Debug); 
                     
                 }
 
@@ -3357,7 +3409,7 @@ namespace Questor.Modules.Caching
             }
             catch (Exception ex)
             {
-                Logging.Log("Cache", "Error loading mission XML file [" + ex.Message + "]", Logging.Orange);
+                Logging.Log("RefreshMissionItems", "Error loading mission XML file [" + ex.Message + "]", Logging.Orange);
             }
         }
 
@@ -4185,7 +4237,7 @@ namespace Questor.Modules.Caching
                             }
                             else
                             {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Cache.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).Seconds + "]", Logging.Debug);
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Cache.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).TotalSeconds + "]", Logging.Debug);
                             }
                         }
                         else
@@ -7408,7 +7460,7 @@ namespace Questor.Modules.Caching
                                         return null;
                                     }
 
-                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).Seconds + "] sec", Logging.Debug);
+                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
                                     return null;
                                 }
 
@@ -7900,7 +7952,7 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < NextBookmarkDeletionAttempt)
             {
-                if (Settings.Instance.DebugSalvage) Logging.Log("DeleteUselessSalvageBookmarks", "NextBookmarkDeletionAttempt is still [" + NextBookmarkDeletionAttempt.Subtract(DateTime.UtcNow).Seconds + "] sec in the future... waiting", Logging.Debug);
+                if (Settings.Instance.DebugSalvage) Logging.Log("DeleteUselessSalvageBookmarks", "NextBookmarkDeletionAttempt is still [" + NextBookmarkDeletionAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "] sec in the future... waiting", Logging.Debug);
                 return false;
             }
 

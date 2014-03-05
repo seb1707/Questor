@@ -130,7 +130,7 @@ namespace QuestorTest1
             //
             // ......
             //
-            Logging.Log("QuestorTest1", "QuestorTest1 [" + DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).Seconds + "] sec since we started. ", Logging.White);
+            Logging.Log("QuestorTest1", "QuestorTest1 [" + DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds + "] sec since we started. ", Logging.White);
 
             return;
         }

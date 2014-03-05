@@ -343,21 +343,20 @@ namespace Questor.Modules.Combat
                 // Reload or change ammo
                 if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId && !weapon.IsChangingAmmo)
                 {
-                    weapon.ReloadAmmo(charge, weaponNumber, (double)ammo.Range);
+                    if (weapon.ReloadAmmo(charge, weaponNumber, (double) ammo.Range))
+                    {
+                        return true;
+                    }
+
                     return false;
+                }
+                
+                if (weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity.Name, entity.Distance))
+                {
+                    return true;
                 }
 
-                if (!weapon.IsChangingAmmo)
-                {
-                    weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity.Name, entity.Distance);
-                    return false;
-                }
-
-                if (weapon.IsChangingAmmo)
-                {
-                    Logging.Log("Combat", "Weapon [" + weaponNumber + "] is already reloading. waiting", Logging.Teal);
-                    return false;
-                }
+                return false;
             }
             catch (Exception exception)
             {
@@ -448,15 +447,29 @@ namespace Questor.Modules.Combat
             // Reload or change ammo
             if (weapon.Charge != null && weapon.Charge.TypeId == charge.TypeId)
             {
-                weapon.ReloadAmmo(charge, weaponNumber, (double)ammo.Range);
+                //
+                // reload
+                //
+                if (weapon.ReloadAmmo(charge, weaponNumber, (double) ammo.Range))
+                {
+                    return true;
+                }
+
+                return false;
             }
-            else
+            
+            //
+            // change ammo
+            //
+            if (weapon.ChangeAmmo(charge, weaponNumber, (double) ammo.Range, entity.Name, entity.Distance))
             {
-                weapon.ChangeAmmo(charge, weaponNumber, (double)ammo.Range, entity.Name, entity.Distance);
+                return true;
             }
 
-            // Return false as we are reloading ammo
             return false;
+            
+
+            
         }
 
         /// <summary> Reload correct (tm) ammo for the NPC
@@ -554,16 +567,17 @@ namespace Questor.Modules.Combat
                     
                     if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                     {
-                        if (!ReloadAmmo(weapon, entity, _weaponNumber)) return false; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
+                        if (!ReloadAmmo(weapon, entity, _weaponNumber)) continue; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
                     }
 
-                    continue;
+                    return false;
                 }
 
                 if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll", "completely reloaded all weapons", Logging.White);
+                _reloadAllIteration = 0;
+                return true;
             }
             
-            //_lastReloadAll = DateTime.UtcNow;
             _reloadAllIteration = 0;
             return true;
         }
@@ -831,14 +845,8 @@ namespace Questor.Modules.Combat
                             return;
                         }
 
-                        if (!target.IsTarget)
-                        {
-                            Logging.Log("Combat", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "]IsTargeting[" + target.IsTargeting + "] was not locked, aborting firing as we cant shoot something that is not locked!", Logging.Debug);
-                            return;
-                        }
-
                         if (Settings.Instance.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: Activate: [" + weapon.TypeName + "][" + _weaponNumber + "] has the correct ammo: activate", Logging.Teal);
-                        if (weapon.Activate(target.Id))
+                        if (weapon.Activate(target))
                         {
                             weaponsActivatedThisTick++; //increment the number of weapons we have activated this ProcessState so that we might optionally activate more than one module per tick
                             Logging.Log("Combat", "Activating weapon  [" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -903,7 +911,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(painter, target, false))
                 {
-                    if (painter.Activate(target.Id))
+                    if (painter.Activate(target))
                     {
                         Logging.Log("Combat", "Activating [" + painter.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                         return;
@@ -953,7 +961,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(sensorDampener, target, false))
                 {
-                    if (sensorDampener.Activate(target.Id))
+                    if (sensorDampener.Activate(target))
                     {
                         Logging.Log("Combat", "Activating [" + sensorDampener.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                         return;    
@@ -1010,7 +1018,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(nos, target, false))
                 {
-                    if (nos.Activate(target.Id))
+                    if (nos.Activate(target))
                     {
                         Logging.Log("Combat", "Activating [" + nos.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                         return;    
@@ -1067,7 +1075,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(web, target, false))
                 {
-                    if (web.Activate(target.Id))
+                    if (web.Activate(target))
                     {
                         Logging.Log("Combat", "Activating [" + web.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                         return;    
@@ -1195,7 +1203,7 @@ namespace Questor.Modules.Combat
 
                 if (CanActivate(WarpDisruptor, target, false))
                 {
-                    if (WarpDisruptor.Activate(target.Id))
+                    if (WarpDisruptor.Activate(target))
                     {
                         Logging.Log("Combat", "Activating [" + WarpDisruptor.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                         return;
@@ -1254,7 +1262,7 @@ namespace Questor.Modules.Combat
 
                     if (CanActivate(RemoteRepairer, target, false))
                     {
-                        if (RemoteRepairer.Activate(target.Id))
+                        if (RemoteRepairer.Activate(target))
                         {
                             Logging.Log("Combat", "Activating [" + RemoteRepairer.TypeName + "][" + _weaponNumber + "] on [" + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.Teal);
                             return;    

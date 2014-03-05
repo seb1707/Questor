@@ -386,10 +386,10 @@ namespace Questor.Behaviors
 
                         if (station.Distance < 1900)
                         {
-                            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                            if (station.Dock())
                             {
-                                Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                station.Dock();
+                                Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+
                             }
                         }
                         else

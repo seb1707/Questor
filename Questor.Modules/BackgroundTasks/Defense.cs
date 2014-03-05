@@ -82,18 +82,28 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Cache.Instance.LastLoggingAction = DateTime.UtcNow;
                     }
-                    Logging.Log("Defense", "Reloading [" + module.TypeId + "] with [" + scriptToLoad.TypeName + "][TypeID: " + scriptToLoad.TypeId + "]", Logging.Teal);
-                    module.ReloadAmmo(scriptToLoad, 0, 0);
-                    return true;
+                    
+                    if (module.ReloadAmmo(scriptToLoad, 0, 0))
+                    {
+                        Logging.Log("Defense", "Reloading [" + module.TypeId + "] with [" + scriptToLoad.TypeName + "][TypeID: " + scriptToLoad.TypeId + "]", Logging.Teal);
+                        return true;    
+                    }
+
+                    return false;
                 }
                 
                 if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
                 {
                     Cache.Instance.LastLoggingAction = DateTime.UtcNow;
                 }
-                Logging.Log("Defense", "Changing [" + module.TypeId + "] with [" + scriptToLoad.TypeName + "][TypeID: " + scriptToLoad.TypeId + "]", Logging.Teal);
-                module.ChangeAmmo(scriptToLoad,0 , 0);
-                return true;
+                
+                if (module.ChangeAmmo(scriptToLoad, 0, 0))
+                {
+                    Logging.Log("Defense", "Changing [" + module.TypeId + "] with [" + scriptToLoad.TypeName + "][TypeID: " + scriptToLoad.TypeId + "]", Logging.Teal);
+                    return true;    
+                }
+
+                return false;
             }
             Logging.Log("LoadthisScript", "script to load was NULL!", Logging.Teal);
             return false;

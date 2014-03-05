@@ -4430,7 +4430,7 @@ namespace Questor.Modules.Caching
             }
         }
         
-        public void Dock()
+        public bool Dock()
         {
             try
             {
@@ -4440,16 +4440,32 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
-                            _directEntity.Dock();
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            //if (Distance < (int) Distances.DockingRange)
+                            //{
+                                _directEntity.Dock();
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);    
+                            //}
+
+                            //Logging.Log("Dock", "[" + Name + "][" + Distance +"] is not in docking range, aborting docking request", Logging.Debug);
+                            //return false;
                         }
+
+                        Logging.Log("Dock", "[" + Name + "]: directEntity is null or is not valid", Logging.Debug);
+                        return false;
                     }
+
+                    Logging.Log("Dock", "We were last detected in space [" + DateTime.UtcNow.Subtract(Cache.Instance.LastInSpace).TotalSeconds + "] seconds ago. We have been unDocked for [ " + DateTime.UtcNow.Subtract(Cache.Instance.LastInStation).TotalSeconds + " ] seconds. we should not dock yet, waiting", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
         

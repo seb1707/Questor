@@ -29,6 +29,9 @@ namespace Questor.Modules.Caching
         private int DictionaryCountThreshhold = 250;
         public EntityCache(DirectEntity entity)
         {
+            //
+            // reminder: this class and all the info within it is created (and destroyed!) each frame for each entity!
+            //
             _directEntity = entity;
             //Interlocked.Increment(ref EntityCacheInstances);
             ThisEntityCacheCreated = DateTime.UtcNow;
@@ -4251,13 +4254,13 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Approach(int range)
+        public bool KeepAtRange(int range)
         {
             try
             {
                 if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
                 {
-                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -4270,15 +4273,19 @@ namespace Questor.Modules.Caching
                         if (bastionModules.Any(i => i.IsActive))
                         {
                             Logging.Log("EntityCache.Approach", "BastionMode is active, we cannot move, aborting attempt to Approach", Logging.Debug);
-                            return;
+                            return false;
                         }
 
                         Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
                         Cache.Instance.Approaching = this;
-                        //_directEntity.Approach();
+                        return true;
                     }
+
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {
@@ -4430,7 +4437,7 @@ namespace Questor.Modules.Caching
             }
         }
         
-        public void Dock()
+        public bool Dock()
         {
             try
             {
@@ -4440,16 +4447,32 @@ namespace Questor.Modules.Caching
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
-                            _directEntity.Dock();
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            //if (Distance < (int) Distances.DockingRange)
+                            //{
+                                _directEntity.Dock();
+                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);    
+                            //}
+
+                            //Logging.Log("Dock", "[" + Name + "][" + Distance +"] is not in docking range, aborting docking request", Logging.Debug);
+                            //return false;
                         }
+
+                        Logging.Log("Dock", "[" + Name + "]: directEntity is null or is not valid", Logging.Debug);
+                        return false;
                     }
+
+                    Logging.Log("Dock", "We were last detected in space [" + DateTime.UtcNow.Subtract(Cache.Instance.LastInSpace).TotalSeconds + "] seconds ago. We have been unDocked for [ " + DateTime.UtcNow.Subtract(Cache.Instance.LastInStation).TotalSeconds + " ] seconds. we should not dock yet, waiting", Logging.Debug);
+                    return false;
                 }
+
+                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
         

@@ -490,7 +490,7 @@ namespace Questor.Behaviors
                                 if (miningTool.IsDeactivating)
                                     continue;
 
-                                if (miningTool.Activate(_targetAsteroid.Id))
+                                if (miningTool.Activate(_targetAsteroid))
                                 {
                                     //only activate one module per cycle
                                     Logging.Log("Mining", "Activating mining tool [" + _minerNumber + "] on [" + _targetAsteroid.Name + "][" + Cache.Instance.MaskedID(_targetAsteroid.Id) + "][" + Math.Round(_targetAsteroid.Distance / 1000, 0) + "k away]", Logging.Teal);

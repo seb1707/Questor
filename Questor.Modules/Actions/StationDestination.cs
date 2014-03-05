@@ -104,12 +104,10 @@ namespace Questor.Modules.Actions
 
             if (station.Distance < (int)Distances.DockingRange)
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (station.Dock())
                 {
                     Logging.Log("StationDestination.StationDestination", "Dock at [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                    station.Dock();
                     nextAction = DateTime.UtcNow.AddSeconds(30);
-                    return false;
                 }
 
                 return false;

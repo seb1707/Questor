@@ -726,12 +726,17 @@ namespace Questor.Modules.Activities
             if (closest != null)
             {
                 // Move to the target
-                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                closest.Approach(DistanceToApproach);
-                _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
-            }
+                if (closest.KeepAtRange(DistanceToApproach))
+                {
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
+                    Nextaction();
+                    _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
+                    return;
+                }
 
-            Nextaction();
+                return;
+            }
+            
             return;
         }
 
@@ -1646,8 +1651,10 @@ namespace Questor.Modules.Activities
                         {
                             if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
-                                Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                                closest.Approach(1000);
+                                if (closest.KeepAtRange(1000))
+                                {
+                                    Logging.Log("MissionController.DropItem", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);    
+                                }
                             }
                         }
                     }

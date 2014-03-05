@@ -404,15 +404,9 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (station.Distance < (int)Distances.DockingRange)
                         {
-                            if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                            if (station.Dock())
                             {
-                                Logging.Log("Panic", "Docking with [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);
-                                station.Dock();
-                            }
-
-                            if (Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) > 2)
-                            {
-                                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                                Logging.Log("Panic", "Docking with [" + Logging.Yellow + station.Name + Logging.Red + "][" + Logging.Yellow + Math.Round((station.Distance / 1000) / 149598000, 2) + Logging.Red + " AU away]", Logging.Red);    
                             }
 
                             return;

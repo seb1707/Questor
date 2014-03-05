@@ -73,7 +73,7 @@ namespace Questor.Modules.BackgroundTasks
                     return;
 
                 Logging.Log("Salvage", "Activating salvager [" + salvager.ItemId + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
-                salvager.Activate(wreck.Id);
+                salvager.Activate(wreck);
             }
         }
 

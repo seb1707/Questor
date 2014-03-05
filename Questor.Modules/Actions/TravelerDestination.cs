@@ -238,11 +238,10 @@ namespace Questor.Modules.Actions
 
             if (station.Distance < (int)Distances.DockingRange)
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (station.Dock())
                 {
                     Logging.Log("TravelerDestination.StationDestination", "Dock at [" + Logging.Yellow + station.Name + Logging.Green + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Green);
-                    station.Dock();
-                    return false;
+                    return false; //we do not return true until we actually appear in the destination (station in this case)
                 }
 
                 return false;

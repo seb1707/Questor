@@ -260,7 +260,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
                     
                     //tractorBeams.Remove(tractorBeam);
-                    if (tractorBeam.Activate(wreck.Id))
+                    if (tractorBeam.Activate(wreck))
                     {
                         tractorsProcessedThisTick++;
 
@@ -348,7 +348,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
-                if (salvager.Activate(wreck.Id))
+                if (salvager.Activate(wreck))
                 {
                     salvagersProcessedThisTick++;
                     Cache.Instance.NextSalvageAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);

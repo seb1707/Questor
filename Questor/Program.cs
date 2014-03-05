@@ -92,11 +92,9 @@ namespace Questor
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
                 };
 
-            List<string> extra;
             try
             {
-                extra = p.Parse(args);
-
+                Logging._QuestorParamaters = p.Parse(args);
                 //Logging.Log(string.Format("questor: extra = {0}", string.Join(" ", extra.ToArray())));
             }
             catch (OptionException ex)

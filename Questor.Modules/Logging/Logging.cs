@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Questor.Modules.Logging
@@ -68,6 +69,7 @@ namespace Questor.Modules.Logging
         public static string _username;
         public static string _password;
         public static string _character;
+        public static List<string> _QuestorParamaters;
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)

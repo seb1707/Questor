@@ -387,88 +387,112 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                bool result = false;
-                result |= !IsActivatable;
-                result |= !IsOnline;
-                result |= IsDeactivating;
-                result |= IsGoingOnline;
-                result |= IsReloadingAmmo;
-                result |= IsChangingAmmo;
-                result |= !Cache.Instance.InSpace;
-                result |= Cache.Instance.InStation;
-                result |= Cache.Instance.LastInStation.AddSeconds(7) > DateTime.UtcNow; 
-                return result;
+                try
+                {
+                    bool result = false;
+                    result |= !IsActivatable;
+                    result |= !IsOnline;
+                    result |= IsDeactivating;
+                    result |= IsGoingOnline;
+                    result |= IsReloadingAmmo;
+                    result |= IsChangingAmmo;
+                    result |= !Cache.Instance.InSpace;
+                    result |= Cache.Instance.InStation;
+                    result |= Cache.Instance.LastInStation.AddSeconds(7) > DateTime.UtcNow;
+                    return result;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("InLimboState", "IterateUnloadLootTheseItemsAreLootItems - Exception: [" + exception + "]", Logging.Red);
+                    return false;
+                }
             }
         }
 
         private int ClickCountThisFrame = 0;
         public bool Click()
         {
-            if (InLimboState || ClickCountThisFrame > 0)
-                return false;
-
-            if (Cache.Instance.LastClickedTimeStamp != null && Cache.Instance.LastClickedTimeStamp.ContainsKey(ItemId))
+            try
             {
-                if (DateTime.UtcNow < Cache.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
-                {
-                    //if (Settings.Instance.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
+                if (InLimboState || ClickCountThisFrame > 0)
                     return false;
-                }
-            }
 
-            ClickCountThisFrame++;
-
-            if (IsActivatable)
-            {
-                if (!IsActive) //it is not yet active, this click should activate it.
+                if (Cache.Instance.LastClickedTimeStamp != null && Cache.Instance.LastClickedTimeStamp.ContainsKey(ItemId))
                 {
-                    Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                    if (DateTime.UtcNow < Cache.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
+                    {
+                        //if (Settings.Instance.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
+                        return false;
+                    }
                 }
 
-                if (Cache.Instance.LastClickedTimeStamp != null) Cache.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;
-                return _module.Click();
-            }
+                ClickCountThisFrame++;
 
-            return false;
+                if (IsActivatable)
+                {
+                    if (!IsActive) //it is not yet active, this click should activate it.
+                    {
+                        Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                    }
+
+                    if (Cache.Instance.LastClickedTimeStamp != null) Cache.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;
+                    return _module.Click();
+                }
+
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Click", "IterateUnloadLootTheseItemsAreLootItems - Exception: [" + exception + "]", Logging.Red);
+                return false;
+            }
         }
 
         private int ActivateCountThisFrame = 0;
 
         public bool Activate(EntityCache target)
         {
-            if (InLimboState || IsActive || ActivateCountThisFrame > 0)
-                return false;
-
-            ActivateCountThisFrame++;
-
-            if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
+            try
             {
-                if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
-                {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                if (InLimboState || IsActive || ActivateCountThisFrame > 0)
                     return false;
-                }    
-            }
 
-            if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
-            {
-                if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                ActivateCountThisFrame++;
+
+                if (Cache.Instance.LastReloadedTimeStamp != null && Cache.Instance.LastReloadedTimeStamp.ContainsKey(ItemId))
                 {
-                    if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
-                    return false;
-                }    
-            }
+                    if (DateTime.UtcNow < Cache.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        return false;
+                    }
+                }
 
-            if (!target.IsTarget)
+                if (Cache.Instance.LastChangedAmmoTimeStamp != null && Cache.Instance.LastChangedAmmoTimeStamp.ContainsKey(ItemId))
+                {
+                    if (DateTime.UtcNow < Cache.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                    {
+                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        return false;
+                    }
+                }
+
+                if (!target.IsTarget)
+                {
+                    Logging.Log("Activate", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "]IsTargeting[" + target.IsTargeting + "] was not locked, aborting activating module as we cant activate a module on something that is not locked!", Logging.Debug);
+                    return false;
+                }
+
+                _module.Activate(target.Id);
+                Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                Cache.Instance.LastModuleTargetIDs[ItemId] = target.Id;
+                return true;
+            }
+            catch (Exception exception)
             {
-                Logging.Log("Combat", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "]IsTargeting[" + target.IsTargeting + "] was not locked, aborting activating module as we cant activate a module on something that is not locked!", Logging.Debug);
+                Logging.Log("Activate", "IterateUnloadLootTheseItemsAreLootItems - Exception: [" + exception + "]", Logging.Red);
                 return false;
             }
-
-            _module.Activate(target.Id);
-            Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
-            Cache.Instance.LastModuleTargetIDs[ItemId] = target.Id;
-            return true;
         }
 
         public void Deactivate()

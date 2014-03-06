@@ -82,11 +82,9 @@ namespace Questor.Modules.Combat
             List<Ammo> correctAmmoToUse = null;
             List<Ammo> correctAmmoInCargo = null;
 
-
             //
             // NOTE: This new setting is NOT ready for use!
             // NOTE: when we are finished molesting ReloadNormalAmmo we should do the same to the routine used for lasers... 
-            //
             //
             // ammo selection based on target size
             //

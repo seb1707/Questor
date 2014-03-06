@@ -407,6 +407,15 @@ namespace Questor.Modules.Caching
             if (InLimboState || ClickCountThisFrame > 0)
                 return false;
 
+            if (Cache.Instance.LastClickedTimeStamp != null && Cache.Instance.LastClickedTimeStamp.ContainsKey(ItemId))
+            {
+                if (DateTime.UtcNow < Cache.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
+                {
+                    //if (Settings.Instance.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
+                    return false;
+                }
+            }
+
             ClickCountThisFrame++;
 
             if (IsActivatable)
@@ -415,9 +424,12 @@ namespace Questor.Modules.Caching
                 {
                     Cache.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
                 }
+
+                if (Cache.Instance.LastClickedTimeStamp != null) Cache.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;
+                return _module.Click();
             }
-            
-            return _module.Click();
+
+            return false;
         }
 
         private int ActivateCountThisFrame = 0;

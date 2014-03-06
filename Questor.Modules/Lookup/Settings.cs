@@ -173,6 +173,7 @@ namespace Questor.Modules.Lookup
         public bool UseInnerspace { get; set; }
         public bool setEveClientDestinationWhenTraveling { get; set; }
         public string EveServerName { get; set; }
+        public int EnforcedDelayBetweenModuleClicks { get; set; }
         
         public string CharacterToAcceptInvitesFrom { get; set; }
 
@@ -817,6 +818,7 @@ namespace Questor.Modules.Lookup
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
             EveServerName = (string)CharacterSettingsXml.Element("eveServerName") ?? (string)CommonSettingsXml.Element("eveServerName") ?? "Tranquility";
+            EnforcedDelayBetweenModuleClicks = (int?)CharacterSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? (int?)CommonSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? 3000;
             //
             // Misc Settings
             //

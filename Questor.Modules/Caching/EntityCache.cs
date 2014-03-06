@@ -4291,6 +4291,7 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                 Cache.Instance.Approaching = null;
+                return false;
             }
         }
 

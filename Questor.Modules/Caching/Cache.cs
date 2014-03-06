@@ -466,6 +466,7 @@ namespace Questor.Modules.Caching
             LastReloadedTimeStamp = new Dictionary<long, DateTime>();
             LastChangedAmmoTimeStamp = new Dictionary<long, DateTime>();
             LastActivatedTimeStamp = new Dictionary<long, DateTime>();
+            LastClickedTimeStamp = new Dictionary<long, DateTime>();
         
             _entitiesById = new Dictionary<long, EntityCache>();
 
@@ -974,15 +975,21 @@ namespace Questor.Modules.Caching
         public Dictionary<long, DateTime> LastReloadedTimeStamp { get; private set; }
         
         /// <summary>
-        ///   Modules last reload time
+        ///   Modules last changed ammo time
         /// </summary>
         public Dictionary<long, DateTime> LastChangedAmmoTimeStamp { get; private set; }
         
         /// <summary>
-        ///   Modules last reload time
+        ///   Modules last activated time
         /// </summary>
         public Dictionary<long, DateTime> LastActivatedTimeStamp { get; private set; }
+
+        /// <summary>
+        ///   Modules last Click time (this is used for activating AND deactivating!)
+        /// </summary>
+        public Dictionary<long, DateTime> LastClickedTimeStamp { get; private set; }
         
+
         /// <summary>
         ///   Used for Drones to know that it should retract drones
         /// </summary>

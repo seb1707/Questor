@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Diagnostics;
+
 namespace Questor.Modules.Activities
 {
     using System;
@@ -89,16 +91,16 @@ namespace Questor.Modules.Activities
         /// <param name = "solarSystemId"></param>
         private static void NavigateToBookmarkSystem(long solarSystemId)
         {
-            if (_nextTravelerAction > DateTime.UtcNow)
+            if (Cache.Instance.NextTravelerAction > DateTime.UtcNow)
             {
-                //Logging.Log("Traveler: will continue in [ " + Math.Round(_nextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec");
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: will continue in [ " + Math.Round(_nextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Debug);
                 return;
             }
 
             if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
             {
-                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "We just session changed less than 10 sec go, wait.", Logging.Teal);
-                _nextTravelerAction = Cache.Instance.LastSessionChange.AddSeconds(12);
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: We just session changed less than 10 sec go, wait.", Logging.Teal);
+                Cache.Instance.NextTravelerAction = Cache.Instance.LastSessionChange.AddSeconds(12);
                 return;
             }
 
@@ -109,8 +111,8 @@ namespace Questor.Modules.Activities
 
             if (_destinationRoute.Count == 0 || _destinationRoute.All(d => d != solarSystemId))
             {
-                if (Settings.Instance.DebugTraveler) if (_destinationRoute.Count == 0) Logging.Log("Traveler", "We have no destination", Logging.Teal);
-                if (Settings.Instance.DebugTraveler) if (_destinationRoute.All(d => d != solarSystemId)) Logging.Log("Traveler", "the destination is not currently set to solarsystemId [" + solarSystemId + "]", Logging.Teal);
+                if (Settings.Instance.DebugTraveler) if (_destinationRoute.Count == 0) Logging.Log("Traveler", "NavigateToBookmarkSystem: We have no destination", Logging.Teal);
+                if (Settings.Instance.DebugTraveler) if (_destinationRoute.All(d => d != solarSystemId)) Logging.Log("Traveler", "NavigateToBookmarkSystem: the destination is not currently set to solarsystemId [" + solarSystemId + "]", Logging.Teal);
 
                 // We do not have the destination set
                 if (DateTime.UtcNow > _nextGetLocation || _location == null)
@@ -126,7 +128,6 @@ namespace Questor.Modules.Activities
                 {
                     _locationErrors = 0;
                     Logging.Log("Traveler", "Setting destination to [" + Logging.Yellow + _location.Name + Logging.Green + "]", Logging.Green);
-                    if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "Setting destination to [" + Logging.Yellow + _location.Name + Logging.Green + "]", Logging.Teal);
                     try
                     {
                         _location.SetDestination();
@@ -139,7 +140,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                Logging.Log("Traveler", "Error setting solar system destination [" + Logging.Yellow + solarSystemId + Logging.Green + "]", Logging.Green);
+                Logging.Log("Traveler", "NavigateToBookmarkSystem: Error setting solar system destination [" + Logging.Yellow + solarSystemId + Logging.Green + "]", Logging.Green);
                 _locationErrors++;
                 if (_locationErrors > 20)
                 {
@@ -157,7 +158,7 @@ namespace Questor.Modules.Activities
                     if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                        _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                        Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
                     }
                 }
                 Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
@@ -218,7 +219,7 @@ namespace Questor.Modules.Activities
             {
                 // not found, that cant be true?!?!?!?!
                 Logging.Log("Traveler", "Error [" + Logging.Yellow + _locationName + Logging.Green + "] not found, most likely lag waiting [" + Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds + "] seconds.", Logging.Red);
-                _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds);
+                Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds);
                 return;
             }
 
@@ -262,7 +263,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            _nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds); //this should probably use a different Time definition, but this works for now. (5 seconds)
+            Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds); //this should probably use a different Time definition, but this works for now. (5 seconds)
             if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
             return;
         }

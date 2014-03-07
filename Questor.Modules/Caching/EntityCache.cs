@@ -4149,7 +4149,7 @@ namespace Questor.Modules.Caching
                                 Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
                                 Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
                                 Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
-                                Traveler._nextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                                 Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                                 return true;
                             }

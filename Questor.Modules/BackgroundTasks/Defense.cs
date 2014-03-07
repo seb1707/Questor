@@ -761,12 +761,16 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
                         continue;
                     }
                 }
 
                 if (SpeedMod.InLimboState)
+                {
+                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
                     continue;
+                }
 
                 //
                 // Should we deactivate the module?

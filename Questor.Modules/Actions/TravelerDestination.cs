@@ -97,12 +97,21 @@ namespace Questor.Modules.Actions
                             return false;
                         }
 
-                        return false;
+                        //
+                        // if we do not have any undock bookmarks then continue w/o it.
+                        //
+                        return true;
                     }
 
-                    return false;
+                    //
+                    // if we are not currently on grid with a station or a stargate continue traveling
+                    //
+                    return true;
                 }
 
+                //
+                // assume we will be in space soon, wait until we have been undocked or in system 9after jumping) a few seconds 
+                //
                 return false;
             }
             catch (Exception exception)

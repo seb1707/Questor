@@ -979,18 +979,8 @@ namespace Questor.Modules.BackgroundTasks
             // this allows speed mods only when not paused, which is expected behavior
             if (!Cache.Instance.Paused)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateSpeedMod();", Logging.White);
+                if (Settings.Instance.DebugDefense || Settings.Instance.DebugSpeedMod) Logging.Log("Defense", "Starting ActivateSpeedMod();", Logging.White);
                 ActivateSpeedMod();
-            }
-
-            if (Cache.Instance.InWarp)
-            {
-                _trackingLinkScriptAttempts = 0;
-                _sensorBoosterScriptAttempts = 0;
-                _sensorDampenerScriptAttempts = 0;
-                _trackingComputerScriptAttempts = 0;
-                _trackingDisruptorScriptAttempts = 0;
-                return;
             }
 
             return;

@@ -759,9 +759,10 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
                 {
+                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
                     if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
                         continue;
                     }
                 }

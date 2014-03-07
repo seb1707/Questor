@@ -93,7 +93,7 @@ namespace Questor.Modules.Activities
         {
             if (Cache.Instance.NextTravelerAction > DateTime.UtcNow)
             {
-                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: will continue in [ " + Math.Round(_nextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Debug);
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: will continue in [ " + Math.Round(Cache.Instance.NextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Debug);
                 return;
             }
 

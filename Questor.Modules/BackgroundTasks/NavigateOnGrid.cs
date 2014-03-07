@@ -30,59 +30,74 @@ namespace Questor.Modules.BackgroundTasks
                 bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (bastionModules.Any(i => i.IsActive)) return;
 
-                //
-                // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-                //
-                if ((Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.Distance < 9000) || (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.Distance < 11000))
+                
+                if (Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.Distance < 9000)
                 {
-                    //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-                    if (thisBigObject != null)
+                    //
+                    // if we are 'close' to a stargate or a station do not attempt to do any collision avoidance, as its unnecessary that close to a station or gate!
+                    //
+                    return;
+                }
+                    
+                if (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.Distance < 11000)
+                {
+                    //
+                    // if we are 'close' to a stargate or a station do not attempt to do any collision avoidance, as its unnecessary that close to a station or gate!
+                    //
+                    return;
+                }
+                
+                //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
+                if (thisBigObject != null)
+                {
+                    //
+                    // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
+                    //
+                    if (thisBigObject.Distance >= (int)Distances.TooCloseToStructure)
                     {
-                        if (thisBigObject.Distance >= (int)Distances.TooCloseToStructure)
+                        //we are no longer "too close" and can proceed.
+                        AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
+                        SafeDistanceFromStructureMultiplier = 1;
+                        AvoidBumpingThingsWarningSent = false;
+                    }
+                    else
+                    {
+                        if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                         {
-                            //we are no longer "too close" and can proceed.
-                            AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
-                            SafeDistanceFromStructureMultiplier = 1;
-                            AvoidBumpingThingsWarningSent = false;
-                        }
-                        else
-                        {
-                            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                            if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddSeconds(30))
                             {
-                                if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddSeconds(30))
+                                if (SafeDistanceFromStructureMultiplier <= 4)
                                 {
-                                    if (SafeDistanceFromStructureMultiplier <= 4)
-                                    {
-                                        //
-                                        // for simplicities sake we reset this timestamp every 30 sec until the multiplier hits 5 then it should stay static until we are not "too close" anymore
-                                        //
-                                        AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
-                                        SafeDistanceFromStructureMultiplier++;
-                                    }
-
-                                    if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpingThingsWarningSent)
-                                    {
-                                        Logging.Log("NavigateOnGrid", "We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.Orange);
-                                        AvoidBumpingThingsWarningSent = true;
-                                    }
-
-                                    if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(15))
-                                    {
-                                        Cache.Instance.CloseQuestorCMDLogoff = false;
-                                        Cache.Instance.CloseQuestorCMDExitGame = true;
-                                        Cache.Instance.ReasonToStopQuestor = "navigateOnGrid: We have been stuck on an object for over 15 min";
-                                        Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.Yellow);
-                                        Cache.Instance.SessionState = "Quitting";
-                                    }
+                                    //
+                                    // for simplicities sake we reset this timestamp every 30 sec until the multiplier hits 5 then it should stay static until we are not "too close" anymore
+                                    //
+                                    AvoidBumpingThingsTimeStamp = DateTime.UtcNow;
+                                    SafeDistanceFromStructureMultiplier++;
                                 }
-                                thisBigObject.Orbit((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier);
-                                Logging.Log(module, ": initiating Orbit of [" + thisBigObject.Name + "] orbiting at [" + ((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.White);
+
+                                if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(5) && !AvoidBumpingThingsWarningSent)
+                                {
+                                    Logging.Log("NavigateOnGrid", "We are stuck on a object and have been trying to orbit away from it for over 5 min", Logging.Orange);
+                                    AvoidBumpingThingsWarningSent = true;
+                                }
+
+                                if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddMinutes(15))
+                                {
+                                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                                    Cache.Instance.ReasonToStopQuestor = "navigateOnGrid: We have been stuck on an object for over 15 min";
+                                    Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.Yellow);
+                                    Cache.Instance.SessionState = "Quitting";
+                                }
                             }
-                            return;
-                            //we are still too close, do not continue through the rest until we are not "too close" anymore
+                            thisBigObject.Orbit((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier);
+                            Logging.Log(module, ": initiating Orbit of [" + thisBigObject.Name + "] orbiting at [" + ((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.White);
                         }
+                        return;
+                        //we are still too close, do not continue through the rest until we are not "too close" anymore
                     }
                 }
+                
             }
         }
 

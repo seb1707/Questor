@@ -7707,7 +7707,13 @@ namespace Questor.Modules.Caching
                 {
                     if (_undockBookmarkInLocal == null)
                     {
-                        if (ListOfUndockBookmarks == null) ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);
+                        if (ListOfUndockBookmarks == null)
+                        {
+                            if (Settings.Instance.UndockBookmarkPrefix != "")
+                            {
+                                ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);    
+                            }
+                        }
                         if (ListOfUndockBookmarks != null && ListOfUndockBookmarks.Any())
                         {
                             ListOfUndockBookmarks = ListOfUndockBookmarks.Where(i => i.LocationId == Cache.Instance.DirectEve.Session.LocationId).ToList();

@@ -4342,27 +4342,36 @@ namespace Questor.Modules.Caching
                             {
                                 Logging.Log("EntityCache.WarpTo", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
-
-                            if (Distance > (int) Distances.WarptoDistance)
+                            
+                            //
+                            // If the position we are trying to warp to is more than 1/2 a light year away it MUST be in a different solar system (31500+ AU)
+                            //
+                            if (Distance < (long)Distances.HalfOfALightYearInAU)
                             {
-                                //we cant move in bastion mode, do not try
-                                List<ModuleCache> bastionModules = null;
-                                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                                if (bastionModules.Any(i => i.IsActive))
+                                if (Distance > (int)Distances.WarptoDistance)
                                 {
-                                    Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
-                                    return false;
+                                    //we cant move in bastion mode, do not try
+                                    List<ModuleCache> bastionModules = null;
+                                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                                    if (bastionModules.Any(i => i.IsActive))
+                                    {
+                                        Logging.Log("EntityCache.WarpTo", "BastionMode is active, we cannot warp, aborting attempt to warp", Logging.Debug);
+                                        return false;
+                                    }
+
+                                    _directEntity.WarpTo();
+                                    Cache.Instance.WehaveMoved = DateTime.UtcNow;
+                                    Cache.Instance.LastInWarp = DateTime.UtcNow;
+                                    Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                                    return true;
                                 }
 
-                                _directEntity.WarpTo();
-                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                                Cache.Instance.LastInWarp = DateTime.UtcNow;
-                                Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                                return true;    
+                                Logging.Log("EntityCache.WarpTo", "[" + Name + "] Distance [" + Math.Round(Distance / 1000, 0) + "k] is not greater then 150k away, WarpTo aborted!", Logging.Debug);
+                                return false;    
                             }
 
-                            Logging.Log("EntityCache.WarpTo", "[" + Name + "] Distance [" + Math.Round(Distance / 1000, 0) + "k] is not greater then 150k away, WarpTo aborted!", Logging.Debug);
-                            return false;
+                            Logging.Log("EntityCache.WarpTo", "[" + Name + "] Distance [" + Math.Round(Distance / 1000, 0) + "k] was greater than 5000AU away, we assume this an error!, WarpTo aborted!", Logging.Debug);
+                            return false; 
                         }
 
                         Logging.Log("EntityCache.WarpTo", "[" + Name + "] DirecEntity is null or is not valid", Logging.Debug);

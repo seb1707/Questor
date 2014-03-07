@@ -73,28 +73,36 @@ namespace Questor.Modules.Actions
                     {
                         if (Cache.Instance.UndockBookmark != null)
                         {
-                            double distance = Cache.Instance.DistanceFromMe(Cache.Instance.UndockBookmark.X ?? 0, Cache.Instance.UndockBookmark.Y ?? 0, Cache.Instance.UndockBookmark.Z ?? 0);
-                            if (distance < (int)Distances.WarptoDistance)
+                            if (Cache.Instance.UndockBookmark.LocationId == Cache.Instance.DirectEve.Session.LocationId)
                             {
-                                Logging.Log("TravelerDestination.useInstaBookmark", "Arrived at undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "]", Logging.White);
-                                Cache.Instance.UndockBookmark = null;
-                                return true;
-                            }
-
-                            if (distance >= (int)Distances.WarptoDistance)
-                            {
-                                if (Cache.Instance.UndockBookmark.WarpTo())
+                                double distance = Cache.Instance.DistanceFromMe(Cache.Instance.UndockBookmark.X ?? 0, Cache.Instance.UndockBookmark.Y ?? 0, Cache.Instance.UndockBookmark.Z ?? 0);
+                                if (distance < (int)Distances.WarptoDistance)
                                 {
-                                    Logging.Log("TravelerDestination.useInstaBookmark", "Warping to undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]", Logging.White);
-                                    //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
-                                    _nextTravelerDestinationAction = DateTime.UtcNow.AddSeconds(10);
-                                    return true;    
+                                    Logging.Log("TravelerDestination.useInstaBookmark", "Arrived at undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "]", Logging.White);
+                                    Cache.Instance.UndockBookmark = null;
+                                    return true;
                                 }
 
-                                return false;
-                            }
+                                if (distance >= (int)Distances.WarptoDistance)
+                                {
+                                    if (Cache.Instance.UndockBookmark.WarpTo())
+                                    {
+                                        Logging.Log("TravelerDestination.useInstaBookmark", "Warping to undock bookmark [" + Logging.Yellow + Cache.Instance.UndockBookmark.Title + Logging.Green + "][" + Math.Round((distance / 1000) / 149598000, 2) + " AU away]", Logging.White);
+                                        //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
+                                        _nextTravelerDestinationAction = DateTime.UtcNow.AddSeconds(10);
+                                        return true;
+                                    }
 
-                            return false;
+                                    return false;
+                                }
+
+                                return false;    
+                            }
+                            //
+                            // How the hell did we get UndockBookmrk to be a bookmark that is not in local?!
+                            //
+                            Logging.Log("useInstaBookmark", "Bookmark Named [" + Cache.Instance.UndockBookmark.Title + "] was somehow picked as an UndockBookmark but it is not in local with us! continuing without it.", Logging.Debug);
+                            return true;
                         }
 
                         //

@@ -30,7 +30,8 @@ namespace Questor.Modules.Lookup
         PanicDistanceToConsiderSafelyWarpedOff = 500000,
         WeCanWarpToStarFromHere = 500000000,
         OnGridWithMe = 250000, //250k by default
-        //AU = 149598000000, // 1 AU - 1 Astronomical Unit = 149 598 000 000 meters
+        AU = 149598000000, // 1 AU - 1 Astronomical Unit = 149 598 000 000 meters
+        HalfOfALightYearInAU = OneAU * 63239 / 2,
         DirectionalScannerCloseRange = 2147483647,
         MaxPocketsDistanceKm = 70000,
         HalfAU = 2147483647,

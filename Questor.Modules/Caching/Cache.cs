@@ -1752,7 +1752,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_entities == null)
                     {
-                        return Cache.Instance.DirectEve.Entities.Where(e => e.IsValid && e.CategoryId != (int)CategoryID.Charge).Select(i => new EntityCache(i)).ToList();
+                        return Cache.Instance.DirectEve.Entities.Where(e => e.IsValid && !e.HasExploded && !e.HasReleased && e.CategoryId != (int)CategoryID.Charge).Select(i => new EntityCache(i)).ToList();
                     }
 
                     return _entities;

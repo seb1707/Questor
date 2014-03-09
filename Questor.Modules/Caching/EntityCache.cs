@@ -4219,7 +4219,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Approach()
+        public bool Approach()
         {
             try
             {
@@ -4238,19 +4238,26 @@ namespace Questor.Modules.Caching
                         if (bastionModules.Any(i => i.IsActive))
                         {
                             Logging.Log("EntityCache.Approach", "BastionMode is active, we cannot move, aborting attempt to Approach", Logging.Debug);
-                            return;
+                            return false;
                         }
 
-                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.Approach();
+                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         Cache.Instance.Approaching = this;
+                        return true;
                     }
+
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                 Cache.Instance.Approaching = null;
+                return false;
             }
         }
 
@@ -4295,36 +4302,45 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public void Orbit(int range)
+        public bool Orbit(int range)
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextOrbit)
+                if (DateTime.UtcNow > Cache.Instance.NextOrbit)
                 {
-                    if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
-                        Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId+ "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+
+                        //we cant move in bastion mode, do not try
+                        List<ModuleCache> bastionModules = null;
+                        bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                        if (bastionModules.Any(i => i.IsActive))
+                        {
+                            Logging.Log("EntityCache.Orbit", "BastionMode is active, we cannot move, aborting attempt to Orbit", Logging.Debug);
+                            return false;
+                        }
+
+                        _directEntity.Orbit(range);
+                        Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
+                        Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
+                        Cache.Instance.Approaching = this;
+                        return true;
                     }
 
-                    //we cant move in bastion mode, do not try
-                    List<ModuleCache> bastionModules = null;
-                    bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                    if (bastionModules.Any(i => i.IsActive))
-                    {
-                        Logging.Log("EntityCache.Orbit", "BastionMode is active, we cannot move, aborting attempt to Orbit", Logging.Debug);
-                        return;
-                    }
-
-                    Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
-                    Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
-                    _directEntity.Orbit(range);
-                    Cache.Instance.Approaching = this;
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
                 Cache.Instance.Approaching = null;
+                return false;
             }
         }
 
@@ -4392,28 +4408,34 @@ namespace Questor.Modules.Caching
             }
         }
         
-        public void AlignTo()
+        public bool AlignTo()
         {
             try
             {
                 if (DateTime.UtcNow > Cache.Instance.NextAlign)
                 {
-                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextAlign)
+                    if (_directEntity != null && _directEntity.IsValid)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
                             Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
+                        _directEntity.AlignTo();
                         Cache.Instance.WehaveMoved = DateTime.UtcNow;
                         Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
-                        _directEntity.AlignTo();
+                        return true;
                     }
+
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
         
@@ -4486,19 +4508,28 @@ namespace Questor.Modules.Caching
             }
         }
         
-        public void OpenCargo()
+        public bool OpenCargo()
         {
             try
             {
-                if (_directEntity != null && _directEntity.IsValid)
+                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
                 {
-                    _directEntity.OpenCargo();
-                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        _directEntity.OpenCargo();
+                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        return true;
+                    }
+
+                    return false;
                 }
+
+                return false;
             }
             catch (Exception exception)
             {
                 Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
         }
 

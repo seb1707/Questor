@@ -7669,9 +7669,13 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.ContainerInSpace.Window == null)
                     {
-                        containerToOpen.OpenCargo();
-                        Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
-                        Logging.Log(module, "Opening Container: waiting [" + Math.Round(Cache.Instance.NextLootAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " sec]", Logging.White);
+                        if (containerToOpen.OpenCargo())
+                        {
+                            Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                            Logging.Log(module, "Opening Container: waiting [" + Math.Round(Cache.Instance.NextLootAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " sec]", Logging.White);
+                            return false;
+                        }
+
                         return false;
                     }
 

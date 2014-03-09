@@ -1264,7 +1264,6 @@ namespace Questor.Behaviors
                         {
                             // Do not change actions, if NextPocket gets a timeout (>2 mins) then it reverts to the last action
                             Logging.Log("CombatMissionsBehavior.Salvage", "Activate [" + closest.Name + "] and change States.CurrentCombatMissionBehaviorState to 'NextPocket'", Logging.White);
-
                             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.SalvageNextPocket;
                             _lastPulse = DateTime.UtcNow;
                             return;
@@ -1276,12 +1275,11 @@ namespace Questor.Behaviors
                     if (closest != null && closest.Distance < (int)Distances.WarptoDistance)
                     {
                         // Move to the target
-                        if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
+                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
-                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                            if (closest.Approach())
                             {
-                                Logging.Log("CombatMissionsBehavior.Salvage", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                                closest.Approach();    
+                                Logging.Log("CombatMissionsBehavior.Salvage", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);    
                             }
                         }
                     }
@@ -1291,9 +1289,9 @@ namespace Questor.Behaviors
                         if (closest.WarpTo())
                         {
                             Logging.Log("CombatMissionsBehavior.Salvage", "Warping to [" + closest.Name + "] which is [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.White);
-                                
                         }
                     }
+
                     _lastPulse = DateTime.UtcNow.AddSeconds(10);
                     break;
 
@@ -1484,14 +1482,13 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
-                                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                                if (station.Approach())
                                 {
-                                    Logging.Log("CombatMissionsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                    station.Approach();    
+                                    Logging.Log("CombatMissionsBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);    
                                 }
-                            }
+                            }   
                         }
                     }
                     else

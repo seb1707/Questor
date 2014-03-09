@@ -115,13 +115,11 @@ namespace Questor.Modules.Actions
 
             if (station.Distance < (int)Distances.WarptoDistance)
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (station.Approach())
                 {
                     Logging.Log("TravelerDestination.StationDestination", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                    station.Approach();
                     nextAction = DateTime.UtcNow.AddSeconds(30);
-                    return false;
-                }
+                }    
 
                 return false;
             }

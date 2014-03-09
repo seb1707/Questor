@@ -394,10 +394,12 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
+                            if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id)
                             {
-                                Logging.Log("DirectionalScannerBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                station.Approach();
+                                if (station.Approach())
+                                {
+                                    Logging.Log("DebugBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
+                                }
                             }
                         }
                     }

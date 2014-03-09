@@ -288,12 +288,12 @@ namespace Questor.Modules.Activities
                         AttemptsToGetAwayFromGate++;
                         if (AttemptsToGetAwayFromGate > 30)
                         {
-                            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                            if (closest.Orbit(1000))
                             {
-                                closest.Orbit(1000);
                                 Logging.Log("CombatMissionCtrl", "Activate: We are too close to [" + closest.Name + "] Initiating orbit", Logging.Orange);
+                                return;
                             }
-
+                            
                             return;
                         }
                     }
@@ -339,8 +339,12 @@ namespace Questor.Modules.Activities
                     {
                         if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
-                            Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            closest.Approach();
+                            if (closest.Approach())
+                            {
+                                Logging.Log("CombatMissionCtrl.Activate", "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                return;
+                            }
+
                             return;
                         }
 
@@ -366,15 +370,12 @@ namespace Questor.Modules.Activities
                     //if (Cache.Instance.ActiveDrones.Count() > 0)
                     //    return;
 
-                    if (DateTime.UtcNow > Cache.Instance.NextAlign)
+                    if (closest.AlignTo())
                     {
-                        // Only happens if we are asked to Activate something that is outside Distance.CloseToGateActivationRange (default is: 6k)
                         Logging.Log("CombatMissionCtrl", "Activate: AlignTo: [" + closest.Name + "] This only happens if we are asked to Activate something that is outside [" + Distances.CloseToGateActivationRange + "]", Logging.Teal);
-                        closest.AlignTo();
                         return;
                     }
-
-                    Logging.Log("CombatMissionCtrl", "Activate: Unable to align: Next Align in [" + Cache.Instance.NextAlign.Subtract(DateTime.UtcNow).TotalSeconds + "] seconds", Logging.Teal);
+                    
                     return;
                 }
 
@@ -669,11 +670,19 @@ namespace Questor.Modules.Activities
             if (closest != null)
             {
                 // Move to the target
-                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Setting [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away as the Orbit Target]", Logging.Teal);
-                closest.Orbit(Cache.Instance.OrbitDistance);    
+                if (closest.Orbit(Cache.Instance.OrbitDistance))
+                {
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Setting [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away as the Orbit Target]", Logging.Teal);
+                    Nextaction();
+                    return;
+                }
             }
-
-            Nextaction();
+            else
+            {
+                Nextaction();
+                return;
+            }
+            
             return;
         }
 
@@ -872,25 +881,28 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl.MoveTo", "Cache.Instance.Approaching.Id [" + Cache.Instance.Approaching.Id + "]", Logging.Teal);
                     if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                     {
-                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                        closest.Approach();
-                        _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
+                        if (closest.Approach())
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
+                            _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
+                            return;
+                        }
+                        
                         return;
                     }
                     if (Settings.Instance.DebugMoveTo) if (Cache.Instance.Approaching != null) Logging.Log("CombatMissionCtrl.MoveTo", "-----------", Logging.Teal);
                     return;
                 }
 
-                if (DateTime.UtcNow > Cache.Instance.NextAlign)
+                // Probably never happens
+                if (closest.AlignTo())
                 {
-                    // Probably never happens
                     Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Aligning to target [" + closest.Name + "][" + Cache.Instance.MaskedID(closest.Id) + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                    closest.AlignTo();
                     _nextCombatMissionCtrlAction = DateTime.UtcNow.AddSeconds(5);
                     return;
                 }
-
-                if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "Nothing to do. Next Approach [" + Cache.Instance.NextApproachAction + " ] NextAlign [" + Cache.Instance.NextAlign + "]", Logging.Teal);
+                
+                return;
             }
 
             return;
@@ -1847,24 +1859,26 @@ namespace Questor.Modules.Activities
                 }
 
                 EntityCache container = containers.FirstOrDefault(c => targetContainerNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-                if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction) 
+                if (container != null) 
                 {
                     if (container.Distance > (int)Distances.SafeScoopRange)
                     {
                         if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
-                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            container.Approach();
-                        }    
+                            if (container.Approach())
+                            {
+                                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "] which is at [" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                return;
+                            }
+                        }
                     }
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("CombatMissionCtrl.LootItemAction","Exception logged was [" + exception +  "]",Logging.Teal);
+                return;
             }
-
-            return;
         }
 
         //
@@ -1925,27 +1939,62 @@ namespace Questor.Modules.Activities
 
         private void LootAction(Actions.Action action)
         {
-            List<string> items = action.GetParameterValues("item");
-            List<string> targetNames = action.GetParameterValues("target");
-
-            // if we are not generally looting we need to re-enable the opening of wrecks to
-            // find this LootItems we are looking for
-            if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
-            Cache.Instance.CurrentlyShouldBeSalvaging = true;
-
-            if (!Settings.Instance.LootEverything)
+            try
             {
-                bool done = items.Count == 0;
-                if (!done)
+                List<string> items = action.GetParameterValues("item");
+                List<string> targetNames = action.GetParameterValues("target");
+
+                // if we are not generally looting we need to re-enable the opening of wrecks to
+                // find this LootItems we are looking for
+                if (Settings.Instance.SpeedTank || !Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = true;
+                Cache.Instance.CurrentlyShouldBeSalvaging = true;
+
+                if (!Settings.Instance.LootEverything)
                 {
-                    // We assume that the ship's cargo will be opened somewhere else
-                    if (Cache.Instance.CurrentShipsCargo != null)
-                        done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName));
+                    bool done = items.Count == 0;
+                    if (!done)
+                    {
+                        // We assume that the ship's cargo will be opened somewhere else
+                        if (Cache.Instance.CurrentShipsCargo != null)
+                            done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName));
+                    }
+
+                    if (done)
+                    {
+                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "LootEverything:  We are done looting", Logging.Teal);
+
+                        // now that we are done with this action revert OpenWrecks to false
+                        if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
+                        Cache.Instance.MissionLoot = false;
+                        Cache.Instance.CurrentlyShouldBeSalvaging = false;
+
+                        _currentAction++;
+                        return;
+                    }
                 }
 
-                if (done)
+                // unlock targets count
+                Cache.Instance.MissionLoot = true;
+
+                //
+                // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
+                //
+                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+
+                if (Settings.Instance.DebugLootWrecks)
                 {
-                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "LootEverything:  We are done looting", Logging.Teal);
+                    int i = 0;
+                    foreach (EntityCache _container in containers)
+                    {
+                        i++;
+                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "[" + i + "] " + _container.Name + "[" + Math.Round(_container.Distance / 1000, 0) + "k] isWreckEmpty [" + _container.IsWreckEmpty + "] IsTarget [" + _container.IsTarget + "]", Logging.Debug);
+                    }
+                }
+
+                if (!containers.Any())
+                {
+                    // lock targets count
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
 
                     // now that we are done with this action revert OpenWrecks to false
                     if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
@@ -1955,71 +2004,47 @@ namespace Questor.Modules.Activities
                     _currentAction++;
                     return;
                 }
-            }
 
-            // unlock targets count
-            Cache.Instance.MissionLoot = true;
-
-            //
-            // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
-            //
-            IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-            
-            if (Settings.Instance.DebugLootWrecks)
-            {
-                int i = 0;
-                foreach (EntityCache _container in containers)
+                //
+                // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
+                //
+                if (targetNames != null && targetNames.Any())
                 {
-                    i++;
-                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "[" + i + "] " + _container.Name + "[" + Math.Round(_container.Distance/1000,0) + "k] isWreckEmpty [" + _container.IsWreckEmpty + "] IsTarget [" + _container.IsTarget + "]" , Logging.Debug);
-                }
-            }
-
-            if (!containers.Any())
-            {
-                // lock targets count
-                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
-
-                // now that we are done with this action revert OpenWrecks to false
-                if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
-                Cache.Instance.MissionLoot = false;
-                Cache.Instance.CurrentlyShouldBeSalvaging = false;
-
-                _currentAction++;
-                return;
-            }
-
-            //
-            // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
-            //
-            if (targetNames != null && targetNames.Any())
-            {
-                foreach (EntityCache continerToLoot in containers)
-                {
-                    if (continerToLoot.Name == targetNames.FirstOrDefault())
+                    foreach (EntityCache continerToLoot in containers)
                     {
-                        if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                        if (continerToLoot.Name == targetNames.FirstOrDefault())
                         {
-                            Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                            if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                            {
+                                Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                            }
                         }
                     }
-                }    
-            }
-            
-            EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
-            if (container != null && DateTime.UtcNow > Cache.Instance.NextApproachAction)
-            {
-                if (container.Distance > (int)Distances.SafeScoopRange)
+                }
+
+                EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+                if (container != null)
                 {
-                    if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                    if (container.Distance > (int)Distances.SafeScoopRange)
                     {
-                        Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
-                        container.Approach();    
+                        if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != container.Id || Cache.Instance.MyShipEntity.Velocity < 50)
+                        {
+                            if (container.Approach())
+                            {
+                                Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Approaching target [" + container.Name + "][" + Cache.Instance.MaskedID(container.Id) + "][" + Math.Round(container.Distance / 1000, 0) + "k away]", Logging.Teal);
+                                return;
+                            }
+
+                            return;
+                        }
                     }
                 }
             }
-
-            return;
+            catch (Exception exception)
+            {
+                Logging.Log("CombatMissionCtrl.LootAction", "Exception logged was [" + exception + "]", Logging.Teal);
+                return;
+            }
         }
 
         private void IgnoreAction(Actions.Action action)

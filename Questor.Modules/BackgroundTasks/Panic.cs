@@ -416,9 +416,12 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
-                                Logging.Log("Panic", "Approaching to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Red);
-                                station.Approach();
-                                Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                                if (station.Approach())
+                                {
+                                    Logging.Log("Panic", "Approaching to [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.Red);
+                                    return;
+                                }
+
                                 return;
                             }
                                     

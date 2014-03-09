@@ -76,14 +76,13 @@ namespace Questor.Modules.BackgroundTasks
 
                         return;
                     }
-                    
-                    if (Cache.Instance.NextApproachAction < DateTime.UtcNow)
+
+                    if (closestWreck.Approach())
                     {
                         Logging.Log("Salvage.NavigateIntorangeOfWrecks", "Approaching [" + Logging.Yellow + closestWreck.Name + Logging.White + "] which is [" + Logging.Yellow + Math.Round(closestWreck.Distance / 1000, 0) + Logging.White + "k away]", Logging.White);
-                        closestWreck.Approach();
                         return;
                     }
-
+                    
                     return;
                 }
 
@@ -664,8 +663,11 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.ContainerInSpace.Window == null)
                 {
-                    containerEntity.OpenCargo();
-                    Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                    if (containerEntity.OpenCargo())
+                    {
+                        Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);    
+                    }
+                    
                     return;
                 }
 

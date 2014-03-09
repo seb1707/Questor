@@ -165,13 +165,13 @@ namespace Questor.Behaviors
                     }
                     else
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                        
+                        if (thisBigObject.Orbit((int) Distances.SafeDistancefromStructure))
                         {
-                            thisBigObject.Orbit((int)Distances.SafeDistancefromStructure);
                             Logging.Log("DebugBehavior", _States.CurrentDebugBehaviorState +
                                         ": initiating Orbit of [" + thisBigObject.Name +
                                         "] orbiting at [" + Distances.SafeDistancefromStructure + "]", Logging.White);
-                            Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(Time.Instance.OrbitDelay_seconds);
+                            return;
                         }
 
                         return;
@@ -558,11 +558,12 @@ namespace Questor.Behaviors
                             }
                             else
                             {
-                                if (Cache.Instance.NextApproachAction < DateTime.UtcNow && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id))
+                                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id)
                                 {
-                                    Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
-                                    Logging.Log("DebugBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                    station.Approach();
+                                    if(station.Approach())
+                                    {
+                                        Logging.Log("DebugBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);    
+                                    }
                                 }
                             }
                         }

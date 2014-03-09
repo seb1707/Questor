@@ -354,9 +354,12 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
 
                 // Open the container
-                Logging.Log("Scoop", "Opening container [" + containerEntity.Name + "][ID: " + Cache.Instance.MaskedID(containerEntity.Id) + "]", Logging.White);
-                containerEntity.OpenCargo();
-                _openedContainers[containerEntity.Id] = DateTime.UtcNow;
+                if (containerEntity.OpenCargo())
+                {
+                    Logging.Log("Scoop", "Opening container [" + containerEntity.Name + "][ID: " + Cache.Instance.MaskedID(containerEntity.Id) + "]", Logging.White);
+                    _openedContainers[containerEntity.Id] = DateTime.UtcNow;    
+                }
+                
                 break;
             }
         }

@@ -1806,7 +1806,13 @@ namespace Questor.Modules.Combat
                         
                         if (Settings.Instance.DebugTargetCombatants)
                         {
-                            Logging.Log("[" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] Distance [" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "] HasExploded:" + Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded + " IsTarget: [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "] IsTargeting: [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting + "] IsReady [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget + "]", "", Logging.Debug); 
+                            Logging.Log("TargetCombatants", "Name [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "]", Logging.Debug);
+                            Logging.Log("TargetCombatants", "Distance [" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "]", Logging.Debug);
+                            Logging.Log("TargetCombatants", "HasExploded [" + Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded + "", Logging.Debug);
+                            Logging.Log("TargetCombatants", "IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
+                            Logging.Log("TargetCombatants", "IsTargeting: [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting + "]", Logging.Debug);
+                            Logging.Log("TargetCombatants", "IsReady [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget + "]", Logging.Debug);
+                            Logging.Log("TargetCombatants", "[" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "] Distance [" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "] HasExploded:" + Cache.Instance.PreferredPrimaryWeaponTarget.HasExploded + " IsTarget: [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "] IsTargeting: [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTargeting + "] IsReady [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget + "]", Logging.Debug);
                         }
                         
                         if (Cache.Instance.PreferredPrimaryWeaponTarget.IsReadyToTarget)

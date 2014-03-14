@@ -818,7 +818,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_IsReadyToShoot == null)
                         {
-                            if (!HasExploded && IsTarget && !IsIgnored)
+                            if (!HasExploded && IsTarget && !IsIgnored && Distance < Cache.Instance.MaxRange)
                             {
                                 //if (_directEntity.Distance < Cache.Instance.MaxRange)
                                 //{
@@ -863,7 +863,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_IsReadyToTarget == null)
                         {
-                            if (!HasExploded && !IsTarget && !IsTargeting)
+                            if (!HasExploded && !IsTarget && !IsTargeting && Distance < Cache.Instance.MaxTargetRange)
                             {
                                 _IsReadyToTarget = true;
                                 return _IsReadyToTarget ?? true;

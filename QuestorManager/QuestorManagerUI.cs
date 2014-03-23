@@ -205,7 +205,7 @@ namespace QuestorManager
         {
             try
             {
-                Cache.Instance.LastFrame = DateTime.UtcNow;
+                Time.Instance.LastFrame = DateTime.UtcNow;
 
                 // Only pulse state changes every 1.5s
                 if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
@@ -219,18 +219,18 @@ namespace QuestorManager
 
                 if (Cache.Instance.DirectEve.Session.IsReady)
                 {
-                    Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                    Time.Instance.LastSessionIsReady = DateTime.UtcNow;
                 }
 
                 // We are not in space or station, don't do shit yet!
                 if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
                 {
-                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                    Cache.Instance.LastSessionChange = DateTime.UtcNow;
+                    Time.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
+                    Time.Instance.LastSessionChange = DateTime.UtcNow;
                     return;
                 }
 
-                if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation) return;
+                if (DateTime.UtcNow < Time.Instance.NextInSpaceorInStation) return;
 
                 // New frame, invalidate old cache
                 Cache.Instance.InvalidateCache();
@@ -248,10 +248,10 @@ namespace QuestorManager
                     Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
                 }
 
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
                 {
-                    Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                    Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
+                    Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
+                    Time.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
                 }
 
                 // We always check our defense state if we're in space, regardless of questor state
@@ -266,7 +266,7 @@ namespace QuestorManager
 
                 if (Cache.Instance.Paused)
                 {
-                    Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                    Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     Cache.Instance.GotoBaseNow = false;
                     Cache.Instance.SessionState = string.Empty;

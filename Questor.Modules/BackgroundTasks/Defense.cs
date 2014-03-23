@@ -8,13 +8,13 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Threading;
 
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
     using System.Linq;
     using System.Collections.Generic;
+    using System.Threading;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
@@ -23,7 +23,7 @@ namespace Questor.Modules.BackgroundTasks
 
     public class Defense
     {
-        public static int DefenseInstances = 0;
+        public static int DefenseInstances;
 
         public Defense()
         {
@@ -35,7 +35,7 @@ namespace Questor.Modules.BackgroundTasks
             Interlocked.Decrement(ref DefenseInstances);
         }
 
-        private DateTime _lastSessionChange = Cache.Instance.StartTime;
+        private DateTime _lastSessionChange = Time.Instance.StartTime;
         private DateTime _lastCloaked = DateTime.UtcNow;
 
         private DateTime _lastPulse = DateTime.UtcNow;
@@ -78,9 +78,9 @@ namespace Questor.Modules.BackgroundTasks
                 // Reload or change ammo
                 if (module.Charge != null && module.Charge.TypeId == scriptToLoad.TypeId)
                 {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastLoggingAction).TotalSeconds > 10)
                     {
-                        Cache.Instance.LastLoggingAction = DateTime.UtcNow;
+                        Time.Instance.LastLoggingAction = DateTime.UtcNow;
                     }
                     
                     if (module.ReloadAmmo(scriptToLoad, 0, 0))
@@ -91,10 +91,10 @@ namespace Questor.Modules.BackgroundTasks
 
                     return false;
                 }
-                
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 10)
+
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastLoggingAction).TotalSeconds > 10)
                 {
-                    Cache.Instance.LastLoggingAction = DateTime.UtcNow;
+                    Time.Instance.LastLoggingAction = DateTime.UtcNow;
                 }
                 
                 if (module.ChangeAmmo(scriptToLoad, 0, 0))
@@ -112,7 +112,7 @@ namespace Questor.Modules.BackgroundTasks
         private void ActivateOnce()
         {
             //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
-            if (DateTime.UtcNow < Cache.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
+            if (DateTime.UtcNow < Time.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
 
             ModuleNumber = 0;
@@ -152,14 +152,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -195,14 +195,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -230,14 +230,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -265,14 +265,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -300,14 +300,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -335,7 +335,7 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
                                         return;    
                                     }
                                 }
@@ -343,7 +343,7 @@ namespace Questor.Modules.BackgroundTasks
                                 bool inCombat = Cache.Instance.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -371,7 +371,7 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
+                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
                                         return;    
                                     }
                                 }
@@ -379,7 +379,7 @@ namespace Questor.Modules.BackgroundTasks
                                 bool inCombat = Cache.Instance.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
-                                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -402,7 +402,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
                 ModuleNumber++;
-                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                 continue;
             }
 
@@ -492,7 +492,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 if (module.Click())
                 {
-                    Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
                     return;    
                 }
@@ -602,7 +602,7 @@ namespace Questor.Modules.BackgroundTasks
         private void ActivateRepairModules()
         {
             //var watch = new Stopwatch();
-            if (DateTime.UtcNow < Cache.Instance.NextRepModuleAction) //if we just did something wait a fraction of a second
+            if (DateTime.UtcNow < Time.Instance.NextRepModuleAction) //if we just did something wait a fraction of a second
                 return;
 
             ModuleNumber = 0;
@@ -648,19 +648,19 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
                         Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
                     if (Cache.Instance.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
                     {
                         Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
                         Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
                     {
                         Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
                     if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
                         Cache.Instance.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
@@ -689,8 +689,8 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (module.Click())
                         {
-                            Cache.Instance.StartedBoosting = DateTime.UtcNow;
-                            Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                            Time.Instance.StartedBoosting = DateTime.UtcNow;
+                            Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                         }
                     }
                     
@@ -706,7 +706,7 @@ namespace Questor.Modules.BackgroundTasks
                         int aggressiveEntities = Cache.Instance.EntitiesOnGrid.Count(e => e.IsAttacking && e.IsPlayer);
                         if (aggressiveEntities == 0 && Cache.Instance.EntitiesOnGrid.Count(e => e.IsStation) == 1)
                         {
-                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
+                            Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
                             Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds", Logging.White);
                         }
                     }
@@ -724,19 +724,19 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (module.Click())
                     {
-                        Cache.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                        Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.UtcNow.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
-                        Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.UtcNow.Subtract(Cache.Instance.StartedBoosting).TotalSeconds);
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                        Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
+                        Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.CapacitorInjector)
                         {
                             perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                            Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
+                            Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                         }
                         else if (module.GroupId == (int)Group.ArmorRepairer)
                         {
                             perc = Cache.Instance.ActiveShip.ArmorPercentage;
-                            Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Cache.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
+                            Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                         }
 
                         //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
@@ -757,12 +757,12 @@ namespace Questor.Modules.BackgroundTasks
             {
                 ModuleNumber++;
 
-                if (Cache.Instance.LastActivatedTimeStamp != null && Cache.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
+                if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
                 {
-                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
-                    if (Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
+                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
+                    if (Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Cache.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
+                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
                         continue;
                     }
                 }
@@ -903,7 +903,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.AddSeconds(-2) > Cache.Instance.LastInSpace)
+            if (DateTime.UtcNow.AddSeconds(-2) > Time.Instance.LastInSpace)
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "it was more than 2 seconds ago since we thought we were in space", Logging.White);
                 return;
@@ -945,8 +945,8 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (DateTime.UtcNow.AddHours(-10) > Cache.Instance.WehaveMoved &&
-                DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(20))
+            if (DateTime.UtcNow.AddHours(-10) > Time.Instance.WehaveMoved &&
+                DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(20))
             {
                 if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
                 //

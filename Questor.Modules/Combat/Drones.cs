@@ -166,11 +166,11 @@ namespace Questor.Modules.Combat
                     }
                     else // Make the target active
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextMakeActiveTargetAction)
+                        if (DateTime.UtcNow > Time.Instance.NextMakeActiveTargetAction)
                         {
                             DroneToShoot.MakeActiveTarget();
                             Logging.Log("Drones", "[" + DroneToShoot.Name + "][ID: " + Cache.Instance.MaskedID(DroneToShoot.Id) + "]IsActiveTarget[" + DroneToShoot.IsActiveTarget + "][" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away] has been made the ActiveTarget (needed for drones)", Logging.Magenta);
-                            Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
+                            Time.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
                         }
                     }
                 }

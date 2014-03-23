@@ -71,7 +71,7 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 10)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 10)
                 {
                     if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
                     if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return false;
@@ -294,7 +294,7 @@ namespace Questor.Modules.Actions
                 }
             }
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 10)
             {
                 if (Settings.Instance.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
                 if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return false;
@@ -434,7 +434,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))

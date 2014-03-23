@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using Questor.Modules.Actions;
-using Questor.Modules.Activities;
-using Questor.Modules.Caching;
-using Questor.Modules.Logging;
-using Questor.Modules.Lookup;
-using Questor.Modules.States;
-using System.Linq;
-using DirectEve;
-
+﻿
 namespace Questor.Storylines
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Activities;
+    using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Logging;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.States;
+    using DirectEve;
+
     public class GenericCourier : IStoryline
     {
         private DateTime _nextGenericCourierStorylineAction;
@@ -89,7 +90,7 @@ namespace Questor.Storylines
                 return StorylineState.BlacklistAgent;
             }
 
-            if (DateTime.UtcNow > Cache.Instance.NextArmAction) //default 7 seconds
+            if (DateTime.UtcNow > Time.Instance.NextArmAction) //default 7 seconds
             {
                 if (Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
                 {
@@ -136,7 +137,7 @@ namespace Questor.Storylines
 
         private bool MoveItem(bool pickup)
         {
-            DirectEve.DirectEve directEve = Cache.Instance.DirectEve;
+            DirectEve directEve = Cache.Instance.DirectEve;
 
             // Open the item hangar (should still be open)
             if (Cache.Instance.ItemHangar == null) return false;

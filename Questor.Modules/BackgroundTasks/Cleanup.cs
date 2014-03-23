@@ -23,7 +23,7 @@ namespace Questor.Modules.BackgroundTasks
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorFlag = true;
-        private bool FoundDuelInvitation = false;
+        private bool FoundDuelInvitation;
         private DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
 
         public static void BeginClosingQuestor()
@@ -346,7 +346,8 @@ namespace Questor.Modules.BackgroundTasks
                 // add repairship, lpstore, marketwindow, etc
                 //
             }
-            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
+
+            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
             return true;
         }
 
@@ -394,9 +395,9 @@ namespace Questor.Modules.BackgroundTasks
 
             _lastCleanupProcessState = DateTime.UtcNow;
 
-            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+            if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
             {
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Cache.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
+                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Time.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
                 return;
             }
 
@@ -411,9 +412,9 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
-                if (DateTime.UtcNow < Cache.Instance.LastInStation.AddSeconds(10))
+                if (DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in station time is [" + Cache.Instance.LastInStation + " waiting until 10 seconds have passed", Logging.Teal);
+                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in station time is [" + Time.Instance.LastInStation + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
                 }
             }
@@ -421,9 +422,9 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InStation)
             {
                 if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in station", Logging.Teal);
-                if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in space time is [" + Cache.Instance.LastInSpace + " waiting until 10 seconds have passed", Logging.Teal);
+                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in space time is [" + Time.Instance.LastInSpace + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
                 }
             }
@@ -451,7 +452,7 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
 
-                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Cache.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
+                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Time.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
                     {
                         Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White);
@@ -749,7 +750,7 @@ namespace Questor.Modules.BackgroundTasks
                 case CleanupState.CleanupTasks:
                     if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
-                        if (!MemoryManagerHasBeenRunThisIteration && Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                        if (!MemoryManagerHasBeenRunThisIteration && Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20))
                         {
                             // get the current process
                             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -763,7 +764,7 @@ namespace Questor.Modules.BackgroundTasks
                             MemoryManagerHasBeenRunThisIteration = true;
                         }
 
-                        if (MemoryManagerHasBeenRunThisIteration && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(300))
+                        if (MemoryManagerHasBeenRunThisIteration && Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(300))
                         {
                             //
                             // reset the flag so that MemManager.exe will run again when we are next in station.
@@ -772,7 +773,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
-                    if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30) && (
+                    if (DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(30) && (
                         _States.CurrentQuestorState == QuestorState.CombatMissionsBehavior ||
                         _States.CurrentQuestorState == QuestorState.CombatHelperBehavior ||
                         _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior ||

@@ -194,7 +194,7 @@ namespace Questor.Behaviors
                 _States.CurrentDirectionalScannerBehaviorState = DirectionalScannerBehaviorState.GotoBase;
             }
 
-            if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
+            if ((DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
                 {
@@ -262,9 +262,9 @@ namespace Questor.Behaviors
                         break;
                     }
                     
-                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
                     {
-                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DirectionalScannerBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
 
@@ -336,7 +336,7 @@ namespace Questor.Behaviors
                         Traveler.ProcessState();
 
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)

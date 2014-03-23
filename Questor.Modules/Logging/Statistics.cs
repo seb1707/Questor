@@ -513,9 +513,9 @@ namespace Questor.Modules.Logging
                     Directory.CreateDirectory(Settings.Instance.SessionsLogPath);
                 }
 
-                Cache.Instance.SessionIskPerHrGenerated = ((int)Cache.Instance.SessionIskGenerated / (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
-                Cache.Instance.SessionLootPerHrGenerated = ((int)Cache.Instance.SessionLootGenerated / (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
-                Cache.Instance.SessionLPPerHrGenerated = (((int)Cache.Instance.SessionLPGenerated * (int)Settings.Instance.IskPerLP) / (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
+                Cache.Instance.SessionIskPerHrGenerated = ((int)Cache.Instance.SessionIskGenerated / (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
+                Cache.Instance.SessionLootPerHrGenerated = ((int)Cache.Instance.SessionLootGenerated / (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
+                Cache.Instance.SessionLPPerHrGenerated = (((int)Cache.Instance.SessionLPGenerated * (int)Settings.Instance.IskPerLP) / (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes / 60));
                 Cache.Instance.SessionTotalPerHrGenerated = ((int)Cache.Instance.SessionIskPerHrGenerated + (int)Cache.Instance.SessionLootPerHrGenerated + (int)Cache.Instance.SessionLPPerHrGenerated);
                 Logging.Log("QuestorState.CloseQuestor", "Writing Session Data [1]", Logging.White);
 
@@ -760,9 +760,9 @@ namespace Questor.Modules.Logging
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
                 weaponNumber++;
-                if (Cache.Instance.ReloadTimePerModule != null && Cache.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
+                if (Time.Instance.ReloadTimePerModule != null && Time.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
                 {
-                    Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + Cache.Instance.ReloadTimePerModule[weapon.ItemId] + "]", Logging.White);    
+                    Logging.Log("Statistics", "Time Spent Reloading: [" + weaponNumber + "][" + Time.Instance.ReloadTimePerModule[weapon.ItemId] + "]", Logging.White);    
                 }
             }
             Logging.Log("Statistics", "Time Spent IN Mission: [" + Cache.Instance.TimeSpentInMission_seconds + "sec]", Logging.White);
@@ -919,9 +919,9 @@ namespace Questor.Modules.Logging
             Statistics.Instance.OutOfDronesCount = 0;
             foreach (ModuleCache weapon in Cache.Instance.Weapons)
             {
-                if (Cache.Instance.ReloadTimePerModule != null && Cache.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
+                if (Time.Instance.ReloadTimePerModule != null && Time.Instance.ReloadTimePerModule.ContainsKey(weapon.ItemId))
                 {
-                    Cache.Instance.ReloadTimePerModule[weapon.ItemId] = 0;    
+                    Time.Instance.ReloadTimePerModule[weapon.ItemId] = 0;    
                 }
             }
 
@@ -1065,7 +1065,7 @@ namespace Questor.Modules.Logging
                     break;
 
                 case StatisticsState.ListItemHangarItems:
-                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20))
                     {
                         _States.CurrentStatisticsState = StatisticsState.Idle;
                         Logging.Log("Statistics", "StatisticsState.ListItemHangarItems", Logging.Debug);
@@ -1084,7 +1084,7 @@ namespace Questor.Modules.Logging
                     break;
 
                 case StatisticsState.ListLootHangarItems:
-                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20))
                     {
                         _States.CurrentStatisticsState = StatisticsState.Idle;
                         Logging.Log("Statistics", "StatisticsState.ListLootHangarItems", Logging.Debug);
@@ -1103,7 +1103,7 @@ namespace Questor.Modules.Logging
                     break;
 
                 case StatisticsState.ListLootContainerItems:
-                    if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20))
+                    if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20))
                     {
                         _States.CurrentStatisticsState = StatisticsState.Idle;
                         Logging.Log("Statistics", "StatisticsState.ListLootContainerItems", Logging.Debug);

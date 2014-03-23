@@ -5,6 +5,7 @@
     using System.Linq;
     using DirectEve;
     using global::Questor.Modules.Logging;
+    using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.States;
 
@@ -28,7 +29,7 @@
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             DirectContainer hangar = null;

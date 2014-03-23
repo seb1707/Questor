@@ -154,7 +154,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             switch (_States.CurrentArmState)
@@ -231,14 +231,14 @@ namespace Questor.Modules.Actions
 
                     _States.CurrentArmState = ArmState.OpenShipHangar;
                     _States.CurrentCombatState = CombatState.Idle;
-                    Cache.Instance.NextArmAction = DateTime.UtcNow;
+                    Time.Instance.NextArmAction = DateTime.UtcNow;
                     break;
 
                 case ArmState.OpenShipHangar:
                 case ArmState.SwitchToTransportShip:
                 case ArmState.SwitchToSalvageShip:
                 case ArmState.SwitchToMiningShip:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
                     
                     if (!Cache.Instance.OpenShipsHangar("Arm")) return;
 
@@ -281,7 +281,7 @@ namespace Questor.Modules.Actions
                     return;
 
                 case ArmState.ActivateMiningShip:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return;
 
@@ -301,7 +301,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                             ship.ActivateShip();
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                             return;
                         }
 
@@ -318,7 +318,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.ActivateNoobShip:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return;
 
@@ -332,7 +332,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                             ship.ActivateShip();
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                             return;
                         }
 
@@ -350,7 +350,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.ActivateTransportShip:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
                     
                     //if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
 
@@ -370,7 +370,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                             ship.ActivateShip();
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                             break;
                         }
                         return;
@@ -383,7 +383,7 @@ namespace Questor.Modules.Actions
                 case ArmState.ActivateSalvageShip:
                     string salvageshipName = Settings.Instance.SalvageShipName.ToLower();
 
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
                     
                     //if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
 
@@ -403,7 +403,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm.ActivateSalvageShip", "Making [" + ship.GivenName + "] active", Logging.White);
                             ship.ActivateShip();
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                             break;
                         }
 
@@ -421,7 +421,7 @@ namespace Questor.Modules.Actions
                     return;
                     
                 case ArmState.ActivateCombatShip:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     string shipNameToUseNow = Settings.Instance.CombatShipName;
                     if (string.IsNullOrEmpty(shipNameToUseNow))
@@ -470,7 +470,7 @@ namespace Questor.Modules.Actions
                         {
                             Logging.Log("Arm.ActivateCombatShip", "Making [" + shipToUseNow.GivenName + "] active", Logging.White);
                             shipToUseNow.ActivateShip();
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
                             if (TryMissionShip)
                             {
                                 UseMissionShip = true;
@@ -514,7 +514,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.RepairShop:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.UseStationRepair && Cache.Instance.RepairAll)
                     {
@@ -530,7 +530,7 @@ namespace Questor.Modules.Actions
 
                 case ArmState.LoadSavedFitting:
 
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     if (Settings.Instance.UseFittingManager)
                     {
@@ -561,7 +561,7 @@ namespace Questor.Modules.Actions
 
                             //let's wait 10 seconds if we still have locked items
                             Logging.Log("Arm.LoadFitting", "Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count, Logging.White);
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.FittingWindowLoadFittingDelay_seconds);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.FittingWindowLoadFittingDelay_seconds);
                             return;
                         }
 
@@ -604,8 +604,8 @@ namespace Questor.Modules.Actions
                                 DirectActiveShip CurrentShip = Cache.Instance.ActiveShip;
                                 if (Cache.Instance.FittingToLoad.ToLower().Equals(fitting.Name.ToLower()) && fitting.ShipTypeId == CurrentShip.TypeId)
                                 {
-                                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                                    Logging.Log("Arm.LoadFitting", "Found saved fitting named: [ " + fitting.Name + " ][" + Math.Round(Cache.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                                    Logging.Log("Arm.LoadFitting", "Found saved fitting named: [ " + fitting.Name + " ][" + Math.Round(Time.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
 
                                     //switch to the requested fitting for the current mission
                                     fitting.Fit();
@@ -643,7 +643,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.MoveDrones:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction) return;
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
 
                     if (!Settings.Instance.UseDrones || 
                         (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle || 
@@ -799,7 +799,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.MoveItems:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction)
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveItems", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
                         return;
@@ -829,11 +829,11 @@ namespace Questor.Modules.Actions
 
                         if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                         {
-                            if (DateTime.UtcNow.Subtract(Cache.Instance.NextArmAction).TotalSeconds > 120)
+                            if (DateTime.UtcNow.Subtract(Time.Instance.NextArmAction).TotalSeconds > 120)
                             {
                                 Logging.Log("Unloadloot.MoveItems", "Moving Items timed out, clearing item locks", Logging.Orange);
                                 Cache.Instance.DirectEve.UnlockItems();
-                                Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(-10);
+                                Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(-10);
                                 _States.CurrentArmState = ArmState.Begin;
                                 return;
                             }
@@ -936,7 +936,7 @@ namespace Questor.Modules.Actions
 
                             if (Settings.Instance.DebugArm) Logging.Log("Arm.MoveItems", "BringItem: We have [" + bringItemQuantity + "] more bringitem(s) to move", Logging.Debug);
                             ItemsAreBeingMoved = true;
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(4);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(4);
                             return;
                         }
 
@@ -1036,7 +1036,7 @@ namespace Questor.Modules.Actions
                             }
 
                             ItemsAreBeingMoved = true;
-                            Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(4);
+                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(4);
                             return;
                         }
 
@@ -1240,7 +1240,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
+                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
                     Logging.Log("Arm.MoveItems", "Waiting for items", Logging.White);
                     _States.CurrentArmState = ArmState.WaitForItems;
                     return;
@@ -1248,7 +1248,7 @@ namespace Questor.Modules.Actions
                     #endregion move ammo
 
                 case ArmState.MoveMiningCrystals:
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction)
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction)
                     {
                         if (Settings.Instance.DebugArm) Logging.Log("ArmState.MoveMiningCrystals", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
                         return;
@@ -1269,11 +1269,11 @@ namespace Questor.Modules.Actions
 
                         if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                         {
-                            if (DateTime.UtcNow.Subtract(Cache.Instance.NextArmAction).TotalSeconds > 120)
+                            if (DateTime.UtcNow.Subtract(Time.Instance.NextArmAction).TotalSeconds > 120)
                             {
                                 Logging.Log("Unloadloot.MoveMiningCrystals", "Moving Items timed out, clearing item locks", Logging.Orange);
                                 Cache.Instance.DirectEve.UnlockItems();
-                                Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(-10);
+                                Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(-10);
                                 _States.CurrentArmState = ArmState.Begin;
                                 return;
                             }
@@ -1382,7 +1382,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
+                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.WaitforItemstoMove_seconds);
                     Logging.Log("Arm.MoveMiningCrystals", "Waiting for items", Logging.White);
                     _States.CurrentArmState = ArmState.WaitForItems;
                     return;
@@ -1393,7 +1393,7 @@ namespace Questor.Modules.Actions
                 case ArmState.WaitForItems:
 
                     // Wait 5 seconds after moving
-                    if (DateTime.UtcNow < Cache.Instance.NextArmAction)
+                    if (DateTime.UtcNow < Time.Instance.NextArmAction)
                         break;
 
                     if (Cache.Instance.CurrentShipsCargo == null)

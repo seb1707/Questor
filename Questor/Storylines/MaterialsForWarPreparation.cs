@@ -44,7 +44,7 @@ namespace Questor.Storylines
                 {
                     Logging.Log("MaterialsForWarPreparation", "Making [" + ship.GivenName + "] active", Logging.White);
                     ship.ActivateShip();
-                    Cache.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Modules.Lookup.Time.Instance.SwitchShipsDelay_seconds);
+                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Modules.Lookup.Time.Instance.SwitchShipsDelay_seconds);
                     return StorylineState.Arm;
                 }
 

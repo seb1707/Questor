@@ -72,7 +72,7 @@ namespace Questor
             _statistics = new Statistics();
 
             Cache.Instance.ScheduleCharacterName = Logging._character;
-            Cache.Instance.NextStartupAction = DateTime.UtcNow;
+            Time.Instance.NextStartupAction = DateTime.UtcNow;
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
 
@@ -93,38 +93,37 @@ namespace Questor
             {
                 if (Cache.Instance.DirectEve.HasSupportInstances())
                 {
-                    //Logging.Log("Questor", "You have a valid directeve.lic file and have instances available", Logging.Orange);
+                    Logging.Log("Questor", "You have a valid directeve.lic file and have instances available", Logging.Orange);
                 }
                 else
                 {
-                    //Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
+                    Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);    
                 }
-
             }
             catch (Exception exception)
             {
                 Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() in questor.cs - exception was: [" + exception + "]", Logging.Orange);
             }
             
-            Cache.Instance.StopTimeSpecified = Program.StopTimeSpecified;
-            Cache.Instance.MaxRuntime = Program.MaxRuntime;
+            Time.Instance.StopTimeSpecified = Program.StopTimeSpecified;
+            Time.Instance.MaxRuntime = Program.MaxRuntime;
             if (Program.StartTime.AddMinutes(10) < Program.StopTime)
             {
-                Cache.Instance.StopTime = Program.StopTime;
-                Logging.Log("Questor", "Schedule: setup correctly: stoptime is [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
+                Time.Instance.StopTime = Program.StopTime;
+                Logging.Log("Questor", "Schedule: setup correctly: stoptime is [" + Time.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
             }
             else
             {
-                Cache.Instance.StopTime = DateTime.Now.AddHours(Time.Instance.QuestorScheduleNotUsed_Hours);
-                Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime  set to [" + Time.Instance.QuestorScheduleNotUsed_Hours + "] hours from now at [" + Cache.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
+                Time.Instance.StopTime = DateTime.Now.AddHours(Time.Instance.QuestorScheduleNotUsed_Hours);
+                Logging.Log("Questor", "Schedule: NOT setup correctly: stoptime  set to [" + Time.Instance.QuestorScheduleNotUsed_Hours + "] hours from now at [" + Time.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
                 Logging.Log("Questor", "You can correct this by editing schedules.xml to have an entry for this toon", Logging.Orange);
                 Logging.Log("Questor", "Ex: <char user=\"" + Settings.Instance.CharacterName + "\" pw=\"MyPasswordForEVEHere\" name=\"MyLoginNameForEVEHere\" start=\"06:45\" stop=\"08:10\" start2=\"09:05\" stop2=\"14:20\"/>", Logging.Orange);
                 Logging.Log("Questor", "make sure each toon has its own innerspace profile and specify the following startup program line:", Logging.Orange);
                 Logging.Log("Questor", "dotnet questor questor -x -c \"MyEVECharacterName\"", Logging.Orange);
             }
 
-            Cache.Instance.StartTime = Program.StartTime;
-            Cache.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
+            Time.Instance.StartTime = Program.StartTime;
+            Time.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
 
             // get the current process
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
@@ -187,9 +186,9 @@ namespace Questor
 
         public void RunOnceAfterStartup()
         {
-            if (!_runOnceAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15))
+            if (!_runOnceAfterStartupalreadyProcessed && DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddSeconds(15))
             {
-                if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
+                if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Time.Instance.NextStartupAction)
                 {
                     Cache.Instance.DirectEve.Skills.RefreshMySkills();
                     _runOnceAfterStartupalreadyProcessed = true;
@@ -244,7 +243,7 @@ namespace Questor
                 else
                 {
                     Logging.Log("RunOnceAfterStartup", "Settings.Instance.CharacterName is still null", Logging.Orange);
-                    Cache.Instance.NextStartupAction = DateTime.UtcNow.AddSeconds(10);
+                    Time.Instance.NextStartupAction = DateTime.UtcNow.AddSeconds(10);
                     _runOnceAfterStartupalreadyProcessed = false;
                     return;
                 }
@@ -253,9 +252,9 @@ namespace Questor
 
         public void RunOnceInStationAfterStartup()
         {
-            if (!_runOnceInStationAfterStartupalreadyProcessed && DateTime.UtcNow > Cache.Instance.QuestorStarted_DateTime.AddSeconds(15) && Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10))
+            if (!_runOnceInStationAfterStartupalreadyProcessed && DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddSeconds(15) && Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(10))
             {
-                if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Cache.Instance.NextStartupAction)
+                if (Settings.Instance.CharacterXMLExists && DateTime.UtcNow > Time.Instance.NextStartupAction)
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) || !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.InStation)
                     {
@@ -268,7 +267,7 @@ namespace Questor
                 else
                 {
                     Logging.Log("RunOnceAfterStartup", "Settings.Instance.CharacterName is still null", Logging.Orange);
-                    Cache.Instance.NextStartupAction = DateTime.UtcNow.AddSeconds(10);
+                    Time.Instance.NextStartupAction = DateTime.UtcNow.AddSeconds(10);
                     _runOnceInStationAfterStartupalreadyProcessed = false;
                     return;
                 }
@@ -292,7 +291,7 @@ namespace Questor
         {
             if (!Cache.Instance.InSpace && Cache.Instance.InStation)
             {
-                if (DateTime.UtcNow < Cache.Instance.NextSkillTrainerAction)
+                if (DateTime.UtcNow < Time.Instance.NextSkillTrainerAction)
                     return true;
 
                 if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
@@ -313,7 +312,7 @@ namespace Questor
                     }
 
                     Logging.Log("Questor.SkillQueueCheck", "Training Queue is full. [" + Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " is more than 24 hours]", Logging.White);
-                    Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
+                    Time.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(3);
                     return true;
                 }
 
@@ -327,16 +326,16 @@ namespace Questor
 
         public static bool TimeCheck()
         {
-            if (DateTime.UtcNow < Cache.Instance.NextTimeCheckAction)
+            if (DateTime.UtcNow < Time.Instance.NextTimeCheckAction)
                 return false;
 
-            Cache.Instance.NextTimeCheckAction = DateTime.UtcNow.AddSeconds(90);
+            Time.Instance.NextTimeCheckAction = DateTime.UtcNow.AddSeconds(90);
             Logging.Log("Questor", "Checking: Current time [" + DateTime.Now.ToString(CultureInfo.InvariantCulture) +
-                        "] StopTimeSpecified [" + Cache.Instance.StopTimeSpecified +
-                        "] StopTime [ " + Cache.Instance.StopTime +
-                        "] ManualStopTime = " + Cache.Instance.ManualStopTime, Logging.White);
+                        "] StopTimeSpecified [" + Time.Instance.StopTimeSpecified +
+                        "] StopTime [ " + Time.Instance.StopTime +
+                        "] ManualStopTime = " + Time.Instance.ManualStopTime, Logging.White);
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes > Cache.Instance.MaxRuntime)
+            if (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes > Time.Instance.MaxRuntime)
             {
                 // quit questor
                 Logging.Log("Questor", "Maximum runtime exceeded.  Quitting...", Logging.White);
@@ -349,9 +348,9 @@ namespace Questor
                 return true;
             }
 
-            if (Cache.Instance.StopTimeSpecified)
+            if (Time.Instance.StopTimeSpecified)
             {
-                if (DateTime.Now >= Cache.Instance.StopTime)
+                if (DateTime.Now >= Time.Instance.StopTime)
                 {
                     Logging.Log("Questor", "Time to stop. StopTimeSpecified and reached. Quitting game.", Logging.White);
                     Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
@@ -364,7 +363,7 @@ namespace Questor
                 }
             }
 
-            if (DateTime.Now >= Cache.Instance.ManualRestartTime)
+            if (DateTime.Now >= Time.Instance.ManualRestartTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualRestartTime reached. Quitting game.", Logging.White);
                 Cache.Instance.ReasonToStopQuestor = "ManualRestartTime reached.";
@@ -376,7 +375,7 @@ namespace Questor
                 return true;
             }
 
-            if (DateTime.Now >= Cache.Instance.ManualStopTime)
+            if (DateTime.Now >= Time.Instance.ManualStopTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualStopTime reached. Quitting game.", Logging.White);
                 Cache.Instance.ReasonToStopQuestor = "ManualStopTime reached.";
@@ -425,30 +424,30 @@ namespace Questor
                 return;
             }
 
-            Cache.Instance.LastWalletCheck = DateTime.UtcNow;
+            Time.Instance.LastWalletCheck = DateTime.UtcNow;
 
             //Logging.Log("[Questor] Wallet Balance Debug Info: LastKnownGoodConnectedTime = " + Settings.Instance.lastKnownGoodConnectedTime);
             //Logging.Log("[Questor] Wallet Balance Debug Info: DateTime.UtcNow - LastKnownGoodConnectedTime = " + DateTime.UtcNow.Subtract(Settings.Instance.LastKnownGoodConnectedTime).TotalSeconds);
-            if (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
+            if (Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes) > 1)
             {
-                Logging.Log("Questor.WalletCheck", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
+                Logging.Log("Questor.WalletCheck", String.Format("Wallet Balance Has Not Changed in [ {0} ] minutes.", Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
             }
 
             if (Settings.Instance.DebugWalletBalance)
             {
-                Logging.Log("Questor.WalletCheck", String.Format("DEBUG: Wallet Balance [ {0} ] has been checked.", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.Yellow);
+                Logging.Log("Questor.WalletCheck", String.Format("DEBUG: Wallet Balance [ {0} ] has been checked.", Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.Yellow);
 
             }
 
             //Settings.Instance.WalletBalanceChangeLogOffDelay = 2;  //used for debugging purposes
-            //Logging.Log("Cache.Instance.lastKnownGoodConnectedTime is currently: " + Cache.Instance.LastKnownGoodConnectedTime);
-            if (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.WalletBalanceChangeLogOffDelay)
+            //Logging.Log("Time.Instance.lastKnownGoodConnectedTime is currently: " + Time.Instance.LastKnownGoodConnectedTime);
+            if (Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes) < Settings.Instance.WalletBalanceChangeLogOffDelay)
             {
                 try
                 {
                     if ((long)Cache.Instance.MyWalletBalance != (long)Cache.Instance.DirectEve.Me.Wealth)
                     {
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     }
                 }
@@ -459,9 +458,9 @@ namespace Questor
             }
             else if (Settings.Instance.WalletBalanceChangeLogOffDelay != 0)
             {
-                if ((Cache.Instance.InStation) || (Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes) > Settings.Instance.WalletBalanceChangeLogOffDelay + 5))
+                if ((Cache.Instance.InStation) || (Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes) > Settings.Instance.WalletBalanceChangeLogOffDelay + 5))
                 {
-                    Logging.Log("Questor", String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.UtcNow.Subtract(Cache.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
+                    Logging.Log("Questor", String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
                     Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.WalletBalanceChangeLogOffDelay + "min";
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
@@ -495,7 +494,7 @@ namespace Questor
             //    if (Settings.Instance.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);
             //}
 
-            Cache.Instance.LastFrame = DateTime.UtcNow;
+            Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1000ms
@@ -514,9 +513,9 @@ namespace Questor
                 }
             }
 
-            if (DateTime.UtcNow < Cache.Instance.QuestorStarted_DateTime.AddSeconds(30))
+            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(30))
             {
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
             }
 
             // Start _cleanup.ProcessState
@@ -544,24 +543,24 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Session.IsReady)
             {
-                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                Time.Instance.LastSessionIsReady = DateTime.UtcNow;
             }
 
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
                 Cache.Instance.ClearPerPocketCache();
-                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                Cache.Instance.LastSessionChange = DateTime.UtcNow;
+                Time.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
+                Time.Instance.LastSessionChange = DateTime.UtcNow;
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation)
+            if (DateTime.UtcNow < Time.Instance.NextInSpaceorInStation)
             {
                 if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                 {
                     Logging.Log("Panic", "We are in a pod. Don't wait for the session wait timer to expire!", Logging.Red);
-                    Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
+                    Time.Instance.NextInSpaceorInStation = DateTime.UtcNow;
                     return true;
                 }
                 return false;
@@ -573,10 +572,10 @@ namespace Questor
                 Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
             }
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
             {
-                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
+                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
+                Time.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
             }
             return true;
         }
@@ -591,7 +590,7 @@ namespace Questor
 
             if (!Cache.Instance.Paused)
             {
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastWalletCheck).TotalMinutes > Time.Instance.WalletCheck_minutes && !Settings.Instance.DefaultSettingsLoaded)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastWalletCheck).TotalMinutes > Time.Instance.WalletCheck_minutes && !Settings.Instance.DefaultSettingsLoaded)
                 {
                     WalletCheck();
                 }
@@ -599,7 +598,7 @@ namespace Questor
 
             // We always check our defense state if we're in space, regardless of questor state
             // We also always check panic
-            if ((Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow) && Cache.Instance.InSpace)
+            if ((Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow) && Cache.Instance.InSpace)
             {
                 DebugPerformanceClearandStartTimer();
                 if (!Cache.Instance.DoNotBreakInvul)
@@ -611,7 +610,7 @@ namespace Questor
 
             if (Cache.Instance.Paused || DateTime.UtcNow < _nextQuestorAction)
             {
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 Cache.Instance.GotoBaseNow = false;
                 Cache.Instance.SessionState = string.Empty;

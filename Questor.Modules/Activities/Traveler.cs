@@ -91,20 +91,20 @@ namespace Questor.Modules.Activities
         /// <param name = "solarSystemId"></param>
         private static void NavigateToBookmarkSystem(long solarSystemId)
         {
-            if (Cache.Instance.NextTravelerAction > DateTime.UtcNow)
+            if (Time.Instance.NextTravelerAction > DateTime.UtcNow)
             {
-                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: will continue in [ " + Math.Round(Cache.Instance.NextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Debug);
+                if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: will continue in [ " + Math.Round(Time.Instance.NextTravelerAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Debug);
                 return;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+            if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
             {
                 if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: We just session changed less than 10 sec go, wait.", Logging.Teal);
-                Cache.Instance.NextTravelerAction = Cache.Instance.LastSessionChange.AddSeconds(12);
+                Time.Instance.NextTravelerAction = Time.Instance.LastSessionChange.AddSeconds(12);
                 return;
             }
 
-            Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(2);
+            Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(2);
             if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem - Iterating- next iteration should be in no less than [1] second ", Logging.Teal);
 
             _destinationRoute = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
@@ -120,7 +120,7 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: getting Location of solarSystemId [" + solarSystemId + "]", Logging.Teal);
                     _nextGetLocation = DateTime.UtcNow.AddSeconds(10);
                     _location = Cache.Instance.DirectEve.Navigation.GetLocation(solarSystemId);
-                    Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(2);
+                    Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(2);
                     return;
                 }
 
@@ -136,7 +136,8 @@ namespace Questor.Modules.Activities
                     {
                         Logging.Log("Traveler", "NavigateToBookmarkSystem: set destination to [" + _location.ToString() + "] failed ", Logging.Debug);
                     }
-                    Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(3);
+
+                    Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(3);
                     return;
                 }
 
@@ -147,6 +148,7 @@ namespace Questor.Modules.Activities
                     _States.CurrentTravelerState = TravelerState.Error;
                     return;
                 }
+
                 return;
             }
 
@@ -155,13 +157,14 @@ namespace Questor.Modules.Activities
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    if (DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
-                        Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
+                        Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds);
                     }
                 }
-                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
+
+                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
 
                 // We are not yet in space, wait for it
                 return;
@@ -219,7 +222,7 @@ namespace Questor.Modules.Activities
             {
                 // not found, that cant be true?!?!?!?!
                 Logging.Log("Traveler", "Error [" + Logging.Yellow + _locationName + Logging.Green + "] not found, most likely lag waiting [" + Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds + "] seconds.", Logging.Red);
-                Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds);
+                Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerNoStargatesFoundRetryDelay_seconds);
                 return;
             }
 
@@ -240,7 +243,7 @@ namespace Questor.Modules.Activities
 
                 if (MyNextStargate.Distance < (int)Distances.WarptoDistance && MyNextStargate.Distance != 0)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction && !Cache.Instance.IsApproaching(MyNextStargate.Id))
+                    if (DateTime.UtcNow > Time.Instance.NextApproachAction && !Cache.Instance.IsApproaching(MyNextStargate.Id))
                     {
                         if (Settings.Instance.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: approaching the stargate named [" + MyNextStargate.Name + "]", Logging.Teal);
                         MyNextStargate.Approach(); //you could use a negative approach distance here but ultimately that is a bad idea.. Id like to go toward the entity without approaching it so we would end up inside the docking ring (eventually)
@@ -263,7 +266,7 @@ namespace Questor.Modules.Activities
                 }
             }
 
-            Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds); //this should probably use a different Time definition, but this works for now. (5 seconds)
+            Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds); //this should probably use a different Time definition, but this works for now. (5 seconds)
             if (!Combat.ReloadAll(Cache.Instance.MyShipEntity)) return;
             return;
         }
@@ -275,7 +278,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToMiningHomeBookmark: _combat.ProcessState()", Logging.White);
                     Combat.ProcessState();
@@ -319,7 +322,7 @@ namespace Questor.Modules.Activities
                 Traveler.ProcessState();
 
                 //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                 if (_States.CurrentTravelerState == TravelerState.AtDestination)
@@ -411,7 +414,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     try
@@ -458,7 +461,7 @@ namespace Questor.Modules.Activities
                 Traveler.ProcessState();
 
                 //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                 if (_States.CurrentTravelerState == TravelerState.AtDestination)
@@ -514,7 +517,7 @@ namespace Questor.Modules.Activities
             //
             if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
-                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
+                if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
                     if (Settings.Instance.DebugGotobase) Logging.Log(module, "TravelToAgentsStation: _combat.ProcessState()", Logging.White);
                     Combat.ProcessState();
@@ -588,7 +591,7 @@ namespace Questor.Modules.Activities
                 Traveler.ProcessState();
 
                 //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                 if (_States.CurrentTravelerState == TravelerState.AtDestination)

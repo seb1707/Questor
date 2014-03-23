@@ -12,7 +12,7 @@ namespace Questor.Modules.BackgroundTasks
 
     public static class NavigateOnGrid
     {
-        public static DateTime AvoidBumpingThingsTimeStamp = Cache.Instance.StartTime;
+        public static DateTime AvoidBumpingThingsTimeStamp = Time.Instance.StartTime;
         public static int SafeDistanceFromStructureMultiplier = 1;
         public static bool AvoidBumpingThingsWarningSent = false;
         public static DateTime NextNavigateIntoRange = DateTime.UtcNow;
@@ -22,7 +22,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Settings.Instance.AvoidBumpingThings)
             {
                 //if It has not been at least 60 seconds since we last session changed do not do anything
-                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+                if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Time.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                     return;
 
                 //we cant move in bastion mode, do not try
@@ -62,7 +62,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
                     else
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                        if (DateTime.UtcNow > Time.Instance.NextOrbit)
                         {
                             if (DateTime.UtcNow > AvoidBumpingThingsTimeStamp.AddSeconds(30))
                             {
@@ -110,7 +110,7 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void OrbitGateorTarget(EntityCache target, string module)
         {
-            if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+            if (DateTime.UtcNow > Time.Instance.NextOrbit)
             {
                 //we cant move in bastion mode, do not try
                 List<ModuleCache> bastionModules = null;
@@ -261,7 +261,7 @@ namespace Questor.Modules.BackgroundTasks
             }
             else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                 {
                     //if optimalrange is set - use it to determine engagement range
                     if (Cache.Instance.OptimalRange != 0)
@@ -372,9 +372,9 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void StopMyShip()
         {
-            if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+            if (DateTime.UtcNow > Time.Instance.NextApproachAction)
             {
-                Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                Time.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdStopShip);
                 Cache.Instance.Approaching = null;
             }
@@ -384,7 +384,7 @@ namespace Questor.Modules.BackgroundTasks
         {
             if (Settings.Instance.SpeedTank)
             {   //this should be only executed when no specific actions
-                if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                if (DateTime.UtcNow > Time.Instance.NextOrbit)
                 {
                     if (target.Distance + Cache.Instance.OrbitDistance < Cache.Instance.MaxRange)
                     {
@@ -435,7 +435,7 @@ namespace Questor.Modules.BackgroundTasks
             }
             else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                 {
                     //if optimalrange is set - use it to determine engagement range
                     //

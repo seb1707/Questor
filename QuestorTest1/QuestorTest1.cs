@@ -8,6 +8,7 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Lookup;
 using Questor.Modules.Misc;
 
 namespace QuestorTest1
@@ -77,7 +78,7 @@ namespace QuestorTest1
                 //_totalQuantityOfOrders = dummy;
             }
 
-            Cache.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
+            Time.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
 
             InnerspaceCommands.CreateLavishCommands();
             //InnerspaceEvents.CreateLavishEvents();
@@ -104,7 +105,7 @@ namespace QuestorTest1
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 
-            Cache.Instance.LastFrame = DateTime.UtcNow;
+            Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 3000)
@@ -130,7 +131,7 @@ namespace QuestorTest1
             //
             // ......
             //
-            Logging.Log("QuestorTest1", "QuestorTest1 [" + DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds + "] sec since we started. ", Logging.White);
+            Logging.Log("QuestorTest1", "QuestorTest1 [" + DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds + "] sec since we started. ", Logging.White);
 
             return;
         }

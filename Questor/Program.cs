@@ -424,8 +424,8 @@ namespace Questor
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 
-            Cache.Instance.LastFrame = DateTime.UtcNow;
-            Cache.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
+            Time.Instance.LastFrame = DateTime.UtcNow;
+            Time.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
 
             //if (Cache.Instance.SessionState != "Quitting")
             //{
@@ -465,7 +465,7 @@ namespace Questor
             if (Cache.Instance.DirectEve.Session.IsReady)
             {
                 Logging.Log("Startup", "We have successfully logged in", Logging.White);
-                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                Time.Instance.LastSessionIsReady = DateTime.UtcNow;
                 _done = true;
                 return;
             }

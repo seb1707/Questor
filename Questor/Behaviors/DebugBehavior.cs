@@ -149,7 +149,7 @@ namespace Questor.Behaviors
         private void AvoidBumpingThings()
         {
             //if It has not been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Cache.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
+            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Time.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
                 return;
             //
             // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
@@ -232,7 +232,7 @@ namespace Questor.Behaviors
             {
                 _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
             }
-            if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
+            if ((DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
                 {
@@ -300,9 +300,9 @@ namespace Questor.Behaviors
                         break;
                     }
                     
-                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
                     {
-                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
 
@@ -347,7 +347,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -358,7 +358,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -368,7 +368,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentArmState == ArmState.Done)
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentArmState = ArmState.Idle;
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
@@ -498,7 +498,7 @@ namespace Questor.Behaviors
                         Traveler.ProcessState();
 
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)

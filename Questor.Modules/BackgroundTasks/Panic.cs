@@ -82,7 +82,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.ActiveShip.Entity == null)
                         return;
 
-                    if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+                    if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
                         return;
 
                     if ((long)Cache.Instance.ActiveShip.StructurePercentage == 0) //if your hull is 0 you are dead or bugged, wait.
@@ -385,7 +385,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
                             }
 
-                            if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
+                            if (DateTime.UtcNow > Time.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < Time.Instance.WarpScrambledNoDelay_seconds) //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds)
                             {
                                 if (station.WarpTo())
                                 {
@@ -393,7 +393,7 @@ namespace Questor.Modules.BackgroundTasks
                                     Cache.Instance.IsMissionPocketDone = true;    
                                 }
                             }
-                            else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                            else Logging.Log("Panic", "Warping will be attempted again after [" + Math.Round(Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 
                             //if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)
                             //{
@@ -411,8 +411,8 @@ namespace Questor.Modules.BackgroundTasks
 
                             return;
                         }
-                            
-                        if (DateTime.UtcNow > Cache.Instance.NextTravelerAction)
+
+                        if (DateTime.UtcNow > Time.Instance.NextTravelerAction)
                         {
                             if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
@@ -429,13 +429,13 @@ namespace Questor.Modules.BackgroundTasks
                             return;
                         }
 
-                        Logging.Log("Panic", "Approaching has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                        Logging.Log("Panic", "Approaching has been delayed for [" + Math.Round(Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                         return;
                     }
 
                     if (Cache.Instance.InSpace)
                     {
-                        if (DateTime.UtcNow.Subtract(Cache.Instance.LastLoggingAction).TotalSeconds > 15)
+                        if (DateTime.UtcNow.Subtract(Time.Instance.LastLoggingAction).TotalSeconds > 15)
                         {
                             Logging.Log("Panic", "No station found in local?", Logging.Red);
                         }
@@ -465,7 +465,7 @@ namespace Questor.Modules.BackgroundTasks
                                         return;
                                     }
 
-                                    if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                    if (DateTime.UtcNow > Time.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                     //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
                                     {
                                         if (offridSafeSpotBookmark.WarpTo())
@@ -480,7 +480,7 @@ namespace Questor.Modules.BackgroundTasks
                                         return;
                                     }
 
-                                    Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                                    Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                     return;
                                 }
                             }
@@ -503,7 +503,7 @@ namespace Questor.Modules.BackgroundTasks
                                 }
 
                                 //this will effectively spam warpto as soon as you are free of warp disruption if you were warp disrupted in the past 10 seconds
-                                if (DateTime.UtcNow > Cache.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
+                                if (DateTime.UtcNow > Time.Instance.NextWarpAction || DateTime.UtcNow.Subtract(_lastWarpScrambled).TotalSeconds < 10)
                                 {
                                     if (Cache.Instance.Star.WarpTo())
                                     {
@@ -514,7 +514,7 @@ namespace Questor.Modules.BackgroundTasks
                                     return;
                                 }
 
-                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                                Logging.Log("Panic", "Warping has been delayed for [" + Math.Round(Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                                 return;
                             }
                         }

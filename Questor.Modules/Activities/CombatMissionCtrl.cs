@@ -61,9 +61,9 @@ namespace Questor.Modules.Activities
         private void Nextaction()
         {
             // make sure all approach / orbit / align timers are reset (why cant we wait them out in the next action!?)
-            Cache.Instance.NextApproachAction = DateTime.UtcNow;
-            Cache.Instance.NextOrbit = DateTime.UtcNow;
-            Cache.Instance.NextAlign = DateTime.UtcNow;
+            Time.Instance.NextApproachAction = DateTime.UtcNow;
+            Time.Instance.NextOrbit = DateTime.UtcNow;
+            Time.Instance.NextAlign = DateTime.UtcNow;
 
             // now that we have completed this action revert OpenWrecks to false
             if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
@@ -116,9 +116,9 @@ namespace Questor.Modules.Activities
                     // This scenario only happens when all wrecks are within tractor range and you have a salvager
                     // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
                     // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
-                    if (DateTime.UtcNow > Cache.Instance.NextBookmarkPocketAttempt)
+                    if (DateTime.UtcNow > Time.Instance.NextBookmarkPocketAttempt)
                     {
-                        Cache.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
+                        Time.Instance.NextBookmarkPocketAttempt = DateTime.UtcNow.AddSeconds(Time.Instance.BookmarkPocketRetryDelay_seconds);
                         if (!Settings.Instance.LootEverything && Cache.Instance.Containers.Count() < Settings.Instance.MinimumWreckCount)
                         {
                             Logging.Log("CombatMissionCtrl", "No bookmark created because the pocket has [" + Cache.Instance.Containers.Count() + "] wrecks/containers and the minimum is [" + Settings.Instance.MinimumWreckCount + "]", Logging.Teal);
@@ -129,7 +129,7 @@ namespace Questor.Modules.Activities
                         return true;
                     }
 
-                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Cache.Instance.NextBookmarkPocketAttempt is in [" + Cache.Instance.NextBookmarkPocketAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "sec] waiting", Logging.Debug);
+                    if (Settings.Instance.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Cache.Instance.NextBookmarkPocketAttempt is in [" + Time.Instance.NextBookmarkPocketAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "sec] waiting", Logging.Debug);
                     return false;
                 }
 
@@ -311,7 +311,7 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "Activate: Done reloading", Logging.Teal);
                     AttemptsToActivateGateTimer++;
 
-                    if (DateTime.UtcNow > Cache.Instance.NextActivateAction || AttemptsToActivateGateTimer > 30)
+                    if (DateTime.UtcNow > Time.Instance.NextActivateAction || AttemptsToActivateGateTimer > 30)
                     {
                         if (closest.Activate())
                         {
@@ -335,7 +335,7 @@ namespace Questor.Modules.Activities
                     if (Settings.Instance.DebugActivateGate) Logging.Log("CombatMissionCtrl", "if (closest.Distance < (int)Distances.WarptoDistance)", Logging.Green);
 
                     // Move to the target
-                    if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                     {
                         if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
@@ -356,7 +356,7 @@ namespace Questor.Modules.Activities
 
                     if (Cache.Instance.IsOrbiting(closest.Id) || Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)
                     {
-                        Logging.Log("CombatMissionCtrl", "Activate: Delaying approach for: [" + Math.Round(Cache.Instance.NextApproachAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.Teal);
+                        Logging.Log("CombatMissionCtrl", "Activate: Delaying approach for: [" + Math.Round(Time.Instance.NextApproachAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.Teal);
                         return;
                     }
 
@@ -824,7 +824,7 @@ namespace Questor.Modules.Activities
                     {
                         if (Cache.Instance.Approaching != null)
                         {
-                            if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                            if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Time.Instance.NextApproachAction)
                             {
                                 NavigateOnGrid.StopMyShip();
                                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Stop ship, we have been targeted and are [" + DistanceToApproach + "] from [ID: " + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -839,7 +839,7 @@ namespace Questor.Modules.Activities
                     {
                         if (Cache.Instance.Approaching != null)
                         {
-                            if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                            if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Time.Instance.NextApproachAction)
                             {
                                 NavigateOnGrid.StopMyShip();
                                 Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Stop ship, we have been targeted and are [" + DistanceToApproach + "] from [ID: " + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -855,7 +855,7 @@ namespace Questor.Modules.Activities
 
                     if (Cache.Instance.Approaching != null)
                     {
-                        if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                        if (Cache.Instance.MyShipEntity.Velocity != 0 && DateTime.UtcNow > Time.Instance.NextApproachAction)
                         {
                             NavigateOnGrid.StopMyShip();
                             Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Stop ship, we have been targeted and are [" + DistanceToApproach + "] from [ID: " + closest.Name + "][" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
@@ -873,7 +873,7 @@ namespace Questor.Modules.Activities
 
                 if (closest.Distance < (int)Distances.WarptoDistance) // if we are inside warpto range you need to approach (you cant warp from here)
                 {
-                    if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distances.WarptoDistance)] -  NextApproachAction [" + Cache.Instance.NextApproachAction + "]", Logging.Teal);
+                    if (Settings.Instance.DebugMoveTo) Logging.Log("CombatMissionCtrl.MoveTo", "if (closest.Distance < (int)Distances.WarptoDistance)] -  NextApproachAction [" + Time.Instance.NextApproachAction + "]", Logging.Teal);
 
                     // Move to the target
 
@@ -1033,7 +1033,8 @@ namespace Questor.Modules.Activities
             {
                 DeactivateAfterSeconds = 5;
             }
-            Cache.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
+
+            Time.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(DeactivateAfterSeconds);
 
             DeactivateIfNothingTargetedWithinRange = false;
             if (!bool.TryParse(action.GetParameterValue("DeactivateIfNothingTargetedWithinRange"), out DeactivateIfNothingTargetedWithinRange))
@@ -1659,7 +1660,7 @@ namespace Questor.Modules.Activities
 
                     if (closest.Distance > (int)Distances.SafeScoopRange)
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                        if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                         {
                             if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                             {
@@ -1672,9 +1673,9 @@ namespace Questor.Modules.Activities
                     }
                     else if (Cache.Instance.MyShipEntity.Velocity < 50) //nearly stopped
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextOpenContainerInSpaceAction)
+                        if (DateTime.UtcNow > Time.Instance.NextOpenContainerInSpaceAction)
                         {
-                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(6, 10));
+                            Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(6, 10));
 
                             DirectContainer container = null;
 
@@ -1723,7 +1724,7 @@ namespace Questor.Modules.Activities
                                             // THIS IS NOT WORKING - EXCEPTION/ERROR IN CLIENT... 
                                             //
                                             //container.Add(CurrentShipsCargoItem, quantity);
-                                            Cache.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                                            Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
                                             ItemsHaveBeenMoved = true;
                                             return;
                                         }

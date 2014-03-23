@@ -1,4 +1,6 @@
-﻿namespace Questor.Modules.Actions
+using Questor.Modules.Lookup;
+
+namespace Questor.Modules.Actions
 {
     using System;
     using System.Linq;
@@ -23,7 +25,7 @@
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             //DirectMarketWindow marketWindow = Cache.Instance.Windows.OfType<DirectMarketWindow>().FirstOrDefault();

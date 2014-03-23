@@ -4001,7 +4001,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow < Cache.Instance.NextTargetAction)
+                if (DateTime.UtcNow < Time.Instance.NextTargetAction)
                 {
                     return false;
                 }
@@ -4132,9 +4132,9 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextJumpAction)
+                if (DateTime.UtcNow > Time.Instance.NextJumpAction)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
@@ -4146,11 +4146,11 @@ namespace Questor.Modules.Caching
                             if (Distance < 2500)
                             {
                                 _directEntity.Jump();
-                                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow;
-                                Cache.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
-                                Cache.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
-                                Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                                Cache.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Time.Instance.NextInSpaceorInStation = DateTime.UtcNow;
+                                Time.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
+                                Time.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                                Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                                 return true;
                             }
 
@@ -4166,7 +4166,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log("EntityCache.Jump", "We still have [" + DateTime.UtcNow.Subtract(Cache.Instance.NextJumpAction) + "] seconds until we should jump again.", Logging.White);
+                Logging.Log("EntityCache.Jump", "We still have [" + DateTime.UtcNow.Subtract(Time.Instance.NextJumpAction) + "] seconds until we should jump again.", Logging.White);
                 return false;
 
             }
@@ -4181,7 +4181,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextActivateAction)
+                if (DateTime.UtcNow > Time.Instance.NextActivateAction)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
@@ -4200,8 +4200,8 @@ namespace Questor.Modules.Caching
                         }
 
                         _directEntity.Activate();
-                        Cache.Instance.LastInWarp = DateTime.UtcNow;
-                        Cache.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
+                        Time.Instance.LastInWarp = DateTime.UtcNow;
+                        Time.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
                         return true;
                     }
 
@@ -4209,7 +4209,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log("EntityCache.Activate", "You have another [" + Cache.Instance.NextActivateAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec before we should attempt to activate [" + Name + "], waiting.", Logging.Debug);
+                Logging.Log("EntityCache.Activate", "You have another [" + Time.Instance.NextActivateAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec before we should attempt to activate [" + Name + "], waiting.", Logging.Debug);
                 return false;
             }
             catch (Exception exception)
@@ -4223,9 +4223,9 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                 {
-                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                    if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Time.Instance.NextApproachAction)
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
@@ -4242,8 +4242,8 @@ namespace Questor.Modules.Caching
                         }
 
                         _directEntity.Approach();
-                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
-                        Cache.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        Time.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         Cache.Instance.Approaching = this;
                         return true;
                     }
@@ -4265,7 +4265,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextApproachAction)
+                if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
@@ -4283,7 +4283,7 @@ namespace Questor.Modules.Caching
                             return false;
                         }
 
-                        Cache.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
+                        Time.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.ApproachDelay_seconds);
                         _directEntity.KeepAtRange(range);
                         Cache.Instance.Approaching = this;
                         return true;
@@ -4306,7 +4306,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextOrbit)
+                if (DateTime.UtcNow > Time.Instance.NextOrbit)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
@@ -4326,7 +4326,7 @@ namespace Questor.Modules.Caching
 
                         _directEntity.Orbit(range);
                         Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double)Cache.Instance.OrbitDistance / 1000, 0) + "k][" + MaskedId + "]", Logging.Teal);
-                        Cache.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
+                        Time.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                         Cache.Instance.Approaching = this;
                         return true;
                     }
@@ -4348,9 +4348,9 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextWarpAction)
+                if (DateTime.UtcNow > Time.Instance.NextWarpAction)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
+                    if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
@@ -4376,9 +4376,9 @@ namespace Questor.Modules.Caching
                                     }
 
                                     _directEntity.WarpTo();
-                                    Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                                    Cache.Instance.LastInWarp = DateTime.UtcNow;
-                                    Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                                    Time.Instance.WehaveMoved = DateTime.UtcNow;
+                                    Time.Instance.LastInWarp = DateTime.UtcNow;
+                                    Time.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
                                     return true;
                                 }
 
@@ -4398,7 +4398,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log("EntityCache.WarpTo", "Waiting [" + Cache.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds + "] for next attempted warp.", Logging.Debug);
+                Logging.Log("EntityCache.WarpTo", "Waiting [" + Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds + "] for next attempted warp.", Logging.Debug);
                 return false;
             }
             catch (Exception exception)
@@ -4412,7 +4412,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextAlign)
+                if (DateTime.UtcNow > Time.Instance.NextAlign)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
@@ -4422,8 +4422,8 @@ namespace Questor.Modules.Caching
                         }
 
                         _directEntity.AlignTo();
-                        Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                        Cache.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
+                        Time.Instance.WehaveMoved = DateTime.UtcNow;
+                        Time.Instance.NextAlign = DateTime.UtcNow.AddMinutes(Time.Instance.AlignDelay_minutes);
                         return true;
                     }
 
@@ -4443,9 +4443,9 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction && DateTime.UtcNow > Cache.Instance.NextWarpAction)
+                if (DateTime.UtcNow > Time.Instance.NextDockAction && DateTime.UtcNow > Time.Instance.NextWarpAction)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
+                    if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(20))
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
@@ -4454,10 +4454,10 @@ namespace Questor.Modules.Caching
                                 Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
-                            Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                            Cache.Instance.LastInWarp = DateTime.UtcNow;
-                            Cache.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
-                            Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                            Time.Instance.WehaveMoved = DateTime.UtcNow;
+                            Time.Instance.LastInWarp = DateTime.UtcNow;
+                            Time.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);
+                            Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                             _directEntity.WarpToAndDock();
                         }
                     }
@@ -4473,17 +4473,17 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextDockAction)
+                if (DateTime.UtcNow > Time.Instance.NextDockAction)
                 {
-                    if (Cache.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20))
+                    if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(20))
                     {
                         if (_directEntity != null && _directEntity.IsValid)
                         {
                             //if (Distance < (int) Distances.DockingRange)
                             //{
                                 _directEntity.Dock();
-                                Cache.Instance.WehaveMoved = DateTime.UtcNow;
-                                Cache.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);    
+                                Time.Instance.WehaveMoved = DateTime.UtcNow;
+                                Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);    
                             //}
 
                             //Logging.Log("Dock", "[" + Name + "][" + Distance +"] is not in docking range, aborting docking request", Logging.Debug);
@@ -4494,11 +4494,11 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    Logging.Log("Dock", "We were last detected in space [" + DateTime.UtcNow.Subtract(Cache.Instance.LastInSpace).TotalSeconds + "] seconds ago. We have been unDocked for [ " + DateTime.UtcNow.Subtract(Cache.Instance.LastInStation).TotalSeconds + " ] seconds. we should not dock yet, waiting", Logging.Debug);
+                    Logging.Log("Dock", "We were last detected in space [" + DateTime.UtcNow.Subtract(Time.Instance.LastInSpace).TotalSeconds + "] seconds ago. We have been unDocked for [ " + DateTime.UtcNow.Subtract(Time.Instance.LastInStation).TotalSeconds + " ] seconds. we should not dock yet, waiting", Logging.Debug);
                     return false;
                 }
 
-                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Time.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                 return false;
             }
             catch (Exception exception)
@@ -4512,12 +4512,12 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                if (DateTime.UtcNow > Time.Instance.NextOpenCargoAction)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
                         _directEntity.OpenCargo();
-                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                         return true;
                     }
 
@@ -4542,7 +4542,7 @@ namespace Questor.Modules.Caching
                     if (IsTarget)
                     {
                         _directEntity.MakeActiveTarget();
-                        Cache.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
+                        Time.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
                     }
 
                     return;

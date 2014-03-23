@@ -111,7 +111,7 @@ namespace ValueDump
 
         private void ValuedumpOnFrame(object sender, EventArgs e)
         {
-            Cache.Instance.LastFrame = DateTime.UtcNow;
+            Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every .5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.ValueDumpPulse_milliseconds) //default: 500ms
@@ -129,18 +129,18 @@ namespace ValueDump
 
             if (Cache.Instance.DirectEve.Session.IsReady)
             {
-                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                Time.Instance.LastSessionIsReady = DateTime.UtcNow;
             }
 
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                Cache.Instance.LastSessionChange = DateTime.UtcNow;
+                Time.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
+                Time.Instance.LastSessionChange = DateTime.UtcNow;
                 return;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation)
+            if (DateTime.UtcNow < Time.Instance.NextInSpaceorInStation)
             {
                 return;
             }
@@ -154,10 +154,10 @@ namespace ValueDump
                 Settings.Instance.LoadSettings();
             }
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
             {
-                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalMinutes;
-                Cache.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
+                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
+                Time.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
             }
 
             if (_States.CurrentValueDumpState == ValueDumpState.Idle)

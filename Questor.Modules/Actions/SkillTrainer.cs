@@ -23,17 +23,17 @@ namespace Questor.Modules.Actions
 		public static void ProcessState()
 		{
 			// Only pulse state changes every .5s
-			if (DateTime.UtcNow <  Cache.Instance.NextSkillTrainerProcessState)
+			if (DateTime.UtcNow <  Time.Instance.NextSkillTrainerProcessState)
 			{
 				return;
 			}
 			
-			Cache.Instance.NextSkillTrainerProcessState = DateTime.UtcNow.AddMilliseconds(Time.Instance.SkillTrainerPulse_milliseconds);
+			Time.Instance.NextSkillTrainerProcessState = DateTime.UtcNow.AddMilliseconds(Time.Instance.SkillTrainerPulse_milliseconds);
 
 			switch (_State.CurrentSkillTrainerState)
 			{
 				case SkillTrainerState.Idle:
-					if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.NextSkillTrainerAction)
+					if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.NextSkillTrainerAction)
 					{
 						Logging.Log("SkillTrainer", "It is Time to Start SkillTrainer again...", Logging.White);
 						_State.CurrentSkillTrainerState = SkillTrainerState.Begin;
@@ -110,7 +110,7 @@ namespace Questor.Modules.Actions
 					SkillPlan.attemptsToDoSomethingWithNonInjectedSkills = 0;
 					SkillPlan.doneWithAllPlannedSKills = false;
 					SkillPlan.injectSkillBookAttempts = 0;
-					Cache.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
+					Time.Instance.NextSkillTrainerAction = DateTime.UtcNow.AddHours(Cache.Instance.RandomNumber(3, 4));
 					_State.CurrentSkillTrainerState = SkillTrainerState.Idle;
 					_States.CurrentQuestorState = QuestorState.Idle;
 					break;

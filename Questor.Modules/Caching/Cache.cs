@@ -176,8 +176,6 @@ namespace Questor.Modules.Caching
             }
         }
         
-        public DateTime LastPreferredPrimaryWeaponTargetDateTime;
-
         /// <summary>
         ///   Drone target chosen by GetBest Target
         /// </summary>
@@ -223,7 +221,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public DateTime LastPreferredDroneTargetDateTime;
         public long? LastDroneTargetID = null;
 
         public string OrbitEntityNamed;
@@ -440,21 +437,7 @@ namespace Questor.Modules.Caching
 
         public Cache()
         {
-            NextDockAction = DateTime.UtcNow;
-            NextUndockAction = DateTime.UtcNow;
-            NextAlign = DateTime.UtcNow;
-            NextBookmarkPocketAttempt = DateTime.UtcNow;
-            NextActivateAction = DateTime.UtcNow;
-            NextTargetAction = DateTime.UtcNow;
-            NextTravelerAction = DateTime.UtcNow;
-            NextApproachAction = DateTime.UtcNow;
-            NextRemoveBookmarkAction = DateTime.UtcNow;
-            NextActivateSupportModules = DateTime.UtcNow;
-            LastJettison = DateTime.UtcNow;
-            NextArmAction = DateTime.UtcNow;
-            NextLootAction = DateTime.UtcNow;
-            NextSalvageAction = DateTime.UtcNow;
-            NextBookmarkAction = DateTime.UtcNow;
+            
             //string line = "Cache: new cache instance being instantiated";
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, line));
             //line = string.Empty;
@@ -462,12 +445,6 @@ namespace Questor.Modules.Caching
             _entitiesthatHaveExploded = new List<EntityCache>();
             LastModuleTargetIDs = new Dictionary<long, long>();
             TargetingIDs = new Dictionary<long, DateTime>();
-            ReloadTimePerModule = new Dictionary<long, long>();
-            LastReloadedTimeStamp = new Dictionary<long, DateTime>();
-            LastChangedAmmoTimeStamp = new Dictionary<long, DateTime>();
-            LastActivatedTimeStamp = new Dictionary<long, DateTime>();
-            LastClickedTimeStamp = new Dictionary<long, DateTime>();
-        
             _entitiesById = new Dictionary<long, EntityCache>();
 
             //InvTypesById = new Dictionary<int, InvType>();
@@ -491,8 +468,8 @@ namespace Questor.Modules.Caching
             LowestShieldPercentageThisMission = 100;
             LowestArmorPercentageThisMission = 100;
             LowestCapacitorPercentageThisMission = 100;
-            LastKnownGoodConnectedTime = DateTime.UtcNow;
-
+            Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+            
             Interlocked.Increment(ref CacheInstances);
         }
 
@@ -571,17 +548,6 @@ namespace Questor.Modules.Caching
         public bool normalNav = true;  //Do we want to bypass normal navigation for some reason?
         public bool onlyKillAggro { get; set; }
 
-        public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
-
-        public DateTime NextSalvageTrip = DateTime.UtcNow;
-        public DateTime LastStackAmmoHangar = DateTime.UtcNow;
-        public DateTime LastStackLootHangar = DateTime.UtcNow;
-        public DateTime LastStackItemHangar = DateTime.UtcNow;
-        public DateTime LastStackShipsHangar = DateTime.UtcNow;
-        public DateTime LastStackCargohold = DateTime.UtcNow;
-        public DateTime LastStackLootContainer = DateTime.UtcNow;
-        public DateTime LastAccelerationGateDetected = DateTime.UtcNow;
-
         public int StackLoothangarAttempts { get; set; }
         public int StackAmmohangarAttempts { get; set; }
         public int StackItemhangarAttempts { get; set; }
@@ -596,18 +562,17 @@ namespace Questor.Modules.Caching
         public string Path;
 
         public bool _isCorpInWar = false;
-        public DateTime nextCheckCorpisAtWar = DateTime.UtcNow;
-
+        
         public bool IsCorpInWar
         {
             get
             {
-                if (DateTime.UtcNow > nextCheckCorpisAtWar)
+                if (DateTime.UtcNow > Time.Instance.NextCheckCorpisAtWar)
                 {
                     bool war = DirectEve.Me.IsAtWar;
                     Cache.Instance._isCorpInWar = war;
 
-                    nextCheckCorpisAtWar = DateTime.UtcNow.AddMinutes(15);
+                    Time.Instance.NextCheckCorpisAtWar = DateTime.UtcNow.AddMinutes(15);
                     if (!_isCorpInWar)
                     {
                         if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is not involved in any wars (yet)", Logging.Green);
@@ -726,7 +691,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if ((Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10)))
+                    if ((Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(10)))
                     {
                         if (_currentShipsCargo == null)
                         {
@@ -738,16 +703,16 @@ namespace Questor.Modules.Caching
                             if (Cache.Instance._currentShipsCargo.Window == null)
                             {
                                 // No?, then command it to open if we have not already tried to open it very recently
-                                if (DateTime.UtcNow > Cache.Instance.NextOpenCurrentShipsCargoWindowAction)
+                                if (DateTime.UtcNow > Time.Instance.NextOpenCurrentShipsCargoWindowAction)
                                 {
-                                    Cache.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                    Time.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                                     if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -775,16 +740,16 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance._currentShipsCargo.Window.IsPrimary())
                             {
-                                if (DateTime.UtcNow > Cache.Instance.NextOpenCargoAction)
+                                if (DateTime.UtcNow > Time.Instance.NextOpenCargoAction)
                                 {
                                     if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
-                                    Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
+                                    Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
+                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -965,32 +930,6 @@ namespace Questor.Modules.Caching
         public Dictionary<long, DateTime> TargetingIDs { get; private set; }
 
         /// <summary>
-        ///   Reload time per module
-        /// </summary>
-        public Dictionary<long, long> ReloadTimePerModule { get; private set; }
-
-        /// <summary>
-        ///   Modules last reload time
-        /// </summary>
-        public Dictionary<long, DateTime> LastReloadedTimeStamp { get; private set; }
-        
-        /// <summary>
-        ///   Modules last changed ammo time
-        /// </summary>
-        public Dictionary<long, DateTime> LastChangedAmmoTimeStamp { get; private set; }
-        
-        /// <summary>
-        ///   Modules last activated time
-        /// </summary>
-        public Dictionary<long, DateTime> LastActivatedTimeStamp { get; private set; }
-
-        /// <summary>
-        ///   Modules last Click time (this is used for activating AND deactivating!)
-        /// </summary>
-        public Dictionary<long, DateTime> LastClickedTimeStamp { get; private set; }
-        
-
-        /// <summary>
         ///   Used for Drones to know that it should retract drones
         /// </summary>
         public bool IsMissionPocketDone { get; set; }
@@ -1005,69 +944,9 @@ namespace Questor.Modules.Caching
 
         public string _agentName = "";
 
-        public DateTime NextWindowAction { get; set; }
-        public DateTime NextGetAgentMissionAction { get; set; }
-        public DateTime NextOpenContainerInSpaceAction { get; set; }
-        public DateTime NextOpenLootContainerAction { get; set; }
-        public DateTime NextOpenCorpBookmarkHangarAction { get; set; }
-        public DateTime NextDroneBayAction { get; set; }
-        public DateTime NextOpenHangarAction { get; set; }
-        public DateTime NextOpenCargoAction { get; set; }
-        public DateTime NextOpenCurrentShipsCargoWindowAction { get; set; }
-        public DateTime NextMakeActiveTargetAction { get; set; }
-        public DateTime NextArmAction { get; set; }
-        public DateTime NextSalvageAction { get; set; }
-        public DateTime NextBookmarkAction { get; set; }
-        public DateTime NextTractorBeamAction { get; set; }
-        public DateTime NextLootAction { get; set; }
-        public DateTime LastJettison { get; set; }
-        public DateTime NextAfterburnerAction { get; set; }
-        public DateTime NextRepModuleAction { get; set; }
-        public DateTime NextActivateSupportModules { get; set; }
-        public DateTime NextRemoveBookmarkAction { get; set; }
-        public DateTime NextApproachAction { get; set; }
-        public DateTime NextOrbit { get; set; }
-        public DateTime NextTravelerAction { get; set; }
-        public DateTime NextTargetAction { get; set; }
-        public DateTime NextActivateAction { get; set; }
-        public DateTime NextBookmarkPocketAttempt { get; set; }
-        public DateTime NextAlign { get; set; }
-        public DateTime NextUndockAction { get; set; }
-        public DateTime NextDockAction { get; set; }
-        public DateTime NextJumpAction { get; set; }
-        public DateTime NextWarpAction { get; set; }
-        public DateTime NextDroneRecall { get; set; }
-        public DateTime NextStartupAction { get; set; }
-        public DateTime NextRepairItemsAction { get; set; }
-        public DateTime NextRepairDronesAction { get; set; }
-        public DateTime NextEVEMemoryManagerAction { get; set; }
-        public DateTime NextGetBestCombatTarget { get; set; }
-        public DateTime NextGetBestDroneTarget { get; set; }
-        public DateTime NextSkillTrainerProcessState;
-        public DateTime NextSkillTrainerAction = DateTime.MinValue;
-        public DateTime NextBastionAction { get; set; }
-        public DateTime NextBastionModeDeactivate { get; set; }
-        public DateTime NextLPStoreAction { get; set; }
-
-        public DateTime LastLocalWatchAction = DateTime.UtcNow;
-        public DateTime LastWalletCheck = DateTime.UtcNow;
-        public DateTime LastScheduleCheck = DateTime.UtcNow;
-
-        public DateTime LastUpdateOfSessionRunningTime;
-        public DateTime NextInSpaceorInStation;
-        public DateTime NextTimeCheckAction = DateTime.UtcNow;
-        public DateTime NextQMJobCheckAction = DateTime.UtcNow;
-
-        public DateTime LastFrame = DateTime.UtcNow;
-        public DateTime LastSessionIsReady = DateTime.UtcNow;
-        public DateTime LastLogMessage = DateTime.UtcNow;
-
         public int WrecksThisPocket;
         public int WrecksThisMission;
-        public DateTime LastLoggingAction = DateTime.MinValue;
-
-        public DateTime LastSessionChange = DateTime.UtcNow;
-
+        
         private bool _paused;
         public bool Paused
         {
@@ -1102,11 +981,7 @@ namespace Questor.Modules.Caching
 
         public int PanicAttemptsThisMission { get; set; }
 
-        public DateTime StartedBoosting { get; set; }
-
         public int RepairCycleTimeThisMission { get; set; }
-
-        public DateTime LastKnownGoodConnectedTime { get; set; }
 
         public long TotalMegaBytesOfMemoryUsed { get; set; }
 
@@ -1122,8 +997,6 @@ namespace Questor.Modules.Caching
         
 
         public bool MissionBookmarkTimerSet = false;
-        public DateTime MissionBookmarkTimeout = DateTime.MaxValue;
-
         public long AgentStationID { get; set; }
 
         public string AgentStationName { get; set; }
@@ -1674,7 +1547,7 @@ namespace Questor.Modules.Caching
                         {
                             if (!_potentialCombatTargets.Any())
                             {
-                                Cache.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
+                                Time.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
                                 List<EntityCache> __entities = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
                                                                 && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
                                                                 && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
@@ -1857,7 +1730,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddMilliseconds(800))
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddMilliseconds(800))
                     {
                         //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
                         return true;
@@ -1873,7 +1746,7 @@ namespace Questor.Modules.Caching
                                 {
                                     if (Cache.Instance.Entities.Any())
                                     {
-                                        Cache.Instance.LastInSpace = DateTime.UtcNow;
+                                        Time.Instance.LastInSpace = DateTime.UtcNow;
                                         return true;    
                                     }
                                 }
@@ -1907,7 +1780,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (DateTime.UtcNow < Cache.Instance.LastInStation.AddMilliseconds(800))
+                    if (DateTime.UtcNow < Time.Instance.LastInStation.AddMilliseconds(800))
                     {
                         //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
                         return true;
@@ -1917,7 +1790,7 @@ namespace Questor.Modules.Caching
                     {
                         if (!Cache.Instance.Entities.Any())
                         {
-                            Cache.Instance.LastInStation = DateTime.UtcNow;
+                            Time.Instance.LastInStation = DateTime.UtcNow;
                             return true;
                         }
                     }
@@ -2119,7 +1992,7 @@ namespace Questor.Modules.Caching
                     //High sec + Low sec = Empire: 1907
                     //Empire + 0.0 = K-space: 5431
                     //K-space + W-space = Total: 7930
-                    if (Cache.Instance.LastSessionChange.AddSeconds(30) > DateTime.UtcNow && (Cache.Instance.InSpace || Cache.Instance.InStation))
+                    if (Time.Instance.LastSessionChange.AddSeconds(30) > DateTime.UtcNow && (Cache.Instance.InSpace || Cache.Instance.InStation))
                     {
                         if (_solarSystems == null || !_solarSystems.Any() || _solarSystems.Count() < 5400)
                         {
@@ -2524,7 +2397,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(20) || (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(20)))
+                    if (Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(20) || (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20)))
                     {
                         return _windows ?? (_windows = DirectEve.Windows);
                     }
@@ -2548,7 +2421,7 @@ namespace Questor.Modules.Caching
         /// <returns>null if no mission could be found</returns>
         public DirectAgentMission GetAgentMission(long agentId, bool ForceUpdate)
         {
-            if (DateTime.UtcNow < NextGetAgentMissionAction)
+            if (DateTime.UtcNow < Time.Instance.NextGetAgentMissionAction)
             {
                 if (FirstAgentMission != null)
                 {
@@ -2563,7 +2436,7 @@ namespace Questor.Modules.Caching
                 if (ForceUpdate || myAgentMissionList == null || !myAgentMissionList.Any())
                 {
                     myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
-                    NextGetAgentMissionAction = DateTime.UtcNow.AddSeconds(5);
+                    Time.Instance.NextGetAgentMissionAction = DateTime.UtcNow.AddSeconds(5);
                 }
 
                 if (myAgentMissionList.Any())
@@ -2631,26 +2504,6 @@ namespace Questor.Modules.Caching
         public int FactionDroneTypeID { get; set; }
         
         public bool? MissionKillSentries { get; set; }
-
-        public bool StopTimeSpecified = true;
-
-        public DateTime StopTime = DateTime.Now.AddHours(10);
-
-        public DateTime ManualStopTime = DateTime.Now.AddHours(10);
-
-        public DateTime ManualRestartTime = DateTime.Now.AddHours(10);
-
-        public DateTime StartTime { get; set; }
-
-        public int MaxRuntime { get; set; }
-
-        public DateTime LastInStation = DateTime.MinValue;
-
-        public DateTime LastInSpace = DateTime.MinValue;
-
-        public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
-
-        public DateTime WehaveMoved = DateTime.UtcNow;
 
         public bool CloseQuestorCMDLogoff; //false;
 
@@ -2829,9 +2682,9 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance._allBookmarks == null || !Cache.Instance._allBookmarks.Any())
                     {
-                        if (DateTime.UtcNow > Cache.Instance.NextBookmarkAction)
+                        if (DateTime.UtcNow > Time.Instance.NextBookmarkAction)
                         {
-                            Cache.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
+                            Time.Instance.NextBookmarkAction = DateTime.UtcNow.AddMilliseconds(200);
                             if (DirectEve.Bookmarks.Any())
                             {
                                 _allBookmarks = Cache.Instance.DirectEve.Bookmarks;
@@ -4224,7 +4077,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_bestPrimaryWeaponTargets.Any())
                         {
-                            if (PreferredPrimaryWeaponTarget == null || (PreferredPrimaryWeaponTarget != null && !PreferredPrimaryWeaponTarget.IsOnGridWithMe) || DateTime.UtcNow > Cache.Instance.NextGetBestCombatTarget)
+                            if (PreferredPrimaryWeaponTarget == null || (PreferredPrimaryWeaponTarget != null && !PreferredPrimaryWeaponTarget.IsOnGridWithMe) || DateTime.UtcNow > Time.Instance.NextGetBestCombatTarget)
                             {
                                 _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.Where(t => t.Distance < distance)
                                                                         .OrderByDescending(t => t.IsInOptimalRange)
@@ -4239,11 +4092,11 @@ namespace Questor.Modules.Caching
                                                                         .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget)   // Shoot targets that are in armor!
                                                                         .ThenBy(t => t.Nearest5kDistance);
 
-                                Cache.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
+                                Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
                             }
                             else
                             {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Cache.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).TotalSeconds + "]", Logging.Debug);
+                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Time.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).TotalSeconds + "]", Logging.Debug);
                             }
                         }
                         else
@@ -4409,7 +4262,7 @@ namespace Questor.Modules.Caching
                             //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
                             Logging.Log("FindPrimaryWeaponPriorityTarget", "if (!FindAUnTargetedEntity) Cache.Instance.PreferredPrimaryWeaponTargetID = [ " + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.White);
                             Cache.Instance.PreferredPrimaryWeaponTarget = target;
-                            Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                            Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                             return target;
                         }
 
@@ -4459,7 +4312,7 @@ namespace Questor.Modules.Caching
                         if (!FindAUnTargetedEntity)
                         {
                             Cache.Instance.PreferredDroneTarget = target;
-                            Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                            Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                             return target;
                         }
 
@@ -4488,9 +4341,9 @@ namespace Questor.Modules.Caching
                 //
                 // we cant do this because the target may need to be targeted again! ECM == bad
                 //
-                //if (Cache.Instance.LastTargetWeWereShooting != null && Cache.Instance.Entities.Any(i => i.Id == Cache.Instance.LastTargetWeWereShooting.Id))
+                //if (Time.Instance.LastTargetWeWereShooting != null && Cache.Instance.Entities.Any(i => i.Id == Time.Instance.LastTargetWeWereShooting.Id))
                 //{
-                //    currentTarget = Cache.Instance.LastTargetWeWereShooting;
+                //    currentTarget = Time.Instance.LastTargetWeWereShooting;
                 //}
 
                 if (currentTarget == null)
@@ -4503,7 +4356,7 @@ namespace Questor.Modules.Caching
                         currentTarget = Cache.Instance.LastTargetPrimaryWeaponsWereShooting;
                     }
 
-                    if (DateTime.UtcNow < Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
+                    if (DateTime.UtcNow < Time.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
                     {
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log("FindCurrentTarget", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                     }
@@ -4583,13 +4436,13 @@ namespace Questor.Modules.Caching
 
             if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
             
-            if (DateTime.UtcNow < NextGetBestCombatTarget)
+            if (DateTime.UtcNow < Time.Instance.NextGetBestCombatTarget)
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
                 return false;
             }
 
-            NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
+            Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
 
             //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
             //{
@@ -4633,7 +4486,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                    Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
                 #endregion Is our current target any other primary weapon priority target?
@@ -4695,7 +4548,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                    Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
 
@@ -4713,7 +4566,7 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
 
                         Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                        Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                        Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                         return true;
                     }
                 }
@@ -4749,7 +4602,7 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
                 Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
-                Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                 return true;
             }
 
@@ -4778,7 +4631,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
                     AddPrimaryWeaponPriorityTarget(callingTarget,PrimaryWeaponPriority.PriorityKillTarget, "GetBestTarget: callingTarget");
                     Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
-                    Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
 
@@ -4837,7 +4690,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Low Value First", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
                 Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
-                Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                 return true;
             }
             #endregion
@@ -4857,7 +4710,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Use High Value", Logging.Teal);
                     if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
-                    Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
             }
@@ -4869,7 +4722,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking use Low Value", Logging.Teal);
                 if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
                 Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
-                Cache.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
                 return true;
             }
             #endregion
@@ -4913,7 +4766,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            NextGetBestCombatTarget = DateTime.UtcNow;
+            Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
             return false;
         }
 
@@ -4927,13 +4780,13 @@ namespace Questor.Modules.Caching
 
             if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
 
-            if (DateTime.UtcNow < NextGetBestDroneTarget)
+            if (DateTime.UtcNow < Time.Instance.NextGetBestDroneTarget)
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
 
-            NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(2000);
+            Time.Instance.NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(2000);
 
             //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
             //{
@@ -4948,8 +4801,8 @@ namespace Questor.Modules.Caching
                 currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsLastTargetDronesWereShooting);
 
             }
-            
-            if (DateTime.UtcNow < Cache.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
+
+            if (DateTime.UtcNow < Time.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
@@ -4984,7 +4837,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
                 #endregion Is our current target any other drone priority target?
@@ -4998,7 +4851,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 80% shields, keep killing this target", Logging.Debug);
                     Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
 
@@ -5014,7 +4867,7 @@ namespace Questor.Modules.Caching
                         if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
 
                         Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                        Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                        Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                         return true;
                     }
                 }
@@ -5084,7 +4937,7 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
                 Cache.Instance.PreferredDroneTarget = dronePriorityTarget;
-                Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                 return true;
             }
 
@@ -5110,7 +4963,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "callingDroneTarget is [" + callingDroneTarget.Name + "][" + Math.Round(callingDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingDroneTarget.Id) + "] GroupID [" + callingDroneTarget.GroupId + "]", Logging.Debug);
                     AddDronePriorityTarget(callingDroneTarget, DronePriority.PriorityKillTarget, " GetBestDroneTarget: callingDroneTarget");
                     Cache.Instance.PreferredDroneTarget = callingDroneTarget;
-                    Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
                 }
 
@@ -5170,7 +5023,7 @@ namespace Questor.Modules.Caching
                     }
                 }
                 Cache.Instance.PreferredDroneTarget = lowValueTarget ?? highValueTarget ?? null;
-                Cache.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+                Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                 return true;
             }
             #endregion
@@ -5214,7 +5067,7 @@ namespace Questor.Modules.Caching
             }
             #endregion
 
-            NextGetBestDroneTarget = DateTime.UtcNow;
+            Time.Instance.NextGetBestDroneTarget = DateTime.UtcNow;
             return false;
         }
 
@@ -5278,12 +5131,12 @@ namespace Questor.Modules.Caching
 
         public bool ReadyItemsHangarSingleInstance(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -5297,8 +5150,8 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
-                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                    Logging.Log(module, "Opening Item Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                    Logging.Log(module, "Opening Item Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
 
@@ -5311,12 +5164,12 @@ namespace Questor.Modules.Caching
 
         public bool CloseItemsHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -5366,12 +5219,12 @@ namespace Questor.Modules.Caching
 
         public bool ReadyItemsHangarAsLootHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -5396,13 +5249,13 @@ namespace Questor.Modules.Caching
 
         public bool ReadyItemsHangarAsAmmoHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
                 return false;
@@ -5428,17 +5281,17 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsLootHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -5447,9 +5300,9 @@ namespace Questor.Modules.Caching
             {
                 if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "public bool StackItemsHangarAsLootHangar(String module)", Logging.Teal);
 
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
                 {
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
+                    if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
@@ -5459,11 +5312,11 @@ namespace Questor.Modules.Caching
 
                     if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds > 20)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds > 20)
                     {
                         Logging.Log(module, "Stacking Corp Loot Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Cache.Instance.LastStackLootHangar = DateTime.UtcNow.AddSeconds(-60);
+                        Time.Instance.LastStackLootHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
 
@@ -5482,11 +5335,11 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.StackLootHangarAttempts++;
                                 Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
                                 Cache.Instance.LootHangar.StackAll();
                                 Cache.Instance.StackLootHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
-                                Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
-                                Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                                Time.Instance.LastStackLootHangar = DateTime.UtcNow;
+                                Time.Instance.LastStackItemHangar = DateTime.UtcNow;
                                 return true;
                             }
 
@@ -5518,18 +5371,18 @@ namespace Questor.Modules.Caching
         {
             //Logging.Log("StackItemsHangarAsAmmoHangar", "test", Logging.Teal);
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
                 return false;
@@ -5537,9 +5390,9 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 30)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
@@ -5549,11 +5402,11 @@ namespace Questor.Modules.Caching
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 20)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 20)
                     {
                         Logging.Log(module, "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
+                        Time.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
 
@@ -5572,11 +5425,11 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.StackAmmoHangarAttempts++;
                                 Logging.Log(module, "Stacking Item Hangar", Logging.White);
-                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
                                 Cache.Instance.AmmoHangar.StackAll();
                                 Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
-                                Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
-                                Cache.Instance.LastStackItemHangar = DateTime.UtcNow;
+                                Time.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                Time.Instance.LastStackItemHangar = DateTime.UtcNow;
                                 return true;
                             }
 
@@ -5606,17 +5459,17 @@ namespace Questor.Modules.Caching
 
         public bool StackCargoHold(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
 
-            if (DateTime.UtcNow < Cache.Instance.LastStackCargohold.AddSeconds(90))
+            if (DateTime.UtcNow < Time.Instance.LastStackCargohold.AddSeconds(90))
                 return true;
 
             try
             {
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackCargohold).TotalSeconds < 25)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 25)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackCargohold).TotalSeconds < 15)", Logging.Debug);
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 15)", Logging.Debug);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
@@ -5626,11 +5479,11 @@ namespace Questor.Modules.Caching
 
                     if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackCargohold).TotalSeconds > 20)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds > 20)
                     {
                         Logging.Log(module, "Stacking CargoHold timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
+                        Time.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
 
@@ -5638,12 +5491,12 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log(module, "Stacking CargoHold: waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                Logging.Log(module, "Stacking CargoHold: waiting [" + Math.Round(Time.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 if (Cache.Instance.CurrentShipsCargo != null)
                 {
                     try
                     {
-                        Cache.Instance.LastStackCargohold = DateTime.UtcNow;
+                        Time.Instance.LastStackCargohold = DateTime.UtcNow;
                         Cache.Instance.CurrentShipsCargo.StackAll();
                         return true;
                     }
@@ -5664,16 +5517,16 @@ namespace Questor.Modules.Caching
 
         public bool CloseCargoHold(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
 
             try
             {
-                if (DateTime.UtcNow < Cache.Instance.NextOpenCargoAction)
+                if (DateTime.UtcNow < Time.Instance.NextOpenCargoAction)
                 {
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.NextOpenCargoAction).TotalSeconds > 0)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds > 0)
                     {
-                        Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Cache.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                        Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Time.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }
                     return false;
                 }
@@ -5701,7 +5554,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
                         Cache.Instance.CurrentShipsCargo.Window.Close();
-                        Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
+                        Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
                         return true;
                     }
                     return true;
@@ -5719,15 +5572,15 @@ namespace Questor.Modules.Caching
 
         public bool OpenShipsHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -5739,7 +5592,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.ShipHangar == null)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar == null)", Logging.Teal);
-                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
+                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
 
@@ -5749,15 +5602,15 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Ship Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Opening Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
 
                 if (!Cache.Instance.ShipHangar.Window.IsReady)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (!Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
-                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
+                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
 
@@ -5772,10 +5625,10 @@ namespace Questor.Modules.Caching
 
         public bool StackShipsHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 return false;
 
             try
@@ -5784,13 +5637,13 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                     {
-                        Logging.Log(module, "Stacking Ship Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                        Cache.Instance.LastStackShipsHangar = DateTime.UtcNow;
-                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                        Logging.Log(module, "Stacking Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                        Time.Instance.LastStackShipsHangar = DateTime.UtcNow;
+                        Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                         Cache.Instance.ShipHangar.StackAll();
                         return true;
                     }
-                    Logging.Log(module, "Stacking Ship Hangar: not yet ready: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Logging.Log(module, "Stacking Ship Hangar: not yet ready: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
                 return false;
@@ -5804,10 +5657,10 @@ namespace Questor.Modules.Caching
 
         public bool CloseShipsHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return false;
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 return false;
 
             try
@@ -5858,7 +5711,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (Cache.Instance.InStation && DateTime.UtcNow > LastSessionChange.AddSeconds(10))
+                if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(10))
                 {
                     string CorpHangarName;
                     if (Settings.Instance.AmmoHangarTabName != null)
@@ -5906,7 +5759,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (Cache.Instance.InStation && DateTime.UtcNow > LastSessionChange.AddSeconds(10))
+                if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(10))
                 {
                     string CorpHangarName;
                     if (Settings.Instance.LootHangarTabName != null)
@@ -5952,28 +5805,28 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpAmmoHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
 
             try
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Cache.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.UtcNow: [" + DateTime.UtcNow + "]", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Time.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.UtcNow: [" + DateTime.UtcNow + "]", Logging.Teal);
 
-                if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 25)
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 25)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
+                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
@@ -5982,11 +5835,11 @@ namespace Questor.Modules.Caching
                     }
                     if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds > 30)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
+                        Time.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
                     if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
@@ -6004,9 +5857,9 @@ namespace Questor.Modules.Caching
                                 if (Cache.Instance.StackAmmoHangarAttempts <= 2)
                                 {
                                     Cache.Instance.StackAmmoHangarAttempts++;
-                                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                                    Logging.Log(module, "Stacking Corporate Ammo Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                                    Cache.Instance.LastStackAmmoHangar = DateTime.UtcNow;
+                                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                    Logging.Log(module, "Stacking Corporate Ammo Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Time.Instance.LastStackAmmoHangar = DateTime.UtcNow;
                                     Cache.Instance.AmmoHangar.StackAll();
                                     Cache.Instance.StackAmmoHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
                                     return true;
@@ -6047,7 +5900,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenInventoryWindow(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
@@ -6060,8 +5913,8 @@ namespace Questor.Modules.Caching
 
                 // No, command it to open
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenInventory);
-                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
-                Logging.Log(module, "Opening Inventory Window: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
+                Logging.Log(module, "Opening Inventory Window: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 return false;
             }
 
@@ -6086,19 +5939,19 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Debug);
                 return false;
@@ -6106,18 +5959,18 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (Cache.Instance.LastStackLootHangar.AddSeconds(60) > DateTime.UtcNow)
+                if (Time.Instance.LastStackLootHangar.AddSeconds(60) > DateTime.UtcNow)
                 {
                     if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
                     {
                         return true;
                     }
 
-                    if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds > 30)
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Loot Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
-                        Cache.Instance.LastStackLootHangar = DateTime.UtcNow.AddSeconds(-60);
+                        Time.Instance.LastStackLootHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
 
@@ -6136,10 +5989,10 @@ namespace Questor.Modules.Caching
                                 if (Cache.Instance.StackLootHangarAttempts <= 2)
                                 {
                                     Cache.Instance.StackLootHangarAttempts++;
-                                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                                    Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                                    Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
-                                    Cache.Instance.LastStackLootContainer = DateTime.UtcNow;
+                                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                                    Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                    Time.Instance.LastStackLootHangar = DateTime.UtcNow;
+                                    Time.Instance.LastStackLootContainer = DateTime.UtcNow;
                                     Cache.Instance.LootHangar.StackAll();
                                     Cache.Instance.StackLootHangarAttempts = 0; //this resets the counter every time the above stackall completes without an exception
                                     return true;
@@ -6173,12 +6026,12 @@ namespace Questor.Modules.Caching
 
         public bool SortCorpLootHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -6189,8 +6042,8 @@ namespace Questor.Modules.Caching
                 {
                     if (LootHangar != null && LootHangar.IsValid)
                     {
-                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                        Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                        Logging.Log(module, "Stacking Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                         Cache.Instance.LootHangar.StackAll();
                         return true;
                     }
@@ -6211,12 +6064,12 @@ namespace Questor.Modules.Caching
         //
         public bool OpenCorpBookmarkHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenCorpBookmarkHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenCorpBookmarkHangarAction)
             {
                 return false;
             }
@@ -6234,8 +6087,8 @@ namespace Questor.Modules.Caching
                     {
                         // No, command it to open
                         //Cache.Instance.DirectEve.OpenCorporationHangar();
-                        Cache.Instance.NextOpenCorpBookmarkHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                        Logging.Log(module, "Opening Corporate Bookmark Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenCorpBookmarkHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                        Time.Instance.NextOpenCorpBookmarkHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        Logging.Log(module, "Opening Corporate Bookmark Hangar: waiting [" + Math.Round(Time.Instance.NextOpenCorpBookmarkHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                         return false;
                     }
 
@@ -6298,7 +6151,7 @@ namespace Questor.Modules.Caching
 
         public bool ClosePrimaryInventoryWindow(string module)
         {
-            if (DateTime.UtcNow < NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 return false;
 
             //
@@ -6312,7 +6165,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log(module, "ClosePrimaryInventoryWindow: Closing Primary Inventory Window Named [" + window.Name + "]", Logging.White);
                         window.Close();
-                        NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
+                        Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                         return false;
                     }
                 }
@@ -6397,12 +6250,12 @@ namespace Questor.Modules.Caching
 
         public bool ReadyHighTierLootContainer(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenLootContainerAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenLootContainerAction)
             {
                 return false;
             }
@@ -6456,12 +6309,12 @@ namespace Questor.Modules.Caching
 
         public bool StackHighTierLootContainer(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenLootContainerAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenLootContainerAction)
             {
                 return false;
             }
@@ -6469,7 +6322,7 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.InStation)
             {
                 if (!Cache.Instance.ReadyHighTierLootContainer("Cache.StackHighTierLootContainer")) return false;
-                Cache.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (HighTierLootContainer.Window == null)
                 {
                     DirectItem firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
@@ -6491,8 +6344,8 @@ namespace Questor.Modules.Caching
 
                 Logging.Log(module, "Loot Container window named: [ " + HighTierLootContainer.Window.Name + " ] was found and its contents are being stacked", Logging.White);
                 HighTierLootContainer.StackAll();
-                Cache.Instance.LastStackLootContainer = DateTime.UtcNow;
-                Cache.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Time.Instance.LastStackLootContainer = DateTime.UtcNow;
+                Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                 return true;
             }
 
@@ -6503,13 +6356,13 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+                if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                     return false;
                 }
 
-                if (DateTime.UtcNow < NextOpenHangarAction)
+                if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
                     return false;
@@ -6545,7 +6398,7 @@ namespace Questor.Modules.Caching
                             {
                                 if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We do not have the right ID selected yet, select it now.", Logging.Teal);
                                 Cache.Instance.PrimaryInventoryWindow.SelectTreeEntryByID(id);
-                                Cache.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(Cache.Instance.RandomNumber(2000, 4400));
+                                Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(Cache.Instance.RandomNumber(2000, 4400));
                                 return false;
                             }
 
@@ -6563,7 +6416,7 @@ namespace Questor.Modules.Caching
                         if (id >= 0 && id <= 6 && Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
                         {
                             Logging.Log(module, "ExpandCorpHangar executed", Logging.Teal);
-                            Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
+                            Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
                             return false;
                         }
 
@@ -6592,13 +6445,13 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow < Cache.Instance.LastSessionChange.AddSeconds(10))
+                if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                     return false;
                 }
 
-                if (DateTime.UtcNow < NextOpenHangarAction)
+                if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
                     return false;
@@ -6618,7 +6471,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
                     {
                         Logging.Log(module, "ExpandCorpHangar executed", Logging.Teal);
-                        Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
+                        Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
                         return false;
                     }
 
@@ -6642,17 +6495,17 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow.AddMinutes(10) < Cache.Instance.LastStackLootContainer)
+                if (DateTime.UtcNow.AddMinutes(10) < Time.Instance.LastStackLootContainer)
                 {
                     return true;
                 }
 
-                if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 {
                     return false;
                 }
 
-                if (DateTime.UtcNow < Cache.Instance.NextOpenLootContainerAction)
+                if (DateTime.UtcNow < Time.Instance.NextOpenLootContainerAction)
                 {
                     return false;
                 }
@@ -6678,9 +6531,9 @@ namespace Questor.Modules.Caching
 
                     Logging.Log(module, "Loot Container window named: [ " + LootContainer.Window.Name + " ] was found and its contents are being stacked", Logging.White);
                     LootContainer.StackAll();
-                    Cache.Instance.LastStackLootContainer = DateTime.UtcNow;
-                    Cache.Instance.LastStackLootHangar = DateTime.UtcNow;
-                    Cache.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Time.Instance.LastStackLootContainer = DateTime.UtcNow;
+                    Time.Instance.LastStackLootHangar = DateTime.UtcNow;
+                    Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     return true;
                 }
 
@@ -6724,7 +6577,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenOreHold(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction) return false;
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction) return false;
 
             if (!Cache.Instance.OpenInventoryWindow("OpenOreHold")) return false;
 
@@ -6736,8 +6589,8 @@ namespace Questor.Modules.Caching
             if (Cache.Instance.OreHoldWindow == null)
             {
                 // No, command it to open
-                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                Logging.Log(module, "Opening Ore Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 long OreHoldID = 1;  //no idea how to get this value atm. this is not yet correct.
                 if (!Cache.Instance.PrimaryInventoryWindow.SelectTreeEntry("Ore Hold", OreHoldID - 1))
                 {
@@ -6829,7 +6682,7 @@ namespace Questor.Modules.Caching
 
         public bool CloseLootHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -6852,8 +6705,8 @@ namespace Questor.Modules.Caching
                             {
                                 // if open command it to close
                                 Cache.Instance.corpLootHangarSecondaryWindow.Close();
-                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                                Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                                Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
                             }
 
@@ -6893,8 +6746,8 @@ namespace Questor.Modules.Caching
                         {
                             // if open command it to close
                             Cache.Instance.LootHangar.Window.Close();
-                            Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
-                            Logging.Log(module, "Closing Item Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                            Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 4));
+                            Logging.Log(module, "Closing Item Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                             return false;
                         }
 
@@ -6926,20 +6779,20 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -6982,12 +6835,12 @@ namespace Questor.Modules.Caching
 
         public bool SortLootHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -7102,20 +6955,20 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
-            if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
             {
                 return true;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Cache.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -7158,7 +7011,7 @@ namespace Questor.Modules.Caching
 
         public bool CloseAmmoHangar(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -7188,8 +7041,8 @@ namespace Questor.Modules.Caching
 
                                 // if open command it to close
                                 Cache.Instance.corpAmmoHangarSecondaryWindow.Close();
-                                Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                                Logging.Log(module, "Closing Corporate Ammo Hangar: waiting [" + Math.Round(Cache.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                                Logging.Log(module, "Closing Corporate Ammo Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
                             }
 
@@ -7244,7 +7097,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenDroneBay(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextDroneBayAction)
+            if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
             {
                 //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
                 return false;
@@ -7281,8 +7134,8 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.DroneBay == null)
                 {
-                    Cache.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Drone Bay: --- waiting [" + Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Opening Drone Bay: --- waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     GetShipsDroneBayAttempts++;
                     return false;
                 }
@@ -7290,8 +7143,8 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.IsValid)
                 {
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                    Cache.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
+                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     GetShipsDroneBayAttempts = 0;
                     return true;
                 }
@@ -7308,7 +7161,7 @@ namespace Questor.Modules.Caching
 
         public bool CloseDroneBay(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextDroneBayAction)
+            if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
             {
                 //Logging.Log(module + ": Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
                 return false;
@@ -7334,8 +7187,8 @@ namespace Questor.Modules.Caching
                 // Is the drone bay open? if so, close it
                 if (Cache.Instance.DroneBay.Window != null)
                 {
-                    Cache.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                    Logging.Log(module, "Closing Drone Bay: waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     Cache.Instance.DroneBay.Window.Close();
                     return true;
                 }
@@ -7372,10 +7225,10 @@ namespace Questor.Modules.Caching
                                 
                                 if (_lpStore == null)
                                 {
-                                    if (DateTime.UtcNow > Cache.Instance.NextLPStoreAction)
+                                    if (DateTime.UtcNow > Time.Instance.NextLPStoreAction)
                                     {
                                         Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
-                                        Cache.Instance.NextLPStoreAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(30, 240));
+                                        Time.Instance.NextLPStoreAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(30, 240));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
                                         return null;    
                                     }
@@ -7408,7 +7261,7 @@ namespace Questor.Modules.Caching
 
         public bool CloseLPStore(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
                 return false;
             }
@@ -7458,15 +7311,15 @@ namespace Questor.Modules.Caching
 
                                 if (_fittingManagerWindow == null)
                                 {
-                                    if (DateTime.UtcNow > Cache.Instance.NextWindowAction)
+                                    if (DateTime.UtcNow > Time.Instance.NextWindowAction)
                                     {
                                         Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
-                                        Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
+                                        Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
                                         Cache.Instance.DirectEve.OpenFitingManager();
                                         return null;
                                     }
 
-                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
+                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
                                     return null;
                                 }
 
@@ -7498,7 +7351,7 @@ namespace Questor.Modules.Caching
         {
             if (Settings.Instance.UseFittingManager)
             {
-                if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)
+                if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
                     return false;
                 }
@@ -7508,7 +7361,7 @@ namespace Questor.Modules.Caching
                     Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
                     Cache.Instance.FittingManagerWindow.Close();
                     Cache.Instance.FittingManagerWindow = null;
-                    Cache.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
+                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                     return true;
                 }
                 
@@ -7520,12 +7373,12 @@ namespace Questor.Modules.Caching
         
         public bool OpenAgentWindow(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
+            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
                 return false;
@@ -7534,7 +7387,7 @@ namespace Questor.Modules.Caching
             if (AgentInteraction.Agent.Window == null)
             {
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
-                Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
+                Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
                 AgentInteraction.Agent.InteractWith();
                 return false;
             }
@@ -7557,12 +7410,12 @@ namespace Questor.Modules.Caching
 
         public bool OpenJournalWindow(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
+            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
             {
                 return false;
             }
@@ -7576,10 +7429,8 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-                    Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                    Logging.Log(module, "Opening Journal Window: waiting [" +
-                                Math.Round(Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,
-                                           0) + "sec]", Logging.White);
+                    Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    Logging.Log(module, "Opening Journal Window: waiting [" + Math.Round(Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
 
@@ -7593,12 +7444,12 @@ namespace Questor.Modules.Caching
 
         public bool OpenMarket(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
+            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
             {
                 return false;
             }
@@ -7612,8 +7463,8 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
-                    Cache.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                    Logging.Log(module, "Opening Market Window: waiting [" + Math.Round(Cache.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds,0) + "sec]", Logging.White);
+                    Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
+                    Logging.Log(module, "Opening Market Window: waiting [" + Math.Round(Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
                 }
 
@@ -7625,12 +7476,12 @@ namespace Questor.Modules.Caching
 
         public bool CloseMarket(string module)
         {
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextWindowAction)
+            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
             {
                 return false;
             }
@@ -7656,7 +7507,7 @@ namespace Questor.Modules.Caching
 
         public bool OpenContainerInSpace(string module, EntityCache containerToOpen)
         {
-            if (DateTime.UtcNow < Cache.Instance.NextLootAction)
+            if (DateTime.UtcNow < Time.Instance.NextLootAction)
             {
                 return false;
             }
@@ -7671,8 +7522,8 @@ namespace Questor.Modules.Caching
                     {
                         if (containerToOpen.OpenCargo())
                         {
-                            Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
-                            Logging.Log(module, "Opening Container: waiting [" + Math.Round(Cache.Instance.NextLootAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " sec]", Logging.White);
+                            Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                            Logging.Log(module, "Opening Container: waiting [" + Math.Round(Time.Instance.NextLootAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " sec]", Logging.White);
                             return false;
                         }
 
@@ -7689,7 +7540,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening Container window as secondary", Logging.White);
                         Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
-                        Cache.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                        Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                         return true;
                     }
                 }
@@ -7901,7 +7752,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Cache.Instance.LastAccelerationGateDetected = DateTime.UtcNow;
+                Time.Instance.LastAccelerationGateDetected = DateTime.UtcNow;
                 return true;
             }
             catch (Exception ex)
@@ -7955,7 +7806,7 @@ namespace Questor.Modules.Caching
                 }
 
                 _bookmarkDeletionAttempt = 0;
-                Cache.Instance.NextSalvageTrip = DateTime.UtcNow;
+                Time.Instance.NextSalvageTrip = DateTime.UtcNow;
                 Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
                 return true;
             }
@@ -8015,7 +7866,7 @@ namespace Questor.Modules.Caching
             try
             {
 
-                if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 {
                     //Logging.Log(module, "Waiting...", Logging.Orange);
                     return false;
@@ -8026,7 +7877,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
 
                 if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
                 {
@@ -8078,7 +7929,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening repairshop window", Logging.White);
                         Cache.Instance.DirectEve.OpenRepairShop();
-                        NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                         return false;
                     }
 
@@ -8105,7 +7956,7 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log(module, "Add items to repair list", Logging.White);
                             repairWindow.RepairItems(repairAllItems);
-                            NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                            Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                             return false;
                         }
 
@@ -8120,7 +7971,7 @@ namespace Questor.Modules.Caching
 
                         repairWindow.RepairAll();
                         Cache.Instance.RepairAll = false;
-                        NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                         return false;
                     }
 
@@ -8141,13 +7992,13 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < NextRepairDronesAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairDronesAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 {
                     //Logging.Log(module, "Waiting...", Logging.Orange);
                     return false;
                 }
 
-                NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
 
                 if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
                 {
@@ -8188,7 +8039,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening repairshop window", Logging.White);
                         Cache.Instance.DirectEve.OpenRepairShop();
-                        NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                         return false;
                     }
 
@@ -8222,7 +8073,7 @@ namespace Questor.Modules.Caching
                         }
 
                         repairWindow.RepairAll();
-                        NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 2));
+                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 2));
                         return false;
                     }
 

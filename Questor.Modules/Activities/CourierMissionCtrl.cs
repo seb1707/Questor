@@ -222,7 +222,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CourierMissionCtrlState.PickupItem:
-                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) return;
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) return;
 
                     if (moveItemRetryCounter > 20)
                     {
@@ -277,7 +277,7 @@ namespace Questor.Modules.Activities
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
                     {
-                        if (DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have been docked for at least a few seconds
+                        if (DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(5) && Cache.Instance.InStation) //do not proceed until we have been docked for at least a few seconds
                         {
                             return;
                         }

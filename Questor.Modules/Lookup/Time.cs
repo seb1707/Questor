@@ -7,6 +7,10 @@
 //     http://www.thehackerwithin.com/license.htm)
 //   </copyright>
 // -------------------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+
 namespace Questor.Modules.Lookup
 {
     public class Time
@@ -82,5 +86,121 @@ namespace Questor.Modules.Lookup
         public int ReLogDelayMaximum_seconds = 60;
         public int RecallDronesDelayBetweenRetries = 15;                    //Time between recall commands for drones when attempting to pull drones
         public int EnforcedDelayBetweenArbitraryAmmoChanges = 60;           //do not allow changing ammo before this # of seconds, default is 60.
+
+        //
+        //
+        //
+        public DateTime LastAccelerationGateDetected = DateTime.UtcNow;
+        public DateTime LastCloaked = DateTime.MinValue;
+        public DateTime LastFrame = DateTime.UtcNow;
+        public DateTime LastInStation = DateTime.MinValue;
+        public DateTime LastInSpace = DateTime.MinValue;
+        public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
+        public DateTime LastJettison { get; set; }
+        public DateTime LastKnownGoodConnectedTime { get; set; }
+        public DateTime LastLocalWatchAction = DateTime.UtcNow;
+        public DateTime LastLoggingAction = DateTime.MinValue;
+        public DateTime LastPreferredDroneTargetDateTime = DateTime.UtcNow;
+        public DateTime LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
+        public DateTime LastScheduleCheck = DateTime.UtcNow;
+        public DateTime LastSessionChange = DateTime.UtcNow; 
+        public DateTime LastStackAmmoHangar = DateTime.UtcNow;
+        public DateTime LastStackLootHangar = DateTime.UtcNow;
+        public DateTime LastStackItemHangar = DateTime.UtcNow;
+        public DateTime LastStackShipsHangar = DateTime.UtcNow;
+        public DateTime LastStackCargohold = DateTime.UtcNow;
+        public DateTime LastStackLootContainer = DateTime.UtcNow;
+        public DateTime LastUpdateOfSessionRunningTime;
+        public DateTime LastWalletCheck = DateTime.UtcNow;
+        public DateTime LastSessionIsReady = DateTime.UtcNow;
+        public DateTime LastLogMessage = DateTime.UtcNow;
+
+        public DateTime ManualStopTime = DateTime.Now.AddHours(10);
+        public DateTime ManualRestartTime = DateTime.Now.AddHours(10);
+        public DateTime MissionBookmarkTimeout = DateTime.MaxValue;
+
+        public DateTime NextCheckCorpisAtWar = DateTime.UtcNow; 
+        public DateTime NextInSpaceorInStation;
+        public DateTime NextTimeCheckAction = DateTime.UtcNow;
+        public DateTime NextQMJobCheckAction = DateTime.UtcNow;
+        public DateTime NextSalvageTrip = DateTime.UtcNow;
+        public DateTime NextWindowAction { get; set; }
+        public DateTime NextGetAgentMissionAction { get; set; }
+        public DateTime NextOpenContainerInSpaceAction { get; set; }
+        public DateTime NextOpenLootContainerAction { get; set; }
+        public DateTime NextOpenCorpBookmarkHangarAction { get; set; }
+        public DateTime NextDroneBayAction { get; set; }
+        public DateTime NextOpenHangarAction { get; set; }
+        public DateTime NextOpenCargoAction { get; set; }
+        public DateTime NextOpenCurrentShipsCargoWindowAction { get; set; }
+        public DateTime NextMakeActiveTargetAction { get; set; }
+        public DateTime NextArmAction { get; set; }
+        public DateTime NextSalvageAction { get; set; }
+        public DateTime NextBookmarkAction { get; set; }
+        public DateTime NextTractorBeamAction { get; set; }
+        public DateTime NextLootAction { get; set; }
+        public DateTime NextAfterburnerAction { get; set; }
+        public DateTime NextRepModuleAction { get; set; }
+        public DateTime NextActivateSupportModules { get; set; }
+        public DateTime NextRemoveBookmarkAction { get; set; }
+        public DateTime NextApproachAction { get; set; }
+        public DateTime NextOrbit { get; set; }
+        public DateTime NextTravelerAction { get; set; }
+        public DateTime NextTargetAction { get; set; }
+        public DateTime NextActivateAction { get; set; }
+        public DateTime NextBookmarkPocketAttempt { get; set; }
+        public DateTime NextAlign { get; set; }
+        public DateTime NextUndockAction { get; set; }
+        public DateTime NextDockAction { get; set; }
+        public DateTime NextJumpAction { get; set; }
+        public DateTime NextWarpAction { get; set; }
+        public DateTime NextDroneRecall { get; set; }
+        public DateTime NextStartupAction { get; set; }
+        public DateTime NextRepairItemsAction { get; set; }
+        public DateTime NextRepairDronesAction { get; set; }
+        public DateTime NextEVEMemoryManagerAction { get; set; }
+        public DateTime NextGetBestCombatTarget { get; set; }
+        public DateTime NextGetBestDroneTarget { get; set; }
+        public DateTime NextSkillTrainerProcessState;
+        public DateTime NextSkillTrainerAction = DateTime.MinValue;
+        public DateTime NextBastionAction { get; set; }
+        public DateTime NextBastionModeDeactivate { get; set; }
+        public DateTime NextLPStoreAction { get; set; }
+        
+        public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
+        public DateTime StartedBoosting { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime StopTime = DateTime.Now.AddHours(10);
+        public DateTime WehaveMoved = DateTime.UtcNow;
+        
+        public bool StopTimeSpecified = true;
+        public int MaxRuntime { get; set; }
+
+        /// <summary>
+        ///   Modules last reload time
+        /// </summary>
+        public Dictionary<long, DateTime> LastReloadedTimeStamp = new Dictionary<long, DateTime>();
+
+        /// <summary>
+        ///   Modules last changed ammo time
+        /// </summary>
+        public Dictionary<long, DateTime> LastChangedAmmoTimeStamp = new Dictionary<long, DateTime>();
+
+        /// <summary>
+        ///   Modules last activated time
+        /// </summary>
+        public Dictionary<long, DateTime> LastActivatedTimeStamp = new Dictionary<long, DateTime>();
+
+        /// <summary>
+        ///   Modules last Click time (this is used for activating AND deactivating!)
+        /// </summary>
+        public Dictionary<long, DateTime> LastClickedTimeStamp = new Dictionary<long, DateTime>();
+
+        /// <summary>
+        ///   Reload time per module
+        /// </summary>
+        public Dictionary<long, long> ReloadTimePerModule = new Dictionary<long, long>();
+
+        
     }
 }

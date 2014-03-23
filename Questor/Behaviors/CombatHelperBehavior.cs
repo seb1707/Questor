@@ -209,7 +209,7 @@ namespace Questor.Behaviors
                 _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
             }
 
-            if ((DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Cache.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
+            if ((DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds > 10) && (DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds < 60))
             {
                 if (Cache.Instance.QuestorJustStarted)
                 {
@@ -285,9 +285,9 @@ namespace Questor.Behaviors
                         break;
                     }
                     
-                    if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10))
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
                     {
-                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Cache.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatHelperBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
                     }
 
@@ -335,7 +335,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -346,7 +346,7 @@ namespace Questor.Behaviors
                     {
                         // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                         // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
                         _States.CurrentArmState = ArmState.Idle;
@@ -356,7 +356,7 @@ namespace Questor.Behaviors
                     if (_States.CurrentArmState == ArmState.Done)
                     {
                         //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                         _States.CurrentArmState = ArmState.Idle;
                         _States.CurrentDroneState = DroneState.WaitingForTargets;
@@ -442,7 +442,7 @@ namespace Questor.Behaviors
 
                     Traveler.TravelHome("CombatHelperBehavior.TravelHome");
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Settings.Instance.DebugGotobase) Logging.Log("CombatHelperBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
@@ -554,7 +554,7 @@ namespace Questor.Behaviors
                         Traveler.ProcessState();
 
                         //we also assume you are connected during a manual set of questor into travel mode (safe assumption considering someone is at the kb)
-                        Cache.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
+                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
 
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)

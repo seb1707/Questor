@@ -23,7 +23,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             string defaultFitting = Settings.Instance.DefaultFitting.FittingName;

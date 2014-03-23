@@ -28,7 +28,7 @@
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Cache.Instance.LastInSpace.AddSeconds(10)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             switch (_States.CurrentDropState)

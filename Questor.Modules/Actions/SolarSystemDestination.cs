@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Lookup;
+
 namespace Questor.Modules.Actions
 {
     using System;
@@ -32,7 +34,7 @@ namespace Questor.Modules.Actions
             {
                 if (_nextAction < DateTime.UtcNow)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                    if (DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                     {
                         Logging.Log("QuestorManager.SolarSystemDestination", "Exiting station", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);

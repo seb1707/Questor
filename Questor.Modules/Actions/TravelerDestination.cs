@@ -41,18 +41,18 @@ namespace Questor.Modules.Actions
                     return;
                 }
 
-                if (DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
+                if (DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(45)) //do not try to leave the station until you have been docked for at least 45seconds! (this gives some overhead to load the station env + session change timer)
                 {
-                    if (DateTime.UtcNow > Cache.Instance.NextUndockAction)
+                    if (DateTime.UtcNow > Time.Instance.NextUndockAction)
                     {
                         Logging.Log("TravelerDestination.SolarSystemDestination", "Exiting station", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
                         _undockAttempts++;
-                        Cache.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds + Cache.Instance.RandomNumber(0, 20));
+                        Time.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds + Cache.Instance.RandomNumber(0, 20));
                         return;
                     }
 
-                    if (Settings.Instance.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Cache.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds + "seconds]", Logging.White);
+                    if (Settings.Instance.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Time.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds + "seconds]", Logging.White);
                     return;
                 }
                 
@@ -67,7 +67,7 @@ namespace Questor.Modules.Actions
             {
                 if (Cache.Instance.InWarp) return true;
 
-                if (Cache.Instance.InSpace && DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10))
+                if (Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10))
                 {
                     if ((Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.IsOnGridWithMe) || (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.IsOnGridWithMe))
                     {
@@ -212,10 +212,10 @@ namespace Questor.Modules.Actions
                 return true;
             }
 
-            if (Cache.Instance.InStation && DateTime.UtcNow > Cache.Instance.LastInSpace.AddSeconds(10))
+            if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(10))
             {
                 // We are in a station, but not the correct station!
-                if (DateTime.UtcNow > Cache.Instance.NextUndockAction)
+                if (DateTime.UtcNow > Time.Instance.NextUndockAction)
                 {
                     TravelerDestination.Undock();
                     return false;
@@ -225,7 +225,7 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if ((DateTime.UtcNow > Cache.Instance.LastInStation.AddSeconds(10)) && !Cache.Instance.InSpace)
+            if ((DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10)) && !Cache.Instance.InSpace)
             {
                 // We are not in station and not in space?  Wait for a bit
                 return false;
@@ -342,7 +342,7 @@ namespace Questor.Modules.Actions
                     return true;
 
                 // We are in a station, but not the correct station!
-                if (DateTime.UtcNow > Cache.Instance.NextUndockAction)
+                if (DateTime.UtcNow > Time.Instance.NextUndockAction)
                 {
                     TravelerDestination.Undock();
                     return false;
@@ -438,10 +438,10 @@ namespace Questor.Modules.Actions
             {
                 if (!Cache.Instance.MissionBookmarkTimerSet)
                 {
-                    Cache.Instance.MissionBookmarkTimeout = DateTime.UtcNow.AddSeconds(10);
+                    Time.Instance.MissionBookmarkTimeout = DateTime.UtcNow.AddSeconds(10);
                 }
 
-                if (Cache.Instance.MissionBookmarkTimeout > DateTime.UtcNow)
+                if (Time.Instance.MissionBookmarkTimeout > DateTime.UtcNow)
                 {
                     AgentId = -1;
                     Title = null;
@@ -455,7 +455,7 @@ namespace Questor.Modules.Actions
                 }
                 else
                 {
-                    Logging.Log("TravelDestination.MissionBookmarkDestination", "Invalid Mission Bookmark! retrying for another [ " + Math.Round(Cache.Instance.MissionBookmarkTimeout.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Green);
+                    Logging.Log("TravelDestination.MissionBookmarkDestination", "Invalid Mission Bookmark! retrying for another [ " + Math.Round(Time.Instance.MissionBookmarkTimeout.Subtract(DateTime.UtcNow).TotalSeconds, 0) + " ]sec", Logging.Green);
                 }
             }
 

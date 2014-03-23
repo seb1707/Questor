@@ -1464,7 +1464,7 @@ namespace Questor.Modules.Lookup
 
             if (Settings.Instance.CharacterSettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
-                if (DateTime.UtcNow > Cache.Instance.LastSessionChange.AddSeconds(30))
+                if (DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(30))
                 {
                     Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);

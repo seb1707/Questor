@@ -52,11 +52,11 @@ namespace QuestorManager
 
         public List<ItemCache> Items { get; set; }
 
-        public List<ItemCache> ItemsToSellUnsorted { get; set; }
+        //public List<ItemCache> ItemsToSellUnsorted { get; set; }
 
-        public List<ItemCache> ItemsToSell { get; set; }
+        //public List<ItemCache> ItemsToSell { get; set; }
 
-        public List<ItemCache> ItemsToRefine { get; set; }
+        //public List<ItemCache> ItemsToRefine { get; set; }
 
         public Dictionary<int, InvType> InvTypesById { get; set; }
 
@@ -94,9 +94,9 @@ namespace QuestorManager
             _cleanup = new Cleanup();
             List = new List<ListItems>();
             Items = new List<ItemCache>();
-            ItemsToSell = new List<ItemCache>();
-            ItemsToSellUnsorted = new List<ItemCache>();
-            ItemsToRefine = new List<ItemCache>();
+            //ItemsToSell = new List<ItemCache>();
+            //ItemsToSellUnsorted = new List<ItemCache>();
+            //ItemsToRefine = new List<ItemCache>();
             
             #region Load DirectEVE
             //

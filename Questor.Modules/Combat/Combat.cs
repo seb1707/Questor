@@ -2222,7 +2222,11 @@ namespace Questor.Modules.Combat
 
                 try
                 {
-                    if (!Cache.Instance.InWarp && !Cache.Instance.MyShipEntity.IsFrigate && !Cache.Instance.MyShipEntity.IsCruiser && Cache.Instance.ActiveShip.GivenName != Settings.Instance.SalvageShipName)
+                    if (!Cache.Instance.InWarp && 
+                        !Cache.Instance.MyShipEntity.IsFrigate && 
+                        !Cache.Instance.MyShipEntity.IsCruiser && 
+                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.SalvageShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TransportShipName)
                     {
                         //
                         // we are not in something light and fast so assume we need weapons and assume we should be in the defined combatship

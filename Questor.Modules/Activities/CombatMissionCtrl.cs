@@ -1257,6 +1257,24 @@ namespace Questor.Modules.Activities
                 numberToIgnore = 0;
             }
 
+            int attackUntilBelowShieldPercentage;
+            if (!int.TryParse(action.GetParameterValue("attackUntilBelowShieldPercentage"), out attackUntilBelowShieldPercentage))
+            {
+                attackUntilBelowShieldPercentage = 0;
+            }
+
+            int attackUntilBelowArmorPercentage;
+            if (!int.TryParse(action.GetParameterValue("attackUntilBelowArmorPercentage"), out attackUntilBelowArmorPercentage))
+            {
+                attackUntilBelowArmorPercentage = 0;
+            }
+
+            int attackUntilBelowHullPercentage;
+            if (!int.TryParse(action.GetParameterValue("attackUntilBelowHullPercentage"), out attackUntilBelowHullPercentage))
+            {
+                attackUntilBelowHullPercentage = 0;
+            }
+
             List<string> targetNames = action.GetParameterValues("target");
 
             // No parameter? Ignore kill action
@@ -1432,7 +1450,34 @@ namespace Questor.Modules.Activities
 
                     if (killTargets.FirstOrDefault() != null) //if it is not null is HAS to be OnGridWithMe as all killTargets are verified OnGridWithMe
                     {
-                        if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " proceeding to kill the target (this is spammy, but useful debug info)", Logging.White);
+                        if (attackUntilBelowShieldPercentage > 0 && (killTargets.FirstOrDefault().ShieldPct * 100) < attackUntilBelowShieldPercentage)
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Kill target [" + killTargets.FirstOrDefault().Name + "] at [" + Math.Round(killTargets.FirstOrDefault().Distance / 1000, 2) + "k] Armor % is [" + killTargets.FirstOrDefault().ShieldPct * 100 + "] which is less then attackUntilBelowShieldPercentage [" + attackUntilBelowShieldPercentage + "] Kill Action Complete, Next Action.", Logging.Yellow);
+                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets);
+                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                            Nextaction();
+                            return;
+                        }
+
+                        if (attackUntilBelowArmorPercentage > 0 && (killTargets.FirstOrDefault().ArmorPct * 100) < attackUntilBelowArmorPercentage)
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Kill target [" + killTargets.FirstOrDefault().Name + "] at [" + Math.Round(killTargets.FirstOrDefault().Distance / 1000,2) + "k] Armor % is [" + killTargets.FirstOrDefault().ArmorPct * 100 + "] which is less then attackUntilBelowArmorPercentage [" + attackUntilBelowArmorPercentage + "] Kill Action Complete, Next Action.", Logging.Yellow);
+                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets);
+                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                            Nextaction();
+                            return;
+                        }
+
+                        if (attackUntilBelowHullPercentage > 0 && (killTargets.FirstOrDefault().ArmorPct * 100) < attackUntilBelowHullPercentage)
+                        {
+                            Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Kill target [" + killTargets.FirstOrDefault().Name + "] at [" + Math.Round(killTargets.FirstOrDefault().Distance / 1000, 2) + "k] Armor % is [" + killTargets.FirstOrDefault().StructurePct * 100 + "] which is less then attackUntilBelowHullPercentage [" + attackUntilBelowHullPercentage + "] Kill Action Complete, Next Action.", Logging.Yellow);
+                            Cache.Instance.RemovePrimaryWeaponPriorityTargets(killTargets);
+                            Cache.Instance.PreferredPrimaryWeaponTarget = null;
+                            Nextaction();
+                            return;
+                        }
+
+                        if (Settings.Instance.DebugKillAction) Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " proceeding to kill [" + killTargets.FirstOrDefault().Name + "] at [" + Math.Round(killTargets.FirstOrDefault().Distance / 1000, 2) + "k] (this is spammy, but useful debug info)", Logging.White);
                         //if (Cache.Instance.PreferredPrimaryWeaponTarget == null || String.IsNullOrEmpty(Cache.Instance.PreferredDroneTarget.Name) || Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe && Cache.Instance.PreferredPrimaryWeaponTarget != currentKillTarget)
                         //{
                             //Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "][" + Cache.Instance.MaskedID(currentKillTarget.Id) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);

@@ -88,8 +88,11 @@
       <action name="Kill">
         <parameter name="IgnoreAttackers" value="true" />
         <parameter name="BreakOnAttackers" value="true" />
-        <parameter name="NotClosest" value="true" />
-        <parameter name="NumberToIgnore" value="50" />
+        <parameter name="NotClosest" value="false" />                   <!-- By default this is false (sort targets closest first), if you wish to sort targets furthest away first set this true   -->
+        <parameter name="NumberToIgnore" value="0" />                   <!-- 0 ignores none, 1 would ignore the 1st in the list, 2 would ignore the 1st two. This takes effect AFTER "NotClosest" if configured  -->
+		<parameter name="AttackUntilBelowShieldPercentage" value="0" /> <!-- 0 is disabled, any other percentage and we will move on to the next action when the target falls below that percentage -->
+		<parameter name="AttackUntilBelowArmorPercentage" value="0" />  <!-- 0 is disabled, any other percentage and we will move on to the next action when the target falls below that percentage -->
+		<parameter name="AttackUntilBelowHullPercentage" value="0" />   <!-- 0 is disabled, any other percentage and we will move on to the next action when the target falls below that percentage -->
         <parameter name="Target" value="Dim" />
       </action>
       

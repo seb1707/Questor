@@ -271,7 +271,9 @@
   <salvagerMinimumCapacitor>0</salvagerMinimumCapacitor>
   <!-- doNotDoANYSalvagingOutsideMissionActions: disabled ALL salvage related actions, tractor/salvager/wreck targeting, everything when not processing a loot or lootitem action in a mission -->
   <doNotDoANYSalvagingOutsideMissionActions>false</doNotDoANYSalvagingOutsideMissionActions>
-
+  <!-- by default this is false. If you do not include a target in a lootItem action we search ALL containers. To avoid this (and force you to clean up your mission XML actions!) this can be set to true. We then will complain and goto the next action if any lootItem action is missing the target parameter.  -->
+  <lootItemRequiresTarget>false</lootItemRequiresTarget>
+  
   <!--                                                -->
   <!--    UNDOCKING SETTINGS     -->
   <!--                                                -->

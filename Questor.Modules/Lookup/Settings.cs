@@ -316,6 +316,7 @@ namespace Questor.Modules.Lookup
         public int TractorBeamMinimumCapacitor { get; set; }
         public int SalvagerMinimumCapacitor { get; set; }
         public bool DoNotDoANYSalvagingOutsideMissionActions { get; set; }
+        public bool LootItemRequiresTarget { get; set; }
 
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
@@ -1064,6 +1065,7 @@ namespace Questor.Modules.Lookup
                 TractorBeamMinimumCapacitor = (int?)CharacterSettingsXml.Element("tractorBeamMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("tractorBeamMinimumCapacitor") ?? 0;
                 SalvagerMinimumCapacitor = (int?)CharacterSettingsXml.Element("salvagerMinimumCapacitor") ?? (int?)CommonSettingsXml.Element("salvagerMinimumCapacitor") ?? 0;
                 DoNotDoANYSalvagingOutsideMissionActions = (bool?)CharacterSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? (bool?)CommonSettingsXml.Element("doNotDoANYSalvagingOutsideMissionActions") ?? false;
+                LootItemRequiresTarget = (bool?)CharacterSettingsXml.Element("lootItemRequiresTarget") ?? (bool?)CommonSettingsXml.Element("lootItemRequiresTarget") ?? false;
             }
             catch (Exception exception)
             {
@@ -1766,6 +1768,7 @@ namespace Questor.Modules.Lookup
                 TractorBeamMinimumCapacitor = 0;
                 SalvagerMinimumCapacitor = 0;
                 DoNotDoANYSalvagingOutsideMissionActions = false;
+                LootItemRequiresTarget = false;
 
                 //
                 // Enable / Disable the different types of logging that are available

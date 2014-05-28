@@ -1812,8 +1812,14 @@ namespace Questor.Modules.Activities
                 if (action.GetParameterValues("target") != null)
                 {
                     targetContainerNames = action.GetParameterValues("target");
-                } 
-                
+                }
+
+                if (targetContainerNames == null && Settings.Instance.LootItemRequiresTarget)
+                {
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], " *** No Target Was Specified In the LootItem Action! ***", Logging.Debug);
+                    _currentAction++;
+                }
+
                 List<string> itemsToLoot = null;
                 if (action.GetParameterValues("item") != null)
                 {
@@ -1851,7 +1857,7 @@ namespace Questor.Modules.Activities
 
                 if (done)
                 {
-                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting - we have the item(s)", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done - we have the item(s)", Logging.Teal);
 
                     // now that we have completed this action revert OpenWrecks to false
                     if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
@@ -1866,9 +1872,20 @@ namespace Questor.Modules.Activities
                 //
                 IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
 
+
                 if (!containers.Any())
                 {
-                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "We are done looting - no containers left to loot", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "no containers left to loot, next action", Logging.Teal);
+                    if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
+                    Cache.Instance.MissionLoot = false;
+                    Cache.Instance.CurrentlyShouldBeSalvaging = false;
+                    _currentAction++;
+                    return;
+                }
+
+                if (targetContainerNames != null && containers.Where(i => !i.IsWreckEmpty).All(i => i.Name != targetContainerNames.FirstOrDefault()))
+                {
+                    Logging.Log("CombatMissionCtrl[" + Cache.Instance.PocketNumber + "]." + _pocketActions[_currentAction], "no containers named [" + targetContainerNames + "] left to loot, next action", Logging.Teal);
                     if (Settings.Instance.SpeedTank) Cache.Instance.OpenWrecks = false;
                     Cache.Instance.MissionLoot = false; 
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;

@@ -100,7 +100,7 @@ namespace BuyLPI
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 
-            Cache.Instance.LastFrame = DateTime.UtcNow;
+            Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 300)
@@ -113,17 +113,17 @@ namespace BuyLPI
                 return;
 
             if (Cache.Instance.DirectEve.Session.IsReady)
-                Cache.Instance.LastSessionIsReady = DateTime.UtcNow;
+                Time.Instance.LastSessionIsReady = DateTime.UtcNow;
 
             // We are not in space or station, don't do shit yet!
             if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
             {
-                Cache.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                Cache.Instance.LastSessionChange = DateTime.UtcNow;
+                Time.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
+                Time.Instance.LastSessionChange = DateTime.UtcNow;
                 return;
             }
 
-            if (DateTime.UtcNow < Cache.Instance.NextInSpaceorInStation)
+            if (DateTime.UtcNow < Time.Instance.NextInSpaceorInStation)
                 return;
 
             if (Cache.Instance.SessionState != "Quitting")

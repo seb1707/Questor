@@ -1049,7 +1049,7 @@ namespace Questor.Modules.Actions
                     }
                 }
             }
-            if (Settings.Instance.UseFittingManager)
+            else if (Settings.Instance.UseFittingManager) //only load the default fitting if we did not find the faction logo in the mission html.
             {
                 Cache.Instance.FactionName = "Default";
                 FactionFitting factionFitting = Settings.Instance.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == "default");

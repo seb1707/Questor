@@ -8,18 +8,17 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Runtime.Remoting;
-using System.Threading;
-using Questor.Modules.Activities;
-using Questor.Modules.BackgroundTasks;
-using Questor.Modules.Caching;
-
 namespace Questor.Modules.Combat
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
+    using System.Runtime.Remoting;
+    using System.Threading;
+    using Questor.Modules.Activities;
+    using Questor.Modules.BackgroundTasks;
+    using Questor.Modules.Caching;
     using Questor.Modules.Logging;
     using Questor.Modules.Lookup;
     using Questor.Modules.States;
@@ -335,6 +334,13 @@ namespace Questor.Modules.Combat
                 if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already changing ammo, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
             }
+
+            //if (weapon.AutoReload && Settings.Instance.disableAutoreload)
+            //{
+            //    if (Settings.Instance.DebugReloadAll) Logging.Log("debug ReloadAll:", "weapon.AutoReload [" + weapon.AutoReload + "] setting it to false", Logging.Orange);
+            //    weapon.SetAutoReload(false);
+            //    return false;
+            //}
 
             try
             {

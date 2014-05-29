@@ -755,7 +755,7 @@ namespace Questor
                 //
                 // we must have support instances available, after a delay, login
                 //
-                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalSeconds > 4 + RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds, Time.Instance.EVEAccountLoginDelayMaximum_seconds))
+                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds > RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds * 1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds * 1000))
                 {
                     Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
                     Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
@@ -768,7 +768,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalSeconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds, Time.Instance.CharacterSelectionDelayMaximum_seconds) && DateTime.UtcNow > NextSlotActivate)
+                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalMilliseconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds * 1000, Time.Instance.CharacterSelectionDelayMaximum_seconds * 1000) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {

@@ -35,7 +35,11 @@ namespace Questor
 
         private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
 
-        public static DateTime AppStarted = DateTime.UtcNow;
+        //public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
+        private static bool _questorScheduleSaysWeShouldLoginNow;
+        public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
+        public static DateTime EVEAccountLoginStarted = DateTime.UtcNow;
+        //public static DateTime EVECharacterSelected = DateTime.UtcNow;
         public static DateTime NextSlotActivate = DateTime.UtcNow;
         private static string _scriptFile;
         private static string _scriptAfterLoginFile;
@@ -46,8 +50,32 @@ namespace Questor
         private static bool _loginNowIgnoreScheduler;
 
         private static double _minutesToStart;
-        private static bool _readyToStarta;
-        private static bool _readyToStart;
+        private static bool? _readyToLoginEVEAccount;
+        private static bool ReadyToLoginToEVEAccount
+        {
+            get
+            {
+                try
+                {
+                    return _readyToLoginEVEAccount ?? false;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("ReadyToLoginToEVE", "Exception [" + ex + "]", Logging.Debug);
+                    return false;
+                }
+            }
+
+            set
+            {
+                _readyToLoginEVEAccount = value;
+                if (value) //if true
+                {
+                    QuestorSchedulerReadyToLogin = DateTime.UtcNow;
+                }
+            }
+        }
+
         private static bool _humanInterventionRequired;
         private static bool MissingEasyHookWarningGiven;
 
@@ -104,8 +132,7 @@ namespace Questor
                 Logging.Log("Startup", "Try `questor --help' for more information.", Logging.White);
                 return;
             }
-            _readyToStart = true;
-
+            
             if (_showHelp)
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
@@ -140,7 +167,7 @@ namespace Questor
             if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
             {
                 Cache.Instance.ScheduleCharacterName = Logging._character;
-                _readyToStart = true;
+                ReadyToLoginToEVEAccount = true;
             }
 
 
@@ -279,6 +306,9 @@ namespace Questor
             CharSchedules = new List<CharSchedule>();
             if (path != null)
             {
+                //
+                // we should add a check for a missing schedules.xml here and log to the user if it is missing
+                //
                 XDocument values = XDocument.Load(Path.Combine(path, "Schedules.xml"));
                 if (values.Root != null)
                 {
@@ -364,7 +394,7 @@ namespace Questor
                 if ((DateTime.Now.Subtract(StartTime).TotalMinutes < 1200)) //if we're less than x hours past start time, start now
                 {
                     StartTime = DateTime.Now;
-                    _readyToStarta = true;
+                    _questorScheduleSaysWeShouldLoginNow = true;
                 }
                 else
                     StartTime = StartTime.AddDays(1); //otherwise, start tomorrow at start time
@@ -372,7 +402,7 @@ namespace Questor
             else if ((StartTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
             {
                 StartTime = DateTime.Now;
-                _readyToStarta = true;
+                _questorScheduleSaysWeShouldLoginNow = true;
             }
 
             if (StopTime < StartTime)
@@ -386,11 +416,11 @@ namespace Questor
 
             if (_loginNowIgnoreScheduler)
             {
-                _readyToStarta = true;
+                _questorScheduleSaysWeShouldLoginNow = true;
             }
             else Logging.Log("Startup", " Start Time: " + StartTime + " - Stop Time: " + StopTime, Logging.White);
 
-            if (!_readyToStarta)
+            if (!_questorScheduleSaysWeShouldLoginNow)
             {
                 _minutesToStart = StartTime.Subtract(DateTime.Now).TotalMinutes;
                 Logging.Log("Startup", "Starting at " + StartTime + ". " + String.Format("{0:0.##}", _minutesToStart) + " minutes to go.", Logging.Yellow);
@@ -409,7 +439,7 @@ namespace Questor
             }
             else
             {
-                _readyToStart = true;
+                ReadyToLoginToEVEAccount = true;
                 Logging.Log("Startup", "Already passed start time.  Starting in 15 seconds.", Logging.White);
                 System.Threading.Thread.Sleep(15000);
             }
@@ -443,13 +473,13 @@ namespace Questor
             }
             _nextPulse = DateTime.UtcNow.AddSeconds(_pulsedelay);
 
-            if (!_readyToStart)
+            if (!ReadyToLoginToEVEAccount)
             {
                 //Logging.Log("if (!_readyToStart) then return");
                 return;
             }
 
-            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_readyToStarta)
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)
             {
                 //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
                 return;
@@ -703,6 +733,7 @@ namespace Questor
                     _nextPulse = DateTime.UtcNow.AddSeconds(30);
                     return;
                 }
+
                 ServerStatusCheck = 0;
                 Cache.Instance.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
                 Logging.Log("Startup", Cache.Instance.ReasonToStopQuestor, Logging.Red);
@@ -721,10 +752,14 @@ namespace Questor
                     return;
                 }
 
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > 5)
+                //
+                // we must have support instances available, after a delay, login
+                //
+                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalSeconds > 4 + RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds, Time.Instance.EVEAccountLoginDelayMaximum_seconds))
                 {
                     Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
                     Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
+                    EVEAccountLoginStarted = DateTime.UtcNow;
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
@@ -733,7 +768,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(AppStarted).TotalSeconds > RandomNumber(Time.Instance.LoginDelayMinimum_seconds, Time.Instance.LoginDelayMaximum_seconds) && DateTime.UtcNow > NextSlotActivate)
+                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalSeconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds, Time.Instance.CharacterSelectionDelayMaximum_seconds) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -745,6 +780,7 @@ namespace Questor
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
                         NextSlotActivate = DateTime.UtcNow.AddSeconds(30);
                         slot.Activate();
+                        //EVECharacterSelected = DateTime.UtcNow;
                         return;
                     }
                     Logging.Log("Startup", "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds", Logging.White);
@@ -756,8 +792,8 @@ namespace Questor
         {
             Timer.Stop();
             Logging.Log("Startup", "Timer elapsed.  Starting now.", Logging.White);
-            _readyToStart = true;
-            _readyToStarta = true;
+            ReadyToLoginToEVEAccount = true;
+            _questorScheduleSaysWeShouldLoginNow = true;
         }
 
         public static int RandomNumber(int min, int max)

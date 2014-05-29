@@ -48,6 +48,7 @@ namespace Questor
         private static int _maxRuntime;
         private static bool _chantlingScheduler;
         private static bool _loginNowIgnoreScheduler;
+        private static bool _standaloneInstance;
 
         private static double _minutesToStart;
         private static bool? _readyToLoginEVEAccount;
@@ -117,6 +118,7 @@ namespace Questor
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
                 {"x|chantling|scheduler", "use scheduler (thank you chantling!)", v => _chantlingScheduler = v != null},
                 {"n|loginNow", "Login using info in scheduler", v => _loginNowIgnoreScheduler = v != null},
+                {"i|standalone instance", "Standalone instance, hook D3D w/o Innerspace!", v => _standaloneInstance = v != null},
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
                 };
 
@@ -198,7 +200,11 @@ namespace Questor
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
                     //}   
-                    Cache.Instance.DirectEve = new DirectEve();
+                    if(_standaloneInstance) {
+						Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+					} else {
+						Cache.Instance.DirectEve = new DirectEve();
+					}
                 }
             }
             catch (Exception ex)

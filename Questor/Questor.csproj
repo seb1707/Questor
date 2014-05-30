@@ -68,6 +68,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ProgramFiles)\InnerSpace\Lavish.InnerSpace.dll</HintPath>
     </Reference>
+    <Reference Include="SlimDX">
+      <HintPath>..\DirectEve\SlimDX.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web.Services" />
@@ -87,6 +90,11 @@
     <Compile Include="Behaviors\DedicatedBookmarkSalvagerBehavior.cs" />
     <Compile Include="Behaviors\DirectionalScannerBehavior.cs" />
     <Compile Include="Behaviors\MiningBehavior.cs" />
+    <Compile Include="D3DDetour\D3D10.cs" />
+    <Compile Include="D3DDetour\D3D11.cs" />
+    <Compile Include="D3DDetour\D3D9.cs" />
+    <Compile Include="D3DDetour\D3DHook.cs" />
+    <Compile Include="D3DDetour\Pulse.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -97,6 +105,7 @@
     <Compile Include="QuestorUI.Designer.cs">
       <DependentUpon>QuestorUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="Standalone.cs" />
     <Compile Include="Storylines\GenericCombatStoryline.cs" />
     <Compile Include="Storylines\GenericCombatStorylineState.cs" />
     <Compile Include="Storylines\GenericCourierStoryline.cs" />
@@ -152,6 +161,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="D3DDetour" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

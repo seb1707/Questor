@@ -89,10 +89,11 @@ namespace Questor.Modules.Logging
             string colorLogLine = line;
 
             //Logging when using Innerspace
-            //if (Cache.Instance.UseInnerspace || Settings.Instance.UseInnerspace)
-            //{
+            if (Cache.Instance.UseInnerspace || Settings.Instance.UseInnerspace)
+            {
                 InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
-            //}
+            }
+          	// probably want some sort of extra logging if using the standalone version? we dont have any output until q window is up
            
             string plainLogLine = FilterColorsFromLogs(line);
 

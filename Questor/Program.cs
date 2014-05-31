@@ -33,8 +33,6 @@ namespace Questor
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
-        private static int _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
-
         //public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
         private static bool _questorScheduleSaysWeShouldLoginNow;
         public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
@@ -87,6 +85,7 @@ namespace Questor
         private static int ServerStatusCheck = 0;
 
         private static DateTime _nextPulse;
+        private static DateTime _lastServerStatusCheckWasNotOK = DateTime.MinValue;
         public static DateTime StartTime = DateTime.MaxValue;
         public static DateTime StopTime = DateTime.MinValue;
 
@@ -200,9 +199,15 @@ namespace Questor
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
                     //}   
-                    if(_standaloneInstance) {
-						Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
-					} else {
+                    if(_standaloneInstance) 
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE, using StandaloneFramework", Logging.Debug);
+						//Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());  //StandaloneFramework not yet? available in this github tree (!?!)
+                        return;
+                    } 
+                    else 
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE", Logging.Debug);
 						Cache.Instance.DirectEve = new DirectEve();
 					}
                 }
@@ -472,12 +477,18 @@ namespace Questor
             //    }
             //}
 
+            if (DateTime.UtcNow < _lastServerStatusCheckWasNotOK.AddSeconds(RandomNumber(10, 20)))
+            {
+                //If the server was not ready, wait 10-20 seconds before trying try again.
+                return;
+            }
+
             if (DateTime.UtcNow < _nextPulse)
             {
                 //Logging.Log("if (DateTime.UtcNow.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
                 return;
             }
-            _nextPulse = DateTime.UtcNow.AddSeconds(_pulsedelay);
+            _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
             if (!ReadyToLoginToEVEAccount)
             {
@@ -600,7 +611,6 @@ namespace Questor
 
                             //Logging.Log("[Startup] (2) close is: " + close);
                             //Logging.Log("[Startup] (1) window.Html is: " + window.Html);
-                            _pulsedelay = 60;
                         }
 
                         //if (update)
@@ -634,8 +644,7 @@ namespace Questor
                         if (quit)
                         {
                             Logging.Log("Startup", "Restarting eve...", Logging.Red);
-                            Logging.Log("Startup", "Content of modal window (HTML): [" +
-                                        (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Red);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Red);
                             window.AnswerModal("quit");
 
                             //_directEve.ExecuteCommand(DirectCmd.CmdQuitGame);
@@ -655,8 +664,7 @@ namespace Questor
                         if (close)
                         {
                             Logging.Log("Startup", "Closing modal window...", Logging.Yellow);
-                            Logging.Log("Startup", "Content of modal window (HTML): [" +
-                                        (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Yellow);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Yellow);
                             window.Close();
                             continue;
                         }
@@ -732,11 +740,16 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
-                if (ServerStatusCheck <= 6)
+                if (ServerStatusCheck <= 20) // at 10 sec a piece this would be 200+ seconds
                 {
                     Logging.Log("Startup", "Server status[" + Cache.Instance.DirectEve.Login.ServerStatus + "] != [OK] try later", Logging.Orange);
                     ServerStatusCheck++;
-                    _nextPulse = DateTime.UtcNow.AddSeconds(30);
+                    //retry the server status check twice (with 1 sec delay between each) before kicking in a larger delay
+                    if (ServerStatusCheck > 2)
+                    {
+                        _lastServerStatusCheckWasNotOK = DateTime.UtcNow;
+                    }
+                
                     return;
                 }
 
@@ -767,7 +780,6 @@ namespace Questor
                     Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
                     EVEAccountLoginStarted = DateTime.UtcNow;
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
-                    _pulsedelay = Time.Instance.QuestorBeforeLoginPulseDelay_seconds;
                     return;
                 }
             }

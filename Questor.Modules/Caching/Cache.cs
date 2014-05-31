@@ -919,6 +919,78 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private DirectItem _myCurrentAmmoInWeapon;
+        /// <summary>
+        ///   Returns the maximum weapon distance
+        /// </summary>
+        public DirectItem myCurrentAmmoInWeapon
+        {
+            get
+            {
+                try
+                {
+                    if (_myCurrentAmmoInWeapon == null)
+                    {
+                        if (Cache.Instance.Weapons != null && Cache.Instance.Weapons.Any())
+                        {
+                            ModuleCache WeaponToCheckForAmmo = Cache.Instance.Weapons.FirstOrDefault();
+                            if (WeaponToCheckForAmmo != null)
+                            {
+                                _myCurrentAmmoInWeapon = WeaponToCheckForAmmo.Charge;
+                                return _myCurrentAmmoInWeapon;
+                            }
+
+                            return null;
+                        }
+
+                        return null;    
+                    }
+
+                    return _myCurrentAmmoInWeapon;
+                }
+                catch (Exception ex)
+                {
+                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.myCurrentAmmoInWeapon", "exception was:" + ex.Message, Logging.Teal);
+                    return null;
+                }
+            }
+        }
+
+        private double? _myAmmoInSpaceAverageSpeed;
+
+        /// <summary>
+        ///   Returns the maximum weapon distance
+        /// </summary>
+        public double myAmmoInSpaceAverageSpeed
+        {
+            get
+            {
+                try
+                {
+                    if (_myAmmoInSpaceAverageSpeed == null)
+                    {
+                        if (myAmmoInSpace != null && myAmmoInSpace.Any() && myAmmoInSpace.FirstOrDefault() != null)
+                        {
+                            _myAmmoInSpaceAverageSpeed = myAmmoInSpace.Average(x => x.Velocity);
+                            
+                            Logging.Log("myAmmoInSpace", "Velocity [" + Math.Round((double)_myAmmoInSpaceAverageSpeed / 1000, 2) + "k/sec]", Logging.Debug);
+                            return (double)_myAmmoInSpaceAverageSpeed;
+                        }
+
+                        return 0;    
+                    }
+
+                    return (double)_myAmmoInSpaceAverageSpeed;
+
+                }
+                catch (Exception ex)
+                {
+                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.myAmmoInSpaceAverageSpeed", "exception was:" + ex.Message, Logging.Teal);
+                    return 0;
+                }
+            }
+        }
+
         /// <summary>
         ///   Last target for a certain module
         /// </summary>
@@ -1311,6 +1383,31 @@ namespace Questor.Modules.Caching
                 }
 
                 return _maxLockedTargets ?? 0;
+            }
+        }
+
+        private List<EntityCache> _myAmmoInSpace;
+        public IEnumerable<EntityCache> myAmmoInSpace
+        {
+            get
+            {
+                if (_myAmmoInSpace == null)
+                {
+                    if (myCurrentAmmoInWeapon != null)
+                    {
+                        _myAmmoInSpace = Cache.Instance.Entities.Where(e => e.Distance > 3000 && e.IsOnGridWithMe && e.TypeId == myCurrentAmmoInWeapon.TypeId && e.Velocity > 50).ToList();
+                        if (_myAmmoInSpace.Any())
+                        {
+                            return _myAmmoInSpace;
+                        }
+
+                        return null;
+                    }
+
+                    return null;
+                }
+
+                return _myAmmoInSpace;
             }
         }
 
@@ -2858,7 +2955,10 @@ namespace Questor.Modules.Caching
                 _maxTargetRange = null;
                 _modules = null;
                 _modulesAsItemCache = null;
-                _myShipEntity = null; 
+                _myAmmoInSpace = null;
+                _myAmmoInSpaceAverageSpeed = null;
+                _myCurrentAmmoInWeapon = null;
+                _myShipEntity = null;
                 _objects = null;
                 _potentialCombatTargets = null;
                 _primaryWeaponPriorityTargetsPerFrameCaching = null;

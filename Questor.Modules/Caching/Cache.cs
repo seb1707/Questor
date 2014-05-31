@@ -7551,6 +7551,236 @@ namespace Questor.Modules.Caching
             return true;
         }
 
+        public bool RepairItems(string module)
+        {
+            try
+            {
+
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                {
+                    //Logging.Log(module, "Waiting...", Logging.Orange);
+                    return false;
+                }
+
+                if (!Cache.Instance.Windows.Any())
+                {
+                    return false;
+                }
+
+                Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+
+                if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
+                {
+                    Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
+                    return true;
+                }
+
+                if (Cache.Instance.InStation)
+                {
+                    DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
+
+                    DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
+
+                    if (doneUsingRepairWindow)
+                    {
+                        doneUsingRepairWindow = false;
+                        if (repairWindow != null) repairWindow.Close();
+                        return true;
+                    }
+
+                    foreach (DirectWindow window in Cache.Instance.Windows)
+                    {
+                        if (window.Name == "modal")
+                        {
+                            if (!string.IsNullOrEmpty(window.Html))
+                            {
+                                if (window.Html.Contains("Repairing these items will cost"))
+                                {
+                                    if (window.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                                    Logging.Log(module, "Closing Quote for Repairing All with YES", Logging.White);
+                                    window.AnswerModal("Yes");
+                                    doneUsingRepairWindow = true;
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+
+                    if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
+                    {
+                        if (repairQuote.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                        Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
+                        repairQuote.AnswerModal("OK");
+                        doneUsingRepairWindow = true;
+                        return false;
+                    }
+
+                    if (repairWindow == null)
+                    {
+                        Logging.Log(module, "Opening repairshop window", Logging.White);
+                        Cache.Instance.DirectEve.OpenRepairShop();
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        return false;
+                    }
+
+                    if (!Cache.Instance.OpenShipsHangar(module)) return false;
+                    if (Cache.Instance.ItemHangar == null) return false;
+                    if (Settings.Instance.UseDrones)
+                    {
+                        if (!Cache.Instance.OpenDroneBay(module)) { return false; }
+                    }
+
+                    //repair ships in ships hangar
+                    List<DirectItem> repairAllItems = Cache.Instance.ShipHangar.Items;
+
+                    //repair items in items hangar and drone bay of active ship also
+                    repairAllItems.AddRange(Cache.Instance.ItemHangar.Items);
+                    if (Settings.Instance.UseDrones)
+                    {
+                        repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
+                    }
+
+                    if (repairAllItems.Any())
+                    {
+                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
+                        {
+                            Logging.Log(module, "Add items to repair list", Logging.White);
+                            repairWindow.RepairItems(repairAllItems);
+                            Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                            return false;
+                        }
+
+                        Logging.Log(module, "Repairing Items: repairWindow.AvgDamage: " + repairWindow.AvgDamage(), Logging.White);
+                        if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
+                        {
+                            Logging.Log(module, "Repairing Items: Zero Damage: skipping repair.", Logging.White);
+                            repairWindow.Close();
+                            Cache.Instance.RepairAll = false;
+                            return true;
+                        }
+
+                        repairWindow.RepairAll();
+                        Cache.Instance.RepairAll = false;
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                        return false;
+                    }
+
+                    Logging.Log(module, "No items available, nothing to repair.", Logging.Orange);
+                    return true;
+                }
+                Logging.Log(module, "Not in station.", Logging.Orange);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Cache.RepairItems", "Exception:" + ex.Message, Logging.White);
+                return false;
+            }
+        }
+
+        public bool RepairDrones(string module)
+        {
+            try
+            {
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairDronesAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                {
+                    //Logging.Log(module, "Waiting...", Logging.Orange);
+                    return false;
+                }
+
+                Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+
+                if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
+                {
+                    Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
+                    return true;
+                }
+
+                if (Cache.Instance.InStation)
+                {
+                    DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
+
+                    DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
+
+                    if (GetShipsDroneBayAttempts > 10 && Cache.Instance.DroneBay == null)
+                    {
+                        Logging.Log(module, "Your current ship does not have a drone bay, aborting repair of drones", Logging.Teal);
+                        return true;
+                    }
+
+                    if (doneUsingRepairWindow)
+                    {
+                        Logging.Log(module, "Done with RepairShop: closing", Logging.White);
+                        doneUsingRepairWindow = false;
+                        if (repairWindow != null) repairWindow.Close();
+                        return true;
+                    }
+
+                    if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
+                    {
+                        if (repairQuote.Html != null) Logging.Log("RepairDrones", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                        Logging.Log(module, "Closing Quote for Repairing Drones with OK", Logging.White);
+                        repairQuote.AnswerModal("OK");
+                        doneUsingRepairWindow = true;
+                        return false;
+                    }
+
+                    if (repairWindow == null)
+                    {
+                        Logging.Log(module, "Opening repairshop window", Logging.White);
+                        Cache.Instance.DirectEve.OpenRepairShop();
+                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        return false;
+                    }
+
+                    if (!Cache.Instance.OpenDroneBay("Repair Drones")) return false;
+
+                    List<DirectItem> dronesToRepair;
+                    try
+                    {
+                        dronesToRepair = Cache.Instance.DroneBay.Items;
+                    }
+                    catch (Exception exception)
+                    {
+                        Logging.Log(module, "Dronebay.Items could not be listed, nothing to repair.[" + exception + "]", Logging.Orange);
+                        return true;
+                    }
+
+                    if (dronesToRepair.Any())
+                    {
+                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
+                        {
+                            Logging.Log(module, "Get Quote for Repairing [" + dronesToRepair.Count() + "] Drones", Logging.White);
+                            repairWindow.RepairItems(dronesToRepair);
+                            return false;
+                        }
+
+                        Logging.Log(module, "Repairing Drones: repairWindow.AvgDamage: " + repairWindow.AvgDamage(), Logging.White);
+                        if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
+                        {
+                            repairWindow.Close();
+                            return true;
+                        }
+
+                        repairWindow.RepairAll();
+                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 2));
+                        return false;
+                    }
+
+                    Logging.Log(module, "No drones available, nothing to repair.", Logging.Orange);
+                    return true;
+                }
+
+                Logging.Log(module, "Not in station.", Logging.Orange);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Cache.RepairDrones", "Exception:" + ex.Message, Logging.White);
+                return false;
+            }
+        }
+
         private IEnumerable<DirectBookmark> ListOfUndockBookmarks;
 
         internal static DirectBookmark _undockBookmarkInLocal;
@@ -7861,234 +8091,5 @@ namespace Questor.Modules.Caching
             return true;
         }
 
-        public bool RepairItems(string module)
-        {
-            try
-            {
-
-                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairItemsAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-                {
-                    //Logging.Log(module, "Waiting...", Logging.Orange);
-                    return false;
-                }
-
-                if (!Cache.Instance.Windows.Any())
-                {
-                    return false;
-                }
-
-                Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
-
-                if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
-                {
-                    Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
-                    return true;
-                }
-
-                if (Cache.Instance.InStation)
-                {
-                    DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
-
-                    DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
-
-                    if (doneUsingRepairWindow)
-                    {
-                        doneUsingRepairWindow = false;
-                        if (repairWindow != null) repairWindow.Close();
-                        return true;
-                    }
-
-                    foreach (DirectWindow window in Cache.Instance.Windows)
-                    {
-                        if (window.Name == "modal")
-                        {
-                            if (!string.IsNullOrEmpty(window.Html))
-                            {
-                                if (window.Html.Contains("Repairing these items will cost"))
-                                {
-                                    if (window.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
-                                    Logging.Log(module, "Closing Quote for Repairing All with YES", Logging.White);
-                                    window.AnswerModal("Yes");
-                                    doneUsingRepairWindow = true;
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-
-                    if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
-                    {
-                        if (repairQuote.Html != null) Logging.Log("RepairItems", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
-                        Logging.Log(module, "Closing Quote for Repairing All with OK", Logging.White);
-                        repairQuote.AnswerModal("OK");
-                        doneUsingRepairWindow = true;
-                        return false;
-                    }
-
-                    if (repairWindow == null)
-                    {
-                        Logging.Log(module, "Opening repairshop window", Logging.White);
-                        Cache.Instance.DirectEve.OpenRepairShop();
-                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
-                        return false;
-                    }
-
-                    if (!Cache.Instance.OpenShipsHangar(module)) return false;
-                    if (Cache.Instance.ItemHangar == null) return false;
-                    if (Settings.Instance.UseDrones)
-                    {
-                        if (!Cache.Instance.OpenDroneBay(module)) { return false; }
-                    }
-
-                    //repair ships in ships hangar
-                    List<DirectItem> repairAllItems = Cache.Instance.ShipHangar.Items;
-
-                    //repair items in items hangar and drone bay of active ship also
-                    repairAllItems.AddRange(Cache.Instance.ItemHangar.Items);
-                    if (Settings.Instance.UseDrones)
-                    {
-                        repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
-                    }
-
-                    if (repairAllItems.Any())
-                    {
-                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
-                        {
-                            Logging.Log(module, "Add items to repair list", Logging.White);
-                            repairWindow.RepairItems(repairAllItems);
-                            Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
-                            return false;
-                        }
-
-                        Logging.Log(module, "Repairing Items: repairWindow.AvgDamage: " + repairWindow.AvgDamage(), Logging.White);
-                        if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
-                        {
-                            Logging.Log(module, "Repairing Items: Zero Damage: skipping repair.", Logging.White);
-                            repairWindow.Close();
-                            Cache.Instance.RepairAll = false;
-                            return true;
-                        }
-
-                        repairWindow.RepairAll();
-                        Cache.Instance.RepairAll = false;
-                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
-                        return false;
-                    }
-
-                    Logging.Log(module, "No items available, nothing to repair.", Logging.Orange);
-                    return true;
-                }
-                Logging.Log(module, "Not in station.", Logging.Orange);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Cache.RepairItems", "Exception:" + ex.Message, Logging.White);
-                return false;
-            }
-        }
-
-        public bool RepairDrones(string module)
-        {
-            try
-            {
-                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(5) && !Cache.Instance.InSpace || DateTime.UtcNow < Time.Instance.NextRepairDronesAction) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-                {
-                    //Logging.Log(module, "Waiting...", Logging.Orange);
-                    return false;
-                }
-
-                Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
-
-                if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
-                {
-                    Logging.Log(module, "This station does not have repair facilities to use! aborting attempt to use non-existent repair facility.", Logging.Orange);
-                    return true;
-                }
-
-                if (Cache.Instance.InStation)
-                {
-                    DirectRepairShopWindow repairWindow = Cache.Instance.Windows.OfType<DirectRepairShopWindow>().FirstOrDefault();
-
-                    DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
-
-                    if (GetShipsDroneBayAttempts > 10 && Cache.Instance.DroneBay == null)
-                    {
-                        Logging.Log(module, "Your current ship does not have a drone bay, aborting repair of drones", Logging.Teal);
-                        return true;
-                    }
-
-                    if (doneUsingRepairWindow)
-                    {
-                        Logging.Log(module, "Done with RepairShop: closing", Logging.White);
-                        doneUsingRepairWindow = false;
-                        if (repairWindow != null) repairWindow.Close();
-                        return true;
-                    }
-
-                    if (repairQuote != null && repairQuote.IsModal && repairQuote.IsKillable)
-                    {
-                        if (repairQuote.Html != null) Logging.Log("RepairDrones", "Content of modal window (HTML): [" + (repairQuote.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
-                        Logging.Log(module, "Closing Quote for Repairing Drones with OK", Logging.White);
-                        repairQuote.AnswerModal("OK");
-                        doneUsingRepairWindow = true;
-                        return false;
-                    }
-
-                    if (repairWindow == null)
-                    {
-                        Logging.Log(module, "Opening repairshop window", Logging.White);
-                        Cache.Instance.DirectEve.OpenRepairShop();
-                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
-                        return false;
-                    }
-
-                    if (!Cache.Instance.OpenDroneBay("Repair Drones")) return false;
-
-                    List<DirectItem> dronesToRepair;
-                    try
-                    {
-                        dronesToRepair = Cache.Instance.DroneBay.Items;
-                    }
-                    catch (Exception exception)
-                    {
-                        Logging.Log(module, "Dronebay.Items could not be listed, nothing to repair.[" + exception + "]", Logging.Orange);
-                        return true;
-                    }
-
-                    if (dronesToRepair.Any())
-                    {
-                        if (String.IsNullOrEmpty(repairWindow.AvgDamage()))
-                        {
-                            Logging.Log(module, "Get Quote for Repairing [" + dronesToRepair.Count() + "] Drones", Logging.White);
-                            repairWindow.RepairItems(dronesToRepair);
-                            return false;
-                        }
-
-                        Logging.Log(module, "Repairing Drones: repairWindow.AvgDamage: " + repairWindow.AvgDamage(), Logging.White);
-                        if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
-                        {
-                            repairWindow.Close();
-                            return true;
-                        }
-
-                        repairWindow.RepairAll();
-                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 2));
-                        return false;
-                    }
-
-                    Logging.Log(module, "No drones available, nothing to repair.", Logging.Orange);
-                    return true;
-                }
-
-                Logging.Log(module, "Not in station.", Logging.Orange);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Cache.RepairDrones", "Exception:" + ex.Message, Logging.White);
-                return false;
-            }
-        }
     }
 }

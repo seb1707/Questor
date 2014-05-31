@@ -483,6 +483,8 @@ namespace Questor
                 return;
             }
 
+            _lastServerStatusCheckWasNotOK = DateTime.UtcNow.AddDays(-1); //reset this so we never hit this twice in a row w/o another server status check not being OK.
+
             if (DateTime.UtcNow < _nextPulse)
             {
                 //Logging.Log("if (DateTime.UtcNow.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");

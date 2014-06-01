@@ -56,6 +56,7 @@ namespace Questor
         public Questor(QuestorfrmMain form1)
         {
             _mParent = form1;
+            Logging.tryToLogToFile = true;
             _lastQuestorPulse = DateTime.UtcNow;
 
             _defense = new Defense();

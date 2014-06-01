@@ -33,7 +33,7 @@ namespace Questor
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
-        //public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
+        public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
         private static bool _questorScheduleSaysWeShouldLoginNow;
         public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
         public static DateTime EVEAccountLoginStarted = DateTime.UtcNow;
@@ -203,26 +203,36 @@ namespace Questor
                     {
                         Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
                         Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                        Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
                     }
                     else
                     {
                         Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
                         Cache.Instance.DirectEve = new DirectEve();
+                        Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
-                Cache.Instance.CloseQuestorCMDLogoff = false;
-                Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
-                return;
+                try
+                {
+                    Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                    Logging.Log("Startup", "DirectEVE: Exception [" + ex + "]", Logging.White);
+                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                    Cache.Instance.CloseQuestorEndProcess = true;
+                    Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                    Cache.Instance.SessionState = "Quitting";
+                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Startup", "Exception while logging exception, oh joy [" + exception + "]", Logging.Orange);
+                    return;
+                }
+                
             }
             #endregion Load DirectEVE
 
@@ -491,21 +501,29 @@ namespace Questor
             }
             _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
-            if (!ReadyToLoginToEVEAccount)
+            if (DateTime.UtcNow > QuestorProgramLaunched.AddSeconds(5) )
             {
-                //Logging.Log("if (!_readyToStart) then return");
+                //
+                // do not login for the first 5 seconds, wait...
+                //
+                return;
+            }
+
+            if (!ReadyToLoginToEVEAccount && Cache.Instance.DirectEve.Login.AtLogin)
+            {
+                Logging.Log("Startup", "if (!ReadyToLoginToEVEAccount)", Logging.White);
                 return;
             }
 
             if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)
             {
-                //Logging.Log("if (_chantlingScheduler && !string.IsNullOrEmpty(_character) && !_readyToStarta) then return");
+                Logging.Log("Startup", "if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)", Logging.White);
                 return;
             }
 
             if (_humanInterventionRequired)
             {
-                //Logging.Log("Startup", "OnFrame: _humanInterventionRequired is true (this will spam every second or so)", Logging.Orange);
+                Logging.Log("Startup", "OnFrame: _humanInterventionRequired is true (this will spam every second or so)", Logging.Orange);
                 return;
             }
 
@@ -594,7 +612,7 @@ namespace Questor
                             restart |= window.Html.ToLower().Contains("the connection was closed");
                             restart |= window.Html.ToLower().Contains("connection to server lost."); //INFORMATION
                             restart |= window.Html.ToLower().Contains("local cache is corrupt");
-                            restart |= window.Html.ToLower().Contains("local session information is corrupt");
+                            sayOk |= window.Html.ToLower().Contains("local session information is corrupt");
                             restart |= window.Html.ToLower().Contains("The client's local session"); // information is corrupt");
                             restart |= window.Html.ToLower().Contains("restart the client prior to logging in");
 
@@ -654,11 +672,8 @@ namespace Questor
                         if (restart)
                         {
                             Logging.Log("Startup", "Restarting eve...", Logging.Red);
-                            Logging.Log("Startup", "Content of modal window (HTML): [" +
-                                        (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Red);
+                            Logging.Log("Startup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Red);
                             window.AnswerModal("restart");
-
-                            //_directEve.ExecuteCommand(DirectCmd.CmdQuitGame);
                             continue;
                         }
 
@@ -797,7 +812,7 @@ namespace Questor
                         }
 
                         Logging.Log("Startup", "Activating character [" + slot.CharName + "]", Logging.White);
-                        NextSlotActivate = DateTime.UtcNow.AddSeconds(30);
+                        NextSlotActivate = DateTime.UtcNow.AddSeconds(5);
                         slot.Activate();
                         //EVECharacterSelected = DateTime.UtcNow;
                         return;

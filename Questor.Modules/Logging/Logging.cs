@@ -19,6 +19,7 @@ namespace Questor.Modules.Logging
     using System.Windows.Forms;
     using Questor.Modules.Caching;
     using Questor.Modules.Lookup;
+    using Questor;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 
@@ -69,6 +70,8 @@ namespace Questor.Modules.Logging
         public static string _username;
         public static string _password;
         public static string _character;
+        public static bool standaloneInstance;
+        public static bool tryToLogToFile;
         public static List<string> _QuestorParamaters;
 
         //public  void Log(string line)
@@ -89,7 +92,7 @@ namespace Questor.Modules.Logging
             string colorLogLine = line;
 
             //Logging when using Innerspace
-            if (Cache.Instance.UseInnerspace || Settings.Instance.UseInnerspace)
+            if (!Logging.standaloneInstance)
             {
                 InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
             }
@@ -104,64 +107,68 @@ namespace Questor.Modules.Logging
             Cache.Instance.ConsoleLogRedacted = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
             plainLogLine = FilterColorsFromLogs(line);
 
-            if (Settings.Instance.SaveConsoleLog)
+            if (Logging.tryToLogToFile)
             {
-                if (!Cache.Instance.ConsoleLogOpened)
+                if (Settings.Instance.SaveConsoleLog)
                 {
-                    if (Settings.Instance.ConsoleLogPath != null && Settings.Instance.ConsoleLogFile != null)
+                    if (!Cache.Instance.ConsoleLogOpened)
                     {
-                        module = "Logging";
-                        line = "Writing to Daily Console Log ";
-                        if (Settings.Instance.InnerspaceGeneratedConsoleLog && Settings.Instance.UseInnerspace)
+                        if (Settings.Instance.ConsoleLogPath != null && Settings.Instance.ConsoleLogFile != null)
                         {
-                            InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
-                            LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
-                        }
-
-                        Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
-
-                        if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile));
-                            if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
+                            module = "Logging";
+                            line = "Writing to Daily Console Log ";
+                            if (Settings.Instance.InnerspaceGeneratedConsoleLog && Settings.Instance.UseInnerspace)
                             {
-                                Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                                Cache.Instance.ConsoleLogOpened = true;
+                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
+                                LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
+                            }
+
+                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
+
+                            if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile));
+                                if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
+                                {
+                                    Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                    Cache.Instance.ConsoleLogOpened = true;
+                                }
+                                else
+                                {
+                                    if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
+                                }
+                                line = "";
                             }
                             else
                             {
-                                if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
+                                line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
+                                if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
+                                Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                             }
-                            line = "";
                         }
-                        else
+                    }
+
+                    if (Cache.Instance.ConsoleLogOpened)
+                    {
+                        if (Settings.Instance.ConsoleLogFile != null)
                         {
-                            line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                            if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                            Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                            File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
                         }
-                    }
-                }
+                        //Cache.Instance.ConsoleLog = null;
 
-                if (Cache.Instance.ConsoleLogOpened)
-                {
-                    if (Settings.Instance.ConsoleLogFile != null)
-                    {
-                        Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                        File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
+                        if (Settings.Instance.ConsoleLogFileRedacted != null)
+                        {
+                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                            File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
+                        }
+                        //Cache.Instance.ConsoleLogRedacted = null;
                     }
-                    //Cache.Instance.ConsoleLog = null;
 
-                    if (Settings.Instance.ConsoleLogFileRedacted != null) 
-                    {
-                        Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
-                        File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
-                    }
-                    //Cache.Instance.ConsoleLogRedacted = null;
-                }
-
-                Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                    Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                }    
             }
+            
         }
 
         //path = path.Replace(Environment.CommandLine, "");

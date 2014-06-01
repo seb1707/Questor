@@ -40,20 +40,28 @@ namespace Questor.Modules.Lookup
 
         public Settings()
         {
-            Ammo = new List<Ammo>();
-            ItemsBlackList = new List<int>();
-            WreckBlackList = new List<int>();
-            ListOfAgents = new List<AgentsList>();
-            ListofFactionFittings = new List<FactionFitting>();
-            ListOfMissionFittings = new List<MissionFitting>();
-            MissionBlacklist = new List<string>();
-            MissionGreylist = new List<string>();
-            CharacterNamesForMasterToInviteToFleet = new List<string>();
+            try
+            {
+                Ammo = new List<Ammo>();
+                ItemsBlackList = new List<int>();
+                WreckBlackList = new List<int>();
+                ListOfAgents = new List<AgentsList>();
+                ListofFactionFittings = new List<FactionFitting>();
+                ListOfMissionFittings = new List<MissionFitting>();
+                MissionBlacklist = new List<string>();
+                MissionGreylist = new List<string>();
+                CharacterNamesForMasterToInviteToFleet = new List<string>();
 
-            FactionBlacklist = new List<string>();
-            UseFittingManager = true;
-            DefaultFitting = new FactionFitting();
-            Interlocked.Increment(ref SettingsInstances);
+                FactionBlacklist = new List<string>();
+                UseFittingManager = true;
+                DefaultFitting = new FactionFitting();
+                Interlocked.Increment(ref SettingsInstances);
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings Initialization", "Exception: [" + exception + "]", Logging.Red);
+                return;
+            }
         }
 
         ~Settings()
@@ -75,6 +83,8 @@ namespace Questor.Modules.Lookup
         public bool QuestorSettingsExists = true;
         public bool QuestorManagerExists = true;
 
+        public string characterNameForLogs = "NoCharacterNameDefinedYet";
+            
         //
         // Debug Variables
         //
@@ -688,6 +698,15 @@ namespace Questor.Modules.Lookup
 
         public void ReadSettingsFromXML(XElement CharacterSettingsXml)
         {
+            if (!String.IsNullOrEmpty(Cache.Instance.ScheduleCharacterName))
+            {
+                characterNameForLogs = Cache.Instance.FilterPath(Cache.Instance.ScheduleCharacterName);
+            }
+            else
+            {
+                characterNameForLogs = Cache.Instance.FilterPath(CharacterName);
+            }
+
             Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
             Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
 
@@ -2027,7 +2046,6 @@ namespace Questor.Modules.Lookup
             }
 
             //"-RandomName-" + Cache.Instance.RandomNumber(1,500) + "-of-500"
-            string characterNameForLogs = Cache.Instance.FilterPath(Settings.Instance.CharacterName);
             if (characterNameForLogs == "AtLoginScreenNoCharactersLoggedInYet")
             {
                 characterNameForLogs = characterNameForLogs + "-randomName-" + Cache.Instance.RandomNumber(1, 500) + "-of-500";

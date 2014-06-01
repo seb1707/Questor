@@ -59,11 +59,6 @@ namespace Questor.Behaviors
 
         public void ProcessState()
         {
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
-                return;
-
-            _lastPulse = DateTime.UtcNow;
-
             if (Cache.Instance.SessionState == "Quitting")
             {
                 BeginClosingQuestor();
@@ -270,11 +265,7 @@ namespace Questor.Behaviors
                     break;
 
                 case MiningState.GotoBelt:
-                    if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds * 2)
-                    {
-                        return;
-                    }
-
+                    
                     if (Cache.Instance.InWarp || (!Cache.Instance.InSpace && !Cache.Instance.InStation))
                     {
                         return;

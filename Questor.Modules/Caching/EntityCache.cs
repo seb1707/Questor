@@ -4519,6 +4519,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow < Time.Instance.NextTargetAction)
                 {
                     return false;
@@ -4650,6 +4655,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextJumpAction)
                 {
                     if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
@@ -4699,6 +4709,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextActivateAction)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
@@ -4741,6 +4756,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                 {
                     if (_directEntity != null && _directEntity.IsValid && DateTime.UtcNow > Time.Instance.NextApproachAction)
@@ -4824,6 +4844,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextOrbit)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
@@ -4866,6 +4891,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextWarpAction)
                 {
                     if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace)
@@ -4930,6 +4960,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextAlign)
                 {
                     if (_directEntity != null && _directEntity.IsValid)
@@ -4961,6 +4996,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextDockAction && DateTime.UtcNow > Time.Instance.NextWarpAction)
                 {
                     if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(20))
@@ -4991,6 +5031,11 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                if (DateTime.UtcNow < Time.Instance.LastInWarp.AddSeconds(5))
+                {
+                    return false;
+                }
+
                 if (DateTime.UtcNow > Time.Instance.NextDockAction)
                 {
                     if (Time.Instance.LastInSpace.AddSeconds(2) > DateTime.UtcNow && Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(20))
@@ -5016,7 +5061,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log("Panic", "Docking will be attempted in [" + Math.Round(Time.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
+                //Logging.Log("Dock", "Dock command will not be allowed again until after another [" + Math.Round(Time.Instance.NextDockAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.Red);
                 return false;
             }
             catch (Exception exception)

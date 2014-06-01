@@ -314,13 +314,13 @@ namespace Questor.Behaviors
                         if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
 
                         // Questor does not handle in space starts very well, head back to base to try again
-                        Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
+                        Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in [" + _randomDelay + "] seconds", Logging.White);
                         LastAction = DateTime.UtcNow;
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
                         break;
                     }
                     
-                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
                     {
                         if (Settings.Instance.DebugAutoStart || Settings.Instance.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
                         return;
@@ -421,6 +421,12 @@ namespace Questor.Behaviors
                         LastAction = DateTime.UtcNow;
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
                         break;
+                    }
+
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
+                    {
+                        //if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
                     }
 
                     if (_firstStart && Settings.Instance.MultiAgentSupport)
@@ -527,6 +533,13 @@ namespace Questor.Behaviors
                     {
                         Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        return;
+                    }
+
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
+                    {
+                        //if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
                     }
 
                     if (_States.CurrentArmState == ArmState.Idle)
@@ -540,7 +553,10 @@ namespace Questor.Behaviors
 
                             // Load right ammo based on mission
                             Arm.AmmoToLoad.Clear();
-                            Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);
+                            if (Settings.Instance.WeaponGroupId != 53) //civilian guns of all types
+                            {
+                                Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);    
+                            }
                         }
                     }
 
@@ -586,7 +602,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.LocalWatch:
                     if (DateTime.UtcNow < Time.Instance.NextArmAction)
                     {
-                        Logging.Log("Cleanup", "Closing Inventory Windows: waiting [" + Math.Round(Time.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "]sec", Logging.White);
+                        //Logging.Log("Cleanup", "Closing Inventory Windows: waiting [" + Math.Round(Time.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "]sec", Logging.White);
                         break;
                     }
                     if (Settings.Instance.UseLocalWatch)
@@ -710,6 +726,12 @@ namespace Questor.Behaviors
 
                 case CombatMissionsBehaviorState.ExecuteMission:
 
+                    if (DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(16))
+                    {
+                        //if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
+                    }
+
                     DebugPerformanceClearandStartTimer();
                     _combatMissionCtrl.ProcessState();
                     DebugPerformanceStopandDisplayTimer("MissionController.ProcessState");
@@ -776,6 +798,7 @@ namespace Questor.Behaviors
                     break;
 
                 case CombatMissionsBehaviorState.GotoBase:
+
                     Cache.Instance.IsMissionPocketDone = true; //pulls drones if we are not scrambled
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
                     Cache.Instance.CurrentlyShouldBeSalvaging = false;
@@ -838,6 +861,12 @@ namespace Questor.Behaviors
                     {
                         Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    }
+
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
+                    {
+                        //if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
                     }
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Idle)
@@ -933,6 +962,12 @@ namespace Questor.Behaviors
                     {
                         Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    }
+
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
+                    {
+                        //if (Settings.Instance.DebugAutoStart) Logging.Log("CombatMissionsBehavior", "DebugIdle: Time.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
+                        return;
                     }
 
                     if (_States.CurrentUnloadLootState == UnloadLootState.Idle)

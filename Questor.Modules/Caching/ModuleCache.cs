@@ -311,6 +311,30 @@ namespace Questor.Modules.Caching
         {
             get { return _module.OptimalRange ?? 0; }
         }
+
+        public bool AutoReload
+        {
+            get { return _module.AutoReload; }
+        }
+
+        public bool DisableAutoReload
+        {
+            get
+            {
+                if (IsActivatable && !InLimboState)
+                {
+                    if (_module.AutoReload)
+                    {
+                        _module.SetAutoReload(false);
+                        return false;
+                    }
+
+                    return true;
+                }
+                
+                return true;
+            }
+        }
         
         public bool DoesNotRequireAmmo
         {
@@ -461,11 +485,15 @@ namespace Questor.Modules.Caching
 
         private int ActivateCountThisFrame = 0;
 
+        public EachWeaponsVolleyCache SnapshotOfVolleyData;
         public bool Activate(EntityCache target)
         {
             try
             {
                 if (InLimboState || IsActive || ActivateCountThisFrame > 0)
+                    return false;
+
+                if (!DisableAutoReload)
                     return false;
 
                 ActivateCountThisFrame++;
@@ -495,6 +523,12 @@ namespace Questor.Modules.Caching
                 }
 
                 _module.Activate(target.Id);
+                SnapshotOfVolleyData = new EachWeaponsVolleyCache(_module, target);
+                if (IsMissileLauncher || IsTurret)
+                {
+                    Cache.Instance.ListofEachWeaponsVolleyData.Add(SnapshotOfVolleyData);
+                }
+                
                 Time.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
                 Cache.Instance.LastModuleTargetIDs[ItemId] = target.Id;
                 return true;

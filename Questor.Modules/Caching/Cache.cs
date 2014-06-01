@@ -311,7 +311,9 @@ namespace Questor.Modules.Caching
         public HashSet<long> ListofWebbingEntities = new HashSet<long>();
         public HashSet<long> ListofContainersToLoot = new HashSet<long>();
         public HashSet<string> ListofMissionCompletionItemsToLoot = new HashSet<string>();
-
+        public List<EachWeaponsVolleyCache> ListofEachWeaponsVolleyData = new List<EachWeaponsVolleyCache>();
+        public long VolleyCount = 0;
+        
         public void DirecteveDispose()
         {
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
@@ -1350,11 +1352,6 @@ namespace Questor.Modules.Caching
             {
                 if (_weapons == null)
                 {
-                    if (Cache.Instance.MissionWeaponGroupId != 0)
-                    {
-                        _weapons = Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
-                    }
-
                     _weapons = Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId); // ||
                     //m.GroupId == (int)Group.ProjectileWeapon ||
                     //m.GroupId == (int)Group.EnergyWeapon ||
@@ -1365,7 +1362,43 @@ namespace Questor.Modules.Caching
                     //m.GroupId == (int)Group.TorpedoLaunchers ||
                     //m.GroupId == (int)Group.AssaultMissilelaunchers ||
                     //m.GroupId == (int)Group.HeavyMissilelaunchers ||
-                    //m.GroupId == (int)Group.DefenderMissilelaunchers);    
+                    //m.GroupId == (int)Group.DefenderMissilelaunchers);
+                    if (Cache.Instance.MissionWeaponGroupId != 0)
+                    {
+                        _weapons = Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
+                    }
+
+                    if (Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10))
+                    {
+                        if (!_weapons.Any())
+                        {
+                            int moduleNumber = 0;
+                            Logging.Log("Cache.Weapons", "WeaponGroupID is defined as [" + Settings.Instance.WeaponGroupId + "] in your characters settings XML", Logging.Debug);
+                            foreach (ModuleCache _module in Cache.Instance.Modules)
+                            {
+                                moduleNumber++;
+                                Logging.Log("Cache.Weapons", "[" + moduleNumber + "][" + _module.TypeName + "] typeID [" + _module.TypeId + "] groupID [" + _module.GroupId + "]", Logging.White);
+                            }
+                        }
+                        else
+                        {
+                            if (DateTime.UtcNow > Time.Instance.NextModuleDisableAutoReload)
+                            {
+                                int weaponNumber = 0;
+                                foreach (ModuleCache _weapon in Cache.Instance.Weapons)
+                                {
+                                    weaponNumber++;
+                                    if (_weapon.AutoReload)
+                                    {
+                                        bool returnValueHereNotUsed = _weapon.DisableAutoReload;
+                                        Time.Instance.NextModuleDisableAutoReload = DateTime.UtcNow.AddSeconds(2);
+                                    }
+                                    //Logging.Log("Cache.Weapons", "[" + weaponNumber + "][" + _module.TypeName + "] typeID [" + _module.TypeId + "] groupID [" + _module.GroupId + "]", Logging.White);
+                                }    
+                            }
+                        }
+                    }
+                    
                 }
 
                 return _weapons;
@@ -1915,7 +1948,8 @@ namespace Questor.Modules.Caching
                             {
                                 if (Cache.Instance.ActiveShip.Entity.Mode == 3)
                                 {
-                                    return Cache.Instance.ActiveShip != null && (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 3);
+                                    Time.Instance.LastInWarp = DateTime.UtcNow;
+                                    return true;
                                 }
                                 else
                                 {
@@ -4026,6 +4060,8 @@ namespace Questor.Modules.Caching
                 ListofWebbingEntities.Clear();
                 ListofContainersToLoot.Clear();
                 ListofMissionCompletionItemsToLoot.Clear();
+                Statistics.IndividualVolleyDataStatistics(Cache.Instance.ListofEachWeaponsVolleyData);
+                ListofEachWeaponsVolleyData.Clear();
                 ListOfUndockBookmarks = null;
                 
                 EntityNames.Clear();

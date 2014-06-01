@@ -373,6 +373,7 @@ namespace Questor.Modules.Combat
 
         private static bool ReloadEnergyWeaponAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
         {
+            if (Settings.Instance.WeaponGroupId == 53) return true;
             // Get ammo based on damage type
             IEnumerable<Ammo> correctAmmo = Settings.Instance.Ammo.Where(a => a.DamageType == Cache.Instance.MissionDamageType).ToList();
 

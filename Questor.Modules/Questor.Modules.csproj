@@ -70,6 +70,7 @@
     <Compile Include="Alerts\Email.cs" />
     <Compile Include="BackgroundTasks\NavigateOnGrid.cs" />
     <Compile Include="Caching\ItemCacheMarket.cs" />
+    <Compile Include="Caching\EachWeaponsVolleyCache.cs" />
     <Compile Include="Lookup\InvTypeMarket.cs" />
     <Compile Include="Lookup\MiningCrystals.cs" />
     <Compile Include="Lookup\OreType.cs" />

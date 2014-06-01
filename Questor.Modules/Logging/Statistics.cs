@@ -1,5 +1,6 @@
 ﻿
 using System.Reflection;
+using LavishSettingsAPI;
 
 namespace Questor.Modules.Logging
 {
@@ -352,6 +353,71 @@ namespace Questor.Modules.Logging
 
                 Logging.Log("Statistics", ";EntityStatistics;" + objectline, Logging.White);
             }
+            return true;
+        }
+
+        public static bool IndividualVolleyDataStatistics(List<EachWeaponsVolleyCache> ListOfVolleyDataToCrunch )
+        {
+            try
+            {
+                if (Settings.Instance.VolleyStatsLog)
+                {
+                    if (!Directory.Exists(Settings.Instance.VolleyStatsLogPath))
+                    {
+                        Directory.CreateDirectory(Settings.Instance.VolleyStatsLogPath);
+                    }
+
+                    Settings.Instance.VolleyStatslogFile = System.IO.Path.Combine(Settings.Instance.VolleyStatsLogPath, Settings.Instance.characterNameForLogs + ".VolleyStats[" + DateTime.UtcNow.DayOfYear + "].log");
+
+                    if (!File.Exists(Settings.Instance.VolleyStatslogFile))
+                    {
+                        File.AppendAllText(Settings.Instance.VolleyStatslogFile, "VolleyNumber;TimeOfTheVolley;targetName;targetDistance;moduleName;moduleAmmoTypeName;myShipName;pocketNumber;missionName;systemName;moduleCurrentCharges;moduleFalloff;moduleItemID;moduleOptimal;moduleTargetID;moduleTypeID;myShipShieldPercentage;myShipArmorPercentage;myShipHullPercentage;myShipCapacitorPercentage;myShipVelocity;myShipXCoordinate;myShipYCoordinate;myShipZCoordinate;targetTransversalVelocity;targetAngularVelocity;targetXCoordinate;targetYCoordinate;targetZCoordinate\r\n");
+                    }
+
+                    foreach (EachWeaponsVolleyCache individualVolleyDataEntry in ListOfVolleyDataToCrunch)
+                    {
+                        string objectline = individualVolleyDataEntry.thisWasVolleyNumber + ";";
+                        objectline += individualVolleyDataEntry.ThisVolleyCacheCreated.ToShortTimeString() + ";";
+                        objectline += individualVolleyDataEntry.targetName + ";";
+                        objectline += Math.Round(individualVolleyDataEntry.targetDistance / 1000, 2) + ";";
+                        objectline += individualVolleyDataEntry.targetVelocity + ";";
+                        objectline += individualVolleyDataEntry.moduleName + ";";
+                        objectline += individualVolleyDataEntry.moduleAmmoTypeName + ";";
+                        objectline += individualVolleyDataEntry.myShipName + ";";
+                        objectline += individualVolleyDataEntry.pocketNumber + ";";
+                        objectline += individualVolleyDataEntry.missionName + ";";
+                        objectline += individualVolleyDataEntry.systemName + ";";
+                        objectline += individualVolleyDataEntry.moduleCurrentCharges + ";";
+                        objectline += individualVolleyDataEntry.moduleFalloff + ";";
+                        objectline += individualVolleyDataEntry.moduleItemID + ";";
+                        objectline += individualVolleyDataEntry.moduleOptimal + ";";
+                        objectline += individualVolleyDataEntry.moduleTargetID + ";";
+                        objectline += individualVolleyDataEntry.moduleTypeID + ";";
+                        objectline += individualVolleyDataEntry.myShipShieldPercentage + ";";
+                        objectline += individualVolleyDataEntry.myShipArmorPercentage + ";";
+                        objectline += individualVolleyDataEntry.myShipHullPercentage + ";";
+                        objectline += individualVolleyDataEntry.myShipCapacitorPercentage + ";";
+                        objectline += individualVolleyDataEntry.myShipVelocity + ";";
+                        objectline += individualVolleyDataEntry.myShipXCoordinate + ";";
+                        objectline += individualVolleyDataEntry.myShipYCoordinate + ";";
+                        objectline += individualVolleyDataEntry.myShipZCoordinate + ";";
+                        objectline += individualVolleyDataEntry.targetTransversalVelocity + ";";
+                        objectline += individualVolleyDataEntry.targetAngularVelocity + ";";
+                        objectline += individualVolleyDataEntry.targetXCoordinate + ";";
+                        objectline += individualVolleyDataEntry.targetYCoordinate + ";";
+                        objectline += individualVolleyDataEntry.targetZCoordinate + ";";
+                        objectline += "\r\n";
+
+                        File.AppendAllText(Settings.Instance.VolleyStatslogFile, objectline);
+                    }    
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Statistics", "IndividualVolleyDataStatistics - Exception: [" + exception + "]", Logging.Red);
+                return false;
+            }
+            
             return true;
         }
 

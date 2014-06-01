@@ -484,6 +484,7 @@ namespace Questor
         {
             if (Cache.Instance.DirectEve.Login.AtLogin)
             {
+                //if we somehow manage to get the questor GUI running on the login screen, do nothing.
                 return false;
             }
 
@@ -498,7 +499,12 @@ namespace Questor
             Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1000ms
+            if (Cache.Instance.InSpace && DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulseInSpace_milliseconds) //default: 1000ms
+            {
+                return false;
+            }
+
+            if (Cache.Instance.InStation && DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulseInStation_milliseconds) //default: 100ms
             {
                 return false;
             }
@@ -584,7 +590,7 @@ namespace Questor
         private void EVEOnFrame(object sender, EventArgs e)
         {
             if (!OnframeProcessEveryPulse()) return;
-            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "OnFrame: this is Questor.cs [" + DateTime.UtcNow + "] by default the next pulse will be in [" + Time.Instance.QuestorPulse_milliseconds + "]milliseconds", Logging.Teal);
+            if (Settings.Instance.DebugOnframe) Logging.Log("Questor", "OnFrame: this is Questor.cs [" + DateTime.UtcNow + "] by default the next InSpace pulse will be in [" + Time.Instance.QuestorPulseInSpace_milliseconds + "]milliseconds", Logging.Teal);
 
             RunOnceAfterStartup();
             RunOnceInStationAfterStartup();

@@ -43,7 +43,7 @@ namespace Questor.Modules.Actions
         //private static bool CheckCargoForOptionalBringItem;
         //private bool CheckCargoForAmmo;
 
-        private static DateTime _lastPulse;
+        //private static DateTime _lastPulse;
         private static DateTime _lastArmAction;
 
         private static int bringItemQuantity;
@@ -142,19 +142,13 @@ namespace Questor.Modules.Actions
 
         public static void ProcessState()
         {
-            // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 1500) //default: 1500ms
-                return;
-
-            _lastPulse = DateTime.UtcNow;
-
             if (!Cache.Instance.InStation)
                 return;
 
             if (Cache.Instance.InSpace)
                 return;
 
-            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10)) // we wait 10 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
             switch (_States.CurrentArmState)
@@ -1055,7 +1049,7 @@ namespace Questor.Modules.Actions
                     //
                     #region load ammo
 
-                    if (Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.DoesNotRequireAmmo)) //civilian guns of all types
+                    if (Settings.Instance.WeaponGroupId == 53) //civilian guns of all types
                     {
                         Logging.Log("Arm.MoveItems","No ammo needed for civilian guns: done",Logging.White);
                         _States.CurrentArmState = ArmState.Cleanup;

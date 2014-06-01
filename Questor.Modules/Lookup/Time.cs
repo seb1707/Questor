@@ -23,7 +23,8 @@ namespace Questor.Modules.Lookup
         public int LootingDelay_milliseconds = 800;                         // Delay between loot attempts
         public int WarpScrambledNoDelay_seconds = 10;                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
         public int RemoveBookmarkDelay_seconds = 5;                         // Delay between each removal of a bookmark
-        public int QuestorPulse_milliseconds = 600;                         // Used to delay the next pulse, units: milliseconds. Default is 1500
+        public int QuestorPulseInSpace_milliseconds = 600;                  // Used to delay the next pulse, units: milliseconds. Default is 600
+        public int QuestorPulseInStation_milliseconds = 400;                // Used to delay the next pulse, units: milliseconds. Default is 600
         public int DefenceDelay_milliseconds = 1500;                        // Delay between defence actions
         public int AfterburnerDelay_milliseconds = 3500;                    //
         public int RepModuleDelay_milliseconds = 2500;                      //
@@ -48,9 +49,9 @@ namespace Questor.Modules.Lookup
         public int WaitforBadGuytoGoAway_minutes = 25;                      // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
         public int CloseQuestorDelayBeforeExit_seconds = 20;                // Delay before closing eve, units: seconds. Default is 20
         public int QuestorBeforeLoginPulseDelay_milliseconds = 5000;        // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule
-        public int SwitchShipsDelay_seconds = 10;                           // Switch Ships Delay before retrying, units: seconds. Default is 10
+        public int SwitchShipsDelay_seconds = 7;                            // Switch Ships Delay before retrying, units: seconds. Default is 10
         public int SwitchShipsCheck_seconds = 5;                            // Switch Ships Check to see if ship is correct, units: seconds. Default is 7
-        public int FittingWindowLoadFittingDelay_seconds = 7;               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
+        public int FittingWindowLoadFittingDelay_seconds = 5;               // We can ask the fitting to be loaded using the fitting window, but we cant know it is done, thus this delay, units: seconds. Default is 10
         public int WaitforItemstoMove_seconds = 1;                          // Arm state: wait for items to move, units: seconds. Default is 5
         public int CheckLocalDelay_seconds = 5;                             // Local Check for bad standings pilots, delay between checks, units: seconds. Default is 5
         public int ReloadWeaponDelayBeforeUsable_seconds = 12;              // Delay after reloading before that module is usable again (non-energy weapons), units: seconds. Default is 12
@@ -97,7 +98,7 @@ namespace Questor.Modules.Lookup
         public DateTime LastFrame = DateTime.UtcNow;
         public DateTime LastInStation = DateTime.MinValue;
         public DateTime LastInSpace = DateTime.MinValue;
-        public DateTime LastInWarp = DateTime.UtcNow.AddMinutes(5);
+        public DateTime LastInWarp = DateTime.UtcNow;
         public DateTime LastJettison { get; set; }
         public DateTime LastKnownGoodConnectedTime { get; set; }
         public DateTime LastLocalWatchAction = DateTime.UtcNow;
@@ -168,7 +169,8 @@ namespace Questor.Modules.Lookup
         public DateTime NextBastionAction { get; set; }
         public DateTime NextBastionModeDeactivate { get; set; }
         public DateTime NextLPStoreAction { get; set; }
-        
+        public DateTime NextModuleDisableAutoReload { get; set; }
+
         public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
         public DateTime StartedBoosting { get; set; }
         public DateTime StartTime { get; set; }

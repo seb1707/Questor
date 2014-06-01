@@ -24,7 +24,7 @@ namespace Questor.Modules.Actions
         private static DateTime _nextUnloadAction = DateTime.UtcNow;
         private static DateTime _lastUnloadAction = DateTime.MinValue;
 
-        private static DateTime _lastPulse;
+        //private static DateTime _lastPulse;
 
         private static bool AmmoIsBeingMoved;
         private static bool LootIsBeingMoved;
@@ -423,11 +423,6 @@ namespace Questor.Modules.Actions
 
         public void ProcessState()
         {
-            // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
-                return;
-            _lastPulse = DateTime.UtcNow;
-
             if (!Cache.Instance.InStation)
                 return;
 

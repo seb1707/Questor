@@ -121,6 +121,7 @@ namespace Questor.Modules.Lookup
         public bool DebugDoneAction { get; set; }
         public bool DebugDrones { get; set; }
         public bool DebugDroneHealth { get; set; }
+        public bool DebugEachWeaponsVolleyCache { get; set; }
         public bool DebugEntityCache { get; set; }
         public bool DebugExceptions { get; set; }
         public bool DebugFittingMgr { get; set; }
@@ -373,6 +374,9 @@ namespace Questor.Modules.Lookup
         public bool DroneStatsLog { get; set; }
         public string DroneStatsLogPath { get; set; }
         public string DroneStatslogFile { get; set; }
+        public bool VolleyStatsLog { get; set; }
+        public string VolleyStatsLogPath { get; set; }
+        public string VolleyStatslogFile { get; set; }
         public bool WreckLootStatistics { get; set; }
         public string WreckLootStatisticsPath { get; set; }
         public string WreckLootStatisticsFile { get; set; }
@@ -774,6 +778,7 @@ namespace Questor.Modules.Lookup
             DebugDoneAction = (bool?)CharacterSettingsXml.Element("debugDoneAction") ?? (bool?)CommonSettingsXml.Element("debugDoneAction") ?? false;
             DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
             DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
+            DebugEachWeaponsVolleyCache = (bool?)CharacterSettingsXml.Element("debugEachWeaponsVolleyCache") ?? (bool?)CommonSettingsXml.Element("debugEachWeaponsVolleyCache") ?? false;
             DebugEntityCache = (bool?)CharacterSettingsXml.Element("debugEntityCache") ?? (bool?)CommonSettingsXml.Element("debugEntityCache") ?? false;
             DebugExceptions = (bool?)CharacterSettingsXml.Element("debugExceptions") ?? (bool?)CommonSettingsXml.Element("debugExceptions") ?? false;
             DebugFittingMgr = (bool?)CharacterSettingsXml.Element("debugFittingMgr") ?? (bool?)CommonSettingsXml.Element("debugFittingMgr") ?? false;
@@ -1138,6 +1143,7 @@ namespace Questor.Modules.Lookup
             PocketStatistics = (bool?)CharacterSettingsXml.Element("PocketStatistics") ?? (bool?)CommonSettingsXml.Element("PocketStatistics") ?? true;
             PocketStatsUseIndividualFilesPerPocket = (bool?)CharacterSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? (bool?)CommonSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
             PocketObjectStatisticsLog = (bool?)CharacterSettingsXml.Element("PocketObjectStatisticsLog") ?? (bool?)CommonSettingsXml.Element("PocketObjectStatisticsLog") ?? true;
+            VolleyStatsLog = (bool?)CharacterSettingsXml.Element("VolleyStatsLog") ?? (bool?)CommonSettingsXml.Element("VolleyStatsLog") ?? true;
 
             //
             // Weapon and targeting Settings
@@ -2065,17 +2071,19 @@ namespace Questor.Modules.Lookup
             SessionsLogFile = System.IO.Path.Combine(SessionsLogPath, characterNameForLogs + ".Sessions.log");
             DroneStatsLogPath = Logpath;
             DroneStatslogFile = System.IO.Path.Combine(DroneStatsLogPath, characterNameForLogs + ".DroneStats.log");
+            VolleyStatsLogPath = System.IO.Path.Combine(Logpath, "VolleyStats\\");
+            VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, characterNameForLogs + ".VolleyStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
             WreckLootStatisticsPath = Logpath;
             WreckLootStatisticsFile = System.IO.Path.Combine(WreckLootStatisticsPath, characterNameForLogs + ".WreckLootStatisticsDump.log");
-            MissionStats1LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
+            MissionStats1LogPath = System.IO.Path.Combine(Logpath, "MissionStats\\");
             MissionStats1LogFile = System.IO.Path.Combine(MissionStats1LogPath, characterNameForLogs + ".Statistics.log");
-            MissionStats2LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
+            MissionStats2LogPath = System.IO.Path.Combine(Logpath, "MissionStats\\");
             MissionStats2LogFile = System.IO.Path.Combine(MissionStats2LogPath, characterNameForLogs + ".DatedStatistics.log");
-            MissionStats3LogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
+            MissionStats3LogPath = System.IO.Path.Combine(Logpath, "MissionStats\\");
             MissionStats3LogFile = System.IO.Path.Combine(MissionStats3LogPath, characterNameForLogs + ".CustomDatedStatistics.csv");
-            MissionDungeonIdLogPath = System.IO.Path.Combine(Logpath, "missionstats\\");
+            MissionDungeonIdLogPath = System.IO.Path.Combine(Logpath, "MissionStats\\");
             MissionDungeonIdLogFile = System.IO.Path.Combine(MissionDungeonIdLogPath, characterNameForLogs + "Mission-DungeonId-list.csv");
-            PocketStatisticsPath = System.IO.Path.Combine(Logpath, "pocketstats\\");
+            PocketStatisticsPath = System.IO.Path.Combine(Logpath, "PocketStats\\");
             PocketStatisticsFile = System.IO.Path.Combine(PocketStatisticsPath, characterNameForLogs + "pocketstats-combined.csv");
             PocketObjectStatisticsPath = System.IO.Path.Combine(Logpath, "PocketObjectStats\\");
             PocketObjectStatisticsFile = System.IO.Path.Combine(PocketObjectStatisticsPath, characterNameForLogs + "PocketObjectStats-combined.csv");

@@ -214,8 +214,8 @@ namespace QuestorManager
             {
                 Time.Instance.LastFrame = DateTime.UtcNow;
 
-                // Only pulse state changes every 1.5s
-                if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulse_milliseconds) //default: 1500ms
+                // Only pulse state changes every 600ms
+                if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < Time.Instance.QuestorPulseInStation_milliseconds)
                 {
                     return;
                 }

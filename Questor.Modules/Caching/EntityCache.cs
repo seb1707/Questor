@@ -918,6 +918,146 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private double? _transversalVelocity;
+        public double TransversalVelocity
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_transversalVelocity == null)
+                        {
+                            _transversalVelocity = _directEntity.TransversalVelocity;
+                            return _transversalVelocity ?? 0;
+                        }
+
+                        return _transversalVelocity ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _angularVelocity;
+        public double AngularVelocity
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_angularVelocity == null)
+                        {
+                            _angularVelocity = _directEntity.AngularVelocity;
+                            return _angularVelocity ?? 0;
+                        }
+
+                        return _angularVelocity ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _xCoordinate;
+        public double XCoordinate
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_xCoordinate == null)
+                        {
+                            _xCoordinate = _directEntity.X;
+                            return _xCoordinate ?? 0;
+                        }
+
+                        return _xCoordinate ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _yCoordinate;
+        public double YCoordinate
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_yCoordinate == null)
+                        {
+                            _yCoordinate = _directEntity.Y;
+                            return _yCoordinate ?? 0;
+                        }
+
+                        return _yCoordinate ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _zCoordinate;
+        public double ZCoordinate
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_zCoordinate == null)
+                        {
+                            _zCoordinate = _directEntity.Z;
+                            return _zCoordinate ?? 0;
+                        }
+
+                        return _zCoordinate ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
         private bool? _isTarget;
 
         public bool IsTarget
@@ -4776,7 +4916,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Logging.Log("EntityCache.WarpTo", "Waiting [" + Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds + "] for next attempted warp.", Logging.Debug);
+                //Logging.Log("EntityCache.WarpTo", "Waiting [" + Math.Round(Time.Instance.NextWarpAction.Subtract(DateTime.UtcNow).TotalSeconds,0) + "sec] before next attempted warp.", Logging.Debug);
                 return false;
             }
             catch (Exception exception)

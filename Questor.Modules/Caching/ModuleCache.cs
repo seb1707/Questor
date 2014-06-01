@@ -311,6 +311,18 @@ namespace Questor.Modules.Caching
         {
             get { return _module.OptimalRange ?? 0; }
         }
+        
+        public bool DoesNotRequireAmmo
+        {
+            get
+            {
+                if (TypeId == (int)TypeID.CivilianGatlingPulseLaser) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingAutocannon) return true;
+                if (TypeId == (int)TypeID.CivilianGatlingRailgun) return true;
+                if (TypeId == (int)TypeID.CivilianLightElectronBlaster) return true;
+                return false;
+            }
+        }
 
         public bool ReloadAmmo(DirectItem charge, int weaponNumber, double Range)
         {

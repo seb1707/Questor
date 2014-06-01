@@ -24,12 +24,7 @@ namespace QuestorTest1
     {
         public static DateTime DateTimeForLogs;
         private const int WaitMillis = 3500;
-        private static long _lastLoyaltyPoints;
         private static DateTime _nextAction;
-        private static DateTime _loyaltyPointTimeout;
-        private static string _type;
-        private static int? _quantity;
-        private static int? _totalQuantityOfOrders;
         private static DateTime _done = DateTime.UtcNow.AddDays(10);
         private static DateTime _lastPulse;
         private static Cleanup _cleanup;
@@ -126,7 +121,8 @@ namespace QuestorTest1
             {
                 return;
             }
-            
+            _nextAction = DateTime.UtcNow.AddMilliseconds(500);
+
 
             //
             // ......

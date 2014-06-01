@@ -2232,7 +2232,9 @@ namespace Questor.Modules.Combat
                         !Cache.Instance.MyShipEntity.IsFrigate && 
                         !Cache.Instance.MyShipEntity.IsCruiser && 
                         Cache.Instance.ActiveShip.GivenName != Settings.Instance.SalvageShipName &&
-                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TransportShipName)
+                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TransportShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TravelShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.MiningShipName)
                     {
                         //
                         // we are not in something light and fast so assume we need weapons and assume we should be in the defined combatship

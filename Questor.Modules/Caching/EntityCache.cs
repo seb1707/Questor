@@ -332,6 +332,70 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private string _typeName;
+
+        public string TypeName
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        if (String.IsNullOrEmpty(_givenName))
+                        {
+                            _typeName = _directEntity.TypeName;
+                        }
+
+                        return _typeName ?? "";
+                    }
+
+                    return "";
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return "";
+                }
+            }
+        }
+
+        private string _givenName;
+
+        public string GivenName
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
+                        {
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(Id) + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                        }
+                        if (String.IsNullOrEmpty(_givenName))
+                        {
+                            _givenName = _directEntity.GivenName;
+                        }
+
+                        return _givenName ?? "";
+                    }
+
+                    return "";
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return "";
+                }
+            }
+        }
+
         private double? _distance;
 
         public double Distance
@@ -409,9 +473,151 @@ namespace Questor.Modules.Caching
                         if (_shieldPct == null)
                         {
                             _shieldPct = _directEntity.ShieldPct;
+                            return _shieldPct ?? 0;
                         }
 
-                        return _shieldPct ?? _directEntity.ShieldPct;
+                        return _shieldPct ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldHitPoints;
+
+        public double ShieldHitPoints
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldHitPoints == null)
+                        {
+                            _shieldHitPoints = _directEntity.Shield;
+                            return _shieldHitPoints ?? 0;
+                        }
+
+                        return _shieldHitPoints ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldResistanceEM;
+        public double ShieldResistanceEM
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldResistanceEM == null)
+                        {
+                            _shieldResistanceEM = _directEntity.ShieldResistanceEM;
+                            return _shieldResistanceEM ?? 0;
+                        }
+
+                        return _shieldResistanceEM ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldResistanceExplosive;
+        public double ShieldResistanceExplosive
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldResistanceExplosive == null)
+                        {
+                            _shieldResistanceExplosive = _directEntity.ShieldResistanceExplosion;
+                            return _shieldResistanceExplosive ?? 0;
+                        }
+
+                        return _shieldResistanceExplosive ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldResistanceKinetic;
+        public double ShieldResistanceKinetic
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldResistanceKinetic == null)
+                        {
+                            _shieldResistanceKinetic = _directEntity.ShieldResistanceKinetic;
+                            return _shieldResistanceKinetic ?? 0;
+                        }
+
+                        return _shieldResistanceKinetic ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _shieldResistanceThermal;
+        public double ShieldResistanceThermal
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_shieldResistanceThermal == null)
+                        {
+                            _shieldResistanceThermal = _directEntity.ShieldResistanceThermal;
+                            return _shieldResistanceThermal ?? 0;
+                        }
+
+                        return _shieldResistanceThermal ?? 0;
                     }
 
                     return 0;
@@ -437,9 +643,152 @@ namespace Questor.Modules.Caching
                         if (_armorPct == null)
                         {
                             _armorPct = _directEntity.ArmorPct;
+                            return _armorPct ?? 0;
                         }
 
-                        return _armorPct ?? _directEntity.ArmorPct;
+                        return _armorPct ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _armorHitPoints;
+
+        public double ArmorHitPoints
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorHitPoints == null)
+                        {
+                            _armorHitPoints = _directEntity.Armor;
+                            return _armorHitPoints ?? 0;
+                        }
+
+                        return _armorHitPoints ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+
+        private double? _armorResistanceEM;
+        public double ArmorResistanceEM
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorResistanceEM == null)
+                        {
+                            _armorResistanceEM = _directEntity.ArmorResistanceEM;
+                            return _armorResistanceEM ?? 0;
+                        }
+
+                        return _armorResistanceEM ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _armorResistanceExplosive;
+        public double ArmorResistanceExplosive
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorResistanceExplosive == null)
+                        {
+                            _armorResistanceExplosive = _directEntity.ArmorResistanceExplosion;
+                            return _armorResistanceExplosive ?? 0;
+                        }
+
+                        return _armorResistanceExplosive ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _armorResistanceKinetic;
+        public double ArmorResistanceKinetic
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorResistanceKinetic == null)
+                        {
+                            _armorResistanceKinetic = _directEntity.ArmorResistanceKinetic;
+                            return _armorResistanceKinetic ?? 0;
+                        }
+
+                        return _armorResistanceKinetic ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _armorResistanceThermal;
+        public double ArmorResistanceThermal
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_armorResistanceThermal == null)
+                        {
+                            _armorResistanceThermal = _directEntity.ArmorResistanceThermal;
+                            return _armorResistanceThermal ?? 0;
+                        }
+
+                        return _armorResistanceThermal ?? 0;
                     }
 
                     return 0;
@@ -465,10 +814,39 @@ namespace Questor.Modules.Caching
                         if (_structurePct == null)
                         {
                             _structurePct = _directEntity.StructurePct;
-                            return _structurePct ?? _directEntity.StructurePct;
+                            return _structurePct ?? 0;
                         }
 
-                        return _structurePct ?? _directEntity.StructurePct;
+                        return _structurePct ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        private double? _structureHitPoints;
+
+        public double StructureHitPoints
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_structureHitPoints == null)
+                        {
+                            _structureHitPoints = _directEntity.Structure;
+                            return _structureHitPoints ?? 0;
+                        }
+
+                        return _structureHitPoints ?? 0;
                     }
 
                     return 0;

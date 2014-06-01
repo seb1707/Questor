@@ -488,7 +488,7 @@ namespace Questor
 
             if (DateTime.UtcNow < _lastServerStatusCheckWasNotOK.AddSeconds(RandomNumber(10, 20)))
             {
-                //If the server was not ready, wait 10-20 seconds before trying try again.
+                Logging.Log("Startup", "lastServerStatusCheckWasNotOK = [" + _lastServerStatusCheckWasNotOK.ToShortTimeString() + "] waiting 10 to 20 seconds.", Logging.White);
                 return;
             }
 
@@ -501,7 +501,7 @@ namespace Questor
             }
             _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
-            if (DateTime.UtcNow > QuestorProgramLaunched.AddSeconds(5) )
+            if (DateTime.UtcNow < QuestorProgramLaunched.AddSeconds(5))
             {
                 //
                 // do not login for the first 5 seconds, wait...

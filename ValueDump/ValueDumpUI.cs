@@ -30,7 +30,7 @@ namespace ValueDump
         public string CharacterName { get; set; }
         private readonly Market _market;
 
-        public ValueDumpUI()
+        public ValueDumpUI(bool standaloneInstance)
         {
             Logging.Log("ValueDump","Starting ValueDump",Logging.Orange);
             InitializeComponent();
@@ -54,7 +54,10 @@ namespace ValueDump
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
                     //}   
-                    Cache.Instance.DirectEve = new DirectEve();
+                    if(standaloneInstance)
+                    	Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    else
+                    	Cache.Instance.DirectEve = new DirectEve();
                 }
             }
             catch (Exception ex)

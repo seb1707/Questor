@@ -81,7 +81,53 @@ namespace BuyLPI
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Starting BuyLPI... - innerspace Echo"));
             Logging.Log("BuyLPI", "Starting BuyLPI...", Logging.White);
             _cleanup = new Cleanup();
-            Cache.Instance.DirectEve = new DirectEve();
+
+
+            #region Load DirectEVE
+            //
+            // Load DirectEVE
+            //
+
+            try
+            {
+                if (Cache.Instance.DirectEve == null)
+                {
+                    //
+                    // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
+                    // 
+                    //
+                    //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
+                    //while (Cache.Instance.DirectEve == null)
+                    //{
+                    //    System.Threading.Thread.Sleep(50); //this pauses forever...
+                    //}
+                    //if (_standaloneInstance)
+                    //{
+                    //    Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
+                    //    Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    //}
+                    //else
+                    //{
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve();
+                    //}
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                Cache.Instance.CloseQuestorCMDLogoff = false;
+                Cache.Instance.CloseQuestorCMDExitGame = true;
+                Cache.Instance.CloseQuestorEndProcess = true;
+                Settings.Instance.AutoStart = true;
+                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cache.Instance.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                return;
+            }
+            #endregion Load DirectEVE
+            
             Cache.Instance.DirectEve.OnFrame += OnFrame;
 
             // Sleep until we're done

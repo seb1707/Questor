@@ -26,11 +26,11 @@ namespace ValueDump
     public partial class ValueDumpUI : Form
     {
         private DateTime _lastPulse;
-        private DirectEve _directEve { get; set; }
+        //private DirectEve _directEve { get; set; }
         public string CharacterName { get; set; }
         private readonly Market _market;
 
-        public ValueDumpUI(bool standaloneInstance)
+        public ValueDumpUI(bool _standaloneInstance)
         {
             Logging.Log("ValueDump","Starting ValueDump",Logging.Orange);
             InitializeComponent();
@@ -53,17 +53,23 @@ namespace ValueDump
                     //while (Cache.Instance.DirectEve == null)
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
-                    //}   
-                    if(standaloneInstance)
-                    	Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    //}
+                    if (_standaloneInstance)
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    }
                     else
-                    	Cache.Instance.DirectEve = new DirectEve();
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve();
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Logging.Log("ValueDump", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("ValueDump", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
+                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;

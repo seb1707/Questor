@@ -77,7 +77,7 @@ namespace QuestorManager
 
         private string _selectHangar = "Local Hangar";
 
-        public QuestorManagerUI(bool standaloneInstance)
+        public QuestorManagerUI(bool _standaloneInstance)
         {
             InitializeComponent();
 
@@ -114,10 +114,16 @@ namespace QuestorManager
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
                     //}
-                    if(standaloneInstance)
-                    	Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    if (_standaloneInstance)
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    }
                     else
-                    	Cache.Instance.DirectEve = new DirectEve();
+                    {
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve();
+                    }
                 }
             }
             catch (Exception ex)

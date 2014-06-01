@@ -198,17 +198,17 @@ namespace Questor
                     //while (Cache.Instance.DirectEve == null)
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
-                    //}   
-                    if(_standaloneInstance) 
+                    //}
+                    if (_standaloneInstance)
                     {
-                        Logging.Log("Startup", "Starting Instance of DirectEVE, using StandaloneFramework", Logging.Debug);
-						Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
-                    } 
-                    else 
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    }
+                    else
                     {
-                        Logging.Log("Startup", "Starting Instance of DirectEVE", Logging.Debug);
-						Cache.Instance.DirectEve = new DirectEve();
-					}
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve();
+                    }
                 }
             }
             catch (Exception ex)

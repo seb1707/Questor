@@ -203,7 +203,6 @@ namespace Questor
                     {
                         Logging.Log("Startup", "Starting Instance of DirectEVE, using StandaloneFramework", Logging.Debug);
 						Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
-                        return;
                     } 
                     else 
                     {

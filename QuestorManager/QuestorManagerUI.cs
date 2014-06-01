@@ -71,14 +71,13 @@ namespace QuestorManager
         private readonly Defense _defense;
         private readonly Cleanup _cleanup;
         private readonly ListItems _item;
-
         private DateTime _lastAction;
 
         public string CharacterName { get; set; }
 
         private string _selectHangar = "Local Hangar";
 
-        public QuestorManagerUI()
+        public QuestorManagerUI(bool standaloneInstance)
         {
             InitializeComponent();
 
@@ -97,7 +96,6 @@ namespace QuestorManager
             //ItemsToSell = new List<ItemCache>();
             //ItemsToSellUnsorted = new List<ItemCache>();
             //ItemsToRefine = new List<ItemCache>();
-            
             #region Load DirectEVE
             //
             // Load DirectEVE
@@ -115,8 +113,11 @@ namespace QuestorManager
                     //while (Cache.Instance.DirectEve == null)
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
-                    //}   
-                    Cache.Instance.DirectEve = new DirectEve();
+                    //}
+                    if(standaloneInstance)
+                    	Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                    else
+                    	Cache.Instance.DirectEve = new DirectEve();
                 }
             }
             catch (Exception ex)

@@ -199,6 +199,7 @@ namespace Questor.Modules.Lookup
 						Logging.Log("buySkill", "Opening market window", Logging.White);
 
 						Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                        Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
 						return false;
 						
 					}

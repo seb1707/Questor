@@ -102,6 +102,37 @@ namespace Questor.Modules.Logging
             return true;
         }
 
+        public static bool LogWindowActionToWindowLog(string Windowname, string Description)
+        {
+            try
+            {
+                string textToLogToFile;
+                if (!File.Exists(Settings.Instance.WindowStatslogFile))
+                {
+                    //
+                    // build header
+                    //
+                    textToLogToFile = "WindowName;Description;Time;Seconds Since LastInSpace;Seconds Since LastInStation;Seconds Since We Started;\r\n";
+                    File.AppendAllText(Settings.Instance.WindowStatslogFile, textToLogToFile);
+                }
+
+                //
+                // header should already be built.
+                //
+                textToLogToFile = Windowname + ";" + Description +  ";" + DateTime.UtcNow.ToShortTimeString() + ";" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + ";" + Time.Instance.LastInStation.Subtract(DateTime.UtcNow).TotalSeconds + ";" + Time.Instance.QuestorStarted_DateTime.Subtract(DateTime.UtcNow).TotalSeconds + ";";
+                textToLogToFile += "\r\n";
+
+                //Logging.Log("Statistics", ";PocketObjectStatistics;" + objectline, Logging.White);
+                File.AppendAllText(Settings.Instance.WindowStatslogFile, textToLogToFile);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Statistics", "Exception while logging to file [" + ex.Message + "]", Logging.White);
+            }
+            
+        }
+
         public static bool PocketObjectStatistics(List<EntityCache> things, bool force = false)
         {
             if (Settings.Instance.PocketObjectStatisticsLog || force)

@@ -377,6 +377,9 @@ namespace Questor.Modules.Lookup
         public bool VolleyStatsLog { get; set; }
         public string VolleyStatsLogPath { get; set; }
         public string VolleyStatslogFile { get; set; }
+        public bool WindowStatsLog { get; set; }
+        public string WindowStatsLogPath { get; set; }
+        public string WindowStatslogFile { get; set; }
         public bool WreckLootStatistics { get; set; }
         public string WreckLootStatisticsPath { get; set; }
         public string WreckLootStatisticsFile { get; set; }
@@ -1144,6 +1147,7 @@ namespace Questor.Modules.Lookup
             PocketStatsUseIndividualFilesPerPocket = (bool?)CharacterSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? (bool?)CommonSettingsXml.Element("PocketStatsUseIndividualFilesPerPocket") ?? true;
             PocketObjectStatisticsLog = (bool?)CharacterSettingsXml.Element("PocketObjectStatisticsLog") ?? (bool?)CommonSettingsXml.Element("PocketObjectStatisticsLog") ?? true;
             VolleyStatsLog = (bool?)CharacterSettingsXml.Element("VolleyStatsLog") ?? (bool?)CommonSettingsXml.Element("VolleyStatsLog") ?? true;
+            WindowStatsLog = (bool?)CharacterSettingsXml.Element("WindowStatsLog") ?? (bool?)CommonSettingsXml.Element("WindowStatsLog") ?? true;
 
             //
             // Weapon and targeting Settings
@@ -2073,6 +2077,8 @@ namespace Questor.Modules.Lookup
             DroneStatslogFile = System.IO.Path.Combine(DroneStatsLogPath, characterNameForLogs + ".DroneStats.log");
             VolleyStatsLogPath = System.IO.Path.Combine(Logpath, "VolleyStats\\");
             VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, characterNameForLogs + ".VolleyStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
+            WindowStatsLogPath = System.IO.Path.Combine(Logpath, "WindowStats\\");
+            WindowStatslogFile = System.IO.Path.Combine(WindowStatsLogPath, characterNameForLogs + ".WindowStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
             WreckLootStatisticsPath = Logpath;
             WreckLootStatisticsFile = System.IO.Path.Combine(WreckLootStatisticsPath, characterNameForLogs + ".WreckLootStatisticsDump.log");
             MissionStats1LogPath = System.IO.Path.Combine(Logpath, "MissionStats\\");
@@ -2089,19 +2095,28 @@ namespace Questor.Modules.Lookup
             PocketObjectStatisticsFile = System.IO.Path.Combine(PocketObjectStatisticsPath, characterNameForLogs + "PocketObjectStats-combined.csv");
             MissionDetailsHtmlPath = System.IO.Path.Combine(Logpath, "MissionDetailsHTML\\");
 
+            try
+            {
+                Directory.CreateDirectory(Logpath);
+                Directory.CreateDirectory(ConsoleLogPath);
+                Directory.CreateDirectory(SessionsLogPath);
+                Directory.CreateDirectory(DroneStatsLogPath);
+                Directory.CreateDirectory(WreckLootStatisticsPath);
+                Directory.CreateDirectory(MissionStats1LogPath);
+                Directory.CreateDirectory(MissionStats2LogPath);
+                Directory.CreateDirectory(MissionStats3LogPath);
+                Directory.CreateDirectory(MissionDungeonIdLogPath);
+                Directory.CreateDirectory(PocketStatisticsPath);
+                Directory.CreateDirectory(PocketObjectStatisticsPath);
+                Directory.CreateDirectory(VolleyStatsLogPath);
+                Directory.CreateDirectory(WindowStatsLogPath);
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Settings", "Problem creating directories for logs [" + exception + "]", Logging.Debug);
+            }
             //create all the logging directories even if they are not configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories.
-            Directory.CreateDirectory(Logpath);
-
-            Directory.CreateDirectory(ConsoleLogPath);
-            Directory.CreateDirectory(SessionsLogPath);
-            Directory.CreateDirectory(DroneStatsLogPath);
-            Directory.CreateDirectory(WreckLootStatisticsPath);
-            Directory.CreateDirectory(MissionStats1LogPath);
-            Directory.CreateDirectory(MissionStats2LogPath);
-            Directory.CreateDirectory(MissionStats3LogPath);
-            Directory.CreateDirectory(MissionDungeonIdLogPath);
-            Directory.CreateDirectory(PocketStatisticsPath);
-            Directory.CreateDirectory(PocketObjectStatisticsPath);
+            
             if (!Settings.Instance.DefaultSettingsLoaded)
             {
                 if (SettingsLoaded != null)

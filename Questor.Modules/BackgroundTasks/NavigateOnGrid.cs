@@ -17,18 +17,18 @@ namespace Questor.Modules.BackgroundTasks
         public static bool AvoidBumpingThingsWarningSent = false;
         public static DateTime NextNavigateIntoRange = DateTime.UtcNow;
 
-        public static void AvoidBumpingThings(EntityCache thisBigObject, string module)
+        public static bool AvoidBumpingThings(EntityCache thisBigObject, string module)
         {
             if (Settings.Instance.AvoidBumpingThings)
             {
                 //if It has not been at least 60 seconds since we last session changed do not do anything
                 if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Time.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
-                    return;
+                    return false;
 
                 //we cant move in bastion mode, do not try
                 List<ModuleCache> bastionModules = null;
                 bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                if (bastionModules.Any(i => i.IsActive)) return;
+                if (bastionModules.Any(i => i.IsActive)) return false;
 
                 
                 if (Cache.Instance.ClosestStargate != null && Cache.Instance.ClosestStargate.Distance < 9000)
@@ -36,7 +36,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // if we are 'close' to a stargate or a station do not attempt to do any collision avoidance, as its unnecessary that close to a station or gate!
                     //
-                    return;
+                    return false;
                 }
                     
                 if (Cache.Instance.ClosestStation != null && Cache.Instance.ClosestStation.Distance < 11000)
@@ -44,7 +44,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // if we are 'close' to a stargate or a station do not attempt to do any collision avoidance, as its unnecessary that close to a station or gate!
                     //
-                    return;
+                    return false;
                 }
                 
                 //EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
@@ -94,18 +94,23 @@ namespace Questor.Modules.BackgroundTasks
                             if (thisBigObject.Orbit((int) Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier))
                             {
                                 Logging.Log(module, ": initiating Orbit of [" + thisBigObject.Name + "] orbiting at [" + ((int)Distances.SafeDistancefromStructure * SafeDistanceFromStructureMultiplier) + "]", Logging.White);
-                                return;
+                                return true;
                             }
 
-                            return;
+                            return false;
                         }
 
-                        return;
+                        return false;
                         //we are still too close, do not continue through the rest until we are not "too close" anymore
                     }
+
+                    return false;
                 }
-                
+
+                return false;
             }
+
+            return false;
         }
 
         public static void OrbitGateorTarget(EntityCache target, string module)

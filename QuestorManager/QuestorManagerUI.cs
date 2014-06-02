@@ -1363,7 +1363,7 @@ namespace QuestorManager
             if (lpstore == null)
             {
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
-
+                Statistics.LogWindowActionToWindowLog("LPStore", "LPStore Opened");
                 return;
             }
 
@@ -1401,7 +1401,7 @@ namespace QuestorManager
                 if (lpstore == null)
                 {
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
-
+                    Statistics.LogWindowActionToWindowLog("LPStore", "LPStore Opened");
                     return;
                 }
 

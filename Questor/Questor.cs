@@ -130,7 +130,7 @@ namespace Questor
             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
             // get the physical mem usage
-            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 + 1 / 1024) / 1024);
             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
             Cache.Instance.SessionIskGenerated = 0;
             Cache.Instance.SessionLootGenerated = 0;
@@ -261,6 +261,7 @@ namespace Questor
                     {
                         Logging.Log("RunOnceAfterStartup", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);", Logging.Debug);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCorpHangar);
+                        Statistics.LogWindowActionToWindowLog("CorpHangar", "CorpHangar Opened");
                     }
 
                     _runOnceInStationAfterStartupalreadyProcessed = true;

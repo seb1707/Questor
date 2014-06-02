@@ -165,6 +165,7 @@ namespace QuestorManager.Actions
                     if (marketWindow == null)
                     {
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                        Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
                         break;
                     }
 

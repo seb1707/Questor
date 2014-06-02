@@ -332,17 +332,22 @@
   <DroneStatsLog>true</DroneStatsLog><!-- default is: true -->
   <!-- Enable or Disable the WreckLootStatistics Log - this log can get quite large -->
   <WreckLootStatistics>false</WreckLootStatistics><!-- default is: false -->
-  <!-- Enable of Disable the MissionStats1Log: original and compatible with QuestorStatistics -->
+  <!-- Enable or Disable the MissionStats1Log: original and compatible with QuestorStatistics -->
   <MissionStats1Log>true</MissionStats1Log><!-- default is: true -->
-  <!-- Enable of Disable the MissionStats2Log: more verbose that MissionStats1Log -->
+  <!-- Enable or Disable the MissionStats2Log: more verbose that MissionStats1Log -->
   <MissionStats2Log>true</MissionStats2Log><!-- default is: true -->
-  <!-- Enable of Disable the MissionStats3Log: most verbose and is in csv format that can be opened in excel for sorting and bean counting -->
+  <!-- Enable or Disable the MissionStats3Log: most verbose and is in csv format that can be opened in excel for sorting and bean counting -->
   <MissionStats3Log>true</MissionStats3Log><!-- default is: true -->
-  <!-- Enable of Disable the PocketStatistics logs: each and every pocket of missions will generate a separate log with completion times and other statistics for your XML tuning pleasure -->
+  <!-- Enable or Disable the PocketStatistics logs: each and every pocket of missions will generate a separate log with completion times and other statistics for your XML tuning pleasure -->
   <PocketStatistics>true</PocketStatistics><!-- default is: true -->
-  <!-- Enable of Disable the PocketObjectsStatistics logs: each and every pocket of missions will generate a separate log with the Entity information for the 1st spawn and other static objects on grid for your XML tuning pleasure -->
+  <!-- Enable or Disable the PocketObjectsStatistics logs: each and every pocket of missions will generate a separate log with the Entity information for the 1st spawn and other static objects on grid for your XML tuning pleasure -->
   <PocketObjectStatisticsLog>true</PocketObjectStatisticsLog>
+  <!-- Enable or Disable the VolleyStats logs: each and every volley of each weapon will be logged along with various details, on by default - this log might get large. It is at least separated into days, each day will be a new log -->
+  <VolleyStatsLog>true</VolleyStatsLog>
+  <!-- Enable or Disable the WindowStats logs each window being opened / closed -->
+  <WindowStatsLog>true</WindowStatsLog>
 
+  
   <!--                                                -->
   <!--       FITTING SETTINGS        -->
   <!--                                                -->

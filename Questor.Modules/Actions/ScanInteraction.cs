@@ -37,6 +37,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("ScanInteraction", "Open Scan Window", Logging.White);
 
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenScanner);
+                        Statistics.LogWindowActionToWindowLog("ScannerWindow", "Opening ScannerWindow");
                         break;
                     }
                     if (!scannerWindow.IsReady)

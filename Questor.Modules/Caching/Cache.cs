@@ -709,6 +709,7 @@ namespace Questor.Modules.Caching
                                 {
                                     Time.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
+                                    Statistics.LogWindowActionToWindowLog("CargoHold", "Opening CargoHold");
                                     if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
@@ -5247,6 +5248,8 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance._itemHangar == null)
                         {
                             Cache.Instance._itemHangar = Cache.Instance.DirectEve.GetItemHangar();
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                            Statistics.LogWindowActionToWindowLog("Itemhangar", "Opening ItemHangar");
                             return Cache.Instance._itemHangar;
                         }
 
@@ -5286,6 +5289,7 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
+                    Statistics.LogWindowActionToWindowLog("Itemhangar", "Opening ItemHangar");
                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                     Logging.Log(module, "Opening Item Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
@@ -5341,6 +5345,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.ItemHangar.Window.IsReady)
                     {
                         Cache.Instance.ItemHangar.Window.Close();
+                        Statistics.LogWindowActionToWindowLog("Itemhangar", "Closing ItemHangar");
                         return false;
                     }
                 }
@@ -5690,6 +5695,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
                     {
                         Cache.Instance.CurrentShipsCargo.Window.Close();
+                        Statistics.LogWindowActionToWindowLog("CargoHold", "Closing CargoHold");
                         Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
                         return true;
                     }
@@ -5738,6 +5744,7 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                    Statistics.LogWindowActionToWindowLog("ShipHangar", "Open ShipHangar");
                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     Logging.Log(module, "Opening Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
@@ -5829,6 +5836,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.ShipHangar.Window.IsReady)
                     {
                         Cache.Instance.ShipHangar.Window.Close();
+                        Statistics.LogWindowActionToWindowLog("ShipHangar", "Close ShipHangar");
                         return false;
                     }
                 }
@@ -6049,6 +6057,7 @@ namespace Questor.Modules.Caching
 
                 // No, command it to open
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenInventory);
+                Statistics.LogWindowActionToWindowLog("Inventory (main)", "Open Inventory");
                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
                 Logging.Log(module, "Opening Inventory Window: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                 return false;
@@ -6270,6 +6279,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Closing Corp Window: " + window, Logging.Teal);
                         corpHangarWindow.Close();
+                        Statistics.LogWindowActionToWindowLog("Corporate Hangar", "Close Corporate Hangar");
                         return false;
                     }
 
@@ -6301,6 +6311,7 @@ namespace Questor.Modules.Caching
                     {
                         if (Settings.Instance.DebugHangars) Logging.Log(module, "ClosePrimaryInventoryWindow: Closing Primary Inventory Window Named [" + window.Name + "]", Logging.White);
                         window.Close();
+                        Statistics.LogWindowActionToWindowLog("Inventory (main)", "Close Inventory");
                         Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                         return false;
                     }
@@ -6534,6 +6545,7 @@ namespace Questor.Modules.Caching
                             {
                                 if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We do not have the right ID selected yet, select it now.", Logging.Teal);
                                 Cache.Instance.PrimaryInventoryWindow.SelectTreeEntryByID(id);
+                                Statistics.LogWindowActionToWindowLog("Select Tree Entry", "Selected Entry on Left of Primary Inventory Window");
                                 Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(Cache.Instance.RandomNumber(2000, 4400));
                                 return false;
                             }
@@ -6606,6 +6618,7 @@ namespace Questor.Modules.Caching
 
                     if (Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
                     {
+                        Statistics.LogWindowActionToWindowLog("Corporate Hangar", "ExpandCorpHangar executed");
                         Logging.Log(module, "ExpandCorpHangar executed", Logging.Teal);
                         Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(4);
                         return false;
@@ -6694,6 +6707,7 @@ namespace Questor.Modules.Caching
                     if (lootHangarWindow != null)
                     {
                         lootHangarWindow.Close();
+                        Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
                         return false;
                     }
 
@@ -6789,7 +6803,6 @@ namespace Questor.Modules.Caching
 
                                 Logging.Log("LootHangar", "Opening Corporate LootHangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
                                 return Cache.Instance.ItemHangar;
-
                             }
 
                             //if (Settings.Instance.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
@@ -6841,6 +6854,7 @@ namespace Questor.Modules.Caching
                             {
                                 // if open command it to close
                                 Cache.Instance.corpLootHangarSecondaryWindow.Close();
+                                Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                                 Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
@@ -6867,6 +6881,7 @@ namespace Questor.Modules.Caching
                         if (lootHangarWindow != null)
                         {
                             lootHangarWindow.Close();
+                            Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
                             return false;
                         }
                         return true;
@@ -7028,6 +7043,7 @@ namespace Questor.Modules.Caching
 
                                 _ammoHangar = null;
                                 _ammoHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.AmmoHangarID);
+                                Statistics.LogWindowActionToWindowLog("AmmoHangar", "AmmoHangar Defined (not opened?)");
 
                                 if (_ammoHangar != null && _ammoHangar.IsValid) //do we have a corp hangar tab setup with that name?
                                 {
@@ -7177,6 +7193,7 @@ namespace Questor.Modules.Caching
 
                                 // if open command it to close
                                 Cache.Instance.corpAmmoHangarSecondaryWindow.Close();
+                                Statistics.LogWindowActionToWindowLog("Ammohangar", "Closing AmmoHangar");
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                                 Logging.Log(module, "Closing Corporate Ammo Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
@@ -7256,6 +7273,8 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InStation || Cache.Instance.InSpace)
                 {
                     Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
+                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
                 }
                 else
                 {
@@ -7279,6 +7298,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.IsValid)
                 {
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
+                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
                     Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
                     if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     GetShipsDroneBayAttempts = 0;
@@ -7326,6 +7346,7 @@ namespace Questor.Modules.Caching
                     Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                     Logging.Log(module, "Closing Drone Bay: waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     Cache.Instance.DroneBay.Window.Close();
+                    Statistics.LogWindowActionToWindowLog("Dronebay", "Closing DroneBay");
                     return true;
                 }
 
@@ -7366,6 +7387,7 @@ namespace Questor.Modules.Caching
                                         Logging.Log("LPStore", "Opening loyalty point store", Logging.White);
                                         Time.Instance.NextLPStoreAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(30, 240));
                                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenLpstore);
+                                        Statistics.LogWindowActionToWindowLog("LPStore", "Opening LPStore");
                                         return null;    
                                     }
 
@@ -7415,6 +7437,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log(module, "Closing loyalty point store", Logging.White);
                     Cache.Instance.LPStore.Close();
+                    Statistics.LogWindowActionToWindowLog("LPStore", "Closing LPStore");
                     return false;
                 }
 
@@ -7452,6 +7475,7 @@ namespace Questor.Modules.Caching
                                         Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
                                         Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
                                         Cache.Instance.DirectEve.OpenFitingManager();
+                                        Statistics.LogWindowActionToWindowLog("FittingManager", "Opening FittingManager");
                                         return null;
                                     }
 
@@ -7496,6 +7520,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log(module, "Closing Fitting Manager Window", Logging.White);
                     Cache.Instance.FittingManagerWindow.Close();
+                    Statistics.LogWindowActionToWindowLog("FittingManager", "Closing FittingManager");
                     Cache.Instance.FittingManagerWindow = null;
                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                     return true;
@@ -7525,6 +7550,7 @@ namespace Questor.Modules.Caching
                 if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
                 Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
                 AgentInteraction.Agent.InteractWith();
+                Statistics.LogWindowActionToWindowLog("AgentWindow", "Opening AgentWindow");
                 return false;
             }
 
@@ -7565,6 +7591,7 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
+                    Statistics.LogWindowActionToWindowLog("JournalWindow", "Opening JournalWindow");
                     Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                     Logging.Log(module, "Opening Journal Window: waiting [" + Math.Round(Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
@@ -7599,6 +7626,7 @@ namespace Questor.Modules.Caching
                 {
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                    Statistics.LogWindowActionToWindowLog("MarketWindow", "Opening MarketWindow");
                     Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
                     Logging.Log(module, "Opening Market Window: waiting [" + Math.Round(Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
@@ -7635,6 +7663,7 @@ namespace Questor.Modules.Caching
 
                 //if MarketWindow is not null then the window must be open, so close it.
                 Cache.Instance.MarketWindow.Close();
+                Statistics.LogWindowActionToWindowLog("MarketWindow", "Closing MarketWindow");
                 return true; 
             }
 
@@ -7676,6 +7705,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening Container window as secondary", Logging.White);
                         Cache.Instance.ContainerInSpace.Window.OpenAsSecondary();
+                        Statistics.LogWindowActionToWindowLog("ContainerInSpace", "Opening ContainerInSpace");
                         Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                         return true;
                     }
@@ -7755,6 +7785,7 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening repairshop window", Logging.White);
                         Cache.Instance.DirectEve.OpenRepairShop();
+                        Statistics.LogWindowActionToWindowLog("RepairWindow", "Opening RepairWindow");
                         Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
                         return false;
                     }
@@ -7791,6 +7822,7 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log(module, "Repairing Items: Zero Damage: skipping repair.", Logging.White);
                             repairWindow.Close();
+                            Statistics.LogWindowActionToWindowLog("RepairWindow", "Closing RepairWindow");
                             Cache.Instance.RepairAll = false;
                             return true;
                         }
@@ -7865,7 +7897,8 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log(module, "Opening repairshop window", Logging.White);
                         Cache.Instance.DirectEve.OpenRepairShop();
-                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        Statistics.LogWindowActionToWindowLog("RepairWindow", "Opening RepairWindow");
+                        Time.Instance.NextRepairDronesAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 4));
                         return false;
                     }
 
@@ -7895,6 +7928,7 @@ namespace Questor.Modules.Caching
                         if (repairWindow.AvgDamage() == "Avg: 0.0 % Damaged")
                         {
                             repairWindow.Close();
+                            Statistics.LogWindowActionToWindowLog("RepairWindow", "Closing RepairWindow");
                             return true;
                         }
 

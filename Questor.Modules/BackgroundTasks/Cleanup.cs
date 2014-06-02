@@ -286,106 +286,122 @@ namespace Questor.Modules.BackgroundTasks
 
         public static bool CloseInventoryWindows()
         {
-            if (DateTime.UtcNow < _lastCleanupAction.AddMilliseconds(500))
-                return false;
-
-            if (!Cache.Instance.Windows.Any())
+            try
             {
-                return false;
-            }
+                if (DateTime.UtcNow < _lastCleanupAction.AddMilliseconds(500))
+                    return false;
 
-            _lastCleanupAction = DateTime.UtcNow;
-
-            //
-            // go through *every* window
-            //
-            foreach (DirectWindow window in Cache.Instance.Windows)
-            {
-                if (window.Name.Contains("_ShipDroneBay_") && window.Caption.Contains("Drone Bay") && window.Type.Contains("Inventory"))
+                if (!Cache.Instance.Windows.Any())
                 {
-                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Drone Bay Window", Logging.White);
-                    window.Close();
-                    _lastCleanupAction = DateTime.UtcNow;
                     return false;
                 }
 
-                if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))
-                {
-                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.White);
-                    window.Close();
-                    _lastCleanupAction = DateTime.UtcNow;
-                    return false;
-                }
-
-                if (window.Name.Contains("_StationItems_") && window.Caption.Contains("Item hangar") && window.Type.Contains("Inventory"))
-                {
-                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Item Hangar Window", Logging.White);
-                    window.Close();
-                    _lastCleanupAction = DateTime.UtcNow;
-                    return false;
-                }
-
-                if (window.Name.Contains("_StationShips_") && window.Caption.Contains("Ship hangar") && window.Type.Contains("Inventory"))
-                {
-                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing Ship Hangar Window", Logging.White);
-                    window.Close();
-                    _lastCleanupAction = DateTime.UtcNow;
-                    return false;
-                }
-
-                if (window.Type.Contains("Inventory"))
-                {
-                    Logging.Log("Cleanup", "CloseInventoryWindows: Closing other Inventory Window named [ " + window.Name + "]", Logging.White);
-                    window.Close();
-                    _lastCleanupAction = DateTime.UtcNow;
-                    return false;
-                }
+                _lastCleanupAction = DateTime.UtcNow;
 
                 //
-                // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
-                // add repairship, lpstore, marketwindow, etc
+                // go through *every* window
                 //
-            }
+                foreach (DirectWindow window in Cache.Instance.Windows)
+                {
+                    if (window.Name.Contains("_ShipDroneBay_") && window.Caption.Contains("Drone Bay") && window.Type.Contains("Inventory"))
+                    {
+                        Logging.Log("Cleanup", "CloseInventoryWindows: Closing Drone Bay Window", Logging.White);
+                        window.Close();
+                        _lastCleanupAction = DateTime.UtcNow;
+                        return false;
+                    }
 
-            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
-            return true;
+                    if (window.Name.Contains("_ShipCargo_") && window.Caption.Contains("active ship") && window.Type.Contains("Inventory"))
+                    {
+                        Logging.Log("Cleanup", "CloseInventoryWindows: Closing Cargo Bay Window", Logging.White);
+                        window.Close();
+                        _lastCleanupAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    if (window.Name.Contains("_StationItems_") && window.Caption.Contains("Item hangar") && window.Type.Contains("Inventory"))
+                    {
+                        Logging.Log("Cleanup", "CloseInventoryWindows: Closing Item Hangar Window", Logging.White);
+                        window.Close();
+                        _lastCleanupAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    if (window.Name.Contains("_StationShips_") && window.Caption.Contains("Ship hangar") && window.Type.Contains("Inventory"))
+                    {
+                        Logging.Log("Cleanup", "CloseInventoryWindows: Closing Ship Hangar Window", Logging.White);
+                        window.Close();
+                        _lastCleanupAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    if (window.Type.Contains("Inventory"))
+                    {
+                        Logging.Log("Cleanup", "CloseInventoryWindows: Closing other Inventory Window named [ " + window.Name + "]", Logging.White);
+                        window.Close();
+                        _lastCleanupAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    //
+                    // add ship hangar, items hangar, corp hangar, etc... as at least come of those may be open in space (pos?) or may someday be bugged by ccp.
+                    // add repairship, lpstore, marketwindow, etc
+                    //
+                }
+
+                Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                Logging.Log("Cleanup", "Exception [" + ex + "]", Logging.White);
+                return false;
+            }
         }
 
         public static void CheckEVEStatus()
         {
-            // get the current process
-            Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-
-            // get the physical mem usage (this only runs between missions)
-            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
-            Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-
-            if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
+            try
             {
-                Logging.Log("Questor", "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
-                if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
+                // get the current process
+                Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
+                // get the physical mem usage (this only runs between missions)
+                Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 + 1 / 1024) / 1024);
+                Logging.Log("Cleanup", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
+
+                if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
                 {
-                    Cache.Instance.CloseQuestorCMDLogoff = true;
-                    Cache.Instance.CloseQuestorCMDExitGame = false;
-                    Cache.Instance.SessionState = "LoggingOff";
-                    BeginClosingQuestor();
-                    return;
+                    Logging.Log("Cleanup", "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
+                    Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
+                    if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
+                    {
+                        Cache.Instance.CloseQuestorCMDLogoff = true;
+                        Cache.Instance.CloseQuestorCMDExitGame = false;
+                        Cache.Instance.SessionState = "LoggingOff";
+                        BeginClosingQuestor();
+                        return;
+                    }
+                    if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "exit")
+                    {
+                        Cache.Instance.CloseQuestorCMDLogoff = false;
+                        Cache.Instance.CloseQuestorCMDExitGame = true;
+                        Cache.Instance.SessionState = "Exiting";
+                        BeginClosingQuestor();
+                        return;
+                    }
+                    Logging.Log("Cleanup", "EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ", Logging.Red);
                 }
-                if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "exit")
+                else
                 {
-                    Cache.Instance.CloseQuestorCMDLogoff = false;
-                    Cache.Instance.CloseQuestorCMDExitGame = true;
-                    Cache.Instance.SessionState = "Exiting";
-                    BeginClosingQuestor();
-                    return;
+                    Cache.Instance.SessionState = "Running";
                 }
-                Logging.Log("Questor", "EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ", Logging.Red);
             }
-            else
+            catch (System.Exception ex)
             {
-                Cache.Instance.SessionState = "Running";
+                Logging.Log("Cleanup", "Exception [" + ex + "]", Logging.White);
             }
+            
         }
 
         public void ProcessState()
@@ -756,7 +772,7 @@ namespace Questor.Modules.BackgroundTasks
                             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
                             // get the physical mem usage (this only runs between missions)
-                            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+                            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 + 1 / 1024) / 1024);
                             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
                             string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.Instance.MemoryManagerTrimThreshold;
                             Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [ " + MemoryManagerCommandToRun + " ]", Logging.White);

@@ -185,6 +185,7 @@ namespace Questor.Storylines
                     Logging.Log("MaterialsForWarPreparation", "Opening market window", Logging.White);
 
                     directEve.ExecuteCommand(DirectCmd.OpenMarket);
+                    Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
                     return StorylineState.PreAcceptMission;
                 }
 

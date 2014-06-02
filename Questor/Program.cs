@@ -29,7 +29,7 @@ namespace Questor
 
     internal static class Program
     {
-        private static bool _done;
+        private static bool loggedInAndreadyToStartQuestorUI;
 
         public static List<CharSchedule> CharSchedules { get; private set; }
 
@@ -269,27 +269,28 @@ namespace Questor
                 Logging.Log("Startup", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
             }
 
-            // Sleep until we're done
-            while (!_done)
+            // Sleep until we're loggedInAndreadyToStartQuestorUI
+            while (!loggedInAndreadyToStartQuestorUI)
             {
                 System.Threading.Thread.Sleep(50); //this runs while we wait to login
             }
 
-            try
+            if (loggedInAndreadyToStartQuestorUI)
             {
-                //
-                // do not dispose here as we want to use the same DirectEve instance later in the main program
-                //
-                //_directEve.Dispose();
-                Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", string.Format("DirectEVE.Dispose: Exception {0}...", ex), Logging.White);
-            }
+                try
+                {
+                    //
+                    // do not dispose here as we want to use the same DirectEve instance later in the main program
+                    //
+                    //_directEve.Dispose();
+                    Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Startup", "DirectEVE.Dispose: Exception [" + ex + "]", Logging.White);
+                }
 
-            if (_done) //this is just here for clarity, we are really held up in LoginUsingScheduler() or LoginUsingUserNamePassword(); until done == true
-            {
+
                 if (!string.IsNullOrEmpty(_scriptAfterLoginFile))
                 {
                     Logging.Log("Startup", "Running Script After Login: [ timedcommand 150 runscript " + _scriptAfterLoginFile + " ]", Logging.Teal);
@@ -303,18 +304,19 @@ namespace Questor
                     Logging.Log("Startup", "_loginOnly: done and exiting", Logging.Teal);
                     return;
                 }
+
+
+                StartTime = DateTime.Now;
+
+                //
+                // We should only get this far if run if we are already logged in...
+                // launch questor
+                //
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Logging.Log("Startup", "We are logged in: Launching Questor", Logging.Teal);
+                Application.Run(new QuestorfrmMain());
             }
-
-            StartTime = DateTime.Now;
-
-            //
-            // We should only get this far if run if we are already logged in...
-            // launch questor
-            //
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Logging.Log("Startup", "We are logged in: Launching Questor", Logging.Teal);
-            Application.Run(new QuestorfrmMain());
         }
 
         private static void LoginUsingScheduler()
@@ -532,7 +534,7 @@ namespace Questor
             {
                 Logging.Log("Startup", "We have successfully logged in", Logging.White);
                 Time.Instance.LastSessionIsReady = DateTime.UtcNow;
-                _done = true;
+                loggedInAndreadyToStartQuestorUI = true;
                 return;
             }
 
@@ -717,7 +719,6 @@ namespace Questor
                     Logging.Log("Startup", "window.IsKillable is: " + window.IsKillable, Logging.Red);
                     Logging.Log("Startup", "window.Viewmode is: " + window.ViewMode, Logging.Red);
                     Logging.Log("Startup", "We have got an unexpected window, auto login halted.", Logging.Red);
-                    _done = true;
                     return;
                 }
                 return;
@@ -745,7 +746,6 @@ namespace Questor
                 catch (System.Exception ex)
                 {
                     Logging.Log("Startup", string.Format("Exception {0}...", ex), Logging.White);
-                    _done = true;
                 }
                 finally
                 {

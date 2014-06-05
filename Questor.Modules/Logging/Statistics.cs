@@ -129,8 +129,8 @@ namespace Questor.Modules.Logging
             catch (Exception ex)
             {
                 Logging.Log("Statistics", "Exception while logging to file [" + ex.Message + "]", Logging.White);
+                return false;
             }
-            
         }
 
         public static bool PocketObjectStatistics(List<EntityCache> things, bool force = false)

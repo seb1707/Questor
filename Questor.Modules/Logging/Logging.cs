@@ -9,6 +9,7 @@
 // -------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 
 namespace Questor.Modules.Logging
@@ -76,7 +77,7 @@ namespace Questor.Modules.Logging
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
-        public static void Log(string module, string line, string color)
+        public static void Log(string module, string line, string color, bool verbose = false)
         {
             //if (Settings.Instance.DateTimeForLogs = EveTime)
             //{
@@ -113,10 +114,12 @@ namespace Questor.Modules.Logging
                 {
                     if (!Cache.Instance.ConsoleLogOpened)
                     {
+                        //
+                        // begin logging to file
+                        //
                         if (Settings.Instance.ConsoleLogPath != null && Settings.Instance.ConsoleLogFile != null)
                         {
                             module = "Logging";
-                            line = "Writing to Daily Console Log ";
                             if (Settings.Instance.InnerspaceGeneratedConsoleLog && Settings.Instance.UseInnerspace)
                             {
                                 InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
@@ -150,8 +153,26 @@ namespace Questor.Modules.Logging
 
                     if (Cache.Instance.ConsoleLogOpened)
                     {
-                        if (Settings.Instance.ConsoleLogFile != null)
+                        //
+                        // log file ready: add next logging entry...
+                        //
+                        if (Settings.Instance.ConsoleLogFile != null && !verbose) //normal
                         {
+
+                            //
+                            // normal text logging
+                            //
+                            Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                            File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
+                        }
+
+                        if (Settings.Instance.ConsoleLogFile != null && verbose) //tons of info
+                        {
+                            //
+                            // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
+                            //
+                            System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
+                            module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
                             Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
                             File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
                         }
@@ -159,6 +180,9 @@ namespace Questor.Modules.Logging
 
                         if (Settings.Instance.ConsoleLogFileRedacted != null)
                         {
+                            //
+                            // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
+                            //
                             Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                             File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
                         }

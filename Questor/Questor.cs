@@ -30,7 +30,6 @@ namespace Questor
 
     public class Questor
     {
-        private readonly QuestorfrmMain _mParent;
         private readonly Defense _defense;
 
         private DateTime _lastQuestorPulse;
@@ -53,9 +52,8 @@ namespace Questor
 
         private readonly Stopwatch _watch;
 
-        public Questor(QuestorfrmMain form1)
+        public Questor()
         {
-            _mParent = form1;
             Logging.tryToLogToFile = true;
             _lastQuestorPulse = DateTime.UtcNow;
 
@@ -98,14 +96,14 @@ namespace Questor
                 }
                 else
                 {
-                    Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);    
+                    Logging.Log("Questor", "You have 0 Support Instances available [ _directEve.HasSupportInstances() is false ]", Logging.Orange);
                 }
             }
             catch (Exception exception)
             {
                 Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() in questor.cs - exception was: [" + exception + "]", Logging.Orange);
             }
-            
+
             Time.Instance.StopTimeSpecified = Program.StopTimeSpecified;
             Time.Instance.MaxRuntime = Program.MaxRuntime;
             if (Program.StartTime.AddMinutes(10) < Program.StopTime)
@@ -139,6 +137,9 @@ namespace Questor
 
             try
             {
+                //
+                // setup the [ Cache.Instance.DirectEve.OnFrame ] Event triggered on every new frame to call EVEOnFrame()
+                //
                 Cache.Instance.DirectEve.OnFrame += EVEOnFrame;
             }
             catch (Exception ex)
@@ -174,7 +175,7 @@ namespace Questor
                     {
                         LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName + " - " + Cache.Instance.MissionName);
                     }
-                }    
+                }
             }
             else
             {
@@ -320,9 +321,9 @@ namespace Questor
 
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "if (Cache.Instance.DirectEve.HasSupportInstances() && Settings.Instance.ThisToonShouldBeTrainingSkills)", Logging.White);
                 if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Cache.Instance.DirectEve.HasSupportInstances() [" + Cache.Instance.DirectEve.HasSupportInstances() + "]", Logging.White);
-                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ThisToonShouldBeTrainingSkills [" + Settings.Instance.ThisToonShouldBeTrainingSkills + "]", Logging.White);    
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("Questor.SkillQueueCheck", "Settings.Instance.ThisToonShouldBeTrainingSkills [" + Settings.Instance.ThisToonShouldBeTrainingSkills + "]", Logging.White);
             }
-            
+
             return true;
         }
 
@@ -420,7 +421,7 @@ namespace Questor
             if (_States.CurrentQuestorState == QuestorState.Mining ||
                 _States.CurrentQuestorState == QuestorState.CombatHelperBehavior ||
                 _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+            //_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
             {
                 if (Settings.Instance.DebugWalletBalance) Logging.Log("Questor.WalletCheck", "QuestorState is [" + _States.CurrentQuestorState.ToString() + "] which does not use WalletCheck", Logging.White);
                 return;
@@ -640,9 +641,9 @@ namespace Questor
             {
                 case QuestorState.Idle:
                     if (TimeCheck()) return; //Should we close questor due to stoptime or runtime?
-                    
+
                     if (!SkillQueueCheck()) return; //if we need to train skills we return here, on the next pass we will be _States.CurrentQuestorState = QuestorSate.SkillTrainer
-                    
+
                     if (Cache.Instance.StopBot)
                     {
                         if (Settings.Instance.DebugIdle) Logging.Log("Questor", "Cache.Instance.StopBot = true - this is set by the LocalWatch code so that we stay in station when local is unsafe", Logging.Orange);

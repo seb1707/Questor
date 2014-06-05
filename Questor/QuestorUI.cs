@@ -18,26 +18,22 @@ namespace Questor
     using global::Questor.Modules.States;
     using global::Questor.Modules.BackgroundTasks;
 
-    public partial class QuestorfrmMain : Form
+    public partial class QuestorUI : Form
     {
-        private readonly Questor _questor;
         private DateTime _nextConsoleLogRefresh = DateTime.MinValue;
         private DateTime _nextUIDataRefresh = DateTime.UtcNow;
         private DateTime _nextScheduleUpdate = DateTime.UtcNow;
 
-        public QuestorfrmMain()
+        public QuestorUI()
         {
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
             InitializeComponent();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.White);
-            _questor = new Questor(this);
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
             PopulateStateComboBoxes();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
             PopulateBehaviorStateComboBox();
-            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "CreateLavishCommands", Logging.White);
-            //CreateLavishCommands();
             if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
             Show();
             if (Settings.Instance.DebugAttachVSDebugger)

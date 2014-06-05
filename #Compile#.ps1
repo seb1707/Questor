@@ -7,13 +7,14 @@ $settingsfileloc=".\CompileSettings.xml"
 function compilesolution {
   param (
         $msBuildexEcutable,
-        $project,
+        $projectFolderName,
+        $projectSolutionName,
         $msBuildOption
         )
    
   Write-Host "Staring to build project: " -NoNewline
-  Write-Host "[$($project)]" -ForegroundColor DarkYellow -BackgroundColor Black
-  $results=Invoke-Expression "$($msBuildexEcutable) .\$($project)\$($project).csproj /p:configuration=$($msBuildOption) /target:Clean';'Build /flp:logfile="".\DebugLogs\$($project)Compile.log"""
+  Write-Host "[$($projectSolutionName)]" -ForegroundColor DarkYellow -BackgroundColor Black
+  $results=Invoke-Expression "$($msBuildexEcutable) .\$($projectFolderName)\$($projectSolutionName).csproj /p:configuration=$($msBuildOption) /target:Clean';'Build /flp:logfile="".\DebugLogs\$($projectSolutionName)Compile.log"""
   if ($LastExitCode -eq 0) {
     Write-Host "Build succeeded, 0 Error(s)" -ForegroundColor DarkGreen 
     write-Host "-----------------------------------------------------------------"
@@ -21,9 +22,9 @@ function compilesolution {
     }
   else {
     Write-Host "There were ERRORS while compiling project: " -ForegroundColor Red -NoNewline
-    Write-Host "[$($project)]" -NoNewline
+    Write-Host "[$($projectSolutionName)]" -NoNewline
     Write-Host " check log for errors: " -ForegroundColor Red -NoNewline 
-    Write-Host "[DebugLogs\$($project)Errors.log]" -ForegroundColor Yellow 
+    Write-Host "[DebugLogs\$($projectSolutionName)Errors.log]" -ForegroundColor Yellow 
     write-Host "-----------------------------------------------------------------"
     $global:badbuilds++
   }
@@ -84,23 +85,20 @@ sleep -Milliseconds 500
 #endregion
 
 #maybe we can collect this from XML, but I don't see a way for now
-$arrProjects=  ("Questor.Modules",
-                "Questor",
-                "valuedump",
-                "QuestorManager",
-                "BUYLPI",
-                "updateinvtypes"
-               )
 Write-Host ""
 Write-Host "Starting to compile" -NoNewline
 sleep -Milliseconds 300
 Write-Host "." -NoNewline; sleep  -Milliseconds 300;Write-Host "." -NoNewline; sleep  -Milliseconds 300; Write-Host ".";sleep -Milliseconds 300
 Write-Host ""
 write-Host "-----------------------------------------------------------------"
-$arrProjects | % {
-compilesolution -msbuildexecutable $msbuild -project $_ -msbuildoption $msbuildoption
-}
 
+compilesolution -msbuildexecutable $msbuild -projectFolderName Questor.Modules -projectSolution Questor.Modules -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName Questor -projectSolution Questor -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName Questor -projectSolution QuestorDLL -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName ValueDump -projectSolution ValueDump -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName QuestorManager -projectSolution QuestorManager -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName BUYLPI -projectSolution BUYLPI -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName UpdateInvtypes -projectSolution UpdateInvtypes -msbuildoption $msbuildoption
 Write-Host "Copy files to output folder " -NoNewline
 
 

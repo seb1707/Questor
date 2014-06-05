@@ -20,6 +20,7 @@ namespace Questor
     using System.Timers;
     using Mono.Options;
     using System.Globalization;
+    using EasyHook;
     using LavishScriptAPI;
     using global::Questor.Modules.BackgroundTasks;
     using global::Questor.Modules.Caching;
@@ -27,7 +28,7 @@ namespace Questor
     using global::Questor.Modules.Lookup;
     using DirectEve;
 
-    internal static class Program
+    public class Program : IEntryPoint
     {
         private static bool loggedInAndreadyToStartQuestorUI;
 
@@ -88,6 +89,8 @@ namespace Questor
         private static DateTime _lastServerStatusCheckWasNotOK = DateTime.MinValue;
         public static DateTime StartTime = DateTime.MaxValue;
         public static DateTime StopTime = DateTime.MinValue;
+        private static Questor _questor;
+        public static bool Stop { get; set; }
 
         public static int MaxRuntime
         {
@@ -97,11 +100,36 @@ namespace Questor
             }
         }
 
+        public static void Main(string[] args) //used during as the  Questor.exe entry point
+        {
+            try
+            {
+                IEnumerable<string> questorParametersfromLauncher = args.Cast<string>();
+                Program_Start(questorParametersfromLauncher);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
+            }
+        }
+
+        public static void Run(EasyHook.RemoteHooking.IContext InContext, IEnumerable<string> questorParametersfromLauncher) //used during as the  Questor.dll entry point
+        {
+            try
+            {
+                Program_Start(questorParametersfromLauncher);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
+            }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main(string[] args)
+        private static void Program_Start(IEnumerable<string> args)
         {
             _maxRuntime = Int32.MaxValue;
             OptionSet p = new OptionSet {
@@ -312,10 +340,31 @@ namespace Questor
                 // We should only get this far if run if we are already logged in...
                 // launch questor
                 //
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Logging.Log("Startup", "We are logged in: Launching Questor", Logging.Teal);
-                Application.Run(new QuestorfrmMain());
+                try
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Logging.Log("Startup", "We are logged in.", Logging.Teal);
+                    Logging.Log("Startup", "Launching Questor", Logging.Teal); 
+                    _questor = new Questor();
+                    Logging.Log("Startup", "Launching QuestorUI", Logging.Teal);
+                    Application.Run(new QuestorUI());
+                    //while (_questorUI.Visible)
+                    //{
+                    //    System.Threading.Thread.Sleep(50); //this runs while we wait to login
+                    //}
+
+                    Logging.Log("Startup", "Exiting Questor", Logging.Teal);
+                    
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Startup", "Exception [" + ex + "]", Logging.Teal);
+                }
+                finally
+                {
+                    //Cache.Instance.DirecteveDispose();
+                }
             }
         }
 

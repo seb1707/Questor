@@ -18,53 +18,61 @@ set msbuild4=%systemroot%\Microsoft.Net\FrameWork\v4.0.30319\msbuild.exe
 del ".\bin\debug\*.*" /Q
 del ".\bin\release\*.*" /Q
 ::
-:: Build Project 1
+:: Build Project: Questor.Modules
 ::
 set nameofproject=Questor.Modules
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 7 builds
 %pause%
 ::
-:: Build Project 2
+:: Build Project: Questor
 ::
 set nameofproject=Questor
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 7 builds
 %pause%
 ::
-:: Build Project 3
+:: Build Project: QuestorDLL
+::
+set nameofproject=QuestorDLL
+set csproj=.\questor\QuestorDLL.csproj
+"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
+Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 7 builds
+pause
+::
+:: Build Project valuedump
 ::
 set nameofproject=valuedump
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 7 builds
 %pause%
 ::
-:: Build Project 4
+:: Build Project: QuestorManager
 ::
 set nameofproject=QuestorManager
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 7 builds
 %pause%
 ::
-:: Build Project 5
+:: Build Project: BUYLPI
 ::
 set nameofproject=BUYLPI
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 7 builds
 %pause%
 ::
-:: Build Project 6
+:: Build Project: updateinvtypes
 ::
 set nameofproject=updateinvtypes
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 ::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%"
-Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 6 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 7 of 7 builds
 %pause%
 
 if not exist output mkdir output >>nul 2>>nul

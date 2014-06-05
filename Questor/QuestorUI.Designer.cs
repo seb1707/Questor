@@ -1,6 +1,6 @@
 ﻿namespace Questor
 {
-    partial class QuestorfrmMain
+    partial class QuestorUI
     {
         /// <summary>
         /// Required designer variable.

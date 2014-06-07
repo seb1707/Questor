@@ -8,128 +8,66 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
-using Questor.Modules.Lookup;
-using Questor.Modules.Misc;
 
-namespace QuestorTest1
+/*
+namespace QuestorTest
 {
     using System;
-    using System.Threading;
-    using DirectEve;
     using Questor.Modules.Logging;
-    using Questor.Modules.Caching;
-    using Questor.Modules.BackgroundTasks;
-
-    internal class QuestorTest1
+    
+    public class QuestorTest : IEntryPoint
     {
-        public static DateTime DateTimeForLogs;
-        private const int WaitMillis = 3500;
-        private static DateTime _nextAction;
-        private static DateTime _done = DateTime.UtcNow.AddDays(10);
-        private static DateTime _lastPulse;
-        private static Cleanup _cleanup;
+        //private Timer dispatcherTimer;
 
-        private static void Main(string[] args)
+        public static void Main(EasyHook.RemoteHooking.IContext InContext, string args)
         {
-            DateTimeForLogs = DateTime.Now;
-            //Logging.Log("BuyLPI", "BuyLPI: Test", Logging.White);
-            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "BuyLPI: Test2"));
+
+        }
+        //public void Run(EasyHook.RemoteHooking.IContext InContext, string args) //used during as the  Questor.dll entry point
+        //{
+        //    try
+        //    {
+        //        //IEnumerable<string> questorParametersfromLauncher = args.Cast<string>();
+        //        //Program_Start(questorParametersfromLauncher);
+        //        Logging.Log("Startup", "Starting...", Logging.White);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
+        //    }
+        //
+        //    Logging.Log("Startup", "Done.", Logging.White);
+        //    while (true)
+        //        Thread.Sleep(50);
+        //}
+
+        public void Run(EasyHook.RemoteHooking.IContext InContext, string args)
+        {
+            //dispatcherTimer = new System.Timers.Timer(20000);
+            //dispatcherTimer.Elapsed += new System.Timers.ElapsedEventHandler(HookOnframe);
+            //dispatcherTimer.Start();
+
+            RemoteHooking.WakeUpProcess();
+
+            try
+            {
+                //IEnumerable<string> questorParametersfromLauncher = args.Cast<string>();
+                //Program_Start(questorParametersfromLauncher);
+                Logging.Log("Startup", "Starting...", Logging.White);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
+            }
             
-            if (args.Length == 0)
-            {
-                ////InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "BuyLPI: 0 arguments"));
-                //Logging.Log("QuestorTest1", "Syntax:", Logging.White);
-                //Logging.Log("QuestorTest1", "DotNet BuyLPI BuyLPI <TypeName or TypeId> [Quantity]", Logging.White);
-                //Logging.Log("QuestorTest1", "(Quantity is optional)", Logging.White);
-                //Logging.Log("QuestorTest1", "", Logging.White);
-                //Logging.Log("QuestorTest1", "Example:", Logging.White);
-                //Logging.Log("QuestorTest1", "DotNet BuyLPI BuyLPI \"Caldari Navy Mjolnir Torpedo\" 10", Logging.White);
-                //Logging.Log("QuestorTest1", "*OR*", Logging.White);
-                //Logging.Log("QuestorTest1", "DotNet BuyLPI BuyLPI 27339 10", Logging.White);
-                //return;
-            }
-
-            if (args.Length >= 1)
-            {
-                //_type = args[0];
-            }
-
-            if (args.Length >= 2)
-            {
-                //int dummy;
-                //if (!int.TryParse(args[1], out dummy))
-                //{
-                //    Logging.Log("QuestorTest1", "Quantity must be an integer, 0 - " + int.MaxValue, Logging.White);
-                //    return;
-                //}
-                //
-                //if (dummy < 0)
-                //{
-                //    Logging.Log("QuestorTest1", "Quantity must be a positive number", Logging.White);
-                //    return;
-                //}
-                //
-                //_quantity = dummy;
-                //_totalQuantityOfOrders = dummy;
-            }
-
-            Time.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
-
-            InnerspaceCommands.CreateLavishCommands();
-            //InnerspaceEvents.CreateLavishEvents();
-
-            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Starting BuyLPI... - innerspace Echo"));
-            Logging.Log("QuestorTest1", "Starting QuestorTest1...", Logging.White);
-            _cleanup = new Cleanup();
-            Cache.Instance.DirectEve = new DirectEve();
-            Cache.Instance.DirectEve.OnFrame += OnFrame;
-
-            // Sleep until we're done
-            while (_done.AddSeconds(5) > DateTime.UtcNow)
+            Logging.Log("Startup", "Done.", Logging.White);
+            while (true)
             {
                 Thread.Sleep(50);
             }
-
-            Cache.Instance.DirectEve.Dispose();
-            Logging.Log("QuestorTest1", "QuestorTest1 finished.", Logging.White);
-            //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "BuyLPI: Finished 2"));
-        }
-
-        private static void OnFrame(object sender, EventArgs eventArgs)
-        {
-            // New frame, invalidate old cache
-            Cache.Instance.InvalidateCache();
-
-            Time.Instance.LastFrame = DateTime.UtcNow;
-
-            // Only pulse state changes every 1.5s
-            if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 3000)
-            {
-                return;
-            }
-
-            _lastPulse = DateTime.UtcNow;
             
-            // Done
-            // Cleanup State: ProcessState
-
-            if (DateTime.UtcNow > _done)
-                return;
-
-            // Wait for the next action
-            if (_nextAction >= DateTime.UtcNow)
-            {
-                return;
-            }
-            _nextAction = DateTime.UtcNow.AddMilliseconds(500);
-
-
-            //
-            // ......
-            //
-            Logging.Log("QuestorTest1", "QuestorTest1 [" + DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalSeconds + "] sec since we started. ", Logging.White);
-
-            return;
+            Cache.Instance.DirectEve.Dispose();
         }
-    }
+    } 
 }
+*/

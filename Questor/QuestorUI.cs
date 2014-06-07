@@ -1,4 +1,3 @@
-﻿using Questor.Modules.Alerts;
 using Questor.Properties;
 
 namespace Questor
@@ -12,6 +11,7 @@ namespace Questor
     using System.IO;
     using LavishScriptAPI;
     using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Alerts;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;

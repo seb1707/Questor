@@ -291,7 +291,7 @@
   <!-- walletbalancechangelogoffdelay: If your characters wallet balance does not change within this many minutes exit eve, the assumption is your toon is stuck or disconnected -->
   <walletbalancechangelogoffdelay>40</walletbalancechangelogoffdelay><!-- default is 40 -->
   <!-- EVEProcessMemoryCieling: If this instance of EVE consumes more than the stated MB of Memory close eve when in station between missions-->
-  <EVEProcessMemoryCeiling>1150</EVEProcessMemoryCeiling><!-- default is 1150-->
+  <EVEProcessMemoryCeiling>2048</EVEProcessMemoryCeiling><!-- default is 2048: units used here is MB, so 1024 would be 1GB, 2048 would be 2GB-->
   <!-- These three options are mutually exclusive: choose ONE: -->
   <!-- When questor has to quit (walletbalance or eveprocessmemoryceiling or <insert reason here> questor will try to initiate a timedcommand to the innerspace uplink to restart the session -->
   <!-- it needs to know if you want to launch the session using the innerspace profile or the ISBoxer Character Set or just execute an arbitrary OS command-->

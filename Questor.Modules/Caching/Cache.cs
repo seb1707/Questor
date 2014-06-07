@@ -1058,7 +1058,7 @@ namespace Questor.Modules.Caching
 
         public int RepairCycleTimeThisMission { get; set; }
 
-        public long TotalMegaBytesOfMemoryUsed { get; set; }
+        public long TotalMegaBytesOfMemoryUsed = 0;
 
         public double MyWalletBalance { get; set; }
 

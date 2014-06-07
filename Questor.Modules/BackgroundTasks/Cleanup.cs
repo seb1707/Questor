@@ -367,7 +367,10 @@ namespace Questor.Modules.BackgroundTasks
                 Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
                 // get the physical mem usage (this only runs between missions)
-                Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 + 1 / 1024) / 1024);
+                if (currentProcess.WorkingSet64 != 0)
+                {
+                    Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024);
+                }
                 Logging.Log("Cleanup", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
 
                 if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
@@ -772,7 +775,10 @@ namespace Questor.Modules.BackgroundTasks
                             Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 
                             // get the physical mem usage (this only runs between missions)
-                            Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 + 1 / 1024) / 1024);
+                            if (currentProcess.WorkingSet64 != 0)
+                            {
+                                Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024 + 1);    
+                            }
                             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
                             string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.Instance.MemoryManagerTrimThreshold;
                             Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [ " + MemoryManagerCommandToRun + " ]", Logging.White);

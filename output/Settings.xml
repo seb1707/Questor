@@ -391,7 +391,7 @@
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
   <distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>7000</distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
 
-  <!-- If an NPC gets inside this range do not consider it within optimal range anymore (targets within optimal are chosen first) -->
+  <!-- If an NPC gets inside this range do not consider it within optimal range any longer (targets within optimal are chosen first) -->
   <insideThisRangeIsHardToTrack>15000</insideThisRangeIsHardToTrack>
   
   <!--                                                                            -->  

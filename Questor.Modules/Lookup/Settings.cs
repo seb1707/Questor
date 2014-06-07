@@ -1104,7 +1104,7 @@ namespace Questor.Modules.Lookup
             //
             // at what memory usage do we need to restart this session?
             //
-            EVEProcessMemoryCeiling = (int?)CharacterSettingsXml.Element("EVEProcessMemoryCeiling") ?? (int?)CommonSettingsXml.Element("EVEProcessMemoryCeiling") ?? 900;
+            EVEProcessMemoryCeiling = (int?)CharacterSettingsXml.Element("EVEProcessMemoryCeiling") ?? (int?)CommonSettingsXml.Element("EVEProcessMemoryCeiling") ?? 2048;
             EVEProcessMemoryCeilingLogofforExit = (string)CharacterSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? (string)CommonSettingsXml.Element("EVEProcessMemoryCeilingLogofforExit") ?? "exit";
 
             CloseQuestorCMDUplinkInnerspaceProfile = (bool?)CharacterSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? (bool?)CommonSettingsXml.Element("CloseQuestorCMDUplinkInnerspaceProfile") ?? true;
@@ -1703,7 +1703,7 @@ namespace Questor.Modules.Lookup
                 //
                 // at what memory usage do we need to restart this session?
                 //
-                EVEProcessMemoryCeiling = 900;
+                EVEProcessMemoryCeiling = 2048;
                 EVEProcessMemoryCeilingLogofforExit = "exit";
 
                 CloseQuestorCMDUplinkInnerspaceProfile = true;

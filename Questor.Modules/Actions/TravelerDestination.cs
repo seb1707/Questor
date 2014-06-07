@@ -162,6 +162,7 @@ namespace Questor.Modules.Actions
 
             // The task was to get to the solar system, we're there :)
             Logging.Log("TravelerDestination.SolarSystemDestination", "Arrived in system", Logging.White);
+            Cache.Instance.MissionBookmarkTimerSet = false;
             return true;
         }
     }
@@ -436,12 +437,19 @@ namespace Questor.Modules.Actions
         {
             if (bookmark == null)
             {
+                if (DateTime.UtcNow > Time.Instance.MissionBookmarkTimeout.AddMinutes(2))
+                {
+                    Logging.Log("TravelerDestination", "MissionBookmarkTimeout [ " + Time.Instance.MissionBookmarkTimeout.ToShortTimeString() + " ] did not get reset from last usage: resetting it now", Logging.Red);
+                    Time.Instance.MissionBookmarkTimeout = DateTime.UtcNow.AddYears(1); 
+                }
+
                 if (!Cache.Instance.MissionBookmarkTimerSet)
                 {
+                    Cache.Instance.MissionBookmarkTimerSet = true;
                     Time.Instance.MissionBookmarkTimeout = DateTime.UtcNow.AddSeconds(10);
                 }
 
-                if (Time.Instance.MissionBookmarkTimeout > DateTime.UtcNow)
+                if (DateTime.UtcNow > Time.Instance.MissionBookmarkTimeout) //if CurrentTime is after the TimeOut value, freak out
                 {
                     AgentId = -1;
                     Title = null;
@@ -465,6 +473,7 @@ namespace Questor.Modules.Actions
                 AgentId = bookmark.AgentId ?? -1;
                 Title = bookmark.Title;
                 SolarSystemId = bookmark.SolarSystemId ?? -1;
+                Cache.Instance.MissionBookmarkTimerSet = false;
             }
         }
 

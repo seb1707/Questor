@@ -345,7 +345,7 @@ namespace Questor.Modules.BackgroundTasks
                 ModuleNumber++;
 
                 // Spread the salvagers around
-                EntityCache wreck = wrecks.OrderBy(w => salvagers.Count(s => s.LastTargetId == w.Id)).FirstOrDefault();
+                EntityCache wreck = wrecks.OrderBy(w => salvagers.Any(s => s.LastTargetId != w.Id)).FirstOrDefault();
                 if (wreck == null)
                 {
                     if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (wreck == null)", Logging.Teal); 
@@ -441,7 +441,7 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
             }
-            else if (wreckTargets.Count >= MaximumWreckTargets || Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
+            else if ((wreckTargets.Count >= MaximumWreckTargets && Cache.Instance.TargetedBy.Any()) || Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
             {
                 if (Settings.Instance.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: else if (wreckTargets.Count >= MaximumWreckTargets)", Logging.Teal);
                 return;

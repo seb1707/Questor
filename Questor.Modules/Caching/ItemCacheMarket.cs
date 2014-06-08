@@ -21,7 +21,7 @@ namespace Questor.Modules.Caching
         {
             Id = item.ItemId;
             Name = item.TypeName;
-
+            NameForSorting = item.TypeName.Replace("'", "");
             TypeId = item.TypeId;
             GroupId = item.GroupId;
             CategoryId = item.CategoryId;
@@ -47,6 +47,8 @@ namespace Questor.Modules.Caching
         public long Id { get; private set; }
 
         public string Name { get; private set; }
+
+        public string NameForSorting { get; private set; }
 
         public int TypeId { get; private set; }
 

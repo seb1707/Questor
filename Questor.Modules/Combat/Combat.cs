@@ -1653,7 +1653,7 @@ namespace Questor.Modules.Combat
 
                     IEnumerable<EntityCache> _primaryWeaponPriorityEntities = Cache.Instance.PrimaryWeaponPriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                      .OrderByDescending(c => c.IsLastTargetPrimaryWeaponsWereShooting)
-                                                                                                                     .ThenBy(c => c.IsInOptimalRange)
+                                                                                                                     .ThenByDescending(c => c.IsInOptimalRange)
                                                                                                                      .ThenBy(c => c.Distance);
 
                     if (_primaryWeaponPriorityEntities.Any())
@@ -1733,7 +1733,7 @@ namespace Questor.Modules.Combat
 
                     IEnumerable<EntityCache> _dronePriorityTargets = Cache.Instance.DronePriorityEntities.Where(t => t.IsTargetWeCanShootButHaveNotYetTargeted)
                                                                                                                          .OrderByDescending(c => c.IsInDroneRange)
-                                                                                                                         .ThenBy(c => c.IsLastTargetPrimaryWeaponsWereShooting)
+                                                                                                                         .ThenByDescending(c => c.IsLastTargetPrimaryWeaponsWereShooting)
                                                                                                                          .ThenBy(c => c.Nearest5kDistance);
 
                     if (_dronePriorityTargets.Any())

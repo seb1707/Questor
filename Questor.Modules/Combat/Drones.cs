@@ -381,8 +381,7 @@ namespace Questor.Modules.Combat
                     if (!Recall)
                     {
                         // Are we done (for now) ?
-                        if (
-                            Cache.Instance.TargetedBy.Count(e => (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
+                        if (Cache.Instance.TargetedBy.Count(e => (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                                                && (e.IsNpc || e.IsNpcByGroupID)
                                                                && e.Distance < Cache.Instance.MaxDroneRange) == 0)
                         {
@@ -391,7 +390,7 @@ namespace Questor.Modules.Combat
                             {
                                 TargtedByCount = Cache.Instance.TargetedBy.Count();
                             }
-                            Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within [" + Cache.Instance.MaxDroneRange + "] DroneControlRange Is [" + Settings.Instance.DroneControlRange + "] Targeting Range Is [" + Cache.Instance.MaxTargetRange + "] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Cache.Instance.ActiveDrones.Count() + " ] drones because no NPC is targeting us within [" + Math.Round(Cache.Instance.MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)Settings.Instance.DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Cache.Instance.MaxTargetRange / 1000,0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
                             Recall = true;
                         }
 

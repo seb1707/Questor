@@ -355,14 +355,14 @@ namespace Questor.Modules.Actions
                     //
                     // Add all items to the list of things to sell
                     //
-                    ItemsToSell.AddRange(Items.Where(i => i.InvType != null && i.MarketGroupId > 0));
+                    ItemsToSell.AddRange(Items.Where(i => i.InvType != null && i.MarketGroupId > 0).OrderBy(e => e.Name));
                 }
                 else
                 {
                     //
                     // Add only items with decent buy orders to the list of tings to sell
                     //
-                    ItemsToSell.AddRange(Items.Where(i => i.InvType != null && i.MarketGroupId > 0 && i.InvType.MedianBuy.HasValue));
+                    ItemsToSell.AddRange(Items.Where(i => i.InvType != null && i.MarketGroupId > 0 && i.InvType.MedianBuy.HasValue).OrderBy(e => e.Name));
                     
                     if (Settings.Instance.DebugValuedump)
                     {

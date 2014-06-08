@@ -36,6 +36,7 @@
           <parameter name="Remove" value="Gist War General" />
         </action>
         <action name="ClearPocket" />
+		<action name="ClearPocket" />
         <action name="Activate">
           <parameter name="target" value="Acceleration Gate" />
         </action>
@@ -58,6 +59,7 @@
           <parameter name="Remove" value="Gist Nephilim" />
         </action>
         <action name="ClearPocket" />
+		<action name="ClearPocket" />
         <action name="Activate">
           <parameter name="target" value="Acceleration Gate" />
         </action>
@@ -95,6 +97,7 @@
           <parameter name="Remove" value="Gist Saint" />
         </action>
         <action name="ClearPocket" />
+		<action name="ClearPocket" />
         <action name="Activate">
           <parameter name="target" value="Acceleration Gate" />
         </action>
@@ -122,6 +125,7 @@
           <parameter name="Remove" value="Gist Saint" />
         </action>
         <action name="ClearPocket" />
+		<action name="ClearPocket" />
         <action name="Activate">
           <parameter name="target" value="Acceleration Gate" />
         </action>
@@ -137,6 +141,7 @@
 		  <parameter name="Target" value="Arch Gistii Nomad" />
 		  <parameter name="Target" value="Angel Webfier" />
         </action>
+		<action name="ClearPocket" />
 		<action name="ClearPocket" />
 		<action name="Done" />
     </pocket>

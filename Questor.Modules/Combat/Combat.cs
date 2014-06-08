@@ -1104,7 +1104,7 @@ namespace Questor.Modules.Combat
                 Time.Instance.NextBastionModeDeactivate = DateTime.UtcNow.AddSeconds(-2);
             }
 
-            if (Cache.Instance.PotentialCombatTargets.Any(e => e.Distance < Cache.Instance.WeaponRange && e.IsPlayer && e.IsTargetedBy && e.IsAttacking))
+            if (Cache.Instance.PotentialCombatTargets.Any(e => e.Distance < Cache.Instance.WeaponRange && e.IsPlayer && e.IsTargetedBy && e.IsAttacking) && _States.CurrentCombatState != CombatState.OutOfAmmo)
             {
                 if (Settings.Instance.DebugActivateBastion) Logging.Log("ActivateBastion", "We are being attacked by a player we should activate bastion", Logging.Debug);
                 activate = true;

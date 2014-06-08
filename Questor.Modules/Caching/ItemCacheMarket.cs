@@ -24,6 +24,7 @@ namespace Questor.Modules.Caching
 
             TypeId = item.TypeId;
             GroupId = item.GroupId;
+            CategoryId = item.CategoryId;
             BasePrice = item.BasePrice;
             Volume = item.Volume;
             Capacity = item.Capacity;
@@ -50,6 +51,8 @@ namespace Questor.Modules.Caching
         public int TypeId { get; private set; }
 
         public int GroupId { get; private set; }
+
+        public int CategoryId { get; private set; }
 
         public double BasePrice { get; private set; }
 

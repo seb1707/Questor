@@ -1150,7 +1150,7 @@ namespace Questor.Modules.Combat
                 if (bastionMod.IsDeactivating)
                     continue;
 
-                if (!bastionMod.IsActive)
+                if (!bastionMod.IsActive && activate)
                 {
                     Logging.Log("Combat", "Activating bastion [" + _weaponNumber + "]", Logging.Teal);
                     if (bastionMod.Click())
@@ -2339,7 +2339,7 @@ namespace Questor.Modules.Combat
                             {
                                 i++;
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Bastion", Logging.Debug);
-                                ActivateBastion(); //by default this will deactivate bastion when needed, but NOT activate it, activation needs activate = true
+                                ActivateBastion(false); //by default this will deactivate bastion when needed, but NOT activate it, activation needs activate = true
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Painters", Logging.Debug);
                                 ActivateTargetPainters(killTarget);
                                 if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "[" + i + "] Activating Webs", Logging.Debug);

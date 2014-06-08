@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Windows.Forms.VisualStyles;
-
 namespace Questor.Modules.Activities
 {
     using System;
@@ -24,8 +22,6 @@ namespace Questor.Modules.Activities
     using global::Questor.Modules.Combat;
     using Questor.Modules.Caching;
 
-    //using System.Reflection;
-
     public class CombatMissionCtrl
     {
         private DateTime? _clearPocketTimeout;
@@ -39,20 +35,17 @@ namespace Questor.Modules.Activities
         private DateTime _waitingSince;
         private DateTime _moveToNextPocket = DateTime.MaxValue;
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
-        //private int openCargoRetryNumber;
         private int AttemptsToActivateGateTimer;
         private int AttemptsToGetAwayFromGate;
         private bool ItemsHaveBeenMoved;
         private bool CargoHoldHasBeenStacked;
         public static bool DeactivateIfNothingTargetedWithinRange;
 
-        //private bool _targetNull;
 
-        public long AgentId { get; set; }
+        public static long AgentId { get; set; }
 
         public CombatMissionCtrl()
         {
-            //_targetNull = false;
             _pocketActions = new List<Actions.Action>();
         }
 
@@ -1043,7 +1036,7 @@ namespace Questor.Modules.Activities
             }
             
             // Start bastion mode
-            if (!Combat.ActivateBastion()) return;
+            if (!Combat.ActivateBastion(true)) return;
             return;
         }
 
@@ -2275,6 +2268,36 @@ namespace Questor.Modules.Activities
                 case ActionState.DebuggingWait:
                     DebuggingWait(action);
                     break;
+            }
+        }
+
+        public static void ReplaceMissionsActions()
+        {
+            _pocketActions.Clear();
+            
+            //
+            // Adds actions specified in the Mission XML
+            //
+            //
+            // Clear the Pocket
+            _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
+            _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
+            _pocketActions.AddRange(Cache.Instance.LoadMissionActions(AgentId, Cache.Instance.PocketNumber, true));
+
+            //we manually add 2 ClearPockets above, then we try to load other mission XMLs for this pocket, if we fail Count will be 2 and we know we need to add an activate and/or a done action.
+            if (_pocketActions.Count() == 2) 
+            {
+                // Is there a gate?
+                if (Cache.Instance.AccelerationGates != null && Cache.Instance.AccelerationGates.Any())
+                {
+                    // Activate it (Activate action also moves to the gate)
+                    _pocketActions.Add(new Actions.Action {State = ActionState.Activate});
+                    _pocketActions[_pocketActions.Count - 1].AddParameter("target", "Acceleration Gate");
+                }
+                else // No, were done
+                {
+                    _pocketActions.Add(new Actions.Action {State = ActionState.Done});
+                }
             }
         }
 

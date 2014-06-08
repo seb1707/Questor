@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Questor.Modules.Activities;
 
 namespace Questor.Modules.BackgroundTasks
 {
@@ -512,7 +513,7 @@ namespace Questor.Modules.BackgroundTasks
                             bool sayOk = false;
                             bool pause = false;
                             bool stackHangars = false;
-
+                            bool clearPocket = false;
                             //bool sayno = false;
                             if (!string.IsNullOrEmpty(window.Html))
                             {
@@ -568,7 +569,10 @@ namespace Questor.Modules.BackgroundTasks
                                 //In station - Flying Between Hangars
                                 close |= window.Html.Contains("You can't fly your active ship into someone else's hangar");
                                 // Lag :/
-                                close |= window.Html.Contains("This gate is locked!");
+                                
+                                clearPocket |= window.Html.Contains("This gate is locked!");
+
+
                                 close |= window.Html.Contains("The Zbikoki's Hacker Card");
                                 close |= window.Html.Contains(" units free.");
                                 close |= window.Html.Contains("already full");
@@ -719,6 +723,18 @@ namespace Questor.Modules.BackgroundTasks
                                 Logging.Log("Cleanup", "Closing modal window...", Logging.White);
                                 Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                                 window.Close();
+                                continue;
+                            }
+
+                            if (clearPocket)
+                            {
+                                Logging.Log("Cleanup", "Closing modal window...", Logging.White);
+                                Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
+                                window.Close();
+                                //
+                                //  queue up a clearpocket action;
+                                //
+                                CombatMissionCtrl.ReplaceMissionsActions();
                                 continue;
                             }
                         }

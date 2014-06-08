@@ -87,7 +87,7 @@ namespace Questor.Storylines
 
                 _statistics.AgentID = _agentId;
 
-                _combatMissionCtrl.AgentId = _agentId;
+                CombatMissionCtrl.AgentId = _agentId;
                 _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
 
                 //_States.CurrentCombatState = CombatState.CheckTargets;

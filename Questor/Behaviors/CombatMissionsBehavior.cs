@@ -126,7 +126,7 @@ namespace Questor.Behaviors
             }
 
             AgentInteraction.AgentId = Cache.Instance.AgentId;
-            _combatMissionCtrl.AgentId = Cache.Instance.AgentId;
+            CombatMissionCtrl.AgentId = Cache.Instance.AgentId;
             Arm.AgentId = Cache.Instance.AgentId;
             _statistics.AgentID = Cache.Instance.AgentId;
             AgentID = Cache.Instance.AgentId;

@@ -6345,21 +6345,23 @@ namespace Questor.Modules.Caching
                                 DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
                                 if (firstLootContainer == null && Cache.Instance.LootHangar.Items.Any(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer)))
                                 {
-                                    if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "Debug: Unable to find a container named [" + Settings.Instance.LootContainerName + "], using the available unnamed container", Logging.Teal);
+                                    Logging.Log("LootContainer", "Unable to find a container named [" + Settings.Instance.LootContainerName + "], using the available unnamed container", Logging.Teal);
                                     firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer));
                                 }
 
                                 if (firstLootContainer != null)
                                 {
+                                    
+                                    Cache.Instance.DirectEve.OpenInventory();
                                     _lootContainer = Cache.Instance.DirectEve.GetContainer(firstLootContainer.ItemId);
-
+                                    
                                     if (_lootContainer != null && _lootContainer.IsValid)
                                     {
-                                        //if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "LootContainer is defined (no window needed)", Logging.DebugHangars);
+                                        Logging.Log("LootContainer", "LootContainer is defined", Logging.DebugHangars);
                                         return _lootContainer;
                                     }
 
-                                    if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "LootContainer is still null", Logging.DebugHangars);
+                                    Logging.Log("LootContainer", "LootContainer is still null", Logging.DebugHangars);
                                     return null;
                                 }
 

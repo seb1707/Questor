@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVE.Net", "EVE.Net\EVE.Net.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorTest1", "QuestorTest1\QuestorTest1.csproj", "{6A28416A-E98D-4FB0-B058-E5FCEAED1C9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorDLL", "Questor\QuestorDLL.csproj", "{66D29F3D-2609-4536-BE84-417DE640FF6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorDLL", "QuestorDLL\QuestorDLL.csproj", "{F9D7C1C0-7D8B-4718-B5B1-A9938682BA33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -191,27 +191,6 @@ Global
 		{6A28416A-E98D-4FB0-B058-E5FCEAED1C9D}.Release|Win32.Build.0 = Release|x86
 		{6A28416A-E98D-4FB0-B058-E5FCEAED1C9D}.Release|x86.ActiveCfg = Release|x86
 		{6A28416A-E98D-4FB0-B058-E5FCEAED1C9D}.Release|x86.Build.0 = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|Any CPU.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|Mixed Platforms.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|Win32.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|Win32.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|x86.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.CodeAnalysis - Debug|x86.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|Win32.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|Win32.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|x86.ActiveCfg = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Debug|x86.Build.0 = Debug|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|Any CPU.ActiveCfg = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|Mixed Platforms.Build.0 = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|Win32.ActiveCfg = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|Win32.Build.0 = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|x86.ActiveCfg = Release|x86
-		{66D29F3D-2609-4536-BE84-417DE640FF6B}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

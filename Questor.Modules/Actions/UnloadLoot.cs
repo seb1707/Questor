@@ -324,9 +324,6 @@ namespace Questor.Modules.Actions
                     
                 foreach (DirectItem item in lootToMove)
                 {
-                    if (!Cache.Instance.InvTypesById.ContainsKey(item.TypeId))
-                        continue;
-
                     if (item.Volume != 0)
                     {
                         if (Settings.Instance.DebugLootValue) Logging.Log("UnloadLoot.Lootvalue","[" + x + "of" + y + "] ItemName [" + item.TypeName + "] ItemTypeID [" + item.TypeId + "] AveragePrice[" + (int)item.AveragePrice() + "]",Logging.Debug);

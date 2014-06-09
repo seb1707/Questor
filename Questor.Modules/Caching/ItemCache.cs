@@ -8,84 +8,39 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using Questor.Modules.States;
-
 namespace Questor.Modules.Caching
 {
+    using System;
     using System.Collections.Generic;
     using DirectEve;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
-
-    /*
-    public class ItemCache2
-    {
-        public ItemCache2(DirectItem item, bool cacheRefineOutput)
-        {
-            Id = item.ItemId;
-            Name = item.TypeName;
-
-            TypeId = item.TypeId;
-            GroupId = item.GroupId;
-            BasePrice = item.BasePrice;
-            Volume = item.Volume;
-            Capacity = item.Capacity;
-            MarketGroupId = item.MarketGroupId;
-            PortionSize = item.PortionSize;
-
-            Quantity = item.Quantity;
-            QuantitySold = 0;
-
-            RefineOutput = new List<ItemCache2>();
-            if (cacheRefineOutput)
-            {
-                foreach (DirectItem i in item.Materials)
-                    RefineOutput.Add(new ItemCache2(i, false));
-            }
-        }
-
-        public InvType InvType { get; set; }
-
-        public long Id { get; private set; }
-        public string Name { get; private set; }
-
-        public int TypeId { get; private set; }
-        public int GroupId { get; private set; }
-        public double BasePrice { get; private set; }
-        public double Volume { get; private set; }
-        public double Capacity { get; private set; }
-        public int MarketGroupId { get; private set; }
-        public int PortionSize { get; private set; }
-
-        public int Quantity { get; private set; }
-        public int QuantitySold { get; set; }
-
-        public double? StationBuy { get; set; }
-
-        public List<ItemCache2> RefineOutput { get; private set; }
-    }
-     * */
+    using global::Questor.Modules.States;
 
     public class ItemCache
     {
         public ItemCache(DirectItem item, bool cacheRefineOutput)
         {
-            BasePrice = item.BasePrice;
-            Capacity = item.Capacity;
-            MarketGroupId = item.MarketGroupId;
-            PortionSize = item.PortionSize;
-            QuantitySold = 0;
-            RefineOutput = new List<ItemCache>();
-            if (cacheRefineOutput)
+            try
             {
-                foreach (DirectItem i in item.Materials)
-                    RefineOutput.Add(new ItemCache(i, false));
+                BasePrice = item.BasePrice;
+                Capacity = item.Capacity;
+                MarketGroupId = item.MarketGroupId;
+                PortionSize = item.PortionSize;
+                QuantitySold = 0;
+                RefineOutput = new List<ItemCache>();
+                if (cacheRefineOutput)
+                {
+                    foreach (DirectItem i in item.Materials)
+                        RefineOutput.Add(new ItemCache(i, false));
+                }
+
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("ItemCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
-
-        //public InvType InvType { get; set; }
 
         //public long Id { get; private set; }
         //public string Name { get; private set; }
@@ -316,47 +271,19 @@ namespace Questor.Modules.Caching
 
         public double TotalVolume
         {
-            get { return InvType.Volume * Quantity; }
-        }
-
-        public InvType InvType
-        {
-            get
-            {
-                // Create a new InvType if its unknown
-                if (!Cache.Instance.InvTypesById.ContainsKey(TypeId))
-                {
-                    Logging.Log("ItemCache", "Unknown TypeID for [" + Name + "][" + TypeId + "]", Logging.Orange);
-                    Cache.Instance.InvTypesById[TypeId] = new Questor.Modules.Lookup.InvType(this);
-                }
-
-                return Cache.Instance.InvTypesById[TypeId];
-            }
-
-            set
-            {
-                if (!Cache.Instance.InvTypesById.ContainsKey(TypeId))
-                {
-                    Cache.Instance.InvTypesById[TypeId] = value;
-                }
-            }
+            get { return _directItem.Volume * Quantity; }
         }
 
         public double? IskPerM3
         {
             get
             {
-                if (InvType.MaxBuy == null)
+                if (_directItem != null && _directItem.AveragePrice() != null)
                 {
-                    if (InvType.MinSell == null)
-                    {
-                        return 1;
-                    }
-
-                    return InvType.MedianSell / InvType.Volume;
+                    return _directItem.AveragePrice() / _directItem.Volume;
                 }
 
-                return InvType.MedianBuy / InvType.Volume;
+                return 1;
             }
         }
 
@@ -364,17 +291,12 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (InvType.MaxBuy == null)
+                if (_directItem != null && _directItem.AveragePrice() != null)
                 {
-                    if (InvType.MinSell == null)
-                    {
-                        return null;
-                    }
-
-                    return InvType.MedianSell;
+                    return _directItem.AveragePrice();
                 }
 
-                return InvType.MedianBuy;
+                return 1;
             }
         }
     }

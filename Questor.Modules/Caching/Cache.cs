@@ -323,6 +323,7 @@ namespace Questor.Modules.Caching
             Environment.Exit(0);
         }
 
+        /*
         public void IterateInvTypes(string module)
         {
             string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -361,6 +362,7 @@ namespace Questor.Modules.Caching
                 Logging.Log(module, "IterateInvTypes - unable to find [" + System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "]", Logging.White);
             }
         }
+         * */
         
         public void IterateShipTargetValues(string module)
         {
@@ -558,7 +560,7 @@ namespace Questor.Modules.Caching
 
         public string MissionXmlPath { get; set; }
 
-        public XDocument InvTypes;
+        //public XDocument InvTypes;
         public XDocument UnloadLootTheseItemsAreLootItems;
         public XDocument InvIgnore;
         public string Path;
@@ -627,7 +629,7 @@ namespace Questor.Modules.Caching
 
         public DirectEve DirectEve { get; set; }
 
-        public Dictionary<int, InvType> InvTypesById { get; private set; }
+        //public Dictionary<int, InvType> InvTypesById { get; private set; }
 
         public Dictionary<int, String> UnloadLootTheseItemsAreLootById { get; private set; }
 

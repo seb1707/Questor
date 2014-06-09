@@ -208,8 +208,9 @@ namespace Questor.Storylines
                 }
 
                 // Get the median sell price
-                InvType type = Cache.Instance.InvTypesById[20];
-                double? maxPrice = type.MedianSell * 4;
+                DirectInvType type;
+                Cache.Instance.DirectEve.InvTypes.TryGetValue(20, out type);
+                double? maxPrice = type.AveragePrice * 4;
 
                 // Do we have orders that sell enough ore for the mission?
                 IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == directEve.Session.StationId && o.Price < maxPrice).ToList();

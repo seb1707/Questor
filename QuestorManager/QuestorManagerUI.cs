@@ -70,7 +70,7 @@ namespace QuestorManager
         private readonly BuyLPI _buylpi;
         private readonly Defense _defense;
         private readonly Cleanup _cleanup;
-        private readonly ListItems _item;
+        //private readonly ListItems _item;
         private DateTime _lastAction;
 
         public string CharacterName { get; set; }
@@ -141,34 +141,7 @@ namespace QuestorManager
             }
             #endregion Load DirectEVE
             
-            //
-            // Invtypes.xml
-            //
-            try
-            {
-                Cache.Instance.InvTypes = XDocument.Load(Settings.Instance.Path + "\\InvTypes.xml");
-
-                List.Clear();
-
-                InvTypesById = new Dictionary<int, InvType>();
-                if (Cache.Instance.InvTypes.Root != null)
-                {
-                    foreach (XElement element in Cache.Instance.InvTypes.Root.Elements("invtype"))
-                    {
-                        InvTypesById.Add((int)element.Attribute("id"), new InvType(element));
-
-                        _item = new ListItems();
-                        _item.Id = (int)element.Attribute("id");
-                        _item.Name = (string)element.Attribute("name");
-                        List.Add(_item);
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("QuestorManager", "Unable to load [" + Settings.Instance.Path + "\\InvIgnore.xml" + "][" + exception + "]", Logging.Teal);
-            }
-
+            
             //
             // InvIgnore.xml
             //
@@ -1092,12 +1065,12 @@ namespace QuestorManager
         private void ProcessItems()
         {
             lvItems.Items.Clear();
-            foreach (ItemCache item in Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
+            foreach (ItemCache item in Items.OrderByDescending(i => i.Value * i.Quantity))
             {
                 ListViewItem listItem = new ListViewItem(item.Name);
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.Quantity));
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.QuantitySold));
-                listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy));
+                listItem.SubItems.Add(string.Format("{0:#,##0}", item.Value));
                 listItem.SubItems.Add(string.Format("{0:#,##0}", item.StationBuy));
 
                 if (cbxSell.Checked)
@@ -1106,7 +1079,7 @@ namespace QuestorManager
                 }
                 else
                 {
-                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.InvType.MedianBuy * item.Quantity));
+                    listItem.SubItems.Add(string.Format("{0:#,##0}", item.Value * item.Quantity));
                 }
 
                 lvItems.Items.Add(listItem);
@@ -1114,12 +1087,12 @@ namespace QuestorManager
 
             if (cbxSell.Checked)
             {
-                tbTotalMedian.Text = string.Format("{0:#,##0}", Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.QuantitySold));
+                tbTotalMedian.Text = string.Format("{0:#,##0}", Items.Sum(i => i.Value * i.QuantitySold));
                 tbTotalSold.Text = string.Format("{0:#,##0}", Items.Sum(i => i.StationBuy * i.QuantitySold));
             }
             else
             {
-                tbTotalMedian.Text = string.Format("{0:#,##0}", Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.Quantity));
+                tbTotalMedian.Text = string.Format("{0:#,##0}", Items.Sum(i => i.Value * i.Quantity));
                 tbTotalSold.Text = "";
             }
         }

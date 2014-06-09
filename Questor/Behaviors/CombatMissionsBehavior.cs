@@ -719,10 +719,11 @@ namespace Questor.Behaviors
         {
             if (Settings.Instance.UseDrones)
             {
-                if (Cache.Instance.InvTypesById.ContainsKey(Settings.Instance.DroneTypeId))
+                DirectInvType drone = null;
+                Cache.Instance.DirectEve.InvTypes.TryGetValue(Settings.Instance.DroneTypeId, out drone);
+                if (drone != null)
                 {
                     if (!Cache.Instance.OpenDroneBay("Statistics: WriteDroneStatsLog")) return;
-                    InvType drone = Cache.Instance.InvTypesById[Settings.Instance.DroneTypeId];
                     Statistics.Instance.LostDrones = (int)Math.Floor((Cache.Instance.DroneBay.Capacity - Cache.Instance.DroneBay.UsedCapacity) / drone.Volume);
                     //Logging.Log("CombatMissionsBehavior: Starting: Statistics.WriteDroneStatsLog");
                     if (!Statistics.WriteDroneStatsLog()) return;

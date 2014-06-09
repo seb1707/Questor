@@ -219,8 +219,9 @@ namespace Questor.Modules.Lookup
 					}
 
 					// Get the median sell price
-					InvType type = Cache.Instance.InvTypesById[skillID];
-					double? maxPrice = type.MedianSell * 10;
+				    DirectInvType type;
+				    Cache.Instance.DirectEve.InvTypes.TryGetValue(skillID, out type);
+					double? maxPrice = type.AveragePrice * 10;
 					Logging.Log("buySkill", "maxPrice "  + maxPrice.ToString(), Logging.White);
 
 					// Do we have orders?

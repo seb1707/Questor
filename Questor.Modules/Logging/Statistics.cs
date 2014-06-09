@@ -469,9 +469,10 @@ namespace Questor.Modules.Logging
                 foreach (DirectItem item in ammoCargo)
                 {
                     Ammo ammo1 = Settings.Instance.Ammo.FirstOrDefault(a => a.TypeId == item.TypeId);
-                    InvType ammoType = Cache.Instance.InvTypesById[item.TypeId];
+                    DirectInvType ammoType;
+                    Cache.Instance.DirectEve.InvTypes.TryGetValue(item.TypeId, out ammoType);
                     if (ammo1 != null) Statistics.Instance.AmmoConsumption = (ammo1.Quantity - item.Quantity);
-                    Statistics.Instance.AmmoValue = ((int?)ammoType.MedianSell ?? 0) * Statistics.Instance.AmmoConsumption;
+                    Statistics.Instance.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.Instance.AmmoConsumption;
                 }
             }
             catch (Exception exception)

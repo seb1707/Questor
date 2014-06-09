@@ -162,13 +162,10 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="D3DDetour" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(ProjectDir)..\Directeve\easyhook*.dll" "$(ProjectDir)..\Output\" 
-copy /y "$(ProjectDir)..\Directeve\easyhook*.exe" "$(ProjectDir)..\Output\"</PostBuildEvent>
+    <PostBuildEvent>copy /y "$(ProjectDir)..\Directeve\easyhook*.dll" "$(ProjectDir)..\Output\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

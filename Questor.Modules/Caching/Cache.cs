@@ -4320,7 +4320,7 @@ namespace Questor.Modules.Caching
                                                                   .ThenByDescending(t => t.IsLastTargetDronesWereShooting)                    // Keep current target
                                                                   .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we do not switch our targets too often
                                                                   .ThenByDescending(t => t.IsEntityIShouldKeepShootingWithDrones)             // Shoot targets that are in armor!
-                                                                  .ThenByDescending(t => t.DronePriorityLevel)
+                                                                  .ThenBy(t => t.DronePriorityLevel)
                                                                   .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || (Settings.Instance.DronesKillHighValueTargets && t.IsBattleship))
                                                                   .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
                                                                   .ThenBy(t => t.Nearest5kDistance);
@@ -4431,7 +4431,7 @@ namespace Questor.Modules.Caching
                         {
                             target = Cache.Instance.DronePriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && (pt.Distance < Distance) && pt.IsActiveDroneEwarType == priorityType)
                                                                                                 || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
-                                                                                                       .OrderByDescending(pt => !pt.IsNPCFrigate)
+                                                                                                       .OrderByDescending(pt => pt.IsNPCFrigate)
                                                                                                        .ThenByDescending(pt => pt.IsLastTargetDronesWereShooting)
                                                                                                        .ThenByDescending(pt => pt.IsInDroneRange)
                                                                                                        .ThenBy(pt => pt.IsEntityIShouldKeepShootingWithDrones)
@@ -5063,8 +5063,8 @@ namespace Questor.Modules.Caching
                                                                             && !p.IsIgnored
                                                                             && p.IsReadyToShoot)
                                                                            .OrderBy(pt => pt.DronePriorityLevel)
-                                                                           .ThenByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenByDescending(pt => pt.IsEwarTarget)
+                                                                           .ThenByDescending(pt => pt.IsTargetedBy)
                                                                            .ThenBy(pt => pt.Nearest5kDistance)
                                                                            .FirstOrDefault();
             }

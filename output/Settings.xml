@@ -12,6 +12,7 @@
   <debugAgentInteractionReplyToAgent>false</debugAgentInteractionReplyToAgent>
   <debugAllMissionsOnBlackList>false</debugAllMissionsOnBlackList>
   <debugAllMissionsOnGreyList>false</debugAllMissionsOnGreyList>
+  <debugAmmo>false</debugAmmo>
   <debugArm>false</debugArm>
   <debugAttachVSDebugger>false</debugAttachVSDebugger>
   <debugAutoStart>false</debugAutoStart>
@@ -86,7 +87,7 @@
   <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
   <eveServername>Tranquility</eveServername> <!-- the US server is Tranquility, the CN server is Serenity, this is used for localization purposes -->
   <enforcedDelayBetweenModuleClicks>3000</enforcedDelayBetweenModuleClicks> <!-- do not adjust this, you have been warned, this is for debugging purposed only and may cause all your hair to fall out -->
-  
+  <avoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley>false</avoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley>
   <!--                                                -->
   <!--          MISC SETTINGS          -->
   <!--                                                -->
@@ -436,7 +437,7 @@
   <!-- MaxRange we should use NOS / Neuts -->
   <NosDistance>38000</NosDistance>
   
-  <!-- Maximum number of targets per value, these will work better set to a higher number but you need multitasking trained and enough targeting slots to accomidate these high and low value slots plus the maximumWreckTarget slots  all at once -->
+  <!-- Maximum number of targets per value, these will work better set to a higher number but you need multitasking trained and enough targeting slots to accommodate these high and low value slots plus the maximumWreckTarget slots  all at once -->
   <maximumHighValueTargets>3</maximumHighValueTargets><!-- default is 3 -->
   <maximumLowValueTargets>2</maximumLowValueTargets><!-- default is 2 -->
 

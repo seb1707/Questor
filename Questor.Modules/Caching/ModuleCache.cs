@@ -9,6 +9,8 @@
 // -------------------------------------------------------------------------------
 
 
+using System.Linq;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -522,6 +524,68 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
+                if (IsMissileLauncher && Settings.Instance.AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley)
+                {
+                    if (Cache.Instance.ListofEachWeaponsVolleyData != null && Cache.Instance.ListofEachWeaponsVolleyData.Any())
+                    {
+                        //
+                        // sanity check
+                        //
+                        if (Cache.Instance.ListofEachWeaponsVolleyData.Count() > 100000)
+                        {
+                            Logging.Log("Activate", "We should be clearing ListofEachWeaponsVolleyData at the end of each mission, how did we get [" + Cache.Instance.ListofEachWeaponsVolleyData.Count() + "] entries already?", Logging.Debug);
+                        }
+
+                        foreach (EachWeaponsVolleyCache _volley in Cache.Instance.ListofEachWeaponsVolleyData.Where(i => i.targetItemID == target.Id))
+                        {
+                            DirectInvType __directInvTypeItem = null;
+                            Cache.Instance.DirectEve.InvTypes.TryGetValue((int)_volley.moduleAmmoTypeID, out __directInvTypeItem); //create a new DirectIntType object and assign it
+                            if (__directInvTypeItem != null)
+                            {
+                                DirectItem __directItem = null;
+                                __directItem = (DirectItem)__directInvTypeItem; //cast the directInvType Object to a DirectItem
+                                ItemCache __item = null;
+                                __item = new ItemCache(__directItem); //create an ItemCache object from the DirectItem
+
+                                //TRUE Max Missile Range
+                                //
+                                //r = Range
+                                //v = Velocity of missile
+                                //f = Flight time of missile
+                                //m = Mass of missile
+                                //a = Agility of missile
+
+                                //Quote:
+                                //r = v*(f-(10^6/(m*a)
+                                //
+                                double WeaponTimeToTarget_Seconds = _volley.targetDistance/__item.maxVelocity;
+                                if (Cache.Instance.MyMissileProjectionSkillLevel > 0)
+                                {                                                                              
+                                    WeaponTimeToTarget_Seconds = _volley.targetDistance / (__item.maxVelocity * (1 + ((Cache.Instance.MyMissileProjectionSkillLevel * 10) / 100)));
+                                }
+
+                                if (DateTime.UtcNow > _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds + .5))
+                                {
+                                    continue;
+                                }
+
+                                if (DateTime.UtcNow < _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds - .5))
+                                {
+                                    continue;
+                                }
+
+                                //
+                                // we found a volley that should hit this target within the next 1 second: delaying the next volley until the next pulse
+                                //
+                                Logging.Log("Activate", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "] has a volley about to hit it, waiting a moment before firing again", Logging.Debug);
+                                return false;
+                            }
+                        }
+                    }
+                }
+                
+                //DateTime.UtcNow > i.ThisVolleyCacheCreated.AddSeconds(10)))
+                
                 _module.Activate(target.Id);
                 SnapshotOfVolleyData = new EachWeaponsVolleyCache(_module, target);
                 if (IsMissileLauncher || IsTurret)

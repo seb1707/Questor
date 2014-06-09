@@ -96,6 +96,7 @@ namespace Questor.Modules.Lookup
         public bool DebugAgentInteractionReplyToAgent { get; set; }
         public bool DebugAllMissionsOnBlackList { get; set; }
         public bool DebugAllMissionsOnGreyList { get; set; }
+        public bool DebugAmmo { get; set; }
         public bool DebugArm { get; set; }
         public bool DebugAttachVSDebugger { get; set; }
         public bool DebugAutoStart { get; set; }
@@ -186,7 +187,7 @@ namespace Questor.Modules.Lookup
         public bool setEveClientDestinationWhenTraveling { get; set; }
         public string EveServerName { get; set; }
         public int EnforcedDelayBetweenModuleClicks { get; set; }
-        
+        public bool AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley { get; set; }
         public string CharacterToAcceptInvitesFrom { get; set; }
 
         //
@@ -756,6 +757,7 @@ namespace Questor.Modules.Lookup
             DebugAgentInteractionReplyToAgent = (bool?)CharacterSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? (bool?)CommonSettingsXml.Element("debugAgentInteractionReplyToAgent") ?? false;
             DebugAllMissionsOnBlackList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnBlackList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnBlackList") ?? false;
             DebugAllMissionsOnGreyList = (bool?)CharacterSettingsXml.Element("debugAllMissionsOnGreyList") ?? (bool?)CommonSettingsXml.Element("debugAllMissionsOnGreyList") ?? false;
+            DebugAmmo = (bool?)CharacterSettingsXml.Element("debugAmmo") ?? (bool?)CommonSettingsXml.Element("debugAmmo") ?? false;
             DebugArm = (bool?)CharacterSettingsXml.Element("debugArm") ?? (bool?)CommonSettingsXml.Element("debugArm") ?? false;
             DebugAttachVSDebugger = (bool?)CharacterSettingsXml.Element("debugAttachVSDebugger") ?? (bool?)CommonSettingsXml.Element("debugAttachVSDebugger") ?? false;
             DebugAutoStart = (bool?)CharacterSettingsXml.Element("debugAutoStart") ?? (bool?)CommonSettingsXml.Element("debugAutoStart") ?? false;
@@ -849,6 +851,7 @@ namespace Questor.Modules.Lookup
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
             EveServerName = (string)CharacterSettingsXml.Element("eveServerName") ?? (string)CommonSettingsXml.Element("eveServerName") ?? "Tranquility";
             EnforcedDelayBetweenModuleClicks = (int?)CharacterSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? (int?)CommonSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? 3000;
+            AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley = (bool?)CharacterSettingsXml.Element("avoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley") ?? (bool?)CommonSettingsXml.Element("AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley") ?? false;
             //
             // Misc Settings
             //

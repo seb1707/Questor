@@ -35,6 +35,36 @@ namespace Questor.Modules.Caching
                         RefineOutput.Add(new ItemCache(i, false));
                 }
 
+                maxVelocity = item.Attributes.TryGet<int>("maxVelocity");
+                
+                emDamage = item.Attributes.TryGet<int>("emDamage");
+                explosiveDamage = item.Attributes.TryGet<int>("explosiveDamage");
+                kineticDamage = item.Attributes.TryGet<int>("explosiveDamage");
+                thermalDamage = item.Attributes.TryGet<int>("thermalDamage");
+                metaLevel = item.Attributes.TryGet<int>("metaLevel");
+                hp = item.Attributes.TryGet<int>("hp");
+                techLevel = item.Attributes.TryGet<int>("techLevel");
+                radius = item.Attributes.TryGet<int>("radius");
+
+                //
+                // only useful for missiles should we not pull this info for items that wont have these attributes?!
+                //
+                aoeDamageReductionFactor = item.Attributes.TryGet<int>("aoeDamageReductionFactor");
+                detonationRange = item.Attributes.TryGet<int>("detonationRange");
+                aoeCloudSize = item.Attributes.TryGet<int>("aoeCloudSize");
+                aoeVelocity = item.Attributes.TryGet<int>("aoeVelocity");
+                agility = item.Attributes.TryGet<int>("agility");
+                explosionDelay = item.Attributes.TryGet<int>("explosionDelay");
+                maxVelocityBonus = item.Attributes.TryGet<int>("maxVelocityBonus");
+                
+                //
+                // only useful for AutoCannon / Artillery and Blaster/RailGun ammo should we not pull this info for items that wont have these attributes?!
+                //
+                fallofMultiplier = item.Attributes.TryGet<int>("fallofMultiplier");
+                weaponRangeMultiplier = item.Attributes.TryGet<int>("weaponRangeMultiplier");
+                trackingSpeedMultiplier = item.Attributes.TryGet<int>("trackingSpeedMultiplier");
+                powerNeedMultiplier = item.Attributes.TryGet<int>("powerNeedMultiplier");
+
             }
             catch (Exception exception)
             {
@@ -42,6 +72,35 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public int maxVelocity { get; set; } //(int)ammo.Attribute("maxVelocity");
+        public int emDamage { get; set; } //(int)ammo.Attribute("emDamage");
+        public int explosiveDamage { get; set; } //(int)ammo.Attribute("explosiveDamage");
+        public int kineticDamage { get; set; } //(int)ammo.Attribute("kineticDamage");
+        public int thermalDamage { get; set; } //(int)ammo.Attribute("thermalDamage");
+        public int metaLevel { get; set; } //(int)ammo.Attribute("metaLevel");
+        public int hp { get; set; } //(int)ammo.Attribute("hp");
+        public int techLevel { get; set; } //(int)ammo.Attribute("techLevel");
+        public int radius { get; set; } //(int)ammo.Attribute("radius");
+
+        //
+        // only useful for missiles
+        //
+        public int aoeDamageReductionFactor { get; set; } //(int)ammo.Attribute("aoeDamageReductionFactor");
+        public int detonationRange { get; set; } //(int)ammo.Attribute("detonationRange");
+        public int aoeCloudSize { get; set; } //(int)ammo.Attribute("aoeCloudSize");
+        public int aoeVelocity { get; set; } //(int)ammo.Attribute("aoeVelocity");
+        public int agility { get; set; } //(int)ammo.Attribute("agility");
+        public int explosionDelay { get; set; } //(int)ammo.Attribute("explosionDelay");
+        public int maxVelocityBonus { get; set; } //(int)ammo.Attribute("maxVelocityBonus");
+        
+        //
+        // only useful for AutoCannons and RailGuns
+        //
+        public int fallofMultiplier { get; set; } //(int)ammo.Attribute("fallofMultiplier");
+        public int weaponRangeMultiplier { get; set; } //(int)ammo.Attribute("weaponRangeMultiplier");
+        public int trackingSpeedMultiplier { get; set; } //(int)ammo.Attribute("trackingSpeedMultiplier");
+        public int powerNeedMultiplier { get; set; } //(int)ammo.Attribute("powerNeedMultiplier");
+        
         //public long Id { get; private set; }
         //public string Name { get; private set; }
 
@@ -278,7 +337,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directItem != null && _directItem.AveragePrice() != null)
+                if (_directItem != null)
                 {
                     return _directItem.AveragePrice() / _directItem.Volume;
                 }
@@ -291,7 +350,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directItem != null && _directItem.AveragePrice() != null)
+                if (_directItem != null)
                 {
                     return _directItem.AveragePrice();
                 }

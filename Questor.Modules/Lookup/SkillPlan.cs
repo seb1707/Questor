@@ -85,12 +85,10 @@ namespace Questor.Modules.Lookup
 						if (DoWeHaveTheRightPrerequisites(SkillBookToInject.TypeId)) {
 							SkillBookToInject.InjectSkill();
 							skillWasInjected = true;
-							
 							return true;
-						} else {
-							if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "Skillbook: We don't have the right Prerequisites for " + SkillBookToInject.GivenName, Logging.Debug);
-						}
-						
+						} 
+
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("InjectSkillBook", "Skillbook: We don't have the right Prerequisites for " + SkillBookToInject.GivenName, Logging.Debug);
 					}
 					
 					if (MyCharacterSheetSkills != null && MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName))
@@ -106,38 +104,41 @@ namespace Questor.Modules.Lookup
 			return false;
 		}
 		public static bool DoWeHaveTheRightPrerequisites(int skillID){
-			try {
-				if (skillPreReqs == null) {
+			try 
+            {
+				if (skillPreReqs == null) 
+                {
 					skillPreReqs = XDocument.Load(Settings.Instance.Path + "\\Skill_Prerequisites.xml");
 					if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites","Skill_Prerequisites.xml Loaded.", Logging.Debug);
 				}
-			} catch (Exception) {
+			} 
+            catch (Exception) 
+            {
 				
 				if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites","Skill_Prerequisites.xml exception -- does the file exist?", Logging.Debug);
 				return false;
 			}
 			
-			foreach (var skills in skillPreReqs.Descendants("skill")){
-				
-				if(skillID.ToString().Equals(skills.Attribute("id").Value)){
-					
+			foreach (var skills in skillPreReqs.Descendants("skill"))
+            {
+				if(skillID.ToString().Equals(skills.Attribute("id").Value))
+                {
 					if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "skillID.ToString().Equals(skills.Attribute(\"id\").Value == TRUE", Logging.Debug);
-					foreach(var preRegs in skills.Descendants("preqskill")){
-						
-						if (MyCharacterSheetSkills.Any(i => i.TypeId.ToString().Equals(preRegs.Attribute("id").Value))){
-							
+					foreach(var preRegs in skills.Descendants("preqskill"))
+                    {	
+						if (MyCharacterSheetSkills.Any(i => i.TypeId.ToString().Equals(preRegs.Attribute("id").Value)))
+                        {	
 							if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We have this Prerequisite: " + preRegs.Attribute("id").Value, Logging.Debug);
-							if(MyCharacterSheetSkills.Any(i => i.TypeId.ToString().Equals(preRegs.Attribute("id").Value) && i.Level < Convert.ToInt32(preRegs.Value))){
-								
+							if(MyCharacterSheetSkills.Any(i => i.TypeId.ToString().Equals(preRegs.Attribute("id").Value) && i.Level < Convert.ToInt32(preRegs.Value)))
+                            {	
 								if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We don't meet the required level on this skill: " + preRegs.Attribute("id").Value, Logging.Debug);
-								
 								return false;
-							} else {
+							} 
 								
-								if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We meet the required skill level on this skill: " + preRegs.Attribute("id").Value, Logging.Debug);
-							}
-						} else {
-							
+							if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We meet the required skill level on this skill: " + preRegs.Attribute("id").Value, Logging.Debug);	
+						} 
+                        else 
+                        {
 							if (Settings.Instance.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites", "We don't have this prerequisite: " + preRegs.Attribute("id").Value, Logging.Debug);
 						}
 					}
@@ -148,17 +149,18 @@ namespace Questor.Modules.Lookup
 			return false;
 			// not in list which is unlikely
 		}
-		public static bool DoWeHaveThisSkillAlreadyInOurItemHangar(int skillID){
+		public static bool DoWeHaveThisSkillAlreadyInOurItemHangar(int skillID)
+        {
 			if (!Cache.Instance.InStation) return false;
 			IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == skillID).ToList();
 			if (items.Any())
 			{
 				if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillPlan.DoWeHaveThisSkillAlreadyInOurItemHangar:", "We already have this skill in our hangar " + skillID.ToString(), Logging.White);
 				return true;
-			} else {
-				if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillPlan.DoWeHaveThisSkillAlreadyInOurItemHangar:", "We don't have this skill in our hangar " + skillID.ToString(), Logging.White);
-				return false;
 			}
+            
+			if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillPlan.DoWeHaveThisSkillAlreadyInOurItemHangar:", "We don't have this skill in our hangar " + skillID.ToString(), Logging.White);
+			return false;
 		}
 		public static bool BuySkill(int skillID){
 			
@@ -172,7 +174,8 @@ namespace Questor.Modules.Lookup
 			if (buyingSkill == true && buyingSkillTypeID != 0){
 				buyingIterator++;
 				
-				if(buyingIterator>20){
+				if (buyingIterator>20)
+                {
 					Logging.Log("buySkill", "buying iterator < 20 with SkillID" + skillID, Logging.White);
 					buyingSkill = false;
 					buyingSkillTypeID = 0;
@@ -203,6 +206,7 @@ namespace Questor.Modules.Lookup
 						return false;
 						
 					}
+
 					if (!marketWindow.IsReady)
 					{
 						_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(3);
@@ -239,14 +243,13 @@ namespace Questor.Modules.Lookup
 						_nextRetrieveCharactersheetInfoAction = DateTime.MinValue; // ensure we get the character sheet update
 						_nextSkillTrainingAction  = DateTime.UtcNow.AddSeconds(20);
 						return true;
-					} else {
-						Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
-						buyingSkill = false;
-						buyingSkillTypeID = 0;
-						buyingIterator = 0;
-						return false;
-						
-					}
+					} 
+
+					Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
+					buyingSkill = false;
+					buyingSkillTypeID = 0;
+					buyingIterator = 0;
+					return false;
 				}
 			}
 			return false;
@@ -375,19 +378,71 @@ namespace Questor.Modules.Lookup
 		
 		public static bool SkillAlreadyInCharacterSheet(KeyValuePair<string, int> skill)
         {
-			foreach (DirectSkill knownskill in MyCharacterSheetSkills)
-			{
-				if (knownskill.TypeName == skill.Key)
-				{
-					if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We already have this skill injected:  [" + skill.Key + "]", Logging.White);
-					return true;
-				}
-			}
+		    try
+		    {
+                foreach (DirectSkill knownskill in MyCharacterSheetSkills)
+                {
+                    if (knownskill.TypeName == skill.Key)
+                    {
+                        if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We already have this skill injected:  [" + skill.Key + "]", Logging.White);
+                        return true;
+                    }
+                }
 
-			if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We DON'T have this skill already injected:  [" + skill.Key + "]", Logging.White);
-			return false;
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We DON'T have this skill already injected:  [" + skill.Key + "]", Logging.White);
+                return false;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("MissileProjectionSkillLevel", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
-		
+
+        public static int SkillLevel(string SkillToLookFor)
+        {
+            try
+            {
+                if (MyCharacterSheetSkills == null || !MyCharacterSheetSkills.Any())
+                {
+                    if (Settings.Instance.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!MyCharacterSheetSkills.Any())", Logging.Teal);
+
+                    MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
+                }
+
+                foreach (DirectSkill knownskill in MyCharacterSheetSkills)
+                {
+                    if (knownskill.TypeName == SkillToLookFor)
+                    {
+                        return knownskill.Level;
+                    }
+                }
+
+                if (Settings.Instance.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We do not have [" + SkillToLookFor + "] yet", Logging.White);
+                return 0;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MissileProjectionSkillLevel", "Exception [" + exception + "]", Logging.Debug);
+                return 0;
+            }
+        }
+
+        public static int MissileProjectionSkillLevel()
+        {
+            try
+            {
+                int? _skillLevel = 0;
+                _skillLevel = SkillLevel("Missile Projection");
+                return _skillLevel ?? 0;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("MissileProjectionSkillLevel", "Exception [" + exception + "]", Logging.Debug);
+                return 0;
+            }
+        }
+
 		public static bool SkillIsBelowPlannedLevel(KeyValuePair<string, int> skill)
         {
 		    foreach (DirectSkill knownskill in MyCharacterSheetSkills)

@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueDump", "ValueDump\Valu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questor.Modules", "Questor.Modules\Questor.Modules.csproj", "{0C0BE1A3-BA5B-41A1-B578-F20777D02304}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateInvTypes", "UpdateInvTypes\UpdateInvTypes.csproj", "{69F44183-8D8B-48A7-B3CA-813A9B57E2A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuyLPI", "BuyLPI\BuyLPI.csproj", "{ABCCE619-8340-4BE1-A241-2A7277FC433D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorManager", "QuestorManager\QuestorManager.csproj", "{393DE7BE-C792-477A-B884-75F174BAB9B6}"

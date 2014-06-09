@@ -2362,6 +2362,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CombatMissionCtrlState.LoadPocket:
+                    Cache.Instance.ClearPerPocketCache();
                     _pocketActions.Clear();
                     _pocketActions.AddRange(Cache.Instance.LoadMissionActions(AgentId, Cache.Instance.PocketNumber, true));
 

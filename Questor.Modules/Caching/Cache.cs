@@ -4046,6 +4046,8 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public int MyMissileProjectionSkillLevel = 0;
+
         public void ClearPerPocketCache()
         {
             try
@@ -4066,7 +4068,9 @@ namespace Questor.Modules.Caching
                 Statistics.IndividualVolleyDataStatistics(Cache.Instance.ListofEachWeaponsVolleyData);
                 ListofEachWeaponsVolleyData.Clear();
                 ListOfUndockBookmarks = null;
-                
+
+                MyMissileProjectionSkillLevel = SkillPlan.MissileProjectionSkillLevel();
+
                 EntityNames.Clear();
                 EntityTypeID.Clear();
                 EntityGroupID.Clear();

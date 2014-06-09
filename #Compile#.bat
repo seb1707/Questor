@@ -23,7 +23,7 @@ del ".\bin\release\*.*" /Q
 set nameofproject=Questor.Modules
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 6 builds
 %pause%
 ::
 :: Build Project: Questor
@@ -31,7 +31,7 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 1 of 7 build
 set nameofproject=Questor
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 6 builds
 %pause%
 ::
 :: Build Project: QuestorDLL
@@ -39,7 +39,7 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 7 build
 set nameofproject=QuestorDLL
 set csproj=.\questor\QuestorDLL.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 6 builds
 pause
 ::
 :: Build Project valuedump
@@ -47,7 +47,7 @@ pause
 set nameofproject=valuedump
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 6 builds
 %pause%
 ::
 :: Build Project: QuestorManager
@@ -55,7 +55,7 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 4 of 7 build
 set nameofproject=QuestorManager
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 6 builds
 %pause%
 ::
 :: Build Project: BUYLPI
@@ -63,16 +63,7 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 7 build
 set nameofproject=BUYLPI
 set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 7 builds
-%pause%
-::
-:: Build Project: updateinvtypes
-::
-set nameofproject=updateinvtypes
-set csproj=.\%nameofproject%\%nameofproject%.csproj
-::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-"%msbuild4%" "%csproj%" /p:configuration="%releasetype%"
-Echo Done building [ %nameofproject% ] - see above for any errors - 7 of 7 builds
+Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 6 builds
 %pause%
 
 if not exist output mkdir output >>nul 2>>nul

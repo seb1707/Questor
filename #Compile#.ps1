@@ -98,7 +98,6 @@ compilesolution -msbuildexecutable $msbuild -projectFolderName Questor -projectS
 compilesolution -msbuildexecutable $msbuild -projectFolderName ValueDump -projectSolution ValueDump -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName QuestorManager -projectSolution QuestorManager -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName BUYLPI -projectSolution BUYLPI -msbuildoption $msbuildoption
-compilesolution -msbuildexecutable $msbuild -projectFolderName UpdateInvtypes -projectSolution UpdateInvtypes -msbuildoption $msbuildoption
 Write-Host "Copy files to output folder " -NoNewline
 
 

@@ -4440,6 +4440,11 @@ namespace Questor.Modules.Caching
                         bool result = false;
                         result |= TypeId == (int)TypeID.Tengu;
                         result |= GroupId == (int)Group.Shuttle;
+                        if (Cache.Instance.DroneBay.Volume == 0)
+                        {
+                            result = true; // no drone bay available
+                        } 
+                        
                         return result;
                     }
 

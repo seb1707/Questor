@@ -203,6 +203,7 @@ namespace Questor.Modules.Combat
 
             if (Cache.Instance.MyShipEntity.IsShipWithNoDroneBay)
             {
+                Cache.Instance.UseDrones = false;
                 _States.CurrentDroneState = DroneState.Idle;
                 return;
             }

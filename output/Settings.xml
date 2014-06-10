@@ -387,8 +387,9 @@
   <!-- Weapon group (508 = Siege, 506 = Cruise, 771 = HAM, etc of the Launcher / Guns / Lasers, NOT the Ammo, *the weapon*) -->
   <weaponGroupId>508</weaponGroupId>
 
+  <!--  If you do not use turrets (if you do use missiles) and if you are ina ship that has no drone bay (or have UseDrones == false) these 2 settings are ignored.-->
+  <!--  For instance Tengus would never care about what these settings are set to because it is going to always kill everything via primary weapons (it has no drones) -->
   <!--  BOTH distance and speed have to be met before the NPC Frigate will be removed from the PrimaryWeapons PriorityTarget List... (under the distance, over the speed) -->
-  <!--  If you wish to effectively turn this off you can set the speedTargetsShouldBeIgnoredByMainWeapons to a very high number like: 9999999 -->
   <speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>300</speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
   <distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>7000</distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons>
 

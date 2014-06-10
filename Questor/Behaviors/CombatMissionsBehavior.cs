@@ -23,7 +23,7 @@ using Questor.Modules.Combat;
 using Questor.Modules.Actions;
 using Questor.Modules.BackgroundTasks;
 using Questor.Storylines;
-using SlimDX.Direct2D;
+//using SlimDX.Direct2D;
 
 namespace Questor.Behaviors
 {

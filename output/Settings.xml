@@ -72,7 +72,7 @@
   <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
-  <debugTargetCombatants>true</debugTargetCombatants>
+  <debugTargetCombatants>false</debugTargetCombatants>
   <debugTargetWrecks>false</debugTargetWrecks>
   <debugTraveler>false</debugTraveler>
   <debugTractorBeams>false</debugTractorBeams>

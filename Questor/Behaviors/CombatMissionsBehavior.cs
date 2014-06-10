@@ -23,6 +23,7 @@ using Questor.Modules.Combat;
 using Questor.Modules.Actions;
 using Questor.Modules.BackgroundTasks;
 using Questor.Storylines;
+using SlimDX.Direct2D;
 
 namespace Questor.Behaviors
 {
@@ -1147,17 +1148,26 @@ namespace Questor.Behaviors
                 return;
             }
 
-            if (Settings.Instance.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < Settings.Instance.ReserveCargoCapacity + 10)
+            if (Settings.Instance.UnloadLootAtStation)
             {
-                Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                return;
+                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.UsedCapacity > 0)
+                {
+                    if ((Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < Settings.Instance.ReserveCargoCapacity + 10)
+                    {
+                        Logging.Log("CombatMissionsBehavior.Salvage", "We are full: My Cargo is at [" + Math.Round(Cache.Instance.CurrentShipsCargo.UsedCapacity, 2) + "m3] of[" + Math.Round(Cache.Instance.CurrentShipsCargo.Capacity, 2) + "] Reserve [" + Math.Round((double)Settings.Instance.ReserveCargoCapacity, 2) + "m3 + 10], go to base to unload", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        return;        
+                    }
+                }
             }
 
-            if (!Cache.Instance.UnlootedContainers.Any())
+            //if we have no salvagers check for UnlootedContainers before moving on
+            //if we have salvagers check for any wrecks before moving on
+            if ((!Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.UnlootedContainers.Any()) 
+               || Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.Wrecks.Any())
             {
                 if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
-                Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room", Logging.White);
+                Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room. UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] Wrecks [" + Cache.Instance.Wrecks + "]", Logging.White);
                 Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
 
                 if (!Cache.Instance.AfterMissionSalvageBookmarks.Any() && !Cache.Instance.GateInGrid())

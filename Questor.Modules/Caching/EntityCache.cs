@@ -4482,6 +4482,30 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool SalvagersAvailable
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= Cache.Instance.Modules.Any(m => m.GroupId == (int)Group.Salvager && m.IsOnline);
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+
+        }
+
         public bool IsOreOrIce
         {
             get

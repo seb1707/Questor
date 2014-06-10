@@ -1167,7 +1167,7 @@ namespace Questor.Behaviors
                || Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.Wrecks.Any())
             {
                 if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
-                Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the room. UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] Wrecks [" + Cache.Instance.Wrecks + "]", Logging.White);
+                Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the pocket. UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] Wrecks [" + Cache.Instance.Wrecks + "] Salvagers? [" + Cache.Instance.MyShipEntity.SalvagersAvailable + "]", Logging.White);
                 Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
 
                 if (!Cache.Instance.AfterMissionSalvageBookmarks.Any() && !Cache.Instance.GateInGrid())

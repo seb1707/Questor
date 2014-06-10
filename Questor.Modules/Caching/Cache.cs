@@ -3477,8 +3477,7 @@ namespace Questor.Modules.Caching
                     //
                     if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (ewarEntity.IsNPCFrigate || ewarEntity.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
                     {
-                        if (ewarEntity.Velocity < Settings.Instance.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons        //slow enough to hit
-                            || ewarEntity.Distance > Settings.Instance.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons) //far enough away to hit
+                        if (!ewarEntity.IsTooCloseTooFastTooSmallToHit)
                         {
                             if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
                             {

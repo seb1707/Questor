@@ -344,6 +344,17 @@ namespace Questor.Modules.BackgroundTasks
 
                 ModuleNumber++;
 
+                //
+                // this salvager has already been activated at least once
+                //
+                if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(salvager.ItemId))
+                {
+                    if (Time.Instance.LastActivatedTimeStamp[salvager.ItemId].AddSeconds(3) > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                }
+
                 // Spread the salvagers around
                 EntityCache wreck = wrecks.OrderBy(w => salvagers.Any(s => s.LastTargetId != w.Id)).FirstOrDefault();
                 if (wreck == null)
@@ -352,6 +363,22 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
+                //
+                // if we have more wrecks on the field then we have salvagers that have not yet been activated
+                //
+                if (wrecks.Count() >= salvagers.Count(i => !i.IsActive))
+                {
+                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "We have [" + wrecks.Count() + "] wrecks  and [" + salvagers.Count(i => !i.IsActive) + "] available salvagers of [" + salvagers.Count() + "] total", Logging.Teal);
+                    //
+                    // skip activating any more salvagers on this wreck that already has at least 1 salvager on it.
+                    //
+                    if (salvagers.Any(i => i.TargetId == wreck.Id))
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Not assigning another salvager to wreck [" + wreck.Name + "][" + wreck.MaskedId + "]at[" + Math.Round(wreck.Distance/1000,0) + "k] as it already has at least 1 salvager active", Logging.Teal);
+                        continue;
+                    }
+                }
+                
                 Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
                 if (salvager.Activate(wreck))
                 {

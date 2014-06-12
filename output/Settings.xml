@@ -282,7 +282,6 @@
   
   <!-- prefix for undock bookmarks -->
   <undockprefix>Insta</undockprefix>
-  <bookmarkWarpOut>Insta</bookmarkWarpOut>
   <!-- undock delay -->
   <undockdelay>11</undockdelay>
   

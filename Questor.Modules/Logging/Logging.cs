@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Questor.Modules.States;
 
 namespace Questor.Modules.Logging
 {
@@ -319,6 +320,109 @@ namespace Questor.Modules.Logging
             {
                 Logging.Log("Logging.MaintainConsoleLogs", "Unable to maintain console logs: [" + exception + "]", Logging.Teal);
             }
+        }
+
+        public static string CurrentBehaviorsMainState()
+        {
+            try
+            {
+                string strBehaviormainState;
+                //
+                // if _ArmStateToSet matches also do this stuff...
+                //
+                switch (_States.CurrentQuestorState)
+                {
+                    case QuestorState.BackgroundBehavior:
+                        strBehaviormainState = _States.CurrentBackgroundBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.Cleanup:
+                        strBehaviormainState = _States.CurrentCleanupState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.CombatHelperBehavior:
+                        strBehaviormainState = _States.CurrentCombatHelperBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.CombatMissionsBehavior:
+                        strBehaviormainState =  _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+                        
+                    case QuestorState.DedicatedBookmarkSalvagerBehavior:
+                        strBehaviormainState = _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.Mining:
+                        strBehaviormainState = _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.SkillTrainer:
+                        strBehaviormainState = _States.CurrentSkillTrainerState.ToString();
+                        return strBehaviormainState;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+            }
+            finally
+            {
+            }
+            return "Unknown";
+        }
+
+        public static string CurrentBehaviorsSubState()
+        {
+            /*
+            try
+            {
+                
+                string strBehaviormainState;
+                //
+                // if _ArmStateToSet matches also do this stuff...
+                //
+                switch (_States.CurrentQuestorState)
+                {
+                    case QuestorState.BackgroundBehavior:
+                        strBehaviormainState = _States.CurrentBackgroundBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.Cleanup:
+                        strBehaviormainState = _States.CurrentCleanupState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.CombatHelperBehavior:
+                        strBehaviormainState = _States.CurrentCombatHelperBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.CombatMissionsBehavior:
+                        strBehaviormainState = _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.DedicatedBookmarkSalvagerBehavior:
+                        strBehaviormainState = _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.Mining:
+                        strBehaviormainState = _States.CurrentCombatMissionBehaviorState.ToString();
+                        return strBehaviormainState;
+
+                    case QuestorState.SkillTrainer:
+                        strBehaviormainState = _States.CurrentSkillTrainerState.ToString();
+                        return strBehaviormainState;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+            }
+            finally
+            {
+            }
+            return "Unknown";
+                 * */
+
+            return null;
         }
     }
 }

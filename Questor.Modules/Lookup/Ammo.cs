@@ -35,46 +35,52 @@ namespace Questor.Modules.Lookup
                 //
                 // the above is pulling from XML, not eve... the below is what we want to pull from eve
                 //
+
+                /*
                 DirectInvType __directInvTypeItem = null;
                 Cache.Instance.DirectEve.InvTypes.TryGetValue(TypeId, out __directInvTypeItem);
                 if (__directInvTypeItem != null)
                 {
                     DirectItem __directItem = null;
                     __directItem = (DirectItem)__directInvTypeItem;
-                    ItemCache __item = null;
-                    __item = new ItemCache(__directItem);
+                    if (__directItem != null)
+                    {
+                        ItemCache __item = null;
+                        __item = new ItemCache(__directItem);
 
-                    Name = __item.Name;
-                    maxVelocity = __item.maxVelocity;
+                        Name = __item.Name;
+                        maxVelocity = __item.maxVelocity;
 
-                    emDamage = __item.emDamage;
-                    explosiveDamage = __item.explosiveDamage;
-                    kineticDamage = __item.kineticDamage;
-                    thermalDamage = __item.thermalDamage;
-                    metaLevel = __item.metaLevel;
-                    hp = __item.hp;
-                    techLevel = __item.techLevel;
-                    radius = __item.radius;
+                        emDamage = __item.emDamage;
+                        explosiveDamage = __item.explosiveDamage;
+                        kineticDamage = __item.kineticDamage;
+                        thermalDamage = __item.thermalDamage;
+                        metaLevel = __item.metaLevel;
+                        hp = __item.hp;
+                        techLevel = __item.techLevel;
+                        radius = __item.radius;
 
-                    //
-                    // only useful for missiles should we not pull this info for items that wont have these attributes?!
-                    //
-                    aoeDamageReductionFactor = __item.aoeDamageReductionFactor;
-                    detonationRange = __item.detonationRange;
-                    aoeCloudSize = __item.aoeCloudSize;
-                    aoeVelocity = __item.aoeVelocity;
-                    agility = __item.agility;
-                    explosionDelay = __item.explosionDelay;
-                    maxVelocityBonus = __item.maxVelocityBonus;
-                    
-                    //
-                    // only useful for AutoCannon / Artillery and Blaster/RailGun ammo should we not pull this info for items that wont have these attributes?!
-                    //
-                    fallofMultiplier = __item.fallofMultiplier;
-                    weaponRangeMultiplier = __item.weaponRangeMultiplier;
-                    trackingSpeedMultiplier = __item.trackingSpeedMultiplier;
-                    powerNeedMultiplier = __item.powerNeedMultiplier;
+                        //
+                        // only useful for missiles should we not pull this info for items that wont have these attributes?!
+                        //
+                        aoeDamageReductionFactor = __item.aoeDamageReductionFactor;
+                        detonationRange = __item.detonationRange;
+                        aoeCloudSize = __item.aoeCloudSize;
+                        aoeVelocity = __item.aoeVelocity;
+                        agility = __item.agility;
+                        explosionDelay = __item.explosionDelay;
+                        maxVelocityBonus = __item.maxVelocityBonus;
+
+                        //
+                        // only useful for AutoCannon / Artillery and Blaster/RailGun ammo should we not pull this info for items that wont have these attributes?!
+                        //
+                        fallofMultiplier = __item.fallofMultiplier;
+                        weaponRangeMultiplier = __item.weaponRangeMultiplier;
+                        trackingSpeedMultiplier = __item.trackingSpeedMultiplier;
+                        powerNeedMultiplier = __item.powerNeedMultiplier;    
+                    }
                 }
+                 * */
                 if (Settings.Instance.DebugAmmo)
                 {
                     Logging.Log("Ammo", " [01] Name [" + Name + "] - derived from XML", Logging.Debug);
@@ -83,6 +89,7 @@ namespace Questor.Modules.Lookup
                     Logging.Log("Ammo", " [03] Range [" + Range + "] - from XML", Logging.Debug);
                     Logging.Log("Ammo", " [04] Quantity [" + Quantity + "] - from XML", Logging.Debug);
                     Logging.Log("Ammo", " [05] Description [" + Description + "] - from XML", Logging.Debug);
+                    /*
                     Logging.Log("Ammo", " [06] -------- EVE Attributes Below ------------", Logging.Debug); 
                     Logging.Log("Ammo", " [07] maxVelocity [" + maxVelocity + "] - from eve no skills applied", Logging.Debug);
                     Logging.Log("Ammo", " [08] emDamage [" + emDamage + "] - from eve no skills applied", Logging.Debug);
@@ -106,6 +113,7 @@ namespace Questor.Modules.Lookup
                     Logging.Log("Ammo", " [26] weaponRangeMultiplier [" + weaponRangeMultiplier + "] - from eve no skills applied", Logging.Debug);
                     Logging.Log("Ammo", " [27] trackingSpeedMultiplier [" + trackingSpeedMultiplier + "] - from eve no skills applied", Logging.Debug);
                     Logging.Log("Ammo", " [28] powerNeedMultiplier [" + powerNeedMultiplier + "] - from eve no skills applied", Logging.Debug);
+                     * */
                 }
             }
             catch (Exception exception)

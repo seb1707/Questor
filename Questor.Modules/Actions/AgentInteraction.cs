@@ -369,10 +369,11 @@ namespace Questor.Modules.Actions
                 //load mission specific ammo and WeaponGroupID if specified in the mission xml
                 if (missionXml.Root != null)
                 {
-                    XElement ammoTypes = missionXml.Root.Element("missionammo");
+                    XElement ammoTypes = missionXml.Root.Element("ammoTypes");
                     if (ammoTypes != null)
                     {
-                        foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                        Cache.Instance.MissionAmmo.Clear();
+                        foreach (XElement ammo in ammoTypes.Elements("ammoType"))
                         {
                             Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
                         }
@@ -380,6 +381,17 @@ namespace Questor.Modules.Actions
                         //Cache.Instance.DamageType
                     }
 
+                    ammoTypes = missionXml.Root.Element("missionammo");
+                    if (ammoTypes != null)
+                    {
+                        Cache.Instance.MissionAmmo.Clear();
+                        foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                        {
+                            Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+                        }
+
+                        //Cache.Instance.DamageType
+                    }
                     Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
                     Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //do not set default here, use character level settings if avail
                     Cache.Instance.MissionKillSentries = (bool?)missionXml.Root.Element("killSentries"); //do not set default here, use character level settings if avail

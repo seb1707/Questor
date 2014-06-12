@@ -10,6 +10,13 @@
   <killSentries>true</killSentries> <!-- if set to true questor's clearpocket action will not ignore sentries -->
   <missionWarpAtDistanceRange>100</missionWarpAtDistanceRange> <!-- distance to warp to bookmark at in km (this only works 2nd through nth times, 1st time you will warpto 0 -->
   <damagetype>EM</damagetype>
+  <!--  Optional! Mission Specific ammo -->
+  <ammoTypes>
+    <ammoType typeId="27339" damageType="EM"        range="35000" quantity="1250" />
+    <ammoType typeId="27345" damageType="Kinetic"   range="35000" quantity="1250" />
+    <ammoType typeId="27351" damageType="Thermal"   range="35000" quantity="1250" />
+    <ammoType typeId="27359" damageType="Explosive" range="35000" quantity="1250" />
+  </ammoTypes>
   <pockets>
     <pocket id="0">
       <damagetype>EM</damagetype>

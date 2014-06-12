@@ -1529,9 +1529,20 @@ namespace Questor.Modules.Actions
                                 Cache.Instance.MissionAmmo = new List<Ammo>();
                                 if (missionXml.Root != null)
                                 {
-                                    XElement ammoTypes = missionXml.Root.Element("missionammo");
+                                    XElement ammoTypes = missionXml.Root.Element("ammoTypes");
                                     if (ammoTypes != null)
                                     {
+                                        Cache.Instance.MissionAmmo.Clear();
+                                        foreach (XElement ammo in ammoTypes.Elements("ammoType"))
+                                        {
+                                            Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
+                                        }
+                                    }
+
+                                    ammoTypes = missionXml.Root.Element("missionammo");
+                                    if (ammoTypes != null)
+                                    {
+                                        Cache.Instance.MissionAmmo.Clear();
                                         foreach (XElement ammo in ammoTypes.Elements("ammo"))
                                         {
                                             Cache.Instance.MissionAmmo.Add(new Ammo(ammo));

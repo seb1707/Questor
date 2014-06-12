@@ -53,10 +53,10 @@ namespace Questor.Modules.Lookup
                     //load mission specific ammo and weaponGroupId if specified in the mission xml
                     if (missionXml.Root != null)
                     {
-                        XElement ammoTypes = missionXml.Root.Element("missionammo");
+                        XElement ammoTypes = missionXml.Root.Element("ammoTypes");
                         if (ammoTypes != null)
                         {
-                            foreach (XElement ammo in ammoTypes.Elements("ammo"))
+                            foreach (XElement ammo in ammoTypes.Elements("ammoType"))
                             {
                                 Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
                             }

@@ -859,6 +859,130 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public double? _effectiveHitpointsViaEM;
+        public double EffectiveHitpointsViaEM
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_effectiveHitpointsViaEM == null)
+                        {
+                            //
+                            // this does not take into account hull, but most things have so very little hull (LCOs might be a problem!)
+                            //
+                            _effectiveHitpointsViaEM = ((ShieldHitPoints * ShieldResistanceEM) + (ArmorHitPoints * ArmorResistanceEM));
+                            return _effectiveHitpointsViaEM ?? 0;
+                        }
+
+                        return _effectiveHitpointsViaEM ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        public double? _effectiveHitpointsViaExplosive;
+        public double EffectiveHitpointsViaExplosive
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_effectiveHitpointsViaExplosive == null)
+                        {
+                            //
+                            // this does not take into account hull, but most things have so very little hull (LCOs might be a problem!)
+                            //
+                            _effectiveHitpointsViaExplosive = ((ShieldHitPoints * ShieldResistanceExplosive) + (ArmorHitPoints * ArmorResistanceExplosive));
+                            return _effectiveHitpointsViaExplosive ?? 0;
+                        }
+
+                        return _effectiveHitpointsViaExplosive ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        public double? _effectiveHitpointsViaKinetic;
+        public double EffectiveHitpointsViaKinetic
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_effectiveHitpointsViaKinetic == null)
+                        {
+                            //
+                            // this does not take into account hull, but most things have so very little hull (LCOs might be a problem!)
+                            //
+                            _effectiveHitpointsViaKinetic = ((ShieldHitPoints * ShieldResistanceKinetic) + (ArmorHitPoints * ArmorResistanceKinetic));
+                            return _effectiveHitpointsViaKinetic ?? 0;
+                        }
+
+                        return _effectiveHitpointsViaKinetic ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
+
+        public double? _effectiveHitpointsViaThermal;
+        public double EffectiveHitpointsViaThermal
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_effectiveHitpointsViaThermal == null)
+                        {
+                            //
+                            // this does not take into account hull, but most things have so very little hull (LCOs might be a problem!)
+                            //
+                            _effectiveHitpointsViaThermal = ((ShieldHitPoints * ShieldResistanceThermal) + (ArmorHitPoints * ArmorResistanceThermal));
+                            return _effectiveHitpointsViaThermal ?? 0;
+                        }
+
+                        return _effectiveHitpointsViaThermal ?? 0;
+                    }
+
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        } 
+        
         private bool? _isNpc;
 
         public bool IsNpc

@@ -325,74 +325,93 @@ namespace Questor.Modules.BackgroundTasks
             {
                 wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange).ToList();
             }
-
+            
             if (wrecks.Count == 0)
             {
                 if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (wrecks.Count == 0)", Logging.Teal); 
                 return;
             }
-
+            
+            //
+            // Activate
+            //
             int salvagersProcessedThisTick = 0;
-            ModuleNumber = 0;
-            foreach (ModuleCache salvager in salvagers)
+            int WreckNumber = 0;
+            foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
             {
-                if (salvager.IsActive || salvager.InLimboState)
+                WreckNumber++;
+                
+                foreach (ModuleCache salvager in salvagers)
                 {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: Salvager# [" + ModuleNumber + "] if (salvager.IsActive || salvager.InLimboState)", Logging.Teal); 
+                    ModuleNumber++;
+                    if (salvager.IsActive)
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] _ Tractorbeam is: IsActive [" + salvager.IsActive + "]. Continue", Logging.Debug);
+                        continue;
+                    }
+
+                    if (salvager.InLimboState)
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] __ Tractorbeam is: InLimboState [" + salvager.InLimboState + "] IsDeactivating [" + salvager.IsDeactivating + "] IsActivatable [" + salvager.IsActivatable + "] IsOnline [" + salvager.IsOnline + "] IsGoingOnline [" + salvager.IsGoingOnline + "] TargetId [" + salvager.TargetId + "]. Continue", Logging.Debug);
+                        continue;
+                    }
+
+                    //
+                    // this tractor has already been activated at least once
+                    //
+                    if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(salvager.ItemId))
+                    {
+                        if (Time.Instance.LastActivatedTimeStamp[salvager.ItemId].AddSeconds(5) > DateTime.UtcNow)
+                        {
+                            continue;
+                        }
+                    }
+
+                    //
+                    // if we have more wrecks on the field then we have salvagers that have not yet been activated
+                    //
+                    if (wrecks.Count() >= salvagers.Count(i => !i.IsActive))
+                    {
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "We have [" + wrecks.Count() + "] wrecks  and [" + salvagers.Count(i => !i.IsActive) + "] available salvagers of [" + salvagers.Count() + "] total", Logging.Teal);
+                        //
+                        // skip activating any more salvagers on this wreck that already has at least 1 salvager on it.
+                        //
+                        if (salvagers.Any(i => i.IsActive && i.LastTargetId == wreck.Id))
+                        {
+                            if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Not assigning another salvager to wreck [" + wreck.Name + "][" + wreck.MaskedId + "]at[" + Math.Round(wreck.Distance / 1000, 0) + "k] as it already has at least 1 salvager active", Logging.Teal);
+                            //
+                            // Break out of the Foreach salvager in salvagers and continue to the next wreck
+                            //
+                            break;
+                        }
+                    }
+
+                    Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
+                    if (salvager.Activate(wreck))
+                    {
+                        salvagersProcessedThisTick++;
+                        Time.Instance.NextSalvageAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                        if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                        {
+                            if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.Teal);
+                            continue;
+                        }
+
+                        //
+                        // return, no more processing this tick
+                        //
+                        return;
+                    }
+
+                    //
+                    // move on to the next salvager
+                    //
                     continue;
                 }
 
-                ModuleNumber++;
-
                 //
-                // this salvager has already been activated at least once
+                // move on to the next wreck
                 //
-                if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(salvager.ItemId))
-                {
-                    if (Time.Instance.LastActivatedTimeStamp[salvager.ItemId].AddSeconds(3) > DateTime.UtcNow)
-                    {
-                        continue;
-                    }
-                }
-
-                // Spread the salvagers around
-                EntityCache wreck = wrecks.OrderBy(w => salvagers.Any(s => s.LastTargetId != w.Id)).FirstOrDefault();
-                if (wreck == null)
-                {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (wreck == null)", Logging.Teal); 
-                    return;
-                }
-
-                //
-                // if we have more wrecks on the field then we have salvagers that have not yet been activated
-                //
-                if (wrecks.Count() >= salvagers.Count(i => !i.IsActive))
-                {
-                    if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "We have [" + wrecks.Count() + "] wrecks  and [" + salvagers.Count(i => !i.IsActive) + "] available salvagers of [" + salvagers.Count() + "] total", Logging.Teal);
-                    //
-                    // skip activating any more salvagers on this wreck that already has at least 1 salvager on it.
-                    //
-                    if (salvagers.Any(i => i.TargetId == wreck.Id))
-                    {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Not assigning another salvager to wreck [" + wreck.Name + "][" + wreck.MaskedId + "]at[" + Math.Round(wreck.Distance/1000,0) + "k] as it already has at least 1 salvager active", Logging.Teal);
-                        continue;
-                    }
-                }
-                
-                Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
-                if (salvager.Activate(wreck))
-                {
-                    salvagersProcessedThisTick++;
-                    Time.Instance.NextSalvageAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                    if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
-                    {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.Teal); 
-                        continue;
-                    }
-
-                    return;
-                }
-                
                 continue;
             }
         }

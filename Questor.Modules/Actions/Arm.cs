@@ -140,6 +140,270 @@ namespace Questor.Modules.Actions
             return false;
         }
 
+        public static bool ChangeArmState(ArmState _ArmStateToSet, string LogMessage = null)
+        {
+            try
+            {
+                //
+                // if _ArmStateToSet matches also do this stuff...
+                //
+                switch (_ArmStateToSet)
+                {
+                    case ArmState.OpenShipHangar:
+                        _States.CurrentCombatState = CombatState.Idle;
+                        break;
+
+                    case ArmState.NotEnoughAmmo:
+                        if (LogMessage != null) Logging.Log(_States.CurrentArmState.ToString(), LogMessage, Logging.Red);
+                        Cache.Instance.Paused = true;
+                        _States.CurrentCombatState = CombatState.Idle;
+                        break;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(Logging.CurrentBehaviorsMainState(), "Exception [" + ex + "]", Logging.Red);
+            }
+            finally
+            {
+                Time.Instance.NextArmAction = DateTime.UtcNow;
+                _States.CurrentArmState = _ArmStateToSet;
+            }
+            
+            return true;
+        }
+
+        public static bool BeginArmState()
+        {
+            if (!Cleanup.CloseInventoryWindows()) return false;
+            Cache.Instance.ArmLoadedCache = false;
+            TryMissionShip = true;           // Used in the event we can't find the ship specified in the missionfittings
+            UseMissionShip = false;          // Were we successful in activating the mission specific ship?
+            DefaultFittingChecked = false;   //flag to check for the correct default fitting before using the fitting manager
+            DefaultFittingFound = false;      //Did we find the default fitting?
+            CustomFittingFound = false;
+            WaitForFittingToLoad = false;
+            _bringItemMoved = false;
+            bringItemQuantity = (int)Cache.Instance.BringMissionItemQuantity;
+            CheckCargoForBringItem = true;
+            //bringOptionalItemQuantity = (int)Cache.Instance.BringOptionalMissionItemQuantity;
+            if (Settings.Instance.DebugArm) Logging.Log("Arm.Begin", "Cache.Instance.BringOptionalMissionItemQuantity is [" + Cache.Instance.BringOptionalMissionItemQuantity + "]", Logging.Debug);
+            _bringoptionalItemMoved = false;
+            //CheckCargoForOptionalBringItem = true;
+            capsMoved = false;
+            //ammoMoved = false;
+            retryCount = 0;
+            ItemHangarRetries = 0;
+
+            if (Cache.Instance.MissionAmmo.Any())
+            {
+                AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
+            }
+
+            if (!ChangeArmState(ArmState.OpenShipHangar)) return false;
+            return true;
+        }
+
+        public static bool CleanupArmState()
+        {
+            if (Settings.Instance.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
+            {
+                // Close the drone bay, its not required in space.
+                if (!Cache.Instance.CloseDroneBay("Arm.Cleanup")) return false;
+            }
+
+            if (Settings.Instance.UseFittingManager)
+            {
+                if (!Cache.Instance.CloseFittingManager("Arm")) return false;
+            }
+
+            if (!Cleanup.CloseInventoryWindows()) return false;
+            if (!ChangeArmState(ArmState.StackAmmoHangar)) return false;
+            return false;
+        }
+
+        public static bool StackAmmoHangarArmState()
+        {
+            if (!Cache.Instance.StackAmmoHangar("Arm")) return false;
+            if (!ChangeArmState(ArmState.Done)) return false;
+            return true;
+        }
+
+        public static bool SwitchShipsArmState()
+        {
+            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
+
+            if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
+
+            if (string.IsNullOrEmpty(Settings.Instance.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "CombatShipName and SalvageShipName both have to be populated! Fix your characters config.")) return false;
+                return false;
+            }
+
+            if (Settings.Instance.CombatShipName == Settings.Instance.SalvageShipName)
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.")) return false;
+                return false;
+            }
+
+            if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.Instance.CharacterMode == "mining")
+            {
+                if (!ChangeArmState(ArmState.ActivateMiningShip, "Changing to ArmState.ActivateMiningShip")) return false;
+                return true;
+            }
+
+            switch (_States.CurrentArmState)
+            {
+                case ArmState.OpenShipHangar:
+                    if (!ChangeArmState(ArmState.ActivateCombatShip, "Changing to ArmState.ActivateCombatShip")) return false;
+                    return true;
+
+                case ArmState.SwitchToTransportShip:
+                    if (!ChangeArmState(ArmState.ActivateTransportShip, "Changing to ArmState.ActivateTransportShip")) return false;
+                    return true;
+
+                case ArmState.SwitchToSalvageShip:
+                    if (!ChangeArmState(ArmState.ActivateSalvageShip, "Changing to ArmState.ActivateTransportShip")) return false;
+                    return true;
+            }
+            
+            return true;
+        }
+
+        public static bool ActivateThisShip(string ShipNameToActivate, string RoleOfThisShipName)
+        {
+            //
+            // move this so that we only close the cargo if necessary!
+            //
+            if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
+
+
+            if (string.IsNullOrEmpty(ShipNameToActivate))
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Could not find " + RoleOfThisShipName + " in your characters XML settings!")) return false;
+                return false;
+            }
+
+            //
+            // we have the mining shipname configured but it is not the current ship
+            // 
+            if ((!string.IsNullOrEmpty(ShipNameToActivate) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != ShipNameToActivate.ToLower()))
+            {
+                if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
+
+                if (Cache.Instance.ShipHangar.Items.Any(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                {
+                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                    {
+                        Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
+                        ship.ActivateShip();
+                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                        return true;
+                    }
+
+                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
+                }
+
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
+                return true;
+            }
+
+            //
+            // the configured MiningShipName is already the current ship
+            //
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
+            {
+                if (!ChangeArmState(ArmState.MoveDrones, "Done")) return false;
+                return true;
+            }
+
+            return true;
+        }
+
+        public static bool ActivateMiningShipArmState()
+        {
+            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
+
+            if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return false;
+
+            if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Could not find miningShipName in settings!")) return false;
+                return false;
+            }
+
+            //
+            // we have the mining shipname configured but it is not the current ship
+            // 
+            if ((!string.IsNullOrEmpty(Settings.Instance.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.MiningShipName.ToLower()))
+            {
+                if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
+
+                if (Cache.Instance.ShipHangar.Items.Any(ship =>ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                {
+                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                    {
+                        Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
+                        ship.ActivateShip();
+                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                        return true;
+                    }
+
+                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
+                }
+                
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
+                return true;
+            }
+
+            //
+            // the configured MiningShipName is already the current ship
+            //
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
+            {
+                if (!ChangeArmState(ArmState.MoveDrones, "Done")) return false;
+                return true;
+            }
+
+            return true;
+        }
+
+        public static bool ActivateNoobShipArmState()
+        {
+            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
+
+            if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return false;
+
+            if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip &&
+                Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
+            {
+                if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
+
+                List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
+                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GroupId == (int)Group.RookieShip || ship.GroupId == (int)Group.Shuttle))
+                {
+                    Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
+                    ship.ActivateShip();
+                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                    return true;
+                }
+
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "No rookie ships or shuttles to use")) return false;
+                return false;
+            }
+
+            if (Cache.Instance.ActiveShip.GroupId == (int)Group.RookieShip ||
+                Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle)
+            {
+                if (!ChangeArmState(ArmState.Cleanup, "Done")) return false;
+                return true;
+            }
+
+            return true;
+        }
+
         public static void ProcessState()
         {
             if (!Cache.Instance.InStation)
@@ -157,190 +421,39 @@ namespace Questor.Modules.Actions
                     break;
 
                 case ArmState.Cleanup:
-
-                    if (Settings.Instance.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
-                    {
-                        // Close the drone bay, its not required in space.
-                        Cache.Instance.CloseDroneBay("Arm.Cleanup");
-                    }
-
-                    if (Settings.Instance.UseFittingManager)
-                    {
-                        if (!Cache.Instance.CloseFittingManager("Arm")) return;
-                    }
-
-                    if (!Cleanup.CloseInventoryWindows()) break;
-                    _States.CurrentArmState = ArmState.StackAmmoHangar;
+                    if (!CleanupArmState()) return;
                     break;
 
                 case ArmState.StackAmmoHangar:
-                    if (!Cache.Instance.StackAmmoHangar("Arm")) return; 
-                    _States.CurrentArmState = ArmState.Done;
+                    if (!StackAmmoHangarArmState()) return;
                     break;
 
                 case ArmState.Done:
                     break;
 
-                case ArmState.NotEnoughDrones:
-
-                    //This is logged in questor.cs - do not double log
-                    //Logging.Log("Arm","Armstate.NotEnoughDrones");
-                    //State = ArmState.Idle;
+                case ArmState.NotEnoughDrones: //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
                     break;
 
-                case ArmState.NotEnoughAmmo:
-
-                    //This is logged in questor.cs - do not double log
-                    //Logging.Log("Arm","Armstate.NotEnoughAmmo");
-                    //State = ArmState.Idle;
+                case ArmState.NotEnoughAmmo:   //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
                     break;
 
                 case ArmState.Begin:
-                    if (!Cleanup.CloseInventoryWindows()) break;
-                    Cache.Instance.ArmLoadedCache = false;
-                    TryMissionShip = true;           // Used in the event we can't find the ship specified in the missionfittings
-                    UseMissionShip = false;          // Were we successful in activating the mission specific ship?
-                    DefaultFittingChecked = false;   //flag to check for the correct default fitting before using the fitting manager
-                    DefaultFittingFound = false;      //Did we find the default fitting?
-                    CustomFittingFound = false;
-                    WaitForFittingToLoad = false;
-                    _bringItemMoved = false;
-                    bringItemQuantity = (int)Cache.Instance.BringMissionItemQuantity;
-                    CheckCargoForBringItem = true;
-                    //bringOptionalItemQuantity = (int)Cache.Instance.BringOptionalMissionItemQuantity;
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.Begin", "Cache.Instance.BringOptionalMissionItemQuantity is [" + Cache.Instance.BringOptionalMissionItemQuantity + "]", Logging.Debug);
-                    _bringoptionalItemMoved = false;
-                    //CheckCargoForOptionalBringItem = true;
-                    capsMoved = false;
-                    //ammoMoved = false;
-                    retryCount = 0;
-                    ItemHangarRetries = 0;
-
-                    if (Cache.Instance.MissionAmmo.Any())
-                    {
-                        AmmoToLoad = new List<Ammo>(Cache.Instance.MissionAmmo);
-                    }
-
-                    //CheckCargoForAmmo = true;
-
-                    _States.CurrentArmState = ArmState.OpenShipHangar;
-                    _States.CurrentCombatState = CombatState.Idle;
-                    Time.Instance.NextArmAction = DateTime.UtcNow;
+                    if (!BeginArmState()) break;
                     break;
 
                 case ArmState.OpenShipHangar:
                 case ArmState.SwitchToTransportShip:
                 case ArmState.SwitchToSalvageShip:
                 case ArmState.SwitchToMiningShip:
-                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
-                    
-                    if (!Cache.Instance.OpenShipsHangar("Arm")) return;
-
-                    if (string.IsNullOrEmpty(Settings.Instance.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
-                    {
-                        Logging.Log("Arm","CombatShipName and SalvageShipName both have to be populated! Fix your characters config.",Logging.Red);
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                        Cache.Instance.Paused = true;
-                        return;
-                    }
-
-                    if (Settings.Instance.CombatShipName == Settings.Instance.SalvageShipName)
-                    {
-                        Logging.Log("Arm", "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.", Logging.Red);
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                        Cache.Instance.Paused = true;
-                        return;
-                    }
-
-                    if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.Instance.CharacterMode == "mining")
-                    {
-                        Logging.Log("Arm", "Activating mining ship", Logging.White);
-                        _States.CurrentArmState = ArmState.ActivateMiningShip;
-                    }
-                    else if (_States.CurrentArmState == ArmState.OpenShipHangar)
-                    {
-                        Logging.Log("Arm", "Activating combat ship", Logging.White);
-                        _States.CurrentArmState = ArmState.ActivateCombatShip;
-                    }
-                    else if (_States.CurrentArmState == ArmState.SwitchToTransportShip)
-                    {
-                        Logging.Log("Arm", "Activating transport ship", Logging.White);
-                        _States.CurrentArmState = ArmState.ActivateTransportShip;
-                    }
-                    else
-                    {
-                        Logging.Log("Arm", "Activating salvage ship", Logging.White);
-                        _States.CurrentArmState = ArmState.ActivateSalvageShip;
-                    }
-                    return;
+                    if (!SwitchShipsArmState()) return;
+                    break;
 
                 case ArmState.ActivateMiningShip:
-                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
-
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return;
-
-                    if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
-                    {
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                        Logging.Log("Arm.ActivateMiningShip", "Could not find miningShipName in settings!", Logging.Orange);
-                        return;
-                    }
-
-                    if ((!string.IsNullOrEmpty(Settings.Instance.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.MiningShipName.ToLower()))
-                    {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) return;
-
-                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                        foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
-                        {
-                            Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
-                            ship.ActivateShip();
-                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                            return;
-                        }
-
-                        return;
-                    }
-
-                    if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
-                    {
-                        Logging.Log("Arm.ActivateMiningShip", "Done", Logging.White);
-                        _States.CurrentArmState = ArmState.MoveDrones;
-                        return;
-                    }
-
+                    if (!ActivateMiningShipArmState()) return;
                     break;
 
                 case ArmState.ActivateNoobShip:
-                    if (DateTime.UtcNow < Time.Instance.NextArmAction) return;
-
-                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return;
-
-                    if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip && 
-                        Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
-                    {
-                        if (!Cache.Instance.OpenShipsHangar("Arm")) return;
-
-                        List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                        foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GroupId == (int)Group.RookieShip || ship.GroupId == (int)Group.Shuttle))
-                        {
-                            Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
-                            ship.ActivateShip();
-                            Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                            return;
-                        }
-
-                        return;
-                    }
-
-                    if (Cache.Instance.ActiveShip.GroupId == (int)Group.RookieShip || 
-                        Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle)
-                    {
-                        Logging.Log("Arm.ActivateNoobShip", "Done", Logging.White);
-                        _States.CurrentArmState = ArmState.Cleanup;
-                        return;
-                    }
-
+                    
                     break;
 
                 case ArmState.ActivateTransportShip:

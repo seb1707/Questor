@@ -4734,6 +4734,29 @@ namespace Questor.Modules.Caching
             }
         }
 
+        public bool IsEwarImmune
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        bool result = false;
+                        result |= TypeId == (int)TypeID.Zor;
+                        return result;
+                    }
+
+                    return false;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return false;
+                }
+            }
+        }
+
         public bool Activate()
         {
             try

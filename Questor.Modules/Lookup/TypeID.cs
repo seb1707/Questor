@@ -77,5 +77,9 @@ namespace Questor.Modules.Lookup
         Slaves = 3721,
         Small_Arms = 9844,
         Ectoplasm = 3771,
+        //
+        // special NPCs
+        //
+        Zor = 12256,
     }
 }

@@ -880,6 +880,12 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateTargetPainters(EntityCache target)
         {
+            if (target.IsEwarImmune)
+            {
+                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Ignoring TargetPainter Activation on [" + target.Name + "]IsEwarImmune[" + target.IsEwarImmune + "]", Logging.Debug);
+                return;
+            }
+
             List<ModuleCache> targetPainters = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TargetPainter).ToList();
 
             // Find the first active weapon
@@ -931,6 +937,12 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateSensorDampeners(EntityCache target)
         {
+            if (target.IsEwarImmune)
+            {
+                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Ignoring SensorDamps Activation on [" + target.Name + "]IsEwarImmune[" + target.IsEwarImmune + "]", Logging.Debug);
+                return;
+            }
+
             List<ModuleCache> sensorDampeners = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.SensorDampener).ToList();
 
             // Find the first active weapon
@@ -981,6 +993,12 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateNos(EntityCache target)
         {
+            if (target.IsEwarImmune)
+            {
+                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Ignoring NOS/NEUT Activation on [" + target.Name + "]IsEwarImmune[" + target.IsEwarImmune + "]", Logging.Debug);
+                return;
+            }
+
             List<ModuleCache> noses = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.NOS || m.GroupId == (int)Group.Neutralizer).ToList();
 
             //Logging.Log("Combat: we have " + noses.Count.ToString() + " Nos modules");
@@ -1040,6 +1058,12 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void ActivateStasisWeb(EntityCache target)
         {
+            if (target.IsEwarImmune)
+            {
+                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Ignoring StasisWeb Activation on [" + target.Name + "]IsEwarImmune[" + target.IsEwarImmune + "]", Logging.Debug);
+                return;
+            }
+
             List<ModuleCache> webs = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.StasisWeb).ToList();
 
             // Find the first active weapon
@@ -1174,6 +1198,12 @@ namespace Questor.Modules.Combat
 
         private static void ActivateWarpDisruptor(EntityCache target)
         {
+            if (target.IsEwarImmune)
+            {
+                if (Settings.Instance.DebugKillTargets) Logging.Log("Combat.KillTargets", "Ignoring WarpDisruptor Activation on [" + target.Name + "]IsEwarImmune[" + target.IsEwarImmune + "]", Logging.Debug);
+                return;
+            }
+
             List<ModuleCache> WarpDisruptors = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.WarpDisruptor).ToList();
 
             // Find the first active weapon

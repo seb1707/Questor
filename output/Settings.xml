@@ -77,6 +77,7 @@
   <debugTraveler>false</debugTraveler>
   <debugTractorBeams>false</debugTractorBeams>
   <debugUI>false</debugUI>
+  <debugUndockBookmarks>false</debugUndockBookmarks>
   <debugUnloadLoot>false</debugUnloadLoot>
   <debugValuedump>false</debugValuedump>
   <debugWatchForActiveWars>false</debugWatchForActiveWars>

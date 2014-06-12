@@ -174,6 +174,7 @@ namespace Questor.Modules.Lookup
         public bool DebugTractorBeams { get; set; }
         public bool DebugTraveler { get; set; }
         public bool DebugUI { get; set; }
+        public bool DebugUndockBookmarks { get; set; }
         public bool DebugUnloadLoot { get; set; }
         public bool DebugValuedump { get; set; }
         public bool DebugWalletBalance { get; set; }
@@ -837,6 +838,7 @@ namespace Questor.Modules.Lookup
             DebugTraveler = (bool?)CharacterSettingsXml.Element("debugTraveler") ?? (bool?)CommonSettingsXml.Element("debugTraveler") ?? false;
             DebugTractorBeams = (bool?)CharacterSettingsXml.Element("debugTractorBeams") ?? (bool?)CommonSettingsXml.Element("debugTractorBeams") ?? false;
             DebugUI = (bool?)CharacterSettingsXml.Element("debugUI") ?? (bool?)CommonSettingsXml.Element("debugUI") ?? false;
+            DebugUndockBookmarks = (bool?)CharacterSettingsXml.Element("debugUndockBookmarks") ?? (bool?)CommonSettingsXml.Element("debugUndockBookmarks") ?? false;
             DebugUnloadLoot = (bool?)CharacterSettingsXml.Element("debugUnloadLoot") ?? (bool?)CommonSettingsXml.Element("debugUnloadLoot") ?? false;
             DebugValuedump = (bool?)CharacterSettingsXml.Element("debugValuedump") ?? (bool?)CommonSettingsXml.Element("debugValuedump") ?? false;
             DebugWalletBalance = (bool?)CharacterSettingsXml.Element("debugWalletBalance") ?? (bool?)CommonSettingsXml.Element("debugWalletBalance") ?? false;

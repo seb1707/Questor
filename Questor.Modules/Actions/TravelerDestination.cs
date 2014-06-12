@@ -65,7 +65,7 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                if (Cache.Instance.InWarp) return true;
+                if (Cache.Instance.InWarp) return false;
 
                 if (Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10))
                 {
@@ -98,28 +98,20 @@ namespace Questor.Modules.Actions
 
                                 return false;    
                             }
-                            //
-                            // How the hell did we get UndockBookmrk to be a bookmark that is not in local?!
-                            //
-                            Logging.Log("useInstaBookmark", "Bookmark Named [" + Cache.Instance.UndockBookmark.Title + "] was somehow picked as an UndockBookmark but it is not in local with us! continuing without it.", Logging.Debug);
+                            
+                            if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Bookmark Named [" + Cache.Instance.UndockBookmark.Title + "] was somehow picked as an UndockBookmark but it is not in local with us! continuing without it.", Logging.Debug);
                             return true;
                         }
 
-                        //
-                        // if we do not have any undock bookmarks then continue w/o it.
-                        //
+                        if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "No undock bookmarks in local matching our undockPrefix [" + Settings.Instance.UndockBookmarkPrefix + "] continuing without it.", Logging.Debug);
                         return true;
                     }
 
-                    //
-                    // if we are not currently on grid with a station or a stargate continue traveling
-                    //
+                    if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Not currently on grid with a station or a stargate: continue traveling", Logging.Debug);
                     return true;
                 }
 
-                //
-                // assume we will be in space soon, wait until we have been undocked or in system 9after jumping) a few seconds 
-                //
+                if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "InSpace [" + Cache.Instance.InSpace + "]: waiting until we have been undocked or in system a few seconds", Logging.Debug);
                 return false;
             }
             catch (Exception exception)

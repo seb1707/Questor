@@ -37,8 +37,6 @@ namespace Questor.Modules.Activities
         private static int _locationErrors;
         private static int TravelHomeCounter;
         
-        public DirectBookmark UndockBookmark { get; set; }
-
         public Traveler()
         {
             _lastPulse = DateTime.MinValue;

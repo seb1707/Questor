@@ -80,7 +80,7 @@
             public void setDeclineTimer(string agentName, DateTime declineTimer)
             {
                 if (_timers.ContainsKey(agentName))
-                    _timers["agentName"] = declineTimer;
+                    _timers[agentName] = declineTimer;
                 else
                     _timers.Add(agentName, declineTimer);
 

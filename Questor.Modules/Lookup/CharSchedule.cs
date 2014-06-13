@@ -75,8 +75,7 @@ namespace Questor.Modules.Lookup
             DateTime stopTime2 = DateTime.MinValue;
             DateTime startTime3 = DateTime.MaxValue;
             DateTime stopTime3 = DateTime.MinValue;
-
-            //
+                        //
             // schedule #1
             // start time parsing
             if (startxml1 != null)
@@ -107,7 +106,15 @@ namespace Questor.Modules.Lookup
                     stopTime1 = DateTime.Now.AddHours(4);
                 }
                 else
+                {
+                    if (stopTime1 < startTime1)
+                    {
+                        Logging.Log("CharSchedule", "Stop Time 1 is lesser than Start Time 1, assuming Stop Time 1 occurs 24hours later", Logging.Orange);
+                        stopTime1 = stopTime1.AddHours(24);
+                    }
+
                     StopTimeSpecified = true;
+                }
 
                 Stop1 = stopTime1;
             }
@@ -143,7 +150,15 @@ namespace Questor.Modules.Lookup
                     stopTime2 = DateTime.Now.AddHours(4);
                 }
                 else
+                {
+                    if (stopTime2 < startTime2)
+                    {
+                        Logging.Log("CharSchedule", "Stop Time 2 i is lesser than Start Time 2, assuming Stop Time 2 occurs 24hours later", Logging.Orange);
+                        stopTime2 = stopTime2.AddHours(24);
+                    }
+
                     StopTime2Specified = true;
+                }
 
                 Stop2 = stopTime2;
             }
@@ -179,7 +194,15 @@ namespace Questor.Modules.Lookup
                     stopTime3 = DateTime.Now.AddHours(4);
                 }
                 else
+                {
+                    if (stopTime3 < startTime3)
+                    {
+                        Logging.Log("CharSchedule", "Stop Time 3 is lesser than Start Time 3, assuming Stop Time 3 occurs 24hours later", Logging.Orange);
+                        stopTime3 = stopTime3.AddHours(24);
+                    }
+
                     StopTime3Specified = true;
+                }
 
                 Stop3 = stopTime3;
             }

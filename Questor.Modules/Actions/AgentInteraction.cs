@@ -84,22 +84,14 @@ namespace Questor.Modules.Actions
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe, Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe, Cache.Instance.AgentFactionEffectiveStandingtoMe));
             AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
-            if (Settings.Instance.MultiAgentSupport)
-            {
-                //
-                //Change Agents
-                //
-                if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddHours(999);
-                CloseConversation();
-                Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
-                Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
-                Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
-                _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
-                return;
-            }
-
-            Logging.Log("AgentInteraction.StartConversation", "", Logging.Orange);
-            Cache.Instance.Paused = true;
+            //
+            //Change Agents
+            //
+            if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddHours(999);
+            CloseConversation();
+            Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
+            Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
+            _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
         }
 
         private static void StartConversation(string module)
@@ -899,7 +891,7 @@ namespace Questor.Modules.Actions
                 // (any lower and we might lose access to this agent)
                 // and no other agents are NOT available (or are also in cool-down)
                 //
-                if ((Settings.Instance.WaitDecline && !Settings.Instance.MultiAgentSupport) || (Settings.Instance.WaitDecline && Settings.Instance.MultiAgentSupport && Cache.Instance.AllAgentsStillInDeclineCoolDown))
+                if ((Settings.Instance.WaitDecline && Cache.Instance.AllAgentsStillInDeclineCoolDown))
                 {
                     //
                     // if true we ALWAYS wait (or switch agents?!?)
@@ -918,45 +910,26 @@ namespace Questor.Modules.Actions
                 {
                     if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
                     
-                    //
-                    // If we have multiple agents defined - switch agents
-                    //
-                    if (Settings.Instance.MultiAgentSupport)
+                    //TODO - We should probably check if there are other agents who's effective standing is above the minAgentBlackListStanding.
+                    if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
                     {
-                        //TODO - We should probably check if there are other agents who's effective standing is above the minAgentBlackListStanding.
-                        if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
-                        if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
-                        {
-                            //
-                            // wait.
-                            //
-                            _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);
-                            Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again because no other agents were avail for use.", Logging.Yellow);
-                            CloseConversation();
-                            _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
-                            return;
-                        }
+                        //
+                        // wait.
+                        //
+                        _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);
+                        Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again because no other agents were avail for use.", Logging.Yellow);
+                        CloseConversation();
+                        _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
+                        return;
                     }
-
-                    _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);
-                    Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.", Logging.Yellow);
-                    CloseConversation();
-                    _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
-                    return;
                 }
 
-                if (Settings.Instance.MultiAgentSupport && !Cache.Instance.AllAgentsStillInDeclineCoolDown)
+                if (!Cache.Instance.AllAgentsStillInDeclineCoolDown)
                 {
-                    if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
-
-                    //
-                    //Change Agents
-                    //
                     if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
                     CloseConversation();
 
                     Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
-                    Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
                     Logging.Log("AgentInteraction.DeclineMission", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.ChangeAgent;
                     return;

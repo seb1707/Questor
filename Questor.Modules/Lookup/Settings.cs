@@ -235,7 +235,6 @@ namespace Questor.Modules.Lookup
         public bool AllowNonStorylineCourierMissionsInLowSec { get; set; }
 
         public bool WaitDecline { get; set; }
-        public bool MultiAgentSupport { get; private set; }
 
         //
         // KillSentries Setting
@@ -1362,21 +1361,9 @@ namespace Questor.Modules.Lookup
             {
                 if (agentList.HasElements)
                 {
-                    int i = 0;
                     foreach (XElement agent in agentList.Elements("agentList"))
                     {
                         ListOfAgents.Add(new AgentsList(agent));
-                        i++;
-                    }
-                    if (i >= 2)
-                    {
-                        MultiAgentSupport = true;
-                        Logging.Log("Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
-                    }
-                    else
-                    {
-                        MultiAgentSupport = false;
-                        Logging.Log("Settings", "Found only one agent in your character XML: MultiAgentSupport is [" + MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
                     }
                 }
                 else

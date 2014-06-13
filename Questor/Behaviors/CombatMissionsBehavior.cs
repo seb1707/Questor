@@ -358,7 +358,7 @@ namespace Questor.Behaviors
                 return;
             }
 
-            if (_firstStart && Settings.Instance.MultiAgentSupport)
+            if (_firstStart)
             {
                 //if you are in wrong station and is not first agent
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Switch;
@@ -1555,16 +1555,12 @@ namespace Questor.Behaviors
                     SalvageNextPocketCMBState();
                     break;
 
-                case CombatMissionsBehaviorState.PrepareStorylineSwitchAgents:
-                    if(Settings.Instance.MultiAgentSupport)
-                    {
-                        //
-                        // change agents to agent #1, so we can go there and use the storyline ships (transport, shuttle, etc)
-                        //
-                        Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
-                        Cache.Instance.CurrentAgentText = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
-                        Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);    
-                    }
+                case CombatMissionsBehaviorState.PrepareStorylineSwitchAgents:                    
+                    //
+                    // change agents to agent #1, so we can go there and use the storyline ships (transport, shuttle, etc)
+                    //
+                    Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
+                    Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
 
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineGotoBase;
                     break;

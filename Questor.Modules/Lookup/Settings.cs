@@ -361,6 +361,7 @@ namespace Questor.Modules.Lookup
         public List<int> WreckBlackList { get; set; }
         public bool WreckBlackListSmallWrecks { get; set; }
         public bool WreckBlackListMediumWrecks { get; set; }
+        public string CachePath { get; set; }
         public string Logpath { get; set; }
         public bool SessionsLog { get; set; }
         public string SessionsLogPath { get; set; }
@@ -2072,6 +2073,7 @@ namespace Questor.Modules.Lookup
             // Log location and log names defined here
             //
             Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + characterNameForLogs + "\\");
+            CachePath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\cache\\" + characterNameForLogs + "\\");
 
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
             ConsoleLogPath = System.IO.Path.Combine(Logpath, "Console\\");
@@ -2105,6 +2107,7 @@ namespace Questor.Modules.Lookup
             try
             {
                 Directory.CreateDirectory(Logpath);
+                Directory.CreateDirectory(CachePath);
                 Directory.CreateDirectory(ConsoleLogPath);
                 Directory.CreateDirectory(SessionsLogPath);
                 Directory.CreateDirectory(DroneStatsLogPath);

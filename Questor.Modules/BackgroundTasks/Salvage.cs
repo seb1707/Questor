@@ -346,13 +346,13 @@ namespace Questor.Modules.BackgroundTasks
                     ModuleNumber++;
                     if (salvager.IsActive)
                     {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] _ Tractorbeam is: IsActive [" + salvager.IsActive + "]. Continue", Logging.Debug);
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] _ Salvager is: IsActive [" + salvager.IsActive + "]. Continue", Logging.Debug);
                         continue;
                     }
 
                     if (salvager.InLimboState)
                     {
-                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] __ Tractorbeam is: InLimboState [" + salvager.InLimboState + "] IsDeactivating [" + salvager.IsDeactivating + "] IsActivatable [" + salvager.IsActivatable + "] IsOnline [" + salvager.IsOnline + "] IsGoingOnline [" + salvager.IsGoingOnline + "] TargetId [" + salvager.TargetId + "]. Continue", Logging.Debug);
+                        if (Settings.Instance.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers.Activating", "[" + WreckNumber + "][::" + ModuleNumber + "] __ Salvager is: InLimboState [" + salvager.InLimboState + "] IsDeactivating [" + salvager.IsDeactivating + "] IsActivatable [" + salvager.IsActivatable + "] IsOnline [" + salvager.IsOnline + "] IsGoingOnline [" + salvager.IsGoingOnline + "] TargetId [" + salvager.TargetId + "]. Continue", Logging.Debug);
                         continue;
                     }
 
@@ -386,7 +386,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
-                    Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "]", Logging.White);
+                    Logging.Log("Salvage", "Activating salvager [" + ModuleNumber + "] on [" + wreck.Name + "][ID: " + Cache.Instance.MaskedID(wreck.Id) + "] we have [" + wrecks.Count() + "] wrecks targeted in salvager range", Logging.White);
                     if (salvager.Activate(wreck))
                     {
                         salvagersProcessedThisTick++;

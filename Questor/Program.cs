@@ -1,39 +1,52 @@
-//------------------------------------------------------------------------------
-//  <copyright from='2010' to='2015' company='THEHACKERWITHIN.COM'>
-//    Copyright (c) TheHackerWithin.COM. All Rights Reserved.
-//
-//    Please look in the accompanying license.htm file for the license that
-//    applies to this source code. (a copy can also be found at:
-//    http://www.thehackerwithin.com/license.htm)
-//  </copyright>
-//-------------------------------------------------------------------------------
+﻿using System.Threading;
+using EasyHook;
 
 namespace Questor
 {
     using System;
-    using System.Windows.Forms;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Xml.Linq;
-    using System.IO;
     using System.Timers;
-    using Mono.Options;
-    using System.Globalization;
-    using EasyHook;
+    using System.Windows.Forms;
+    using System.Xml.Linq;
+    using DirectEve;
     using LavishScriptAPI;
+    using Mono.Options;
     using global::Questor.Modules.BackgroundTasks;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
-    using DirectEve;
 
-    public class Program : IEntryPoint
+    public class BeforeLogin : IEntryPoint
     {
+        public static IEnumerable<string> SplitArguments(string commandLine)
+        {
+            var parmChars = commandLine.ToCharArray();
+            var inSingleQuote = false;
+            var inDoubleQuote = false;
+            for (var index = 0; index < parmChars.Length; index++)
+            {
+                if (parmChars[index] == '"' && !inSingleQuote)
+                {
+                    inDoubleQuote = !inDoubleQuote;
+                    parmChars[index] = '\n';
+                }
+                if (parmChars[index] == '\'' && !inDoubleQuote)
+                {
+                    inSingleQuote = !inSingleQuote;
+                    parmChars[index] = '\n';
+                }
+                if (!inSingleQuote && !inDoubleQuote && parmChars[index] == ' ')
+                    parmChars[index] = '\n';
+            }
+            return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+        
         private static bool loggedInAndreadyToStartQuestorUI;
-
         public static List<CharSchedule> CharSchedules { get; private set; }
-
         public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
         private static bool _questorScheduleSaysWeShouldLoginNow;
         public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
@@ -48,7 +61,6 @@ namespace Questor
         private static bool _chantlingScheduler;
         private static bool _loginNowIgnoreScheduler;
         private static bool _standaloneInstance;
-
         private static double _minutesToStart;
         private static bool? _readyToLoginEVEAccount;
         private static bool ReadyToLoginToEVEAccount
@@ -75,16 +87,13 @@ namespace Questor
                 }
             }
         }
-
         private static bool _humanInterventionRequired;
         private static bool MissingEasyHookWarningGiven;
-
-        static readonly System.Timers.Timer Timer = new System.Timers.Timer();
+        private static readonly System.Timers.Timer Timer = new System.Timers.Timer();
         private const int RandStartDelay = 30; //Random startup delay in minutes
         private static readonly Random R = new Random();
         public static bool StopTimeSpecified; //false;
         private static int ServerStatusCheck = 0;
-
         private static DateTime _nextPulse;
         private static DateTime _lastServerStatusCheckWasNotOK = DateTime.MinValue;
         public static DateTime StartTime = DateTime.MaxValue;
@@ -100,39 +109,11 @@ namespace Questor
             }
         }
 
-        public static void Main(string[] args) //used during as the  Questor.exe entry point
-        {
-            try
-            {
-                IEnumerable<string> questorParametersfromLauncher = args.Cast<string>();
-                Program_Start(questorParametersfromLauncher);
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
-            }
-        }
-
-        public static void Run(EasyHook.RemoteHooking.IContext InContext, IEnumerable<string> questorParametersfromLauncher) //used during as the  Questor.dll entry point
-        {
-            try
-            {
-                Program_Start(questorParametersfromLauncher);
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", "exception [" + ex + "]", Logging.White);
-            }
-        }
-
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        private static void Program_Start(IEnumerable<string> args)
+        public static void Program_Start(IEnumerable<string> args)
         {
             _maxRuntime = Int32.MaxValue;
-            OptionSet p = new OptionSet {
+            OptionSet p = new OptionSet
+            {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
@@ -147,7 +128,7 @@ namespace Questor
                 {"n|loginNow", "Login using info in scheduler", v => _loginNowIgnoreScheduler = v != null},
                 {"i|standalone instance", "Standalone instance, hook D3D w/o Innerspace!", v => _standaloneInstance = v != null},
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
-                };
+            };
 
             try
             {
@@ -161,7 +142,7 @@ namespace Questor
                 Logging.Log("Startup", "Try `questor --help' for more information.", Logging.White);
                 return;
             }
-            
+
             if (_showHelp)
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
@@ -210,6 +191,7 @@ namespace Questor
             }
 
             #region Load DirectEVE
+
             //
             // Load DirectEVE
             //
@@ -260,11 +242,13 @@ namespace Questor
                     Logging.Log("Startup", "Exception while logging exception, oh joy [" + exception + "]", Logging.Orange);
                     return;
                 }
-                
+
             }
+
             #endregion Load DirectEVE
 
             #region Verify DirectEVE Support Instances
+
             //
             // Verify DirectEVE Support Instances
             //
@@ -345,7 +329,7 @@ namespace Questor
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Logging.Log("Startup", "We are logged in.", Logging.Teal);
-                    Logging.Log("Startup", "Launching Questor", Logging.Teal); 
+                    Logging.Log("Startup", "Launching Questor", Logging.Teal);
                     _questor = new Questor();
                     Logging.Log("Startup", "Launching QuestorUI", Logging.Teal);
                     Application.Run(new QuestorUI());
@@ -355,7 +339,7 @@ namespace Questor
                     //}
 
                     Logging.Log("Startup", "Exiting Questor", Logging.Teal);
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -371,8 +355,8 @@ namespace Questor
         private static void LoginUsingScheduler()
         {
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Logging._character = Logging._character.Replace("\"", "");  // strip quotation marks if any are present
-                   
+            Logging._character = Logging._character.Replace("\"", ""); // strip quotation marks if any are present
+
 
             CharSchedules = new List<CharSchedule>();
             if (path != null)
@@ -458,7 +442,9 @@ namespace Questor
             }
 
             if (schedule.StartTimeSpecified || schedule.StartTime2Specified || schedule.StartTime3Specified)
-                StartTime = StartTime.AddSeconds(R.Next(0, (RandStartDelay * 60)));
+            {
+                StartTime = StartTime.AddSeconds(R.Next(0, (RandStartDelay*60)));
+            }
 
             if ((DateTime.Now > StartTime))
             {
@@ -468,7 +454,9 @@ namespace Questor
                     _questorScheduleSaysWeShouldLoginNow = true;
                 }
                 else
+                {
                     StartTime = StartTime.AddDays(1); //otherwise, start tomorrow at start time
+                }
             }
             else if ((StartTime.Subtract(DateTime.Now).TotalMinutes > 1200)) //if we're more than x hours shy of start time, start now
             {
@@ -477,7 +465,9 @@ namespace Questor
             }
 
             if (StopTime < StartTime)
+            {
                 StopTime = StopTime.AddDays(1);
+            }
 
             //if (schedule.RunTime > 0) //if runtime is specified, overrides stop time
             //    StopTime = StartTime.AddMinutes(schedule.RunTime); //minutes of runtime
@@ -489,7 +479,10 @@ namespace Questor
             {
                 _questorScheduleSaysWeShouldLoginNow = true;
             }
-            else Logging.Log("Startup", " Start Time: " + StartTime + " - Stop Time: " + StopTime, Logging.White);
+            else
+            {
+                Logging.Log("Startup", " Start Time: " + StartTime + " - Stop Time: " + StopTime, Logging.White);
+            }
 
             if (!_questorScheduleSaysWeShouldLoginNow)
             {
@@ -498,7 +491,7 @@ namespace Questor
                 Timer.Elapsed += new ElapsedEventHandler(TimerEventProcessor);
                 if (_minutesToStart > 0)
                 {
-                    Timer.Interval = (int)(_minutesToStart * 60000);
+                    Timer.Interval = (int) (_minutesToStart*60000);
                 }
                 else
                 {
@@ -526,7 +519,8 @@ namespace Questor
             Cache.Instance.InvalidateCache();
 
             Time.Instance.LastFrame = DateTime.UtcNow;
-            Time.Instance.LastSessionIsReady = DateTime.UtcNow; //update this regardless before we login there is no session
+            Time.Instance.LastSessionIsReady = DateTime.UtcNow;
+                //update this regardless before we login there is no session
 
             //if (Cache.Instance.SessionState != "Quitting")
             //{
@@ -566,7 +560,8 @@ namespace Questor
                 return;
             }
 
-            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) &&
+                !_questorScheduleSaysWeShouldLoginNow)
             {
                 Logging.Log("Startup", "if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)", Logging.White);
                 return;
@@ -789,7 +784,7 @@ namespace Questor
                     else
                     {
                         Logging.Log("Startup", string.Format("Running {0}...", _scriptFile), Logging.White);
-                        info.Invoke(Cache.Instance.DirectEve, new Object[] { _scriptFile });
+                        info.Invoke(Cache.Instance.DirectEve, new Object[] {_scriptFile});
                     }
                 }
                 catch (System.Exception ex)
@@ -814,7 +809,7 @@ namespace Questor
                     {
                         _lastServerStatusCheckWasNotOK = DateTime.UtcNow;
                     }
-                
+
                     return;
                 }
 
@@ -839,7 +834,7 @@ namespace Questor
                 //
                 // we must have support instances available, after a delay, login
                 //
-                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds > RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds * 1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds * 1000))
+                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds > RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds*1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds*1000))
                 {
                     Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
                     Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
@@ -851,7 +846,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalMilliseconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds * 1000, Time.Instance.CharacterSelectionDelayMaximum_seconds * 1000) && DateTime.UtcNow > NextSlotActivate)
+                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalMilliseconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds*1000, Time.Instance.CharacterSelectionDelayMaximum_seconds*1000) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
@@ -866,7 +861,9 @@ namespace Questor
                         //EVECharacterSelected = DateTime.UtcNow;
                         return;
                     }
-                    Logging.Log("Startup", "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds", Logging.White);
+                    Logging.Log("Startup",
+                        "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds",
+                        Logging.White);
                 }
             }
         }
@@ -884,5 +881,6 @@ namespace Questor
             Random random = new Random();
             return random.Next(min, max);
         }
+
     }
 }

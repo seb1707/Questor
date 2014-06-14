@@ -6,10 +6,10 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0E528457-6A20-441F-94BB-84F6FC0EEE70}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Questor</RootNamespace>
-    <AssemblyName>Questor</AssemblyName>
+    <RootNamespace>QuestorDLL</RootNamespace>
+    <AssemblyName>QuestorDLL</AssemblyName>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
@@ -59,6 +59,9 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DirectEve, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -83,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Program.cs" />
     <Compile Include="Behaviors\CombatHelperBehavior.cs" />
     <Compile Include="Behaviors\CombatMissionsBehavior.cs" />
     <Compile Include="Behaviors\DebugBehavior.cs" />
@@ -96,7 +100,7 @@
     <Compile Include="D3DDetour\D3DHook.cs" />
     <Compile Include="D3DDetour\Pulse.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="WTF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Questor.cs" />
     <Compile Include="QuestorUI.cs">
@@ -165,7 +169,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(ProjectDir)..\Directeve\easyhook*.dll" "$(ProjectDir)..\Output\"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,4 +1,5 @@
-using QuestorDLL.Properties;
+
+using Questor.Properties;
 
 namespace Questor
 {

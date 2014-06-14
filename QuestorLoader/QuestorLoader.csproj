@@ -38,8 +38,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\DirectEve\EasyHook.dll</HintPath>
     </Reference>
+    <Reference Include="Lavish.InnerSpace, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9029a3ab4cbe108d, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,18 +50,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logging.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Questor.Modules\Questor.Modules.csproj">
-      <Project>{0C0BE1A3-BA5B-41A1-B578-F20777D02304}</Project>
-      <Name>Questor.Modules</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Questor\Questor.csproj">
-      <Project>{0E528457-6A20-441F-94BB-84F6FC0EEE70}</Project>
-      <Name>Questor</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

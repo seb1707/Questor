@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using EasyHook;
-
-namespace Questor
+﻿namespace Questor
 {
     using System;
     using System.Collections.Generic;
@@ -20,7 +17,7 @@ namespace Questor
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
 
-    public class BeforeLogin : IEntryPoint
+    public class BeforeLogin
     {
         public static IEnumerable<string> SplitArguments(string commandLine)
         {
@@ -109,7 +106,7 @@ namespace Questor
             }
         }
 
-        public static void Program_Start(IEnumerable<string> args)
+        public static void Main(string[] args)
         {
             _maxRuntime = Int32.MaxValue;
             OptionSet p = new OptionSet

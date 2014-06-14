@@ -1745,6 +1745,61 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private double? _myAmmoInSpaceAverageVelocity;
+
+        public double MyAmmoInSpaceAverageVelocity
+        {
+            get
+            {
+                try
+                {
+                    if (_myAmmoInSpaceAverageVelocity == null)
+                    {
+                        ItemCache matchingAmmoInCargo = null;
+                        double maxVelocityOfmatchingAmmoInCargo = 0;
+                        if (Cache.Instance.CurrentShipsCargo.Items != null && Cache.Instance.CurrentShipsCargo.Items.Any())
+                        {
+                            if (Cache.Instance.ListofEachWeaponsVolleyData != null) 
+                            {
+                                if (Cache.Instance.ListofEachWeaponsVolleyData.Any())
+                                {
+                                    EachWeaponsVolleyCache _volley = Cache.Instance.ListofEachWeaponsVolleyData.LastOrDefault();
+                                    {
+                                        if (_volley != null)
+                                        {
+                                            if (Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == _volley.moduleAmmoTypeID))
+                                            {
+                                                matchingAmmoInCargo = new ItemCache(Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == _volley.moduleAmmoTypeID));
+                                                maxVelocityOfmatchingAmmoInCargo = matchingAmmoInCargo.maxVelocity;    
+                                            }
+                                        }   
+                                    }   
+                                }
+                            }
+                        }
+
+                        //double AmmoInSpaceAvergeVelocity = Math.Max(maxVelocityOfmatchingAmmoInCargo ,Cache.Instance.Entities.Where(i => i.IsOnGridWithMe && i.CategoryId == (int)CategoryID.Charge && i.TypeId == __volleyUsedForInvType.moduleAmmoTypeID).Average( e => e.AngularVelocity);
+                    
+                        //_myAmmoInSpaceAverageVelocity = Cache.Instance.EntitiesOnGrid.Where(i => i.CategoryId != (int)CategoryID.Asteroid && i.Id != Cache.Instance.ActiveShip.ItemId).ToList();
+                        //if (_entitiesNotSelf.Any())
+                        //{
+                        //    return _entitiesNotSelf;
+                        //}
+
+                        //return new List<EntityCache>();
+                    }
+
+                    return 0; //_myAmmoInSpaceAverageVelocity;
+
+
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+        }
+
         /// <summary>
         ///   Entities cache (all entities within 256km) //cleared in InvalidateCache 
         /// </summary>

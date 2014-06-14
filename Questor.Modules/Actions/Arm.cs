@@ -795,6 +795,9 @@ namespace Questor.Modules.Actions
                     int AmmoHangarDronesQuantity = 0;
                     int LootHangarDronesQuantity = 0;
 
+                    if (Settings.Instance.DebugArm) 
+                        Logging.Log("Arm.MoveDrones", String.Format("Cache.Instance.DirectEve.GetShipsDroneBay().Capacity = {0}, Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity = {1}", Cache.Instance.DirectEve.GetShipsDroneBay().Capacity, Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity), Logging.White);
+
                     if (Cache.Instance.DirectEve.GetShipsDroneBay().Capacity == Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity)
                     {
                         retryCount = 0;

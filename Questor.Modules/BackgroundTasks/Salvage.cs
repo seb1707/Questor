@@ -634,23 +634,13 @@ namespace Questor.Modules.BackgroundTasks
             // Open a container in range
             int containersProcessedThisTick = 0;
             List<EntityCache> containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
+            
             if (Settings.Instance.DebugLootWrecks)
             {
-                int containersInRangeCount = 0;
-                if (containersInRange.Any())
-                {
-                    containersInRangeCount = containersInRange.Count();
-                }
-            
                 List<EntityCache> containersOutOfRange = Cache.Instance.Containers.Where(e => e.Distance >= (int)Distances.SafeScoopRange).ToList();
-                int containersOutOfRangeCount = 0;
-                if (containersOutOfRange.Any())
-                {
-                    containersOutOfRangeCount = containersOutOfRange.Count();
-                }
 
-                if (containersInRangeCount < 1) Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRangeCount + "]", Logging.Teal);
-                if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
+                Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRange.Count + "]", Logging.Teal);
+                Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRange.Count + "]", Logging.Teal);   
             }
             
             foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))

@@ -1119,7 +1119,7 @@ namespace Questor.Modules.Caching
         private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisSolarSystemSelector = (a, s) => a.SolarSystemId == s.SolarSystemId;
         private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisStationSelector = (a, s) => a.StationId == s.StationId;
 
-        private string SelectNearestAgent()
+        private string SelectNearestAgent( bool requireValidDeclineTimer )
         {
             string agentName = null;
 
@@ -1150,7 +1150,7 @@ namespace Questor.Modules.Caching
                     {
                         Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
                         var nearestAgent = Settings.Instance.ListOfAgents
-                            .Where(x => DateTime.UtcNow >= x.DeclineTimer)
+                            .Where(x => !requireValidDeclineTimer || DateTime.UtcNow >= x.DeclineTimer)
                             .OrderBy(x => x.Priorit)
                             .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                             .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
@@ -1162,7 +1162,7 @@ namespace Questor.Modules.Caching
                         else if (Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).Any())
                         {
                             AgentsList __HighestPriorityAgentInList = Settings.Instance.ListOfAgents
-                                .Where(x => DateTime.UtcNow >= x.DeclineTimer)
+                                .Where(x => !requireValidDeclineTimer || DateTime.UtcNow >= x.DeclineTimer)
                                 .OrderBy(x => x.Priorit)
                                 .FirstOrDefault();
                             if (__HighestPriorityAgentInList != null)
@@ -1182,9 +1182,8 @@ namespace Questor.Modules.Caching
             return agentName;
         }
 
-        private string SelectFirstAgent()
+        private string SelectFirstAgent(bool returnFirstOneIfNoneFound = false)
         {
-            Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
             AgentsList FirstAgent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
 
             string agentName = null;
@@ -1207,13 +1206,14 @@ namespace Questor.Modules.Caching
 
             if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.PrepareStorylineSwitchAgents)
             {
+                //TODO: must be a better way to achieve this
                 agentName = SelectFirstAgent();
             }
             else if (_agentName == "")
             {
                 // it means that this is first switch for Questor, so we'll check missions, then station or system for agents.
                 AllAgentsStillInDeclineCoolDown = false;
-                agentName = SelectNearestAgent();
+                agentName = SelectNearestAgent(true) ?? SelectNearestAgent(false);
             }
             else
             {

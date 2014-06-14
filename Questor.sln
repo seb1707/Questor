@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVE.Net", "EVE.Net\EVE.Net.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorTest1", "QuestorTest1\QuestorTest1.csproj", "{6A28416A-E98D-4FB0-B058-E5FCEAED1C9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorDLL", "QuestorDLL\QuestorDLL.csproj", "{F9D7C1C0-7D8B-4718-B5B1-A9938682BA33}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestorLoader", "QuestorDLL\QuestorLoader.csproj", "{F9D7C1C0-7D8B-4718-B5B1-A9938682BA33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

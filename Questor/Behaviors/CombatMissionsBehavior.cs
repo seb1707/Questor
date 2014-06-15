@@ -376,7 +376,7 @@ namespace Questor.Behaviors
                 {
                     Logging.Log("CombatMissionsBehavior", "Storyline detected, doing storyline.", Logging.White);
                     _storyline.Reset();
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineSwitchAgents;
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineGotoBase;
                     return;
                 }
 
@@ -1554,17 +1554,7 @@ namespace Questor.Behaviors
                 case CombatMissionsBehaviorState.SalvageNextPocket:
                     SalvageNextPocketCMBState();
                     break;
-
-                case CombatMissionsBehaviorState.PrepareStorylineSwitchAgents:                    
-                    //
-                    // change agents to agent #1, so we can go there and use the storyline ships (transport, shuttle, etc)
-                    //
-                    Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
-                    Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
-
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineGotoBase;
-                    break;
-
+                    
                 case CombatMissionsBehaviorState.PrepareStorylineGotoBase:
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "PrepareStorylineGotoBase: AvoidBumpingThings()", Logging.White);
 
@@ -1576,7 +1566,15 @@ namespace Questor.Behaviors
 
                     if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "PrepareStorylineGotoBase: Traveler.TravelHome()", Logging.White);
 
-                    Traveler.TravelHome("CombatMissionsBehavior.TravelHome");
+                    if(Settings.Instance.StoryLineBaseBookmark != "")
+                    {
+                        if(!Traveler.TravelToBookmarkName(Settings.Instance.StoryLineBaseBookmark, "CombatMissionsBehavior.TravelHome"))
+                        {
+                            Traveler.TravelHome("CombatMissionsBehavior.TravelHome");
+                        }
+                    }
+                    else
+                        Traveler.TravelHome("CombatMissionsBehavior.TravelHome");
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
@@ -1605,9 +1603,40 @@ namespace Questor.Behaviors
                     if (_States.CurrentStorylineState == StorylineState.Done)
                     {
                         Logging.Log("CombatMissionsBehavior.Storyline", "We have completed the storyline, returning to base", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.StorylineReturnToBase;
                         break;
                     }
+                    break;
+
+                case CombatMissionsBehaviorState.StorylineReturnToBase:
+                    if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "StorylineReturnToBase: AvoidBumpingThings()", Logging.White);
+
+                    if (Settings.Instance.AvoidBumpingThings)
+                    {
+                        if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "StorylineReturnToBase: if (Settings.Instance.AvoidBumpingThings)", Logging.White);
+                        NavigateOnGrid.AvoidBumpingThings(Cache.Instance.BigObjects.FirstOrDefault(), "CombatMissionsBehaviorState.StorylineReturnToBase");
+                    }
+
+                    if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "StorylineReturnToBase: TravelToStorylineBase", Logging.White);
+
+                    if (Settings.Instance.StoryLineBaseBookmark != "")
+                    {
+                        if (!Traveler.TravelToBookmarkName(Settings.Instance.StoryLineBaseBookmark, "CombatMissionsBehavior.TravelToStorylineBase"))
+                        {
+                            Traveler.TravelHome("CombatMissionsBehavior.TravelToStorylineBase");
+                        }
+                    }
+                    else
+                        Traveler.TravelHome("CombatMissionsBehavior.TravelToStorylineBase");
+
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5))
+                    {
+                        if (Settings.Instance.DebugGotobase) Logging.Log("CombatMissionsBehavior", "StorylineReturnToBase: We are at destination", Logging.White);
+                        Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
+
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Switch;
+                    }
+
                     break;
 
                 case CombatMissionsBehaviorState.CourierMission:

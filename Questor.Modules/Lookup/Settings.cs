@@ -232,6 +232,7 @@ namespace Questor.Modules.Lookup
         public string MissionsPath { get; set; }
         public bool RequireMissionXML { get; set; }
 
+        public string StoryLineBaseBookmark { get; set; }
         public bool AllowNonStorylineCourierMissionsInLowSec { get; set; }
 
         public bool WaitDecline { get; set; }
@@ -919,6 +920,7 @@ namespace Questor.Modules.Lookup
 
             RequireMissionXML = (bool?)CharacterSettingsXml.Element("requireMissionXML") ?? (bool?)CommonSettingsXml.Element("requireMissionXML") ?? false;
             AllowNonStorylineCourierMissionsInLowSec = (bool?)CharacterSettingsXml.Element("LowSecMissions") ?? (bool?)CommonSettingsXml.Element("LowSecMissions") ?? false;
+            StoryLineBaseBookmark = (string)CharacterSettingsXml.Element("storyLineBaseBookmark") ?? (string)CommonSettingsXml.Element("storyLineBaseBookmark") ?? "";
             MaterialsForWarOreID = (int?)CharacterSettingsXml.Element("MaterialsForWarOreID") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreID") ?? 20;
             MaterialsForWarOreQty = (int?)CharacterSettingsXml.Element("MaterialsForWarOreQty") ?? (int?)CommonSettingsXml.Element("MaterialsForWarOreQty") ?? 8000;
             KillSentries = (bool?)CharacterSettingsXml.Element("killSentries") ?? (bool?)CommonSettingsXml.Element("killSentries") ?? false;

@@ -130,7 +130,7 @@ namespace Questor.Behaviors
                     DirectBookmark miningHome = Cache.Instance.BookmarksByLabel("Mining Home").FirstOrDefault();
 
                     //Cache.Instance.DirectEve.Navigation.GetDestinationPath
-                    Traveler.TravelToMiningHomeBookmark(miningHome, "Mining go to base");
+                    Traveler.TravelToBookmark(miningHome, "Mining go to base");
 
                     if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {

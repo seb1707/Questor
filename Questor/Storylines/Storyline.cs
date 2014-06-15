@@ -146,6 +146,7 @@
                                //
                                // COURIER/DELIVERY - MINMATAR - LEVEL 1
                                //
+                               {"Very Important Pirates".ToLower(), new GenericCourier()}, //lvl1
                                
                                //
                                // COURIER/DELIVERY - MINMATAR - LEVEL 2

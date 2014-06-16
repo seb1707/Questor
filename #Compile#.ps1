@@ -94,7 +94,7 @@ write-Host "-----------------------------------------------------------------"
 
 compilesolution -msbuildexecutable $msbuild -projectFolderName Questor.Modules -projectSolution Questor.Modules -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName Questor -projectSolution Questor -msbuildoption $msbuildoption
-compilesolution -msbuildexecutable $msbuild -projectFolderName Questor -projectSolution QuestorDLL -msbuildoption $msbuildoption
+compilesolution -msbuildexecutable $msbuild -projectFolderName QuestorLoader -projectSolution QuestorLoader -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName ValueDump -projectSolution ValueDump -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName QuestorManager -projectSolution QuestorManager -msbuildoption $msbuildoption
 compilesolution -msbuildexecutable $msbuild -projectFolderName BUYLPI -projectSolution BUYLPI -msbuildoption $msbuildoption

@@ -4604,10 +4604,20 @@ namespace Questor.Modules.Caching
                         bool result = false;
                         result |= TypeId == (int)TypeID.Tengu;
                         result |= GroupId == (int)Group.Shuttle;
-                        if (Drones.DroneBay.Volume == 0)
+                        if (Cache.Instance.InSpace && Cache.Instance.InMission)
                         {
-                            result = true; // no drone bay available
-                        } 
+                            if (Drones.DroneBay != null && Drones.DroneBay.IsReady)
+                            {
+                                //
+                                // can or should we just check for drone bandwidth?
+                                //
+                                if (Drones.DroneBay.Volume == 0)
+                                {
+                                    if (Logging.DebugDrones) Logging.Log("IsShipWithNoDroneBay", "Dronebay Volume = 0", Logging.Debug);
+                                    result = true; // no drone bay available
+                                }
+                            }    
+                        }
                         
                         return result;
                     }

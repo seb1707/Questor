@@ -208,6 +208,7 @@ namespace Questor.Modules.Lookup
         public static List<Ammo> MissionAmmo;
         public static int MissionWeaponGroupId { get; set; }
         public static bool? MissionUseDrones { get; set; }
+        public static bool? PocketUseDrones { get; set; }
         public static bool? MissionKillSentries { get; set; }
         public static int MissionsThisSession = 0;
 
@@ -296,8 +297,8 @@ namespace Questor.Modules.Lookup
                     }
 
                     MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
-                    MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //do not set default here, use character level settings if avail
-                    MissionKillSentries = (bool?)missionXml.Root.Element("killSentries"); //do not set default here, use character level settings if avail
+                    MissionUseDrones = (bool?) missionXml.Root.Element("useDrones") ?? null; 
+                    MissionKillSentries = (bool?)missionXml.Root.Element("killSentries" ?? null);
                     MissionWarpAtDistanceRange = (int?)missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
                 }
 

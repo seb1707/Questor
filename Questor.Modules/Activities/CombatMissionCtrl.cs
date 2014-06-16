@@ -72,6 +72,7 @@ namespace Questor.Modules.Activities
             Cache.Instance.normalNav = true;
             Cache.Instance.onlyKillAggro = false;
             MissionSettings.MissionActivateRepairModulesAtThisPerc = null;
+            MissionSettings.PocketUseDrones = null;
             ItemsHaveBeenMoved = false;
             CargoHoldHasBeenStacked = false;
             _currentAction++;
@@ -2355,6 +2356,7 @@ namespace Questor.Modules.Activities
 
                     // Update UseDrones from settings (this can be overridden with a mission action named UseDrones)
                     MissionSettings.MissionUseDrones = null;
+                    MissionSettings.PocketUseDrones = null;
 
                     // Reload the items needed for this mission from the XML file
                     MissionSettings.RefreshMissionItems(AgentId);
@@ -2525,6 +2527,7 @@ namespace Questor.Modules.Activities
                         //No mission file but we need to set some cache settings
                         MissionSettings.MissionOrbitDistance = null;
                         MissionSettings.MissionOptimalRange = null;
+                        MissionSettings.MissionUseDrones = null;
                         Cache.Instance.AfterMissionSalvaging = Salvage.AfterMissionSalvaging;
                         return new Actions.Action[0];
                     }

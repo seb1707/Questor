@@ -100,6 +100,11 @@ namespace Questor.Modules.Combat
         {
             get
             {
+                if (MissionSettings.PocketUseDrones != null)
+                {
+                    return (bool)MissionSettings.PocketUseDrones;
+                }
+
                 if (MissionSettings.MissionUseDrones != null)
                 {
                     return (bool) MissionSettings.MissionUseDrones;

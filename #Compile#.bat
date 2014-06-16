@@ -60,11 +60,11 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 5 of 6 build
 ::
 :: Build Project: BUYLPI
 ::
-::set nameofproject=BUYLPI
-::set csproj=.\%nameofproject%\%nameofproject%.csproj
-::"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-::Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 6 builds
-::%pause%
+set nameofproject=BUYLPI
+set csproj=.\%nameofproject%\%nameofproject%.csproj
+"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
+Echo Done building [ %nameofproject% ] - see above for any errors - 6 of 6 builds
+%pause%
 
 if not exist output mkdir output >>nul 2>>nul
 :: Echo deleting old build from the output directory

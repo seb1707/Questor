@@ -1,4 +1,4 @@
-
+using Questor.Modules.Combat;
 using Questor.Properties;
 
 namespace Questor
@@ -219,6 +219,7 @@ namespace Questor
                         NextStartupActionData.Text = Time.Instance.NextStartupAction.ToLongTimeString();
                         LastSessionChangeData.Text = Time.Instance.LastSessionChange.ToLongTimeString();
                         AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
+                        useDronesData.Text = Drones.UseDrones.ToString(CultureInfo.InvariantCulture);
 
                         if (Settings.Instance.UserDefinedLavishScriptScript1Description != string.Empty)
                         {

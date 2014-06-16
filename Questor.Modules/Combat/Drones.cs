@@ -57,9 +57,8 @@ namespace Questor.Modules.Combat
         public static bool WarpScrambled; //false
         private static DateTime _nextDroneAction = DateTime.UtcNow;
         private static DateTime _nextWarpScrambledWarning = DateTime.MinValue;
-        private static List<EntityCache> _activeDrones; //cleared in Cache.InvalidateCache()
         public static IEnumerable<EntityCache> DamagedDrones;
-        public static long? LastDroneTargetID = null;
+        public static long? LastDroneTargetID { get; set; }
         public static EntityCache LastTargetDronesWereShooting = null;
         public static int GetShipsDroneBayAttempts { get; set; }
         public static bool AddWarpScramblersToDronePriorityTargetList { get; set; }
@@ -69,7 +68,15 @@ namespace Questor.Modules.Combat
         public static bool AddTargetPaintersToDronePriorityTargetList { get; set; }
         public static bool AddECMsToDroneTargetList { get; set; }
         public static bool AddTrackingDisruptorsToDronePriorityTargetList { get; set; }
-        
+        private static IEnumerable<EntityCache> _activeDrones; //cleared in Cache.InvalidateCache()
+        public static IEnumerable<EntityCache> ActiveDrones
+        {
+            get
+            {
+                return _activeDrones ?? (_activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList());
+            }
+        }
+
         private static int _droneTypeID;
 
         public static int DroneTypeID
@@ -824,90 +831,103 @@ namespace Questor.Modules.Combat
         /// </summary>
         private static void EngageTarget()
         {
-            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "Entering EngageTarget()", Logging.Debug);
-                    
-            // Find the first active weapon's target
-            //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
-
-            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: MaxDroneRange [" + MaxDroneRange + "]);", Logging.Debug);
-            // Return best possible low value target
-
-            if (PreferredDroneTarget == null || !PreferredDroneTarget.IsFrigate)
+            try
             {
-                GetBestDroneTarget(MaxDroneRange, !Drones.DronesKillHighValueTargets, "Drones");
-            }    
-            
-            EntityCache DroneToShoot = PreferredDroneTarget;
+                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "Entering EngageTarget()", Logging.Debug);
 
-            if (DroneToShoot == null)
-            {
-                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "GetBestDroneTarget: PreferredDroneTarget is null, picking a target using a simple rule set...", Logging.Debug);
-                if (Cache.Instance.Targets.Any(i => !i.IsContainer && !i.IsBadIdea))
+                // Find the first active weapon's target
+                //TargetingCache.CurrentDronesTarget = Cache.Instance.EntityById(_lastTarget);
+
+                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "MaxDroneRange [" + MaxDroneRange + "] lowValueTargetTargeted [" + Combat.lowValueTargetsTargeted.Count() + "] LVTT InDroneRange [" + Combat.lowValueTargetsTargeted.Count(i => i.Distance < Drones.MaxDroneRange) + "] highValueTargetTargeted [" + Combat.highValueTargetsTargeted.Count() + "] HVTT InDroneRange [" + Combat.highValueTargetsTargeted.Count(i => i.Distance < Drones.MaxDroneRange) + "]", Logging.Debug);
+                // Return best possible low value target
+
+                if (PreferredDroneTarget == null || !PreferredDroneTarget.IsFrigate)
                 {
-                    DroneToShoot = Cache.Instance.Targets.Where(i => !i.IsContainer && !i.IsBadIdea && i.Distance < MaxDroneRange).OrderByDescending(i => i.IsWarpScramblingMe).ThenByDescending(i => i.IsFrigate).ThenBy(i => i.Distance).FirstOrDefault();
+                    GetBestDroneTarget(MaxDroneRange, !Drones.DronesKillHighValueTargets, "Drones");
                 }
-            }
 
-            if (DroneToShoot != null)
-            {
-                if (DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < MaxDroneRange)
+                EntityCache DroneToShoot = PreferredDroneTarget;
+
+                if (DroneToShoot == null)
                 {
-                    if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
-
-                     // Nothing to engage yet, probably re-targeting
-                    if (!DroneToShoot.IsTarget)
+                    if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "PreferredDroneTarget is null, picking a target using a simple rule set...", Logging.Debug);
+                    if (Cache.Instance.Targets.Any(i => !i.IsContainer && !i.IsBadIdea && i.Distance < MaxDroneRange))
                     {
-                        if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (!DroneToShoot.IsTarget)", Logging.Debug);
-                        return;
-                    }
-
-                    if (DroneToShoot.IsBadIdea) //&& !DroneToShoot.IsAttacking)
-                    {
-                        if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot.IsBadIdea && !DroneToShoot.IsAttacking) return;", Logging.Debug);
-                        return;
-                    }
-
-                    // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
-                    if (LastDroneTargetID != null)
-                    {
-                        if (LastDroneTargetID == DroneToShoot.Id && Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID))
+                        DroneToShoot = Cache.Instance.Targets.Where(i => !i.IsContainer && !i.IsBadIdea && i.Distance < MaxDroneRange).OrderByDescending(i => i.IsWarpScramblingMe).ThenByDescending(i => i.IsFrigate).ThenBy(i => i.Distance).FirstOrDefault();
+                        if (DroneToShoot == null)
                         {
-                            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
-                            return;
-                        }    
-                    }
-                    
-                    //
-                    // If we got this far we need to tell the drones to do something
-                    // Is the last target our current active target?
-                    //
-                    if (DroneToShoot.IsActiveTarget)
-                    {
-                        // Save target id (so we do not constantly switch)
-                        LastDroneTargetID = DroneToShoot.Id;
-
-                        // Engage target
-                        Logging.Log("Drones", "Engaging [ " + Drones.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + DroneToShoot.MaskedId + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
-                        _lastEngageCommand = DateTime.UtcNow;
-                    }
-                    else // Make the target active
-                    {
-                        if (DateTime.UtcNow > Time.Instance.NextMakeActiveTargetAction)
-                        {
-                            DroneToShoot.MakeActiveTarget();
-                            Logging.Log("Drones", "[" + DroneToShoot.Name + "][ID: " + DroneToShoot.MaskedId + "]IsActiveTarget[" + DroneToShoot.IsActiveTarget + "][" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away] has been made the ActiveTarget (needed for drones)", Logging.Magenta);
-                            Time.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
+                            Logging.Log("EngageTarget", "DroneToShoot is Null, this is bad.", Logging.Debug);
                         }
                     }
                 }
 
-                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
+                if (DroneToShoot != null)
+                {
+                    if (DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < MaxDroneRange)
+                    {
+                        if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
+
+                        // Nothing to engage yet, probably re-targeting
+                        if (!DroneToShoot.IsTarget)
+                        {
+                            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (!DroneToShoot.IsTarget)", Logging.Debug);
+                            return;
+                        }
+
+                        if (DroneToShoot.IsBadIdea) //&& !DroneToShoot.IsAttacking)
+                        {
+                            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot.IsBadIdea && !DroneToShoot.IsAttacking) return;", Logging.Debug);
+                            return;
+                        }
+
+                        // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
+                        if (LastDroneTargetID != null)
+                        {
+                            if (LastDroneTargetID == DroneToShoot.Id && Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID))
+                            {
+                                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
+                                return;
+                            }
+                        }
+
+                        if (DateTime.UtcNow < (_lastEngageCommand.AddSeconds(11 + Cache.Instance.RandomNumber(5, 11))))
+                            return;
+
+                        //
+                        // If we got this far we need to tell the drones to do something
+                        // Is the last target our current active target?
+                        //
+                        if (DroneToShoot.IsActiveTarget)
+                        {
+                            // Engage target
+                            Logging.Log("Drones", "Engaging [ " + Drones.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + DroneToShoot.MaskedId + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
+                            _lastEngageCommand = DateTime.UtcNow;
+                            // Save target id (so we do not constantly switch)
+                            LastDroneTargetID = DroneToShoot.Id;
+                        }
+                        else // Make the target active
+                        {
+                            if (DateTime.UtcNow > Time.Instance.NextMakeActiveTargetAction)
+                            {
+                                DroneToShoot.MakeActiveTarget();
+                                Logging.Log("Drones", "[" + DroneToShoot.Name + "][ID: " + DroneToShoot.MaskedId + "]IsActiveTarget[" + DroneToShoot.IsActiveTarget + "][" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away] has been made the ActiveTarget (needed for drones)", Logging.Magenta);
+                                Time.Instance.NextMakeActiveTargetAction = DateTime.UtcNow.AddSeconds(5 + Cache.Instance.RandomNumber(0, 3));
+                            }
+                        }
+                    }
+
+                    if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (DroneToShoot != null && DroneToShoot.IsReadyToShoot && DroneToShoot.Distance < Cache.Instance.MaxDroneRange)", Logging.Debug);
+                    return;
+                }
+
+                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (Cache.Instance.PreferredDroneTargetID != null)", Logging.Debug);
                 return;
             }
-
-            if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (Cache.Instance.PreferredDroneTargetID != null)", Logging.Debug);
-            return;
+            catch (Exception ex)
+            {
+                Logging.Log("Drones.EngageTarget", "Exception [" + ex + "]", Logging.Debug);
+            }
         }
 
         public static DirectContainer DroneBay { get; set; }
@@ -1030,7 +1050,6 @@ namespace Questor.Modules.Combat
 
         public static void ProcessState()
         {
-            InvalidateCache();
             if (_nextDroneAction > DateTime.UtcNow || Logging.DebugDisableDrones) return;
 
             if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "Entering Drones.ProcessState", Logging.Debug);
@@ -1446,12 +1465,7 @@ namespace Questor.Modules.Combat
             _lastDroneCount = Drones.ActiveDrones.Count();
             GetDamagedDrones();
         }
-
-        public static IEnumerable<EntityCache> ActiveDrones
-        {
-            get { return _activeDrones ?? (_activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList()); }
-        }
-
+        
         /// <summary>
         ///   Invalidate the cached items
         /// </summary>
@@ -1462,7 +1476,6 @@ namespace Questor.Modules.Combat
                 //
                 // this list of variables is cleared every pulse.
                 //
-                _activeDrones = null;
                 _activeDrones = null;
                 _dronePriorityEntities = null;
                 _maxDroneRange = null;

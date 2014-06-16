@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.IO;
+
 namespace Questor.Modules.Actions
 {
     using System;
@@ -26,13 +28,13 @@ namespace Questor.Modules.Actions
     
     public static class Arm
     {
-        public static int ArmInstances = 0;
+        //public static int ArmInstances = 0;
 
         static Arm()
         {
             AmmoToLoad = new List<Ammo>();
             CrystalsToLoad = new List<MiningCrystals>();
-            Interlocked.Increment(ref ArmInstances);
+            //Interlocked.Increment(ref ArmInstances);
         }
 
         private static List<MiningCrystals> CrystalsToLoad;
@@ -1501,7 +1503,7 @@ namespace Questor.Modules.Actions
 
                 #region WaitForItems
                 case ArmState.WaitForItems:
-
+                    
                     // Wait 5 seconds after moving
                     if (DateTime.UtcNow < Time.Instance.NextArmAction)
                         break;
@@ -1523,32 +1525,43 @@ namespace Questor.Modules.Actions
                             //reload the ammo setting for combat
                             try
                             {
-                                DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
-                                if (mission == null) return;
+                                //DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
+                                //if (mission == null) return;
 
-                                MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(mission.Name));
-
-                                XDocument missionXml = XDocument.Load(MissionSettings.MissionXmlPath);
-                                MissionSettings.MissionAmmo = new List<Ammo>();
-                                if (missionXml.Root != null)
+                                if (!string.IsNullOrEmpty(AgentInteraction.MissionName))
                                 {
-                                    XElement ammoTypes = missionXml.Root.Element("ammoTypes");
-                                    if (ammoTypes != null)
+                                    MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(AgentInteraction.MissionName));
+                                    if (File.Exists(MissionSettings.MissionXmlPath))
                                     {
-                                        MissionSettings.MissionAmmo.Clear();
-                                        foreach (XElement ammo in ammoTypes.Elements("ammoType"))
+                                        XDocument missionXml = XDocument.Load(MissionSettings.MissionXmlPath);
+                                        MissionSettings.MissionAmmo = new List<Ammo>();
+                                        if (missionXml.Root != null)
                                         {
-                                            MissionSettings.MissionAmmo.Add(new Ammo(ammo));
-                                        }
-                                    }
+                                            XElement ammoTypes = missionXml.Root.Element("ammoTypes");
+                                            if (ammoTypes != null)
+                                            {
+                                                if (MissionSettings.MissionAmmo.Any()) Logging.Log("Arm.WaitForitems", "Clearing existing list of Ammo to bring", Logging.White);
+                                                MissionSettings.MissionAmmo.Clear();
+                                                foreach (XElement ammoDefinedInXML in ammoTypes.Elements("ammoType"))
+                                                {
+                                                    Ammo AmmoToAdd = new Ammo(ammoDefinedInXML);
+                                                    MissionSettings.MissionAmmo.Add(AmmoToAdd);
+                                                    Logging.Log("Arm.WaitForitems", "Adding [" + AmmoToAdd.Name + "] TypeID [" + AmmoToAdd.TypeId + "] DamageType [" + AmmoToAdd.DamageType + "] to the list of Ammo to bring/use", Logging.White);
+                                                }
+                                            }
 
-                                    ammoTypes = missionXml.Root.Element("missionammo");
-                                    if (ammoTypes != null)
-                                    {
-                                        MissionSettings.MissionAmmo.Clear();
-                                        foreach (XElement ammo in ammoTypes.Elements("ammo"))
-                                        {
-                                            MissionSettings.MissionAmmo.Add(new Ammo(ammo));
+                                            ammoTypes = missionXml.Root.Element("missionammo");
+                                            if (ammoTypes != null)
+                                            {
+                                                if (MissionSettings.MissionAmmo.Any()) Logging.Log("Arm.WaitForitems", "Clearing existing list of Ammo to bring", Logging.White);
+                                                MissionSettings.MissionAmmo.Clear();
+                                                foreach (XElement ammoDefinedInXML in ammoTypes.Elements("ammoType"))
+                                                {
+                                                    Ammo AmmoToAdd = new Ammo(ammoDefinedInXML);
+                                                    MissionSettings.MissionAmmo.Add(AmmoToAdd);
+                                                    Logging.Log("Arm.WaitForitems", "Adding [" + AmmoToAdd.Name + "] TypeID [" + AmmoToAdd.TypeId + "] DamageType [" + AmmoToAdd.DamageType + "] to the list of Ammo to bring/use", Logging.White);
+                                                }
+                                            }
                                         }
                                     }
                                 }

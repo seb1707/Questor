@@ -578,6 +578,8 @@
             this.bttnUserDefinedScript3 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript2 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript1 = new System.Windows.Forms.Button();
+            this.label275 = new System.Windows.Forms.Label();
+            this.useDronesData = new System.Windows.Forms.Label();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -848,6 +850,8 @@
             // 
             // tabMiscInfo
             // 
+            this.tabMiscInfo.Controls.Add(this.useDronesData);
+            this.tabMiscInfo.Controls.Add(this.label275);
             this.tabMiscInfo.Controls.Add(this.DataCurrentDroneTarget);
             this.tabMiscInfo.Controls.Add(this.DataCurrentCombatTarget);
             this.tabMiscInfo.Controls.Add(this.lblCurrentDroneTarget);
@@ -6139,7 +6143,25 @@
             this.bttnUserDefinedScript1.UseVisualStyleBackColor = true;
             this.bttnUserDefinedScript1.Click += new System.EventHandler(this.bttnUserDefinedScript1_Click);
             // 
-            // QuestorfrmMain
+            // label275
+            // 
+            this.label275.AutoSize = true;
+            this.label275.Location = new System.Drawing.Point(64, 222);
+            this.label275.Name = "label275";
+            this.label275.Size = new System.Drawing.Size(58, 13);
+            this.label275.TabIndex = 233;
+            this.label275.Text = "useDrones";
+            // 
+            // useDronesData
+            // 
+            this.useDronesData.AutoSize = true;
+            this.useDronesData.Location = new System.Drawing.Point(132, 222);
+            this.useDronesData.Name = "useDronesData";
+            this.useDronesData.Size = new System.Drawing.Size(24, 13);
+            this.useDronesData.TabIndex = 234;
+            this.useDronesData.Text = "n/a";
+            // 
+            // QuestorUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -6171,7 +6193,7 @@
             this.Controls.Add(this.AutoStartCheckBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.Name = "QuestorfrmMain";
+            this.Name = "QuestorUI";
             this.Text = "Questor";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.QuestorfrmMainFormClosed);
             this.Load += new System.EventHandler(this.FrmMainLoad);
@@ -6770,6 +6792,8 @@
         private System.Windows.Forms.Label lvlCurrentPrimaryWeaponsTarget;
         private System.Windows.Forms.Label DataCurrentDroneTarget;
         private System.Windows.Forms.Label DataCurrentCombatTarget;
+        private System.Windows.Forms.Label useDronesData;
+        private System.Windows.Forms.Label label275;
     }
 }
 

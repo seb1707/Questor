@@ -345,11 +345,6 @@ namespace Questor.Modules.Logging
             {
                 //Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
                 Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
-                Logging.Log("debug", "Defense Class Instances: [" + Defense.DefenseInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Arm Class Instances: [" + Arm.ArmInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Salvage Class Instances: [" + Salvage.SalvageInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Combat Class Instances: [" + Combat.CombatInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Logging Class Instances: [" + Logging.LoggingInstances + "]", Logging.Debug);
                 Logging.Log("debug", "Cache Class Instances: [" + Cache.CacheInstances + "]", Logging.Debug);
                 Logging.Log("debug", "Settings Class Instances: [" + Settings.SettingsInstances + "]", Logging.Debug);
             }

@@ -312,6 +312,75 @@ namespace Questor.Modules.Caching
             }
         }
 
+        private List<string> _attacks;
+
+        public List<string> Attacks
+        {
+            get
+            {
+                try
+                {
+                    
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_attacks == null)
+                        {
+                            _attacks = _directEntity.Attacks;
+                        }
+
+                        return _attacks;
+                    }
+
+                    return null;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
+            }
+        }
+
+        private int? _mode;
+
+        public int Mode
+        {
+            get
+            {
+                try
+                {
+                    if (_directEntity != null && _directEntity.IsValid)
+                    {
+                        if (_mode == null)
+                        {
+                            _mode = _directEntity.Mode;
+                            //
+                            // 1 = Approaching or entityCombat
+                            // 2 = 
+                            // 3 = Warping
+                            // 4 = Orbiting
+                            // 5 =
+                            // 6 = entityPursuit
+                            // 7 = 
+                            // 8 = 
+                            // 9 =
+                            // 10 = entityEngage
+                            //
+                        }
+
+                        return (int)_mode;
+                    }
+
+                    _mode = null;
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("EntityCache", "Exception [" + exception + "]", Logging.Debug);
+                    return 0;
+                }
+            }
+        }
         private string _name;
 
         public string Name
@@ -4635,7 +4704,7 @@ namespace Questor.Modules.Caching
                                 if (Drones.DroneBay.Volume == 0)
                                 {
                                     if (Logging.DebugDrones) Logging.Log("IsShipWithNoDroneBay", "Dronebay Volume = 0", Logging.Debug);
-                                    result = true; // no drone bay available
+                                    //result = true; // no drone bay available
                                 }
                             }    
                         }

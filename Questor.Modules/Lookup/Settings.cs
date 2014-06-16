@@ -61,10 +61,6 @@ namespace Questor.Modules.Lookup
             Interlocked.Decrement(ref SettingsInstances);
         }
 
-        public bool AtLoginScreen { get; set; }
-        public string LoginUsername;
-        public string LoginCharacter;
-
         public bool CharacterXMLExists = true;
         public bool CommonXMLExists = false;
         public bool SchedulesXMLExists = true;
@@ -94,7 +90,7 @@ namespace Questor.Modules.Lookup
                 _useInnerspace = value;
             }
         }
-        public bool setEveClientDestinationWhenTraveling { get; set; }
+        //public bool setEveClientDestinationWhenTraveling { get; set; }
         public string EveServerName { get; set; }
         public int EnforcedDelayBetweenModuleClicks { get; set; }
         public bool AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley { get; set; }
@@ -186,7 +182,6 @@ namespace Questor.Modules.Lookup
         public string TravelToBookmarkPrefix { get; set; }
 
         public string UndockBookmarkPrefix { get; set; }
-        public int UndockDelay { get; set; }
         
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
@@ -242,13 +237,13 @@ namespace Questor.Modules.Lookup
         //
         // Email SMTP settings
         //
-        public bool EmailSupport { get; set; }
-        public string EmailAddress { get; set; }
-        public string EmailPassword { get; set; }
-        public string EmailSMTPServer { get; set; }
-        public int EmailSMTPPort { get; set; }
+        public bool EmailSupport { get; private set; }
+        public string EmailAddress { get; private set; }
+        public string EmailPassword { get; private set; }
+        public string EmailSMTPServer { get; private set; }
+        public int EmailSMTPPort { get; private set; }
         public string EmailAddressToSendAlerts { get; set; }
-        public bool? EmailEnableSSL { get; set; }
+        public bool? EmailEnableSSL { get; private set; }
 
         //
         // Skill Training Settings
@@ -425,7 +420,7 @@ namespace Questor.Modules.Lookup
             DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
             DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
             UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
-            setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
+            //setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
             CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
@@ -536,7 +531,6 @@ namespace Questor.Modules.Lookup
             //
             // Undock settings
             //
-            UndockDelay = (int?)CharacterSettingsXml.Element("undockdelay") ?? (int?)CommonSettingsXml.Element("undockdelay") ?? 10; //Delay when undocking - not in use
             UndockBookmarkPrefix = (string)CharacterSettingsXml.Element("undockprefix") ?? (string)CommonSettingsXml.Element("undockprefix") ?? (string)CharacterSettingsXml.Element("bookmarkWarpOut") ?? (string)CommonSettingsXml.Element("bookmarkWarpOut") ?? "";
 
             //
@@ -1211,7 +1205,7 @@ namespace Questor.Modules.Lookup
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
                 UseInnerspace = true;
-                setEveClientDestinationWhenTraveling = false;
+                // setEveClientDestinationWhenTraveling = false;
 
                 CharacterToAcceptInvitesFrom = Settings.Instance.CharacterName;
                 //
@@ -1316,7 +1310,6 @@ namespace Questor.Modules.Lookup
                 //
                 // Undock settings
                 //
-                UndockDelay = 10; //Delay when undocking - not in use
                 UndockBookmarkPrefix = "Insta";
 
                 //

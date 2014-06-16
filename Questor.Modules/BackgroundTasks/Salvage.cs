@@ -29,12 +29,12 @@ namespace Questor.Modules.BackgroundTasks
         {
             WreckBlackList = new List<int>();
             OpenedContainers = new Dictionary<long, DateTime>();
-            Interlocked.Increment(ref SalvageInstances);
+            //Interlocked.Increment(ref SalvageInstances);
         }
 
         private static DateTime _lastSalvageProcessState;
         public static Dictionary<long, DateTime> OpenedContainers;
-        public static int SalvageInstances;
+        //public static int SalvageInstances;
         public static List<int> WreckBlackList { get; set; }
         public static bool WreckBlackListSmallWrecks { get; set; }
         public static bool WreckBlackListMediumWrecks { get; set; }

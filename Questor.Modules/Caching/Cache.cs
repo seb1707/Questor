@@ -1402,6 +1402,30 @@ namespace Questor.Modules.Caching
             }
         }
 
+        /// <summary>
+        ///   Entities cache (all entities within 256km) //cleared in InvalidateCache 
+        /// </summary>
+        private List<EntityCache> _chargeEntities;
+
+        public IEnumerable<EntityCache> ChargeEntities
+        {
+            get
+            {
+                try
+                {
+                    if (_chargeEntities == null)
+                    {
+                        return Cache.Instance.DirectEve.Entities.Where(e => e.IsValid && !e.HasExploded && !e.HasReleased && e.CategoryId == (int)CategoryID.Charge).Select(i => new EntityCache(i)).ToList();
+                    }
+
+                    return _chargeEntities;
+                }
+                catch (NullReferenceException) { }  // this can happen during session changes
+
+                return new List<EntityCache>();
+            }
+        }
+
         public Dictionary<long, string> EntityNames = new Dictionary<long, string>();
         public Dictionary<long, int> EntityTypeID = new Dictionary<long, int>();
         public Dictionary<long, int> EntityGroupID = new Dictionary<long, int>();
@@ -2270,6 +2294,7 @@ namespace Questor.Modules.Caching
                 _approaching = null;
                 _bigObjects = null;
                 _bigObjectsAndGates = null;
+                _chargeEntities = null;
                 _currentShipsCargo = null;
                 _containerInSpace = null;
                 _containers = null;
@@ -2384,7 +2409,7 @@ namespace Questor.Modules.Caching
         /// <param name = "z"></param>
         /// <param name="entity"> </param>
         /// <returns></returns>
-        public double DistanceFromEntity(double x, double y, double z, DirectEntity entity)
+        public double DistanceFromEntity(double x, double y, double z, EntityCache entity)
         {
             try
             {
@@ -2393,9 +2418,9 @@ namespace Questor.Modules.Caching
                     return double.MaxValue;
                 }
 
-                double curX = entity.X;
-                double curY = entity.Y;
-                double curZ = entity.Z;
+                double curX = entity.XCoordinate;
+                double curY = entity.YCoordinate;
+                double curZ = entity.ZCoordinate;
 
                 return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
             }
@@ -2574,7 +2599,7 @@ namespace Questor.Modules.Caching
             return true;
         }
         
-        public int MyMissileProjectionSkillLevel;
+        //public int MyMissileProjectionSkillLevel;
 
         public void ClearPerPocketCache()
         {
@@ -2597,7 +2622,7 @@ namespace Questor.Modules.Caching
                 ListofEachWeaponsVolleyData.Clear();
                 ListOfUndockBookmarks = null;
 
-                MyMissileProjectionSkillLevel = SkillPlan.MissileProjectionSkillLevel();
+                //MyMissileProjectionSkillLevel = SkillPlan.MissileProjectionSkillLevel();
 
                 EntityNames.Clear();
                 EntityTypeID.Clear();

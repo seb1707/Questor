@@ -394,7 +394,7 @@ namespace Questor.Modules.Lookup
 		    }
             catch (Exception exception)
             {
-                Logging.Log("MissileProjectionSkillLevel", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("SkillAlreadyInCharacterSheet", "Exception [" + exception + "]", Logging.Debug);
                 return false;
             }
 		}
@@ -405,7 +405,7 @@ namespace Questor.Modules.Lookup
             {
                 if (MyCharacterSheetSkills == null || !MyCharacterSheetSkills.Any())
                 {
-                    if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!MyCharacterSheetSkills.Any())", Logging.Teal);
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillLevel", "if (!MyCharacterSheetSkills.Any())", Logging.Teal);
 
                     MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
                 }
@@ -418,12 +418,12 @@ namespace Questor.Modules.Lookup
                     }
                 }
 
-                if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We do not have [" + SkillToLookFor + "] yet", Logging.White);
+                if (Logging.DebugSkillTraining) Logging.Log("SkillLevel", "We do not have [" + SkillToLookFor + "] yet", Logging.White);
                 return 0;
             }
             catch (Exception exception)
             {
-                Logging.Log("MissileProjectionSkillLevel", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("SkillLevel", "Exception [" + exception + "]", Logging.Debug);
                 return 0;
             }
         }

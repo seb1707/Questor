@@ -1071,6 +1071,7 @@ namespace Questor.Modules.Lookup
             }
             catch (Exception ex)
             {
+                Logging.Log("Settings", "Exception trying to find CharacterName [" + ex + "]", Logging.White);
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
             }
 

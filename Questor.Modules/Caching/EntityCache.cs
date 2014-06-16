@@ -44,6 +44,27 @@ namespace Questor.Modules.Caching
         //    Interlocked.Decrement(ref EntityCacheInstances);
         //}
 
+        public double? DistanceFromEntity(EntityCache OtherEntityToMeasureFrom)
+        {
+            try
+            {
+                if (OtherEntityToMeasureFrom == null)
+                {
+                    return null;
+                }
+
+                double deltaX = XCoordinate - OtherEntityToMeasureFrom.XCoordinate;
+                double deltaY = YCoordinate - OtherEntityToMeasureFrom.YCoordinate;
+                double deltaZ = ZCoordinate - OtherEntityToMeasureFrom.ZCoordinate;
+
+                return Math.Sqrt((deltaX * deltaX) + (deltaY * deltaY) + (deltaZ * deltaZ));
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("DistanceFromEntity", "Exception [" + ex + "]", Logging.Debug);
+                return 0;
+            }
+        }
         public bool BookmarkThis(string NameOfBookmark = "bookmark", string Comment = "")
         {
             try

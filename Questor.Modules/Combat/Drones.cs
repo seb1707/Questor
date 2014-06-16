@@ -8,16 +8,13 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Threading;
-using System.Windows.Forms;
-using Questor.Modules.Activities;
-
 namespace Questor.Modules.Combat
 {
     using System;
     using System.Linq;
     using DirectEve;
+    using System.Collections.Generic;
+    using global::Questor.Modules.Activities;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
@@ -31,11 +28,11 @@ namespace Questor.Modules.Combat
     /// </remarks>
     public static class Drones
     {
-        public static int DronesInstances = 0;
+        //public static int DronesInstances;
 
         static Drones()
         {
-            Interlocked.Increment(ref DronesInstances);
+            //Interlocked.Increment(ref DronesInstances);
         }
 
         //~Drones()
@@ -164,10 +161,10 @@ namespace Questor.Modules.Combat
                 if (_maxDroneRange == null)
                 {
                     _maxDroneRange = Math.Min(DroneControlRange, Combat.MaxTargetRange);
-                    return _maxDroneRange ?? 0;
+                    return (double) _maxDroneRange;
                 }
 
-                return _maxDroneRange ?? 0;
+                return (double) _maxDroneRange;
             }
         }
         /// <summary>
@@ -183,9 +180,16 @@ namespace Questor.Modules.Combat
                 {
                     if (PreferredDroneTargetID != null)
                     {
-                        _preferredDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == PreferredDroneTargetID);
-                        return _preferredDroneTarget ?? null;
+                        if (Cache.Instance.EntitiesOnGrid.Any(i => i.Id == PreferredDroneTargetID))
+                        {
+                            _preferredDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == PreferredDroneTargetID);
+                            return _preferredDroneTarget;
+                        }
+
+                        return null;
                     }
+
+                    return null;
                 }
 
                 return _preferredDroneTarget;

@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Questor.Modules.Caching
 {
     using System;
@@ -509,145 +511,6 @@ namespace Questor.Modules.Caching
 
         private int ActivateCountThisFrame = 0;
 
-        public bool VolleyInTheAirMightActuallyKillEmSoonWaitASec(EntityCache target)
-        {
-            if (Cache.Instance.ListofEachWeaponsVolleyData != null && Cache.Instance.ListofEachWeaponsVolleyData.Any())
-            {
-                //
-                // sanity check
-                //
-                if (Cache.Instance.ListofEachWeaponsVolleyData.Count() > 100000)
-                {
-                    Logging.Log("Activate", "We should be clearing ListofEachWeaponsVolleyData at the end of each mission, how did we get [" + Cache.Instance.ListofEachWeaponsVolleyData.Count() + "] entries already?", Logging.Debug);
-                }
-
-                //int VolleysInTheAir = 0;
-                double WeaponTimeToTarget_Seconds = 0;
-
-                EachWeaponsVolleyCache __volleyUsedForInvType = Cache.Instance.ListofEachWeaponsVolleyData.FirstOrDefault(i => i.targetItemID == target.Id);
-
-                if (__volleyUsedForInvType != null)
-                {
-                    if (Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == __volleyUsedForInvType.moduleAmmoTypeID))
-                    {
-                        ItemCache __item = new ItemCache(Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeId == __volleyUsedForInvType.moduleAmmoTypeID));
-                        
-                        foreach (EachWeaponsVolleyCache _volley in Cache.Instance.ListofEachWeaponsVolleyData.Where(i => i.targetItemID == target.Id))
-                        {
-                            WeaponTimeToTarget_Seconds = _volley.targetDistance / __item.maxVelocity;
-                            if (Cache.Instance.MyMissileProjectionSkillLevel > 0)
-                            {
-                                WeaponTimeToTarget_Seconds = _volley.targetDistance / (__item.maxVelocity * (1 + ((Cache.Instance.MyMissileProjectionSkillLevel * 10) / 100)));
-                            }
-
-                            if (DateTime.UtcNow > _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds + .5))
-                            {
-
-                                //
-                                // volley still in the air
-                                //
-                                return true;
-                            }
-
-                            if (DateTime.UtcNow < _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds - .5))
-                            {
-                                //
-                                // volley recently hit (might still be in the air)
-                                //
-                                return true;
-                            }
-
-                            //
-                            // we found a volley that should hit this target within the next 1 second: delaying the next volley until the next pulse
-                            //
-                            Logging.Log("Activate", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "] has a volley about to hit it, waiting a moment before firing again", Logging.Debug);
-                            return false;
-                        }
-
-                        return false;
-                    }
-
-                    return false;
-                }
-
-                return false;
-            }
-
-            return false;
-        }
-
-        //public int TargetBeingHitByOtherVolleys(EntityCache target)
-        //{
-
-        //}
-
-        public int VolleysInTheAir(EntityCache target)
-        {
-            if (Cache.Instance.ListofEachWeaponsVolleyData != null && Cache.Instance.ListofEachWeaponsVolleyData.Any())
-            {
-                //
-                // sanity check
-                //
-                if (Cache.Instance.ListofEachWeaponsVolleyData.Count() > 100000)
-                {
-                    Logging.Log("Activate", "We should be clearing ListofEachWeaponsVolleyData at the end of each mission, how did we get [" + Cache.Instance.ListofEachWeaponsVolleyData.Count() + "] entries already?", Logging.Debug);
-                }
-
-                //int VolleysInTheAir = 0;
-                double WeaponTimeToTarget_Seconds = 0;
-
-                EachWeaponsVolleyCache __volleyUsedForInvType = Cache.Instance.ListofEachWeaponsVolleyData.FirstOrDefault(i => i.targetItemID == target.Id);
-                if (__volleyUsedForInvType != null)
-                {
-                    
-                        foreach (EachWeaponsVolleyCache _volley in Cache.Instance.ListofEachWeaponsVolleyData.Where(i => i.targetItemID == target.Id))
-                        {
-                            //
-                            // now find the missiles in the entities list that are associated with each of the volleys we just filtered...
-                            //
-                            //Cache.Instance.Entities.Where(i => i.Id == )
-                        }
-
-                        //double test =  VolleysInTheAir * __item.
-
-                        foreach (EachWeaponsVolleyCache _volley in Cache.Instance.ListofEachWeaponsVolleyData.Where(i => i.targetItemID == target.Id))
-                        {
-                            //WeaponTimeToTarget_Seconds = _volley.targetDistance / __item.maxVelocity;
-                            if (Cache.Instance.MyMissileProjectionSkillLevel > 0)
-                            {
-                                //WeaponTimeToTarget_Seconds = _volley.targetDistance / (__item.maxVelocity * (1 + ((Cache.Instance.MyMissileProjectionSkillLevel * 10) / 100)));
-                            }
-
-                            if (DateTime.UtcNow > _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds + .5))
-                            {
-
-                                //
-                                // volley still in the air
-                                //
-                                continue;
-                            }
-
-                            if (DateTime.UtcNow < _volley.ThisVolleyCacheCreated.AddSeconds(WeaponTimeToTarget_Seconds - .5))
-                            {
-                                //
-                                // volley recently hit (might still be in the air)
-                                //
-                                continue;
-                            }
-
-                            //
-                            // we found a volley that should hit this target within the next 1 second: delaying the next volley until the next pulse
-                            //
-                            Logging.Log("Activate", "Target [" + target.Name + "][" + Math.Round(target.Distance / 1000, 2) + "] has a volley about to hit it, waiting a moment before firing again", Logging.Debug);
-                            return 0;
-                        }
-                    
-                }
-            }
-
-            return 0;
-        }
-
         public EachWeaponsVolleyCache SnapshotOfVolleyData;
         public bool Activate(EntityCache target)
         {
@@ -658,6 +521,47 @@ namespace Questor.Modules.Caching
 
                 if (!DisableAutoReload)
                     return false;
+
+                //
+                // if their are ANY changes in space (NOT JUST OUR OWN!, but ANY) 
+                // that are headed to the same target we want to shoot and are going 
+                // to likely hit in the next 1 sec do not shoot yet, wait until their 
+                // is no ammo that close (we assume this will eliminate some exceptions 
+                // we were seeing trying to shoot things that were dead/dieing
+                //
+                try
+                {
+                    if (Cache.Instance.ChargeEntities.Any(e => e.FollowId == target.Id && e.DistanceFromEntity(target) < e.Velocity))
+                    {
+                        IEnumerable<EntityCache> AmmoNeartarget = Cache.Instance.ChargeEntities.Where(e => e.FollowId == target.Id && e.DistanceFromEntity(target) < e.Velocity).ToList();
+                        if (AmmoNeartarget.Any())
+                        {
+                            EntityCache ClosestAmmoToTarget = AmmoNeartarget.OrderByDescending(i => i.Distance).FirstOrDefault();
+                            if (ClosestAmmoToTarget != null)
+                            {
+                                double? AmmosDistanceFromTarget = ClosestAmmoToTarget.DistanceFromEntity(target);
+                                if (AmmosDistanceFromTarget != null)
+                                {
+                                    if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache.Activate", "Not Shooting Yet: Waiting on [" + ClosestAmmoToTarget.Name + "] that is [" + Math.Round((double)AmmosDistanceFromTarget / 1000, 0) + "k] from [" + target.Name + "][" + Math.Round(target.Distance /1000, 0) + "k][" + TargetId + "]", Logging.Debug);
+                                    return false;
+                                }
+
+                                if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache.Activate", "AmmosDistanceFromTarget is null", Logging.Debug);
+                            }
+
+                            if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache.Activate", "ClosestAmmoToTarget is null", Logging.Debug);
+                            //return false; if we cant log it correctly just shoot something
+                        }
+
+                        if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache.Activate", "AmmoNeartarget is null)", Logging.Debug);
+                        //return false; if we cant log it correctly just shoot something
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("ModuleCache.Activate","Exception [" + ex + "]",Logging.Debug);
+                }
+                
 
                 ActivateCountThisFrame++;
 

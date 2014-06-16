@@ -8,25 +8,24 @@
 // </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Linq;
-using System.Threading;
-using Questor.Modules.Combat;
 
 namespace Questor.Modules.Lookup
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Xml.Linq;
     using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Threading;
+    using System.Xml;
+    using System.Xml.Linq;
     using Questor.Modules.Actions;
     using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Combat;
     using Questor.Modules.Caching;
     using Questor.Modules.Logging;
     using Questor.Modules.States;
-    using System.Xml;
 
     public class Settings
     {

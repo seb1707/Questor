@@ -102,11 +102,13 @@ namespace Questor.Modules.Combat
             {
                 if (MissionSettings.PocketUseDrones != null)
                 {
+                    if (Logging.DebugDrones) Logging.Log("Drones.useDrones","We are using PocketDrones setting [" + MissionSettings.PocketUseDrones + "]",Logging.Debug);
                     return (bool)MissionSettings.PocketUseDrones;
                 }
 
                 if (MissionSettings.MissionUseDrones != null)
                 {
+                    if (Logging.DebugDrones) Logging.Log("Drones.useDrones", "We are using MissionDrones setting [" + MissionSettings.PocketUseDrones + "]", Logging.Debug);
                     return (bool) MissionSettings.MissionUseDrones;
                 }
 

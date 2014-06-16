@@ -32,7 +32,7 @@ namespace BuyLPI
         private static int? _totalQuantityOfOrders;
         private static DateTime _done = DateTime.UtcNow.AddDays(10);
         private static DateTime _lastPulse;
-        private static Cleanup _cleanup;
+        //private static Cleanup _cleanup;
 
         private static void Main(string[] args)
         {
@@ -80,7 +80,7 @@ namespace BuyLPI
 
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Starting BuyLPI... - innerspace Echo"));
             Logging.Log("BuyLPI", "Starting BuyLPI...", Logging.White);
-            _cleanup = new Cleanup();
+            //_cleanup = new Cleanup();
 
 
             #region Load DirectEVE
@@ -184,7 +184,7 @@ namespace BuyLPI
             // Start _cleanup.ProcessState
             // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
             //
-            _cleanup.ProcessState();
+            Cleanup.ProcessState();
 
             // Done
             // Cleanup State: ProcessState

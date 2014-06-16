@@ -16,43 +16,45 @@ namespace Questor.Modules.BackgroundTasks
     using System.Collections.Generic;
     using System.Threading;
     using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;
     using Questor.Modules.States;
     using DirectEve;
 
-    public class Defense
+    public static class Defense
     {
         public static int DefenseInstances;
 
-        public Defense()
+        static Defense()
         {
             Interlocked.Increment(ref DefenseInstances);
         }
+        
+        private static DateTime _lastSessionChange = Time.Instance.StartTime;
+        private static DateTime _lastCloaked = DateTime.UtcNow;
 
-        ~Defense()
-        {
-            Interlocked.Decrement(ref DefenseInstances);
-        }
-
-        private DateTime _lastSessionChange = Time.Instance.StartTime;
-        private DateTime _lastCloaked = DateTime.UtcNow;
-
-        private DateTime _lastPulse = DateTime.UtcNow;
-        private int _trackingLinkScriptAttempts;
-        private int _sensorBoosterScriptAttempts;
-        private int _sensorDampenerScriptAttempts;
-        private int _trackingComputerScriptAttempts;
-        private int _trackingDisruptorScriptAttempts;
+        private static DateTime _lastPulse = DateTime.UtcNow;
+        private static int _trackingLinkScriptAttempts;
+        private static int _sensorBoosterScriptAttempts;
+        private static int _sensorDampenerScriptAttempts;
+        private static int _trackingComputerScriptAttempts;
+        private static int _trackingDisruptorScriptAttempts;
         //private int _ancillaryShieldBoosterAttempts;
         //private int _capacitorInjectorAttempts;
-        private DateTime _nextOverloadAttempt = DateTime.UtcNow;
+        private static DateTime _nextOverloadAttempt = DateTime.UtcNow;
+        public static bool DoNotBreakInvul;
+        public static int MinimumPropulsionModuleDistance { get; set; }
+        public static int MinimumPropulsionModuleCapacitor { get; set; }
+        public static int ActivateRepairModulesAtThisPerc { get; set; }
+        public static int DeactivateRepairModulesAtThisPerc { get; set; }
+        public static int InjectCapPerc { get; set; }
 
-        private int ModuleNumber { get; set; }
+        private static int ModuleNumber { get; set; }
 
         private static readonly Dictionary<long, DateTime> NextScriptReload = new Dictionary<long, DateTime>();
 
-        private bool LoadthisScript(DirectItem scriptToLoad, ModuleCache module)
+        private static bool LoadthisScript(DirectItem scriptToLoad, ModuleCache module)
         {
             if (scriptToLoad != null)
             {
@@ -109,9 +111,9 @@ namespace Questor.Modules.BackgroundTasks
             return false;
         }
 
-        private void ActivateOnce()
+        private static void ActivateOnce()
         {
-            //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
+            //if (Logging.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
             if (DateTime.UtcNow < Time.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
 
@@ -121,7 +123,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (!module.IsActivatable)
                     continue;
 
-                //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
+                //if (Logging.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
 
                 if (module.GroupId == (int)Group.TrackingDisruptor ||
                     module.GroupId == (int)Group.TrackingComputer ||
@@ -131,23 +133,23 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.CapacitorInjector ||
                     module.GroupId == (int)Group.AncillaryShieldBooster)
                 {
-                    //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
+                    //if (Logging.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
                     if (module.CurrentCharges < module.MaxCharges)
                     {
-                        if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module with no charge[typeID:" + module.TypeId + "]", Logging.White);
+                        if (Logging.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module with no charge[typeID:" + module.TypeId + "]", Logging.White);
                         DirectItem scriptToLoad;
 
                         if (module.GroupId == (int)Group.TrackingDisruptor && _trackingDisruptorScriptAttempts < 5)
                         {
                             _trackingDisruptorScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
 
                             // this needs a counter and an abort after 10 tries or so... or it will keep checking the cargo for a script that may not exist
                             // every second we are in space!
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -178,10 +180,10 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.TrackingComputer && _trackingComputerScriptAttempts < 5)
                         {
                             _trackingComputerScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingComputer Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingComputer Found", Logging.White);
                             DirectItem TrackingComputerScript = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
                             
-                            EntityCache EntityTrackingDisruptingMe = Cache.Instance.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
+                            EntityCache EntityTrackingDisruptingMe = Combat.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
                             if (EntityTrackingDisruptingMe != null || TrackingComputerScript == null)
                             {
                                 TrackingComputerScript = Cache.Instance.CheckCargoForItem((int)TypeID.OptimalRangeScript, 1);
@@ -190,7 +192,7 @@ namespace Questor.Modules.BackgroundTasks
                             scriptToLoad = TrackingComputerScript;
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingComputer", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingComputer", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -221,11 +223,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.TrackingLink && _trackingLinkScriptAttempts < 5)
                         {
                             _trackingLinkScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "TrackingLink Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingLink Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingLinkScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingLink", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingLink", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -256,11 +258,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.SensorBooster && _sensorBoosterScriptAttempts < 5)
                         {
                             _sensorBoosterScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "SensorBooster Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "SensorBooster Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorBoosterScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorBooster", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorBooster", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -291,11 +293,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.SensorDampener && _sensorDampenerScriptAttempts < 5)
                         {
                             _sensorDampenerScriptAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "SensorDampener Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "SensorDampener Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorDampenerScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorDampener", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorDampener", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -326,11 +328,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.AncillaryShieldBooster)
                         {
                             //_ancillaryShieldBoosterAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "ancillaryShieldBooster Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "ancillaryShieldBooster Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.AncillaryShieldBoosterScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for ancillaryShieldBooster", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for ancillaryShieldBooster", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -340,7 +342,7 @@ namespace Questor.Modules.BackgroundTasks
                                     }
                                 }
 
-                                bool inCombat = Cache.Instance.TargetedBy.Any();
+                                bool inCombat = Combat.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
                                     Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
@@ -362,11 +364,11 @@ namespace Questor.Modules.BackgroundTasks
                         if (module.GroupId == (int)Group.CapacitorInjector)
                         {
                             //_capacitorInjectorAttempts++;
-                            if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "capacitorInjector Found", Logging.White);
+                            if (Logging.DebugLoadScripts) Logging.Log("Defense", "capacitorInjector Found", Logging.White);
                             scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.CapacitorInjectorScript, 1);
                             if (scriptToLoad != null)
                             {
-                                if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for capacitorInjector", Logging.White);
+                                if (Logging.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for capacitorInjector", Logging.White);
                                 if (module.IsActive)
                                 {
                                     if (module.Click())
@@ -376,7 +378,7 @@ namespace Questor.Modules.BackgroundTasks
                                     }
                                 }
 
-                                bool inCombat = Cache.Instance.TargetedBy.Any();
+                                bool inCombat = Combat.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
                                     Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
@@ -423,22 +425,22 @@ namespace Questor.Modules.BackgroundTasks
 
                 ModuleNumber++;
 
-                if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] Module TypeID [" + module.TypeId + "] GroupId [" + module.GroupId + "] Found", Logging.Debug);
+                if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] Module TypeID [" + module.TypeId + "] GroupId [" + module.GroupId + "] Found", Logging.Debug);
                 if (!activate)
                 {
-                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is not activatable, proceed to next module", Logging.Debug);
+                    if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is not activatable, proceed to next module", Logging.Debug);
                     continue;
                 }
 
                 if (module.IsActive)
                 {
-                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is already active", Logging.Debug);
+                    if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is already active", Logging.Debug);
                     continue;
                 }
 
                 if (module.InLimboState)
                 {
-                    if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is in LimboState (likely being activated or decativated already)", Logging.Debug);
+                    if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is in LimboState (likely being activated or decativated already)", Logging.Debug);
                     continue;
                 }
 
@@ -466,13 +468,13 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     if (Cache.Instance.ActiveShip.Capacitor < 45)
                     {
-                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 45 UNITS of cap: do not make it worse by turning on the hardeners", Logging.Debug);
+                        if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 45 UNITS of cap: do not make it worse by turning on the hardeners", Logging.Debug);
                         continue;
                     }
 
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
                     {
-                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 3% of cap: do not make it worse by turning on the hardeners", Logging.Debug);
+                        if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 3% of cap: do not make it worse by turning on the hardeners", Logging.Debug);
                         continue;
                     }
 
@@ -480,10 +482,10 @@ namespace Questor.Modules.BackgroundTasks
                     // if total capacitor is really low, do not run stuff unless we are targeted by something
                     // this should only kick in when using frigates as the combatship
                     //
-                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Cache.Instance.TargetedBy.Any() &&
+                    if (Cache.Instance.ActiveShip.Capacitor < 400 && !Combat.TargetedBy.Any() &&
                         Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                     {
-                        if (Settings.Instance.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 400 units total cap and nothing is targeting you yet, no need for hardeners yet.", Logging.Debug);
+                        if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 400 units total cap and nothing is targeting you yet, no need for hardeners yet.", Logging.Debug);
                         continue;
                     }
                 }
@@ -493,7 +495,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (module.Click())
                 {
                     Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                    if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
+                    if (Logging.DebugDefense) Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
                     return;    
                 }
             }
@@ -501,9 +503,9 @@ namespace Questor.Modules.BackgroundTasks
             ModuleNumber = 0;
         }
 
-        private bool OverLoadWeapons()
+        private static bool OverLoadWeapons()
         {
-            //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
+            //if (Logging.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
             if (DateTime.UtcNow < _nextOverloadAttempt) //if we just did something wait a bit
                 return true;
 
@@ -528,7 +530,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (module.IsOverloaded || module.IsPendingOverloading || module.IsPendingStopOverloading)
                     continue;
 
-                //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
+                //if (Logging.DebugLoadScripts) Logging.Log("Defense", "Found Activatable Module [typeid: " + module.TypeId + "][groupID: " + module.GroupId +  "]", Logging.White);
 
                 if (module.GroupId == (int)Group.EnergyWeapon ||
                     module.GroupId == (int)Group.HybridWeapon ||
@@ -542,7 +544,7 @@ namespace Questor.Modules.BackgroundTasks
                     module.GroupId == (int)Group.DefenderMissilelaunchers
                     )
                 {
-                    //if (Settings.Instance.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
+                    //if (Logging.DebugLoadScripts) Logging.Log("Defense", "---Found mod that could take a script [typeid: " + module.TypeId + "][groupID: " + module.GroupId + "][module.CurrentCharges [" + module.CurrentCharges + "]", Logging.White);
 
                     ModuleNumber++;
 
@@ -555,7 +557,7 @@ namespace Questor.Modules.BackgroundTasks
                             
                         //double DamageThresholdToStopOverloading = 1;
 
-                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "IsOverLoaded - HP [" + Math.Round(module.Hp,2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+                        if (Logging.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "IsOverLoaded - HP [" + Math.Round(module.Hp,2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
 
                         //if (module.Damage > DamageThresholdToStopOverloading)
                         //{
@@ -576,7 +578,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         //double DamageThresholdToAllowOverLoading = 1;
 
-                        if (Settings.Instance.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "Is not OverLoaded - HP [" + Math.Round(module.Hp, 2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
+                        if (Logging.DebugOverLoadWeapons) Logging.Log("Defense.Overload", "Is not OverLoaded - HP [" + Math.Round(module.Hp, 2) + "] Damage [" + Math.Round(module.Damage, 2) + "][" + module.TypeId + "]", Logging.Debug);
                         _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
 
                         //if (module.Damage < DamageThresholdToAllowOverLoading)
@@ -599,7 +601,7 @@ namespace Questor.Modules.BackgroundTasks
             return true;
         }
 
-        private void ActivateRepairModules()
+        private static void ActivateRepairModules()
         {
             //var watch = new Stopwatch();
             if (DateTime.UtcNow < Time.Instance.NextRepModuleAction) //if we just did something wait a fraction of a second
@@ -632,8 +634,8 @@ namespace Questor.Modules.BackgroundTasks
 
                 // Module is either for Cap or Tank recharging, so we look at these separated (or random things will happen, like cap recharging when we need to repair but cap is near max) 
                 // Cap recharging
-                bool inCombat = Cache.Instance.EntitiesOnGrid.Any(i => i.IsTargetedBy) || Cache.Instance.PotentialCombatTargets.Any();
-                if (!module.IsActive && inCombat && cap < Settings.Instance.InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
+                bool inCombat = Cache.Instance.EntitiesOnGrid.Any(i => i.IsTargetedBy) || Combat.PotentialCombatTargets.Any();
+                if (!module.IsActive && inCombat && cap < InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
                 {
                     if (module.Click())
                     {
@@ -642,28 +644,28 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
                 // Shield/Armor recharging
-                else if (!module.IsActive && ((inCombat && perc < Settings.Instance.ActivateRepairModules) || (!inCombat && perc < Settings.Instance.DeactivateRepairModules && cap > Settings.Instance.SafeCapacitorPct)))
+                else if (!module.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
                 {
-                    if (Cache.Instance.ActiveShip.ShieldPercentage < Cache.Instance.LowestShieldPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ShieldPercentage < Statistics.LowestShieldPercentageThisPocket)
                     {
-                        Cache.Instance.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
-                        Cache.Instance.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
+                        Statistics.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
+                        Statistics.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.ActiveShip.ArmorPercentage < Cache.Instance.LowestArmorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.ArmorPercentage < Statistics.LowestArmorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
-                        Cache.Instance.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
+                        Statistics.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
+                        Statistics.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Cache.Instance.LowestCapacitorPercentageThisPocket)
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Statistics.LowestCapacitorPercentageThisPocket)
                     {
-                        Cache.Instance.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
-                        Cache.Instance.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
+                        Statistics.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
+                        Statistics.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if ((Cache.Instance.UnlootedContainers != null) && Cache.Instance.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
-                        Cache.Instance.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
+                    if ((Cache.Instance.UnlootedContainers != null) && Statistics.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
+                        Statistics.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
 
                     if (module.GroupId == (int)Group.AncillaryShieldBooster) //this needs to have a huge delay and it currently does not.
                     {
@@ -720,13 +722,13 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
-                if (module.IsActive && (perc >= Settings.Instance.DeactivateRepairModules || module.GroupId == (int)Group.CapacitorInjector))
+                if (module.IsActive && (perc >= DeactivateRepairModulesAtThisPerc || module.GroupId == (int)Group.CapacitorInjector))
                 {
                     if (module.Click())
                     {
                         Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
-                        Cache.Instance.RepairCycleTimeThisPocket = Cache.Instance.RepairCycleTimeThisPocket + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
-                        Cache.Instance.RepairCycleTimeThisMission = Cache.Instance.RepairCycleTimeThisMission + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
+                        Statistics.RepairCycleTimeThisPocket = Statistics.RepairCycleTimeThisPocket + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
+                        Statistics.RepairCycleTimeThisMission = Statistics.RepairCycleTimeThisMission + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                         if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.CapacitorInjector)
                         {
@@ -750,7 +752,7 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        private void ActivateSpeedMod()
+        private static void ActivateSpeedMod()
         {
             ModuleNumber = 0;
             foreach (ModuleCache SpeedMod in Cache.Instance.Modules.Where(i => i.GroupId == (int)Group.Afterburner))
@@ -759,24 +761,24 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
                 {
-                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
+                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
                     if (Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
                         continue;
                     }
                 }
 
                 if (SpeedMod.InLimboState)
                 {
-                    if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
+                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
                     continue;
                 }
 
                 //
                 // Should we deactivate the module?
                 //
-                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
+                if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
 
                 if (SpeedMod.IsActive)
                 {
@@ -787,37 +789,37 @@ namespace Questor.Modules.BackgroundTasks
                     bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                     if (bastionModules.Any(i => i.IsActive))
                     {
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, deactivating speed module", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, deactivating speed module", Logging.Debug);
                         deactivate = true;
                     }
 
                     if (!Cache.Instance.IsApproachingOrOrbiting(0))
                     {
                         deactivate = true;
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Cache.Instance.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.Instance.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
                     {
                         deactivate = true;
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Settings.Instance.SpeedTank)
+                    else if (!NavigateOnGrid.SpeedTank)
                     {
                         // This only applies when not speed tanking
                         if (Cache.Instance.IsApproachingOrOrbiting(0) && Cache.Instance.Approaching != null)
                         {
                             // Deactivate if target is too close
-                            if (Cache.Instance.Approaching.Distance < Settings.Instance.MinimumPropulsionModuleDistance)
+                            if (Cache.Instance.Approaching.Distance < Defense.MinimumPropulsionModuleDistance)
                             {
                                 deactivate = true;
-                                if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching... and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within [" + Math.Round((double)Settings.Instance.MinimumPropulsionModuleDistance / 1000, 0) + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                                if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching... and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within [" + Math.Round((double)Defense.MinimumPropulsionModuleDistance / 1000, 0) + "] Deactivate [" + deactivate + "]", Logging.Debug);
                             }
                         }
                     }
-                    else if (Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor)
+                    else if (Cache.Instance.ActiveShip.CapacitorPercentage < Defense.MinimumPropulsionModuleCapacitor)
                     {
                         deactivate = true;
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Capacitor is at [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is below MinimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Capacitor is at [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is below MinimumPropulsionModuleCapacitor [" + Defense.MinimumPropulsionModuleCapacitor + "] Deactivate [" + deactivate + "]", Logging.Debug);
                     }
 
                     if (deactivate)
@@ -842,7 +844,7 @@ namespace Questor.Modules.BackgroundTasks
                     bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                     if (bastionModules.Any(i => i.IsActive))
                     {
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, do not attempt to activate speed module", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, do not attempt to activate speed module", Logging.Debug);
                         activate = false;
                         return;
                     }
@@ -850,25 +852,25 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.IsApproachingOrOrbiting(0) && Cache.Instance.Approaching != null)
                     {
                         // Activate if target is far enough
-                        if (Cache.Instance.Approaching.Distance > Settings.Instance.MinimumPropulsionModuleDistance)
+                        if (Cache.Instance.Approaching.Distance > Defense.MinimumPropulsionModuleDistance)
                         {
                             activate = true;
-                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + Settings.Instance.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "k] is within MinimumPropulsionModuleDistance [" + Math.Round((double)Settings.Instance.MinimumPropulsionModuleDistance/1000,2) + "] Activate [" + activate + "]", Logging.Debug);
+                            if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] SpeedTank is [" + NavigateOnGrid.SpeedTank + "] We are approaching or orbiting and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "k] is within MinimumPropulsionModuleDistance [" + Math.Round((double)Defense.MinimumPropulsionModuleDistance/1000,2) + "] Activate [" + activate + "]", Logging.Debug);
                         }
 
-                        if (Settings.Instance.SpeedTank)
+                        if (NavigateOnGrid.SpeedTank)
                         {
                             activate = true;
-                            if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching or orbiting: Activate [" + activate + "]", Logging.Debug);      
+                            if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching or orbiting: Activate [" + activate + "]", Logging.Debug);      
                         }
                     }    
                     
                     // If we have less then x% cap, do not activate the module
                     //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
-                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Settings.Instance.MinimumPropulsionModuleCapacitor)
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage < Defense.MinimumPropulsionModuleCapacitor)
                     {
                         activate = false;
-                        if (Settings.Instance.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] CapacitorPercentage is [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is less than MinimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "] Activate [" + activate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] CapacitorPercentage is [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is less than MinimumPropulsionModuleCapacitor [" + Defense.MinimumPropulsionModuleCapacitor + "] Activate [" + activate + "]", Logging.Debug);
                     }
 
                     if (activate)
@@ -884,7 +886,7 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        public void ProcessState()
+        public static void ProcessState()
         {
             // Only pulse state changes every 1.5s
             if (DateTime.UtcNow.Subtract(_lastPulse).TotalMilliseconds < 350) //default: 350ms
@@ -905,13 +907,13 @@ namespace Questor.Modules.BackgroundTasks
 
             if (DateTime.UtcNow.AddSeconds(-2) > Time.Instance.LastInSpace)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "it was more than 2 seconds ago since we thought we were in space", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "it was more than 2 seconds ago since we thought we were in space", Logging.White);
                 return;
             }
 
             if (!Cache.Instance.InSpace)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are not in space (yet?)", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "we are not in space (yet?)", Logging.White);
                 _lastSessionChange = DateTime.UtcNow;
                 return;
             }
@@ -919,14 +921,14 @@ namespace Questor.Modules.BackgroundTasks
             // What? No ship entity?
             if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int) Group.Capsule)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "no ship entity, or we are in a pod...", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "no ship entity, or we are in a pod...", Logging.White);
                 _lastSessionChange = DateTime.UtcNow;
                 return;
             }
 
             if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 15)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
                 _nextOverloadAttempt = DateTime.UtcNow;
                 return;
             }
@@ -934,21 +936,27 @@ namespace Questor.Modules.BackgroundTasks
             // There is no better defense then being cloaked ;)
             if (Cache.Instance.ActiveShip.Entity.IsCloaked)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are cloaked... no defense needed.", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "we are cloaked... no defense needed.", Logging.White);
                 _lastCloaked = DateTime.UtcNow;
+                return;
+            }
+
+            if (Defense.DoNotBreakInvul)
+            {
+                if (Logging.DebugDefense) Logging.Log("Defense", "DoNotBreakInvul == true, not running defense yet as that will break invulnerability", Logging.White);
                 return;
             }
 
             if (DateTime.UtcNow.Subtract(_lastCloaked).TotalSeconds < 2)
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we are cloaked.... waiting.", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "we are cloaked.... waiting.", Logging.White);
                 return;
             }
 
             if (DateTime.UtcNow.AddHours(-10) > Time.Instance.WehaveMoved &&
                 DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(20))
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "we have not moved yet after jumping or undocking... waiting.", Logging.White);
                 //
                 // we reset this datetime stamp to -7 days when we jump, and set it to DateTime.UtcNow when we move (to deactivate jump cloak!)
                 // once we have moved (warp, orbit, dock, etc) this should be false and before that it will be true
@@ -956,15 +964,15 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Cache.Instance.TargetedBy.Any())
+            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Combat.TargetedBy.Any())
             {
-                if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow)", Logging.White);
+                if (Logging.DebugDefense) Logging.Log("Defense", "Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow)", Logging.White);
                 return;
             }
 
-            if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateRepairModules();", Logging.White);
+            if (Logging.DebugDefense) Logging.Log("Defense", "Starting ActivateRepairModules();", Logging.White);
             ActivateRepairModules();
-            if (Settings.Instance.DebugDefense) Logging.Log("Defense", "Starting ActivateOnce();", Logging.White);
+            if (Logging.DebugDefense) Logging.Log("Defense", "Starting ActivateOnce();", Logging.White);
             ActivateOnce();
 
             if (Cache.Instance.InWarp)
@@ -980,7 +988,7 @@ namespace Questor.Modules.BackgroundTasks
             // this allows speed mods only when not paused, which is expected behavior
             if (!Cache.Instance.Paused)
             {
-                if (Settings.Instance.DebugDefense || Settings.Instance.DebugSpeedMod) Logging.Log("Defense", "Starting ActivateSpeedMod();", Logging.White);
+                if (Logging.DebugDefense || Logging.DebugSpeedMod) Logging.Log("Defense", "Starting ActivateSpeedMod();", Logging.White);
                 ActivateSpeedMod();
             }
 

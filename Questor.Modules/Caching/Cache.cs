@@ -8,22 +8,19 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using LavishSettingsAPI;
+using Questor.Modules.BackgroundTasks;
 
 namespace Questor.Modules.Caching
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Xml.Linq;
-    using System.Xml.XPath;
     using System.Threading;
     using global::Questor.Modules.Actions;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
@@ -35,12 +32,6 @@ namespace Questor.Modules.Caching
         ///   Singleton implementation
         /// </summary>
         private static Cache _instance = new Cache();
-
-        public bool UseInnerspace { get; set; }
-        /// <summary>
-        ///   Active Drones //cleared in InvalidateCache 
-        /// </summary>
-        private List<EntityCache> _activeDrones;
 
         /// <summary>
         ///   _agent cache //cleared in InvalidateCache 
@@ -93,24 +84,9 @@ namespace Questor.Modules.Caching
         private List<EntityCache> _containers;
 
         /// <summary>
-        ///   _CombatTarget Entities cache - list of things we have targeted to kill //cleared in InvalidateCache 
-        /// </summary>
-        private List<EntityCache> _combatTargets;
-
-        /// <summary>
-        ///   _PotentialCombatTarget Entities cache - list of things we can kill //cleared in InvalidateCache 
-        /// </summary>
-        private List<EntityCache> _potentialCombatTargets;
-
-        /// <summary>
         ///   Safespot Bookmark cache (all bookmarks that start with the defined safespot prefix) //cleared in InvalidateCache 
         /// </summary>
         private List<DirectBookmark> _safeSpotBookmarks;
-
-        /// <summary>
-        ///   Damaged drones
-        /// </summary>
-        public IEnumerable<EntityCache> DamagedDrones;
 
         /// <summary>
         ///   Entities by Id //cleared in InvalidateCache
@@ -121,107 +97,6 @@ namespace Questor.Modules.Caching
         ///   Module cache //cleared in InvalidateCache
         /// </summary>
         private List<ModuleCache> _modules;
-
-        /// <summary>
-        ///   Primary Weapon Priority targets (e.g. mission kill targets) //cleared in InvalidateCache
-        /// </summary>
-        public List<EntityCache> _entitiesthatHaveExploded;
-
-        /// <summary>
-        ///  Primary Weapon target chosen by GetBest Target
-        /// </summary>
-       
-        public long? PreferredPrimaryWeaponTargetID;
-        private EntityCache _preferredPrimaryWeaponTarget;
-        public EntityCache PreferredPrimaryWeaponTarget
-        {
-            get
-            {
-                if (Cache.Instance._preferredPrimaryWeaponTarget == null)
-                {
-                    if (Cache.Instance.PreferredPrimaryWeaponTargetID != null)
-                    {
-                        Cache.Instance._preferredPrimaryWeaponTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == Cache.Instance.PreferredPrimaryWeaponTargetID);
-
-                        return Cache.Instance._preferredPrimaryWeaponTarget ?? null;    
-                    }
-
-                    return null;
-                }
-
-                return Cache.Instance._preferredPrimaryWeaponTarget;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    if (Cache.Instance._preferredPrimaryWeaponTarget != null)
-                    {
-                        Cache.Instance._preferredPrimaryWeaponTarget = null;
-                        Cache.Instance.PreferredPrimaryWeaponTargetID = null;
-                        if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", "[ null ]", Logging.Debug);
-                        return;
-                    }
-                }
-                else if ((Cache.Instance._preferredPrimaryWeaponTarget != null && Cache.Instance._preferredPrimaryWeaponTarget.Id != value.Id) || Cache.Instance._preferredPrimaryWeaponTarget == null)
-                {
-                    Cache.Instance._preferredPrimaryWeaponTarget = value;
-                    Cache.Instance.PreferredPrimaryWeaponTargetID = value.Id;
-                    if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", value.Name + " [" + Cache.Instance.MaskedID(value.Id) + "][" + Math.Round(value.Distance / 1000, 0) + "k] isTarget [" + value.IsTarget + "]", Logging.Debug);
-                    return;
-                }
-
-                //if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("PreferredPrimaryWeaponTarget", "Cache.Instance._preferredPrimaryWeaponTarget [" + Cache.Instance._preferredPrimaryWeaponTarget.Name + "] is already set (no need to change)", Logging.Debug);
-                return;
-            }
-        }
-        
-        /// <summary>
-        ///   Drone target chosen by GetBest Target
-        /// </summary>
-        public long? PreferredDroneTargetID;
-        private EntityCache _preferredDroneTarget;
-        public EntityCache PreferredDroneTarget
-        {
-            get
-            {
-                if (Cache.Instance._preferredDroneTarget == null)
-                {
-                    if (Cache.Instance.PreferredDroneTargetID != null)
-                    {
-                        Cache.Instance._preferredDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.Id == Cache.Instance.PreferredDroneTargetID);
-                        return Cache.Instance._preferredDroneTarget ?? null;
-                    }
-                }
-
-                return Cache.Instance._preferredDroneTarget;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    if (Cache.Instance._preferredDroneTarget != null)
-                    {
-                        Cache.Instance._preferredDroneTarget = null;
-                        Cache.Instance.PreferredDroneTargetID = null;
-                        Logging.Log("PreferredPrimaryWeaponTarget.Set", "[ null ]", Logging.Debug);
-                        return;
-                    }
-                }
-                else
-                {
-                    if (Cache.Instance._preferredDroneTarget != null && _preferredDroneTarget.Id != value.Id)
-                    {
-                        Cache.Instance._preferredDroneTarget = value;
-                        Cache.Instance.PreferredDroneTargetID = value.Id;
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("PreferredPrimaryWeaponTarget.Set", value + " [" + Cache.Instance.MaskedID(value.Id) + "]", Logging.Debug);
-                        return;
-                    }
-                }
-            }
-        }
-
-        public long? LastDroneTargetID = null;
 
         public string OrbitEntityNamed;
 
@@ -255,11 +130,6 @@ namespace Questor.Modules.Caching
         private IEnumerable<EntityCache> _jumpBridges;
 
         /// <summary>
-        ///   Targeted by cache //cleared in InvalidateCache
-        /// </summary>
-        private List<EntityCache> _targetedBy;
-
-        /// <summary>
         ///   Targeting cache //cleared in InvalidateCache
         /// </summary>
         private List<EntityCache> _targeting;
@@ -269,11 +139,7 @@ namespace Questor.Modules.Caching
         /// </summary>
         private List<EntityCache> _targets;
 
-        /// <summary>
-        ///   Aggressed cache //cleared in InvalidateCache
-        /// </summary>
-        private List<EntityCache> _aggressed;
-
+        
         /// <summary>
         ///   IDs in Inventory window tree (on left) //cleared in InvalidateCache
         /// </summary>
@@ -297,7 +163,7 @@ namespace Questor.Modules.Caching
         /// <summary>
         ///   Returns maxLockedTargets, the minimum between the character and the ship //cleared in InvalidateCache
         /// </summary>
-        private int? _maxLockedTargets = null;
+        private int? _maxLockedTargets;
         
         /// <summary>
         ///  Dictionary for cached EWAR target
@@ -312,17 +178,8 @@ namespace Questor.Modules.Caching
         public HashSet<long> ListofContainersToLoot = new HashSet<long>();
         public HashSet<string> ListofMissionCompletionItemsToLoot = new HashSet<string>();
         public List<EachWeaponsVolleyCache> ListofEachWeaponsVolleyData = new List<EachWeaponsVolleyCache>();
-        public long VolleyCount = 0;
+        public long VolleyCount;
         
-        public void DirecteveDispose()
-        {
-            Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
-            Cache.Instance.DirectEve.Dispose(); //could this hang?
-            Logging.Log("Questor", "finished calling DirectEve.Dispose()", Logging.White);
-            Process.GetCurrentProcess().Kill();
-            Environment.Exit(0);
-        }
-
         /*
         public void IterateInvTypes(string module)
         {
@@ -416,11 +273,11 @@ namespace Questor.Modules.Caching
                 try
                 {
                     Logging.Log(module, "IterateUnloadLootTheseItemsAreLootItems - Loading [" + UnloadLootTheseItemsAreLootItemsXmlFile + "]", Logging.White);
-                    Cache.Instance.UnloadLootTheseItemsAreLootItems = XDocument.Load(UnloadLootTheseItemsAreLootItemsXmlFile);
+                    MissionSettings.UnloadLootTheseItemsAreLootItems = XDocument.Load(UnloadLootTheseItemsAreLootItemsXmlFile);
 
-                    if (UnloadLootTheseItemsAreLootItems.Root != null)
+                    if (MissionSettings.UnloadLootTheseItemsAreLootItems.Root != null)
                     {
-                        foreach (XElement element in UnloadLootTheseItemsAreLootItems.Root.Elements("invtype"))
+                        foreach (XElement element in MissionSettings.UnloadLootTheseItemsAreLootItems.Root.Elements("invtype"))
                         {
                             UnloadLootTheseItemsAreLootById.Add((int)element.Attribute("id"), (string)element.Attribute("name"));
                         }
@@ -437,7 +294,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public static int CacheInstances = 0;
+        public static int CacheInstances;
 
         public Cache()
         {
@@ -446,7 +303,6 @@ namespace Questor.Modules.Caching
             //InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, line));
             //line = string.Empty;
 
-            _entitiesthatHaveExploded = new List<EntityCache>();
             LastModuleTargetIDs = new Dictionary<long, long>();
             TargetingIDs = new Dictionary<long, DateTime>();
             _entitiesById = new Dictionary<long, EntityCache>();
@@ -456,22 +312,6 @@ namespace Questor.Modules.Caching
             //UnloadLootTheseItemsAreLootById = new Dictionary<int, InvType>();
             
             LootedContainers = new HashSet<long>();
-            IgnoreTargets = new HashSet<string>();
-            MissionItems = new List<string>();
-            ChangeMissionShipFittings = false;
-            UseMissionShip = false;
-            ArmLoadedCache = false;
-            MissionAmmo = new List<Ammo>();
-            MissionUseDrones = null;
-
-            PanicAttemptsThisPocket = 0;
-            LowestShieldPercentageThisPocket = 100;
-            LowestArmorPercentageThisPocket = 100;
-            LowestCapacitorPercentageThisPocket = 100;
-            PanicAttemptsThisMission = 0;
-            LowestShieldPercentageThisMission = 100;
-            LowestArmorPercentageThisMission = 100;
-            LowestCapacitorPercentageThisMission = 100;
             Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
             
             Interlocked.Increment(ref CacheInstances);
@@ -487,65 +327,70 @@ namespace Questor.Modules.Caching
         /// </summary>
         public HashSet<long> LootedContainers { get; private set; }
 
-        /// <summary>
-        ///   List of targets to ignore
-        /// </summary>
-        public HashSet<string> IgnoreTargets { get; private set; }
-
+        
         public static Cache Instance
         {
             get { return _instance; }
         }
 
-        public bool ExitWhenIdle = false;
-        public bool StopBot = false;
-        public bool DoNotBreakInvul = false;
-        public bool UseDrones = true;
-        public bool LootAlreadyUnloaded = false;
-        public bool MissionLoot = false;
-        public bool SalvageAll = false;
-        public bool RouteIsAllHighSecBool = false;
-        public bool CurrentlyShouldBeSalvaging = false;
-        public bool NeedRepair = false;
-
+        public bool ExitWhenIdle;
+        public bool StopBot;
+        public bool LootAlreadyUnloaded;
+        public bool RouteIsAllHighSecBool;
+        public bool NeedRepair;
         public double Wealth { get; set; }
-
         public double WealthatStartofPocket { get; set; }
-
-        public int PocketNumber { get; set; }
-
         public int StackLootHangarAttempts { get; set; }
         public int StackAmmoHangarAttempts { get; set; }
-
         public string ScheduleCharacterName; //= Program._character;
-        public bool OpenWrecks = false;
         public bool NormalApproach = true;
-        public bool CourierMission = false;
-        public bool RepairAll = false;
-        public bool doneUsingRepairWindow = false;
-        public string MissionName = "";
-        public int MissionsThisSession = 0;
-        public int StopSessionAfterMissionNumber = int.MaxValue;
-        public bool ConsoleLogOpened = false;
-        public int TimeSpentReloading_seconds = 0;
-        public int TimeSpentInMission_seconds = 0;
-        public int TimeSpentInMissionInRange = 0;
-        public int TimeSpentInMissionOutOfRange = 0;
-        public int GreyListedMissionsDeclined = 0;
-        public string LastGreylistMissionDeclined = string.Empty;
-        public int BlackListedMissionsDeclined = 0;
-        public string LastBlacklistMissionDeclined = string.Empty;
-
+        public bool CourierMission;
+        public bool RepairAll;
+        public bool doneUsingRepairWindow;
+        
         public long AmmoHangarID = -99;
         public long LootHangarID = -99;
+        
+        /// <summary>
+        ///   Returns the mission for a specific agent
+        /// </summary>
+        /// <param name="agentId"></param>
+        /// <param name="ForceUpdate"> </param>
+        /// <returns>null if no mission could be found</returns>
+        public DirectAgentMission GetAgentMission(long agentId, bool ForceUpdate)
+        {
+            if (DateTime.UtcNow < Time.Instance.NextGetAgentMissionAction)
+            {
+                if (MissionSettings.FirstAgentMission != null)
+                {
+                    return MissionSettings.FirstAgentMission;
+                }
 
-        public DirectAgentMission Mission;
+                return null;
+            }
 
-        public DirectAgentMission FirstAgentMission;
+            try
+            {
+                if (ForceUpdate || MissionSettings.myAgentMissionList == null || !MissionSettings.myAgentMissionList.Any())
+                {
+                    MissionSettings.myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
+                    Time.Instance.NextGetAgentMissionAction = DateTime.UtcNow.AddSeconds(5);
+                }
 
-        public IEnumerable<DirectAgentMission> myAgentMissionList { get; set; }
+                if (MissionSettings.myAgentMissionList.Any())
+                {
+                    MissionSettings.FirstAgentMission = MissionSettings.myAgentMissionList.FirstOrDefault();
+                    return MissionSettings.FirstAgentMission;
+                }
 
-        public bool DronesKillHighValueTargets { get; set; }
+                return null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.Instance.GetAgentMission", "DirectEve.AgentMissions failed: [" + exception + "]", Logging.Teal);
+                return null;
+            }
+        }
 
         public bool InMission { get; set; }
 
@@ -556,13 +401,6 @@ namespace Questor.Modules.Caching
         public int StackAmmohangarAttempts { get; set; }
         public int StackItemhangarAttempts { get; set; }
         
-        public bool MissionXMLIsAvailable { get; set; }
-
-        public string MissionXmlPath { get; set; }
-
-        //public XDocument InvTypes;
-        public XDocument UnloadLootTheseItemsAreLootItems;
-        public XDocument InvIgnore;
         public string Path;
 
         public bool _isCorpInWar = false;
@@ -579,11 +417,11 @@ namespace Questor.Modules.Caching
                     Time.Instance.NextCheckCorpisAtWar = DateTime.UtcNow.AddMinutes(15);
                     if (!_isCorpInWar)
                     {
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is not involved in any wars (yet)", Logging.Green);
+                        if (Logging.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is not involved in any wars (yet)", Logging.Green);
                     }
                     else
                     {
-                        if (Settings.Instance.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is involved in a war, be careful", Logging.Orange);
+                        if (Logging.DebugWatchForActiveWars) Logging.Log("IsCorpInWar", "Your corp is involved in a war, be careful", Logging.Orange);
                     }
 
                     return _isCorpInWar;
@@ -640,11 +478,6 @@ namespace Questor.Modules.Caching
         public List<ShipTargetValue> ShipTargetValues { get; private set; }
 
         /// <summary>
-        ///   Best damage type for the mission
-        /// </summary>
-        public DamageType MissionDamageType { get; set; }
-
-        /// <summary>
         ///   Best damage type for this mission
         /// </summary>
         public DamageType FrigateDamageType { get; set; }
@@ -668,16 +501,6 @@ namespace Questor.Modules.Caching
         ///   Best damage type for LargeColidables for this mission / faction
         /// </summary>
         public DamageType LargeColidableDamageType { get; set; }
-
-        /// <summary>
-        ///   Best orbit distance for the mission
-        /// </summary>
-        public int OrbitDistance { get; set; }
-
-        /// <summary>
-        ///   Current OptimalRange during the mission (effected by e-war)
-        /// </summary>
-        public int OptimalRange { get; set; }
 
         /// <summary>
         ///   Force Salvaging after mission
@@ -712,12 +535,12 @@ namespace Questor.Modules.Caching
                                     Time.Instance.NextOpenCurrentShipsCargoWindowAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);
                                     Statistics.LogWindowActionToWindowLog("CargoHold", "Opening CargoHold");
-                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
+                                    if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenCargoHoldOfActiveShip);", Logging.Debug); 
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
+                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -731,15 +554,15 @@ namespace Questor.Modules.Caching
 
                             if (!Cache.Instance._currentShipsCargo.Window.IsPrimary())
                             {
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.DebugHangars);
+                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: cargoHold window is ready and is a secondary inventory window", Logging.Debug);
                                     
                                 if (_currentShipsCargo != null)
                                 {
-                                    //if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is not null", Logging.Debug);
+                                    //if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is not null", Logging.Debug);
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null!?", Logging.Debug);
+                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null!?", Logging.Debug);
                                 return null;
                             }
 
@@ -747,14 +570,14 @@ namespace Questor.Modules.Caching
                             {
                                 if (DateTime.UtcNow > Time.Instance.NextOpenCargoAction)
                                 {
-                                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.DebugHangars);
+                                    if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.Debug);
                                     Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
                                     _currentShipsCargo = null;
                                     return _currentShipsCargo;
                                 }
 
-                                if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
+                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
                                 _currentShipsCargo = null;
                                 return _currentShipsCargo;
                             }
@@ -764,7 +587,7 @@ namespace Questor.Modules.Caching
 
                         if (_currentShipsCargo == null)
                         {
-                            if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);    
+                            if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);    
                         }
                             
                         return _currentShipsCargo;
@@ -776,7 +599,7 @@ namespace Questor.Modules.Caching
                         EntityCount = Cache.Instance.Entities.Count();
                     }
 
-                    if (Settings.Instance.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.MyShipEntity is null: We have a total of [" + EntityCount + "] entities available at the moment.", Logging.Debug);
+                    if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Cache.Instance.MyShipEntity is null: We have a total of [" + EntityCount + "] entities available at the moment.", Logging.Debug);
                     return null;
                    
                 }
@@ -805,77 +628,11 @@ namespace Questor.Modules.Caching
             set { _containerInSpace = value; }
         }
 
-
         public DirectActiveShip ActiveShip
         {
             get
             {
                 return Cache.Instance.DirectEve.ActiveShip;
-            }
-        }
-
-        private double? _maxDroneRange;
-
-        public double MaxDroneRange
-        {
-            get
-            {
-                if (_maxDroneRange == null)
-                {
-                    _maxDroneRange = Math.Min(Settings.Instance.DroneControlRange, Cache.Instance.MaxTargetRange);
-                    return _maxDroneRange ?? 0;
-                }
-
-                return _maxDroneRange ?? 0;
-            }
-        }
-
-        private double? _maxrange;
-        
-        public double MaxRange
-        {
-            get
-            {
-                if (_maxrange == null)
-                {
-                    _maxrange = Math.Min(Cache.Instance.WeaponRange, Cache.Instance.MaxTargetRange);
-                    return _maxrange ?? 0;
-                }
-
-                return _maxrange ?? 0;
-            }
-        }
-
-        private double? _maxTargetRange;
-
-        public double MaxTargetRange
-        {
-            get
-            {
-                if (_maxTargetRange == null)
-                {
-                    _maxTargetRange = Cache.Instance.ActiveShip.MaxTargetRange;
-                    return _maxTargetRange ?? 0;
-                }
-
-                return _maxTargetRange ?? 0;
-            }
-        }
-
-        public double LowValueTargetsHaveToBeWithinDistance
-        {
-            get
-            {
-                if (Cache.Instance.UseDrones && Cache.Instance.MaxDroneRange != 0)
-                {
-                    return Cache.Instance.MaxDroneRange;
-                }
-                
-                //
-                // if we are not using drones return min range (Weapons or targeting range whatever is lower)
-                //
-                return Cache.Instance.MaxRange;
-                
             }
         }
 
@@ -887,36 +644,36 @@ namespace Questor.Modules.Caching
             get
             {
                 // Get ammo based on current damage type
-                IEnumerable<Ammo> ammo = Settings.Instance.Ammo.Where(a => a.DamageType == MissionDamageType).ToList();
+                IEnumerable<Ammo> ammo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
 
                 try
                 {
                     // Is our ship's cargo available?
                     if ((Cache.Instance.CurrentShipsCargo != null) && (Cache.Instance.CurrentShipsCargo.IsValid))
                     {
-                        ammo = ammo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Settings.Instance.MinimumAmmoCharges));
+                        ammo = ammo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => a.TypeId == i.TypeId && i.Quantity >= Combat.MinimumAmmoCharges));
                     }
                     else
                     {
-                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
+                        return System.Convert.ToInt32(Combat.MaxTargetRange);
                     }
 
                     // Return ship range if there's no ammo left
                     if (!ammo.Any())
                     {
-                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
+                        return System.Convert.ToInt32(Combat.MaxTargetRange);
                     }
 
                     return ammo.Max(a => a.Range);
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.WeaponRange", "exception was:" + ex.Message, Logging.Teal);
+                    if (Logging.DebugExceptions) Logging.Log("Cache.WeaponRange", "exception was:" + ex.Message, Logging.Teal);
 
                     // Return max range
                     if (Cache.Instance.ActiveShip != null)
                     {
-                        return System.Convert.ToInt32(Cache.Instance.MaxTargetRange);
+                        return System.Convert.ToInt32(Combat.MaxTargetRange);
                     }
 
                     return 0;
@@ -955,7 +712,7 @@ namespace Questor.Modules.Caching
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.myCurrentAmmoInWeapon", "exception was:" + ex.Message, Logging.Teal);
+                    if (Logging.DebugExceptions) Logging.Log("Cache.myCurrentAmmoInWeapon", "exception was:" + ex.Message, Logging.Teal);
                     return null;
                 }
             }
@@ -990,7 +747,7 @@ namespace Questor.Modules.Caching
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.myAmmoInSpaceAverageSpeed", "exception was:" + ex.Message, Logging.Teal);
+                    if (Logging.DebugExceptions) Logging.Log("Cache.myAmmoInSpaceAverageSpeed", "exception was:" + ex.Message, Logging.Teal);
                     return 0;
                 }
             }
@@ -1006,24 +763,10 @@ namespace Questor.Modules.Caching
         /// </summary>
         public Dictionary<long, DateTime> TargetingIDs { get; private set; }
 
-        /// <summary>
-        ///   Used for Drones to know that it should retract drones
-        /// </summary>
-        public bool IsMissionPocketDone { get; set; }
-
-        public string ExtConsole { get; set; }
-
-        public string ConsoleLog { get; set; }
-
-        public string ConsoleLogRedacted { get; set; }
-
         public bool AllAgentsStillInDeclineCoolDown { get; set; }
 
         public string _agentName = "";
 
-        public int WrecksThisPocket;
-        public int WrecksThisMission;
-        
         private bool _paused;
         public bool Paused
         {
@@ -1038,52 +781,20 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public int RepairCycleTimeThisPocket { get; set; }
-
-        public int PanicAttemptsThisPocket { get; set; }
-
-        private int GetShipsDroneBayAttempts { get; set; }
-
-        public double LowestShieldPercentageThisMission { get; set; }
-
-        public double LowestArmorPercentageThisMission { get; set; }
-
-        public double LowestCapacitorPercentageThisMission { get; set; }
-
-        public double LowestShieldPercentageThisPocket { get; set; }
-
-        public double LowestArmorPercentageThisPocket { get; set; }
-
-        public double LowestCapacitorPercentageThisPocket { get; set; }
-
-        public int PanicAttemptsThisMission { get; set; }
-
-        public int RepairCycleTimeThisMission { get; set; }
-
         public long TotalMegaBytesOfMemoryUsed = 0;
-
         public double MyWalletBalance { get; set; }
-
         public string CurrentPocketAction { get; set; }
-
         public float AgentEffectiveStandingtoMe;
         public string AgentEffectiveStandingtoMeText;
         public float AgentCorpEffectiveStandingtoMe;
         public float AgentFactionEffectiveStandingtoMe;
         public float StandingUsedToAccessAgent;
-        
-
-        public bool MissionBookmarkTimerSet = false;
+        public bool MissionBookmarkTimerSet;
         public long AgentStationID { get; set; }
-
-        public string AgentStationName { get; set; }
-
-        public long AgentSolarSystemID { get; set; }
-
-        public string AgentSolarSystemName { get; set; }
-
+        public string AgentStationName;
+        public long AgentSolarSystemID;
+        //public string AgentSolarSystemName;
         public string CurrentAgentText = string.Empty;
-
         public string CurrentAgent
         {
             get
@@ -1114,7 +825,6 @@ namespace Questor.Modules.Caching
                 _agentName = value;
             }
         }
-
         private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisSolarSystemSelector = (a, s) => a.SolarSystemId == s.SolarSystemId;
         private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisStationSelector = (a, s) => a.StationId == s.StationId;
 
@@ -1124,7 +834,7 @@ namespace Questor.Modules.Caching
             {
                 DirectAgentMission mission = null;
 
-                foreach (AgentsList potentialAgent in Settings.Instance.ListOfAgents)
+                foreach (AgentsList potentialAgent in MissionSettings.ListOfAgents)
                 {
                     if (Cache.Instance.DirectEve.AgentMissions.Any(m => m.State == (int)MissionState.Accepted && !m.Important && DirectEve.GetAgentById(m.AgentId).Name == potentialAgent.Name))
                     {
@@ -1138,7 +848,7 @@ namespace Questor.Modules.Caching
                     try
                     {
                         Func<DirectAgent, DirectSession, bool> selector = DirectEve.Session.IsInSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
-                        var nearestAgent = Settings.Instance.ListOfAgents
+                        var nearestAgent = MissionSettings.ListOfAgents
                             .Select(x => new { Agent = x, DirectAgent = DirectEve.GetAgentByName(x.Name) })
                             .FirstOrDefault(x => selector(x.DirectAgent, DirectEve.Session));
 
@@ -1148,9 +858,9 @@ namespace Questor.Modules.Caching
                         }
 
 
-                        if (Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).Any())
+                        if (MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).Any())
                         {
-                            AgentsList __HighestPriorityAgentInList = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
+                            AgentsList __HighestPriorityAgentInList = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
                             if (__HighestPriorityAgentInList != null)
                             {
                                 return __HighestPriorityAgentInList.Name;
@@ -1178,7 +888,7 @@ namespace Questor.Modules.Caching
         private string SelectFirstAgent()
         {
             Func<DirectAgent, DirectSession, bool> selector = Cache.Instance.InSpace ? AgentInThisSolarSystemSelector : AgentInThisStationSelector;
-            AgentsList FirstAgent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
+            AgentsList FirstAgent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
             if (FirstAgent == null)
             {
                 Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
@@ -1205,16 +915,16 @@ namespace Questor.Modules.Caching
                 return SelectNearestAgent();
             }
 
-            AgentsList agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
+            AgentsList agent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
             if (agent == null)
             {
                 try
                 {
-                    agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
+                    agent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("Cache.SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]",Logging.Debug);
+                    Logging.Log("Cache.SwitchAgent", "Unable to process agent section of [" + Logging.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]",Logging.Debug);
                     Cache.Instance.Paused = true;
                 }
                 AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
@@ -1266,7 +976,7 @@ namespace Questor.Modules.Caching
                             //Logging.Log("Cache: CurrentAgent", "Processing Agent Info...", Logging.White);
                             Cache.Instance.AgentStationName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.StationId);
                             Cache.Instance.AgentStationID = Cache.Instance._agent.StationId;
-                            Cache.Instance.AgentSolarSystemName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.SolarSystemId);
+                            //Cache.Instance.AgentSolarSystemName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.SolarSystemId);
                             Cache.Instance.AgentSolarSystemID = Cache.Instance._agent.SolarSystemId;
                             //Logging.Log("Cache: CurrentAgent", "AgentStationName [" + Cache.Instance.AgentStationName + "]", Logging.White);
                             //Logging.Log("Cache: CurrentAgent", "AgentStationID [" + Cache.Instance.AgentStationID + "]", Logging.White);
@@ -1276,7 +986,7 @@ namespace Questor.Modules.Caching
                     }
                     catch (Exception ex)
                     {
-                        Logging.Log("Cache.Agent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
+                        Logging.Log("Cache.Agent", "Unable to process agent section of [" + Logging.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
                         Cache.Instance.Paused = true;
                     }
                     if (_agentId != null) return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
@@ -1355,7 +1065,7 @@ namespace Questor.Modules.Caching
             {
                 if (_weapons == null)
                 {
-                    _weapons = Modules.Where(m => m.GroupId == Settings.Instance.WeaponGroupId); // ||
+                    _weapons = Modules.Where(m => m.GroupId == Combat.WeaponGroupId).ToList(); // ||
                     //m.GroupId == (int)Group.ProjectileWeapon ||
                     //m.GroupId == (int)Group.EnergyWeapon ||
                     //m.GroupId == (int)Group.HybridWeapon ||
@@ -1366,9 +1076,9 @@ namespace Questor.Modules.Caching
                     //m.GroupId == (int)Group.AssaultMissilelaunchers ||
                     //m.GroupId == (int)Group.HeavyMissilelaunchers ||
                     //m.GroupId == (int)Group.DefenderMissilelaunchers);
-                    if (Cache.Instance.MissionWeaponGroupId != 0)
+                    if (MissionSettings.MissionWeaponGroupId != 0)
                     {
-                        _weapons = Modules.Where(m => m.GroupId == Cache.Instance.MissionWeaponGroupId);
+                        _weapons = Modules.Where(m => m.GroupId == MissionSettings.MissionWeaponGroupId).ToList();
                     }
 
                     if (Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10))
@@ -1376,7 +1086,7 @@ namespace Questor.Modules.Caching
                         if (!_weapons.Any())
                         {
                             int moduleNumber = 0;
-                            Logging.Log("Cache.Weapons", "WeaponGroupID is defined as [" + Settings.Instance.WeaponGroupId + "] in your characters settings XML", Logging.Debug);
+                            Logging.Log("Cache.Weapons", "WeaponGroupID is defined as [" + Combat.WeaponGroupId + "] in your characters settings XML", Logging.Debug);
                             foreach (ModuleCache _module in Cache.Instance.Modules)
                             {
                                 moduleNumber++;
@@ -1387,10 +1097,10 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow > Time.Instance.NextModuleDisableAutoReload)
                             {
-                                int weaponNumber = 0;
+                                //int weaponNumber = 0;
                                 foreach (ModuleCache _weapon in Cache.Instance.Weapons)
                                 {
-                                    weaponNumber++;
+                                    //weaponNumber++;
                                     if (_weapon.AutoReload)
                                     {
                                         bool returnValueHereNotUsed = _weapon.DisableAutoReload;
@@ -1415,10 +1125,10 @@ namespace Questor.Modules.Caching
                 if (_maxLockedTargets == null)
                 {
                     _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.ActiveShip.MaxLockedTargets);
-                    return _maxLockedTargets ?? 0;
+                    return (int) _maxLockedTargets;
                 }
 
-                return _maxLockedTargets ?? 0;
+                return (int) _maxLockedTargets;
             }
         }
 
@@ -1530,21 +1240,19 @@ namespace Questor.Modules.Caching
             }
         }
 
-
         public int TargetingSlotsNotBeingUsedBySalvager
         {
             get
             {
-                if (Settings.Instance.MaximumWreckTargets > 0 && Cache.Instance.MaxLockedTargets >= 5)
+                if (Salvage.MaximumWreckTargets > 0 && Cache.Instance.MaxLockedTargets >= 5)
                 {
-                    return Cache.Instance.MaxLockedTargets - Settings.Instance.MaximumWreckTargets;
+                    return Cache.Instance.MaxLockedTargets - Salvage.MaximumWreckTargets;
                 }
 
                 return Cache.Instance.MaxLockedTargets;
             }
         }
         
-
         public IEnumerable<EntityCache> Targets
         {
             get
@@ -1588,136 +1296,6 @@ namespace Questor.Modules.Caching
             {
                 Logging.Log("Cache.IDsinInventoryTree", "Refreshing IDs from inventory tree, it has been longer than 30 seconds since the last refresh", Logging.Teal);
                 return _IDsinInventoryTree ?? (_IDsinInventoryTree = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false));
-            }
-        }
-
-        public IEnumerable<EntityCache> TargetedBy
-        {
-            get { return _targetedBy ?? (_targetedBy = Cache.Instance.PotentialCombatTargets.Where(e => e.IsTargetedBy).ToList()); }
-        }
-
-        public IEnumerable<EntityCache> Aggressed
-        {
-            get { return _aggressed ?? (_aggressed = Cache.Instance.PotentialCombatTargets.Where(e => e.IsAttacking).ToList()); }
-        }
-
-        //
-        // entities that have been locked (or are being locked now)
-        // entities that are IN range
-        // entities that eventually we want to shoot (and now that they are locked that will happen shortly)
-        //
-        public IEnumerable<EntityCache> combatTargets
-        {
-            get
-            {
-                if (_combatTargets == null)
-                {
-                    //List<EntityCache>
-                    if (Cache.Instance.InSpace)
-                    {
-                        if (_combatTargets == null)
-                        {
-                            List<EntityCache> targets = new List<EntityCache>();
-                            targets.AddRange(Cache.Instance.Targets);
-                            targets.AddRange(Cache.Instance.Targeting);
-
-                            _combatTargets = targets.Where(e => e.CategoryId == (int)CategoryID.Entity && e.Distance < (double)Distances.OnGridWithMe
-                                                                && !e.IsIgnored
-                                                                && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                                                && (e.IsNpc || e.IsNpcByGroupID)
-                                                                && e.Distance < Cache.Instance.MaxRange
-                                                                && !e.IsContainer
-                                                                && !e.IsFactionWarfareNPC
-                                                                && !e.IsEntityIShouldLeaveAlone
-                                                                && !e.IsBadIdea
-                                                                && !e.IsCelestial
-                                                                && !e.IsAsteroid)
-                                                                .ToList();
-
-                            return _combatTargets;
-                        }
-
-                        return _combatTargets;
-                    }
-
-                    return Cache.Instance.Targets.ToList(); 
-                }
-
-                return _combatTargets;
-            }
-        }
-
-        //
-        // entities that have potentially not been locked yet
-        // entities that may not be in range yet
-        // entities that eventually we want to shoot
-        //
-        public IEnumerable<EntityCache> PotentialCombatTargets
-        {
-            get
-            {
-                if (_potentialCombatTargets == null)
-                {
-                    //List<EntityCache>
-                    if (Cache.Instance.InSpace)
-                    {
-                        _potentialCombatTargets = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                            && !e.IsIgnored
-                                                            && (!e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                                            && (e.IsNpcByGroupID || e.IsAttacking) //|| e.isPreferredPrimaryWeaponTarget || e.IsPrimaryWeaponKillPriority || e.IsDronePriorityTarget || e.isPreferredDroneTarget) //|| e.IsNpc)
-                            //&& !e.IsTarget
-                                                            && !e.IsContainer
-                                                            && !e.IsFactionWarfareNPC
-                                                            && !e.IsEntityIShouldLeaveAlone
-                                                            && !e.IsBadIdea // || e.IsBadIdea && e.IsAttacking)
-                                                            && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
-                                                            && !e.IsMiscJunk
-                                                            && (!e.IsLargeCollidable || e.IsPrimaryWeaponPriorityTarget)
-                                                            )
-                                                            .ToList();
-
-                        if (Settings.Instance.DebugPotentialCombatTargets)
-                        {
-                            if (!_potentialCombatTargets.Any())
-                            {
-                                Time.Instance.NextTargetAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.TargetDelay_milliseconds);
-                                List<EntityCache> __entities = EntitiesOnGrid.Where(e => e.CategoryId == (int)CategoryID.Entity
-                                                                && !e.IsBadIdea //|| e.IsBadIdea && e.IsAttacking)
-                                                                && (!e.IsPlayer || e.IsPlayer && e.IsAttacking)
-                                                                && !e.IsMiscJunk
-                                                                && !e.IsAsteroid
-                                                                && !e.IsIgnored
-                                                                )
-                                                                .ToList();
-
-                                int _entitiescount = 0;
-
-                                if (__entities.Any())
-                                {
-                                    _entitiescount = __entities.Count();
-                                    Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities below", Logging.Debug);
-                                    int i = 0;
-                                    foreach (EntityCache t in __entities)
-                                    {
-                                        i++;
-                                        Logging.Log("Cache.potentialCombatTargets", "[" + i + "] Name [" + t.Name + "] Distance [" + Math.Round(t.Distance / 1000, 2) + "] TypeID [" + t.TypeId + "] groupID [" + t.GroupId + "] IsNPC [" + t.IsNpc + "] IsNPCByGroupID [" + t.IsNpcByGroupID + "]", Logging.Debug);
-                                        continue;
-                                    }
-
-                                    Logging.Log("Cache.potentialCombatTargets", "DebugPotentialCombatTargets: list of __entities above", Logging.Debug);
-                                }
-
-                                if (Settings.Instance.DebugPotentialCombatTargets) Logging.Log("Cache.potentialCombatTargets", "[1]: no targets found !!! _entities [" + _entitiescount + "]", Logging.Debug);
-                            }
-                        }
-
-                        return _potentialCombatTargets;
-                    }
-
-                    return new List<EntityCache>();
-                }
-
-                return _potentialCombatTargets;
             }
         }
 
@@ -1939,24 +1517,24 @@ namespace Questor.Modules.Caching
                                     }
                                 }
                                 
-                                if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Session is Not Ready", Logging.Debug);
+                                if (Logging.DebugInSpace) Logging.Log("InSpace", "Session is Not Ready", Logging.Debug);
                                 return false;
                             }
                             
-                            if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "Cache.Instance.DirectEve.ActiveShip.Entity is null", Logging.Debug);
+                            if (Logging.DebugInSpace) Logging.Log("InSpace", "Cache.Instance.DirectEve.ActiveShip.Entity is null", Logging.Debug);
                             return false;
                         }
 
-                        if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "NOT InStation is False", Logging.Debug);
+                        if (Logging.DebugInSpace) Logging.Log("InSpace", "NOT InStation is False", Logging.Debug);
                         return false;
                     }
 
-                    if (Settings.Instance.DebugInSpace) Logging.Log("InSpace", "InSpace is False", Logging.Debug);
+                    if (Logging.DebugInSpace) Logging.Log("InSpace", "InSpace is False", Logging.Debug);
                     return false;
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.InSpace", "if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
+                    if (Logging.DebugExceptions) Logging.Log("Cache.InSpace", "if (DirectEve.Session.IsInSpace && !DirectEve.Session.IsInStation && DirectEve.Session.IsReady && Cache.Instance.ActiveShip.Entity != null) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
                     return false;
                 }
             }
@@ -1986,7 +1564,7 @@ namespace Questor.Modules.Caching
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugExceptions) Logging.Log("Cache.InStation", "if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
+                    if (Logging.DebugExceptions) Logging.Log("Cache.InStation", "if (DirectEve.Session.IsInStation && !DirectEve.Session.IsInSpace && DirectEve.Session.IsReady) <---must have failed exception was [" + ex.Message + "]", Logging.Teal);
                     return false;
                 }
             }
@@ -2011,25 +1589,25 @@ namespace Questor.Modules.Caching
                                 }
                                 else
                                 {
-                                    if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.Cache.Instance.ActiveShip.Entity.Mode  is [" + Cache.Instance.ActiveShip.Entity.Mode + "]", Logging.Teal);
+                                    if (Logging.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "We are not in warp.Cache.Instance.ActiveShip.Entity.Mode  is [" + Cache.Instance.ActiveShip.Entity.Mode + "]", Logging.Teal);
                                     return false;
                                 }
                             }
                             else
                             {
-                                if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
+                                if (Logging.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip.Entity is Null? (session change?)", Logging.Teal);
                                 return false;
                             }
                         }
                         else
                         {
-                            if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip is Null? (session change?)", Logging.Teal);
+                            if (Logging.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp if Cache.Instance.ActiveShip is Null? (session change?)", Logging.Teal);
                             return false;
                         }
                     }
                     else
                     {
-                        if (Settings.Instance.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp while docked or between session changes?", Logging.Teal);
+                        if (Logging.DebugInWarp && !Cache.Instance.Paused) Logging.Log("Cache.InWarp", "Why are we checking for InWarp while docked or between session changes?", Logging.Teal);
                         return false;
                     }
                 }
@@ -2107,11 +1685,6 @@ namespace Questor.Modules.Caching
             }
 
             return false;
-        }
-
-        public IEnumerable<EntityCache> ActiveDrones
-        {
-            get { return _activeDrones ?? (_activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList()); }
         }
 
         public List<EntityCache> Stations
@@ -2260,13 +1833,13 @@ namespace Questor.Modules.Caching
                             //    continue;
                             //}
 
-                            return _stargates ?? new List<EntityCache>();
+                            return _stargates;
                         }
 
                         return null;
                     }
 
-                    return _stargates ?? new List<EntityCache>(); ;
+                    return _stargates;
                 }
                 catch (Exception exception)
                 {
@@ -2363,189 +1936,6 @@ namespace Questor.Modules.Caching
             get { return _star ?? (_star = Entities.FirstOrDefault(e => e.CategoryId == (int)CategoryID.Celestial && e.GroupId == (int)Group.Star)); }
         }
         
-        private List<PriorityTarget> _primaryWeaponPriorityTargetsPerFrameCaching;
-        
-        private List<PriorityTarget> _primaryWeaponPriorityTargets;
-        
-        public List<PriorityTarget> PrimaryWeaponPriorityTargets
-        {
-            get
-            {
-                try
-                {
-                    if (_primaryWeaponPriorityTargetsPerFrameCaching == null)
-                    {
-                        //
-                        // remove targets that no longer exist
-                        //
-                        if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
-                        {
-                            foreach (PriorityTarget _primaryWeaponPriorityTarget in _primaryWeaponPriorityTargets)
-                            {
-                                if (Cache.Instance.EntitiesOnGrid.All(i => i.Id != _primaryWeaponPriorityTarget.EntityID))
-                                {
-                                    Logging.Log("PrimaryWeaponPriorityTargets", "Remove Target that is no longer in the Entities list [" + _primaryWeaponPriorityTarget.Name + "]ID[" + Cache.Instance.MaskedID(_primaryWeaponPriorityTarget.EntityID) + "] PriorityLevel [" + _primaryWeaponPriorityTarget.PrimaryWeaponPriority + "]", Logging.Debug);
-                                    _primaryWeaponPriorityTargets.Remove(_primaryWeaponPriorityTarget);
-                                    break;
-                                }
-                            }
-
-                            _primaryWeaponPriorityTargetsPerFrameCaching = _primaryWeaponPriorityTargets;
-                            return _primaryWeaponPriorityTargets;
-                        }
-
-                        //
-                        // initialize a fresh list - to be filled in during panic (updated every tick)
-                        //
-                        _primaryWeaponPriorityTargets = new List<PriorityTarget>();
-                        _primaryWeaponPriorityTargetsPerFrameCaching = _primaryWeaponPriorityTargets;
-                        return _primaryWeaponPriorityTargets;
-                    }
-
-                    return _primaryWeaponPriorityTargetsPerFrameCaching;
-                }
-                catch (NullReferenceException)
-                {
-                    return null;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.PrimaryWeaponPriorityEntities", "Exception [" + exception + "]", Logging.Debug);
-                    return null;
-                }
-            }
-            set
-            {
-                _primaryWeaponPriorityTargets = value;
-            }
-        }
-
-        private IEnumerable<EntityCache> _primaryWeaponPriorityEntities;
-
-        public IEnumerable<EntityCache> PrimaryWeaponPriorityEntities
-        {
-            get
-            {
-                try
-                {
-                    //
-                    // every frame re-populate the PrimaryWeaponPriorityEntities from the list of IDs we have tucked away in PrimaryWeaponPriorityEntities
-                    // this occurs because in Invalidatecache() we are, necessarily,  clearing this every frame!
-                    //
-                    if (_primaryWeaponPriorityEntities == null)
-                    {
-                        if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
-                        {
-                            _primaryWeaponPriorityEntities = PrimaryWeaponPriorityTargets.OrderByDescending(pt => pt.PrimaryWeaponPriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity).ToList();
-                            return _primaryWeaponPriorityEntities;
-                        }
-
-                        if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("PrimaryWeaponPriorityEntities", "if (_primaryWeaponPriorityTargets.Any()) none available yet", Logging.Debug);
-                        _primaryWeaponPriorityEntities = new List<EntityCache>();
-                        return _primaryWeaponPriorityEntities;
-                    }
-
-                    //
-                    // if we have already populated the list this frame return the list we already generated
-                    //
-                    return _primaryWeaponPriorityEntities;
-                }
-                catch (NullReferenceException)
-                {
-                    return null;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.PrimaryWeaponPriorityEntities", "Exception [" + exception + "]", Logging.Debug);
-                    return null;
-                }
-            }
-        }
-
-        private List<PriorityTarget> _dronePriorityTargets;
-
-        public List<PriorityTarget> DronePriorityTargets
-        {
-            get
-            {
-                try
-                {
-                    //
-                    // remove targets that no longer exist
-                    //
-                    if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
-                    {
-                        foreach (PriorityTarget dronePriorityTarget in _dronePriorityTargets)
-                        {
-                            if (Cache.Instance.EntitiesOnGrid.All(i => i.Id != dronePriorityTarget.EntityID))
-                            {
-                                _dronePriorityTargets.Remove(dronePriorityTarget);
-                                break;
-                            }
-                        }
-
-                        return _dronePriorityTargets;
-                    }
-
-                    //
-                    // initialize a fresh list - to be filled in during panic (updated every tick)
-                    //
-                    _dronePriorityTargets = new List<PriorityTarget>();
-                    return _dronePriorityTargets;
-                }
-                catch (NullReferenceException)
-                {
-                    return null;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.DronePriorityEntities", "Exception [" + exception + "]", Logging.Debug);
-                    return null;
-                }
-            }
-        }
-
-        private IEnumerable<EntityCache> _dronePriorityEntities;
-
-        public IEnumerable<EntityCache> DronePriorityEntities
-        {
-            get
-            {
-                try
-                {
-                    //
-                    // every frame re-populate the DronePriorityEntities from the list of IDs we have tucked away in DronePriorityTargets
-                    // this occurs because in Invalidatecache() we are, necessarily,  clearing this every frame!
-                    //
-                    if (_dronePriorityEntities == null)
-                    {
-                        if (DronePriorityTargets != null && DronePriorityTargets.Any())
-                        {
-                            _dronePriorityEntities = DronePriorityTargets.OrderByDescending(pt => pt.DronePriority).ThenBy(pt => pt.Entity.Distance).Select(pt => pt.Entity);
-                            return _dronePriorityEntities;
-                        }
-
-                        _dronePriorityEntities = new List<EntityCache>();
-                        return _dronePriorityEntities;
-                    }
-
-                    //
-                    // if we have already populated the list this frame return the list we already generated
-                    //
-                    return _dronePriorityEntities;
-                }
-                catch (NullReferenceException)
-                {
-                    return null;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.DronePriorityEntities", "Exception [" + exception + "]", Logging.Debug);
-                    return null;
-                }
-            }
-        }
-
         public EntityCache Approaching
         {
             get
@@ -2602,103 +1992,11 @@ namespace Questor.Modules.Caching
             }
         }
 
-        /// <summary>
-        ///   Returns the mission for a specific agent
-        /// </summary>
-        /// <param name="agentId"></param>
-        /// <param name="ForceUpdate"> </param>
-        /// <returns>null if no mission could be found</returns>
-        public DirectAgentMission GetAgentMission(long agentId, bool ForceUpdate)
-        {
-            if (DateTime.UtcNow < Time.Instance.NextGetAgentMissionAction)
-            {
-                if (FirstAgentMission != null)
-                {
-                    return FirstAgentMission;
-                }
-
-                return null;
-            }
-
-            try
-            {
-                if (ForceUpdate || myAgentMissionList == null || !myAgentMissionList.Any())
-                {
-                    myAgentMissionList = DirectEve.AgentMissions.Where(m => m.AgentId == agentId).ToList();
-                    Time.Instance.NextGetAgentMissionAction = DateTime.UtcNow.AddSeconds(5);
-                }
-
-                if (myAgentMissionList.Any())
-                {
-                    FirstAgentMission = myAgentMissionList.FirstOrDefault();
-                    return FirstAgentMission;
-                }
-
-                return null;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.Instance.GetAgentMission", "DirectEve.AgentMissions failed: [" + exception + "]", Logging.Teal);
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///   Returns the mission objectives from
-        /// </summary>
-        public List<string> MissionItems { get; private set; }
-
-        /// <summary>
-        ///   Returns the item that needs to be brought on the mission
-        /// </summary>
-        /// <returns></returns>
-        public string BringMissionItem { get; private set; }
-
-        public int BringMissionItemQuantity { get; private set; }
-
-        public string BringOptionalMissionItem { get; private set; }
-
-        public int BringOptionalMissionItemQuantity { get; set; }
-
-        /// <summary>
-        ///   Range for warp to mission bookmark
-        /// </summary>
-        public double MissionWarpAtDistanceRange { get; set; } //in km
-
-        public string FittingToLoad { get; set; } // stores name of the final fitting we want to use
-
-        public string MissionShip { get; set; } //stores name of mission specific ship
-
-        public string DefaultFitting { get; set; } //stores name of the default fitting
-
-        public string CurrentFit { get; set; }
-
-        public string FactionFittingForThisMissionsFaction { get; set; }
-
-        public string FactionName { get; set; }
-
-        public bool ArmLoadedCache { get; set; } // flags whether arm has already loaded the mission
-
-        public bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
-
-        public bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
-
-        public List<Ammo> MissionAmmo;
-
-        public int MissionWeaponGroupId { get; set; }
-
-        public bool? MissionUseDrones { get; set; }
-
-        public int DroneTypeID { get; set; }
-        public int FactionDroneTypeID { get; set; }
-        
-        public bool? MissionKillSentries { get; set; }
-
         public bool CloseQuestorCMDLogoff; //false;
 
         public bool CloseQuestorCMDExitGame = true;
 
-        public bool CloseQuestorEndProcess = false;
+        public bool CloseQuestorEndProcess;
 
         public bool GotoBaseNow; //false;
 
@@ -2706,29 +2004,11 @@ namespace Questor.Modules.Caching
 
         public string SessionState { get; set; }
 
-        public double SessionIskGenerated { get; set; }
-
-        public double SessionLootGenerated { get; set; }
-
-        public double SessionLPGenerated { get; set; }
-
-        public int SessionRunningTime { get; set; }
-
-        public double SessionIskPerHrGenerated { get; set; }
-
-        public double SessionLootPerHrGenerated { get; set; }
-
-        public double SessionLPPerHrGenerated { get; set; }
-
-        public double SessionTotalPerHrGenerated { get; set; }
-
         public bool QuestorJustStarted = true;
-
-        public bool InvalidateCacheQuestorJustStartedFlag = false;
 
         public DateTime EnteredCloseQuestor_DateTime;
 
-        public bool DropMode { get; set; }
+        //public bool DropMode;
 
         public DirectWindow GetWindowByCaption(string caption)
         {
@@ -2773,6 +2053,7 @@ namespace Questor.Modules.Caching
         ///   Return entities by name
         /// </summary>
         /// <param name = "nameToSearchFor"></param>
+        /// <param name = "EntitiesToLookThrough"></param>
         /// <returns></returns>
         public IEnumerable<EntityCache> EntitiesByName(string nameToSearchFor, IEnumerable<EntityCache> EntitiesToLookThrough)
         {
@@ -2901,40 +2182,6 @@ namespace Questor.Modules.Caching
         }
 
         /// <summary>
-        ///   Returns the first mission bookmark that starts with a certain string
-        /// </summary>
-        /// <returns></returns>
-        public DirectAgentMissionBookmark GetMissionBookmark(long agentId, string startsWith)
-        {
-            try
-            {
-                // Get the missions
-                DirectAgentMission missionForBookmarkInfo = GetAgentMission(agentId, false);
-                if (missionForBookmarkInfo == null)
-                {
-                    Logging.Log("Cache.DirectAgentMissionBookmark", "missionForBookmarkInfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]", Logging.White);
-                    return null;
-                }
-
-                // Did we accept this mission?
-                if (missionForBookmarkInfo.State != (int)MissionState.Accepted || missionForBookmarkInfo.AgentId != agentId)
-                {
-                    //Logging.Log("missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString(CultureInfo.InvariantCulture) + "]");
-                    //Logging.Log("missionForBookmarkInfo.AgentId: [" + missionForBookmarkInfo.AgentId.ToString(CultureInfo.InvariantCulture) + "]");
-                    //Logging.Log("agentId: [" + agentId.ToString(CultureInfo.InvariantCulture) + "]");
-                    return null;
-                }
-
-                return missionForBookmarkInfo.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.DirectAgentMissionBookmark", "Exception [" + exception + "]", Logging.Debug);
-                return null;
-            }
-        }
-
-        /// <summary>
         ///   Return a bookmark by id
         /// </summary>
         /// <param name = "bookmarkId"></param>
@@ -3011,21 +2258,18 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                Drones.InvalidateCache();
+                Combat.InvalidateCache();
+                
                 //
                 // this list of variables is cleared every pulse.
                 //
-                _activeDrones = null;
                 _agent = null;
-                _aggressed = null;
                 _allBookmarks = null;
                 _ammoHangar = null;
                 _approaching = null;
-                _activeDrones = null;
-                _bestDroneTargets = null;
-                _bestPrimaryWeaponTargets = null;
                 _bigObjects = null;
                 _bigObjectsAndGates = null;
-                _combatTargets = null;
                 _currentShipsCargo = null;
                 _containerInSpace = null;
                 _containers = null;
@@ -3042,18 +2286,14 @@ namespace Questor.Modules.Caching
                 _lootHangar = null;
                 _lpStore = null;
                 _maxLockedTargets = null;
-                _maxDroneRange = null;
-                _maxrange = null;
-                _maxTargetRange = null;
                 _modules = null;
                 _modulesAsItemCache = null;
                 _myAmmoInSpace = null;
                 _myAmmoInSpaceAverageSpeed = null;
+                _myAmmoInSpaceAverageVelocity = null;
                 _myCurrentAmmoInWeapon = null;
                 _myShipEntity = null;
                 _objects = null;
-                _potentialCombatTargets = null;
-                _primaryWeaponPriorityTargetsPerFrameCaching = null;
                 _safeSpotBookmarks = null;
                 _star = null;
                 _stations = null;
@@ -3061,31 +2301,11 @@ namespace Questor.Modules.Caching
                 _stargates = null;
                 _targets = null;
                 _targeting = null;
-                _targetedBy = null;
                 _TotalTargetsandTargeting = null;
                 _unlootedContainers = null;
                 _unlootedWrecksAndSecureCans = null;
                 _weapons = null;
                 _windows = null;
-
-                _primaryWeaponPriorityEntities = null;
-                _dronePriorityEntities = null;
-                _preferredPrimaryWeaponTarget = null;
-                    
-                //if (QuestorJustStarted && InvalidateCacheQuestorJustStartedFlag)
-                //{
-                //    InvalidateCacheQuestorJustStartedFlag = false;
-                //     if (Settings.Instance.DebugPreferredPrimaryWeaponTarget) Logging.Log("Cache.InvalidateCache", "QuestorJustStarted: initializing", Logging.Debug);
-                    if (_primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any())
-                    {
-                        _primaryWeaponPriorityTargets.ForEach(pt => pt.ClearCache());
-                    }
-                    
-                    if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
-                    {
-                        _dronePriorityTargets.ForEach(pt => pt.ClearCache());
-                    }
-                //}
             }
             catch (Exception exception)
             {
@@ -3125,729 +2345,7 @@ namespace Questor.Modules.Caching
             }
         }
 
-        /// <summary>
-        ///   Loads mission objectives from XML file
-        /// </summary>
-        /// <param name = "agentId"> </param>
-        /// <param name = "pocketId"> </param>
-        /// <param name = "missionMode"> </param>
-        /// <returns></returns>
-        public IEnumerable<Actions.Action> LoadMissionActions(long agentId, int pocketId, bool missionMode)
-        {
-            try
-            {
-
-                DirectAgentMission missiondetails = GetAgentMission(agentId, false);
-                if (missiondetails == null && missionMode)
-                {
-                    return new Actions.Action[0];
-                }
-
-                if (missiondetails != null)
-                {
-                    Cache.Instance.SetmissionXmlPath(FilterPath(missiondetails.Name));
-                    if (!File.Exists(Cache.Instance.MissionXmlPath))
-                    {
-                        //No mission file but we need to set some cache settings
-                        OrbitDistance = Settings.Instance.OrbitDistance;
-                        OptimalRange = Settings.Instance.OptimalRange;
-                        AfterMissionSalvaging = Settings.Instance.AfterMissionSalvaging;
-                        return new Actions.Action[0];
-                    }
-
-                    //
-                    // this loads the settings from each pocket... but NOT any settings global to the mission
-                    //
-                    try
-                    {
-                        XDocument xdoc = XDocument.Load(Cache.Instance.MissionXmlPath);
-                        if (xdoc.Root != null)
-                        {
-                            XElement xElement = xdoc.Root.Element("pockets");
-                            if (xElement != null)
-                            {
-                                IEnumerable<XElement> pockets = xElement.Elements("pocket");
-                                foreach (XElement pocket in pockets)
-                                {
-                                    if ((int)pocket.Attribute("id") != pocketId)
-                                    {
-                                        continue;
-                                    }
-
-                                    if (pocket.Element("orbitentitynamed") != null)
-                                    {
-                                        OrbitEntityNamed = (string)pocket.Element("orbitentitynamed");
-                                    }
-
-                                    if (pocket.Element("damagetype") != null)
-                                    {
-                                        MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
-                                    }
-
-                                    if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present
-                                    {
-                                        OrbitDistance = (int)pocket.Element("orbitdistance");
-                                        Logging.Log("Cache", "Using Mission Orbit distance [" + OrbitDistance + "]", Logging.White);
-                                    }
-                                    else //Otherwise, use value defined in charname.xml file
-                                    {
-                                        OrbitDistance = Settings.Instance.OrbitDistance;
-                                        Logging.Log("Cache", "Using Settings Orbit distance [" + OrbitDistance + "]", Logging.White);
-                                    }
-
-                                    if (pocket.Element("optimalrange") != null) 	//Load OrbitDistance from mission.xml, if present
-                                    {
-                                        OptimalRange = (int)pocket.Element("optimalrange");
-                                        Logging.Log("Cache", "Using Mission OptimalRange [" + OptimalRange + "]", Logging.White);
-                                    }
-                                    else //Otherwise, use value defined in charname.xml file
-                                    {
-                                        OptimalRange = Settings.Instance.OptimalRange;
-                                        Logging.Log("Cache", "Using Settings OptimalRange [" + OptimalRange + "]", Logging.White);
-                                    }
-
-                                    if (pocket.Element("afterMissionSalvaging") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
-                                    {
-                                        AfterMissionSalvaging = (bool)pocket.Element("afterMissionSalvaging");
-                                    }
-
-                                    if (pocket.Element("dronesKillHighValueTargets") != null) 	//Load afterMissionSalvaging setting from mission.xml, if present
-                                    {
-                                        DronesKillHighValueTargets = (bool)pocket.Element("dronesKillHighValueTargets");
-                                    }
-                                    else //Otherwise, use value defined in charname.xml file
-                                    {
-                                        DronesKillHighValueTargets = Settings.Instance.DronesKillHighValueTargets;
-
-                                        //Logging.Log(string.Format("Cache: Using Character Setting DroneKillHighValueTargets  {0}", DronesKillHighValueTargets));
-                                    }
-
-                                    List<Actions.Action> actions = new List<Actions.Action>();
-                                    XElement elements = pocket.Element("actions");
-                                    if (elements != null)
-                                    {
-                                        foreach (XElement element in elements.Elements("action"))
-                                        {
-                                            Actions.Action action = new Actions.Action
-                                            {
-                                                State = (ActionState)Enum.Parse(typeof(ActionState), (string)element.Attribute("name"), true)
-                                            };
-                                            XAttribute xAttribute = element.Attribute("name");
-                                            if (xAttribute != null && xAttribute.Value == "ClearPocket")
-                                            {
-                                                action.AddParameter("", "");
-                                            }
-                                            else
-                                            {
-                                                foreach (XElement parameter in element.Elements("parameter"))
-                                                {
-                                                    action.AddParameter((string)parameter.Attribute("name"), (string)parameter.Attribute("value"));
-                                                }
-                                            }
-                                            actions.Add(action);
-                                        }
-                                    }
-
-                                    return actions;
-                                }
-
-                                //actions.Add(action);
-                            }
-                            else
-                            {
-                                return new Actions.Action[0];
-                            }
-                        }
-                        else
-                        {
-                            { return new Actions.Action[0]; }
-                        }
-
-                        // if we reach this code there is no mission XML file, so we set some things -- Assail
-
-                        OptimalRange = Settings.Instance.OptimalRange;
-                        OrbitDistance = Settings.Instance.OrbitDistance;
-                        Logging.Log("Cache", "Using Settings Orbit distance [" + Settings.Instance.OrbitDistance + "]", Logging.White);
-
-                        return new Actions.Action[0];
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache", "Error loading mission XML file [" + ex.Message + "]", Logging.Orange);
-                        return new Actions.Action[0];
-                    }
-                }
-                return new Actions.Action[0];
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.LoadMissionActions", "Exception [" + exception + "]", Logging.Debug);
-                return null;
-            }
-        }
-
-        public void SetmissionXmlPath(string missionName)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(Cache.Instance.FactionName))
-                {
-                    Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + "-" + Cache.Instance.FactionName + ".xml");
-                    if (!File.Exists(Cache.Instance.MissionXmlPath))
-                    {
-                        //
-                        // This will always fail for courier missions, can we detect those and suppress these log messages?
-                        //
-                        Logging.Log("Cache.SetmissionXmlPath", "[" + Cache.Instance.MissionXmlPath + "] not found.", Logging.White);
-                        Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + ".xml");
-                        if (!File.Exists(Cache.Instance.MissionXmlPath))
-                        {
-                            Logging.Log("Cache.SetmissionXmlPath", "[" + Cache.Instance.MissionXmlPath + "] not found", Logging.White);
-                        }
-
-                        if (File.Exists(Cache.Instance.MissionXmlPath))
-                        {
-                            Logging.Log("Cache.SetmissionXmlPath", "[" + Cache.Instance.MissionXmlPath + "] found!", Logging.Green);
-                        }
-                    }
-                }
-                else
-                {
-                    Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, FilterPath(missionName) + ".xml");
-                }
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.SetmissionXmlPath", "Exception [" + exception + "]", Logging.Debug);
-            }
-        }
-
-        /// <summary>
-        ///   Refresh the mission items
-        /// </summary>
-        public void RefreshMissionItems(long agentId)
-        {
-            // Clear out old items
-            MissionItems.Clear();
-            BringMissionItem = string.Empty;
-            BringOptionalMissionItem = string.Empty;
-
-            if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
-            {
-                Settings.Instance.UseFittingManager = false;
-
-                //Logging.Log("Cache.RefreshMissionItems", "We are not running missions so we have no mission items to refresh", Logging.Teal);
-                return;
-            }
-
-            DirectAgentMission missionDetailsForMissionItems = GetAgentMission(agentId, false);
-            if (missionDetailsForMissionItems == null)
-            {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(Cache.Instance.FactionName))
-            {
-                Cache.Instance.FactionName = "Default";
-            }
-
-            if (Settings.Instance.UseFittingManager)
-            {
-                //Set fitting to default
-                Cache.Instance.DefaultFitting = Settings.Instance.DefaultFitting.FittingName;
-                Cache.Instance.FittingToLoad = DefaultFitting;
-                Cache.Instance.MissionShip = "";
-                Cache.Instance.ChangeMissionShipFittings = false;
-
-                //
-                // default to using the faction fitting if defined
-                //
-                if (!string.IsNullOrEmpty(Cache.Instance.FactionFittingForThisMissionsFaction))
-                {
-                    Cache.Instance.FittingToLoad = Cache.Instance.FactionFittingForThisMissionsFaction;
-                    Cache.Instance.DroneTypeID = Cache.Instance.FactionDroneTypeID;
-                }
-                
-                if (Settings.Instance.ListOfMissionFittings.Any(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())) //priority goes to mission-specific fittings
-                {
-                    MissionFitting FittingNameTouseForThisMission;
-
-                    // if we have got multiple copies of the same mission, find the one with the matching faction
-                    if (Settings.Instance.ListOfMissionFittings.Any(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())))
-                    {
-                        FittingNameTouseForThisMission = Settings.Instance.ListOfMissionFittings.FirstOrDefault(m => m.Faction.ToLower() == FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower()));
-                    }
-                    else //otherwise just use the first copy of that mission
-                    {
-                        FittingNameTouseForThisMission = Settings.Instance.ListOfMissionFittings.FirstOrDefault(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower());
-                    }
-
-                    if (FittingNameTouseForThisMission != null)
-                    {
-                        //
-                        //
-                        //
-                        // this whole thing should be reworked to use faction fittings, drones, etc and them apply mission specific stuff if avail to overwrite it.
-                        //
-                        //
-                        //
-                        Cache.Instance.MissionShip = FittingNameTouseForThisMission.Ship;
-                        //
-                        // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
-                        //
-                        if (FittingNameTouseForThisMission.DroneTypeID != null)
-                        {
-                            Cache.Instance.DroneTypeID = (int) FittingNameTouseForThisMission.DroneTypeID;
-                        }
-                        
-                        if (!(FittingNameTouseForThisMission.Fitting == "" && Cache.Instance.MissionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
-                        {
-                            ChangeMissionShipFittings = true;
-                            Cache.Instance.FittingToLoad = FittingNameTouseForThisMission.Fitting;
-                        }
-                        else if (!string.IsNullOrEmpty(FactionFittingForThisMissionsFaction))
-                        {
-                            Cache.Instance.FittingToLoad = FactionFittingForThisMissionsFaction;
-                        }
-
-                        Logging.Log("RefreshMissionItems", "Mission: " + Cache.Instance.MissionShip + " - Faction: " + Cache.Instance.FactionName + " - Fitting: " + Cache.Instance.FittingToLoad + "]", Logging.White);
-                        Logging.Log("RefreshMissionItems", "Ship: " + Cache.Instance.MissionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings + "Using DroneTypeID [" + Cache.Instance.DroneTypeID + "]", Logging.White);
-                    }
-                }
-                else if (!string.IsNullOrEmpty(FactionFittingForThisMissionsFaction)) // if no mission fittings defined, try to match by faction
-                {
-                    Cache.Instance.FittingToLoad = Cache.Instance.FactionFittingForThisMissionsFaction;
-                }
-
-                if (Cache.Instance.FittingToLoad == "") // otherwise use the default
-                {
-                    Cache.Instance.FittingToLoad = DefaultFitting;
-                }
-            }
-
-            string missionName = FilterPath(missionDetailsForMissionItems.Name);
-            Cache.Instance.MissionXmlPath = System.IO.Path.Combine(Settings.Instance.MissionsPath, missionName + ".xml");
-            if (!File.Exists(Cache.Instance.MissionXmlPath))
-            {
-                return;
-            }
-
-            try
-            {
-                XDocument xdoc = XDocument.Load(Cache.Instance.MissionXmlPath);
-                IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
-                MissionItems.AddRange(items);
-
-                if (xdoc.Root != null)
-                {
-                    BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
-                    BringMissionItem = BringMissionItem.ToLower();
-                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "bring XML [" + xdoc.Root.Element("bring") + "] BringMissionItem [" + BringMissionItem + "]", Logging.Debug);
-                    BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
-                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "bringquantity XML [" + xdoc.Root.Element("bringquantity") + "] BringMissionItemQuantity [" + BringMissionItemQuantity + "]", Logging.Debug);
-                    
-                    BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
-                    BringOptionalMissionItem = BringOptionalMissionItem.ToLower();
-                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "trytobring XML [" + xdoc.Root.Element("trytobring") + "] BringOptionalMissionItem [" + BringOptionalMissionItem + "]", Logging.Debug);
-                    BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
-                    if (Settings.Instance.DebugArm) Logging.Log("RefreshMissionItems", "trytobringquantity XML [" + xdoc.Root.Element("trytobringquantity") + "] BringOptionalMissionItemQuantity [" + BringOptionalMissionItemQuantity + "]", Logging.Debug); 
-                    
-                }
-
-                //load fitting setting from the mission file
-                //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RefreshMissionItems", "Error loading mission XML file [" + ex.Message + "]", Logging.Orange);
-            }
-        }
-
-        /// <summary>
-        ///   Remove targets from priority list
-        /// </summary>
-        /// <param name = "targets"></param>
-        public bool RemovePrimaryWeaponPriorityTargets(List<EntityCache> targets)
-        {
-            try
-            {
-                targets = targets.ToList();
-
-                if (targets.Any() && _primaryWeaponPriorityTargets != null && _primaryWeaponPriorityTargets.Any() && _primaryWeaponPriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
-                {
-                    _primaryWeaponPriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
-                    return true;
-                }
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemovePrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);  
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        ///   Remove targets from priority list
-        /// </summary>
-        /// <param name = "targets"></param>
-        public bool RemoveDronePriorityTargets(List<EntityCache> targets)
-        {
-            try
-            {
-                targets = targets.ToList();
-
-                if (targets.Any() && _dronePriorityTargets != null && _dronePriorityTargets.Any() && _dronePriorityTargets.Any(pt => targets.Any(t => t.Id == pt.EntityID)))
-                {
-                    _dronePriorityTargets.RemoveAll(pt => targets.Any(t => t.Id == pt.EntityID));
-                    return true;
-                }
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemoveDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
-            }
-
-            return false;
-        }
-
-        public void AddPrimaryWeaponPriorityTarget(EntityCache ewarEntity, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
-        {
-            try
-            {
-                if ((ewarEntity.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
-                {
-                    if (Settings.Instance.DebugAddPrimaryWeaponPriorityTarget) Logging.Log("AddPrimaryWeaponPriorityTargets", "if ((target.IsIgnored) || PrimaryWeaponPriorityTargets.Any(p => p.Id == target.Id)) continue", Logging.Debug);
-                    return;
-                }
-
-                if (AddEwarTypeToPriorityTargetList)
-                {
-                    //
-                    // Primary Weapons
-                    //
-                    if (Cache.Instance.DoWeCurrentlyHaveTurretsMounted() && (ewarEntity.IsNPCFrigate || ewarEntity.IsFrigate)) //we use turrets, and this PrimaryWeaponPriorityTarget is a frigate
-                    {
-                        if (!ewarEntity.IsTooCloseTooFastTooSmallToHit)
-                        {
-                            if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
-                            {
-                                Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "k] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                                Cache.Instance._primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
-                                if (Settings.Instance.DebugKillAction)
-                                {
-                                    Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                                    _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
-                                }
-                            }
-                        }
-
-                        return;
-                    }
-
-                    if (PrimaryWeaponPriorityTargets.All(i => i.EntityID != ewarEntity.Id))
-                    {
-                        Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + "m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a PrimaryWeaponPriorityTarget [" + priority.ToString() + "]", Logging.White);
-                        Cache.Instance._primaryWeaponPriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, PrimaryWeaponPriority = priority });
-                        if (Settings.Instance.DebugKillAction)
-                        {
-                            Logging.Log("Statistics", "Entering StatisticsState.ListPrimaryWeaponPriorityTargets", Logging.Debug);
-                            _States.CurrentStatisticsState = StatisticsState.ListPrimaryWeaponPriorityTargets;
-                        }
-                    }
-
-                    return;
-                }
-
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddPrimaryWeaponPriorityTarget", "Exception [" + ex + "]", Logging.Debug);
-            }
-
-            return;
-        }
-
-        public void AddPrimaryWeaponPriorityTargets(IEnumerable<EntityCache> ewarEntities, PrimaryWeaponPriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
-        {
-            try
-            {
-                ewarEntities = ewarEntities.ToList();
-                if (ewarEntities.Any())
-                {
-                    foreach (EntityCache ewarEntity in ewarEntities)
-                    {
-                        AddPrimaryWeaponPriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
-                    }
-                }
-
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddPrimaryWeaponPriorityTargets", "Exception [" + ex + "]", Logging.Debug);
-            }
-
-            return;
-        }
-
-        public void AddPrimaryWeaponPriorityTargetsByName(string stringEntitiesToAdd)
-        {
-            try
-            {
-                if (Cache.Instance.EntitiesOnGrid.Any(i => i.Name == stringEntitiesToAdd))
-                {
-                    IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesOnGrid.Where(i => i.Name == stringEntitiesToAdd).ToList();
-                    if (entitiesToAdd.Any())
-                    {
-
-                        foreach (EntityCache entityToAdd in entitiesToAdd)
-                        {
-                            AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
-                            continue;
-                        }
-
-                        return;
-                    }
-
-                    Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found.", Logging.Debug);
-                    return;
-                }
-
-                int EntitiesOnGridCount = 0;
-                if (Cache.Instance.EntitiesOnGrid.Any())
-                {
-                    EntitiesOnGridCount = Cache.Instance.EntitiesOnGrid.Count();
-                }
-                
-                int EntitiesCount = 0;
-                if (Cache.Instance.EntitiesOnGrid.Any())
-                {
-                    EntitiesCount = Cache.Instance.EntitiesOnGrid.Count();
-                }
-
-                Logging.Log("Adding PWPT", "[" + stringEntitiesToAdd + "] was not found. [" + EntitiesOnGridCount + "] entities on grid [" + EntitiesCount + "] entities", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddPrimaryWeaponPriorityTargetsByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-
-            return;
-        }
-
-        public void RemovePrimaryWeaponPriorityTargetsByName(string stringEntitiesToRemove)
-        {
-            try
-            {
-                IEnumerable<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove, Cache.Instance.EntitiesOnGrid).ToList();
-                if (entitiesToRemove.Any())
-                {
-                    Logging.Log("RemovingPWPT", "removing [" + stringEntitiesToRemove + "] from the PWPT List", Logging.Debug);
-                    RemovePrimaryWeaponPriorityTargets(entitiesToRemove.ToList());
-                    return;
-                }
-
-                Logging.Log("RemovingPWPT", "[" + stringEntitiesToRemove + "] was not found on grid", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemovePrimaryWeaponPriorityTargetsByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void AddDronePriorityTargetsByName(string stringEntitiesToAdd)
-        {
-            try
-            {
-                IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByPartialName(stringEntitiesToAdd).ToList();
-                if (entitiesToAdd.Any())
-                {
-                    foreach (EntityCache entityToAdd in entitiesToAdd)
-                    {
-                        Logging.Log("RemovingPWPT", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the PWPT List", Logging.Debug);
-                        AddDronePriorityTarget(entityToAdd, DronePriority.PriorityKillTarget, "AddDPTByName");
-                        continue;
-                    }
-
-                    return;
-                }
-
-                Logging.Log("Adding DPT", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddDronePriorityTargetsByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void RemovedDronePriorityTargetsByName(string stringEntitiesToRemove)
-        {
-            try
-            {
-                List<EntityCache> entitiesToRemove = Cache.Instance.EntitiesByName(stringEntitiesToRemove, Cache.Instance.EntitiesOnGrid).ToList();
-                if (entitiesToRemove.Any())
-                {
-                    Logging.Log("RemovingDPT", "removing [" + stringEntitiesToRemove + "] from the DPT List", Logging.Debug);
-                    RemoveDronePriorityTargets(entitiesToRemove);
-                    return;
-                }
-
-                Logging.Log("RemovingDPT", "[" + stringEntitiesToRemove + "] was not found on grid", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("RemovedDronePriorityTargetsByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void AddDronePriorityTargets(IEnumerable<EntityCache> ewarEntities, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
-        {
-            try
-            {
-                ewarEntities = ewarEntities.ToList();
-                if (ewarEntities.Any())
-                {
-                    foreach (EntityCache ewarEntity in ewarEntities)
-                    {
-                        AddDronePriorityTarget(ewarEntity, priority, module, AddEwarTypeToPriorityTargetList);
-                        continue;
-                    }
-
-                    return;
-                }
-
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddDronePriorityTargets", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void AddDronePriorityTarget(EntityCache ewarEntity, DronePriority priority, string module, bool AddEwarTypeToPriorityTargetList = true)
-        {
-            try
-            {
-                if (AddEwarTypeToPriorityTargetList && Cache.Instance.UseDrones)
-                {
-                    if ((ewarEntity.IsIgnored) || DronePriorityTargets.Any(p => p.EntityID == ewarEntity.Id))
-                    {
-                        if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log("AddDronePriorityTargets", "if ((target.IsIgnored) || DronePriorityTargets.Any(p => p.Id == target.Id))", Logging.Debug);
-                        return;
-                    }
-
-                    if (DronePriorityTargets.All(i => i.EntityID != ewarEntity.Id))
-                    {
-                        int DronePriorityTargetCount = 0;
-                        if (Cache.Instance.DronePriorityTargets.Any())
-                        {
-                            DronePriorityTargetCount = Cache.Instance.DronePriorityTargets.Count();
-                        }
-                        Logging.Log(module, "Adding [" + ewarEntity.Name + "] Speed [" + Math.Round(ewarEntity.Velocity, 2) + " m/s] Distance [" + Math.Round(ewarEntity.Distance / 1000, 2) + "] [ID: " + Cache.Instance.MaskedID(ewarEntity.Id) + "] as a drone priority target [" + priority.ToString() + "] we have [" + DronePriorityTargetCount + "] other DronePriorityTargets", Logging.Teal);
-                        _dronePriorityTargets.Add(new PriorityTarget { Name = ewarEntity.Name, EntityID = ewarEntity.Id, DronePriority = priority });
-                    }
-
-                    return;
-                }
-
-                if (Settings.Instance.DebugAddDronePriorityTarget) Logging.Log(module, "UseDrones is [" + Cache.Instance.UseDrones.ToString() + "] AddWarpScramblersToDronePriorityTargetList is [" + Settings.Instance.AddWarpScramblersToDronePriorityTargetList + "] [" + ewarEntity.Name + "] was not added as a Drone PriorityTarget (why did we even try?)", Logging.Teal);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddDronePriorityTarget", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void AddWarpScramblerByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
-        {
-            try
-            {
-                IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd, Cache.Instance.EntitiesOnGrid).OrderBy(i => i.Distance).ToList();
-                if (notTheClosest)
-                {
-                    entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);
-                }
-
-                if (entitiesToAdd.Any())
-                {
-                    foreach (EntityCache entityToAdd in entitiesToAdd)
-                    {
-                        if (numberToIgnore > 0)
-                        {
-                            numberToIgnore--;
-                            continue;
-                        }
-
-                        Logging.Log("AddWarpScramblerByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the WarpScrambler List", Logging.Debug);
-                        if (!Cache.Instance.ListOfWarpScramblingEntities.Contains(entityToAdd.Id))
-                        {
-                            Cache.Instance.ListOfWarpScramblingEntities.Add(entityToAdd.Id);
-                        }
-                        continue;
-                    }
-
-                    return;
-                }
-
-                Logging.Log("AddWarpScramblerByName", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddWarpScramblerByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
-        public void AddWebifierByName(string stringEntitiesToAdd, int numberToIgnore = 0, bool notTheClosest = false)
-        {
-            try
-            {
-                IEnumerable<EntityCache> entitiesToAdd = Cache.Instance.EntitiesByName(stringEntitiesToAdd, Cache.Instance.EntitiesOnGrid).OrderBy(i => i.Distance).ToList();
-                if (notTheClosest)
-                {
-                    entitiesToAdd = entitiesToAdd.OrderByDescending(i => i.Distance);
-                }
-
-                if (entitiesToAdd.Any())
-                {
-                    foreach (EntityCache entityToAdd in entitiesToAdd)
-                    {
-                        if (numberToIgnore > 0)
-                        {
-                            numberToIgnore--;
-                            continue;
-                        }
-                        Logging.Log("AddWebifierByName", "adding [" + entityToAdd.Name + "][" + Math.Round(entityToAdd.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(entityToAdd.Id) + "] to the Webifier List", Logging.Debug);
-                        if (!Cache.Instance.ListofWebbingEntities.Contains(entityToAdd.Id))
-                        {
-                            Cache.Instance.ListofWebbingEntities.Add(entityToAdd.Id);
-                        }
-                        continue;
-                    }
-
-                    return;
-                }
-
-                Logging.Log("AddWebifierByName", "[" + stringEntitiesToAdd + "] was not found on grid", Logging.Debug);
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AddWebifierByName", "Exception [" + ex + "]", Logging.Debug);
-            }
-        }
-
+        
         /// <summary>
         ///   Calculate distance from me
         /// </summary>
@@ -3947,7 +2445,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.AfterMissionSalvageBookmarks.Count() < 100)
                 {
-                    if (Settings.Instance.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
+                    if (Salvage.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
                     {
                         DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.FirstOrDefault(i => i.Name == Settings.Instance.BookmarkFolder);
                         if (folder != null)
@@ -3991,7 +2489,7 @@ namespace Questor.Modules.Caching
         //    DirectEve.BookmarkEntity(Cache.Instance.Containers.FirstOrDefault, "a", "a", null);
         //}
 
-        private Func<EntityCache, int> OrderByLowestHealth()
+        public Func<EntityCache, int> OrderByLowestHealth()
         {
             try
             {
@@ -4075,40 +2573,16 @@ namespace Questor.Modules.Caching
             Cache.Instance.RouteIsAllHighSecBool = true;
             return true;
         }
-
-        public string MaskedID(long? ID)
-        {
-            try
-            {
-                if (ID != null)
-                {
-                    int numofCharacters = ID.ToString().Length;
-                    if (numofCharacters >= 5)
-                    {
-                        string maskedID = ID.ToString().Substring(numofCharacters - 4);
-                        maskedID = "[MaskedID]" + maskedID;
-                        return maskedID;
-                    }    
-                }
-
-                return "!0!";
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.DoWeCurrentlyHaveTurretsMounted", "Exception [" + exception + "]", Logging.Debug);
-                return "!0!";
-            }
-        }
-
-        public int MyMissileProjectionSkillLevel = 0;
+        
+        public int MyMissileProjectionSkillLevel;
 
         public void ClearPerPocketCache()
         {
             try
             {
-                _doWeCurrentlyHaveTurretsMounted = null;
-                LastTargetPrimaryWeaponsWereShooting = null;
-                LastDroneTargetID = null;
+                Combat._doWeCurrentlyHaveTurretsMounted = null;
+                Combat.LastTargetPrimaryWeaponsWereShooting = null;
+                Drones.LastDroneTargetID = null;
 
                 ListOfWarpScramblingEntities.Clear();
                 ListOfJammingEntities.Clear();
@@ -4155,1119 +2629,7 @@ namespace Questor.Modules.Caching
                 return;
             }
         }
-
-        private bool? _doWeCurrentlyHaveTurretsMounted;
-
-        public bool DoWeCurrentlyHaveTurretsMounted()
-        {
-            try
-            {
-                if (_doWeCurrentlyHaveTurretsMounted == null)
-                {
-                    //int ModuleNumber = 0;
-                    foreach (ModuleCache m in Cache.Instance.Modules)
-                    {
-                        if (m.GroupId == (int)Group.ProjectileWeapon
-                         || m.GroupId == (int)Group.EnergyWeapon
-                         || m.GroupId == (int)Group.HybridWeapon
-                            //|| m.GroupId == (int)Group.CruiseMissileLaunchers
-                            //|| m.GroupId == (int)Group.RocketLaunchers
-                            //|| m.GroupId == (int)Group.StandardMissileLaunchers
-                            //|| m.GroupId == (int)Group.TorpedoLaunchers
-                            //|| m.GroupId == (int)Group.AssaultMissilelaunchers
-                            //|| m.GroupId == (int)Group.HeavyMissilelaunchers
-                            //|| m.GroupId == (int)Group.DefenderMissilelaunchers
-                           )
-                        {
-                            _doWeCurrentlyHaveTurretsMounted = true;
-                            return _doWeCurrentlyHaveTurretsMounted ?? true;
-                        }
-
-                        continue;
-                    }
-
-                    _doWeCurrentlyHaveTurretsMounted = false;
-                    return _doWeCurrentlyHaveTurretsMounted ?? false;
-                }
-
-                return _doWeCurrentlyHaveTurretsMounted ?? false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.DoWeCurrentlyHaveTurretsMounted", "Exception [" + exception + "]", Logging.Debug);
-            }
-
-            return false;
-        }
-
-        public EntityCache CurrentWeaponTarget()
-        {
-            // Find the first active weapon's target
-            EntityCache _currentWeaponTarget = null;
-            double OptimalOfWeapon = 0;
-            double FallOffOfWeapon = 0;
-
-            try
-            {
-                // Find the target associated with the weapon
-                ModuleCache weapon = Cache.Instance.Weapons.FirstOrDefault(m => m.IsOnline
-                                                                                    && !m.IsReloadingAmmo
-                                                                                    && !m.IsChangingAmmo
-                                                                                    && m.IsActive);
-                if (weapon != null)
-                {
-                    _currentWeaponTarget = Cache.Instance.EntityById(weapon.TargetId);
-
-                    //
-                    // in a perfect world we'd always use the same guns / missiles across the board, for those that do not this will at least come up with sane numbers
-                    //
-                    if (OptimalOfWeapon <= 1)
-                    {
-                        OptimalOfWeapon = Math.Min(OptimalOfWeapon, weapon.OptimalRange);
-                    }
-
-                    if (FallOffOfWeapon <= 1)
-                    {
-                        FallOffOfWeapon = Math.Min(FallOffOfWeapon, weapon.FallOff);
-                    }
-
-                    if (_currentWeaponTarget != null && _currentWeaponTarget.IsReadyToShoot)
-                    {
-                        return _currentWeaponTarget;
-                    }
-
-                    return null;
-                }
-
-                return null;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("GetCurrentWeaponTarget", "exception [" + exception + "]", Logging.Debug);
-            }
-
-            return null;
-        }
-
-        private IEnumerable<EntityCache> _bestPrimaryWeaponTargets;
-
-        public IEnumerable<EntityCache> __GetBestWeaponTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
-        {
-            try
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "Attempting to Get Best Weapon Targets", Logging.Teal);
-
-                if (Settings.Instance.DebugDisableGetBestTarget)
-                {
-                    _bestPrimaryWeaponTargets = _potentialTargets ?? PotentialCombatTargets.OrderBy(i => i.Nearest5kDistance).ToList();
-                    _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.ToList();
-                }
-
-                if (_bestPrimaryWeaponTargets == null)
-                {
-                    _bestPrimaryWeaponTargets = _potentialTargets ?? Cache.Instance.PotentialCombatTargets; //.ToList();
-                    //_bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.ToList();
-                    long? currentWeaponId = Cache.Instance.CurrentWeaponTarget() != null ? Cache.Instance.CurrentWeaponTarget().Id : -1;
-                    long? preferredTargetId = Cache.Instance.PreferredPrimaryWeaponTargetID ?? -1;
-
-                    if (MaxLockedTargets > 0 && !Settings.Instance.DebugDisableGetBestTarget) //if we are not ECMd
-                    {
-                        if (_bestPrimaryWeaponTargets.Any())
-                        {
-                            if (PreferredPrimaryWeaponTarget == null || (PreferredPrimaryWeaponTarget != null && !PreferredPrimaryWeaponTarget.IsOnGridWithMe) || DateTime.UtcNow > Time.Instance.NextGetBestCombatTarget)
-                            {
-                                _bestPrimaryWeaponTargets = _bestPrimaryWeaponTargets.Where(t => t.Distance < distance)
-                                                                        .OrderByDescending(t => t.IsInOptimalRange)
-                                                                        .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget && t.IsInOptimalRange)
-                                                                        .ThenByDescending(t => t.IsCorrectSizeForMyWeapons)                            // Weapons should fire big targets first
-                                                                        .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                                                                        .ThenByDescending(t => t.isPreferredPrimaryWeaponTarget)
-                                                                        .ThenByDescending(t => t.IsTargetedBy)                                         // if something does not target us it's not too interesting
-                                                                        .ThenByDescending(t => t.PrimaryWeaponPriorityLevel)                           // WarpScram over Webs over any other EWAR
-                                                                        .ThenByDescending(t => t.Id == currentWeaponId)                                // Lets keep shooting
-                                                                        .ThenByDescending(t => t.Id == preferredTargetId)                              // Keep the preferred target so we do not switch our targets too often
-                                                                        .ThenByDescending(t => t.IsEntityIShouldKeepShooting && !t.IsLowValueTarget)   // Shoot targets that are in armor!
-                                                                        .ThenBy(t => t.Nearest5kDistance);
-
-                                Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
-                            }
-                            else
-                            {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "PreferredPrimaryWeaponTarget [" + PreferredPrimaryWeaponTarget.Name + "] IsOnGridWithMe [" + PreferredPrimaryWeaponTarget.IsOnGridWithMe + "] Time until NextGetBestCombatTarget [" + Time.Instance.NextGetBestCombatTarget.Subtract(DateTime.UtcNow).TotalSeconds + "]", Logging.Debug);
-                            }
-                        }
-                        else
-                        {
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log("__GetBestWeaponTarget", "We have nothing to shoot yet. Waiting", Logging.Debug);
-                        }
-                    }
-                    else
-                    {
-                        if (Settings.Instance.DebugGetBestTarget && !Settings.Instance.DebugDisableGetBestTarget) Logging.Log("__GetBestWeaponTarget", "We have no targeting slots (ECMd?). Waiting", Logging.Debug);
-                    }
-                }
-
-
-                if (_bestPrimaryWeaponTargets != null && _bestPrimaryWeaponTargets.Any())
-                {
-                    int BestPrimaryWeaponTargetsCount = _bestPrimaryWeaponTargets.Count();
-                    if (_bestPrimaryWeaponTargets.FirstOrDefault() != null)
-                    {
-                        Cache.Instance.PreferredPrimaryWeaponTarget = _bestPrimaryWeaponTargets.FirstOrDefault();
-                        if (Cache.Instance.PreferredPrimaryWeaponTarget != null)
-                        {
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Cache.Instance.MaskedID(Cache.Instance.PreferredPrimaryWeaponTarget.Id) + "]", Logging.Debug);
-                        }
-                        else if (Cache.Instance.PreferredPrimaryWeaponTarget == null)
-                        {
-                            if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [ null ] huh?", Logging.Debug);
-                        }
-                    }
-
-                    if (Settings.Instance.DebugGetBestTarget)
-                    {
-                        if (_bestPrimaryWeaponTargets.Any())
-                        {
-                            if (Cache.Instance.PreferredPrimaryWeaponTarget != null) Logging.Log("Debug: GetBestTarget (Weapons):", "PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(PreferredPrimaryWeaponTargetID) + "] BestPrimaryWeaponTargets Total [" + BestPrimaryWeaponTargetsCount + "]", Logging.Teal);
-                            int i = 0;
-                            foreach (EntityCache bestPrimaryWeaponTarget in _bestPrimaryWeaponTargets)
-                            {
-                                i++;
-                                Logging.Log("GetBestTarget (Weapons):", "[" + i + "] BestPrimaryWeaponTarget [" + bestPrimaryWeaponTarget.Name + "][" + Math.Round(bestPrimaryWeaponTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestPrimaryWeaponTarget.Id) + "] IsInOptimal [" + bestPrimaryWeaponTarget.IsInOptimalRange + "] isCorrectSize [" + bestPrimaryWeaponTarget.IsCorrectSizeForMyWeapons + "] isPPWPT [" + bestPrimaryWeaponTarget.isPreferredPrimaryWeaponTarget + "] IsPWPT [" + bestPrimaryWeaponTarget.IsPrimaryWeaponPriorityTarget + "] IsLockedTarget [" + bestPrimaryWeaponTarget.IsTarget + "] IsTargetedBy [" + bestPrimaryWeaponTarget.IsTargetedBy + "] IsEwarTarget [" + bestPrimaryWeaponTarget.IsEwarTarget + "] IsWarpScramblingMe [" + bestPrimaryWeaponTarget.IsWarpScramblingMe + "]", Logging.Teal);
-                            }
-                        }
-                    }
-                }
-
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Weapons):", "return BestPrimaryWeaponTargets;", Logging.Debug);
-                return _bestPrimaryWeaponTargets;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("__GetBestWeaponTargets", "Exception [" + exception + "]", Logging.Debug);
-            }
-
-            return _bestPrimaryWeaponTargets;
-        }
-
-        private IEnumerable<EntityCache> _bestDroneTargets;
-
-        public IEnumerable<EntityCache> __GetBestDroneTargets(double distance, IEnumerable<EntityCache> _potentialTargets = null)
-        {
-            try
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Drones):", "Attempting to get Best Drone Target", Logging.Teal);
-
-                if (Settings.Instance.DebugDisableGetBestTarget)
-                {
-                    _bestDroneTargets = _potentialTargets ?? PotentialCombatTargets.OrderBy(i => i.Nearest5kDistance).ThenByDescending(i => i.IsFrigate).ToList();
-                }
-
-                if (_bestDroneTargets == null)
-                {
-                    _bestDroneTargets = _potentialTargets ?? PotentialCombatTargets.ToList();
-                    _bestDroneTargets = _bestDroneTargets.ToList();
-                    //long currentDroneTargetId = TargetingCache.CurrentDronesTarget != null ? TargetingCache.CurrentDronesTarget.Id : -1;
-                    long? preferredTargetId = Cache.Instance.PreferredDroneTargetID ?? -1;
-
-                    if (_bestDroneTargets.Any())
-                    {
-                        _bestDroneTargets = _bestDroneTargets.Where(t => t.Distance < distance)
-                                                                  .Where(t => t.Distance < Cache.Instance.MaxDroneRange)
-                                                                  .OrderByDescending(t => t.isPreferredDroneTarget)
-                                                                  .ThenByDescending(t => t.IsTargetedBy)                                      // if something does not target us it's not too interesting
-                                                                  .ThenByDescending(t => t.IsTarget || t.IsTargeting)                         // is the entity already targeted?
-                                                                  .ThenByDescending(t => t.IsLastTargetDronesWereShooting)                    // Keep current target
-                                                                  .ThenByDescending(t => t.Id == preferredTargetId)                           // Keep the preferred target so we do not switch our targets too often
-                                                                  .ThenByDescending(t => t.IsEntityIShouldKeepShootingWithDrones)             // Shoot targets that are in armor!
-                                                                  .ThenBy(t => t.DronePriorityLevel)
-                                                                  .ThenByDescending(t => (t.IsFrigate || t.IsNPCFrigate) || (Settings.Instance.DronesKillHighValueTargets && t.IsBattleship))
-                                                                  .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit)
-                                                                  .ThenBy(t => t.Nearest5kDistance);
-
-
-                        int BestDroneTargetsCount = _bestDroneTargets.Count();
-                        if (_bestDroneTargets.FirstOrDefault() != null)
-                        {
-                            Cache.Instance.PreferredDroneTarget = _bestDroneTargets.FirstOrDefault();
-                            if (Cache.Instance.PreferredDroneTarget != null)
-                            {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "][" + Cache.Instance.MaskedID(Cache.Instance.PreferredDroneTarget.Id) + "]", Logging.Debug);
-                            }
-                            else if (Cache.Instance.PreferredDroneTarget == null)
-                            {
-                                if (Settings.Instance.DebugGetBestTarget) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredDroneTarget [ null ] huh?", Logging.Debug);
-                            }
-                        }
-
-                        if (Settings.Instance.DebugGetBestTarget)
-                        {
-                            if (_bestDroneTargets.Any())
-                            {
-                                if (Cache.Instance.PreferredDroneTarget != null) Logging.Log("Debug: GetBestTarget (Drones):", "PreferredDroneTarget [" + PreferredDroneTarget.Name + "][" + Math.Round(PreferredDroneTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(PreferredDroneTargetID) + "] BestPrimaryWeaponTargets Total [" + BestDroneTargetsCount + "]", Logging.Teal);
-                                int i = 0;
-                                foreach (EntityCache bestDroneTarget in _bestDroneTargets)
-                                {
-                                    i++;
-                                    Logging.Log("GetBestTarget (Drones):", "[" + i + "] BestPrimaryWeaponTarget [" + bestDroneTarget.Name + "][" + Math.Round(bestDroneTarget.Distance / 1000, 0) + "k][" + Cache.Instance.MaskedID(bestDroneTarget.Id) + "] IsPWPT [" + bestDroneTarget.IsPrimaryWeaponPriorityTarget + "] IsLockedTarget [" + bestDroneTarget.IsTarget + "] IsTargetedBy [" + bestDroneTarget.IsTargetedBy + "] IsEwarTarget [" + bestDroneTarget.IsEwarTarget + "] IsWarpScramblingMe [" + bestDroneTarget.IsWarpScramblingMe + "]", Logging.Teal);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return _bestDroneTargets;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("__GetBestWeaponTargets", "Exception [" + exception + "]", Logging.Debug);
-            }
-
-            return _bestDroneTargets;
-        }
-
-        public EntityCache FindPrimaryWeaponPriorityTarget(EntityCache currentTarget, PrimaryWeaponPriority priorityType, bool AddECMTypeToPrimaryWeaponPriorityTargetList, double Distance, bool FindAUnTargetedEntity = true)
-        {
-            if (AddECMTypeToPrimaryWeaponPriorityTargetList)
-            {
-                //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking for Neutralizing priority targets (currentTarget first)", Logging.Teal);
-                // Choose any Neutralizing primary weapon priority targets
-                try
-                {
-                    EntityCache target = null;
-                    try
-                    {
-                        if (Cache.Instance.PrimaryWeaponPriorityEntities.Any(pt => pt.PrimaryWeaponPriorityLevel == priorityType))
-                        {
-                            target = Cache.Instance.PrimaryWeaponPriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && pt.Distance < Distance && pt.IsActivePrimaryWeaponEwarType == priorityType && !pt.IsTooCloseTooFastTooSmallToHit)
-                                                                                            || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.PrimaryWeaponPriorityLevel == priorityType && !pt.IsTooCloseTooFastTooSmallToHit))
-                                                                                    .OrderByDescending(pt => pt.IsReadyToShoot)
-                                                                                    .ThenByDescending(pt => pt.IsCurrentTarget)
-                                                                                    .ThenByDescending(pt => !pt.IsNPCFrigate)
-                                                                                    .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                                    .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                    .ThenBy(pt => pt.Distance)
-                                                                                    .FirstOrDefault();
-                        }
-                    }
-                    catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
-
-                    if (target != null)
-                    {
-                        if (!FindAUnTargetedEntity)
-                        {
-                            //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
-                            Logging.Log("FindPrimaryWeaponPriorityTarget", "if (!FindAUnTargetedEntity) Cache.Instance.PreferredPrimaryWeaponTargetID = [ " + target.Name + "][" + Cache.Instance.MaskedID(target.Id) + "]", Logging.White);
-                            Cache.Instance.PreferredPrimaryWeaponTarget = target;
-                            Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                            return target;
-                        }
-
-                        return target;
-                    }
-
-                    return null;
-                }
-                catch (NullReferenceException) { }
-
-                return null;
-            }
-
-            return null;
-        }
-
-        public EntityCache FindDronePriorityTarget(EntityCache currentTarget, DronePriority priorityType, bool AddECMTypeToDronePriorityTargetList, double Distance, bool FindAUnTargetedEntity = true)
-        {
-            if (AddECMTypeToDronePriorityTargetList)
-            {
-                //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "Checking for Neutralizing priority targets (currentTarget first)", Logging.Teal);
-                // Choose any Neutralizing primary weapon priority targets
-                try
-                {
-                    EntityCache target = null;
-                    try
-                    {
-                        if (Cache.Instance.DronePriorityEntities.Any(pt => pt.DronePriorityLevel == priorityType))
-                        {
-                            target = Cache.Instance.DronePriorityEntities.Where(pt => ((FindAUnTargetedEntity || pt.IsReadyToShoot) && currentTarget != null && pt.Id == currentTarget.Id && (pt.Distance < Distance) && pt.IsActiveDroneEwarType == priorityType)
-                                                                                                || ((FindAUnTargetedEntity || pt.IsReadyToShoot) && pt.Distance < Distance && pt.IsActiveDroneEwarType == priorityType))
-                                                                                                       .OrderByDescending(pt => pt.IsNPCFrigate)
-                                                                                                       .ThenByDescending(pt => pt.IsLastTargetDronesWereShooting)
-                                                                                                       .ThenByDescending(pt => pt.IsInDroneRange)
-                                                                                                       .ThenBy(pt => pt.IsEntityIShouldKeepShootingWithDrones)
-                                                                                                       .ThenBy(pt => (pt.ShieldPct + pt.ArmorPct + pt.StructurePct))
-                                                                                                       .ThenBy(pt => pt.Nearest5kDistance)
-                                                                                                       .FirstOrDefault();
-                        }
-                    }
-                    catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
-
-                    if (target != null)
-                    {
-                        //if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget", "NeutralizingPrimaryWeaponPriorityTarget [" + NeutralizingPriorityTarget.Name + "][" + Math.Round(NeutralizingPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(NeutralizingPriorityTarget.Id) + "] GroupID [" + NeutralizingPriorityTarget.GroupId + "]", Logging.Debug);
-                        
-                        if (!FindAUnTargetedEntity)
-                        {
-                            Cache.Instance.PreferredDroneTarget = target;
-                            Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                            return target;
-                        }
-
-                        return target;
-                    }
-
-                    return null;
-                }
-                catch (NullReferenceException) { }
-
-                return null;
-            }
-
-            return null;
-        }
-
-        public EntityCache LastTargetPrimaryWeaponsWereShooting = null;
-
-        public EntityCache LastTargetDronesWereShooting = null;
-
-        public EntityCache FindCurrentTarget()
-        {
-            try
-            {
-                EntityCache currentTarget = null;
-                //
-                // we cant do this because the target may need to be targeted again! ECM == bad
-                //
-                //if (Time.Instance.LastTargetWeWereShooting != null && Cache.Instance.Entities.Any(i => i.Id == Time.Instance.LastTargetWeWereShooting.Id))
-                //{
-                //    currentTarget = Time.Instance.LastTargetWeWereShooting;
-                //}
-
-                if (currentTarget == null)
-                {
-                    if (Cache.Instance.CurrentWeaponTarget() != null
-                    && Cache.Instance.CurrentWeaponTarget().IsReadyToShoot
-                    && !Cache.Instance.CurrentWeaponTarget().IsIgnored)
-                    {
-                        Cache.Instance.LastTargetPrimaryWeaponsWereShooting = Cache.Instance.CurrentWeaponTarget();
-                        currentTarget = Cache.Instance.LastTargetPrimaryWeaponsWereShooting;
-                    }
-
-                    if (DateTime.UtcNow < Time.Instance.LastPreferredPrimaryWeaponTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredPrimaryWeaponTargetID)))
-                    {
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log("FindCurrentTarget", "We have a PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
-                    }
-                }
-                
-                return currentTarget;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("FindCurrentTarget", "Exception [" + ex + "]", Logging.Debug);
-                return null;
-            }
-        }
-
-        public bool CheckForPrimaryWeaponPriorityTargetsInOrder(EntityCache currentTarget, double distance)
-        {
-            try
-            {
-                // Do we have ANY warp scrambling entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.WarpScrambler, Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY ECM entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Jamming, Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY tracking disrupting entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.TrackingDisrupting, Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY Neutralizing entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Neutralizing, Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY Target Painting entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.TargetPainting, Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Dampening, Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                // Do we have ANY Webbing entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-                if (Cache.Instance.FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Webbing, Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList, distance) != null)
-                    return true;
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("CheckForPrimaryWeaponPriorityTargetsInOrder", "Exception [" + ex + "]", Logging.Debug);
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///   Return the best possible target (based on current target, distance and low value first)
-        /// </summary>
-        /// <param name="_potentialTargets"></param>
-        /// <param name="distance"></param>
-        /// <param name="lowValueFirst"></param>
-        /// <param name="callingroutine"> </param>
-        /// <returns></returns>
-        public bool GetBestPrimaryWeaponTarget(double distance, bool lowValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
-        {
-            if (Settings.Instance.DebugDisableGetBestTarget)
-            {
-                return true;
-            }
-
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Attempting to get Best Target", Logging.Teal);
-            
-            if (DateTime.UtcNow < Time.Instance.NextGetBestCombatTarget)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "No need to run GetBestTarget again so soon. We only want to run once per tick", Logging.Teal);
-                return false;
-            }
-
-            Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow.AddMilliseconds(800);
-
-            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
-            //{
-            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
-            //    return false;
-            //}
-
-            EntityCache currentTarget = FindCurrentTarget();
-            
-            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
-            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
-            //and there is nothing to replace it with.
-            //if (Cache.Instance.PreferredPrimaryWeaponTarget != null
-            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredPrimaryWeaponTargetID))
-            //{
-            //    if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget", "PreferredPrimaryWeaponTarget is not valid, clearing it", Logging.White);
-            //    Cache.Instance.PreferredPrimaryWeaponTarget = null;
-            //}
-
-            //
-            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
-            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
-            //
-
-            //
-            // if currentTarget set to something (not null) and it is actually an entity...
-            //
-            if (currentTarget != null && currentTarget.IsReadyToShoot)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "We have a target, testing conditions", Logging.Teal);
-
-                #region Is our current target any other primary weapon priority target?
-                //
-                // Is our current target any other primary weapon priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
-                //
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Priority", Logging.Teal);
-                if (PrimaryWeaponPriorityEntities.Any(pt => pt.IsReadyToShoot 
-                                                        && pt.Distance < Cache.Instance.MaxRange
-                                                        && pt.IsCurrentTarget
-                                                        && !currentTarget.IsHigherPriorityPresent))
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-                #endregion Is our current target any other primary weapon priority target?
-
-                /*
-                #region Current Target Health Logging
-                //
-                // Current Target Health Logging
-                //
-                bool currentTargetHealthLogNow = true;
-                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
-                {
-                    if ((int)currentTarget.Id != (int)TargetingCache.CurrentTargetID)
-                    {
-                        if ((int)currentTarget.ArmorPct == 0 && (int)currentTarget.ShieldPct == 0 && (int)currentTarget.StructurePct == 0)
-                        {
-                            //assume that any NPC with no shields, armor or hull is dead or does not yet have valid data associated with it
-                        }
-                        else
-                        {
-                            //
-                            // assign shields and armor to targetingcache variables - compare them to each other
-                            // to see if we need to send another log message to the console, if the values have not changed no need to log it.
-                            //
-                            if ((int)currentTarget.ShieldPct >= TargetingCache.CurrentTargetShieldPct ||
-                                (int)currentTarget.ArmorPct >= TargetingCache.CurrentTargetArmorPct ||
-                                (int)currentTarget.StructurePct >= TargetingCache.CurrentTargetStructurePct)
-                            {
-                                currentTargetHealthLogNow = false;
-                            }
-
-                            //
-                            // now that we are done comparing - assign new values for this tick
-                            //
-                            TargetingCache.CurrentTargetShieldPct = (int)currentTarget.ShieldPct;
-                            TargetingCache.CurrentTargetArmorPct = (int)currentTarget.ArmorPct;
-                            TargetingCache.CurrentTargetStructurePct = (int)currentTarget.StructurePct;
-                            if (currentTargetHealthLogNow)
-                            {
-                                Logging.Log(callingroutine, ".GetBestTarget (Weapons): CurrentTarget is [" + currentTarget.Name +                              //name
-                                            "][" + (Math.Round(currentTarget.Distance / 1000, 0)).ToString(CultureInfo.InvariantCulture) +           //distance
-                                            "k][Shield%:[" + Math.Round(currentTarget.ShieldPct * 100, 0).ToString(CultureInfo.InvariantCulture) +   //shields
-                                            "][Armor%:[" + Math.Round(currentTarget.ArmorPct * 100, 0).ToString(CultureInfo.InvariantCulture) + "]" //armor
-                                            , Logging.White);
-                            }
-                        }
-                    }
-                }
-
-                #endregion Current Target Health Logging
-                */
-
-                #region Is our current target already in armor? keep shooting the same target if so...
-                //
-                // Is our current target already in armor? keep shooting the same target if so...
-                //
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Checking Low Health", Logging.Teal);
-                if (currentTarget.IsEntityIShouldKeepShooting)
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "CurrentTarget [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + " GroupID [" + currentTarget.GroupId + "]] has less than 60% armor, keep killing this target", Logging.Debug);
-                    Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-
-                #endregion Is our current target already in armor? keep shooting the same target if so...
-                
-                #region If none of the above matches, does our current target meet the conditions of being hittable and in range
-                if (!currentTarget.IsHigherPriorityPresent)
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons): currentTarget", "Does the currentTarget exist? can it be hit?", Logging.Teal);
-                    if (currentTarget.IsReadyToShoot
-                        && (!currentTarget.IsNPCFrigate || (!Cache.Instance.UseDrones && !currentTarget.IsTooCloseTooFastTooSmallToHit)) 
-                        && currentTarget.Distance < Cache.Instance.MaxRange)
-                    {
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "if  the currentTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
-                        if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "currentTarget is [" + currentTarget.Name + "][" + Math.Round(currentTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentTarget.Id) + "] GroupID [" + currentTarget.GroupId + "]", Logging.Debug);
-
-                        Cache.Instance.PreferredPrimaryWeaponTarget = currentTarget;
-                        Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                        return true;
-                    }
-                }
-                #endregion
-            }
-
-            if (CheckForPrimaryWeaponPriorityTargetsInOrder(currentTarget, distance)) return true;
-
-            #region Get the closest primary weapon priority target
-            //
-            // Get the closest primary weapon priority target
-            //
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Closest PrimaryWeaponPriorityTarget", Logging.Teal);
-            EntityCache primaryWeaponPriorityTarget = null;
-            try
-            {
-                primaryWeaponPriorityTarget = Cache.Instance.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Cache.Instance.MaxRange
-                                                                            && !p.IsIgnored
-                                                                            && p.IsReadyToShoot
-                                                                            && ((!p.IsNPCFrigate && !p.IsFrigate ) || (!Cache.Instance.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
-                                                                           .OrderByDescending(pt => pt.IsTargetedBy)
-                                                                           .ThenByDescending(pt =>  pt.IsCurrentTarget)
-                                                                           .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.IsEwarTarget)
-                                                                           .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
-                                                                           .ThenByDescending(pt => pt.TargetValue)
-                                                                           .ThenBy(pt => pt.Nearest5kDistance)
-                                                                           .FirstOrDefault();
-            }
-            catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
-
-            if (primaryWeaponPriorityTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "primaryWeaponPriorityTarget is [" + primaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(primaryWeaponPriorityTarget.Id) + "] GroupID [" + primaryWeaponPriorityTarget.GroupId + "]", Logging.Debug);
-                Cache.Instance.PreferredPrimaryWeaponTarget = primaryWeaponPriorityTarget;
-                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                return true;
-            }
-
-            #endregion Get the closest primary weapon priority target
-
-            #region did our calling routine (CombatMissionCtrl?) pass us targets to shoot?
-            //
-            // This is where CombatMissionCtrl would pass targets to GetBestTarget
-            //
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Calling Target", Logging.Teal);
-            if (_potentialTargets != null && _potentialTargets.Any())
-            {
-                EntityCache callingTarget = null;
-                try
-                {
-                    callingTarget = _potentialTargets.OrderBy(t => t.Distance).FirstOrDefault();
-                }
-                catch (NullReferenceException) { }
-
-                if (callingTarget != null && (callingTarget.IsReadyToShoot || callingTarget.IsLargeCollidable)
-                        //((!callingTarget.IsNPCFrigate && !callingTarget.IsFrigate)                      
-                        //|| (!Cache.Instance.UseDrones && !callingTarget.IsTooCloseTooFastTooSmallToHit))   
-                   )
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "if (callingTarget != null && !callingTarget.IsIgnored)", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "callingTarget is [" + callingTarget.Name + "][" + Math.Round(callingTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingTarget.Id) + "] GroupID [" + callingTarget.GroupId + "]", Logging.Debug);
-                    AddPrimaryWeaponPriorityTarget(callingTarget,PrimaryWeaponPriority.PriorityKillTarget, "GetBestTarget: callingTarget");
-                    Cache.Instance.PreferredPrimaryWeaponTarget = callingTarget;
-                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-
-                //return false; //do not return here, continue to process targets, we did not find one yet
-            }
-            #endregion
-
-            #region Get the closest High Value Target
-
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Closest High Value", Logging.Teal);
-            EntityCache highValueTarget = null;
-
-            if (PotentialCombatTargets.Any())
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
-
-                highValueTarget = PotentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
-                    .OrderByDescending(t => !t.IsNPCFrigate)
-                    .ThenByDescending(t => t.IsTargetedBy)
-                    .ThenByDescending(t => !t.IsTooCloseTooFastTooSmallToHit)
-                    .ThenByDescending(t => t.IsInOptimalRange)
-                    .ThenByDescending(pt => pt.TargetValue) //highest value first
-                    .ThenByDescending(t => !t.IsCruiser)
-                    .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Nearest5kDistance)
-                    .FirstOrDefault();
-            }
-            #endregion
-
-            #region Get the closest low value target that is not moving too fast for us to hit
-            //
-            // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
-            //
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking closest Low Value", Logging.Teal);
-            EntityCache lowValueTarget = null;
-            if (PotentialCombatTargets.Any())
-            {
-                lowValueTarget = PotentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
-                    .OrderByDescending(t => t.IsNPCFrigate)
-                    .ThenByDescending(t => t.IsTargetedBy)
-                    .ThenByDescending(t => t.IsTooCloseTooFastTooSmallToHit) //this will return false (not to close to fast to small), then true due to .net sort order of bools
-                    .ThenBy(pt => pt.TargetValue) //lowest value first
-                    .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Nearest5kDistance)
-                    .FirstOrDefault();
-            }
-            #endregion
-
-            #region If lowValueFirst && lowValue aggrod or no high value aggrod
-            if ((lowValueFirst && lowValueTarget != null)
-                    && (lowValueTarget.IsTargetedBy 
-                    || (highValueTarget == null 
-                        || (highValueTarget != null 
-                        && !highValueTarget.IsTargetedBy))))
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Low Value First", Logging.Teal);
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-                Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
-                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                return true;
-            }
-            #endregion
-            
-            #region High Value - aggrod, or no low value aggrod
-            // high value if aggrod
-            // if no high value aggrod, low value thats aggrod
-            // if no high aggro, and no low aggro, shoot high value thats present
-            if (highValueTarget != null)
-            {
-                if (highValueTarget.IsTargetedBy 
-                    || Cache.Instance.UseDrones
-                    || (lowValueTarget == null 
-                        || (lowValueTarget != null 
-                        && !lowValueTarget.IsTargetedBy)))
-                {
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking Use High Value", Logging.Teal);
-                    if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredPrimaryWeaponTarget = highValueTarget;
-                    Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-            }
-            #endregion
-
-            #region If we do not have a high value target but we do have a low value target
-            if (lowValueTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "Checking use Low Value", Logging.Teal);
-                if (Settings.Instance.DebugGetBestTarget) Logging.Log(callingroutine + " Debug: GetBestTarget (Weapons):", "lowValueTarget is [" + lowValueTarget.Name + "][" + Math.Round(lowValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(lowValueTarget.Id) + "] GroupID [" + lowValueTarget.GroupId + "]", Logging.Debug);
-                Cache.Instance.PreferredPrimaryWeaponTarget = lowValueTarget;
-                Time.Instance.LastPreferredPrimaryWeaponTargetDateTime = DateTime.UtcNow;
-                return true;
-            }
-            #endregion
-
-            if (Settings.Instance.DebugGetBestTarget) Logging.Log("GetBestTarget: none", "Could not determine a suitable target", Logging.Debug);
-            #region If we did not find anything at all (wtf!?!?)
-            if (Settings.Instance.DebugGetBestTarget)
-            {
-                if (Cache.Instance.Targets.Any())
-                {
-                    Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
-                    Logging.Log("GetBestTarget (Weapons): none", "*** ALL LOCKED/LOCKING TARGETS LISTED BELOW", Logging.Debug);
-                    int LockedTargetNumber = 0; 
-                    foreach (EntityCache __target in Cache.Instance.Targets)
-                    {
-                        LockedTargetNumber++;
-                        Logging.Log("GetBestTarget (Weapons): none", "*** Target: [" + LockedTargetNumber + "][" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
-                    }
-                    Logging.Log("GetBestTarget (Weapons): none", "*** ALL LOCKED/LOCKING TARGETS LISTED ABOVE", Logging.Debug);
-                    Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
-                }
-
-                if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
-                {
-                    if (Cache.Instance.IgnoreTargets.Any())
-                    {
-                        int IgnoreCount = Cache.Instance.IgnoreTargets.Count;
-                        Logging.Log("GetBestTarget (Weapons): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
-                    }
-
-                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
-                    int potentialCombatTargetNumber = 0;
-                    foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
-                    {
-                        potentialCombatTargetNumber++;
-                        Logging.Log("GetBestTarget (Weapons): none", "***** Unlocked [" + potentialCombatTargetNumber  + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
-                    }
-                    Logging.Log("GetBestTarget (Weapons): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
-                    Logging.Log("GetBestTarget (Weapons): none", ".", Logging.Debug);
-                }
-            }
-            #endregion
-
-            Time.Instance.NextGetBestCombatTarget = DateTime.UtcNow;
-            return false;
-        }
-
-        public bool GetBestDroneTarget(double distance, bool highValueFirst, string callingroutine, List<EntityCache> _potentialTargets = null)
-        {
-            if (Settings.Instance.DebugDisableGetBestDroneTarget || !Cache.Instance.UseDrones)
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "!Cache.Instance.UseDrones - drones are disabled currently", Logging.Teal);
-                return true;
-            }
-
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
-
-            if (DateTime.UtcNow < Time.Instance.NextGetBestDroneTarget)
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
-                return false;
-            }
-
-            Time.Instance.NextGetBestDroneTarget = DateTime.UtcNow.AddMilliseconds(2000);
-
-            //if (!Cache.Instance.Targets.Any()) //&& _potentialTargets == null )
-            //{
-            //    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "We have no locked targets and [" + Cache.Instance.Targeting.Count() + "] targets being locked atm", Logging.Teal);
-            //    return false;
-            //}
-
-            EntityCache currentDroneTarget = null;
-
-            if (Cache.Instance.EntitiesOnGrid.Any(i => i.IsLastTargetDronesWereShooting))
-            {
-                currentDroneTarget = Cache.Instance.EntitiesOnGrid.FirstOrDefault(i => i.IsLastTargetDronesWereShooting);
-
-            }
-
-            if (DateTime.UtcNow < Time.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Cache.Instance.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Cache.Instance.PreferredDroneTarget.Id)))
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Cache.Instance.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
-                return true;
-            }
-
-            //We need to make sure that our current Preferred is still valid, if not we need to clear it out
-            //This happens when we have killed the last thing within our range (or the last thing in the pocket)
-            //and there is nothing to replace it with.
-            //if (Cache.Instance.PreferredDroneTarget != null
-            //    && Cache.Instance.Entities.All(t => t.Id != Instance.PreferredDroneTargetID))
-            //{
-            //    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget", "PreferredDroneTarget is not valid, clearing it", Logging.White);
-            //    Cache.Instance.PreferredDroneTarget = null;
-            //}
-
-            //
-            // if currentTarget set to something (not null) and it is actually an entity...
-            //
-            if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentDroneTarget", "We have a currentTarget [" + currentDroneTarget.Name + "][" + currentDroneTarget.MaskedId + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k], testing conditions", Logging.Teal);
-
-                #region Is our current target any other drone priority target?
-                //
-                // Is our current target any other drone priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
-                //
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
-                if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot
-                                                        && pt.Nearest5kDistance < Cache.Instance.MaxDroneRange
-                                                        && pt.Id == currentDroneTarget.Id
-                                                        && !currentDroneTarget.IsHigherPriorityPresent))
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
-                    Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-                #endregion Is our current target any other drone priority target?
-
-                #region Is our current target already in armor? keep shooting the same target if so...
-                //
-                // Is our current target already low health? keep shooting the same target if so...
-                //
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
-                if (currentDroneTarget.IsEntityIShouldKeepShootingWithDrones)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 80% shields, keep killing this target", Logging.Debug);
-                    Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-
-                #endregion Is our current target already in armor? keep shooting the same target if so...
-
-                #region If none of the above matches, does our current target meet the conditions of being hittable and in range
-                if (!currentDroneTarget.IsHigherPriorityPresent)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Does the currentTarget exist? Can it be hit?", Logging.Teal);
-                    if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < Cache.Instance.MaxDroneRange)
-                    {
-                        if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
-                        if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(currentDroneTarget.Id) + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
-
-                        Cache.Instance.PreferredDroneTarget = currentDroneTarget;
-                        Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                        return true;
-                    }
-                }
-                #endregion
-            }
-
-            //
-            // process the list of PrimaryWeaponPriorityTargets in this order... Eventually the order itself should be user selectable
-            // this allow us to kill the most 'important' things doing e-war first instead of just handling them by range
-            //
-
-            // Do we have ANY warp scrambling entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Settings.Instance.AddWarpScramblersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY ECM entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Settings.Instance.AddECMsToDroneTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY tracking disrupting entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Neutralizing entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddNeutralizersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Target Painting entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddTargetPaintersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddDampenersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            // Do we have ANY Webbing entities targeted starting with currentTarget
-            // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
-            if (Cache.Instance.FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Settings.Instance.AddWebifiersToDronePriorityTargetList, distance) != null)
-                return true;
-
-            #region Get the closest drone priority target
-            //
-            // Get the closest primary weapon priority target
-            //
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest DronePriorityTarget", Logging.Teal);
-            EntityCache dronePriorityTarget = null;
-            try
-            {
-                dronePriorityTarget = Cache.Instance.DronePriorityEntities.Where(p => p.Nearest5kDistance < Cache.Instance.MaxDroneRange
-                                                                            && !p.IsIgnored
-                                                                            && p.IsReadyToShoot)
-                                                                           .OrderBy(pt => pt.DronePriorityLevel)
-                                                                           .ThenByDescending(pt => pt.IsEwarTarget)
-                                                                           .ThenByDescending(pt => pt.IsTargetedBy)
-                                                                           .ThenBy(pt => pt.Nearest5kDistance)
-                                                                           .FirstOrDefault();
-            }
-            catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
-
-            if (dronePriorityTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "dronePriorityTarget is [" + dronePriorityTarget.Name + "][" + Math.Round(dronePriorityTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(dronePriorityTarget.Id) + "] GroupID [" + dronePriorityTarget.GroupId + "]", Logging.Debug);
-                Cache.Instance.PreferredDroneTarget = dronePriorityTarget;
-                Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                return true;
-            }
-
-            #endregion Get the closest drone priority target
-
-            #region did our calling routine (CombatMissionCtrl?) pass us targets to shoot?
-            //
-            // This is where CombatMissionCtrl would pass targets to GetBestDroneTarget
-            //
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Calling Target", Logging.Teal);
-            if (_potentialTargets != null && _potentialTargets.Any())
-            {
-                EntityCache callingDroneTarget = null;
-                try
-                {
-                    callingDroneTarget = _potentialTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
-                }
-                catch (NullReferenceException) { }
-
-                if (callingDroneTarget != null && callingDroneTarget.IsReadyToShoot)
-                {
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "if (callingDroneTarget != null && !callingDroneTarget.IsIgnored)", Logging.Debug);
-                    if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "callingDroneTarget is [" + callingDroneTarget.Name + "][" + Math.Round(callingDroneTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(callingDroneTarget.Id) + "] GroupID [" + callingDroneTarget.GroupId + "]", Logging.Debug);
-                    AddDronePriorityTarget(callingDroneTarget, DronePriority.PriorityKillTarget, " GetBestDroneTarget: callingDroneTarget");
-                    Cache.Instance.PreferredDroneTarget = callingDroneTarget;
-                    Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                    return true;
-                }
-
-                //return false; //do not return here, continue to process targets, we did not find one yet
-            }
-            #endregion
-
-            #region Get the closest Low Value Target
-
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking Closest Low Value", Logging.Teal);
-            EntityCache lowValueTarget = null;
-
-            if (PotentialCombatTargets.Any())
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "get closest: if (potentialCombatTargets.Any())", Logging.Teal);
-
-                lowValueTarget = PotentialCombatTargets.Where(t => t.IsLowValueTarget && t.IsReadyToShoot)
-                    .OrderBy(t => t.IsEwarTarget)
-                    .ThenByDescending(t => t.IsNPCFrigate)
-                    .ThenByDescending(t => t.IsTargetedBy)
-                    .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Nearest5kDistance)
-                    .FirstOrDefault();
-            }
-            #endregion
-
-            #region Get the closest high value target
-            //
-            // Get the closest low value target //excluding things going too fast for guns to hit (if you have guns fitted)
-            //
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking closest Low Value", Logging.Teal);
-            EntityCache highValueTarget = null;
-            if (PotentialCombatTargets.Any())
-            {
-                highValueTarget = PotentialCombatTargets.Where(t => t.IsHighValueTarget && t.IsReadyToShoot)
-                    .OrderByDescending(t => !t.IsNPCFrigate)
-                    .ThenByDescending(t => t.IsTargetedBy)
-                    .ThenBy(OrderByLowestHealth())
-                    .ThenBy(t => t.Nearest5kDistance)
-                    .FirstOrDefault();
-            }
-            #endregion
-
-            #region prefer to grab a lowvaluetarget, if none avail use a high value target
-            if (lowValueTarget != null || highValueTarget != null)
-            {
-                if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Checking use High Value", Logging.Teal);
-                if (Settings.Instance.DebugGetBestDroneTarget)
-                {
-                    if (highValueTarget != null)
-                    {
-                        Logging.Log(callingroutine + " GetBestDroneTarget:", "highValueTarget is [" + highValueTarget.Name + "][" + Math.Round(highValueTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(highValueTarget.Id) + "] GroupID [" + highValueTarget.GroupId + "]", Logging.Debug);
-                    }
-                    else
-                    {
-                        Logging.Log(callingroutine + " GetBestDroneTarget:", "highValueTarget is [ null ]", Logging.Debug);
-                    }
-                }
-                Cache.Instance.PreferredDroneTarget = lowValueTarget ?? highValueTarget ?? null;
-                Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
-                return true;
-            }
-            #endregion
-
-            if (Settings.Instance.DebugGetBestDroneTarget) Logging.Log("GetBestDroneTarget: none", "Could not determine a suitable Drone target", Logging.Debug);
-            #region If we did not find anything at all (wtf!?!?)
-            if (Settings.Instance.DebugGetBestDroneTarget)
-            {
-                if (Cache.Instance.Targets.Any())
-                {
-                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
-                    Logging.Log("GetBestDroneTarget (Drones): none", "*** ALL LOCKED/LOCKING TARGETS LISTED BELOW", Logging.Debug);
-                    int LockedTargetNumber = 0;
-                    foreach (EntityCache __target in Targets)
-                    {
-                        LockedTargetNumber++;
-                        Logging.Log("GetBestDroneTarget (Drones): none", "*** Target: [" + LockedTargetNumber + "][" + __target.Name + "][" + Math.Round(__target.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(__target.Id) + "][isTarget: " + __target.IsTarget + "][isTargeting: " + __target.IsTargeting + "] GroupID [" + __target.GroupId + "]", Logging.Debug);
-                    }
-                    Logging.Log("GetBestDroneTarget (Drones): none", "*** ALL LOCKED/LOCKING TARGETS LISTED ABOVE", Logging.Debug);
-                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
-                }
-
-                if (Cache.Instance.PotentialCombatTargets.Any(t => !t.IsTarget && !t.IsTargeting))
-                {
-                    if (Cache.Instance.IgnoreTargets.Any())
-                    {
-                        int IgnoreCount = Cache.Instance.IgnoreTargets.Count;
-                        Logging.Log("GetBestDroneTarget (Drones): none", "Ignore List has [" + IgnoreCount + "] Entities in it.", Logging.Debug);
-                    }
-
-                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED BELOW (not yet targeted or targeting)", Logging.Debug);
-                    int potentialCombatTargetNumber = 0;
-                    foreach (EntityCache potentialCombatTarget in Cache.Instance.PotentialCombatTargets)
-                    {
-                        potentialCombatTargetNumber++;
-                        Logging.Log("GetBestDroneTarget (Drones): none", "***** Unlocked [" + potentialCombatTargetNumber + "]: [" + potentialCombatTarget.Name + "][" + Math.Round(potentialCombatTarget.Distance / 1000, 2) + "k][" + Cache.Instance.MaskedID(potentialCombatTarget.Id) + "][isTarget: " + potentialCombatTarget.IsTarget + "] GroupID [" + potentialCombatTarget.GroupId + "]", Logging.Debug);
-                    }
-                    Logging.Log("GetBestDroneTarget (Drones): none", "***** ALL [" + Cache.Instance.PotentialCombatTargets.Count() + "] potentialCombatTargets LISTED ABOVE (not yet targeted or targeting)", Logging.Debug);
-                    Logging.Log("GetBestDroneTarget (Drones): none", ".", Logging.Debug);
-                }
-            }
-            #endregion
-
-            Time.Instance.NextGetBestDroneTarget = DateTime.UtcNow;
-            return false;
-        }
-
+        
         public int RandomNumber(int min, int max)
         {
             Random random = new Random();
@@ -5378,16 +2740,16 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "We are in Station", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenItemsHangar", "We are in Station", Logging.Teal);
                     Cache.Instance.ItemHangar = Cache.Instance.DirectEve.GetItemHangar();
 
                     if (Cache.Instance.ItemHangar == null)
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar was null", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar was null", Logging.Teal);
                         return false;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar exists", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar exists", Logging.Teal);
 
                     // Is the items hangar open?
                     if (Cache.Instance.ItemHangar.Window == null)
@@ -5398,7 +2760,7 @@ namespace Questor.Modules.Caching
 
                     if (!Cache.Instance.ItemHangar.Window.IsReady)
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar.window is not yet ready", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenItemsHangar", "ItemsHangar.window is not yet ready", Logging.Teal);
                         return false;
                     }
 
@@ -5434,7 +2796,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("ReadyItemsHangarAsLootHangar", "We are in Station", Logging.Teal);
+                    if (Logging.DebugItemHangar) Logging.Log("ReadyItemsHangarAsLootHangar", "We are in Station", Logging.Teal);
                     Cache.Instance.LootHangar = Cache.Instance.ItemHangar;
                     return true;
                 }
@@ -5452,13 +2814,13 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
                 return false;
             }
 
@@ -5466,7 +2828,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "We are in Station", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("ReadyItemsHangarAsAmmoHangar", "We are in Station", Logging.Teal);
                     Cache.Instance.AmmoHangar = Cache.Instance.ItemHangar;
                     return true;
                 }
@@ -5499,19 +2861,19 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "public bool StackItemsHangarAsLootHangar(String module)", Logging.Teal);
+                if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "public bool StackItemsHangarAsLootHangar(String module)", Logging.Teal);
 
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
                 {
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
+                    if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
-                        if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
+                        if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
                         return true;
                     }
 
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
+                    if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                     if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds > 20)
                     {
@@ -5521,13 +2883,13 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (Settings.Instance.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "return false", Logging.Teal);
+                    if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "return false", Logging.Teal);
                     return false;
                 }
 
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (Cache.Instance.InStation)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (Cache.Instance.InStation)", Logging.Teal);
                     if (Cache.Instance.LootHangar != null)
                     {
                         try
@@ -5554,7 +2916,7 @@ namespace Questor.Modules.Caching
                         }
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (!Cache.Instance.ReadyItemsHangarAsLootHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsLootHangar", "if (!Cache.Instance.ReadyItemsHangarAsLootHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
                     if (!Cache.Instance.ReadyItemsHangarAsLootHangar("Cache.StackItemsHangar")) return false;
                     return false;
                 }
@@ -5579,13 +2941,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Teal);
                 return false;
             }
 
@@ -5593,15 +2955,15 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 30)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
                         return true;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                     if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 20)
                     {
@@ -5611,13 +2973,13 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "return false", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "return false", Logging.Teal);
                     return false;
                 }
 
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (Cache.Instance.InStation)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (Cache.Instance.InStation)", Logging.Teal);
                     if (Cache.Instance.AmmoHangar != null)
                     {
                         try
@@ -5644,7 +3006,7 @@ namespace Questor.Modules.Caching
                         }
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (!Cache.Instance.ReadyItemsHangarAsAmmoHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (!Cache.Instance.ReadyItemsHangarAsAmmoHangar(Cache.StackItemsHangar)) return false;", Logging.Teal);
                     if (!Cache.Instance.ReadyItemsHangarAsAmmoHangar("Cache.StackItemsHangar")) return false;
                     return false;
                 }
@@ -5670,15 +3032,15 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 25)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 15)", Logging.Debug);
+                    if (Logging.DebugHangars) Logging.Log("StackCargoHold", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 15)", Logging.Debug);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Debug);
+                        if (Logging.DebugHangars) Logging.Log("StackCargoHold", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Debug);
                         return true;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackCargoHold", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                     if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds > 20)
                     {
@@ -5688,7 +3050,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCargoHold", "return false", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackCargoHold", "return false", Logging.Teal);
                     return false;
                 }
 
@@ -5776,24 +3138,24 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
             if (Cache.Instance.InStation)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.InStation)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.InStation)", Logging.Teal);
 
                 Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
                 if (Cache.Instance.ShipHangar == null)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar == null)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar == null)", Logging.Teal);
                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
@@ -5801,7 +3163,7 @@ namespace Questor.Modules.Caching
                 // Is the ship hangar open?
                 if (Cache.Instance.ShipHangar.Window == null)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
                     // No, command it to open
                     Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
                     Statistics.LogWindowActionToWindowLog("ShipHangar", "Open ShipHangar");
@@ -5812,14 +3174,14 @@ namespace Questor.Modules.Caching
 
                 if (!Cache.Instance.ShipHangar.Window.IsReady)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (!Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (!Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
                     return false;
                 }
 
                 if (Cache.Instance.ShipHangar.Window.IsReady)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
                     return true;
                 }
             }
@@ -5870,15 +3232,15 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "We are in Station", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "We are in Station", Logging.Teal);
                     Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
 
                     if (Cache.Instance.ShipHangar == null)
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar was null", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar was null", Logging.Teal);
                         return false;
                     }
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar exists", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar exists", Logging.Teal);
 
                     // Is the items hangar open?
                     if (Cache.Instance.ShipHangar.Window == null)
@@ -5889,7 +3251,7 @@ namespace Questor.Modules.Caching
 
                     if (!Cache.Instance.ShipHangar.Window.IsReady)
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar.window is not yet ready", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "ShipsHangar.window is not yet ready", Logging.Teal);
                         return false;
                     }
 
@@ -5921,11 +3283,11 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.AmmoHangarTabName != null)
                     {
                         CorpHangarName = Settings.Instance.AmmoHangarTabName;
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ AmmoHangarID was: " + Cache.Instance.AmmoHangarID + "]", Logging.White);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ AmmoHangarID was: " + Cache.Instance.AmmoHangarID + "]", Logging.White);
                     }
                     else
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar not configured: Questor will default to item hangar", Logging.White);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar not configured: Questor will default to item hangar", Logging.White);
                         return true;
                     }
 
@@ -5933,17 +3295,17 @@ namespace Questor.Modules.Caching
                     {
                         Cache.Instance.AmmoHangarID = -99;
                         Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.AmmoHangarTabName); //- 1;
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
                         
                         Cache.Instance.AmmoHangar = null;
                         Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.AmmoHangarID);
                         if (Cache.Instance.AmmoHangar.IsValid)
                         {
-                            if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar contains [" + Cache.Instance.AmmoHangar.Items.Count() + "] Items", Logging.White);
+                            if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar contains [" + Cache.Instance.AmmoHangar.Items.Count() + "] Items", Logging.White);
 
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar Description [" + Cache.Instance.AmmoHangar.Description + "]", Logging.White);
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar UsedCapacity [" + Cache.Instance.AmmoHangar.UsedCapacity + "]", Logging.White);
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar Volume [" + Cache.Instance.AmmoHangar.Volume + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar Description [" + Cache.Instance.AmmoHangar.Description + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar UsedCapacity [" + Cache.Instance.AmmoHangar.UsedCapacity + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangar Volume [" + Cache.Instance.AmmoHangar.Volume + "]", Logging.White);
                         }
 
                         return true;
@@ -5969,11 +3331,11 @@ namespace Questor.Modules.Caching
                     if (Settings.Instance.LootHangarTabName != null)
                     {
                         CorpHangarName = Settings.Instance.LootHangarTabName;
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ LootHangarID was: " + Cache.Instance.LootHangarID + "]", Logging.White);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ LootHangarID was: " + Cache.Instance.LootHangarID + "]", Logging.White);
                     }
                     else
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar not configured: Questor will default to item hangar", Logging.White);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar not configured: Questor will default to item hangar", Logging.White);
                         return true;
                     }
 
@@ -5981,17 +3343,17 @@ namespace Questor.Modules.Caching
                     {
                         Cache.Instance.LootHangarID = -99;
                         Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName);  //- 1;
-                        if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                         Cache.Instance.LootHangar = null;
                         Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.LootHangarID);
                         if (Cache.Instance.LootHangar.IsValid)
                         {
-                            if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar contains [" + Cache.Instance.LootHangar.Items.Count() + "] Items", Logging.White);
+                            if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar contains [" + Cache.Instance.LootHangar.Items.Count() + "] Items", Logging.White);
 
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar Description [" + Cache.Instance.LootHangar.Description + "]", Logging.White);
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar UsedCapacity [" + Cache.Instance.LootHangar.UsedCapacity + "]", Logging.White);
-                            //if (Settings.Instance.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar Volume [" + Cache.Instance.LootHangar.Volume + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar Description [" + Cache.Instance.LootHangar.Description + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar UsedCapacity [" + Cache.Instance.LootHangar.UsedCapacity + "]", Logging.White);
+                            //if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangar Volume [" + Cache.Instance.LootHangar.Volume + "]", Logging.White);
                         }
 
                         return true;
@@ -6026,18 +3388,18 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Time.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.UtcNow: [" + DateTime.UtcNow + "]", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Time.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.UtcNow: [" + DateTime.UtcNow + "]", Logging.Teal);
 
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 25)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
 
                     if (!Cache.Instance.DirectEve.GetLockedItems().Any())
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (!Cache.Instance.DirectEve.GetLockedItems().Any())", Logging.Teal);
                         return true;
                     }
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
                     if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 30)
                     {
@@ -6046,7 +3408,7 @@ namespace Questor.Modules.Caching
                         Time.Instance.LastStackAmmoHangar = DateTime.UtcNow.AddSeconds(-60);
                         return false;
                     }
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "return false", Logging.Teal);
                     return false;
                 }
 
@@ -6113,7 +3475,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.PrimaryInventoryWindow == null)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow is null, opening InventoryWindow", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow is null, opening InventoryWindow", Logging.Teal);
 
                 // No, command it to open
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenInventory);
@@ -6125,10 +3487,10 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.PrimaryInventoryWindow != null)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow exists", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow exists", Logging.Teal);
                 if (Cache.Instance.PrimaryInventoryWindow.IsReady)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow exists and is ready", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("debug", "Cache.Instance.InventoryWindow exists and is ready", Logging.Teal);
                     return true;
                 }
 
@@ -6146,19 +3508,19 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
+                if (Logging.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
                 return true;
             }
 
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
+                if (Logging.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Debug);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Debug);
+                if (Logging.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow < Cache.Instance.NextOpenHangarAction)", Logging.Debug);
                 return false;
             }
 
@@ -6179,7 +3541,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackCorpLootHangar", "waiting for item locks: if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)", Logging.Debug);
+                    if (Logging.DebugHangars) Logging.Log("StackCorpLootHangar", "waiting for item locks: if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)", Logging.Debug);
                     return false;
                 }
 
@@ -6369,7 +3731,7 @@ namespace Questor.Modules.Caching
                 {
                     if (window.Type.Contains("form.Inventory"))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log(module, "ClosePrimaryInventoryWindow: Closing Primary Inventory Window Named [" + window.Name + "]", Logging.White);
+                        if (Logging.DebugHangars) Logging.Log(module, "ClosePrimaryInventoryWindow: Closing Primary Inventory Window Named [" + window.Name + "]", Logging.White);
                         window.Close();
                         Statistics.LogWindowActionToWindowLog("Inventory (main)", "Close Inventory");
                         Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
@@ -6400,7 +3762,7 @@ namespace Questor.Modules.Caching
                         {
                             if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                             {
-                                //if (Settings.Instance.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                                //if (Logging.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
 
                                 DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
                                 if (firstLootContainer == null && Cache.Instance.LootHangar.Items.Any(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer)))
@@ -6417,11 +3779,11 @@ namespace Questor.Modules.Caching
                                     
                                     if (_lootContainer != null && _lootContainer.IsValid)
                                     {
-                                        Logging.Log("LootContainer", "LootContainer is defined", Logging.DebugHangars);
+                                        Logging.Log("LootContainer", "LootContainer is defined", Logging.Debug);
                                         return _lootContainer;
                                     }
 
-                                    Logging.Log("LootContainer", "LootContainer is still null", Logging.DebugHangars);
+                                    Logging.Log("LootContainer", "LootContainer is still null", Logging.Debug);
                                     return null;
                                 }
 
@@ -6473,7 +3835,7 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.HighTierLootContainer))", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.HighTierLootContainer))", Logging.Teal);
 
                     DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
                     if (firstLootContainer != null)
@@ -6483,7 +3845,7 @@ namespace Questor.Modules.Caching
 
                         if (Cache.Instance.HighTierLootContainer != null && Cache.Instance.HighTierLootContainer.IsValid)
                         {
-                            if (Settings.Instance.DebugHangars) Logging.Log(module, "HighTierLootContainer is defined (no window needed)", Logging.DebugHangars);
+                            if (Logging.DebugHangars) Logging.Log(module, "HighTierLootContainer is defined (no window needed)", Logging.Debug);
                             return true;
                         }
 
@@ -6494,7 +3856,7 @@ namespace Questor.Modules.Caching
                             return false;
                         }
 
-                        if (Settings.Instance.DebugHangars) Logging.Log(module, "HighTierLootContainer is not yet ready. waiting...", Logging.DebugHangars);
+                        if (Logging.DebugHangars) Logging.Log(module, "HighTierLootContainer is not yet ready. waiting...", Logging.Debug);
                         return false;
                     }
 
@@ -6567,17 +3929,17 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                     return false;
                 }
 
                 if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
                     return false;
                 }
 
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: about to: if (!Cache.Instance.OpenInventoryWindow", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: about to: if (!Cache.Instance.OpenInventoryWindow", Logging.Teal);
 
                 if (!Cache.Instance.OpenInventoryWindow(module)) return false;
 
@@ -6595,24 +3957,24 @@ namespace Questor.Modules.Caching
                     }
 
                     List<long> idsInInvTreeView = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false);
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: IDs Found in the Inv Tree [" + idsInInvTreeView.Count() + "]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: IDs Found in the Inv Tree [" + idsInInvTreeView.Count() + "]", Logging.Teal);
 
                     foreach (Int64 itemInTree in idsInInvTreeView)
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: itemInTree [" + itemInTree + "][looking for: " + id, Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: itemInTree [" + itemInTree + "][looking for: " + id, Logging.Teal);
                         if (itemInTree == id)
                         {
-                            if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: Found a match! itemInTree [" + itemInTree + "] = id [" + id + "]", Logging.Teal);
+                            if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: Found a match! itemInTree [" + itemInTree + "] = id [" + id + "]", Logging.Teal);
                             if (Cache.Instance.PrimaryInventoryWindow.currInvIdItem != id)
                             {
-                                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We do not have the right ID selected yet, select it now.", Logging.Teal);
+                                if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We do not have the right ID selected yet, select it now.", Logging.Teal);
                                 Cache.Instance.PrimaryInventoryWindow.SelectTreeEntryByID(id);
                                 Statistics.LogWindowActionToWindowLog("Select Tree Entry", "Selected Entry on Left of Primary Inventory Window");
                                 Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(Cache.Instance.RandomNumber(2000, 4400));
                                 return false;
                             }
 
-                            if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We already have the right ID selected.", Logging.Teal);
+                            if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: We already have the right ID selected.", Logging.Teal);
                             return true;
                         }
 
@@ -6621,7 +3983,7 @@ namespace Questor.Modules.Caching
 
                     if (!idsInInvTreeView.Contains(id))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (!Cache.Instance.InventoryWindow.GetIdsFromTree(false).Contains(ID))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (!Cache.Instance.InventoryWindow.GetIdsFromTree(false).Contains(ID))", Logging.Teal);
 
                         if (id >= 0 && id <= 6 && Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
                         {
@@ -6657,17 +4019,17 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                     return false;
                 }
 
                 if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: if (DateTime.UtcNow < NextOpenHangarAction)", Logging.Teal);
                     return false;
                 }
 
-                if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: about to: if (!Cache.Instance.OpenInventoryWindow", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: about to: if (!Cache.Instance.OpenInventoryWindow", Logging.Teal);
 
                 if (!Cache.Instance.OpenInventoryWindow(module)) return false;
 
@@ -6676,7 +4038,7 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.PrimaryInventoryWindow != null && Cache.Instance.PrimaryInventoryWindow.IsReady)
                 {
                     List<long> idsInInvTreeView = Cache.Instance.PrimaryInventoryWindow.GetIdsFromTree(false);
-                    if (Settings.Instance.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: IDs Found in the Inv Tree [" + idsInInvTreeView.Count() + "]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenAndSelectInvItem", "Debug: IDs Found in the Inv Tree [" + idsInInvTreeView.Count() + "]", Logging.Teal);
 
                     if (Cache.Instance.PrimaryInventoryWindow.ExpandCorpHangarView())
                     {
@@ -6763,7 +4125,7 @@ namespace Questor.Modules.Caching
             {
                 if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                 {
-                    if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                     DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainerName);
 
                     if (lootHangarWindow != null)
@@ -6836,22 +4198,22 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.LootHangarID = -99;
                                 Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName); //- 1;
-                                if (Settings.Instance.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
+                                if (Logging.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                                 _lootHangar = null;
                                 _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.LootHangarID);
 
                                 if (_lootHangar != null && _lootHangar.IsValid) //do we have a corp hangar tab setup with that name?
                                 {
-                                    if (Settings.Instance.DebugHangars)
+                                    if (Logging.DebugHangars)
                                     {
-                                        Logging.Log("LootHangar", "LootHangar is defined (no window needed)", Logging.DebugHangars);
+                                        Logging.Log("LootHangar", "LootHangar is defined (no window needed)", Logging.Debug);
                                         try
                                         {
                                             if (_lootHangar.Items.Any())
                                             {
                                                 int LootHangarItemCount = _lootHangar.Items.Count();
-                                                if (Settings.Instance.DebugHangars) Logging.Log("LootHangar", "LootHangar [" + Settings.Instance.LootHangarTabName + "] has [" + LootHangarItemCount + "] items", Logging.DebugHangars);
+                                                if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar [" + Settings.Instance.LootHangarTabName + "] has [" + LootHangarItemCount + "] items", Logging.Debug);
                                             }
                                         }
                                         catch (Exception exception)
@@ -6867,7 +4229,7 @@ namespace Questor.Modules.Caching
                                 return Cache.Instance.ItemHangar;
                             }
 
-                            //if (Settings.Instance.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
+                            //if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
                             _lootHangar = null;
                             return Cache.Instance.ItemHangar;
                         }
@@ -6910,7 +4272,7 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.LootHangar != null)
                         {
                             Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootHangarTabName));
-                            if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
+                            if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpLootHangarSecondaryWindow != null)
                             {
@@ -6937,7 +4299,7 @@ namespace Questor.Modules.Caching
                     }
                     else if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                         DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainerName));
 
                         if (lootHangarWindow != null)
@@ -6999,13 +4361,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -7015,23 +4377,23 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpLootHangar("Cache.StackCorpLootHangar")) return false;
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "Finished [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackLootHangar", "Finished [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         StackLoothangarAttempts = 0;
                         return true;
                     }
 
                     if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                         //if (!Cache.Instance.StackLootContainer("Cache.StackLootContainer")) return false;
                         Logging.Log("StackLootHangar", "We do not stack containers, you will need to do so manually. StackAll does not seem to work with Primary Inventory windows.", Logging.Teal);
                         StackLoothangarAttempts = 0; 
                         return true;
                     }
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "!Cache.Instance.StackItemsHangarAsLootHangar(Cache.StackLootHangar))", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackLootHangar", "!Cache.Instance.StackItemsHangarAsLootHangar(Cache.StackLootHangar))", Logging.Teal);
                     if (!Cache.Instance.StackItemsHangarAsLootHangar("Cache.StackItemsHangarAsLootHangar")) return false;
                     StackLoothangarAttempts = 0;
                     return true;
@@ -7101,7 +4463,7 @@ namespace Questor.Modules.Caching
                             {
                                 Cache.Instance.AmmoHangarID = -99;
                                 Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.AmmoHangarTabName); //- 1;
-                                if (Settings.Instance.DebugHangars) Logging.Log("AmmoHangar: GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
+                                if (Logging.DebugHangars) Logging.Log("AmmoHangar: GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
 
                                 _ammoHangar = null;
                                 _ammoHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.AmmoHangarID);
@@ -7109,15 +4471,15 @@ namespace Questor.Modules.Caching
 
                                 if (_ammoHangar != null && _ammoHangar.IsValid) //do we have a corp hangar tab setup with that name?
                                 {
-                                    if (Settings.Instance.DebugHangars)
+                                    if (Logging.DebugHangars)
                                     {
-                                        Logging.Log("AmmoHangar", "AmmoHangar is defined (no window needed)", Logging.DebugHangars);
+                                        Logging.Log("AmmoHangar", "AmmoHangar is defined (no window needed)", Logging.Debug);
                                         try
                                         {
                                             if (AmmoHangar.Items.Any())
                                             {
                                                 int AmmoHangarItemCount = AmmoHangar.Items.Count();
-                                                if (Settings.Instance.DebugHangars) Logging.Log("AmmoHangar", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] has [" + AmmoHangarItemCount + "] items", Logging.DebugHangars);
+                                                if (Logging.DebugHangars) Logging.Log("AmmoHangar", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] has [" + AmmoHangarItemCount + "] items", Logging.Debug);
                                             }
                                         }
                                         catch (Exception exception)
@@ -7176,13 +4538,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
             {
-                if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
+                if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
                 return false;
             }
 
@@ -7192,24 +4554,24 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpAmmoHangar(module)) return false;
-                        if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         StackAmmohangarAttempts = 0;
                         return true;
                     }
 
                     //if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
                     //{
-                    //    if (Settings.Instance.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                    //    if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
                     //    if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
                     //    StackLoothangarAttempts = 0;
                     //    return true;
                     //}
 
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
                     if (!Cache.Instance.StackItemsHangarAsAmmoHangar(module)) return false;
-                    if (Settings.Instance.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackItemsHangarAsAmmoHangar]", Logging.Teal);
                     StackAmmohangarAttempts = 0;
                     return true;
                 }
@@ -7236,7 +4598,7 @@ namespace Questor.Modules.Caching
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                     {
-                        if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))", Logging.Teal);
 
                         if (Cache.Instance.AmmoHangar == null)
                         {
@@ -7247,11 +4609,11 @@ namespace Questor.Modules.Caching
                         if (Cache.Instance.AmmoHangar != null)
                         {
                             Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.AmmoHangarTabName));
-                            if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
+                            if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpAmmoHangarSecondaryWindow != null)
                             {
-                                if (Settings.Instance.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (ammoHangarWindow != null)", Logging.Teal);
+                                if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (ammoHangarWindow != null)", Logging.Teal);
 
                                 // if open command it to close
                                 Cache.Instance.corpAmmoHangarSecondaryWindow.Close();
@@ -7300,123 +4662,6 @@ namespace Questor.Modules.Caching
             catch (Exception exception)
             {
                 Logging.Log("CloseAmmoHangar", "Unable to complete CloseAmmoHangar [" + exception + "]", Logging.Teal);
-                return false;
-            }
-        }
-
-        public DirectContainer DroneBay { get; set; }
-
-        //{
-        //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
-        //}
-
-        public bool OpenDroneBay(string module)
-        {
-            if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
-            {
-                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
-                return false;
-            }
-
-            try
-            {
-                if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
-                {
-                    Logging.Log(module, "Opening Drone Bay: We are not in station or space?!", Logging.Orange);
-                    return false;
-                }
-
-                //if(Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == 31)
-                //{
-                //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
-                //    return false;
-                //}
-
-                if (Cache.Instance.InStation || Cache.Instance.InSpace)
-                {
-                    Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
-                }
-                else
-                {
-                    return false;
-                }
-
-                if (GetShipsDroneBayAttempts > 10) //we her have not located a dronebay in over 10 attempts, we are not going to
-                {
-                    Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.DebugHangars);
-                    return true;
-                }
-
-                if (Cache.Instance.DroneBay == null)
-                {
-                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Drone Bay: --- waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    GetShipsDroneBayAttempts++;
-                    return false;
-                }
-
-                if (Cache.Instance.DroneBay != null && Cache.Instance.DroneBay.IsValid)
-                {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
-                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
-                    if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    GetShipsDroneBayAttempts = 0;
-                    return true;
-                }
-
-                if (Settings.Instance.DebugHangars) Logging.Log(module, "DroneBay is not ready...", Logging.White);
-                return false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("ReadyDroneBay", "Unable to complete ReadyDroneBay [" + exception + "]", Logging.Teal);
-                return false;
-            }
-        }
-
-        public bool CloseDroneBay(string module)
-        {
-            if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
-            {
-                //Logging.Log(module + ": Closing Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
-                return false;
-            }
-
-            try
-            {
-                if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
-                {
-                    Logging.Log(module, "Closing Drone Bay: We are not in station or space?!", Logging.Orange);
-                    return false;
-                }
-
-                if (Cache.Instance.InStation || Cache.Instance.InSpace)
-                {
-                    Cache.Instance.DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-                }
-                else
-                {
-                    return false;
-                }
-
-                // Is the drone bay open? if so, close it
-                if (Cache.Instance.DroneBay.Window != null)
-                {
-                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Closing Drone Bay: waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    Cache.Instance.DroneBay.Window.Close();
-                    Statistics.LogWindowActionToWindowLog("Dronebay", "Closing DroneBay");
-                    return true;
-                }
-
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("CloseDroneBay", "Unable to complete CloseDroneBay [" + exception + "]", Logging.Teal);
                 return false;
             }
         }
@@ -7541,7 +4786,7 @@ namespace Questor.Modules.Caching
                                         return null;
                                     }
 
-                                    if (Settings.Instance.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
+                                    if (Logging.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
                                     return null;
                                 }
 
@@ -7603,13 +4848,13 @@ namespace Questor.Modules.Caching
 
             if (DateTime.UtcNow < Time.Instance.NextWindowAction)
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
                 return false;
             }
 
             if (AgentInteraction.Agent.Window == null)
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
                 Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
                 AgentInteraction.Agent.InteractWith();
                 Statistics.LogWindowActionToWindowLog("AgentWindow", "Opening AgentWindow");
@@ -7623,7 +4868,7 @@ namespace Questor.Modules.Caching
 
             if (AgentInteraction.Agent.Window.IsReady && AgentInteraction.AgentId == AgentInteraction.Agent.AgentId)
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
                 return true;
             }
 
@@ -7854,9 +5099,9 @@ namespace Questor.Modules.Caching
 
                     if (!Cache.Instance.OpenShipsHangar(module)) return false;
                     if (Cache.Instance.ItemHangar == null) return false;
-                    if (Settings.Instance.UseDrones)
+                    if (Drones.UseDrones)
                     {
-                        if (!Cache.Instance.OpenDroneBay(module)) { return false; }
+                        if (!Drones.OpenDroneBay(module)) { return false; }
                     }
 
                     //repair ships in ships hangar
@@ -7864,9 +5109,9 @@ namespace Questor.Modules.Caching
 
                     //repair items in items hangar and drone bay of active ship also
                     repairAllItems.AddRange(Cache.Instance.ItemHangar.Items);
-                    if (Settings.Instance.UseDrones)
+                    if (Drones.UseDrones)
                     {
-                        repairAllItems.AddRange(Cache.Instance.DroneBay.Items);
+                        repairAllItems.AddRange(Drones.DroneBay.Items);
                     }
 
                     if (repairAllItems.Any())
@@ -7932,7 +5177,7 @@ namespace Questor.Modules.Caching
 
                     DirectWindow repairQuote = Cache.Instance.GetWindowByName("Set Quantity");
 
-                    if (GetShipsDroneBayAttempts > 10 && Cache.Instance.DroneBay == null)
+                    if (Drones.GetShipsDroneBayAttempts > 10 && Drones.DroneBay == null)
                     {
                         Logging.Log(module, "Your current ship does not have a drone bay, aborting repair of drones", Logging.Teal);
                         return true;
@@ -7964,12 +5209,12 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (!Cache.Instance.OpenDroneBay("Repair Drones")) return false;
+                    if (!Drones.OpenDroneBay("Repair Drones")) return false;
 
                     List<DirectItem> dronesToRepair;
                     try
                     {
-                        dronesToRepair = Cache.Instance.DroneBay.Items;
+                        dronesToRepair = Drones.DroneBay.Items;
                     }
                     catch (Exception exception)
                     {
@@ -8124,7 +5369,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    return DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofBookmarksForSalvageBehavior);
+                    return DateTime.UtcNow.AddMinutes(-Salvage.AgeofBookmarksForSalvageBehavior);
                 }
                 catch (Exception ex)
                 {
@@ -8142,16 +5387,16 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.AllBookmarks != null && Cache.Instance.AllBookmarks.Any())
                     {
-                        List<DirectBookmark> _SalvagingBookmarks = null;
-                        DirectBookmark _SalvagingBookmark = null;
-                        if (Settings.Instance.FirstSalvageBookmarksInSystem)
+                        List<DirectBookmark> _SalvagingBookmarks;
+                        DirectBookmark _SalvagingBookmark;
+                        if (Salvage.FirstSalvageBookmarksInSystem)
                         {
                             Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.White);
                             _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                             if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
                             {
                                 _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
-                                return _SalvagingBookmark ?? null;
+                                return _SalvagingBookmark;
                             }
 
                             return null;
@@ -8162,7 +5407,7 @@ namespace Questor.Modules.Caching
                         if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
                         {
                             _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
-                            return _SalvagingBookmark ?? null;
+                            return _SalvagingBookmark;
                         }
 
                         return null;
@@ -8269,7 +5514,7 @@ namespace Questor.Modules.Caching
 
                 _bookmarkDeletionAttempt = 0;
                 Time.Instance.NextSalvageTrip = DateTime.UtcNow;
-                Statistics.Instance.FinishedSalvaging = DateTime.UtcNow;
+                Statistics.FinishedSalvaging = DateTime.UtcNow;
                 return true;
             }
             catch (Exception ex)
@@ -8283,14 +5528,14 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < NextBookmarkDeletionAttempt)
             {
-                if (Settings.Instance.DebugSalvage) Logging.Log("DeleteUselessSalvageBookmarks", "NextBookmarkDeletionAttempt is still [" + NextBookmarkDeletionAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "] sec in the future... waiting", Logging.Debug);
+                if (Logging.DebugSalvage) Logging.Log("DeleteUselessSalvageBookmarks", "NextBookmarkDeletionAttempt is still [" + NextBookmarkDeletionAttempt.Subtract(DateTime.UtcNow).TotalSeconds + "] sec in the future... waiting", Logging.Debug);
                 return false;
             }
 
             try
             {
                 //Delete bookmarks older than 2 hours.
-                DateTime bmExpirationDate = DateTime.UtcNow.AddMinutes(-Settings.Instance.AgeofSalvageBookmarksToExpire);
+                DateTime bmExpirationDate = DateTime.UtcNow.AddMinutes(-Salvage.AgeofSalvageBookmarksToExpire);
                 List<DirectBookmark> uselessSalvageBookmarks = new List<DirectBookmark>(AfterMissionSalvageBookmarks.Where(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0).ToList());
 
                 DirectBookmark uselessSalvageBookmark = uselessSalvageBookmarks.FirstOrDefault();
@@ -8299,7 +5544,7 @@ namespace Questor.Modules.Caching
                     _bookmarkDeletionAttempt++;
                     if (_bookmarkDeletionAttempt <= uselessSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
                     {
-                        Logging.Log(module, "removing a salvage bookmark that aged more than [" + Settings.Instance.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
+                        Logging.Log(module, "removing a salvage bookmark that aged more than [" + Salvage.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
                         NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
                         uselessSalvageBookmark.Delete();
                         return false;

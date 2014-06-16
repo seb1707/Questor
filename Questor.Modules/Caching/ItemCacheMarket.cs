@@ -15,8 +15,10 @@ namespace Questor.Modules.Caching
     using System.Collections.Generic;
     using DirectEve;
 
-    public class ItemCacheMarket
-    {
+    
+    //public class ItemCacheMarket : ItemCache
+    //{
+        /*
         public ItemCacheMarket(DirectItem item, bool cacheRefineOutput)
         {
             Id = item.ItemId;
@@ -73,5 +75,6 @@ namespace Questor.Modules.Caching
         public double? StationBuy { get; set; }
 
         public List<ItemCacheMarket> RefineOutput { get; private set; }
-    }
+         * */
+    //}
 }

@@ -23,11 +23,21 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                //Id = item.ItemId;
+                //Name = item.TypeName;
+                //TypeId = item.TypeId;
+                //Volume = item.Volume;
+                //Quantity = item.Quantity;
+                NameForSorting = item.TypeName.Replace("'", "");
+                GroupId = item.GroupId;
+                CategoryId = item.CategoryId;
                 BasePrice = item.BasePrice;
                 Capacity = item.Capacity;
                 MarketGroupId = item.MarketGroupId;
                 PortionSize = item.PortionSize;
+
                 QuantitySold = 0;
+
                 RefineOutput = new List<ItemCache>();
                 if (cacheRefineOutput)
                 {
@@ -101,22 +111,20 @@ namespace Questor.Modules.Caching
         public int trackingSpeedMultiplier { get; set; } //(int)ammo.Attribute("trackingSpeedMultiplier");
         public int powerNeedMultiplier { get; set; } //(int)ammo.Attribute("powerNeedMultiplier");
         
-        //public long Id { get; private set; }
-        //public string Name { get; private set; }
+        public string NameForSorting { get; private set; }
 
-        //public int TypeId { get; private set; }
         public int GroupId { get; private set; }
+
+        public int CategoryId { get; private set; }
 
         public double BasePrice { get; private set; }
 
-        //public double Volume { get; private set; }
         public double Capacity { get; private set; }
 
         public int MarketGroupId { get; private set; }
 
         public int PortionSize { get; private set; }
 
-        //public int Quantity { get; private set; }
         public int QuantitySold { get; set; }
 
         public double? StationBuy { get; set; }
@@ -143,6 +151,7 @@ namespace Questor.Modules.Caching
         public int TypeId
         {
             get { return _directItem.TypeId; }
+            //private set { return value};
         }
 
         public int GroupID
@@ -153,6 +162,7 @@ namespace Questor.Modules.Caching
         public int Quantity
         {
             get { return _directItem.Quantity; }
+            //private set (return value);
         }
 
         public bool IsContraband
@@ -290,7 +300,7 @@ namespace Questor.Modules.Caching
             {
                 if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                 {
-                    if (Cache.Instance.MissionItems.Contains((Name ?? string.Empty).ToLower()))
+                    if (MissionSettings.MissionItems.Contains((Name ?? string.Empty).ToLower()))
                     {
                         return true;
                     }
@@ -318,14 +328,18 @@ namespace Questor.Modules.Caching
             get { return TypeId == 51; }
         }
 
+        //public string Name { get; private set; }
+
         public string Name
         {
             get { return _directItem.TypeName; }
+            //private set {return value;};
         }
 
         public double Volume
         {
             get { return _directItem.Volume; }
+            //private set { return value; };
         }
 
         public double TotalVolume

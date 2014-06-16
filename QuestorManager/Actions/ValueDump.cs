@@ -39,19 +39,20 @@ namespace QuestorManager.Actions
             switch (_States.CurrentValueDumpState)
             {
                 case ValueDumpState.CheckMineralPrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.CheckMineralPrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.CheckMineralPrices:", Logging.Debug);
                     if(!Market.CheckMineralPrices("ValueDump",  _questorManagerForm.RefineCheckBox.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                     break;
 
                 case ValueDumpState.SaveMineralPrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SaveMineralPrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SaveMineralPrices:", Logging.Debug);
                     if (!Market.SaveMineralprices("ValueDump")) return;
                     _States.CurrentValueDumpState = ValueDumpState.Idle;    
                     break;
 
                 case ValueDumpState.GetItems:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.GetItems:", Logging.Debug);
+                    /* fixme: 6/2014
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.GetItems:", Logging.Debug);
                     if (Cache.Instance.ItemHangar == null) return;
                     Logging.Log("ValueDump", "Loading hangar items", Logging.White);
 
@@ -64,10 +65,11 @@ namespace QuestorManager.Actions
                     }
 
                     _States.CurrentValueDumpState = ValueDumpState.UpdatePrices;
+                     */
                     break;
 
                 case ValueDumpState.UpdatePrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.UpdatePrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.UpdatePrices:", Logging.Debug);
                     if (!Market.UpdatePrices("ValueDump", _questorManagerForm.cbxSell.Checked, _questorManagerForm.RefineCheckBox.Checked, _questorManagerForm.cbxUndersell.Checked)) return;
                     //
                     // we are out of items
@@ -80,7 +82,7 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.Begin:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.Begin:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.Begin:", Logging.Debug);
                     if (_questorManagerForm.RefineCheckBox.Checked && _questorManagerForm.cbxSell.Checked)
                     {
                         _questorManagerForm.cbxSell.Checked = false;
@@ -99,7 +101,7 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.NextItem:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.NextItem:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.NextItem:", Logging.Debug);
                     if (!Market.NextItem("ValueDump")) return;
                     if (_questorManagerForm.cbxSellOrder.Checked)
                         _States.CurrentValueDumpState = ValueDumpState.SellOrder;
@@ -108,37 +110,37 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.SellOrder:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SellOrder:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SellOrder:", Logging.Debug);
                     if (!Market.CreateSellOrder("ValueDump", 90, _questorManagerForm.cbxCorpOrder.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.StartQuickSell:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.StartQuickSell:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.StartQuickSell:", Logging.Debug);
                     if (!Market.StartQuickSell("ValueDump", _questorManagerForm.cbxSell.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.InspectOrder;
                     break;
 
                 case ValueDumpState.InspectOrder:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectOrder:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectOrder:", Logging.Debug);
                     if (!Market.Inspectorder("ValueDump", _questorManagerForm.cbxSell.Checked, _questorManagerForm.RefineCheckBox.Checked, _questorManagerForm.cbxUndersell.Checked, (double)_questorManagerForm.RefineEfficiencyInput.Value)) return;
                     _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                     break;
 
                 case ValueDumpState.InspectRefinery:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectRefinery:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectRefinery:", Logging.Debug);
                     if (!Market.InspectRefinery("ValueDump", (double)_questorManagerForm.RefineEfficiencyInput.Value))
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.WaitingToFinishQuickSell:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToFinishQuickSell:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToFinishQuickSell:", Logging.Debug);
                     if (!Market.WaitingToFinishQuickSell("ValueDump")) return;
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.RefineItems:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.RefineItems:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.RefineItems:", Logging.Debug);
                     if (Market.RefineItems("ValueDump", _questorManagerForm.RefineCheckBox.Checked)) return;
                     _lastExecute = DateTime.UtcNow;
                     Logging.Log("Valuedump", "Waiting 17 seconds for minerals to appear in the item hangar", Logging.White);
@@ -146,7 +148,7 @@ namespace QuestorManager.Actions
                     break;
 
                 case ValueDumpState.WaitingToBack:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToBack:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToBack:", Logging.Debug);
                     if (DateTime.UtcNow.Subtract(_lastExecute).TotalSeconds > 17 && _valueProcess)
                     {
                         _States.CurrentValueDumpState = _valueProcess ? ValueDumpState.Begin : ValueDumpState.Done;

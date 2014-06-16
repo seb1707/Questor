@@ -1,31 +1,32 @@
-﻿using System.Linq;
-using Questor.Modules.Activities;
-
+﻿
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
-    using System.Globalization;
-    using DirectEve;
     using System.Diagnostics;
+    using System.Globalization;
+    using System.Linq;
+    using DirectEve;
     using LavishScriptAPI;
+    using global::Questor.Modules.Activities;
     using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
-    public class Cleanup
+    public static class Cleanup
     {
         private static DateTime _lastCleanupAction;
-        private DateTime _lastCleanupProcessState;
-        private int _droneBayClosingAttempts;
-        private bool MemoryManagerHasBeenRunThisIteration;
+        private static DateTime _lastCleanupProcessState;
+        private static int _droneBayClosingAttempts;
+        private static bool MemoryManagerHasBeenRunThisIteration;
         private static DateTime CloseQuestorDelay { get; set; }
 
         private static bool _closeQuestor10SecWarningDone;
         private static bool _closeQuestorCMDUplink = true;
         public static bool CloseQuestorFlag = true;
-        private bool FoundDuelInvitation;
-        private DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
+        private static bool FoundDuelInvitation;
+        private static DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
 
         public static void BeginClosingQuestor()
         {
@@ -33,6 +34,15 @@ namespace Questor.Modules.BackgroundTasks
             Cache.Instance.SessionState = "Quitting";
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
             //Cleanup.CloseQuestor();
+        }
+
+        public static void DirecteveDispose()
+        {
+            Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
+            Cache.Instance.DirectEve.Dispose(); //could this hang?
+            Logging.Log("Questor", "finished calling DirectEve.Dispose()", Logging.White);
+            Process.GetCurrentProcess().Kill();
+            Environment.Exit(0);
         }
 
         public static bool CloseQuestor(string Reason, bool restart = false)
@@ -73,7 +83,7 @@ namespace Questor.Modules.BackgroundTasks
                 {
                     if (CloseQuestorFlag)
                     {
-                        Logging.Log("Questor", "Logging off EVE: In theory eve and questor will restart on their own when the client comes back up", Logging.White);
+                        Logging.Log("Questor", "Logging off EVE: EVE and questor should restart on their own when the client comes back up", Logging.White);
                         if (Settings.Instance.UseInnerspace)
                         {
                             LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
@@ -144,7 +154,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > CloseQuestorDelay)
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
-                                Cache.Instance.DirecteveDispose();
+                                DirecteveDispose();
                                 return false;
                             }
                             return false;
@@ -175,7 +185,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > CloseQuestorDelay)
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
-                                Cache.Instance.DirecteveDispose();
+                                DirecteveDispose();
                                 return false;
                             }
                             return false;
@@ -205,7 +215,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > CloseQuestorDelay)
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
-                                Cache.Instance.DirecteveDispose();
+                                DirecteveDispose();
                                 return false;
                             }
                             return false;
@@ -230,7 +240,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (DateTime.UtcNow > CloseQuestorDelay)
                             {
                                 Logging.Log("Questor", "Exiting eve now.", Logging.White);
-                                Cache.Instance.DirecteveDispose();
+                                DirecteveDispose();
                                 return false;
                             }
                             return false;
@@ -256,7 +266,7 @@ namespace Questor.Modules.BackgroundTasks
                         if (DateTime.UtcNow > CloseQuestorDelay)
                         {
                             Logging.Log("Questor", "Exiting eve now.", Logging.White);
-                            Cache.Instance.DirecteveDispose();
+                            DirecteveDispose();
                             return false;
                         }
                     }
@@ -279,7 +289,7 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow > CloseQuestorDelay)
             {
                 Logging.Log("Questor", "Closing with: Process.GetCurrentProcess().Kill()", Logging.White);
-                Cache.Instance.DirecteveDispose();
+                DirecteveDispose();
                 return false;
             }
             return false;
@@ -374,32 +384,18 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 Logging.Log("Cleanup", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
 
-                if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50) && Settings.Instance.EVEProcessMemoryCeilingLogofforExit != "")
+                if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50))
                 {
                     Logging.Log("Cleanup", "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
                     Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
-                    if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "logoff")
-                    {
-                        Cache.Instance.CloseQuestorCMDLogoff = true;
-                        Cache.Instance.CloseQuestorCMDExitGame = false;
-                        Cache.Instance.SessionState = "LoggingOff";
-                        BeginClosingQuestor();
-                        return;
-                    }
-                    if (Settings.Instance.EVEProcessMemoryCeilingLogofforExit == "exit")
-                    {
-                        Cache.Instance.CloseQuestorCMDLogoff = false;
-                        Cache.Instance.CloseQuestorCMDExitGame = true;
-                        Cache.Instance.SessionState = "Exiting";
-                        BeginClosingQuestor();
-                        return;
-                    }
-                    Logging.Log("Cleanup", "EVEProcessMemoryCeilingLogofforExit was not set to exit or logoff - doing nothing ", Logging.Red);
+                    Cache.Instance.CloseQuestorCMDLogoff = false;
+                    Cache.Instance.CloseQuestorCMDExitGame = true;
+                    Cache.Instance.SessionState = "Exiting";
+                    BeginClosingQuestor();
+                    return;
                 }
-                else
-                {
-                    Cache.Instance.SessionState = "Running";
-                }
+                
+                Cache.Instance.SessionState = "Running";
             }
             catch (System.Exception ex)
             {
@@ -408,16 +404,16 @@ namespace Questor.Modules.BackgroundTasks
             
         }
 
-        public void ProcessState()
+        public static void ProcessState()
         {
-            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100) || Settings.Instance.DebugDisableCleanup) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
+            if (DateTime.UtcNow < _lastCleanupProcessState.AddMilliseconds(100) || Logging.DebugDisableCleanup) //if it has not been 100ms since the last time we ran this ProcessState return. We can't do anything that close together anyway
                 return;
 
             _lastCleanupProcessState = DateTime.UtcNow;
 
             if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
             {
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Time.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
+                if (Logging.DebugCleanup) Logging.Log("Cleanup", "last session change was at [" + Time.Instance.LastSessionChange + "] waiting until 20 sec have passed", Logging.Teal);
                 return;
             }
 
@@ -426,25 +422,25 @@ namespace Questor.Modules.BackgroundTasks
                 // When in warp there's nothing we can do, so ignore everything
                 if (Cache.Instance.InWarp)
                 {
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
+                    if (Logging.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in warp: do nothing", Logging.Teal);
                     _States.CurrentSalvageState = SalvageState.Idle;
                     return;
                 }
 
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
+                if (Logging.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in space", Logging.Teal);
                 if (DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in station time is [" + Time.Instance.LastInStation + " waiting until 10 seconds have passed", Logging.Teal);
+                    if (Logging.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in station time is [" + Time.Instance.LastInStation + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
                 }
             }
 
             if (Cache.Instance.InStation)
             {
-                if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in station", Logging.Teal);
+                if (Logging.DebugCleanup) Logging.Log("Cleanup", "Processstate: we are in station", Logging.Teal);
                 if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
                 {
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in space time is [" + Time.Instance.LastInSpace + " waiting until 10 seconds have passed", Logging.Teal);
+                    if (Logging.DebugCleanup) Logging.Log("Cleanup", "Processstate: last in space time is [" + Time.Instance.LastInSpace + " waiting until 10 seconds have passed", Logging.Teal);
                     return;
                 }
             }
@@ -466,7 +462,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     if (!Cache.Instance.InSpace && !Cache.Instance.InStation && Settings.Instance.CharacterName != "AtLoginScreenNoCharactersLoggedInYet")
                     {
-                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
+                        if (Logging.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
                         _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
@@ -484,12 +480,12 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Cache.Instance.Windows == null || !Cache.Instance.Windows.Any())
                     {
-                        if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null or empty", Logging.White);
+                        if (Logging.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: Cache.Instance.Windows returned null or empty", Logging.White);
                         _lastCleanupAction = DateTime.UtcNow;
                         _States.CurrentCleanupState = CleanupState.Idle;
                         return;
                     }
-                    if (Settings.Instance.DebugCleanup) Logging.Log("Cleanup", "Checking Each window in Cache.Instance.Windows", Logging.Teal);
+                    if (Logging.DebugCleanup) Logging.Log("Cleanup", "Checking Each window in Cache.Instance.Windows", Logging.Teal);
 
                     foreach (DirectWindow window in Cache.Instance.Windows)
                     {
@@ -759,7 +755,7 @@ namespace Questor.Modules.BackgroundTasks
 
                             if (window.Name.Contains("_ShipDroneBay_") && window.Caption == "Drone Bay")
                             {
-                                if (Settings.Instance.UseDrones &&
+                                if (Drones.UseDrones &&
                                    (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle &&
                                     Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial &&
                                     Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip &&

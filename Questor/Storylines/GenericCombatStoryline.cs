@@ -25,7 +25,7 @@ namespace Questor.Storylines
         //private readonly Combat _combat;
         //private readonly Drones _drones;
         //private readonly Salvage _salvage;
-        private readonly Statistics _statistics;
+        //private readonly Statistics _statistics;
 
         private GenericCombatStorylineState _state;
 
@@ -38,29 +38,20 @@ namespace Questor.Storylines
         public GenericCombatStoryline()
         {
             _neededAmmo = new List<Ammo>();
-
             //_agentInteraction = new AgentInteraction();
             //_arm = new Arm();
             //_combat = new Combat();
             //_drones = new Drones();
             //_salvage = new Salvage();
-            _statistics = new Statistics();
+            //_statistics = new Statistics();
             _combatMissionCtrl = new CombatMissionCtrl();
 
             Settings.Instance.SettingsLoaded += ApplySettings;
         }
 
-        /// <summary>
-        ///   Apply settings to the salvager
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ApplySettings(object sender, EventArgs e)
         {
-            Salvage.Ammo = Settings.Instance.Ammo;
-            Salvage.MaximumWreckTargets = Settings.Instance.MaximumWreckTargets;
-            Salvage.ReserveCargoCapacity = Settings.Instance.ReserveCargoCapacity;
-            Salvage.LootEverything = Settings.Instance.LootEverything;
+            Settings.Instance.LoadSettings(true);
         }
 
         /// <summary>
@@ -85,7 +76,7 @@ namespace Questor.Storylines
 
                 //Questor.AgentID = _agentId;
 
-                _statistics.AgentID = _agentId;
+                Statistics.AgentID = _agentId;
 
                 CombatMissionCtrl.AgentId = _agentId;
                 _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
@@ -147,7 +138,7 @@ namespace Questor.Storylines
             if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
             {
                 Modules.Actions.Arm.AmmoToLoad.Clear();
-                Modules.Actions.Arm.AmmoToLoad.AddRange(AgentInteraction.AmmoToLoad);
+                Modules.Actions.Arm.AmmoToLoad.AddRange(MissionSettings.AmmoToLoad);
                 return true;
             }
 
@@ -213,14 +204,14 @@ namespace Questor.Storylines
                         {
                             Logging.Log("GenericCombatStoryline.WarpOut", "Warp at " + warpOutBookMark.Title, Logging.White);
                             Traveler.Destination = new BookmarkDestination(warpOutBookMark);
-                            Cache.Instance.DoNotBreakInvul = true;
+                            Defense.DoNotBreakInvul = true;
                         }
 
                         Traveler.ProcessState();
                         if (_States.CurrentTravelerState == TravelerState.AtDestination)
                         {
                             Logging.Log("GenericCombatStoryline.WarpOut", "Safe!", Logging.White);
-                            Cache.Instance.DoNotBreakInvul = false;
+                            Defense.DoNotBreakInvul = false;
                             _state = GenericCombatStorylineState.GotoMission;
                             Traveler.Destination = null;
                             break;
@@ -247,10 +238,10 @@ namespace Questor.Storylines
                         if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
                         if (nameOfBookmark == "") nameOfBookmark = "Encounter";
                         Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + Cache.Instance.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.White);
-                        Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
+                        Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));
                     }
 
-                    if (Cache.Instance.PotentialCombatTargets.Any())
+                    if (Combat.PotentialCombatTargets.Any())
                     {
                         Logging.Log("GenericCombatStoryline", "Priority targets found while traveling, engaging!", Logging.White);
                         Combat.ProcessState();

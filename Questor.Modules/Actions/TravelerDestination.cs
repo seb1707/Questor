@@ -13,6 +13,7 @@ namespace Questor.Modules.Actions
     using System;
     using System.Linq;
     using DirectEve;
+    using global::Questor.Modules.BackgroundTasks;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
@@ -52,7 +53,7 @@ namespace Questor.Modules.Actions
                         return;
                     }
 
-                    if (Settings.Instance.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Time.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds + "seconds]", Logging.White);
+                    if (Logging.DebugTraveler) Logging.Log("TravelerDestination.SolarSystemDestination", "LastInSpace is more than 45 sec old (we are docked), but NextUndockAction is still in the future [" + Time.Instance.NextUndockAction.Subtract(DateTime.UtcNow).TotalSeconds + "seconds]", Logging.White);
                     return;
                 }
                 
@@ -99,19 +100,19 @@ namespace Questor.Modules.Actions
                                 return false;    
                             }
                             
-                            if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Bookmark Named [" + Cache.Instance.UndockBookmark.Title + "] was somehow picked as an UndockBookmark but it is not in local with us! continuing without it.", Logging.Debug);
+                            if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Bookmark Named [" + Cache.Instance.UndockBookmark.Title + "] was somehow picked as an UndockBookmark but it is not in local with us! continuing without it.", Logging.Debug);
                             return true;
                         }
 
-                        if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "No undock bookmarks in local matching our undockPrefix [" + Settings.Instance.UndockBookmarkPrefix + "] continuing without it.", Logging.Debug);
+                        if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "No undock bookmarks in local matching our undockPrefix [" + Settings.Instance.UndockBookmarkPrefix + "] continuing without it.", Logging.Debug);
                         return true;
                     }
 
-                    if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Not currently on grid with a station or a stargate: continue traveling", Logging.Debug);
+                    if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "Not currently on grid with a station or a stargate: continue traveling", Logging.Debug);
                     return true;
                 }
 
-                if (Settings.Instance.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "InSpace [" + Cache.Instance.InSpace + "]: waiting until we have been undocked or in system a few seconds", Logging.Debug);
+                if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "InSpace [" + Cache.Instance.InSpace + "]: waiting until we have been undocked or in system a few seconds", Logging.Debug);
                 return false;
             }
             catch (Exception exception)
@@ -398,17 +399,17 @@ namespace Questor.Modules.Actions
                 return true;
             }
 
-            Cache.Instance.DoNotBreakInvul = false;
+            Defense.DoNotBreakInvul = false;
             string nameOfBookmark = "";
             if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
             if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
             if (nameOfBookmark == "") nameOfBookmark = "Encounter";
             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
-            if (Cache.Instance.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains(nameOfBookmark))
+            if (MissionSettings.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains(nameOfBookmark))
             {
-                if (bookmark.WarpTo(Cache.Instance.MissionWarpAtDistanceRange*1000))
+                if (bookmark.WarpTo(MissionSettings.MissionWarpAtDistanceRange*1000))
                 {
-                    Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + " At " + Cache.Instance.MissionWarpAtDistanceRange + Logging.Green + " km]", Logging.Green);
+                    Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + " At " + MissionSettings.MissionWarpAtDistanceRange + Logging.Green + " km]", Logging.Green);
                 }
             }
             else

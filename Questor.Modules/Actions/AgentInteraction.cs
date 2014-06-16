@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Combat;
+
 namespace Questor.Modules.Actions
 {
     using System;
@@ -41,8 +43,7 @@ namespace Questor.Modules.Actions
         private static bool _agentStandingsCheckFlag;  //false;
         private static bool _waitingOnAgentResponse;
         private static bool _waitingOnMission;
-        private static bool loadedAmmo = false;
-
+        
         private static DateTime _agentWindowTimeStamp = DateTime.MinValue;
         private static DateTime _agentStandingsCheckTimeOut = DateTime.MaxValue;
         private static DateTime _nextAgentAction;
@@ -50,10 +51,17 @@ namespace Questor.Modules.Actions
         private static DateTime _waitingOnMissionTimer = DateTime.UtcNow;
 
         private static int LoyaltyPointCounter;
+        public static float StandingsNeededToAccessLevel1Agent { get; set; }
+        public static float StandingsNeededToAccessLevel2Agent { get; set; }
+        public static float StandingsNeededToAccessLevel3Agent { get; set; }
+        public static float StandingsNeededToAccessLevel4Agent { get; set; }
+        public static float StandingsNeededToAccessLevel5Agent { get; set; }
+
+        
 
         static AgentInteraction()
         {
-            AmmoToLoad = new List<Ammo>();
+            MissionSettings.AmmoToLoad = new List<Ammo>();
         }
 
         public static long AgentId { get; set; }
@@ -67,14 +75,6 @@ namespace Questor.Modules.Actions
 
         public static AgentInteractionPurpose Purpose { get; set; }
 
-        public static List<Ammo> AmmoToLoad { get; private set; }
-
-        private static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
-        {
-            AmmoToLoad.Clear();
-            AmmoToLoad.AddRange(Settings.Instance.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
-        }
-
         private static void MyStandingsAreTooLowSwitchAgentsOrPause()
         {
             Cache.Instance.AgentEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(AgentId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
@@ -82,9 +82,9 @@ namespace Questor.Modules.Actions
             Cache.Instance.AgentFactionEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.FactionId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
 
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe, Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe, Cache.Instance.AgentFactionEffectiveStandingtoMe));
-            AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+            AgentsList currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
-            if (Settings.Instance.MultiAgentSupport)
+            if (MissionSettings.MultiAgentSupport)
             {
                 //
                 //Change Agents
@@ -109,7 +109,7 @@ namespace Questor.Modules.Actions
             Cache.Instance.AgentFactionEffectiveStandingtoMe = Cache.Instance.DirectEve.Standings.EffectiveStanding(Agent.FactionId, Cache.Instance.DirectEve.Session.CharacterId ?? -1);
 
             Cache.Instance.StandingUsedToAccessAgent = Math.Max(Cache.Instance.AgentEffectiveStandingtoMe,Math.Max(Cache.Instance.AgentCorpEffectiveStandingtoMe,Cache.Instance.AgentFactionEffectiveStandingtoMe));
-            AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+            AgentsList currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
             Cache.Instance.AgentEffectiveStandingtoMeText = Cache.Instance.StandingUsedToAccessAgent.ToString("0.00");
 
@@ -137,45 +137,45 @@ namespace Questor.Modules.Actions
                 // what do tutorial mission agents show as?
                 //
                 case 1: //lvl1 agent
-                    if (Cache.Instance.StandingUsedToAccessAgent < Settings.Instance.StandingsNeededToAccessLevel1Agent)
+                    if (Cache.Instance.StandingUsedToAccessAgent < StandingsNeededToAccessLevel1Agent)
                     {
-                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + Settings.Instance.StandingsNeededToAccessLevel1Agent + "]", Logging.Orange);
+                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + StandingsNeededToAccessLevel1Agent + "]", Logging.Orange);
                         MyStandingsAreTooLowSwitchAgentsOrPause();
                         return;
                     }
                     break;
              
                 case 2: //lvl2 agent
-                    if (Cache.Instance.StandingUsedToAccessAgent < Settings.Instance.StandingsNeededToAccessLevel2Agent)
+                    if (Cache.Instance.StandingUsedToAccessAgent < StandingsNeededToAccessLevel2Agent)
                     {
-                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + Settings.Instance.StandingsNeededToAccessLevel2Agent + "]", Logging.Orange);
+                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + StandingsNeededToAccessLevel2Agent + "]", Logging.Orange);
                         MyStandingsAreTooLowSwitchAgentsOrPause();
                         return;
                     }
                     break;
 
                 case 3: //lvl3 agent
-                    if (Cache.Instance.StandingUsedToAccessAgent < Settings.Instance.StandingsNeededToAccessLevel3Agent)
+                    if (Cache.Instance.StandingUsedToAccessAgent < StandingsNeededToAccessLevel3Agent)
                     {
-                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + Settings.Instance.StandingsNeededToAccessLevel3Agent + "]", Logging.Orange);
+                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + StandingsNeededToAccessLevel3Agent + "]", Logging.Orange);
                         MyStandingsAreTooLowSwitchAgentsOrPause();
                         return;
                     }
                     break;
 
                 case 4: //lvl4 agent
-                    if (Cache.Instance.StandingUsedToAccessAgent < Settings.Instance.StandingsNeededToAccessLevel4Agent)
+                    if (Cache.Instance.StandingUsedToAccessAgent < StandingsNeededToAccessLevel4Agent)
                     {
-                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + Settings.Instance.StandingsNeededToAccessLevel4Agent + "]", Logging.Orange);
+                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + StandingsNeededToAccessLevel4Agent + "]", Logging.Orange);
                         MyStandingsAreTooLowSwitchAgentsOrPause();
                         return;
                     }
                     break;
 
                 case 5: //lvl5 agent
-                    if (Cache.Instance.StandingUsedToAccessAgent < Settings.Instance.StandingsNeededToAccessLevel5Agent)
+                    if (Cache.Instance.StandingUsedToAccessAgent < StandingsNeededToAccessLevel5Agent)
                     {
-                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + Settings.Instance.StandingsNeededToAccessLevel5Agent + "]", Logging.Orange);
+                        Logging.Log("AgentInteraction.StartConversation", "Our Standings to [" + Agent.Name + "] are [" + Cache.Instance.StandingUsedToAccessAgent + "] < [" + StandingsNeededToAccessLevel5Agent + "]", Logging.Orange);
                         MyStandingsAreTooLowSwitchAgentsOrPause();
                         return;
                     }
@@ -206,7 +206,7 @@ namespace Questor.Modules.Actions
             {
                 if (_waitingOnAgentResponse == false)
                 {
-                    if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: if (_waitingOnAgentResponse == false)", Logging.Yellow);
+                    if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: if (_waitingOnAgentResponse == false)", Logging.Yellow);
                     _waitingOnAgentResponseTimer = DateTime.UtcNow;
                     _waitingOnAgentResponse = true;
                 }
@@ -217,13 +217,13 @@ namespace Questor.Modules.Actions
                     Agent.Window.Close();
                 }
 
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: if (Agent.Window.AgentResponses == null || !Agent.Window.AgentResponses.Any())", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: if (Agent.Window.AgentResponses == null || !Agent.Window.AgentResponses.Any())", Logging.Yellow);
                 return;
             }
 
             if (Agent.Window.AgentResponses.Any())
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: we have Agent.Window.AgentResponces", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log("AgentInteraction.ReplyToAgent", "Debug: we have Agent.Window.AgentResponces", Logging.Yellow);
             }
 
             _waitingOnAgentResponse = false;
@@ -242,7 +242,7 @@ namespace Questor.Modules.Actions
             //
             if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.
             {
-                if (Settings.Instance.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.", Logging.Yellow);
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.", Logging.Yellow);
                 if (accept != null && decline != null && delay != null)
                 {
                     if (Purpose != AgentInteractionPurpose.StartMission)
@@ -253,7 +253,7 @@ namespace Questor.Modules.Actions
                     }
                 }
 
-                if (complete != null && quit != null && close != null && Statistics.Instance.MissionCompletionErrors == 0)
+                if (complete != null && quit != null && close != null && Statistics.MissionCompletionErrors == 0)
                 {
                     //
                     // this should run for ANY courier and likely needs to be changed when we implement generic courier support
@@ -292,7 +292,7 @@ namespace Questor.Modules.Actions
                     // Complete the mission, close conversation
                     Logging.Log("AgentInteraction", "Saying [Complete Mission]", Logging.Yellow);
                     complete.Say();
-                    Cache.Instance.FactionName = string.Empty;
+                    MissionSettings.FactionName = string.Empty;
 
                     Logging.Log("AgentInteraction", "Closing conversation", Logging.Yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.CloseConversation;
@@ -353,228 +353,14 @@ namespace Questor.Modules.Actions
             }
         }
 
-        public static void LoadMissionXMLData()
-        {
-            Logging.Log("AgentInteraction", "Loading mission xml [" + MissionName + "] from [" + Cache.Instance.MissionXmlPath + "]", Logging.Yellow);
-            Cache.Instance.MissionXMLIsAvailable = true;
-
-            //
-            // this loads the settings global to the mission, NOT individual pockets
-            //
-            XDocument missionXml = null;
-            try
-            {
-                missionXml = XDocument.Load(Cache.Instance.MissionXmlPath);
-
-                //load mission specific ammo and WeaponGroupID if specified in the mission xml
-                if (missionXml.Root != null)
-                {
-                    XElement ammoTypes = missionXml.Root.Element("ammoTypes");
-                    if (ammoTypes != null)
-                    {
-                        Cache.Instance.MissionAmmo.Clear();
-                        foreach (XElement ammo in ammoTypes.Elements("ammoType"))
-                        {
-                            Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
-                        }
-
-                        //Cache.Instance.DamageType
-                    }
-
-                    ammoTypes = missionXml.Root.Element("missionammo");
-                    if (ammoTypes != null)
-                    {
-                        Cache.Instance.MissionAmmo.Clear();
-                        foreach (XElement ammo in ammoTypes.Elements("ammo"))
-                        {
-                            Cache.Instance.MissionAmmo.Add(new Ammo(ammo));
-                        }
-
-                        //Cache.Instance.DamageType
-                    }
-                    Cache.Instance.MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
-                    Cache.Instance.MissionUseDrones = (bool?)missionXml.Root.Element("useDrones"); //do not set default here, use character level settings if avail
-                    Cache.Instance.MissionKillSentries = (bool?)missionXml.Root.Element("killSentries"); //do not set default here, use character level settings if avail
-                    Cache.Instance.MissionWarpAtDistanceRange = (int?)missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
-                }
-
-                //Cache.Instance.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? Settings.Instance.DroneTypeId;
-                IEnumerable<DamageType> damageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
-                if (damageTypesForThisMission.Any())
-                {
-                    Cache.Instance.MissionDamageType = damageTypesForThisMission.FirstOrDefault();
-                    LoadSpecificAmmo(damageTypesForThisMission.Distinct());
-                    loadedAmmo = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("AgentInteraction", "Error in mission (not pocket) specific XML tags [" + MissionName + "], " + ex.Message, Logging.Orange);
-            }
-            finally
-            {
-                missionXml = null;
-                System.GC.Collect();
-            }
-
-        }
-
-        private static void GetDungeonId(string html)
-        {
-            HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
-            missionHtml.LoadHtml(html);
-            try
-            {
-                foreach (HtmlAgilityPack.HtmlNode nd in missionHtml.DocumentNode.SelectNodes("//a[@href]"))
-                {
-                    if (nd.Attributes["href"].Value.Contains("dungeonID="))
-                    {
-                        Cache.Instance.DungeonId = nd.Attributes["href"].Value;
-                        Logging.Log("GetDungeonId", "DungeonID is: " + Cache.Instance.DungeonId, Logging.White);
-                    }
-                    else
-                    {
-                        Cache.Instance.DungeonId = "n/a";
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("GetDungeonId", "if (nd.Attributes[href].Value.Contains(dungeonID=)) - Exception: [" + exception + "]", Logging.White);
-            }
-        }
-
-        private static void GetFactionName(string html)
-        {
-            Statistics.SaveMissionHTMLDetails(html, MissionName);
-            // We are going to check damage types
-            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
-
-            Match logoMatch = logoRegex.Match(html);
-            if (logoMatch.Success)
-            {
-                string logo = logoMatch.Groups["factionlogo"].Value;
-
-                // Load faction xml
-                string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
-                try
-                {
-                    XDocument xml = XDocument.Load(factionsXML);
-                    if (xml.Root != null)
-                    {
-                        XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
-                        if (faction != null)
-                        {
-                            Cache.Instance.FactionName = (string)faction.Attribute("name");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Logging.Log("CombatMissionSettings", "ERROR! unable to read [" + factionsXML + "]  no root element named <faction> ERROR!", Logging.Red);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logging.Log("CombatMissionSettings", "ERROR! unable to find [" + factionsXML + "] ERROR! [" + ex.Message + "]", Logging.Red);
-                }
-            }
-
-            bool roguedrones = false;
-            bool mercenaries = false;
-            bool eom = false;
-            bool seven = false;
-            if (!string.IsNullOrEmpty(html))
-            {
-                roguedrones |= html.Contains("Destroy the Rogue Drones");
-                roguedrones |= html.Contains("Rogue Drone Harassment Objectives");
-                roguedrones |= html.Contains("Air Show! Objectives");
-                roguedrones |= html.Contains("Alluring Emanations Objectives");
-                roguedrones |= html.Contains("Anomaly Objectives");
-                roguedrones |= html.Contains("Attack of the Drones Objectives");
-                roguedrones |= html.Contains("Drone Detritus Objectives");
-                roguedrones |= html.Contains("Drone Infestation Objectives");
-                roguedrones |= html.Contains("Evolution Objectives");
-                roguedrones |= html.Contains("Infected Ruins Objectives");
-                roguedrones |= html.Contains("Infiltrated Outposts Objectives");
-                roguedrones |= html.Contains("Mannar Mining Colony");
-                roguedrones |= html.Contains("Missing Convoy Objectives");
-                roguedrones |= html.Contains("Onslaught Objectives");
-                roguedrones |= html.Contains("Patient Zero Objectives");
-                roguedrones |= html.Contains("Persistent Pests Objectives");
-                roguedrones |= html.Contains("Portal to War Objectives");
-                roguedrones |= html.Contains("Rogue Eradication Objectives");
-                roguedrones |= html.Contains("Rogue Hunt Objectives");
-                roguedrones |= html.Contains("Rogue Spy Objectives");
-                roguedrones |= html.Contains("Roving Rogue Drones Objectives");
-                roguedrones |= html.Contains("Soothe The Salvage Beast");
-                roguedrones |= html.Contains("Wildcat Strike Objectives");
-                eom |= html.Contains("Gone Berserk Objectives");
-                seven |= html.Contains("The Damsel In Distress Objectives");
-            }
-
-            if (roguedrones)
-            {
-                Cache.Instance.FactionName = "rogue drones";
-                return;
-            }
-            if (eom)
-            {
-                Cache.Instance.FactionName = "eom";
-                return;
-            }
-            if (mercenaries)
-            {
-                Cache.Instance.FactionName = "mercenaries";
-                return;
-            }
-            if (seven)
-            {
-                Cache.Instance.FactionName = "the seven";
-                return;
-            }
-
-            Logging.Log("AgentInteraction", "Unable to find the faction for [" + MissionName + "] when searching through the html (listed below)", Logging.Orange);
-
-            Logging.Log("AgentInteraction", html, Logging.White);
-            return;
-        }
-
-        private static DamageType GetMissionDamageType(string html)
-        {
-            // We are going to check damage types
-            Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
-
-            Match logoMatch = logoRegex.Match(html);
-            if (logoMatch.Success)
-            {
-                string logo = logoMatch.Groups["factionlogo"].Value;
-
-                // Load faction xml
-                XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
-                if (xml.Root != null)
-                {
-                    XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
-                    if (faction != null)
-                    {
-                        Cache.Instance.FactionName = (string)faction.Attribute("name");
-                        Cache.Instance.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
-                        return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
-                    }
-                }
-            }
-            Cache.Instance.MissionDamageType = DamageType.EM;
-            return DamageType.EM;
-        }
-
         private static void WaitForMission(string module)
         {
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
             if (!Cache.Instance.OpenJournalWindow(module)) return;
 
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId, true);
-            if (Cache.Instance.Mission == null)
+            MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentId, true);
+            if (MissionSettings.Mission == null)
             {
                 if (_waitingOnMission == false)
                 {
@@ -599,20 +385,20 @@ namespace Questor.Modules.Actions
 
             _waitingOnMission = false;
 
-            MissionName = Cache.Instance.FilterPath(Cache.Instance.Mission.Name);
+            MissionName = Cache.Instance.FilterPath(MissionSettings.Mission.Name);
 
-            Logging.Log("AgentInteraction", "[" + Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMeText + "], minAgentGreyListStandings: [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.Yellow);
+            Logging.Log("AgentInteraction", "[" + Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMeText + "], minAgentGreyListStandings: [" + MissionSettings.MinAgentGreyListStandings + "]", Logging.Yellow);
             string html = Agent.Window.Objective;
-            if (Settings.Instance.DebugAllMissionsOnBlackList || CheckFaction() || Settings.Instance.MissionBlacklist.Any(m => m.ToLower() == MissionName.ToLower()))
+            if (Logging.DebugAllMissionsOnBlackList || CheckFaction() || MissionSettings.MissionBlacklist.Any(m => m.ToLower() == MissionName.ToLower()))
             {
                 if (Purpose != AgentInteractionPurpose.AmmoCheck)
                 {
-                    Logging.Log("AgentInteraction", "Declining blacklisted mission [" + Cache.Instance.Mission.Name + "]", Logging.Yellow);
+                    Logging.Log("AgentInteraction", "Declining blacklisted mission [" + MissionSettings.Mission.Name + "]", Logging.Yellow);
                 }
 
                 if (CheckFaction())
                 {
-                    Logging.Log("AgentInteraction", "Declining blacklisted mission [" + Cache.Instance.Mission.Name + "] because of faction blacklist", Logging.Yellow);
+                    Logging.Log("AgentInteraction", "Declining blacklisted mission [" + MissionSettings.Mission.Name + "] because of faction blacklist", Logging.Yellow);
                 }
 
                 //
@@ -620,32 +406,32 @@ namespace Questor.Modules.Actions
                 // to fix this wed have to move this tracking stuff to the decline state and pass a reason we are
                 // declining the mission to that process too... not knowing why we are declining is downright silly
                 //
-                Cache.Instance.LastBlacklistMissionDeclined = MissionName;
-                Cache.Instance.BlackListedMissionsDeclined++;
+                MissionSettings.LastBlacklistMissionDeclined = MissionName;
+                MissionSettings.BlackListedMissionsDeclined++;
                 _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                 _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(5, 10));
                 return;
             }
 
-            if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the blacklist and might be on the GreyList we have not checked yet", Logging.White);
+            if (Logging.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the blacklist and might be on the GreyList we have not checked yet", Logging.White);
 
-            if (Settings.Instance.DebugAllMissionsOnGreyList || Settings.Instance.MissionGreylist.Any(m => m.ToLower() == MissionName.ToLower())) //-1.7
+            if (Logging.DebugAllMissionsOnGreyList || MissionSettings.MissionGreylist.Any(m => m.ToLower() == MissionName.ToLower())) //-1.7
             {
-                if (Cache.Instance.StandingUsedToAccessAgent > Settings.Instance.MinAgentGreyListStandings)
+                if (Cache.Instance.StandingUsedToAccessAgent > MissionSettings.MinAgentGreyListStandings)
                 {
-                    Cache.Instance.LastGreylistMissionDeclined = MissionName;
-                    Cache.Instance.GreyListedMissionsDeclined++;
+                    MissionSettings.LastGreylistMissionDeclined = MissionName;
+                    MissionSettings.GreyListedMissionsDeclined++;
                     Logging.Log("AgentInteraction", "Declining GreyListed mission [" + MissionName + "]", Logging.Yellow);
                     _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
                     _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(5, 10));
                     return;
                 }
 
-                Logging.Log("AgentInteraction", "Unable to decline GreyListed mission: AgentEffectiveStandings [" + Cache.Instance.StandingUsedToAccessAgent + "] >  MinGreyListStandings [" + Settings.Instance.MinAgentGreyListStandings + "]", Logging.Orange);
+                Logging.Log("AgentInteraction", "Unable to decline GreyListed mission: AgentEffectiveStandings [" + Cache.Instance.StandingUsedToAccessAgent + "] >  MinGreyListStandings [" + MissionSettings.MinAgentGreyListStandings + "]", Logging.Orange);
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the GreyList and will likely be run if it is not in lowsec, we have not checked for that yet", Logging.White);
+                if (Logging.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not on the GreyList and will likely be run if it is not in lowsec, we have not checked for that yet", Logging.White);
             }
 
             //public bool RouteIsAllHighSec(long solarSystemId, List<long> currentDestination)
@@ -655,7 +441,7 @@ namespace Questor.Modules.Actions
             // at this point we have not yet accepted the mission, thus we do not have the bookmark in people and places
             // we cannot and should not accept the mission without checking the route first, declining after accepting incurs a much larger penalty to standings
             //
-            DirectBookmark missionBookmark = Cache.Instance.Mission.Bookmarks.FirstOrDefault();
+            DirectBookmark missionBookmark = MissionSettings.Mission.Bookmarks.FirstOrDefault();
             if (missionBookmark != null)
             {
                 String missionLocationID = missionBookmark.LocationId.ToString();
@@ -663,12 +449,12 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                Logging.Log("AgentInteraction", "There are No Bookmarks Associated with " + Cache.Instance.Mission.Name + " yet", Logging.White);
+                Logging.Log("AgentInteraction", "There are No Bookmarks Associated with " + MissionSettings.Mission.Name + " yet", Logging.White);
             }
 
             if (html.Contains("The route generated by current autopilot settings contains low security systems!"))
             {
-                bool decline = !Cache.Instance.CourierMission || (Cache.Instance.CourierMission && !Settings.Instance.AllowNonStorylineCourierMissionsInLowSec);
+                bool decline = !Cache.Instance.CourierMission || (Cache.Instance.CourierMission && !MissionSettings.AllowNonStorylineCourierMissionsInLowSec);
 
                 if (decline)
                 {
@@ -684,7 +470,7 @@ namespace Questor.Modules.Actions
             }
             else
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not in lowsec so we will do the mission", Logging.White);
+                if (Logging.DebugDecline) Logging.Log("AgentInteraction", "[" + MissionName + "] is not in lowsec so we will do the mission", Logging.White);
             }
 
             //
@@ -717,9 +503,9 @@ namespace Questor.Modules.Actions
             if (!ForceAccept)
             {
                 // Is the mission offered?
-                if (Cache.Instance.Mission.State == (int)MissionState.Offered && (Cache.Instance.Mission.Type == "Mining" || Cache.Instance.Mission.Type == "Trade" || (Cache.Instance.Mission.Type == "Courier" && Cache.Instance.CourierMission)))
+                if (MissionSettings.Mission.State == (int)MissionState.Offered && (MissionSettings.Mission.Type == "Mining" || MissionSettings.Mission.Type == "Trade" || (MissionSettings.Mission.Type == "Courier" && Cache.Instance.CourierMission)))
                 {
-                    if (!Cache.Instance.Mission.Important) //do not decline courier/mining/trade storylines!
+                    if (!MissionSettings.Mission.Important) //do not decline courier/mining/trade storylines!
                     {
                         Logging.Log("AgentInteraction", "Declining courier/mining/trade", Logging.Yellow);
                         _States.CurrentAgentInteractionState = AgentInteractionState.DeclineMission;
@@ -731,21 +517,21 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.CourierMission)
             {
-                loadedAmmo = false;
-                GetFactionName(html);
-                GetDungeonId(html);
-                Cache.Instance.SetmissionXmlPath(Cache.Instance.FilterPath(MissionName));
+                MissionSettings.loadedAmmo = false;
+                MissionSettings.GetFactionName(html);
+                MissionSettings.GetDungeonId(html);
+                MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(MissionName));
 
-                Cache.Instance.MissionAmmo = new List<Ammo>();
-                if (File.Exists(Cache.Instance.MissionXmlPath))
+                MissionSettings.MissionAmmo = new List<Ammo>();
+                if (File.Exists(MissionSettings.MissionXmlPath))
                 {
-                    LoadMissionXMLData();
+                    MissionSettings.LoadMissionXMLData();
                 }
                 else
                 {
-                    Logging.Log("AgentInteraction", "Missing mission xml [" + MissionName + "] from [" + Cache.Instance.MissionXmlPath + "] !!!", Logging.Orange);
-                    Cache.Instance.MissionXMLIsAvailable = false;
-                    if (Settings.Instance.RequireMissionXML)
+                    Logging.Log("AgentInteraction", "Missing mission xml [" + MissionName + "] from [" + MissionSettings.MissionXmlPath + "] !!!", Logging.Orange);
+                    MissionSettings.MissionXMLIsAvailable = false;
+                    if (MissionSettings.RequireMissionXML)
                     {
                         Logging.Log("AgentInteraction", "Stopping Questor because RequireMissionXML is true in your character XML settings", Logging.Orange);
                         Logging.Log("AgentInteraction", "You will need to create a mission XML for [" + MissionName + "]", Logging.Orange);
@@ -755,11 +541,11 @@ namespace Questor.Modules.Actions
                     }
                 }
 
-                if (!loadedAmmo)
+                if (!MissionSettings.loadedAmmo)
                 {
-                    Cache.Instance.MissionDamageType = GetMissionDamageType(html);
-                    LoadSpecificAmmo(new[] { Cache.Instance.MissionDamageType });
-                    Logging.Log("AgentInteraction", "Detected configured damage type for [" + MissionName + "] is [" + Cache.Instance.MissionDamageType + "]", Logging.Yellow);
+                    MissionSettings.MissionDamageType = MissionSettings.GetMissionDamageType(html);
+                    MissionSettings.LoadSpecificAmmo(new[] { MissionSettings.MissionDamageType });
+                    Logging.Log("AgentInteraction", "Detected configured damage type for [" + MissionName + "] is [" + MissionSettings.MissionDamageType + "]", Logging.Yellow);
                 }
 
                 if (Purpose == AgentInteractionPurpose.AmmoCheck)
@@ -771,9 +557,9 @@ namespace Questor.Modules.Actions
                 }
             }
 
-            Cache.Instance.MissionName = MissionName;
+            MissionSettings.MissionName = MissionName;
 
-            if (Cache.Instance.Mission.State == (int)MissionState.Offered)
+            if (MissionSettings.Mission.State == (int)MissionState.Offered)
             {
                 Logging.Log("AgentInteraction", "Accepting mission [" + MissionName + "]", Logging.Yellow);
 
@@ -815,7 +601,7 @@ namespace Questor.Modules.Actions
             }
 
             LoyaltyPointCounter = 0;
-            Statistics.Instance.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
+            Statistics.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
 
             Logging.Log("AgentInteraction", "Saying [Accept]", Logging.Yellow);
             Cache.Instance.Wealth = Cache.Instance.DirectEve.Me.Wealth;
@@ -831,7 +617,7 @@ namespace Questor.Modules.Actions
             // If we are doing an ammo check then Decline Mission is an end-state! (no, it is not... wtf)
             //if (Purpose == AgentInteractionPurpose.AmmoCheck)
             //{
-            //    if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Purpose == AgentInteractionPurpose.AmmoCheck) return", Logging.Debug);
+            //    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Purpose == AgentInteractionPurpose.AmmoCheck) return", Logging.Debug);
             //    return;
             //}
 
@@ -840,14 +626,14 @@ namespace Questor.Modules.Actions
             List<DirectAgentResponse> responses = Agent.Window.AgentResponses;
             if (responses == null || responses.Count == 0)
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (responses == null || responses.Count == 0) return", Logging.Debug);
+                if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (responses == null || responses.Count == 0) return", Logging.Debug);
                 return;
             }
 
             DirectAgentResponse decline = responses.FirstOrDefault(r => r.Text.Contains(Decline));
             if (decline == null)
             {
-                if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (decline == null) return", Logging.Debug);
+                if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (decline == null) return", Logging.Debug);
                 return;
             }
 
@@ -865,13 +651,13 @@ namespace Questor.Modules.Actions
                         Cache.Instance.StandingUsedToAccessAgent = Cache.Instance.StandingUsedToAccessAgent / 10;
                     }
 
-                    if (Settings.Instance.MinAgentBlackListStandings > 10)
+                    if (MissionSettings.MinAgentBlackListStandings > 10)
                     {
                         Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent > 10)", Logging.Yellow);
-                        Settings.Instance.MinAgentBlackListStandings = Settings.Instance.MinAgentBlackListStandings / 10;
+                        MissionSettings.MinAgentBlackListStandings = MissionSettings.MinAgentBlackListStandings / 10;
                     }
 
-                    Logging.Log("AgentInteraction.DeclineMission", "Agent decline timer detected. Current standings: " + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + ". Minimum standings: " + Math.Round(Settings.Instance.MinAgentBlackListStandings, 2), Logging.Yellow);
+                    Logging.Log("AgentInteraction.DeclineMission", "Agent decline timer detected. Current standings: " + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + ". Minimum standings: " + Math.Round(MissionSettings.MinAgentBlackListStandings, 2), Logging.Yellow);
                 }
 
                 Regex hourRegex = new Regex("\\s(?<hour>\\d+)\\shour");
@@ -892,14 +678,14 @@ namespace Questor.Modules.Actions
                 }
 
                 int secondsToWait = ((hours * 3600) + (minutes * 60) + 60);
-                AgentsList currentAgent = Settings.Instance.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+                AgentsList currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
                 //
                 // standings are below the blacklist minimum 
                 // (any lower and we might lose access to this agent)
                 // and no other agents are NOT available (or are also in cool-down)
                 //
-                if ((Settings.Instance.WaitDecline && !Settings.Instance.MultiAgentSupport) || (Settings.Instance.WaitDecline && Settings.Instance.MultiAgentSupport && Cache.Instance.AllAgentsStillInDeclineCoolDown))
+                if ((MissionSettings.WaitDecline && !MissionSettings.MultiAgentSupport) || (MissionSettings.WaitDecline && MissionSettings.MultiAgentSupport && Cache.Instance.AllAgentsStillInDeclineCoolDown))
                 {
                     //
                     // if true we ALWAYS wait (or switch agents?!?)
@@ -914,24 +700,24 @@ namespace Questor.Modules.Actions
                 //
                 // if WaitDecline is false we only wait if standings are below our configured minimums
                 //
-                if (Cache.Instance.StandingUsedToAccessAgent <= Settings.Instance.MinAgentBlackListStandings)
+                if (Cache.Instance.StandingUsedToAccessAgent <= MissionSettings.MinAgentBlackListStandings)
                 {
-                    if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
+                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
                     
                     //
                     // If we have multiple agents defined - switch agents
                     //
-                    if (Settings.Instance.MultiAgentSupport)
+                    if (MissionSettings.MultiAgentSupport)
                     {
                         //TODO - We should probably check if there are other agents who's effective standing is above the minAgentBlackListStanding.
-                        if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
+                        if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
                         if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
                         {
                             //
                             // wait.
                             //
                             _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);
-                            Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again because no other agents were avail for use.", Logging.Yellow);
+                            Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + MissionSettings.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again because no other agents were avail for use.", Logging.Yellow);
                             CloseConversation();
                             _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                             return;
@@ -939,15 +725,15 @@ namespace Questor.Modules.Actions
                     }
 
                     _nextAgentAction = DateTime.UtcNow.AddSeconds(secondsToWait);
-                    Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + Settings.Instance.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.", Logging.Yellow);
+                    Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] at or below configured minimum of [" + MissionSettings.MinAgentBlackListStandings + "].  Waiting " + (secondsToWait / 60) + " minutes to try decline again.", Logging.Yellow);
                     CloseConversation();
                     _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                     return;
                 }
 
-                if (Settings.Instance.MultiAgentSupport && !Cache.Instance.AllAgentsStillInDeclineCoolDown)
+                if (MissionSettings.MultiAgentSupport && !Cache.Instance.AllAgentsStillInDeclineCoolDown)
                 {
-                    if (Settings.Instance.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
+                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
 
                     //
                     //Change Agents
@@ -962,7 +748,7 @@ namespace Questor.Modules.Actions
                     return;
                 }
 
-                Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] is above our configured minimum [" + Settings.Instance.MinAgentBlackListStandings + "].  Declining [" + Cache.Instance.Mission.Name + "] note: WaitDecline is false", Logging.Yellow);
+                Logging.Log("AgentInteraction.DeclineMission", "Current standings [" + Math.Round(Cache.Instance.StandingUsedToAccessAgent, 2) + "] is above our configured minimum [" + MissionSettings.MinAgentBlackListStandings + "].  Declining [" + MissionSettings.Mission.Name + "] note: WaitDecline is false", Logging.Yellow);
             }
 
             //
@@ -972,7 +758,7 @@ namespace Questor.Modules.Actions
             {
                 Logging.Log("AgentInteraction.DeclineMission", "Storyline: Storylines cannot be declined, thus we will add this agent to the blacklist for this session.", Logging.Yellow);
                 Logging.Log("AgentInteraction.DeclineMission", "Saying [Decline]", Logging.Yellow);
-                Cache.Instance.Mission.RemoveOffer();
+                MissionSettings.Mission.RemoveOffer();
                 _States.CurrentStorylineState = StorylineState.Idle;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
@@ -985,7 +771,7 @@ namespace Questor.Modules.Actions
                 else
                 {
                     Cache.Instance.AgentBlacklist.Add(Cache.Instance.CurrentStorylineAgentId);
-                    Statistics.Instance.MissionCompletionErrors = 0;
+                    Statistics.MissionCompletionErrors = 0;
                     return;    
                 }
             }
@@ -997,7 +783,7 @@ namespace Questor.Modules.Actions
             Logging.Log("AgentInteraction.DeclineMission", "Replying to agent", Logging.Yellow);
             _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
             _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 7));
-            Statistics.Instance.MissionCompletionErrors = 0;
+            Statistics.MissionCompletionErrors = 0;
             return;
         }
 
@@ -1018,36 +804,36 @@ namespace Questor.Modules.Actions
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
 
                     //Cache.Instance.FactionFit = "Default";
-                    Cache.Instance.FittingToLoad = Settings.Instance.DefaultFitting.ToString();
-                    Cache.Instance.FactionName = "Default";
+                    MissionSettings.FittingToLoad = MissionSettings.DefaultFitting.ToString();
+                    MissionSettings.FactionName = "Default";
                     if (faction != null)
                     {
                         string factionName = ((string)faction.Attribute("name"));
-                        Cache.Instance.FactionName = factionName;
+                        MissionSettings.FactionName = factionName;
                         Logging.Log("AgentInteraction", "Mission enemy faction: " + factionName, Logging.Yellow);
-                        if (Settings.Instance.FactionBlacklist.Any(m => m.ToLower() == factionName.ToLower()))
+                        if (MissionSettings.FactionBlacklist.Any(m => m.ToLower() == factionName.ToLower()))
                         {
                             return true;
                         }
 
-                        if (Settings.Instance.UseFittingManager && Settings.Instance.ListofFactionFittings.Any(m => m.FactionName.ToLower() == factionName.ToLower()))
+                        if (Settings.Instance.UseFittingManager && MissionSettings.ListofFactionFittings.Any(m => m.FactionName.ToLower() == factionName.ToLower()))
                         {
-                            FactionFitting _factionFittingForThisMissionsFaction = Settings.Instance.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == factionName.ToLower());
+                            FactionFitting _factionFittingForThisMissionsFaction = MissionSettings.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == factionName.ToLower());
                             if (_factionFittingForThisMissionsFaction != null)
                             {
-                                Cache.Instance.FactionFittingForThisMissionsFaction = _factionFittingForThisMissionsFaction.FittingName;
+                                MissionSettings.FactionFittingForThisMissionsFaction = _factionFittingForThisMissionsFaction.FittingName;
                                 //
                                 // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
                                 //
                                 if (_factionFittingForThisMissionsFaction.DroneTypeID != null)
                                 {
-                                    Cache.Instance.DroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
+                                    Drones.DroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
                                 }
-                                Logging.Log("AgentInteraction", "Faction fitting: " + _factionFittingForThisMissionsFaction.FactionName + "Using DroneTypeID [" + Cache.Instance.DroneTypeID + "]", Logging.Yellow);
+                                Logging.Log("AgentInteraction", "Faction fitting: " + _factionFittingForThisMissionsFaction.FactionName + "Using DroneTypeID [" + Drones.DroneTypeID + "]", Logging.Yellow);
                             }
                             else
                             {
-                                Cache.Instance.FactionFittingForThisMissionsFaction = null;
+                                MissionSettings.FactionFittingForThisMissionsFaction = null;
                                 Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + factionName + " ]", Logging.Yellow);
                             }
 
@@ -1063,16 +849,16 @@ namespace Questor.Modules.Actions
             }
             else if (Settings.Instance.UseFittingManager) //only load the default fitting if we did not find the faction logo in the mission html.
             {
-                Cache.Instance.FactionName = "Default";
-                FactionFitting factionFitting = Settings.Instance.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == "default");
+                MissionSettings.FactionName = "Default";
+                FactionFitting factionFitting = MissionSettings.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == "default");
                 if (factionFitting != null)
                 {
-                    Cache.Instance.FactionFittingForThisMissionsFaction = factionFitting.FittingName;
+                    MissionSettings.FactionFittingForThisMissionsFaction = factionFitting.FittingName;
                     Logging.Log("AgentInteraction", "Faction fitting: " + factionFitting.FactionName, Logging.Yellow);
                 }
                 else
                 {
-                    Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + Cache.Instance.FactionName + " ]", Logging.Orange);
+                    Logging.Log("AgentInteraction", "Faction fitting: No fittings defined for [ " + MissionSettings.FactionName + " ]", Logging.Orange);
                 }
 
                 //Cache.Instance.Fitting = Cache.Instance.FactionFit;
@@ -1102,7 +888,7 @@ namespace Questor.Modules.Actions
                 agentWindow.Close();
             }
 
-            Cache.Instance.Mission = Cache.Instance.GetAgentMission(AgentId, true);
+            MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentId, true);
         }
 
         public static void ProcessState()
@@ -1150,17 +936,17 @@ namespace Questor.Modules.Actions
 
                     if (needHumanIntervention)
                     {
-                        Statistics.Instance.MissionCompletionErrors++;
-                        Statistics.Instance.LastMissionCompletionError = DateTime.UtcNow;
+                        Statistics.MissionCompletionErrors++;
+                        Statistics.LastMissionCompletionError = DateTime.UtcNow;
 
-                        Logging.Log("AgentInteraction", "This window indicates an error completing a mission: [" + Statistics.Instance.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
+                        Logging.Log("AgentInteraction", "This window indicates an error completing a mission: [" + Statistics.MissionCompletionErrors + "] errors already we will stop questor and halt restarting when we reach 3", Logging.White);
                         window.Close();
 
-                        if (Statistics.Instance.MissionCompletionErrors > 3 && Cache.Instance.InStation)
+                        if (Statistics.MissionCompletionErrors > 3 && Cache.Instance.InStation)
                         {
-                            if (Cache.Instance.MissionXMLIsAvailable)
+                            if (MissionSettings.MissionXMLIsAvailable)
                             {
-                                Logging.Log("AgentInteraction", "ERROR: Mission XML is available for [" + Cache.Instance.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Logging.Log("AgentInteraction", "ERROR: Mission XML is available for [" + MissionSettings.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
                                 Settings.Instance.AutoStart = false;
 
                                 //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
@@ -1172,7 +958,7 @@ namespace Questor.Modules.Actions
                             }
                             else
                             {
-                                Logging.Log("AgentInteraction", "ERROR: Mission XML is missing for [" + Cache.Instance.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
+                                Logging.Log("AgentInteraction", "ERROR: Mission XML is missing for [" + MissionSettings.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
                                 Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
 
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;

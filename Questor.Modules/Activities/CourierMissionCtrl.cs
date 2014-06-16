@@ -32,7 +32,7 @@ namespace Questor.Modules.Activities
         {
             MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.StartsWith(title))
-                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(agentId, title));
 
             Traveler.ProcessState();
 
@@ -63,7 +63,7 @@ namespace Questor.Modules.Activities
             if (Cache.Instance.CurrentShipsCargo == null) return false;
             string missionItem;
 
-            switch (Cache.Instance.Mission.Name)
+            switch (MissionSettings.Mission.Name)
             {
                 case "Enemies Abound (2 of 5)":                       //lvl4 courier
                     missionItem = "Encoded Data Chip";
@@ -206,7 +206,7 @@ namespace Questor.Modules.Activities
             if (DateTime.UtcNow < _nextCourierMissionCtrlPulse)
                 return;
 
-            if (Settings.Instance.DebugCourierMissions) Logging.Log("CourierMissionCtrl","CourierMissionCtrlState: [" + _States.CurrentCourierMissionCtrlState.ToString() + "]",Logging.Debug);
+            if (Logging.DebugCourierMissions) Logging.Log("CourierMissionCtrl","CourierMissionCtrlState: [" + _States.CurrentCourierMissionCtrlState.ToString() + "]",Logging.Debug);
 
             switch (_States.CurrentCourierMissionCtrlState)
             {
@@ -290,8 +290,6 @@ namespace Questor.Modules.Activities
                     }
 
                     AgentInteraction.ProcessState();
-
-                    if (Settings.Instance.DebugStates) Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {

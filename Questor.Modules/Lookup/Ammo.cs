@@ -81,7 +81,7 @@ namespace Questor.Modules.Lookup
                     }
                 }
                  * */
-                if (Settings.Instance.DebugAmmo)
+                if (Logging.DebugAmmo)
                 {
                     Logging.Log("Ammo", " [01] Name [" + Name + "] - derived from XML", Logging.Debug);
                     Logging.Log("Ammo", " [01] TypeId [" + TypeId + "] - from XML", Logging.Debug);

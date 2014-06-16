@@ -29,7 +29,7 @@ namespace Questor.Storylines
 
             if (Cache.Instance.ActiveShip == null || Cache.Instance.ActiveShip.GivenName == null)
             {
-                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.ActiveShip == null)", Logging.Debug);
+                if (Logging.DebugArm) Logging.Log("StorylineState.Arm", "if (Cache.Instance.ActiveShip == null)", Logging.Debug);
                 _nextAction = DateTime.UtcNow.AddSeconds(3);
                 return StorylineState.Arm;
             }
@@ -57,14 +57,14 @@ namespace Questor.Storylines
 
             if (Cache.Instance.ItemHangar == null) return StorylineState.Arm;
 
-            IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == Settings.Instance.MaterialsForWarOreID).ToList();
+            IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == MissionSettings.MaterialsForWarOreID).ToList();
             if (!items.Any())
             {
-                if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + Settings.Instance.MaterialsForWarOreID + "] not found in ItemHangar", Logging.Debug);
-                items = Cache.Instance.AmmoHangar.Items.Where(k => k.TypeId == Settings.Instance.MaterialsForWarOreID).ToList();
+                if (Logging.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + MissionSettings.MaterialsForWarOreID + "] not found in ItemHangar", Logging.Debug);
+                items = Cache.Instance.AmmoHangar.Items.Where(k => k.TypeId == MissionSettings.MaterialsForWarOreID).ToList();
                 if (!items.Any())
                 {
-                    if (Settings.Instance.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + Settings.Instance.MaterialsForWarOreID + "] not found in AmmoHangar", Logging.Debug);
+                    if (Logging.DebugArm) Logging.Log("StorylineState.Arm", "Ore for MaterialsForWar: typeID [" + MissionSettings.MaterialsForWarOreID + "] not found in AmmoHangar", Logging.Debug);
                     //
                     // if we do not have the ore... either we can blacklist it right here, or continue normally
                     //
@@ -76,14 +76,14 @@ namespace Questor.Storylines
             int oreIncargo = 0;
             foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items.ToList())
             {
-                if (cargoItem.TypeId != Settings.Instance.MaterialsForWarOreID)
+                if (cargoItem.TypeId != MissionSettings.MaterialsForWarOreID)
                     continue;
 
                 oreIncargo += cargoItem.Quantity;
                 continue;
             }
 
-            int oreToLoad = Settings.Instance.MaterialsForWarOreQty - oreIncargo;
+            int oreToLoad = MissionSettings.MaterialsForWarOreQty - oreIncargo;
             if (oreToLoad <= 0)
             {
                 //OreLoaded = true;
@@ -121,8 +121,8 @@ namespace Questor.Storylines
             //  Level 4         <MaterialsForWarOreID>20</MaterialsForWarOreID>
             //                  <MaterialsForWarOreQty>8000</MaterialsForWarOreQty>
 
-            int oreid = Settings.Instance.MaterialsForWarOreID; //1230;
-            int orequantity = Settings.Instance.MaterialsForWarOreQty; //999
+            int oreid = MissionSettings.MaterialsForWarOreID; //1230;
+            int orequantity = MissionSettings.MaterialsForWarOreQty; //999
 
             // Open the item hangar
             if (Cache.Instance.ItemHangar == null) return StorylineState.PreAcceptMission;

@@ -69,7 +69,6 @@
   <debugSalvage>false</debugSalvage>
   <debugScheduler>false</debugScheduler>
   <debugSkillTraining>false</debugSkillTraining>
-  <debugStates>false</debugStates>
   <debugStatistics>false</debugStatistics>
   <debugStorylineMissions>false</debugStorylineMissions>
   <debugTargetCombatants>false</debugTargetCombatants>
@@ -135,14 +134,14 @@
   <UseLocalWatch>true</UseLocalWatch><!-- if false all local watching for bad standings pilots is disabled -->
   <!-- UseFittingManager is either true of false and allows questor to use the IN GAME EVE fitting manager to change your fits per faction/mission -->
   <UseFittingManager>true</UseFittingManager><!-- default is true -->
-  <!-- WatchForActiveWars will detect ACTIVE wars (not wars that havent yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
+  <!-- WatchForActiveWars will detect ACTIVE wars (not wars that have not yet started) and go into panic, and stay in panic (like it does when you are in a pod) - if set to false we will not check for wars -->
   <watchForActiveWars>true</watchForActiveWars><!-- default is true -->
   
-  <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will seach for and travel to the master (if any)-->
+  <!-- fleetSupportSlave is either true or false: if true the slave background actions will kick in and it will search for and travel to the master (if any)-->
   <fleetSupportSlave>false</fleetSupportSlave>
   <!-- fleetSupportMaster is either true or false: if true the master background actions will kick in and communicate targets and its own location to slaves (if any)-->
   <fleetSupportMaster>false</fleetSupportMaster>
-  <!-- fleetname is used to seperate the IPC communications so that only masters and slaves from the same "fleetName" communicate with each other -->  
+  <!-- fleetName is used to separate the IPC communications so that only masters and slaves from the same "fleetName" communicate with each other -->  
   <fleetName>Fleet1</fleetName>
 
   <characterNamesForMasterToInviteToFleet>
@@ -162,7 +161,7 @@
   <minAgentBlackListStandings>5.5</minAgentBlackListStandings>
   <!-- MinAgentGreyListStandings is a number between -10 and 10 and is used to determine if you can decline more greylist missions, Once you drop below this threshold greylist missions will be accepted in order to keep your standings up -->
   <minAgentGreyListStandings>6.0</minAgentGreyListStandings>
-  <!-- Missionspath is a string and is used for the path in /.net programs/ to point questor to where you want it to use the mission xmls from -->
+  <!-- MissionsPath is a string and is used for the path in /.net programs/ to point questor to where you want it to use the mission xmls from -->
   <missionsPath>Caldari Missions</missionsPath><!-- needs to be customized -->
   <!-- Run missions that take us into low security space? - READ: DANGEROUS!!! -->
   <LowSecMissionsInShuttles>false</LowSecMissionsInShuttles><!-- default is: false -->
@@ -219,8 +218,6 @@
   <lootHangar></lootHangar><!-- default is no value -->
   <!-- Corporation hangar to use for ammo (empty is personal hangar) -->
   <ammoHangar></ammoHangar><!-- default is: no value -->
-  <!-- Bookmark hangar.. dont use this anymore -->
-  <bookMarkHangar></bookMarkHangar>
   <!-- container to use for Loot (empty would not use a container at all) : this ONLY works with General Freight Containers at the moment-->
   <lootContainer></lootContainer>
   
@@ -243,14 +240,14 @@
   <reserveCargoCapacity>100</reserveCargoCapacity>
   <!-- maximum number of wreck targets, at least 1 is required for salvager or tractor beam to work, this will work better set to 3 but you need multitasking trained and enough targeting slots to accomidate this plus the high and low value slots all at once -->
   <maximumWreckTargets>2</maximumWreckTargets>
-  <!-- if the mission does not despawn (ninja looters?) and the accel gates are still present: use gates! -->
+  <!-- if the mission does not de-spawn (ninja looters?) and the acceleration gates are still present: use gates! -->
   <useGatesInSalvage>true</useGatesInSalvage><!-- default is true -->
   <!-- All salvage bookmarks will be prefixed by this string, default: Salvage: -->
   <bookmarkPrefix>Salvage:</bookmarkPrefix><!-- default is salvage: -->
   <!-- Minimum amount of wrecks / unlooted containers needed for a bookmark to be created -->
   <minimumWreckCount>5</minimumWreckCount><!-- default is 5 -->
   <!-- After-mission salvaging, this will cause the bot to visit all salvage bookmarks 
-       with the salvage ship and pickup loot / salvage wrecks 
+       with the salvage ship and pick up loot / salvage wrecks 
        Note: After mission salvaging will *only* take place if there are *no* accepted missions left ! -->
   <afterMissionSalvaging>false</afterMissionSalvaging><!-- default is false -->
   <!-- Loot everything or only mission loot, if turned off empty loot-actions are ignored 
@@ -628,7 +625,7 @@
   <!-- Y Position of EVE Window -->
   <eveWindowYPosition>0</eveWindowYPosition> <!-- blank leaves the EVE Window Untouched, if you want to use this you must define all 4 settings  -->
   <!-- X Size of EVE Window -->
-  <eveWindowXSize>0</eveWindowXSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings -->
+  <eveWindowXSize>0</eveWindowXSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to define all 4 settings -->
   <!-- Y Size of EVE Window -->
-  <eveWindowYSize>0</eveWindowYSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to definel 4 settings  -->
+  <eveWindowYSize>0</eveWindowYSize> <!-- blank leaves the EVE Window Untouched, if you want to use this you must to define all 4 settings  -->
 </settings>

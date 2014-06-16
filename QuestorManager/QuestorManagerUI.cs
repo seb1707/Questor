@@ -68,8 +68,8 @@ namespace QuestorManager
         private readonly Sell _sell;
         private readonly ValueDump _valuedump;
         private readonly BuyLPI _buylpi;
-        private readonly Defense _defense;
-        private readonly Cleanup _cleanup;
+        //private readonly Defense _defense;
+        //private readonly Cleanup _cleanup;
         //private readonly ListItems _item;
         private DateTime _lastAction;
 
@@ -89,8 +89,8 @@ namespace QuestorManager
             //_valuedump = new ValueDump();
             _buylpi = new BuyLPI(this);
             //_buylpi = new BuyLPI();
-            _defense = new Defense();
-            _cleanup = new Cleanup();
+            //_defense = new Defense();
+            //_cleanup = new Cleanup();
             List = new List<ListItems>();
             Items = new List<ItemCache>();
             //ItemsToSell = new List<ItemCache>();
@@ -147,7 +147,7 @@ namespace QuestorManager
             //
             try
             {
-                Cache.Instance.InvIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
+                MissionSettings.InvIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
             }
             catch (Exception exception)
             {
@@ -230,20 +230,14 @@ namespace QuestorManager
 
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
                 {
-                    Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
+                    Statistics.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
                     Time.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
                 }
 
                 // We always check our defense state if we're in space, regardless of questor state
                 // We also always check panic
-                if (Cache.Instance.InSpace)
-                {
-                    if (!Cache.Instance.DoNotBreakInvul)
-                    {
-                        _defense.ProcessState();
-                    }
-                }
-
+                Defense.ProcessState();
+                
                 if (Cache.Instance.Paused)
                 {
                     Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
@@ -264,9 +258,7 @@ namespace QuestorManager
                 // Start _cleanup.ProcessState
                 // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc
                 //
-                _cleanup.ProcessState();
-
-                if (Settings.Instance.DebugStates) Logging.Log("Cleanup.State is", _States.CurrentCleanupState.ToString(), Logging.White);
+                Cleanup.ProcessState();
 
                 // Done
                 // Cleanup State: ProcessState

@@ -165,7 +165,7 @@ namespace ValueDump
 
             if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
             {
-                Cache.Instance.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
+                Statistics.SessionRunningTime = (int)DateTime.UtcNow.Subtract(Time.Instance.QuestorStarted_DateTime).TotalMinutes;
                 Time.Instance.LastUpdateOfSessionRunningTime = DateTime.UtcNow;
             }
 
@@ -189,19 +189,21 @@ namespace ValueDump
                     break;
 
                 case ValueDumpState.CheckMineralPrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.CheckMineralPrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.CheckMineralPrices:", Logging.Debug);
                     if (!Market.CheckMineralPrices("ValueDump", RefineCheckBox.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.SaveMineralPrices;
                     break;
 
                 case ValueDumpState.SaveMineralPrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SaveMineralPrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.SaveMineralPrices:", Logging.Debug);
                     if (!Market.SaveMineralprices("ValueDump")) return;
                     _States.CurrentValueDumpState = ValueDumpState.Idle;    
                     break;
 
                 case ValueDumpState.GetItems:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.GetItems:", Logging.Debug);
+                    /*
+                     * FIXME 6/2014
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.GetItems:", Logging.Debug);
                     if (Cache.Instance.ItemHangar == null) return;
                     Logging.Log("ValueDump", "Loading hangar items", Logging.White);
 
@@ -214,10 +216,11 @@ namespace ValueDump
                     }
 
                     _States.CurrentValueDumpState = ValueDumpState.UpdatePrices;
+                     */
                     break;
 
                 case ValueDumpState.UpdatePrices:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.UpdatePrices:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.UpdatePrices:", Logging.Debug);
                     if (!Market.UpdatePrices("ValueDump", cbxSell.Checked, RefineCheckBox.Checked, cbxUndersell.Checked)) return;
                     //
                     // we are out of items
@@ -226,37 +229,37 @@ namespace ValueDump
                     break;
 
                 case ValueDumpState.NextItem:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.NextItem:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.NextItem:", Logging.Debug);
                     if (!Market.NextItem("ValueDump")) return;
                     _States.CurrentValueDumpState = ValueDumpState.StartQuickSell;
                     break;
 
                 case ValueDumpState.StartQuickSell:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.StartQuickSell:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.StartQuickSell:", Logging.Debug);
                     if (!Market.StartQuickSell("ValueDump", cbxSell.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.InspectOrder;
                     break;
 
                 case ValueDumpState.InspectOrder:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectOrder:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectOrder:", Logging.Debug);
                     if (!Market.Inspectorder("ValueDump", cbxSell.Checked, RefineCheckBox.Checked, cbxUndersell.Checked, (double)RefineEfficiencyInput.Value)) return;
                     _States.CurrentValueDumpState = ValueDumpState.WaitingToFinishQuickSell;
                     break;
 
                 case ValueDumpState.InspectRefinery:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectRefinery:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.InspectRefinery:", Logging.Debug);
                     if (!Market.InspectRefinery("ValueDump", (double)RefineEfficiencyInput.Value)) return;
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.WaitingToFinishQuickSell:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToFinishQuickSell:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.WaitingToFinishQuickSell:", Logging.Debug);
                     if (!Market.WaitingToFinishQuickSell("ValueDump")) return;
                     _States.CurrentValueDumpState = ValueDumpState.NextItem;
                     break;
 
                 case ValueDumpState.RefineItems:
-                    if (Settings.Instance.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.RefineItems:", Logging.Debug);
+                    if (Logging.DebugValuedump) Logging.Log("ValueDump", "case ValueDumpState.RefineItems:", Logging.Debug);
                     if (Market.RefineItems("ValueDump", RefineCheckBox.Checked)) return;
                     _States.CurrentValueDumpState = ValueDumpState.Idle;
                     break;
@@ -285,6 +288,7 @@ namespace ValueDump
 
                 if (Market.Items.Any())
                 {
+                    /* FIXME 6-2014
                     foreach (ItemCacheMarket item in Market.Items.Where(i => i.InvType != null).OrderByDescending(i => i.InvType.MedianBuy * i.Quantity))
                     {
                         ListViewItem listItem = new ListViewItem(item.Name);
@@ -315,6 +319,7 @@ namespace ValueDump
                         tbTotalMedian.Text = string.Format("{0:#,##0}", Market.Items.Where(i => i.InvType != null).Sum(i => i.InvType.MedianBuy * i.Quantity));
                         tbTotalSold.Text = "";
                     }
+                     * */
                 }
             }
             catch (Exception exception)

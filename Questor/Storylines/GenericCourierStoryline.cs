@@ -61,16 +61,16 @@ namespace Questor.Storylines
 
             try
             {
-                if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
+                if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
                 if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
+                    if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
                     if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; //no ships?!?
 
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; done", Logging.White);
+                    if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; done", Logging.White);
 
                     List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                    if (Settings.Instance.DebugArm) Logging.Log("Arm.ActivateTransportShip", "List<DirectItem> ships = Cache.Instance.ShipHangar.Items;", Logging.White);
+                    if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "List<DirectItem> ships = Cache.Instance.ShipHangar.Items;", Logging.White);
 
                     foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))
                     {
@@ -122,7 +122,7 @@ namespace Questor.Storylines
         {
             MissionBookmarkDestination destination = Traveler.Destination as MissionBookmarkDestination;
             if (destination == null || destination.AgentId != agentId || !destination.Title.ToLower().StartsWith(title.ToLower()))
-                Traveler.Destination = new MissionBookmarkDestination(Cache.Instance.GetMissionBookmark(agentId, title));
+                Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(agentId, title));
 
             Traveler.ProcessState();
 

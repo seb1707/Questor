@@ -125,7 +125,7 @@ namespace Questor.Modules.Caching
             moduleCurrentCharges = module.CurrentCharges;
             if (moduleGroupID != 53 && module.Charge != null)
             {
-                if (Settings.Instance.DebugEachWeaponsVolleyCache) Logging.Log("DebugEachWeaponsVolleyCache", "[" + thisWasVolleyNumber + "] ModuleItemID [" + moduleItemID + "] ModuleTypeID [" + moduleTypeID + "] ModuleGroupID [" + moduleGroupID + "] ModuleCurrentCharges [" + moduleCurrentCharges + "]", Logging.Debug);
+                if (Logging.DebugEachWeaponsVolleyCache) Logging.Log("DebugEachWeaponsVolleyCache", "[" + thisWasVolleyNumber + "] ModuleItemID [" + moduleItemID + "] ModuleTypeID [" + moduleTypeID + "] ModuleGroupID [" + moduleGroupID + "] ModuleCurrentCharges [" + moduleCurrentCharges + "]", Logging.Debug);
                 moduleAmmoTypeName = module.Charge.TypeName;
                 moduleAmmoTypeID = module.Charge.TypeId;    
             }

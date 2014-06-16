@@ -8,16 +8,15 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-
-using System.Linq;
-
 namespace Questor.Modules.Caching
 {
     using System;
-    //using System.Collections.Generic;
+    using System.Linq;
     using DirectEve;
-    using Questor.Modules.Lookup;
-    using Questor.Modules.Logging;
+    using global::Questor.Modules.BackgroundTasks;
+    using global::Questor.Modules.Combat;
+    using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.Logging;
 
     public class ModuleCache
     {
@@ -99,14 +98,14 @@ namespace Questor.Modules.Caching
                         //
                         if (_module.GroupId == (int)Group.RemoteArmorRepairer || _module.GroupId == (int)Group.RemoteShieldRepairer || _module.GroupId == (int)Group.RemoteHullRepairer)
                         {
-                            return Settings.Instance.RemoteRepairDistance;
+                            return Combat.RemoteRepairDistance;
                         }
                         //
                         // if we could not find the max range via EVE use the XML setting for Nos/Neuts
                         //
                         if (_module.GroupId == (int)Group.NOS || _module.GroupId == (int)Group.Neutralizer)
                         {
-                            return Settings.Instance.NosDistance;
+                            return Combat.NosDistance;
                         }
                         //
                         // Add other types of modules here?
@@ -193,7 +192,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
-                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        //if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                         return true;
                     }
                 }
@@ -225,7 +224,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
-                        //if (Settings.Instance.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        //if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
                         return true;
                     }
                 }
@@ -481,7 +480,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
                     {
-                        //if (Settings.Instance.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
+                        //if (Logging.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
                         return false;
                     }
                 }
@@ -522,7 +521,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("Activate", "We should be clearing ListofEachWeaponsVolleyData at the end of each mission, how did we get [" + Cache.Instance.ListofEachWeaponsVolleyData.Count() + "] entries already?", Logging.Debug);
                 }
 
-                int VolleysInTheAir = 0;
+                //int VolleysInTheAir = 0;
                 double WeaponTimeToTarget_Seconds = 0;
 
                 EachWeaponsVolleyCache __volleyUsedForInvType = Cache.Instance.ListofEachWeaponsVolleyData.FirstOrDefault(i => i.targetItemID == target.Id);
@@ -594,7 +593,7 @@ namespace Questor.Modules.Caching
                     Logging.Log("Activate", "We should be clearing ListofEachWeaponsVolleyData at the end of each mission, how did we get [" + Cache.Instance.ListofEachWeaponsVolleyData.Count() + "] entries already?", Logging.Debug);
                 }
 
-                int VolleysInTheAir = 0;
+                //int VolleysInTheAir = 0;
                 double WeaponTimeToTarget_Seconds = 0;
 
                 EachWeaponsVolleyCache __volleyUsedForInvType = Cache.Instance.ListofEachWeaponsVolleyData.FirstOrDefault(i => i.targetItemID == target.Id);
@@ -666,7 +665,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                     {
-                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        if (Logging.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
                         return false;
                     }
                 }
@@ -675,7 +674,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastChangedAmmoTimeStamp[ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                     {
-                        if (Settings.Instance.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
+                        if (Logging.DebugActivateWeapons) Logging.Log("Activate", "TypeName: [" + _module.TypeName + "] This module is likely still changing ammo! aborting activating this module.", Logging.Debug);
                         return false;
                     }
                 }

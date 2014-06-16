@@ -6,6 +6,7 @@ using Questor.Modules.Caching;
 
 namespace Questor.Modules.Lookup
 {
+    /*
     public class InvTypeMarket
     {
         public static List<string> Minerals = new List<string> { "Morphite", "Megacyte", "Zydrine", "Nocxium", "Isogen", "Mexallon", "Pyerite", "Tritanium" };
@@ -95,4 +96,5 @@ namespace Questor.Modules.Lookup
 
         public Dictionary<string, double?> Reprocess { get; set; }
     }
+     * */
 }

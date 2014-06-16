@@ -314,7 +314,7 @@
 
                 missionsInJournal = missionsInJournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId)).ToList();
                 Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] missions available", Logging.Yellow);
-                if (Settings.Instance.DebugStorylineMissions)
+                if (Logging.DebugStorylineMissions)
                 {
                     int i = 1;
                     foreach (DirectAgentMission _mission in missionsInJournal)
@@ -331,7 +331,7 @@
                 Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions available", Logging.Yellow);
                 missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Cache.Instance.FilterPath(m.Name).ToLower()));
                 Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do", Logging.Yellow);
-                missionsInJournal = missionsInJournal.Where(m => Settings.Instance.MissionBlacklist.All(b => b.ToLower() != Cache.Instance.FilterPath(m.Name).ToLower())).ToList();
+                missionsInJournal = missionsInJournal.Where(m => MissionSettings.MissionBlacklist.All(b => b.ToLower() != Cache.Instance.FilterPath(m.Name).ToLower())).ToList();
                 Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do and are not blacklisted", Logging.Yellow);
 
                 //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Cache.Instance.FilterPath(m.Name).ToLower()));
@@ -346,7 +346,7 @@
             {
                 _nextStoryLineAttempt = DateTime.UtcNow.AddMinutes(15);
                 _States.CurrentStorylineState = StorylineState.Done;
-                Cache.Instance.MissionName = String.Empty;
+                MissionSettings.MissionName = String.Empty;
                 return;
             }
 
@@ -361,7 +361,7 @@
             }
 
             Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.Yellow);
-            Cache.Instance.MissionName = currentStorylineMission.Name;
+            MissionSettings.MissionName = currentStorylineMission.Name;
 
             _highSecChecked = false;
             _States.CurrentStorylineState = StorylineState.Arm;
@@ -426,7 +426,7 @@
                 _highSecChecked = true;
             }
 
-            if (Cache.Instance.PotentialCombatTargets.Any())
+            if (Combat.PotentialCombatTargets.Any())
             {
                 Combat.ProcessState();
             }
@@ -438,9 +438,6 @@
                 Traveler.Destination = null;
                 _setDestinationStation = false;
             }
-
-            if (Settings.Instance.DebugStates)
-                Logging.Log("Traveler.State is", _States.CurrentTravelerState.ToString(), Logging.White);
         }
 
         private bool BringSpoilsOfWar()
@@ -465,7 +462,7 @@
             // Yes, open the ships cargo
             if (Cache.Instance.CurrentShipsCargo == null)
             {
-                if (Settings.Instance.DebugUnloadLoot) Logging.Log("BringSpoilsOfWar", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                if (Logging.DebugUnloadLoot) Logging.Log("BringSpoilsOfWar", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
                 return false;
             }
 
@@ -493,7 +490,7 @@
                 return false;
             }
 
-            if (Settings.Instance.DebugStorylineMissions) Logging.Log("BringSpoilsOfWar", "There are more items to move: waiting for locks to clear.", Logging.White);
+            if (Logging.DebugStorylineMissions) Logging.Log("BringSpoilsOfWar", "There are more items to move: waiting for locks to clear.", Logging.White);
             return false;
         }
 
@@ -536,9 +533,6 @@
 
                     AgentInteraction.ProcessState();
 
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
-
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
                         _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
@@ -561,9 +555,6 @@
                     }
 
                     AgentInteraction.ProcessState();
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State is ", _States.CurrentAgentInteractionState.ToString(), Logging.White);
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {
@@ -592,9 +583,6 @@
                     }
 
                     AgentInteraction.ProcessState();
-
-                    if (Settings.Instance.DebugStates)
-                        Logging.Log("AgentInteraction.State is", _States.CurrentAgentInteractionState.ToString(), Logging.White);
 
                     if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
                     {

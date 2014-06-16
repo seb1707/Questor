@@ -18,12 +18,12 @@ namespace QuestorLoader
 
         public Main(RemoteHooking.IContext InContext, string questorParameters)
         {
-            RemoteHooking.WakeUpProcess(); 
+            RemoteHooking.WakeUpProcess();
         }
 
         public void Run(RemoteHooking.IContext InContext, string questorParameters)
         {
-
+            RemoteHooking.WakeUpProcess();
             Logging.Log("QuestorLauncher", "QuestorLauncher has started", Logging.White);
 
             OptionSet p = new OptionSet

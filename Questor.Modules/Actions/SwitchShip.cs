@@ -26,7 +26,7 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            string defaultFitting = Settings.Instance.DefaultFitting.FittingName;
+            string defaultFitting = MissionSettings.DefaultFitting.FittingName;
 
             switch (_States.CurrentSwitchShipState)
             {
@@ -85,8 +85,8 @@ namespace Questor.Modules.Actions
                 case SwitchShipState.OpenFittingWindow:
 
                     //let's check first if we need to change fitting at all
-                    Logging.Log("SwitchShip", "Fitting: " + defaultFitting + " - currentFit: " + Cache.Instance.CurrentFit, Logging.White);
-                    if (defaultFitting.Equals(Cache.Instance.CurrentFit))
+                    Logging.Log("SwitchShip", "Fitting: " + defaultFitting + " - currentFit: " + MissionSettings.CurrentFit, Logging.White);
+                    if (defaultFitting.Equals(MissionSettings.CurrentFit))
                     {
                         Logging.Log("SwitchShip", "Current fit is correct - no change necessary", Logging.White);
                         _States.CurrentSwitchShipState = SwitchShipState.Done;
@@ -134,7 +134,7 @@ namespace Questor.Modules.Actions
                                 //switch to the requested fitting for the current mission
                                 fitting.Fit();
                                 _lastSwitchShipAction = DateTime.UtcNow;
-                                Cache.Instance.CurrentFit = fitting.Name;
+                                MissionSettings.CurrentFit = fitting.Name;
                                 _States.CurrentSwitchShipState = SwitchShipState.WaitForFitting;
                                 break;
                             }

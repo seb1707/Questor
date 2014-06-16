@@ -8,20 +8,19 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using Questor.Modules.States;
-
 namespace Questor.Modules.Logging
 {
     using System;
-    using System.IO;
+    using System.Collections.Generic;
     using System.Drawing;
+    using System.IO;
+    using System.Text;
+    using System.Threading;
     using System.Windows.Forms;
-    using Questor.Modules.Caching;
-    using Questor.Modules.Lookup;
-    using Questor;
+    //using Questor;
+    //using Questor.Modules.Caching;
+    //using Questor.Modules.Lookup;
+    using Questor.Modules.States;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 
@@ -39,6 +38,8 @@ namespace Questor.Modules.Logging
         //    Interlocked.Decrement(ref LoggingInstances);
         //}
 
+        public static bool DebugMaintainConsoleLogs { get; set; }
+        
         public static DateTime DateTimeForLogs;
         //list of colors
         public const string Green = "\ag";    //traveler mission control
@@ -67,31 +68,47 @@ namespace Questor.Modules.Logging
         public const string TravelerGenericLogging = White;
         public const string TravelerDestinationColor = White;
 
-        public const string DebugHangars = White;
-
         public static string _username;
         public static string _password;
         public static string _character;
+        public static string CharacterSettingsPath;
+
         public static bool standaloneInstance;
         public static bool tryToLogToFile;
         public static List<string> _QuestorParamaters;
+
+        private static string colorLogLine;
+        private static string ConsoleLogText;
+        public static bool SaveConsoleLog;
+        public static bool ConsoleLogOpened = false;
+        public static string ExtConsole { get; set; }
+        //public static string ConsoleLog { get; set; }
+        //public static string ConsoleLogRedacted { get; set; }
+        public static string Logpath { get; set; }
+        public static bool InnerspaceGeneratedConsoleLog { get; set; }
+        public static bool UseInnerspace { get; set; }
+        //public static bool ConsoleLog { get; set; }
+        public static string ConsoleLogPath { get; set; }
+        public static string ConsoleLogFile { get; set; }
+        public static bool SaveLogRedacted { get; set; }
+        //public static bool ConsoleLogRedacted { get; set; }
+        public static string redactedLogLine { get; set; }
+        public static string ConsoleLogPathRedacted { get; set; }
+        public static string ConsoleLogFileRedacted { get; set; }
+        
+        //
+        // number of days of console logs to keep (anything older will be deleted on startup)
+        //
+        public static int ConsoleLogDaysOfLogsToKeep { get; set; }
+
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
         public static void Log(string module, string line, string color, bool verbose = false)
         {
-            //if (Settings.Instance.DateTimeForLogs = EveTime)
-            //{
-            //    DateTimeForLogs = DateTime.UtcNow;
-            //}
-            //else //assume LocalTime
-            //{
             DateTimeForLogs = DateTime.Now;
-
-            //}
-
             //colorLogLine contains color and is for the InnerSpace console
-            string colorLogLine = line;
+            colorLogLine = line;
 
             //Logging when using Innerspace
             if (!Logging.standaloneInstance)
@@ -106,94 +123,97 @@ namespace Questor.Modules.Logging
             // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
             // we now filter sensitive info by default
             //
-            Cache.Instance.ConsoleLogRedacted = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+            redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
             plainLogLine = FilterColorsFromLogs(line);
+            if (Logging.standaloneInstance)
+            {
+                Console.WriteLine(plainLogLine);
+            }
 
             if (Logging.tryToLogToFile)
             {
-                if (Settings.Instance.SaveConsoleLog)
+                if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
                 {
-                    if (!Cache.Instance.ConsoleLogOpened)
+                    if (!Logging.ConsoleLogOpened)
                     {
                         //
                         // begin logging to file
                         //
-                        if (Settings.Instance.ConsoleLogPath != null && Settings.Instance.ConsoleLogFile != null)
+                        if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
                         {
                             module = "Logging";
-                            if (Settings.Instance.InnerspaceGeneratedConsoleLog && Settings.Instance.UseInnerspace)
+                            if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
                             {
-                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log"));
-                                LavishScript.ExecuteCommand("log " + Settings.Instance.ConsoleLogFile + "-innerspace-generated.log");
+                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
+                                LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
                             }
 
-                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
+                            Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
 
-                            if (!string.IsNullOrEmpty(Settings.Instance.ConsoleLogFile))
+                            if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
                             {
-                                Directory.CreateDirectory(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile));
-                                if (Directory.Exists(Path.GetDirectoryName(Settings.Instance.ConsoleLogFile)))
+                                Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
+                                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
                                 {
-                                    Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                                    Cache.Instance.ConsoleLogOpened = true;
+                                    Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                    Logging.ConsoleLogOpened = true;
                                 }
                                 else
                                 {
-                                    if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Settings.Instance.ConsoleLogPath));
+                                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
                                 }
                                 line = "";
                             }
                             else
                             {
                                 line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                                if (Settings.Instance.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                                if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
+                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                             }
                         }
                     }
 
-                    if (Cache.Instance.ConsoleLogOpened)
+                    if (Logging.ConsoleLogOpened)
                     {
                         //
                         // log file ready: add next logging entry...
                         //
-                        if (Settings.Instance.ConsoleLogFile != null && !verbose) //normal
+                        if (Logging.ConsoleLogFile != null && !verbose) //normal
                         {
 
                             //
                             // normal text logging
                             //
-                            Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                            File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
+                            Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                            File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                         }
 
-                        if (Settings.Instance.ConsoleLogFile != null && verbose) //tons of info
+                        if (Logging.ConsoleLogFile != null && verbose) //tons of info
                         {
                             //
                             // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
                             //
                             System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
                             module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
-                            Cache.Instance.ConsoleLog = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                            File.AppendAllText(Settings.Instance.ConsoleLogFile, Cache.Instance.ConsoleLog); //Write In Memory Console log to File
+                            Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                            File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                         }
                         //Cache.Instance.ConsoleLog = null;
 
-                        if (Settings.Instance.ConsoleLogFileRedacted != null)
+                        if (Logging.ConsoleLogFileRedacted != null)
                         {
                             //
                             // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
                             //
-                            Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
-                            File.AppendAllText(Settings.Instance.ConsoleLogFileRedacted, Cache.Instance.ConsoleLogRedacted);               //Write In Memory Console log to File
+                            Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                            File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedLogLine);               //Write In Memory Console log to File
                         }
                         //Cache.Instance.ConsoleLogRedacted = null;
                     }
 
-                    Cache.Instance.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                 }    
             }
-            
         }
 
         //path = path.Replace(Environment.CommandLine, "");
@@ -203,27 +223,27 @@ namespace Questor.Modules.Logging
         {
             if (line == null)
                 return string.Empty;
-            if (!string.IsNullOrEmpty(Settings.Instance.CharacterName))
+            if (!string.IsNullOrEmpty(Logging._character))
             {
-                line = line.Replace(Settings.Instance.CharacterName, Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("/" + Settings.Instance.CharacterName, "/" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("\\" + Settings.Instance.CharacterName, "\\" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("[" + Settings.Instance.CharacterName + "]", "[" + Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
-                line = line.Replace(Settings.Instance.CharacterName + ".xml", Settings.Instance.CharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
-                line = line.Replace(Settings.Instance.CharacterSettingsPath, Settings.Instance.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
+                line = line.Replace(Logging._character, Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("/" + Logging._character, "/" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("\\" + Logging._character, "\\" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                line = line.Replace("[" + Logging._character + "]", "[" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
+                line = line.Replace(Logging._character + ".xml", Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                line = line.Replace(Logging.CharacterSettingsPath, Logging.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
                 //line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
                 //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
             }
 
             //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
             //{
-            //    if (Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
+            //    if (Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
             //    line = line.Replace(" " + Cache.Instance.CurrentAgent + " ", " _MyCurrentAgentRedacted_ ");
             //    line = line.Replace("[" + Cache.Instance.CurrentAgent + "]", "[_MyCurrentAgentRedacted_]");
             //}
             //if (Cache.Instance.AgentId != -1)
             //{
-            //    if(Settings.Instance.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: AgentId is not -1");
+            //    if(Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: AgentId is not -1");
             //    line = line.Replace(" " + Cache.Instance.AgentId + " ", " _MyAgentIdRedacted_ ");
             //    line = line.Replace("[" + Cache.Instance.AgentId + "]", "[_MyAgentIdRedacted_]");
             //}
@@ -284,25 +304,25 @@ namespace Questor.Modules.Logging
             const string searchpattern = ".log";
 
             //calculate the current date - the number of keep days (make sure you use the negative value if Settings.Instance.ConsoleLogDaysOfLogsToKeep as we want to keep that many days in the past, not that many days in the future)
-            DateTime keepdate = DateTime.UtcNow.AddDays(-Settings.Instance.ConsoleLogDaysOfLogsToKeep);
+            DateTime keepdate = DateTime.UtcNow.AddDays(-Logging.ConsoleLogDaysOfLogsToKeep);
 
             //this is where it gets the directory and looks at
             //the files in the directory to compare the last write time
             //against the keepdate variable.
             try
             {
-                if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "ConsoleLogPath is [" + Settings.Instance.ConsoleLogPath + "]", Logging.White);
-                DirectoryInfo fileListing = new DirectoryInfo(Settings.Instance.ConsoleLogPath);
+                if (Logging.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "ConsoleLogPath is [" + Logging.ConsoleLogPath + "]", Logging.White);
+                DirectoryInfo fileListing = new DirectoryInfo(Logging.ConsoleLogPath);
 
                 if (fileListing.Exists)
                 {
-                    if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (fileListing.Exists)", Logging.White);
+                    if (Logging.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (fileListing.Exists)", Logging.White);
                     foreach (FileInfo log in fileListing.GetFiles(searchpattern))
                     {
-                        if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "foreach (FileInfo log in fileListing.GetFiles(searchpattern))", Logging.White);
+                        if (Logging.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "foreach (FileInfo log in fileListing.GetFiles(searchpattern))", Logging.White);
                         if (log.LastWriteTime <= keepdate)
                         {
-                            if (Settings.Instance.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (log.LastWriteTime <= keepdate)", Logging.White);
+                            if (Logging.DebugMaintainConsoleLogs) Logging.Log("Logging.MaintainConsoleLogs", "if (log.LastWriteTime <= keepdate)", Logging.White);
                             try
                             {
                                 Logging.Log("Logging", "Removing old console log named [" + log.Name + "] Dated [" + log.LastWriteTime + "]", Logging.White);
@@ -424,5 +444,100 @@ namespace Questor.Modules.Logging
 
             return null;
         }
+
+        //
+        // Debug Variables
+        //
+        public static bool DebugActivateGate { get; set; }
+        public static bool DebugActivateWeapons { get; set; }
+        public static bool DebugActivateBastion { get; set; }
+        public static bool DebugAddDronePriorityTarget { get; set; }
+        public static bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
+        public static bool DebugAgentInteractionReplyToAgent { get; set; }
+        public static bool DebugAllMissionsOnBlackList { get; set; }
+        public static bool DebugAllMissionsOnGreyList { get; set; }
+        public static bool DebugAmmo { get; set; }
+        public static bool DebugArm { get; set; }
+        public static bool DebugAttachVSDebugger { get; set; }
+        public static bool DebugAutoStart { get; set; }
+        public static bool DebugBlackList { get; set; }
+        public static bool DebugCargoHold { get; set; }
+        public static bool DebugChat { get; set; }
+        public static bool DebugCleanup { get; set; }
+        public static bool DebugClearPocket { get; set; }
+        public static bool DebugCourierMissions { get; set; }
+        public static bool DebugDecline { get; set; }
+        public static bool DebugDefense { get; set; }
+        public static bool DebugDisableCleanup { get; set; }
+        public static bool DebugDisableCombatMissionsBehavior { get; set; }
+        public static bool DebugDisableCombatMissionCtrl { get; set; }
+        public static bool DebugDisableCombat { get; set; }
+        public static bool DebugDisableDrones { get; set; }
+        public static bool DebugDisablePanic { get; set; }
+        public static bool DebugDisableSalvage { get; set; }
+        public static bool DebugDisableTargetCombatants { get; set; }
+        public static bool DebugDisableGetBestTarget { get; set; }
+        public static bool DebugDisableGetBestDroneTarget { get; set; }
+        public static bool DebugDisableNavigateIntoRange { get; set; }
+        public static bool DebugDoneAction { get; set; }
+        public static bool DebugDrones { get; set; }
+        public static bool DebugDroneHealth { get; set; }
+        public static bool DebugEachWeaponsVolleyCache { get; set; }
+        public static bool DebugEntityCache { get; set; }
+        public static bool DebugExceptions { get; set; }
+        public static bool DebugFittingMgr { get; set; }
+        public static bool DebugFleetSupportSlave { get; set; }
+        public static bool DebugFleetSupportMaster { get; set; }
+        public static bool DebugGetBestTarget { get; set; }
+        public static bool DebugGetBestDroneTarget { get; set; }
+        public static bool DebugGotobase { get; set; }
+        public static bool DebugGreyList { get; set; }
+        public static bool DebugHangars { get; set; }
+        public static bool DebugHasExploded { get; set; }
+        public static bool DebugIdle { get; set; }
+        public static bool DebugInSpace { get; set; }
+        public static bool DebugInStation { get; set; }
+        public static bool DebugInWarp { get; set; }
+        public static bool DebugIsReadyToShoot { get; set; }
+        public static bool DebugItemHangar { get; set; }
+        public static bool DebugKillTargets { get; set; }
+        public static bool DebugKillAction { get; set; }
+        public static bool DebugLoadScripts { get; set; }
+        public static bool DebugLogging { get; set; }
+        public static bool DebugLootWrecks { get; set; }
+        public static bool DebugLootValue { get; set; }
+        public static bool DebugNavigateOnGrid { get; set; }
+        public static bool DebugMiningBehavior { get; set; }
+        public static bool DebugMissionFittings { get; set; }
+        public static bool DebugMoveTo { get; set; }
+        public static bool DebugOnframe { get; set; }
+        public static bool DebugOverLoadWeapons { get; set; }
+        public static bool DebugPanic { get; set; }
+        public static bool DebugPerformance { get; set; }
+        public static bool DebugPotentialCombatTargets { get; set; }
+        public static bool DebugPreferredPrimaryWeaponTarget { get; set; }
+        public static bool DebugQuestorManager { get; set; }
+        public static bool DebugReloadAll { get; set; }
+        public static bool DebugReloadorChangeAmmo { get; set; }
+        public static bool DebugRemoteRepair { get; set; }
+        public static bool DebugSalvage { get; set; }
+        public static bool DebugScheduler { get; set; }
+        public static bool DebugSettings { get; set; }
+        public static bool DebugShipTargetValues { get; set; }
+        public static bool DebugSkillTraining { get; set; }
+        public static bool DebugSpeedMod { get; set; }
+        public static bool DebugStatistics { get; set; }
+        public static bool DebugStorylineMissions { get; set; }
+        public static bool DebugTargetCombatants { get; set; }
+        public static bool DebugTargetWrecks { get; set; }
+        public static bool DebugTractorBeams { get; set; }
+        public static bool DebugTraveler { get; set; }
+        public static bool DebugUI { get; set; }
+        public static bool DebugUndockBookmarks { get; set; }
+        public static bool DebugUnloadLoot { get; set; }
+        public static bool DebugValuedump { get; set; }
+        public static bool DebugWalletBalance { get; set; }
+        public static bool DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange { get; set; }
+        public static bool DebugWatchForActiveWars { get; set; }
     }
 }

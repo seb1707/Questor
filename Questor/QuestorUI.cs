@@ -27,17 +27,17 @@ namespace Questor
 
         public QuestorUI()
         {
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
             InitializeComponent();
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.White);
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
             PopulateStateComboBoxes();
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
             PopulateBehaviorStateComboBox();
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
             Show();
-            if (Settings.Instance.DebugAttachVSDebugger)
+            if (Logging.DebugAttachVSDebugger)
             {
                 //if (!System.Diagnostics.Debugger.IsAttached)
                 //{
@@ -53,7 +53,7 @@ namespace Questor
 
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.White);
 
             Cache.Instance.DirectEve.Dispose();
             Cache.Instance.DirectEve = null;
@@ -61,14 +61,14 @@ namespace Questor
 
         private void PopulateStateComboBoxes()
         {
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
             QuestorStateComboBox.Items.Clear();
             foreach (string text in Enum.GetNames(typeof(QuestorState)))
                 QuestorStateComboBox.Items.Add(text);
 
             if (Settings.Instance.CharacterMode != null)
             {
-                //if (Settings.Instance.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
+                //if (Logging.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
                 //SkillTrainerStateComboBox.Items.Clear();
                 //foreach (string text in Enum.GetNames(typeof(SkillTrainerState)))
                 //{
@@ -171,14 +171,14 @@ namespace Questor
         {
             //Logging.Log("QuestorUI","populating MissionBlacklisttextbox",Logging.White);
             BlacklistedMissionstextbox.Text = "";
-            foreach (string blacklistedmission in Settings.Instance.MissionBlacklist)
+            foreach (string blacklistedmission in MissionSettings.MissionBlacklist)
             {
                 BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
             }
 
             //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.White);
             GreyListedMissionsTextBox.Text = "";
-            foreach (string GreyListedMission in Settings.Instance.MissionGreylist)
+            foreach (string GreyListedMission in MissionSettings.MissionGreylist)
             {
                 GreyListedMissionsTextBox.AppendText(GreyListedMission + "\r\n");
             }
@@ -240,20 +240,20 @@ namespace Questor
                             lblUserDefinedScript4.Text = Settings.Instance.UserDefinedLavishScriptScript4Description;
                         }
 
-                        DamageTypeData.Text = Cache.Instance.MissionDamageType.ToString();
+                        DamageTypeData.Text = MissionSettings.MissionDamageType.ToString();
 
                         //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
                         //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
                         //AgentIdData.Text = Cache.Instance.AgentId.ToString(CultureInfo.InvariantCulture);
                         //AgentData.Text = Cache.Instance.CurrentAgent.ToString(CultureInfo.InvariantCulture);
                         AgentInteractionPurposeData.Text = AgentInteraction.Purpose.ToString();
-                        MissionsThisSessionData.Text = Cache.Instance.MissionsThisSession.ToString(CultureInfo.InvariantCulture);
+                        MissionsThisSessionData.Text = MissionSettings.MissionsThisSession.ToString(CultureInfo.InvariantCulture);
 
                         //crashes questor when in station?
                         //
-                        //if (Cache.Instance.MaxRange > 0)
+                        //if (Combat.MaxRange > 0)
                         //{
-                        //    MaxRangeData.Text = Cache.Instance.MaxRange.ToString(CultureInfo.InvariantCulture);
+                        //    MaxRangeData.Text = Combat.MaxRange.ToString(CultureInfo.InvariantCulture);
                              //causes problems / crashes
                         //}
                         //WeaponRangeData.Text = Cache.Instance.WeaponRange.ToString(CultureInfo.InvariantCulture); //causes problems / crashes
@@ -291,7 +291,7 @@ namespace Questor
                 }
                 catch (Exception ex)
                 {
-                    if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "RefreshInfoDisplayedInUI: unable to update all UI labels: exception was [" + ex.Message + "]", Logging.Teal);
+                    if (Logging.DebugUI) Logging.Log("QuestorUI", "RefreshInfoDisplayedInUI: unable to update all UI labels: exception was [" + ex.Message + "]", Logging.Teal);
                 }
             }
             if (DateTime.UtcNow > _nextScheduleUpdate)
@@ -355,7 +355,7 @@ namespace Questor
 
         private void PopulateBehaviorStateComboBox()
         {
-            if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
+            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
             if (Settings.Instance.CharacterMode != null)
             {
                 //
@@ -424,7 +424,7 @@ namespace Questor
 
         private void UpdateUiTick(object sender, EventArgs e)
         {
-            //if (Settings.Instance.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
+            //if (Logging.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
             // The if's in here stop the UI from flickering
             string text = "Questor";
             if (Settings.Instance.CharacterName != string.Empty)
@@ -524,9 +524,9 @@ namespace Questor
             //    }
             //}
 
-            if ((string)DamageTypeComboBox.SelectedItem != Cache.Instance.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+            if ((string)DamageTypeComboBox.SelectedItem != MissionSettings.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
             {
-                DamageTypeComboBox.SelectedItem = Cache.Instance.MissionDamageType.ToString();
+                DamageTypeComboBox.SelectedItem = MissionSettings.MissionDamageType.ToString();
             }
 
             //
@@ -663,13 +663,13 @@ namespace Questor
                 }
             }
 
-            if (!String.IsNullOrEmpty(Cache.Instance.MissionName))
+            if (!String.IsNullOrEmpty(MissionSettings.MissionName))
             {
-                if (!String.IsNullOrEmpty(Settings.Instance.MissionsPath))
+                if (!String.IsNullOrEmpty(MissionSettings.MissionsPath))
                 {
-                    if (File.Exists(Cache.Instance.MissionXmlPath))
+                    if (File.Exists(MissionSettings.MissionXmlPath))
                     {
-                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.Instance.MissionsThisSession + " ]";
+                        string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
                         if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
                         {
                             lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
@@ -678,7 +678,7 @@ namespace Questor
                     }
                     else
                     {
-                        string newlblCurrentMissionInfotext = "[ " + Cache.Instance.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.Instance.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.Instance.MissionsThisSession + " ]";
+                        string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
                         if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
                         {
                             lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
@@ -687,7 +687,7 @@ namespace Questor
                     }
                 }
             }
-            else if (String.IsNullOrEmpty(Cache.Instance.MissionName))
+            else if (String.IsNullOrEmpty(MissionSettings.MissionName))
             {
                 lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
                 buttonOpenMissionXML.Enabled = false;
@@ -776,7 +776,7 @@ namespace Questor
                 }
             }
 
-            if (!String.IsNullOrEmpty(Cache.Instance.ExtConsole))
+            if (!String.IsNullOrEmpty(Logging.ExtConsole))
             {
                 if (DateTime.UtcNow > _nextConsoleLogRefresh)
                 {
@@ -784,8 +784,8 @@ namespace Questor
                     {
                         txtExtConsole.Text = "";
                     }
-                    txtExtConsole.AppendText(Cache.Instance.ExtConsole);
-                    Cache.Instance.ExtConsole = null;
+                    txtExtConsole.AppendText(Logging.ExtConsole);
+                    Logging.ExtConsole = null;
                     _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
                 }
             }
@@ -827,7 +827,7 @@ namespace Questor
 
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
-            Cache.Instance.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
+            MissionSettings.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
         }
 
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)
@@ -890,19 +890,18 @@ namespace Questor
         private void ButtonOpenLogDirectoryClick(object sender, EventArgs e)
         {
             //string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            System.Diagnostics.Process.Start(Settings.Instance.Logpath);
+            System.Diagnostics.Process.Start(Logging.Logpath);
         }
 
         private void ButtonOpenMissionXmlClick(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI", "Launching [" + Cache.Instance.MissionXmlPath + "]", Logging.White);
-            System.Diagnostics.Process.Start(Cache.Instance.MissionXmlPath);
+            Logging.Log("QuestorUI", "Launching [" + MissionSettings.MissionXmlPath + "]", Logging.White);
+            System.Diagnostics.Process.Start(MissionSettings.MissionXmlPath);
         }
 
         private void QuestorStateComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
             _States.CurrentQuestorState = (QuestorState)Enum.Parse(typeof(QuestorState), QuestorStateComboBox.Text);
-            if (Settings.Instance.DebugStates) Logging.Log("QuestorUI", "QuestorState has been changed to [" + QuestorStateComboBox.Text + "]", Logging.White);
             PopulateBehaviorStateComboBox();
             PopulateMissionLists();
             _States.LavishEvent_QuestorState();
@@ -967,21 +966,21 @@ namespace Questor
                 //
                 // greylist info
                 //
-                MinAgentGreyListStandingsData.Text = Math.Round(Settings.Instance.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
-                LastGreylistedMissionDeclinedData.Text = Cache.Instance.LastGreylistMissionDeclined;
-                greylistedmissionsdeclineddata.Text = Cache.Instance.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                MinAgentGreyListStandingsData.Text = Math.Round(MissionSettings.MinAgentGreyListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastGreylistedMissionDeclinedData.Text = MissionSettings.LastGreylistMissionDeclined;
+                greylistedmissionsdeclineddata.Text = MissionSettings.GreyListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
 
                 //
                 // blacklist info
                 //
-                MinAgentBlackListStandingsData.Text = Math.Round(Settings.Instance.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
-                LastBlacklistedMissionDeclinedData.Text = Cache.Instance.LastBlacklistMissionDeclined;
-                blacklistedmissionsdeclineddata.Text = Cache.Instance.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
+                MinAgentBlackListStandingsData.Text = Math.Round(MissionSettings.MinAgentBlackListStandings, 2).ToString(CultureInfo.InvariantCulture);
+                LastBlacklistedMissionDeclinedData.Text = MissionSettings.LastBlacklistMissionDeclined;
+                blacklistedmissionsdeclineddata.Text = MissionSettings.BlackListedMissionsDeclined.ToString(CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
                 //if we get an exception here ignore it as it should not effect anything, the GUI is only displaying data collected and processed elsewhere
-                if (Settings.Instance.DebugExceptions || (Settings.Instance.DebugUI)) Logging.Log("QuestorUI", "Exception was [" + ex.Message + "]", Logging.Teal);
+                if (Logging.DebugExceptions || (Logging.DebugUI)) Logging.Log("QuestorUI", "Exception was [" + ex.Message + "]", Logging.Teal);
             }
         }
 
@@ -1059,14 +1058,14 @@ namespace Questor
 
         private void ButtonOpenCharacterXMLClick(object sender, EventArgs e)
         {
-            if (File.Exists(Settings.Instance.CharacterSettingsPath))
+            if (File.Exists(Logging.CharacterSettingsPath))
             {
-                Logging.Log("QuestorUI", "Launching [" + Settings.Instance.CharacterSettingsPath + "]", Logging.White);
-                System.Diagnostics.Process.Start(Settings.Instance.CharacterSettingsPath);
+                Logging.Log("QuestorUI", "Launching [" + Logging.CharacterSettingsPath + "]", Logging.White);
+                System.Diagnostics.Process.Start(Logging.CharacterSettingsPath);
             }
             else
             {
-                Logging.Log("QuestorUI", "Unable to open [" + Settings.Instance.CharacterSettingsPath + "] file not found", Logging.Orange);
+                Logging.Log("QuestorUI", "Unable to open [" + Logging.CharacterSettingsPath + "] file not found", Logging.Orange);
             }
         }
 
@@ -1131,7 +1130,7 @@ namespace Questor
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            Cache.Instance.StopSessionAfterMissionNumber = (int)numericUpDown1.Value;
+            MissionSettings.StopSessionAfterMissionNumber = (int)numericUpDown1.Value;
         }
 
         private void ReloadAllClick(object sender, EventArgs e)

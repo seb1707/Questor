@@ -92,7 +92,6 @@
     <Compile Include="Behaviors\DebugBehavior.cs" />
     <Compile Include="Behaviors\DebugHangarsBehavior.cs" />
     <Compile Include="Behaviors\DedicatedBookmarkSalvagerBehavior.cs" />
-    <Compile Include="Behaviors\DirectionalScannerBehavior.cs" />
     <Compile Include="Behaviors\MiningBehavior.cs" />
     <Compile Include="D3DDetour\D3D10.cs" />
     <Compile Include="D3DDetour\D3D11.cs" />

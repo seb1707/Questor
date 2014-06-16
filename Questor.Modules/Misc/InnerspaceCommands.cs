@@ -2,10 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Questor.Modules.Activities;
+using Questor.Modules.Combat;
 
 namespace Questor.Modules.Misc
 {
     using Questor.Modules.Caching;
+    using Questor.Modules.Combat;
     using Questor.Modules.Logging;
     using Questor.Modules.Lookup;
     using Questor.Modules.States;
@@ -243,7 +246,7 @@ namespace Questor.Modules.Misc
             AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddDronePriorityTargetsByName " + AddThese, Logging.White);
-            Cache.Instance.AddDronePriorityTargetsByName(AddThese);
+            Drones.AddDronePriorityTargetsByName(AddThese);
             return 0;
         }
 
@@ -259,7 +262,7 @@ namespace Questor.Modules.Misc
             AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddWarpScramblerByName " + AddThese, Logging.White);
-            Cache.Instance.AddWarpScramblerByName(AddThese);
+            Combat.AddWarpScramblerByName(AddThese);
             return 0;
         }
 
@@ -274,7 +277,7 @@ namespace Questor.Modules.Misc
             AddThese = args[1];
 
             Logging.Log("InnerspaceCommands", "Processing Command as: AddWebifierByName " + AddThese, Logging.White);
-            Cache.Instance.AddWebifierByName(AddThese);
+            Combat.AddWebifierByName(AddThese);
             return 0;
         }
 
@@ -288,7 +291,7 @@ namespace Questor.Modules.Misc
 
             string RemoveThese = args[1];
 
-            Cache.Instance.RemovedDronePriorityTargetsByName(RemoveThese);
+            Drones.RemovedDronePriorityTargetsByName(RemoveThese);
             return 0;
         }
 
@@ -323,7 +326,7 @@ namespace Questor.Modules.Misc
 
                             foreach (EntityCache entityToAdd in entitiesToAdd)
                             {
-                                Cache.Instance.AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
+                                Combat.AddPrimaryWeaponPriorityTarget(entityToAdd, PrimaryWeaponPriority.PriorityKillTarget, "AddPWPTByName");
                                 continue;
                             }
 
@@ -372,7 +375,7 @@ namespace Questor.Modules.Misc
 
             string RemoveThese = args[1];
 
-            Cache.Instance.RemovePrimaryWeaponPriorityTargetsByName(RemoveThese);
+            Combat.RemovePrimaryWeaponPriorityTargetsByName(RemoveThese);
             return 0;
         }
 
@@ -385,14 +388,14 @@ namespace Questor.Modules.Misc
             }
 
             string ignoreThese = args[1];
-            if (!Cache.Instance.IgnoreTargets.Contains(ignoreThese))
+            if (!CombatMissionCtrl.IgnoreTargets.Contains(ignoreThese))
             {
-                Cache.Instance.IgnoreTargets.Add(ignoreThese.Trim());    
+                CombatMissionCtrl.IgnoreTargets.Add(ignoreThese.Trim());    
             }
             int IgnoreTargetsCount = 0;
-            if (Cache.Instance.IgnoreTargets.Any())
+            if (CombatMissionCtrl.IgnoreTargets.Any())
             {
-                IgnoreTargetsCount = Cache.Instance.IgnoreTargets.Count();
+                IgnoreTargetsCount = CombatMissionCtrl.IgnoreTargets.Count();
             }
             Logging.Log("InnerspaceCommands", "Added [" + ignoreThese + "] to Ignored Targets List. IgnoreTargets Contains [" + IgnoreTargetsCount + "] items", Logging.White);
             return 0;
@@ -407,15 +410,15 @@ namespace Questor.Modules.Misc
             }
 
             string unIgnoreThese = args[1];
-            if (Cache.Instance.IgnoreTargets.Contains(unIgnoreThese))
+            if (CombatMissionCtrl.IgnoreTargets.Contains(unIgnoreThese))
             {
-                Cache.Instance.IgnoreTargets.Remove(unIgnoreThese.Trim());
+                CombatMissionCtrl.IgnoreTargets.Remove(unIgnoreThese.Trim());
             }
 
             int IgnoreTargetsCount = 0;
-            if ( Cache.Instance.IgnoreTargets.Any())
+            if (CombatMissionCtrl.IgnoreTargets.Any())
             {
-                IgnoreTargetsCount = Cache.Instance.IgnoreTargets.Count;
+                IgnoreTargetsCount = CombatMissionCtrl.IgnoreTargets.Count;
             }
             Logging.Log("InnerspaceCommands", "Removed [" + unIgnoreThese + "] from Ignored Targets List. IgnoreTargets Contains [" + IgnoreTargetsCount + "] items", Logging.White);
             return 0;
@@ -449,32 +452,32 @@ namespace Questor.Modules.Misc
         public static bool ListPrimaryWeaponPriorityTargets()
         {
             Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+            if (Combat.PreferredPrimaryWeaponTarget != null && Combat.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
             {
-                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
+                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Combat.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Combat.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Combat.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Combat.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
             }
 
-            if (Cache.Instance.PrimaryWeaponPriorityTargets.Any())
+            if (Combat.PrimaryWeaponPriorityTargets.Any())
             {
                 int icount = 0;
-                foreach (PriorityTarget PrimaryWeaponPriorityTarget in Cache.Instance.PrimaryWeaponPriorityTargets)
+                foreach (PriorityTarget PrimaryWeaponPriorityTarget in Combat.PrimaryWeaponPriorityTargets)
                 {
                     icount++;
-                    Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityTarget.PrimaryWeaponPriority + "] EntityID [" + Cache.Instance.MaskedID(PrimaryWeaponPriorityTarget.EntityID) + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityTarget.PrimaryWeaponPriority + "] EntityID [" + PrimaryWeaponPriorityTarget.MaskedID + "]", Logging.Debug);
                     //Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityTarget.Name + "][" + Math.Round(primaryWeaponPriorityEntity.Distance / 1000, 0) + "k] IsInOptimalRange [" + primaryWeaponPriorityEntity.IsInOptimalRange + "] IsTarget [" + primaryWeaponPriorityEntity.IsTarget + "] PrimaryWeaponPriorityLevel [" + primaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "]", Logging.Debug);
                 }
             }
             Logging.Log("PWPT", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             Logging.Log("PWPT", "--------------------------- Start (listed below)-----------------------------", Logging.Yellow);
-            if (Cache.Instance.PreferredPrimaryWeaponTarget != null && Cache.Instance.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
+            if (Combat.PreferredPrimaryWeaponTarget != null && Combat.PreferredPrimaryWeaponTarget.IsOnGridWithMe)
             {
-                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Cache.Instance.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Cache.Instance.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
+                Logging.Log("PWPT", "[" + 0 + "] PreferredPrimaryWeaponTarget [" + Combat.PreferredPrimaryWeaponTarget.Name + "][" + Math.Round(Combat.PreferredPrimaryWeaponTarget.Distance / 1000, 0) + "k] IsInOptimalRange [" + Combat.PreferredPrimaryWeaponTarget.IsInOptimalRange + "] IsTarget [" + Combat.PreferredPrimaryWeaponTarget.IsTarget + "]", Logging.Debug);
             }
 
-            if (Cache.Instance.PrimaryWeaponPriorityEntities.Any())
+            if (Combat.PrimaryWeaponPriorityEntities.Any())
             {
                 int icount = 0;
-                foreach (EntityCache PrimaryWeaponPriorityEntity in Cache.Instance.PrimaryWeaponPriorityEntities)
+                foreach (EntityCache PrimaryWeaponPriorityEntity in Combat.PrimaryWeaponPriorityEntities)
                 {
                     icount++;
                     Logging.Log(icount.ToString(), "[" + PrimaryWeaponPriorityEntity.Name + "] PrimaryWeaponPriorityLevel [" + PrimaryWeaponPriorityEntity.PrimaryWeaponPriorityLevel + "][" + PrimaryWeaponPriorityEntity.MaskedId + "]", Logging.Debug);
@@ -778,7 +781,7 @@ namespace Questor.Modules.Misc
                 foreach (EntityCache thing in things.OrderBy(i => i.Distance))
                 {
                     icount++;
-                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + Cache.Instance.MaskedID(thing.Id) + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] isTarget [" + thing.IsTarget + "] isTargeting [" + thing.IsTargeting + "]", Logging.Debug);
+                    Logging.Log(icount.ToString(), thing.Name + "[" + Math.Round(thing.Distance / 1000, 0) + "k] GroupID[" + thing.GroupId + "] ID[" + thing.MaskedId + "] isSentry[" + thing.IsSentry + "] IsHVT[" + thing.IsHighValueTarget + "] IsLVT[" + thing.IsLowValueTarget + "] IsIgnored[" + thing.IsIgnored + "] isTarget [" + thing.IsTarget + "] isTargeting [" + thing.IsTargeting + "]", Logging.Debug);
                 }
             }
             Logging.Log("Entities", "--------------------------- Done  (listed above)-----------------------------", Logging.Yellow);

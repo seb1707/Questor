@@ -106,113 +106,120 @@ namespace Questor.Modules.Logging
         //public static void Log(string module, string line, string color = Logging.White)
         public static void Log(string module, string line, string color, bool verbose = false)
         {
-            DateTimeForLogs = DateTime.Now;
-            //colorLogLine contains color and is for the InnerSpace console
-            colorLogLine = line;
-
-            //Logging when using Innerspace
-            if (!Logging.standaloneInstance)
+            try
             {
-                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
-            }
-          	// probably want some sort of extra logging if using the standalone version? we dont have any output until q window is up
-           
-            string plainLogLine = FilterColorsFromLogs(line);
+                DateTimeForLogs = DateTime.Now;
+                //colorLogLine contains color and is for the InnerSpace console
+                colorLogLine = line;
 
-            //
-            // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
-            // we now filter sensitive info by default
-            //
-            redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
-            plainLogLine = FilterColorsFromLogs(line);
-            if (Logging.standaloneInstance)
-            {
-                Console.WriteLine(plainLogLine);
-            }
-
-            if (Logging.tryToLogToFile)
-            {
-                if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
+                //Logging when using Innerspace
+                if (!Logging.standaloneInstance)
                 {
-                    if (!Logging.ConsoleLogOpened)
+                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+                }
+                // probably want some sort of extra logging if using the standalone version? we dont have any output until q window is up
+
+                string plainLogLine = FilterColorsFromLogs(line);
+
+                //
+                // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
+                // we now filter sensitive info by default
+                //
+                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                plainLogLine = FilterColorsFromLogs(line);
+                if (Logging.standaloneInstance)
+                {
+                    Console.WriteLine(plainLogLine);
+                }
+
+                if (Logging.tryToLogToFile)
+                {
+                    if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
                     {
-                        //
-                        // begin logging to file
-                        //
-                        if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
+                        if (!Logging.ConsoleLogOpened)
                         {
-                            module = "Logging";
-                            if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
+                            //
+                            // begin logging to file
+                            //
+                            if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
                             {
-                                InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
-                                LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
-                            }
-
-                            Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
-
-                            if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
-                            {
-                                Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
-                                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
+                                module = "Logging";
+                                if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
                                 {
-                                    Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                                    Logging.ConsoleLogOpened = true;
+                                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
+                                    LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
+                                }
+
+                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
+
+                                if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
+                                {
+                                    Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
+                                    if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
+                                    {
+                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                        Logging.ConsoleLogOpened = true;
+                                    }
+                                    else
+                                    {
+                                        if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
+                                    }
+                                    line = "";
                                 }
                                 else
                                 {
-                                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
+                                    line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
+                                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
+                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                                 }
-                                line = "";
                             }
-                            else
+                        }
+
+                        if (Logging.ConsoleLogOpened)
+                        {
+                            //
+                            // log file ready: add next logging entry...
+                            //
+                            if (Logging.ConsoleLogFile != null && !verbose) //normal
                             {
-                                line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                                if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+
+                                //
+                                // normal text logging
+                                //
+                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                             }
+
+                            if (Logging.ConsoleLogFile != null && verbose) //tons of info
+                            {
+                                //
+                                // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
+                                //
+                                System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
+                                module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
+                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
+                            }
+                            //Cache.Instance.ConsoleLog = null;
+
+                            if (Logging.ConsoleLogFileRedacted != null)
+                            {
+                                //
+                                // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
+                                //
+                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                                File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedLogLine);               //Write In Memory Console log to File
+                            }
+                            //Cache.Instance.ConsoleLogRedacted = null;
                         }
+
+                        Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                     }
-
-                    if (Logging.ConsoleLogOpened)
-                    {
-                        //
-                        // log file ready: add next logging entry...
-                        //
-                        if (Logging.ConsoleLogFile != null && !verbose) //normal
-                        {
-
-                            //
-                            // normal text logging
-                            //
-                            Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                            File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
-                        }
-
-                        if (Logging.ConsoleLogFile != null && verbose) //tons of info
-                        {
-                            //
-                            // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
-                            //
-                            System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
-                            module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
-                            Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                            File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
-                        }
-                        //Cache.Instance.ConsoleLog = null;
-
-                        if (Logging.ConsoleLogFileRedacted != null)
-                        {
-                            //
-                            // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
-                            //
-                            Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
-                            File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedLogLine);               //Write In Memory Console log to File
-                        }
-                        //Cache.Instance.ConsoleLogRedacted = null;
-                    }
-
-                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
-                }    
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Logging", "Exception while write a log entry [" + exception + "]", Logging.Debug);
             }
         }
 
@@ -221,50 +228,59 @@ namespace Questor.Modules.Logging
 
         public static string FilterSensitiveInfo(string line)
         {
-            if (line == null)
-                return string.Empty;
-            if (!string.IsNullOrEmpty(Logging._character))
+            try
             {
-                line = line.Replace(Logging._character, Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("/" + Logging._character, "/" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("\\" + Logging._character, "\\" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                line = line.Replace("[" + Logging._character + "]", "[" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
-                line = line.Replace(Logging._character + ".xml", Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
-                line = line.Replace(Logging.CharacterSettingsPath, Logging.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
-                //line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
-                //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
+                if (line == null)
+                    return string.Empty;
+                if (!string.IsNullOrEmpty(Logging._character))
+                {
+                    line = line.Replace(Logging._character, Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("/" + Logging._character, "/" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("\\" + Logging._character, "\\" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("[" + Logging._character + "]", "[" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
+                    line = line.Replace(Logging._character + ".xml", Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                    line = line.Replace(Logging.CharacterSettingsPath, Logging.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
+                    //line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
+                    //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
+                }
+
+                //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
+                //{
+                //    if (Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
+                //    line = line.Replace(" " + Cache.Instance.CurrentAgent + " ", " _MyCurrentAgentRedacted_ ");
+                //    line = line.Replace("[" + Cache.Instance.CurrentAgent + "]", "[_MyCurrentAgentRedacted_]");
+                //}
+                //if (Cache.Instance.AgentId != -1)
+                //{
+                //    if(Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: AgentId is not -1");
+                //    line = line.Replace(" " + Cache.Instance.AgentId + " ", " _MyAgentIdRedacted_ ");
+                //    line = line.Replace("[" + Cache.Instance.AgentId + "]", "[_MyAgentIdRedacted_]");
+                //}
+                if (!String.IsNullOrEmpty(Logging._username))
+                {
+                    line = line.Replace(Logging._username, Logging._username.Substring(0, 2) + "_HiddenEVELoginName_");
+                }
+                if (!String.IsNullOrEmpty(Logging._password))
+                {
+                    line = line.Replace(Logging._password, "_HiddenPassword_");
+                }
+                if (!string.IsNullOrEmpty(Environment.UserName))
+                {
+                    line = line.Replace("\\" + Environment.UserName + "\\", "\\_MyWindowsLoginNameRedacted_\\");
+                    line = line.Replace("/" + Environment.UserName + "/", "/_MyWindowsLoginNameRedacted_/");
+                }
+                if (!string.IsNullOrEmpty(Environment.UserDomainName))
+                {
+                    line = line.Replace(Environment.UserDomainName, "_MyWindowsDomainNameRedacted_");
+                }
+                return line;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Logging", "Exception in FilterSensitiveInfo [" + exception + "]", Logging.Debug);
             }
 
-            //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
-            //{
-            //    if (Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: CurrentAgent exists [" + Cache.Instance.CurrentAgent + "]");
-            //    line = line.Replace(" " + Cache.Instance.CurrentAgent + " ", " _MyCurrentAgentRedacted_ ");
-            //    line = line.Replace("[" + Cache.Instance.CurrentAgent + "]", "[_MyCurrentAgentRedacted_]");
-            //}
-            //if (Cache.Instance.AgentId != -1)
-            //{
-            //    if(Logging.DebugLogging) InnerSpace.Echo("Logging.Log: FilterSensitiveInfo: AgentId is not -1");
-            //    line = line.Replace(" " + Cache.Instance.AgentId + " ", " _MyAgentIdRedacted_ ");
-            //    line = line.Replace("[" + Cache.Instance.AgentId + "]", "[_MyAgentIdRedacted_]");
-            //}
-            if (!String.IsNullOrEmpty(Logging._username))
-            {
-                line = line.Replace(Logging._username, Logging._username.Substring(0, 2) + "_HiddenEVELoginName_");
-            }
-            if (!String.IsNullOrEmpty(Logging._password))
-            {
-                line = line.Replace(Logging._password, "_HiddenPassword_");
-            }
-            if (!string.IsNullOrEmpty(Environment.UserName))
-            {
-                line = line.Replace("\\" + Environment.UserName + "\\", "\\_MyWindowsLoginNameRedacted_\\");
-                line = line.Replace("/" + Environment.UserName + "/", "/_MyWindowsLoginNameRedacted_/");
-            }
-            if (!string.IsNullOrEmpty(Environment.UserDomainName))
-            {
-                line = line.Replace(Environment.UserDomainName, "_MyWindowsDomainNameRedacted_");
-            }
-            return line;
+            return null;
         }
 
         public static class RichTextBoxExtensions
@@ -282,21 +298,29 @@ namespace Questor.Modules.Logging
 
         public static string FilterColorsFromLogs(string line)
         {
-            if (line == null)
-                return string.Empty;
+            try
+            {
+                if (line == null)
+                    return string.Empty;
 
-            line = line.Replace("\ag", "");
-            line = line.Replace("\ay", "");
-            line = line.Replace("\ab", "");
-            line = line.Replace("\ar", "");
-            line = line.Replace("\ao", "");
-            line = line.Replace("\ap", "");
-            line = line.Replace("\am", "");
-            line = line.Replace("\at", "");
-            line = line.Replace("\aw", "");
-            while (line.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
-                line = line.Replace("  ", " ");
-            return line.Trim();
+                line = line.Replace("\ag", "");
+                line = line.Replace("\ay", "");
+                line = line.Replace("\ab", "");
+                line = line.Replace("\ar", "");
+                line = line.Replace("\ao", "");
+                line = line.Replace("\ap", "");
+                line = line.Replace("\am", "");
+                line = line.Replace("\at", "");
+                line = line.Replace("\aw", "");
+                while (line.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
+                    line = line.Replace("  ", " ");
+                return line.Trim();
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Logging", "Exception in FilterColorsFromLogs [" + exception + "]", Logging.Debug);
+                return null;
+            }
         }
 
         public static void MaintainConsoleLogs()

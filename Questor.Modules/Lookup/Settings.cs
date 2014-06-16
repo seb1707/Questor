@@ -1069,7 +1069,7 @@ namespace Questor.Modules.Lookup
                     //Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.Instance.CharacterName + "]", Logging.White);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
             }
@@ -1097,9 +1097,12 @@ namespace Questor.Modules.Lookup
             }
 
             bool reloadSettings = true;
-            if (File.Exists(Logging.CharacterSettingsPath) && !forcereload)
+            if (File.Exists(Logging.CharacterSettingsPath))
             {
-                reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                //if (!forcereload)
+                //{
+                    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                //}
             }
 
             //if (File.Exists(Settings.Instance.CommonSettingsPath))

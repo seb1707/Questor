@@ -337,7 +337,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InStation)
             {
                 Logging.Log("Panic", "Entered a station, lower panic mode", Logging.White);
-                Settings.Instance.LoadSettings(true);
+                //Settings.Instance.LoadSettings(false);
                 _States.CurrentPanicState = PanicState.Panic;
                 return;
             }
@@ -524,7 +524,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             Logging.Log("Panic", "At a safe location, lower panic mode", Logging.Red);
-            Settings.Instance.LoadSettings(true);
+            //Settings.Instance.LoadSettings(false);
             _States.CurrentPanicState = PanicState.Panic;
             return;
         }

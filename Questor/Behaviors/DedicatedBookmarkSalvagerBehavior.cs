@@ -102,7 +102,7 @@ namespace Questor.Behaviors
             }
             else
             {
-                Settings.Instance.LoadSettings(true);
+                //Settings.Instance.LoadSettings(true);
                 Arm.AgentId = agent.AgentId;
                 Statistics.AgentID = agent.AgentId;
                 AgentID = agent.AgentId;

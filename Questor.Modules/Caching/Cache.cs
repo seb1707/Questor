@@ -4779,7 +4779,7 @@ namespace Questor.Modules.Caching
             return true; //if we are not in station then the LP Store should have auto closed already.
         }
 
-        private DirectFittingManagerWindow _fittingManagerWindow;
+        private DirectFittingManagerWindow _fittingManagerWindow; //cleared in invalidatecache()
         public DirectFittingManagerWindow FittingManagerWindow
         {
             get
@@ -4798,24 +4798,27 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance.InStation)
                             {
-                                _fittingManagerWindow = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
-
-                                if (_fittingManagerWindow == null)
+                                if (Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().Any())
                                 {
-                                    if (DateTime.UtcNow > Time.Instance.NextWindowAction)
+                                    DirectFittingManagerWindow __fittingManagerWindow = Cache.Instance.Windows.OfType<DirectFittingManagerWindow>().FirstOrDefault();
+                                    if (__fittingManagerWindow != null && __fittingManagerWindow.IsReady)
                                     {
-                                        Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
-                                        Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
-                                        Cache.Instance.DirectEve.OpenFitingManager();
-                                        Statistics.LogWindowActionToWindowLog("FittingManager", "Opening FittingManager");
-                                        return null;
+                                        _fittingManagerWindow = __fittingManagerWindow;
+                                        return _fittingManagerWindow;
                                     }
+                                }
 
-                                    if (Logging.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
+                                if (DateTime.UtcNow > Time.Instance.NextWindowAction)
+                                {
+                                    Logging.Log("FittingManager", "Opening Fitting Manager Window", Logging.White);
+                                    Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(10, 24));
+                                    Cache.Instance.DirectEve.OpenFitingManager();
+                                    Statistics.LogWindowActionToWindowLog("FittingManager", "Opening FittingManager");
                                     return null;
                                 }
 
-                                return _fittingManagerWindow;
+                                if (Logging.DebugFittingMgr) Logging.Log("FittingManager", "NextWindowAction is still in the future [" + Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds + "] sec", Logging.Debug);
+                                return null;
                             }
 
                             return null;

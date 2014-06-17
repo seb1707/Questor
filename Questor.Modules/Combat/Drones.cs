@@ -881,14 +881,14 @@ namespace Questor.Modules.Combat
                         }
 
                         // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
-                        if (LastDroneTargetID != null)
-                        {
-                            if (LastDroneTargetID == DroneToShoot.Id && Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID))
-                            {
-                                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
-                                return;
-                            }
-                        }
+                        //if (LastDroneTargetID != null)
+                        //{
+                        //    if (LastDroneTargetID == DroneToShoot.Id && Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID))
+                        //    {
+                        //        if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
+                        //        return;
+                        //    }
+                        //}
 
                         if (DateTime.UtcNow < (_lastEngageCommand.AddSeconds(11 + Cache.Instance.RandomNumber(5, 11))))
                             return;
@@ -1271,33 +1271,33 @@ namespace Questor.Modules.Combat
                             Recall = true;
                         }
 
-                        if (!Recall & (Drones.IsMissionPocketDone) && !WarpScrambled)
+                        if (Drones.IsMissionPocketDone && !WarpScrambled)
                         {
                             Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because we are done with this pocket.", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (!Recall & (_shieldPctTotal > GetShieldPctTotal()))
+                        else if (_shieldPctTotal > GetShieldPctTotal())
                         {
                             Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some shields! [Old: " +
                                         _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") +
                                         "]", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (!Recall & (_armorPctTotal > GetArmorPctTotal()))
+                        else if (_armorPctTotal > GetArmorPctTotal())
                         {
                             Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some armor! [Old:" +
                                         _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") +
                                         "]", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (!Recall & (_structurePctTotal > GetStructurePctTotal()))
+                        else if (_structurePctTotal > GetStructurePctTotal())
                         {
                             Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some structure! [Old:" +
                                         _structurePctTotal.ToString("N2") + "][New: " +
                                         GetStructurePctTotal().ToString("N2") + "]", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (!Recall & (Drones.ActiveDrones.Count() < _lastDroneCount))
+                        else if (Drones.ActiveDrones.Count() < _lastDroneCount)
                         {
                             // Did we lose a drone? (this should be covered by total's as well though)
                             Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because we have lost a drone! [Old:" + _lastDroneCount +

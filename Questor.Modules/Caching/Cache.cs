@@ -2607,7 +2607,7 @@ namespace Questor.Modules.Caching
             {
                 Combat._doWeCurrentlyHaveTurretsMounted = null;
                 Combat.LastTargetPrimaryWeaponsWereShooting = null;
-                Drones.LastDroneTargetID = null;
+                Drones.LastTargetIDDronesEngaged = null;
 
                 ListOfWarpScramblingEntities.Clear();
                 ListOfJammingEntities.Clear();
@@ -3144,10 +3144,13 @@ namespace Questor.Modules.Caching
                         Cache.Instance.CurrentShipsCargo.Window.Close();
                         Statistics.LogWindowActionToWindowLog("CargoHold", "Closing CargoHold");
                         Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(1, 2));
-                        return true;
+                        return false;
                     }
+
+                    Logging.Log("CloseCargoHold", "Cargohold is probably closed", Logging.White);
                     return true;
                 }
+
                 return false;
             }
             catch (Exception exception)

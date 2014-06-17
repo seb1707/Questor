@@ -3529,6 +3529,9 @@ namespace Questor.Modules.Combat
             }
         }
 
+        ///
+        ///   Invalidate the cached items every pulse (called from cache.invalidatecache, which itself is called every frame in questor.cs)
+        /// 
         public static void InvalidateCache()
         {
             try
@@ -3544,7 +3547,6 @@ namespace Questor.Modules.Combat
                 _primaryWeaponPriorityTargetsPerFrameCaching = null;
                 _targetedBy = null;
                 
-
                 _primaryWeaponPriorityEntities = null;
                 _preferredPrimaryWeaponTarget = null;
 

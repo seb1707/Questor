@@ -75,7 +75,10 @@ namespace Questor.Modules.Actions
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 10)
                 {
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
-                    if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return false;
+                    //
+                    // why do we *ever* have to close the Ammohangar?
+                    //
+                    //if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return false;
                     Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);
                     AmmoIsBeingMoved = false;
                     _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
@@ -298,7 +301,10 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 10)
             {
                 if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
-                if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return false;
+                //
+                // why do we *ever* have to close the loothangar?
+                //
+                //if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return false;
                 Logging.Log("UnloadLoot.MoveLoot", "Loot was worth an estimated [" + Statistics.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
                 LootIsBeingMoved = false;
                 AllLootWillFit = false;

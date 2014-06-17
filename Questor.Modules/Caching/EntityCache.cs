@@ -1891,7 +1891,7 @@ namespace Questor.Modules.Caching
                     {
                         if (_isLastTargetDronesWereShooting == null)
                         {
-                            if (Drones.LastDroneTargetID != null && Id == Drones.LastDroneTargetID)
+                            if (Drones.LastTargetIDDronesEngaged != null && Id == Drones.LastTargetIDDronesEngaged)
                             {
                                 _isLastTargetDronesWereShooting = true;
                                 return (bool) _isLastTargetDronesWereShooting;

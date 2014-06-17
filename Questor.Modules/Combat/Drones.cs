@@ -57,9 +57,8 @@ namespace Questor.Modules.Combat
         public static bool WarpScrambled; //false
         private static DateTime _nextDroneAction = DateTime.UtcNow;
         private static DateTime _nextWarpScrambledWarning = DateTime.MinValue;
-        public static IEnumerable<EntityCache> DamagedDrones;
-        public static long? LastDroneTargetID { get; set; }
-        public static EntityCache LastTargetDronesWereShooting = null;
+        public static long? LastTargetIDDronesEngaged { get; set; }
+        
         public static int GetShipsDroneBayAttempts { get; set; }
         public static bool AddWarpScramblersToDronePriorityTargetList { get; set; }
         public static bool AddWebifiersToDronePriorityTargetList { get; set; }
@@ -68,16 +67,27 @@ namespace Questor.Modules.Combat
         public static bool AddTargetPaintersToDronePriorityTargetList { get; set; }
         public static bool AddECMsToDroneTargetList { get; set; }
         public static bool AddTrackingDisruptorsToDronePriorityTargetList { get; set; }
-        private static IEnumerable<EntityCache> _activeDrones; //cleared in Cache.InvalidateCache()
+        private static IEnumerable<EntityCache> _activeDrones; //cleared every frame in Cache.InvalidateCache()
         public static IEnumerable<EntityCache> ActiveDrones
         {
             get
             {
-                return _activeDrones ?? (_activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList());
+                if (_activeDrones == null)
+                {
+                    if (Cache.Instance.DirectEve.ActiveDrones.Any())
+                    {
+                        _activeDrones = Cache.Instance.DirectEve.ActiveDrones.Select(d => new EntityCache(d)).ToList();
+                        return _activeDrones;
+                    }
+
+                    return null;
+                }
+
+                return _activeDrones;
             }
         }
 
-        private static int _droneTypeID;
+        private static int _droneTypeID; //only cleared by reloading settings
 
         public static int DroneTypeID
         {
@@ -98,7 +108,7 @@ namespace Questor.Modules.Combat
 
         public static int FactionDroneTypeID { get; set; }
 
-        private static bool _useDrones;
+        private static bool _useDrones;  //only cleared by reloading settings
 
         public static bool UseDrones
         {
@@ -178,7 +188,7 @@ namespace Questor.Modules.Combat
         ///   Drone target chosen by GetBest Target
         /// </summary>
         public static long? PreferredDroneTargetID;
-        private static EntityCache _preferredDroneTarget;
+        private static EntityCache _preferredDroneTarget; //cleared every frame in Cache.InvalidateCache()
         public static EntityCache PreferredDroneTarget
         {
             get
@@ -793,15 +803,6 @@ namespace Questor.Modules.Combat
             return false;
         }
 
-        private static void GetDamagedDrones()
-        {
-            foreach (EntityCache drone in Drones.ActiveDrones)
-            {
-                if (Logging.DebugDroneHealth) Logging.Log("Drones: GetDamagedDrones", "Health[" + drone.Health + "]" + "S[" + Math.Round(drone.ShieldPct, 3) + "]" + "A[" + Math.Round(drone.ArmorPct, 3) + "]" + "H[" + Math.Round(drone.StructurePct, 3) + "][ID" + drone.Id + "]", Logging.White);
-            }
-            DamagedDrones = Drones.ActiveDrones.Where(d => d.Health < BelowThisHealthLevelRemoveFromDroneBay);
-        }
-
         private static double GetShieldPctTotal()
         {
             if (!Drones.ActiveDrones.Any())
@@ -881,17 +882,14 @@ namespace Questor.Modules.Combat
                         }
 
                         // Is our current target still the same and are all the drones shooting the PreferredDroneTarget?
-                        //if (LastDroneTargetID != null)
-                        //{
-                        //    if (LastDroneTargetID == DroneToShoot.Id && Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID))
-                        //    {
-                        //        if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastDroneTargetID + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
-                        //        return;
-                        //    }
-                        //}
-
-                        if (DateTime.UtcNow < (_lastEngageCommand.AddSeconds(11 + Cache.Instance.RandomNumber(5, 11))))
-                            return;
+                        if (LastTargetIDDronesEngaged != null)
+                        {
+                            if (LastTargetIDDronesEngaged == DroneToShoot.Id && Drones.ActiveDrones.All(i => i.FollowId == PreferredDroneTargetID && (i.Mode == 1 || i.Mode == 6 || i.Mode == 10)))
+                            {
+                                if (Logging.DebugDrones) Logging.Log("Drones.EngageTarget", "if (LastDroneTargetID [" + LastTargetIDDronesEngaged + "] == DroneToShoot.Id [" + DroneToShoot.Id + "] && Cache.Instance.ActiveDrones.Any(i => i.FollowId != Cache.Instance.PreferredDroneTargetID) [" + Drones.ActiveDrones.Any(i => i.FollowId != PreferredDroneTargetID) + "])", Logging.Debug);
+                                return;
+                            }
+                        }
 
                         //
                         // If we got this far we need to tell the drones to do something
@@ -904,7 +902,7 @@ namespace Questor.Modules.Combat
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
                             _lastEngageCommand = DateTime.UtcNow;
                             // Save target id (so we do not constantly switch)
-                            LastDroneTargetID = DroneToShoot.Id;
+                            LastTargetIDDronesEngaged = DroneToShoot.Id;
                         }
                         else // Make the target active
                         {
@@ -1103,7 +1101,7 @@ namespace Questor.Modules.Combat
                         break;
                     }
 
-                    if (Cache.Instance.Targets.Any() || DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive)
+                    if (Cache.Instance.Targets.Any() || (Combat.PotentialCombatTargets.Any() && DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive))
                     {
                         // Should we launch drones?
                         bool launch = true;
@@ -1463,11 +1461,10 @@ namespace Questor.Modules.Combat
             _armorPctTotal = GetArmorPctTotal();
             _structurePctTotal = GetStructurePctTotal();
             _lastDroneCount = Drones.ActiveDrones.Count();
-            GetDamagedDrones();
         }
         
         /// <summary>
-        ///   Invalidate the cached items
+        ///   Invalidate the cached items every pulse (called from cache.invalidatecache, which itself is called every frame in questor.cs)
         /// </summary>
         public static void InvalidateCache()
         {
@@ -1479,6 +1476,7 @@ namespace Questor.Modules.Combat
                 _activeDrones = null;
                 _dronePriorityEntities = null;
                 _maxDroneRange = null;
+                _preferredDroneTarget = null;
                 
                 if (_dronePriorityTargets != null && _dronePriorityTargets.Any())
                 {
@@ -1487,7 +1485,7 @@ namespace Questor.Modules.Combat
             }
             catch (Exception exception)
             {
-                Logging.Log("Cache.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("Drones.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
     }

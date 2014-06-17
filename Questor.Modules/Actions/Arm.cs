@@ -91,12 +91,6 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (!Cache.Instance.FittingManagerWindow.IsReady)
-                {
-                    Logging.Log("FindDefaultFitting", "FittingManagerWindow is not ready", Logging.Debug);
-                    return false;
-                }
-
                 if (MissionSettings.DefaultFitting == null)
                 {
                     MissionSettings.DefaultFittingName = MissionSettings.DefaultFitting.FittingName;
@@ -284,12 +278,6 @@ namespace Questor.Modules.Actions
 
         public static bool ActivateThisShip(string ShipNameToActivate, string RoleOfThisShipName)
         {
-            //
-            // move this so that we only close the cargo if necessary!
-            //
-            if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
-
-
             if (string.IsNullOrEmpty(ShipNameToActivate))
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, "Could not find " + RoleOfThisShipName + " in your characters XML settings!")) return false;
@@ -307,6 +295,7 @@ namespace Questor.Modules.Actions
                 {
                     foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                     {
+                        if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                         ship.ActivateShip();
                         Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
@@ -336,8 +325,6 @@ namespace Questor.Modules.Actions
         {
             if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-            if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return false;
-
             if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, "Could not find miningShipName in settings!")) return false;
@@ -355,6 +342,8 @@ namespace Questor.Modules.Actions
                 {
                     foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                     {
+
+                        if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return false; 
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                         ship.ActivateShip();
                         Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
@@ -384,8 +373,7 @@ namespace Questor.Modules.Actions
         {
             if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-            if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return false;
-
+            
             if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip &&
                 Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
             {
@@ -394,6 +382,7 @@ namespace Questor.Modules.Actions
                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GroupId == (int)Group.RookieShip || ship.GroupId == (int)Group.Shuttle))
                 {
+                    if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return false;
                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                     ship.ActivateShip();
                     Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);

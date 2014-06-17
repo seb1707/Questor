@@ -91,6 +91,12 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
+                if (!Cache.Instance.FittingManagerWindow.IsReady)
+                {
+                    Logging.Log("FindDefaultFitting", "FittingManagerWindow is not ready", Logging.Debug);
+                    return false;
+                }
+
                 if (MissionSettings.DefaultFitting == null)
                 {
                     MissionSettings.DefaultFittingName = MissionSettings.DefaultFitting.FittingName;

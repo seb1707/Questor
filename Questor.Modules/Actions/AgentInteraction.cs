@@ -825,7 +825,7 @@ namespace Questor.Modules.Actions
                                 //
                                 // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
                                 //
-                                if (_factionFittingForThisMissionsFaction.DroneTypeID != null)
+                                if (_factionFittingForThisMissionsFaction.DroneTypeID != null && _factionFittingForThisMissionsFaction.DroneTypeID != 0)
                                 {
                                     Drones.DroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
                                 }

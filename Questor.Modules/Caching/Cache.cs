@@ -587,7 +587,8 @@ namespace Questor.Modules.Caching
 
                         if (_currentShipsCargo == null)
                         {
-                            if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);    
+                            if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);
+                            return null;
                         }
                             
                         return _currentShipsCargo;
@@ -719,39 +720,6 @@ namespace Questor.Modules.Caching
         }
 
         private double? _myAmmoInSpaceAverageSpeed;
-
-        /// <summary>
-        ///   Returns the maximum weapon distance
-        /// </summary>
-        public double myAmmoInSpaceAverageSpeed
-        {
-            get
-            {
-                try
-                {
-                    if (_myAmmoInSpaceAverageSpeed == null)
-                    {
-                        if (myAmmoInSpace != null && myAmmoInSpace.Any() && myAmmoInSpace.FirstOrDefault() != null)
-                        {
-                            _myAmmoInSpaceAverageSpeed = myAmmoInSpace.Average(x => x.Velocity);
-                            
-                            Logging.Log("myAmmoInSpace", "Velocity [" + Math.Round((double)_myAmmoInSpaceAverageSpeed / 1000, 2) + "k/sec]", Logging.Debug);
-                            return (double)_myAmmoInSpaceAverageSpeed;
-                        }
-
-                        return 0;    
-                    }
-
-                    return (double)_myAmmoInSpaceAverageSpeed;
-
-                }
-                catch (Exception ex)
-                {
-                    if (Logging.DebugExceptions) Logging.Log("Cache.myAmmoInSpaceAverageSpeed", "exception was:" + ex.Message, Logging.Teal);
-                    return 0;
-                }
-            }
-        }
 
         /// <summary>
         ///   Last target for a certain module
@@ -2397,65 +2365,6 @@ namespace Questor.Modules.Caching
             catch (Exception ex)
             {
                 Logging.Log("DistanceFromMe", "Exception [" + ex + "]", Logging.Debug);
-                return 0;
-            }
-        }
-
-        /// <summary>
-        ///   Calculate distance from entity
-        /// </summary>
-        /// <param name = "x"></param>
-        /// <param name = "y"></param>
-        /// <param name = "z"></param>
-        /// <param name="entity"> </param>
-        /// <returns></returns>
-        public double DistanceFromEntity(double x, double y, double z, EntityCache entity)
-        {
-            try
-            {
-                if (entity == null)
-                {
-                    return double.MaxValue;
-                }
-
-                double curX = entity.XCoordinate;
-                double curY = entity.YCoordinate;
-                double curZ = entity.ZCoordinate;
-
-                return Math.Sqrt((curX - x) * (curX - x) + (curY - y) * (curY - y) + (curZ - z) * (curZ - z));
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("DistanceFromEntity", "Exception [" + ex + "]", Logging.Debug);
-                return 0;
-            }
-        }
-
-        /// <summary>
-        ///   Calculate distance between 2 entities
-        /// </summary>
-        public double DistanceBetween2Entities(DirectEntity entity1, DirectEntity entity2)
-        {
-            try
-            {
-                if (entity1 == null || entity2 == null)
-                {
-                    return double.MaxValue;
-                }
-
-                double entity1X = entity1.X;
-                double entity1Y = entity1.Y;
-                double entity1Z = entity1.Z;
-
-                double entity2X = entity2.X;
-                double entity2Y = entity2.Y;
-                double entity2Z = entity2.Z;
-
-                return Math.Sqrt((entity1X - entity2X) * (entity1X - entity2X) + (entity1Y - entity2Y) * (entity1Y - entity2Y) + (entity1Z - entity2Z) * (entity1Z - entity2Z));
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("DistanceBetween2Entities", "Exception [" + ex + "]", Logging.Debug);
                 return 0;
             }
         }

@@ -1309,7 +1309,7 @@ namespace Questor.Modules.Combat
                                 lowCapWarning = DroneRecallCapacitorPct;
                             }
 
-                            if (!Cache.Instance.Targets.Any() || !DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive)
+                            if ((!Cache.Instance.Targets.Any() && Combat.PotentialCombatTargets.Any()) || !DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive)
                             {
                                 Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to [" + Cache.Instance.Targets.Count() + "] targets being locked. Locking [" + Cache.Instance.Targeting.Count() + "] targets atm", Logging.Orange);
                                 Recall = true;

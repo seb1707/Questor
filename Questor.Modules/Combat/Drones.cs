@@ -41,7 +41,7 @@ namespace Questor.Modules.Combat
         //}
 
         private static int _lastDroneCount;
-        private static DateTime _lastEngageCommand;
+        //private static DateTime _lastEngageCommand;
         private static DateTime _lastRecallCommand;
 
         private static int _recallCount;
@@ -53,7 +53,6 @@ namespace Questor.Modules.Combat
         private static double _activeDronesShieldTotalOnLastPulse;
         private static double _activeDronesArmorTotalOnLastPulse;
         private static double _activeDronesStructureTotalOnLastPulse;
-        public static bool Recall; //false
         public static bool WarpScrambled; //false
         private static DateTime _nextDroneAction = DateTime.UtcNow;
         private static DateTime _nextWarpScrambledWarning = DateTime.MinValue;
@@ -910,7 +909,7 @@ namespace Questor.Modules.Combat
                             // Engage target
                             Logging.Log("Drones", "Engaging [ " + Drones.ActiveDrones.Count() + " ] drones on [" + DroneToShoot.Name + "][ID: " + DroneToShoot.MaskedId + "]" + Math.Round(DroneToShoot.Distance / 1000, 0) + "k away]", Logging.Magenta);
                             Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesEngage);
-                            _lastEngageCommand = DateTime.UtcNow;
+                            //_lastEngageCommand = DateTime.UtcNow;
                             // Save target id (so we do not constantly switch)
                             LastTargetIDDronesEngaged = DroneToShoot.Id;
                         }
@@ -1387,7 +1386,6 @@ namespace Questor.Modules.Combat
         {
             if (Logging.DebugDrones) Logging.Log("Drones.Launch", "LaunchAllDrones", Logging.Debug);
             // Launch all drones
-            Recall = false;
             _launchTimeout = DateTime.UtcNow;
             Cache.Instance.ActiveShip.LaunchAllDrones();
             _States.CurrentDroneState = DroneState.Launching;
@@ -1456,7 +1454,6 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
             {
                 Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);
-                Recall = true;
             }
             else
             {
@@ -1467,7 +1464,6 @@ namespace Questor.Modules.Combat
                     {
                         _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
                         Logging.Log("Drones", "We are scrambled by: [" + Logging.White + WarpScrambledBy.Name + Logging.Orange + "][" + Logging.White + Math.Round(WarpScrambledBy.Distance, 0) + Logging.Orange + "][" + Logging.White + WarpScrambledBy.Id + Logging.Orange + "]", Logging.Orange);
-                        Recall = false;
                         WarpScrambled = true;
                     }
                 }
@@ -1505,7 +1501,6 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
             {
                 _lastRecall = DateTime.UtcNow;
-                Recall = false;
                 _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
                 _States.CurrentDroneState = DroneState.WaitingForTargets;
                 return true;

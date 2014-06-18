@@ -72,14 +72,51 @@ namespace Questor.Modules.Lookup
         public static int NumberOfTriesToDeleteBookmarks = 3;
         public static int MaterialsForWarOreID { get; set; }
         public static int MaterialsForWarOreQty { get; set; }
-        public static int? MissionDroneTypeID { get; set; }
-        public static bool? MissionDronesKillHighValueTargets = null;
         public static int StopSessionAfterMissionNumber = int.MaxValue;
         public static int GreyListedMissionsDeclined = 0;
         public static string LastGreylistMissionDeclined = string.Empty;
         public static int BlackListedMissionsDeclined = 0;
         public static string LastBlacklistMissionDeclined = string.Empty;
+        
+
+        //
+        // Pocket Specific Settings (we should make these ALL settable via the mission XML inside of pockets
+        //
+
+        public static int? PocketDroneTypeID { get; set; }
+        public static bool? PocketKillSentries { get; set; }
+        public static bool? PocketUseDrones { get; set; }
+        public static double? PocketOrbitDistance = null;
+        public static double? PocketOptimalRange = null;
+        public static int? PocketActivateRepairModulesAtThisPerc { get; set; }
+        
+        //
+        // Mission Specific Settings (we should make these ALL settable via the mission XML outside of pockets (just inside the mission tag)
+        //
+        public static int? MissionDroneTypeID { get; set; }
+        public static bool? MissionDronesKillHighValueTargets = null;
+        public static bool? MissionKillSentries { get; set; }
+        public static bool? MissionUseDrones { get; set; }
+        public static double? MissionOrbitDistance = null;
+        public static double? MissionOptimalRange = null;
         public static int? MissionActivateRepairModulesAtThisPerc { get; set; }
+        public static int MissionWeaponGroupId { get; set; }
+        public static string BringMissionItem { get; private set; }
+        public static int BringMissionItemQuantity { get; private set; }
+        public static string BringOptionalMissionItem { get; private set; }
+        public static int BringOptionalMissionItemQuantity { get; set; }
+        public static double MissionWarpAtDistanceRange { get; set; } //in km
+
+        //
+        // Faction Specific Settings (we should make these ALL settable via some mechanic that I have not come up with yet
+        //
+        public static int? FactionDroneTypeID { get; set; }
+        public static bool? FactionDronesKillHighValueTargets = null;
+        public static double? FactionOrbitDistance = null;
+        public static double? FactionOptimalRange = null;
+        public static int? FactionActivateRepairModulesAtThisPerc { get; set; }
+
+       
         //
         // Mission Blacklist / Greylist Settings
         //
@@ -187,15 +224,6 @@ namespace Questor.Modules.Lookup
         /// </summary>
         public static List<string> MissionItems { get; private set; }
 
-        /// <summary>
-        ///   Returns the item that needs to be brought on the mission
-        /// </summary>
-        /// <returns></returns>
-        public static string BringMissionItem { get; private set; }
-        public static int BringMissionItemQuantity { get; private set; }
-        public static string BringOptionalMissionItem { get; private set; }
-        public static int BringOptionalMissionItemQuantity { get; set; }
-        public static double MissionWarpAtDistanceRange { get; set; } //in km
         public static string FittingToLoad { get; set; } // stores name of the final fitting we want to use
         public static string MissionShip { get; set; } //stores name of mission specific ship
         public static string DefaultFittingName { get; set; } //stores name of the default fitting
@@ -206,21 +234,8 @@ namespace Questor.Modules.Lookup
         public static bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public static bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
         public static List<Ammo> MissionAmmo;
-        public static int MissionWeaponGroupId { get; set; }
-        public static bool? MissionUseDrones { get; set; }
-        public static bool? PocketUseDrones { get; set; }
-        public static bool? MissionKillSentries { get; set; }
         public static int MissionsThisSession = 0;
 
-        /// <summary>
-        ///   Best orbit distance for the mission
-        /// </summary>
-        public static double? MissionOrbitDistance = null;
-
-        /// <summary>
-        ///   Current OptimalRange during the mission (effected by e-war)
-        /// </summary>
-        public static double? MissionOptimalRange = null;
         
         /// <summary>
         ///   Returns the first mission bookmark that starts with a certain string
@@ -256,10 +271,51 @@ namespace Questor.Modules.Lookup
             }
         }
 
+        public static void ClearPocketSpecificSettings()
+        {
+            MissionSettings.PocketActivateRepairModulesAtThisPerc = null;
+            MissionSettings.PocketKillSentries = null;
+            MissionSettings.PocketOptimalRange = null;
+            MissionSettings.PocketOrbitDistance = null;
+            MissionSettings.PocketUseDrones = null;
+        }
+
+        public static void ClearMissionSpecificSettings()
+        {
+            MissionSettings.MissionItems.Clear();
+            MissionSettings.BringMissionItem = string.Empty;
+            MissionSettings.BringOptionalMissionItem = string.Empty;
+
+            MissionSettings.MissionDroneTypeID = null;
+            MissionSettings.MissionDronesKillHighValueTargets = null;
+            //MissionSettings.MissionWeaponGroupId = null;
+            //MissionSettings.BringOptionalMissionItemQuantity = null;
+            //MissionSettings.MissionWarpAtDistanceRange = null;
+            MissionSettings.MissionXMLIsAvailable = true;
+            MissionSettings.MissionDroneTypeID = null;
+            MissionSettings.MissionKillSentries = null;
+            MissionSettings.MissionUseDrones = null;
+            MissionSettings.MissionUseDrones = null;
+            MissionSettings.MissionOrbitDistance = null;
+            MissionSettings.MissionOptimalRange = null;
+        }
+
+        public static void ClearFactionSpecificSettings()
+        {
+            MissionSettings.FactionActivateRepairModulesAtThisPerc = null;
+            MissionSettings.FactionDroneTypeID = null;
+            MissionSettings.FactionDronesKillHighValueTargets = null;
+            MissionSettings.FactionOptimalRange = null;
+            MissionSettings.FactionOrbitDistance = null;
+        }
+
         public static void LoadMissionXMLData()
         {
             Logging.Log("AgentInteraction", "Loading mission xml [" + MissionName + "] from [" + MissionSettings.MissionXmlPath + "]", Logging.Yellow);
-            MissionSettings.MissionXMLIsAvailable = true;
+            //
+            // Clear Mission Specific Settings
+            //
+            ClearMissionSpecificSettings();
 
             //
             // this loads the settings global to the mission, NOT individual pockets
@@ -553,11 +609,8 @@ namespace Questor.Modules.Lookup
         /// </summary>
         public static void RefreshMissionItems(long agentId)
         {
-            // Clear out old items
-            MissionItems.Clear();
-            BringMissionItem = string.Empty;
-            BringOptionalMissionItem = string.Empty;
-
+            ClearMissionSpecificSettings();
+            
             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
             {
                 Settings.Instance.UseFittingManager = false;

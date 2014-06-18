@@ -93,9 +93,19 @@ namespace Questor.Modules.Combat
         {
             get
             {
+                if (MissionSettings.PocketDroneTypeID != null)
+                {
+                    return (int)MissionSettings.PocketDroneTypeID;
+                }
+
                 if (MissionSettings.MissionDroneTypeID != null)
                 {
                     return (int) MissionSettings.MissionDroneTypeID;
+                }
+
+                if (MissionSettings.FactionDroneTypeID != null)
+                {
+                    return (int)MissionSettings.FactionDroneTypeID;
                 }
 
                 return _droneTypeID;
@@ -1045,10 +1055,9 @@ namespace Questor.Modules.Combat
             }
         }
 
-
-        public static void ProcessState()
+        private static bool OnEveryDroneProcessState()
         {
-            if (_nextDroneAction > DateTime.UtcNow || Logging.DebugDisableDrones) return;
+            if (_nextDroneAction > DateTime.UtcNow || Logging.DebugDisableDrones) return false;
 
             if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "Entering Drones.ProcessState", Logging.Debug);
             _nextDroneAction = DateTime.UtcNow.AddMilliseconds(800);
@@ -1062,7 +1071,7 @@ namespace Questor.Modules.Combat
             {
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "] InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
                 _States.CurrentDroneState = DroneState.Idle;
-                return;
+                return false;
             }
 
             if (Cache.Instance.MyShipEntity.IsShipWithNoDroneBay)
@@ -1070,7 +1079,7 @@ namespace Questor.Modules.Combat
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "IsShipWithNoDronesBay - Setting useDrones to false.", Logging.Debug);
                 Drones.UseDrones = false;
                 _States.CurrentDroneState = DroneState.Idle;
-                return;
+                return false;
             }
 
             if ((!Drones.ActiveDrones.Any() && Cache.Instance.InWarp))
@@ -1078,7 +1087,7 @@ namespace Questor.Modules.Combat
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "No Active Drones in space and we are InWarp - doing nothing", Logging.Debug);
                 RemoveDronePriorityTargets(Drones.DronePriorityEntities.ToList());
                 _States.CurrentDroneState = DroneState.Idle;
-                return;
+                return false;
             }
 
             if (!Cache.Instance.EntitiesOnGrid.Any())
@@ -1086,366 +1095,428 @@ namespace Questor.Modules.Combat
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "Nothing to shoot on grid - doing nothing", Logging.Debug);
                 RemoveDronePriorityTargets(Drones.DronePriorityEntities.ToList());
                 _States.CurrentDroneState = DroneState.Idle;
-                return;
+                return false;
             }
 
-            switch (_States.CurrentDroneState)
+            return true;
+        }
+        private static bool IdleDroneState()
+        {
+            //
+            // below is the reasons we will start the combat state(s) - if the below is not met do nothing
+            //
+            if (Cache.Instance.InSpace &&
+                Cache.Instance.ActiveShip.Entity != null &&
+                !Cache.Instance.ActiveShip.Entity.IsCloaked &&
+                Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
+                Drones.UseDrones &&
+                !Cache.Instance.InWarp)
             {
-                case DroneState.WaitingForTargets:
+                _States.CurrentDroneState = DroneState.WaitingForTargets;
+                return true;
+            }
 
-                    // Are we in the right state ?
-                    if (Drones.ActiveDrones.Any())
+            return false;
+        }
+
+        private static bool WaitingForTargetsDroneState()
+        {
+            // Are we in the right state ?
+            if (Drones.ActiveDrones.Any())
+            {
+                // Apparently not, we have drones out, go into fight mode
+                _States.CurrentDroneState = DroneState.Fighting;
+                return true;
+            }
+
+            if (Cache.Instance.Targets.Any() || (Combat.PotentialCombatTargets.Any() && DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive))
+            {
+                // Should we launch drones?
+                bool launch = true;
+
+                // Always launch if we're scrambled
+                if (!Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
+                    launch &= Drones.UseDrones;
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", " launch &= Cache.Instance.UseDrones; Launch is [" + launch + "]", Logging.Debug);
+                    // Are we done with this mission pocket?
+                    launch &= !Drones.IsMissionPocketDone;
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "!Cache.Instance.IsMissionPocketDone; Launch is [" + launch + "]", Logging.Debug);
+                    // If above minimums
+                    launch &= Cache.Instance.ActiveShip.ShieldPercentage >= DroneMinimumShieldPct;
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ShieldPercentage; Launch is [" + launch + "]", Logging.Debug);
+                    launch &= Cache.Instance.ActiveShip.ArmorPercentage >= DroneMinimumArmorPct;
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ArmorPercentage; Launch is [" + launch + "]", Logging.Debug);
+                    launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= DroneMinimumCapacitorPct;
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
+
+                    // yes if there are targets to kill
+                    launch &= (Combat.Aggressed.Count(e => e.Distance < MaxDroneRange && (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))) > 0 || Cache.Instance.Targets.Count(e => e.IsLargeCollidable) > 0);
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Aggressed.Count; Launch is [" + launch + "] MaxDroneRange [" + MaxDroneRange + "] DroneControlrange [" + DroneControlRange + "] TargetingRange [" + Combat.MaxTargetRange + "]", Logging.Debug);
+
+                    if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
                     {
-                        // Apparently not, we have drones out, go into fight mode
-                        _States.CurrentDroneState = DroneState.Fighting;
-                        break;
+                        launch &= Cache.Instance.EntitiesOnGrid.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < MaxDroneRange) > 0;
+                        if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Entities.Count; Launch is [" + launch + "]", Logging.Debug);
                     }
 
-                    if (Cache.Instance.Targets.Any() || (Combat.PotentialCombatTargets.Any() && DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive))
+                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
+                    // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
+                    if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
                     {
-                        // Should we launch drones?
-                        bool launch = true;
-
-                        // Always launch if we're scrambled
-                        if (!Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+                        if (_lastRecall.AddSeconds(5 * _recallCount + 5) < DateTime.UtcNow)
                         {
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                            launch &= Drones.UseDrones;
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", " launch &= Cache.Instance.UseDrones; Launch is [" + launch + "]", Logging.Debug);
-                            // Are we done with this mission pocket?
-                            launch &= !Drones.IsMissionPocketDone;
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "!Cache.Instance.IsMissionPocketDone; Launch is [" + launch + "]", Logging.Debug);
-                            // If above minimums
-                            launch &= Cache.Instance.ActiveShip.ShieldPercentage >= DroneMinimumShieldPct;
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ShieldPercentage; Launch is [" + launch + "]", Logging.Debug);
-                            launch &= Cache.Instance.ActiveShip.ArmorPercentage >= DroneMinimumArmorPct;
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ArmorPercentage; Launch is [" + launch + "]", Logging.Debug);
-                            launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= DroneMinimumCapacitorPct;
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
+                            // Increase recall count and allow the launch
+                            _recallCount++;
 
-                            // yes if there are targets to kill
-                            launch &= (Combat.Aggressed.Count(e => e.Distance < MaxDroneRange && (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget) )) > 0 || Cache.Instance.Targets.Count(e => e.IsLargeCollidable) > 0);
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Aggressed.Count; Launch is [" + launch + "] MaxDroneRange [" + MaxDroneRange + "] DroneControlrange [" + DroneControlRange + "] TargetingRange [" + Combat.MaxTargetRange + "]", Logging.Debug);
-
-                            if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
-                            {
-                                launch &= Cache.Instance.EntitiesOnGrid.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < MaxDroneRange) > 0;
-                                if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Entities.Count; Launch is [" + launch + "]", Logging.Debug);
-                            }
-
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                            // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
-                            if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
-                            {
-                                if (_lastRecall.AddSeconds(5 * _recallCount + 5) < DateTime.UtcNow)
-                                {
-                                    // Increase recall count and allow the launch
-                                    _recallCount++;
-
-                                    // Never let _recallCount go above 5
-                                    if (_recallCount > 5)
-                                        _recallCount = 5;
-                                }
-                                else
-                                {
-                                    // Do not launch the drones until the delay has passed
-                                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "We are still in _lastRecall delay. Launch is [" + launch + "]", Logging.Debug);
-                                    launch = false;
-                                }
-                            }
-                            else // Drones have been out for more then 30s
-                                _recallCount = 0;
-                        }
-                        if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                        if (launch)
-                        {
-                            // Reset launch tries
-                            _launchTries = 0;
-                            _lastLaunch = DateTime.UtcNow;
-                            _States.CurrentDroneState = DroneState.Launch;
-                        }
-                    }
-                    break;
-
-                case DroneState.Launch:
-                    if (Logging.DebugDrones) Logging.Log("Drones.Launch", "LaunchAllDrones", Logging.Debug);
-                    // Launch all drones
-                    Recall = false;
-                    _launchTimeout = DateTime.UtcNow;
-                    Cache.Instance.ActiveShip.LaunchAllDrones();
-                    _States.CurrentDroneState = DroneState.Launching;
-                    break;
-
-                case DroneState.Launching:
-                    if (Logging.DebugDrones) Logging.Log("Drones.Launching", "Entering Launching State...", Logging.Debug);
-                    // We haven't launched anything yet, keep waiting
-                    if (!Drones.ActiveDrones.Any())
-                    {
-                        if (Logging.DebugDrones) Logging.Log("Drones.Launching", "No Drones in space yet. waiting", Logging.Debug);
-                        if (DateTime.UtcNow.Subtract(_launchTimeout).TotalSeconds > 10)
-                        {
-                            // Relaunch if tries < 5
-                            if (_launchTries < 5)
-                            {
-                                _launchTries++;
-                                _States.CurrentDroneState = DroneState.Launch;
-                                break;
-                            }
-
-                            _States.CurrentDroneState = DroneState.OutOfDrones;
-                        }
-                        break;
-                    }
-
-                    // Are we done launching?
-                    if (_lastDroneCount == Drones.ActiveDrones.Count())
-                    {
-                        Logging.Log("Drones", "[" + Drones.ActiveDrones.Count() + "] Drones Launched", Logging.Magenta);
-                        _States.CurrentDroneState = DroneState.Fighting;
-                    }
-                    break;
-
-                case DroneState.OutOfDrones:
-
-                    if (Drones.UseDrones && Settings.Instance.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
-                    {
-                        if (Statistics.OutOfDronesCount >= 3)
-                        {
-                            Logging.Log("Drones", "We are Out of Drones! AGAIN - Headed back to base to stay!", Logging.Red);
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                            Statistics.MissionCompletionErrors = 10; //this effectively will stop questor in station so we do not try to do this mission again, this needs human intervention if we have lots this many drones
-                            Statistics.OutOfDronesCount++;
-                        }
-
-                        Logging.Log("Drones","We are Out of Drones! - Headed back to base to Re-Arm",Logging.Red);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                        Statistics.OutOfDronesCount++;
-                        return;
-                    }
-
-                    break;
-
-                case DroneState.Fighting:
-                    if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "Should we recall our drones? This is a possible list of reasons why we should", Logging.Debug);
-
-                    if (!Drones.ActiveDrones.Any())
-                    {
-                        Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);
-                        Recall = true;
-                    }
-                    else
-                    {
-                        if (Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
-                        {
-                            EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
-                            if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
-                            {
-                                _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
-                                Logging.Log("Drones", "We are scrambled by: [" + Logging.White + WarpScrambledBy.Name + Logging.Orange + "][" + Logging.White + Math.Round(WarpScrambledBy.Distance, 0) + Logging.Orange + "][" + Logging.White + WarpScrambledBy.Id + Logging.Orange + "]", Logging.Orange);
-                                Recall = false;
-                                WarpScrambled = true;
-                            }
+                            // Never let _recallCount go above 5
+                            if (_recallCount > 5)
+                                _recallCount = 5;
                         }
                         else
                         {
-                            //Logging.Log("Drones: We are not warp scrambled at the moment...");
-                            WarpScrambled = false;
+                            // Do not launch the drones until the delay has passed
+                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "We are still in _lastRecall delay. Launch is [" + launch + "]", Logging.Debug);
+                            launch = false;
                         }
                     }
+                    else // Drones have been out for more then 30s
+                        _recallCount = 0;
+                }
+                if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
+                if (launch)
+                {
+                    // Reset launch tries
+                    _launchTries = 0;
+                    _lastLaunch = DateTime.UtcNow;
+                    _States.CurrentDroneState = DroneState.Launch;
+                    return true;
+                }
 
-                    if (!Recall)
-                    {
-                        // Are we done (for now) ?
-                        if (Combat.TargetedBy.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                               && e.Distance < MaxDroneRange))
-                        {
-                            int TargtedByCount = 0;
-                            if (Combat.TargetedBy.Any())
-                            {
-                                TargtedByCount = Combat.TargetedBy.Count();
-                            }
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: no NPC is targeting us within [" + Math.Round(MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
-                            Recall = true;
-                        }
-
-                        if (Drones.IsMissionPocketDone && !WarpScrambled)
-                        {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We are done with this pocket.", Logging.Magenta);
-                            Recall = true;
-                        }
-                        else if (_activeDronesShieldTotalOnLastPulse > GetActiveDroneShieldTotal())
-                        {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldTotal().ToString("N2") + "]", Logging.Magenta);
-                            Recall = true;
-                        }
-                        else if (_activeDronesArmorTotalOnLastPulse > GetActiveDroneArmorTotal())
-                        {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorTotal().ToString("N2") + "]", Logging.Magenta);
-                            Recall = true;
-                        }
-                        else if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal())
-                        {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructureTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructureTotal().ToString("N2") + "]", Logging.Magenta);
-                            Recall = true;
-                        }
-                        else if (Drones.ActiveDrones.Count() < _lastDroneCount)
-                        {
-                            // Did we lose a drone? (this should be covered by total's as well though)
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We lost a drone! [Old:" + _lastDroneCount + "][New: " + Drones.ActiveDrones.Count() + "]", Logging.Orange);
-                            Recall = true;
-                        }
-                        else if (!Recall)
-                        {
-                            // Default to long range recall
-                            int lowShieldWarning = LongRangeDroneRecallShieldPct;
-                            int lowArmorWarning = LongRangeDroneRecallArmorPct;
-                            int lowCapWarning = LongRangeDroneRecallCapacitorPct;
-
-                            if (Drones.ActiveDrones.Average(d => d.Distance) < (MaxDroneRange / 2d))
-                            {
-                                lowShieldWarning = DroneRecallShieldPct;
-                                lowArmorWarning = DroneRecallArmorPct;
-                                lowCapWarning = DroneRecallCapacitorPct;
-                            }
-
-                            if ((!Cache.Instance.Targets.Any() && Combat.PotentialCombatTargets.Any()) || !DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive)
-                            {
-                                Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to [" + Cache.Instance.Targets.Count() + "] targets being locked. Locking [" + Cache.Instance.Targeting.Count() + "] targets atm", Logging.Orange);
-                                Recall = true;
-                            }
-
-                            if (Cache.Instance.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
-                            {
-                                Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + lowShieldWarning + "%] minimum", Logging.Orange);
-                                Recall = true;
-                            }
-                            else if (Cache.Instance.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
-                            {
-                                Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + lowArmorWarning + "%] minimum", Logging.Orange);
-                                Recall = true;
-                            }
-                            else if (Cache.Instance.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
-                            {
-                                Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + lowCapWarning + "%] minimum", Logging.Orange);
-                                Recall = true;
-                            }
-                            else if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior && !WarpScrambled)
-                            {
-                                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoBase && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotobase state", Logging.Orange);
-                                    Recall = true;
-                                }
-                                else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoMission && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotomission state", Logging.Orange);
-                                    Recall = true;
-                                }
-                                else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Panic && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
-                                    Recall = true;
-                                }
-                            }
-                            else if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior && !WarpScrambled)
-                            {
-                                if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Panic && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
-                                    Recall = true;
-                                }
-                                else if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.GotoBase && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
-                                    Recall = true;
-                                }
-                            }
-                            else if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior && !WarpScrambled)
-                            {
-                                if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoBase && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotobase state", Logging.Orange);
-                                    Recall = true;
-                                }
-                                else if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Panic && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
-                                    Recall = true;
-                                }
-                                else if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoNearestStation && !WarpScrambled)
-                                {
-                                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to GotoNearestStation state", Logging.Orange);
-                                    Recall = true;
-                                }
-                            }
-                        }
-                    }
-
-                    // Recall or engage
-                    if (Recall)
-                    {
-                        Statistics.DroneRecalls++;
-                        _States.CurrentDroneState = DroneState.Recalling;
-                    }
-                    else
-                    {
-                        if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "EngageTarget(); - before", Logging.Debug);
-                    
-                        EngageTarget();
-
-                        if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "EngageTarget(); - after", Logging.Debug);
-                        // We lost a drone and did not recall, assume panicking and launch (if any) additional drones
-                        if (Drones.ActiveDrones.Count() < _lastDroneCount)
-                        {
-                            _States.CurrentDroneState = DroneState.Launch;
-                        }
-                    }
-                    break;
-
-                case DroneState.Recalling:
-
-                    // Are we done?
-                    if (!Drones.ActiveDrones.Any())
-                    {
-                        _lastRecall = DateTime.UtcNow;
-                        Recall = false;
-                        _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
-                        _States.CurrentDroneState = DroneState.WaitingForTargets;
-                        break;
-                    }
-
-                    // Give recall command every x seconds (default is 15)
-                    if (DateTime.UtcNow.Subtract(_lastRecallCommand).TotalSeconds > Time.Instance.RecallDronesDelayBetweenRetries + Cache.Instance.RandomNumber(0,2))
-                    {
-                        Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesReturnToBay);
-                        _lastRecallCommand = DateTime.UtcNow;
-                    }
-                    break;
-
-                case DroneState.Idle:
-
-                    //
-                    // below is the reasons we will start the combat state(s) - if the below is not met do nothing
-                    //
-                    if (Cache.Instance.InSpace &&
-                        Cache.Instance.ActiveShip.Entity != null &&
-                        !Cache.Instance.ActiveShip.Entity.IsCloaked &&
-                        Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
-                        Drones.UseDrones &&
-                        !Cache.Instance.InWarp)
-                    {
-                        _States.CurrentDroneState = DroneState.WaitingForTargets;
-                        return;
-                    }
-
-                    break;
+                return true;
             }
 
-            // Update health values
-            _activeDronesShieldTotalOnLastPulse = GetActiveDroneShieldTotal();
-            _activeDronesArmorTotalOnLastPulse = GetActiveDroneArmorTotal();
-            _activeDronesStructureTotalOnLastPulse = GetActiveDroneStructureTotal();
-            _lastDroneCount = Drones.ActiveDrones.Count();
+            return true;
+        }
+
+        private static bool LaunchDronesState()
+        {
+            if (Logging.DebugDrones) Logging.Log("Drones.Launch", "LaunchAllDrones", Logging.Debug);
+            // Launch all drones
+            Recall = false;
+            _launchTimeout = DateTime.UtcNow;
+            Cache.Instance.ActiveShip.LaunchAllDrones();
+            _States.CurrentDroneState = DroneState.Launching;
+            return true;
+        }
+
+        private static bool LaunchingDronesState()
+        {
+            if (Logging.DebugDrones) Logging.Log("Drones.Launching", "Entering Launching State...", Logging.Debug);
+            // We haven't launched anything yet, keep waiting
+            if (!Drones.ActiveDrones.Any())
+            {
+                if (Logging.DebugDrones) Logging.Log("Drones.Launching", "No Drones in space yet. waiting", Logging.Debug);
+                if (DateTime.UtcNow.Subtract(_launchTimeout).TotalSeconds > 10)
+                {
+                    // Relaunch if tries < 5
+                    if (_launchTries < 5)
+                    {
+                        _launchTries++;
+                        _States.CurrentDroneState = DroneState.Launch;
+                        return true;
+                    }
+
+                    _States.CurrentDroneState = DroneState.OutOfDrones;
+                }
+
+                return true;
+            }
+
+            // Are we done launching?
+            if (_lastDroneCount == Drones.ActiveDrones.Count())
+            {
+                Logging.Log("Drones", "[" + Drones.ActiveDrones.Count() + "] Drones Launched", Logging.Magenta);
+                _States.CurrentDroneState = DroneState.Fighting;
+                return true;
+            }
+
+            return true;
+        }
+
+        private static bool OutOfDronesDronesState()
+        {
+            if (Drones.UseDrones && Settings.Instance.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
+            {
+                if (Statistics.OutOfDronesCount >= 3)
+                {
+                    Logging.Log("Drones", "We are Out of Drones! AGAIN - Headed back to base to stay!", Logging.Red);
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    Statistics.MissionCompletionErrors = 10; //this effectively will stop questor in station so we do not try to do this mission again, this needs human intervention if we have lots this many drones
+                    Statistics.OutOfDronesCount++;
+                }
+
+                Logging.Log("Drones", "We are Out of Drones! - Headed back to base to Re-Arm", Logging.Red);
+                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                Statistics.OutOfDronesCount++;
+                return true;
+            }
+
+            return true;
+        }
+
+        private static bool FightingDronesState()
+        {
+            if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "Should we recall our drones? This is a possible list of reasons why we should", Logging.Debug);
+
+            if (!Drones.ActiveDrones.Any())
+            {
+                Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);
+                Recall = true;
+            }
+            else
+            {
+                if (Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+                {
+                    EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
+                    if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
+                    {
+                        _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
+                        Logging.Log("Drones", "We are scrambled by: [" + Logging.White + WarpScrambledBy.Name + Logging.Orange + "][" + Logging.White + Math.Round(WarpScrambledBy.Distance, 0) + Logging.Orange + "][" + Logging.White + WarpScrambledBy.Id + Logging.Orange + "]", Logging.Orange);
+                        Recall = false;
+                        WarpScrambled = true;
+                    }
+                }
+                else
+                {
+                    //Logging.Log("Drones: We are not warp scrambled at the moment...");
+                    WarpScrambled = false;
+                }
+            }
+
+            if (!Recall)
+            {
+                // Are we done (for now) ?
+                if (!Combat.TargetedBy.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
+                                       && e.Distance < MaxDroneRange))
+                {
+                    int TargtedByCount = 0;
+                    if (Combat.TargetedBy.Any())
+                    {
+                        TargtedByCount = Combat.TargetedBy.Count();
+                    }
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: no NPC is targeting us within [" + Math.Round(MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
+                    Recall = true;
+                }
+
+                if (Drones.IsMissionPocketDone && !WarpScrambled)
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We are done with this pocket.", Logging.Magenta);
+                    Recall = true;
+                }
+                else if (_activeDronesShieldTotalOnLastPulse > GetActiveDroneShieldTotal())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldTotal().ToString("N2") + "]", Logging.Magenta);
+                    Recall = true;
+                }
+                else if (_activeDronesArmorTotalOnLastPulse > GetActiveDroneArmorTotal())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorTotal().ToString("N2") + "]", Logging.Magenta);
+                    Recall = true;
+                }
+                else if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructureTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructureTotal().ToString("N2") + "]", Logging.Magenta);
+                    Recall = true;
+                }
+                else if (Drones.ActiveDrones.Count() < _lastDroneCount)
+                {
+                    // Did we lose a drone? (this should be covered by total's as well though)
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We lost a drone! [Old:" + _lastDroneCount + "][New: " + Drones.ActiveDrones.Count() + "]", Logging.Orange);
+                    Recall = true;
+                }
+                else if (!Recall)
+                {
+                    // Default to long range recall
+                    int lowShieldWarning = LongRangeDroneRecallShieldPct;
+                    int lowArmorWarning = LongRangeDroneRecallArmorPct;
+                    int lowCapWarning = LongRangeDroneRecallCapacitorPct;
+
+                    if (Drones.ActiveDrones.Average(d => d.Distance) < (MaxDroneRange / 2d))
+                    {
+                        lowShieldWarning = DroneRecallShieldPct;
+                        lowArmorWarning = DroneRecallArmorPct;
+                        lowCapWarning = DroneRecallCapacitorPct;
+                    }
+
+                    if ((!Cache.Instance.Targets.Any() && Combat.PotentialCombatTargets.Any()) || !DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive)
+                    {
+                        Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to [" + Cache.Instance.Targets.Count() + "] targets being locked. Locking [" + Cache.Instance.Targeting.Count() + "] targets atm", Logging.Orange);
+                        Recall = true;
+                    }
+
+                    if (Cache.Instance.ActiveShip.ShieldPercentage < lowShieldWarning && !WarpScrambled)
+                    {
+                        Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to shield [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] below [" + lowShieldWarning + "%] minimum", Logging.Orange);
+                        Recall = true;
+                    }
+                    else if (Cache.Instance.ActiveShip.ArmorPercentage < lowArmorWarning && !WarpScrambled)
+                    {
+                        Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to armor [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] below [" + lowArmorWarning + "%] minimum", Logging.Orange);
+                        Recall = true;
+                    }
+                    else if (Cache.Instance.ActiveShip.CapacitorPercentage < lowCapWarning && !WarpScrambled)
+                    {
+                        Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + lowCapWarning + "%] minimum", Logging.Orange);
+                        Recall = true;
+                    }
+                    else if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior && !WarpScrambled)
+                    {
+                        if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoBase && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotobase state", Logging.Orange);
+                            Recall = true;
+                        }
+                        else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoMission && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotomission state", Logging.Orange);
+                            Recall = true;
+                        }
+                        else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Panic && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
+                            Recall = true;
+                        }
+                    }
+                    else if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior && !WarpScrambled)
+                    {
+                        if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.Panic && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
+                            Recall = true;
+                        }
+                        else if (_States.CurrentCombatHelperBehaviorState == CombatHelperBehaviorState.GotoBase && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
+                            Recall = true;
+                        }
+                    }
+                    else if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior && !WarpScrambled)
+                    {
+                        if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoBase && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to gotobase state", Logging.Orange);
+                            Recall = true;
+                        }
+                        else if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.Panic && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to panic state", Logging.Orange);
+                            Recall = true;
+                        }
+                        else if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == DedicatedBookmarkSalvagerBehaviorState.GotoNearestStation && !WarpScrambled)
+                        {
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones due to GotoNearestStation state", Logging.Orange);
+                            Recall = true;
+                        }
+                    }
+                }
+            }
+
+            // Recall or engage
+            if (Recall)
+            {
+                Statistics.DroneRecalls++;
+                _States.CurrentDroneState = DroneState.Recalling;
+            }
+            else
+            {
+                if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "EngageTarget(); - before", Logging.Debug);
+
+                EngageTarget();
+
+                if (Logging.DebugDrones) Logging.Log("Drones.Fighting", "EngageTarget(); - after", Logging.Debug);
+                // We lost a drone and did not recall, assume panicking and launch (if any) additional drones
+                if (Drones.ActiveDrones.Count() < _lastDroneCount)
+                {
+                    _States.CurrentDroneState = DroneState.Launch;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool RecallingDronesState()
+        {
+            // Are we done?
+            if (!Drones.ActiveDrones.Any())
+            {
+                _lastRecall = DateTime.UtcNow;
+                Recall = false;
+                _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
+                _States.CurrentDroneState = DroneState.WaitingForTargets;
+                return true;
+            }
+
+            // Give recall command every x seconds (default is 15)
+            if (DateTime.UtcNow.Subtract(_lastRecallCommand).TotalSeconds > Time.Instance.RecallDronesDelayBetweenRetries + Cache.Instance.RandomNumber(0, 2))
+            {
+                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesReturnToBay);
+                _lastRecallCommand = DateTime.UtcNow;
+                return true;
+            }
+
+            return true;
+        }
+
+        public static void ProcessState()
+        {
+            try
+            {
+                if (!OnEveryDroneProcessState()) return;
+
+                switch (_States.CurrentDroneState)
+                {
+                    case DroneState.WaitingForTargets:
+                        if (!WaitingForTargetsDroneState()) return;
+                        break;
+
+                    case DroneState.Launch:
+                        if (!LaunchDronesState()) return;
+                        break;
+
+                    case DroneState.Launching:
+                        if (!LaunchingDronesState()) return;
+                        break;
+
+                    case DroneState.OutOfDrones:
+                        if (!OutOfDronesDronesState()) return;
+                        break;
+
+                    case DroneState.Fighting:
+                        if (!FightingDronesState()) return;
+                        break;
+
+                    case DroneState.Recalling:
+                        if (!RecallingDronesState()) return;
+                        break;
+
+                    case DroneState.Idle:
+                        if (!IdleDroneState()) return;
+                        break;
+                }
+
+                // Update health values
+                _activeDronesShieldTotalOnLastPulse = GetActiveDroneShieldTotal();
+                _activeDronesArmorTotalOnLastPulse = GetActiveDroneArmorTotal();
+                _activeDronesStructureTotalOnLastPulse = GetActiveDroneStructureTotal();
+                _lastDroneCount = Drones.ActiveDrones.Count();
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("Drones.ProcessState","Exception [" + ex + "]",Logging.Debug);
+                return;
+            }
         }
         
         /// <summary>

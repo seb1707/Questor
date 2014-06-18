@@ -110,10 +110,10 @@ namespace Questor.Modules.BackgroundTasks
                     return true;
                 }
 
-                if (Combat.TargetedBy.Any())
+                if (Combat.PotentialCombatTargets.Any())
                 {
                     if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been locked by [" + Combat.TargetedBy.Count() + "] Entities", Logging.Debug);
-                    List<EntityCache> EntitiesThatAreWarpScramblingMe = Combat.TargetedBy.Where(t => t.IsWarpScramblingMe).ToList();
+                    List<EntityCache> EntitiesThatAreWarpScramblingMe = Combat.PotentialCombatTargets.Where(t => t.IsWarpScramblingMe).ToList();
                     if (EntitiesThatAreWarpScramblingMe.Any())
                     {
                         if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been warp scrambled by [" + EntitiesThatAreWarpScramblingMe.Count() + "] Entities", Logging.Debug);
@@ -123,7 +123,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (NavigateOnGrid.SpeedTank)
                     {
-                        List<EntityCache> EntitiesThatAreWebbingMe = Combat.TargetedBy.Where(t => t.IsWebbingMe).ToList();
+                        List<EntityCache> EntitiesThatAreWebbingMe = Combat.PotentialCombatTargets.Where(t => t.IsWebbingMe).ToList();
                         if (EntitiesThatAreWebbingMe.Any())
                         {
                             if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been webbed by [" + EntitiesThatAreWebbingMe.Count() + "] Entities", Logging.Debug);
@@ -131,7 +131,7 @@ namespace Questor.Modules.BackgroundTasks
                             Combat.AddPrimaryWeaponPriorityTargets(EntitiesThatAreWebbingMe, PrimaryWeaponPriority.Webbing, "Panic", Combat.AddWebifiersToPrimaryWeaponsPriorityTargetList);
                         }
 
-                        List<EntityCache> EntitiesThatAreTargetPaintingMe = Combat.TargetedBy.Where(t => t.IsTargetPaintingMe).ToList();
+                        List<EntityCache> EntitiesThatAreTargetPaintingMe = Combat.PotentialCombatTargets.Where(t => t.IsTargetPaintingMe).ToList();
                         if (EntitiesThatAreTargetPaintingMe.Any())
                         {
                             if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been target painted by [" + EntitiesThatAreTargetPaintingMe.Count() + "] Entities", Logging.Debug);
@@ -140,7 +140,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
-                    List<EntityCache> EntitiesThatAreNeutralizingMe = Combat.TargetedBy.Where(t => t.IsNeutralizingMe).ToList();
+                    List<EntityCache> EntitiesThatAreNeutralizingMe = Combat.PotentialCombatTargets.Where(t => t.IsNeutralizingMe).ToList();
                     if (EntitiesThatAreNeutralizingMe.Any())
                     {
                         if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been neuted by [" + EntitiesThatAreNeutralizingMe.Count() + "] Entities", Logging.Debug);
@@ -148,7 +148,7 @@ namespace Questor.Modules.BackgroundTasks
                         Combat.AddPrimaryWeaponPriorityTargets(EntitiesThatAreNeutralizingMe, PrimaryWeaponPriority.Neutralizing, "Panic", Combat.AddNeutralizersToPrimaryWeaponsPriorityTargetList);
                     }
 
-                    List<EntityCache> EntitiesThatAreJammingMe = Combat.TargetedBy.Where(t => t.IsJammingMe).ToList();
+                    List<EntityCache> EntitiesThatAreJammingMe = Combat.PotentialCombatTargets.Where(t => t.IsJammingMe).ToList();
                     if (EntitiesThatAreJammingMe.Any())
                     {
                         if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been ECMd by [" + EntitiesThatAreJammingMe.Count() + "] Entities", Logging.Debug);
@@ -156,7 +156,7 @@ namespace Questor.Modules.BackgroundTasks
                         Combat.AddPrimaryWeaponPriorityTargets(EntitiesThatAreJammingMe, PrimaryWeaponPriority.Jamming, "Panic", Combat.AddECMsToPrimaryWeaponsPriorityTargetList);
                     }
 
-                    List<EntityCache> EntitiesThatAreSensorDampeningMe = Combat.TargetedBy.Where(t => t.IsSensorDampeningMe).ToList();
+                    List<EntityCache> EntitiesThatAreSensorDampeningMe = Combat.PotentialCombatTargets.Where(t => t.IsSensorDampeningMe).ToList();
                     if (EntitiesThatAreSensorDampeningMe.Any())
                     {
                         if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been Sensor Damped by [" + EntitiesThatAreSensorDampeningMe.Count() + "] Entities", Logging.Debug);
@@ -169,7 +169,7 @@ namespace Questor.Modules.BackgroundTasks
                         //
                         // tracking disrupting targets
                         //
-                        List<EntityCache> EntitiesThatAreTrackingDisruptingMe = Combat.TargetedBy.Where(t => t.IsTrackingDisruptingMe).ToList();
+                        List<EntityCache> EntitiesThatAreTrackingDisruptingMe = Combat.PotentialCombatTargets.Where(t => t.IsTrackingDisruptingMe).ToList();
                         if (EntitiesThatAreTrackingDisruptingMe.Any())
                         {
                             if (Logging.DebugPanic) Logging.Log("Panic.Normal", "We have been Tracking Disrupted by [" + EntitiesThatAreTrackingDisruptingMe.Count() + "] Entities", Logging.Debug);

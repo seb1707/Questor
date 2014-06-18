@@ -789,6 +789,7 @@ namespace Questor.Modules.Actions
 
         public static bool CheckFaction()
         {
+            MissionSettings.ClearFactionSpecificSettings();
             DirectAgentWindow agentWindow = Agent.Window;
             string html = agentWindow.Objective;
             Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
@@ -827,7 +828,7 @@ namespace Questor.Modules.Actions
                                 //
                                 if (_factionFittingForThisMissionsFaction.DroneTypeID != null && _factionFittingForThisMissionsFaction.DroneTypeID != 0)
                                 {
-                                    Drones.DroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
+                                    Drones.FactionDroneTypeID = (int)_factionFittingForThisMissionsFaction.DroneTypeID;
                                 }
                                 Logging.Log("AgentInteraction", "Faction fitting: " + _factionFittingForThisMissionsFaction.FactionName + "Using DroneTypeID [" + Drones.DroneTypeID + "]", Logging.Yellow);
                             }

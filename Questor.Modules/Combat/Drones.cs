@@ -1466,26 +1466,26 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
             {
                 Logging.Log("Drones", "Apparently we have lost all our drones", Logging.Orange);
+                _States.CurrentDroneState = DroneState.Idle;
+                return false;
+            }
+
+            if (Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+            {
+                EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
+                if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
+                {
+                    _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
+                    Logging.Log("Drones", "We are scrambled by: [" + Logging.White + WarpScrambledBy.Name + Logging.Orange + "][" + Logging.White + Math.Round(WarpScrambledBy.Distance, 0) + Logging.Orange + "][" + Logging.White + WarpScrambledBy.Id + Logging.Orange + "]", Logging.Orange);
+                    WarpScrambled = true;
+                }
             }
             else
             {
-                if (Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
-                {
-                    EntityCache WarpScrambledBy = Cache.Instance.Targets.OrderBy(d => d.Distance).ThenByDescending(i => i.IsWarpScramblingMe).FirstOrDefault();
-                    if (WarpScrambledBy != null && DateTime.UtcNow > _nextWarpScrambledWarning)
-                    {
-                        _nextWarpScrambledWarning = DateTime.UtcNow.AddSeconds(20);
-                        Logging.Log("Drones", "We are scrambled by: [" + Logging.White + WarpScrambledBy.Name + Logging.Orange + "][" + Logging.White + Math.Round(WarpScrambledBy.Distance, 0) + Logging.Orange + "][" + Logging.White + WarpScrambledBy.Id + Logging.Orange + "]", Logging.Orange);
-                        WarpScrambled = true;
-                    }
-                }
-                else
-                {
-                    //Logging.Log("Drones: We are not warp scrambled at the moment...");
-                    WarpScrambled = false;
-                }
+                //Logging.Log("Drones: We are not warp scrambled at the moment...");
+                WarpScrambled = false;
             }
-
+            
             if (ShouldWeRecallDrones())
             {
                 Statistics.DroneRecalls++;

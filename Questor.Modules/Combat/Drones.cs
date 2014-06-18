@@ -1305,16 +1305,15 @@ namespace Questor.Modules.Combat
                 Cache.Instance.ActiveShip.Entity.IsCloaked  // There is no combat when cloaked
                 )
             {
-                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "] InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
+                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
                 _States.CurrentDroneState = DroneState.Idle;
                 return false;
             }
 
-            if (!Drones.UseDrones)
+            if (!Drones.UseDrones && Drones.ActiveDrones.Any())
             {
-                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "] InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
-                ShouldWeRecallDrones();
-                _States.CurrentDroneState = DroneState.Recalling;
+                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "]", Logging.Debug);
+                if (!RecallingDronesState()) return false;
                 return false;
             }
 

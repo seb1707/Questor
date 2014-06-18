@@ -40,7 +40,6 @@ namespace Questor.Modules.Combat
         //    Interlocked.Decrement(ref DronesInstances);
         //}
 
-        private static double _armorPctTotal;
         private static int _lastDroneCount;
         private static DateTime _lastEngageCommand;
         private static DateTime _lastRecallCommand;
@@ -51,8 +50,9 @@ namespace Questor.Modules.Combat
 
         private static DateTime _launchTimeout;
         private static int _launchTries;
-        private static double _shieldPctTotal;
-        private static double _structurePctTotal;
+        private static double _activeDronesShieldTotalOnLastPulse;
+        private static double _activeDronesArmorTotalOnLastPulse;
+        private static double _activeDronesStructureTotalOnLastPulse;
         public static bool Recall; //false
         public static bool WarpScrambled; //false
         private static DateTime _nextDroneAction = DateTime.UtcNow;
@@ -803,28 +803,28 @@ namespace Questor.Modules.Combat
             return false;
         }
 
-        private static double GetShieldPctTotal()
+        private static double GetActiveDroneShieldTotal()
         {
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.ShieldPct * 100);
+            return Drones.ActiveDrones.Sum(d => d.ShieldHitPoints * 100);
         }
 
-        private static double GetArmorPctTotal()
+        private static double GetActiveDroneArmorTotal()
         {
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.ArmorPct * 100);
+            return Drones.ActiveDrones.Sum(d => d.ArmorHitPoints * 100);
         }
 
-        private static double GetStructurePctTotal()
+        private static double GetActiveDroneStructureTotal()
         {
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.StructurePct * 100);
+            return Drones.ActiveDrones.Sum(d => d.StructureHitPoints * 100);
         }
 
         /// <summary>
@@ -1256,43 +1256,42 @@ namespace Questor.Modules.Combat
                     if (!Recall)
                     {
                         // Are we done (for now) ?
-                        if (Combat.TargetedBy.Count(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                                               && (e.IsNpc || e.IsNpcByGroupID)
-                                                               && e.Distance < MaxDroneRange) == 0)
+                        if (Combat.TargetedBy.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
+                                               && e.Distance < MaxDroneRange))
                         {
                             int TargtedByCount = 0;
                             if (Combat.TargetedBy.Any())
                             {
                                 TargtedByCount = Combat.TargetedBy.Count();
                             }
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because no NPC is targeting us within [" + Math.Round(MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: no NPC is targeting us within [" + Math.Round(MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
                             Recall = true;
                         }
 
                         if (Drones.IsMissionPocketDone && !WarpScrambled)
                         {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because we are done with this pocket.", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We are done with this pocket.", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (_shieldPctTotal > GetShieldPctTotal())
+                        else if (_activeDronesShieldTotalOnLastPulse > GetActiveDroneShieldTotal())
                         {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some shields! [Old: " + _shieldPctTotal.ToString("N2") + "][New: " + GetShieldPctTotal().ToString("N2") + "]", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldTotal().ToString("N2") + "]", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (_armorPctTotal > GetArmorPctTotal())
+                        else if (_activeDronesArmorTotalOnLastPulse > GetActiveDroneArmorTotal())
                         {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some armor! [Old:" + _armorPctTotal.ToString("N2") + "][New: " + GetArmorPctTotal().ToString("N2") + "]", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorTotal().ToString("N2") + "]", Logging.Magenta);
                             Recall = true;
                         }
-                        else if (_structurePctTotal > GetStructurePctTotal())
+                        else if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal())
                         {
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because drones have lost some structure! [Old:" + _structurePctTotal.ToString("N2") + "][New: " + GetStructurePctTotal().ToString("N2") + "]", Logging.Magenta);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructureTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructureTotal().ToString("N2") + "]", Logging.Magenta);
                             Recall = true;
                         }
                         else if (Drones.ActiveDrones.Count() < _lastDroneCount)
                         {
                             // Did we lose a drone? (this should be covered by total's as well though)
-                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones because we have lost a drone! [Old:" + _lastDroneCount + "][New: " + Drones.ActiveDrones.Count() + "]", Logging.Orange);
+                            Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: We lost a drone! [Old:" + _lastDroneCount + "][New: " + Drones.ActiveDrones.Count() + "]", Logging.Orange);
                             Recall = true;
                         }
                         else if (!Recall)
@@ -1443,9 +1442,9 @@ namespace Questor.Modules.Combat
             }
 
             // Update health values
-            _shieldPctTotal = GetShieldPctTotal();
-            _armorPctTotal = GetArmorPctTotal();
-            _structurePctTotal = GetStructurePctTotal();
+            _activeDronesShieldTotalOnLastPulse = GetActiveDroneShieldTotal();
+            _activeDronesArmorTotalOnLastPulse = GetActiveDroneArmorTotal();
+            _activeDronesStructureTotalOnLastPulse = GetActiveDroneStructureTotal();
             _lastDroneCount = Drones.ActiveDrones.Count();
         }
         

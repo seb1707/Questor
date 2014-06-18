@@ -1154,6 +1154,12 @@ namespace Questor.Modules.Combat
                     lowCapWarning = DroneRecallCapacitorPct;
                 }
 
+                if (!Drones.UseDrones)
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: UseDrones is [" + UseDrones + "]", Logging.Magenta);
+                    return true;
+                }
+
                 // Are we done (for now) ?
                 if (!Combat.TargetedBy.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
                                         && e.Distance < MaxDroneRange))
@@ -1293,15 +1299,22 @@ namespace Questor.Modules.Combat
             if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "Entering Drones.ProcessState", Logging.Debug);
             _nextDroneAction = DateTime.UtcNow.AddMilliseconds(800);
 
-            if (Cache.Instance.InStation ||                             // There is really no combat in stations (yet)
-                !Cache.Instance.InSpace ||                              // if we are not in space yet, wait...
-                Cache.Instance.MyShipEntity == null ||   // What? No ship entity?
-                Cache.Instance.ActiveShip.Entity.IsCloaked || // There is no combat when cloaked
-                !Drones.UseDrones                               // if UseDrones is false
+            if (Cache.Instance.InStation ||                 // There is really no combat in stations (yet)
+                !Cache.Instance.InSpace ||                  // if we are not in space yet, wait...
+                Cache.Instance.MyShipEntity == null ||      // What? No ship entity?
+                Cache.Instance.ActiveShip.Entity.IsCloaked  // There is no combat when cloaked
                 )
             {
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "] InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
                 _States.CurrentDroneState = DroneState.Idle;
+                return false;
+            }
+
+            if (!Drones.UseDrones)
+            {
+                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "UseDrones [" + Drones.UseDrones + "] InStation [" + Cache.Instance.InStation + "] InSpace [" + Cache.Instance.InSpace + "] IsCloaked [" + Cache.Instance.ActiveShip.Entity.IsCloaked + "] - doing nothing", Logging.Debug);
+                ShouldWeRecallDrones();
+                _States.CurrentDroneState = DroneState.Recalling;
                 return false;
             }
 
@@ -1497,20 +1510,26 @@ namespace Questor.Modules.Combat
 
         private static bool RecallingDronesState()
         {
-            // Are we done?
-            if (!Drones.ActiveDrones.Any())
-            {
-                _lastRecall = DateTime.UtcNow;
-                _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
-                _States.CurrentDroneState = DroneState.WaitingForTargets;
-                return true;
-            }
-
             // Give recall command every x seconds (default is 15)
             if (DateTime.UtcNow.Subtract(_lastRecallCommand).TotalSeconds > Time.Instance.RecallDronesDelayBetweenRetries + Cache.Instance.RandomNumber(0, 2))
             {
                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdDronesReturnToBay);
                 _lastRecallCommand = DateTime.UtcNow;
+                return true;
+            }
+
+            // Are we done?
+            if (!Drones.ActiveDrones.Any())
+            {
+                _lastRecall = DateTime.UtcNow;
+                _nextDroneAction = DateTime.UtcNow.AddSeconds(3);
+                if (!Drones.UseDrones)
+                {
+                    _States.CurrentDroneState = DroneState.Idle;
+                    return false;
+                }
+
+                _States.CurrentDroneState = DroneState.WaitingForTargets;
                 return true;
             }
 

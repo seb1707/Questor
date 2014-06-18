@@ -1188,8 +1188,7 @@ namespace Questor.Modules.Combat
                 }
 
                 // Are we done (for now) ?
-                if (!Combat.TargetedBy.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))
-                                        && e.Distance < MaxDroneRange))
+                if (!Combat.TargetedBy.All(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.IsInDroneRange) && !WarpScrambled && !Settings.Instance.FleetSupportSlave)
                 {
                     int TargtedByCount = 0;
                     if (Combat.TargetedBy.Any())

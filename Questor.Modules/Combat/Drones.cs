@@ -1371,7 +1371,7 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.Targets.Any() || (Combat.PotentialCombatTargets.Any() && DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive))
             {
                 // Should we launch drones?
-                if (!ShouldWeLaunchDrones()) return;
+                if (!ShouldWeLaunchDrones()) return false;
                 
                 // Reset launch tries
                 _launchTries = 0;

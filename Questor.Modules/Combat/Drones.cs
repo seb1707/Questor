@@ -1055,6 +1055,90 @@ namespace Questor.Modules.Combat
             }
         }
 
+        private static bool ShouldWeLaunchDrones()
+        {
+            // Always launch if we're scrambled
+            if (!Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
+            {
+                if (!Drones.UseDrones)
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "UseDrones is [" + UseDrones + "] Not Launching Drones", Logging.Debug);
+                    return false;
+                }
+
+                // Are we done with this mission pocket?
+                if (Drones.IsMissionPocketDone)
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "IsMissionPocketDone [" + Drones.IsMissionPocketDone + "] Not Launching Drones", Logging.Debug);
+                    return false;
+                }
+
+                // If above my ships shield minimum for launching drones
+                if (Cache.Instance.ActiveShip.ShieldPercentage <= DroneMinimumShieldPct)
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "My Ships ShieldPercentage [" + Cache.Instance.ActiveShip.ShieldPercentage + "] is below [" + DroneMinimumShieldPct + "] Not Launching Drones", Logging.Debug);
+                    return false;
+                }
+
+                // If above my ships armor minimum for launching drones
+                if (Cache.Instance.ActiveShip.ArmorPercentage <= DroneMinimumArmorPct)
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "My Ships ArmorPercentage [" + Cache.Instance.ActiveShip.ArmorPercentage + "] is below [" + DroneMinimumArmorPct + "] Not Launching Drones", Logging.Debug);
+                    return false;
+                }
+
+                // If above my ships capacitor minimum for launching drones
+                if (Cache.Instance.ActiveShip.CapacitorPercentage <= DroneMinimumCapacitorPct)
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "My Ships CapacitorPercentage [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] is below [" + DroneMinimumCapacitorPct + "] Not Launching Drones", Logging.Debug);
+                    return false;
+                }
+
+                // yes if there are targets to kill
+                if (!Combat.Aggressed.Any(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.Distance < MaxDroneRange) && !Cache.Instance.Targets.Any(e => e.IsLargeCollidable))
+                {
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "We have nothing Aggressed; MaxDroneRange [" + MaxDroneRange + "] DroneControlrange [" + DroneControlRange + "] TargetingRange [" + Combat.MaxTargetRange + "]", Logging.Debug);
+                    return false;
+                }
+
+                if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
+                {
+                    if (!Cache.Instance.EntitiesOnGrid.Any(e => ((!e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable) || e.IsAttacking) && e.Distance < MaxDroneRange))
+                    {
+                        if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "QuestorState is [" + _States.CurrentQuestorState.ToString() + "] We have nothing to shoot;", Logging.Debug);
+                        return false;
+                    }
+                }
+
+                // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
+                if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
+                {
+                    if (_lastRecall.AddSeconds(5 * _recallCount + 5) < DateTime.UtcNow)
+                    {
+                        // Increase recall count and allow the launch
+                        _recallCount++;
+
+                        // Never let _recallCount go above 5
+                        if (_recallCount > 5)
+                        {
+                            _recallCount = 5;
+                        }
+
+                        return true;
+                    }
+
+                    // Do not launch the drones until the delay has passed
+                    if (Logging.DebugDrones) Logging.Log("Drones.ShouldWeLaunchDrones", "We are still in _lastRecall delay.", Logging.Debug);
+                    return false;
+                }
+
+                // Drones have been out for more then 30s
+                _recallCount = 0;
+                return true;
+            }
+
+            return true;
+        }
         private static bool ShouldWeRecallDrones()
         {
             try
@@ -1287,68 +1371,12 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.Targets.Any() || (Combat.PotentialCombatTargets.Any() && DronesDontNeedTargetsBecauseWehaveThemSetOnAggressive))
             {
                 // Should we launch drones?
-                bool launch = true;
-
-                // Always launch if we're scrambled
-                if (!Combat.PotentialCombatTargets.Any(pt => pt.IsWarpScramblingMe))
-                {
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                    launch &= Drones.UseDrones;
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", " launch &= Cache.Instance.UseDrones; Launch is [" + launch + "]", Logging.Debug);
-                    // Are we done with this mission pocket?
-                    launch &= !Drones.IsMissionPocketDone;
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "!Cache.Instance.IsMissionPocketDone; Launch is [" + launch + "]", Logging.Debug);
-                    // If above minimums
-                    launch &= Cache.Instance.ActiveShip.ShieldPercentage >= DroneMinimumShieldPct;
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ShieldPercentage; Launch is [" + launch + "]", Logging.Debug);
-                    launch &= Cache.Instance.ActiveShip.ArmorPercentage >= DroneMinimumArmorPct;
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.ArmorPercentage; Launch is [" + launch + "]", Logging.Debug);
-                    launch &= Cache.Instance.ActiveShip.CapacitorPercentage >= DroneMinimumCapacitorPct;
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "ActiveShip.CapacitorPercentage; Launch is [" + launch + "]", Logging.Debug);
-
-                    // yes if there are targets to kill
-                    launch &= (Combat.Aggressed.Count(e => e.Distance < MaxDroneRange && (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))) > 0 || Cache.Instance.Targets.Count(e => e.IsLargeCollidable) > 0);
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Aggressed.Count; Launch is [" + launch + "] MaxDroneRange [" + MaxDroneRange + "] DroneControlrange [" + DroneControlRange + "] TargetingRange [" + Combat.MaxTargetRange + "]", Logging.Debug);
-
-                    if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
-                    {
-                        launch &= Cache.Instance.EntitiesOnGrid.Count(e => !e.IsSentry && !e.IsBadIdea && e.CategoryId == (int)CategoryID.Entity && e.IsNpc && !e.IsContainer && !e.IsLargeCollidable && e.Distance < MaxDroneRange) > 0;
-                        if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Cache.Instance.Entities.Count; Launch is [" + launch + "]", Logging.Debug);
-                    }
-
-                    if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                    // If drones get aggro'd within 30 seconds, then wait (5 * _recallCount + 5) seconds since the last recall
-                    if (_lastLaunch < _lastRecall && _lastRecall.Subtract(_lastLaunch).TotalSeconds < 30)
-                    {
-                        if (_lastRecall.AddSeconds(5 * _recallCount + 5) < DateTime.UtcNow)
-                        {
-                            // Increase recall count and allow the launch
-                            _recallCount++;
-
-                            // Never let _recallCount go above 5
-                            if (_recallCount > 5)
-                                _recallCount = 5;
-                        }
-                        else
-                        {
-                            // Do not launch the drones until the delay has passed
-                            if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "We are still in _lastRecall delay. Launch is [" + launch + "]", Logging.Debug);
-                            launch = false;
-                        }
-                    }
-                    else // Drones have been out for more then 30s
-                        _recallCount = 0;
-                }
-                if (Logging.DebugDrones) Logging.Log("Drones.WaitingForTargets", "Launch is [" + launch + "]", Logging.Debug);
-                if (launch)
-                {
-                    // Reset launch tries
-                    _launchTries = 0;
-                    _lastLaunch = DateTime.UtcNow;
-                    _States.CurrentDroneState = DroneState.Launch;
-                    return true;
-                }
-
+                if (!ShouldWeLaunchDrones()) return;
+                
+                // Reset launch tries
+                _launchTries = 0;
+                _lastLaunch = DateTime.UtcNow;
+                _States.CurrentDroneState = DroneState.Launch;
                 return true;
             }
 

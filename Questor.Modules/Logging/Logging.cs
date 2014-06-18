@@ -239,9 +239,11 @@ namespace Questor.Modules.Logging
                     line = line.Replace("\\" + Logging._character, "\\" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
                     line = line.Replace("[" + Logging._character + "]", "[" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
                     line = line.Replace(Logging._character + ".xml", Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                }
+
+                if (!string.IsNullOrEmpty(Logging.CharacterSettingsPath))
+                {
                     line = line.Replace(Logging.CharacterSettingsPath, Logging.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");
-                    //line = line.Replace(Cache.Instance._agentName, Cache.Instance._agentName.Substring(0, 2) + "_MyCurrentAgentName_");
-                    //line = line.Replace(Cache.Instance.AgentId, "_MyCurrentAgentID_");
                 }
 
                 //if (!string.IsNullOrEmpty(Cache.Instance.CurrentAgent))
@@ -278,6 +280,7 @@ namespace Questor.Modules.Logging
             catch (Exception exception)
             {
                 Logging.Log("Logging", "Exception in FilterSensitiveInfo [" + exception + "]", Logging.Debug);
+                return line;
             }
 
             return null;

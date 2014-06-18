@@ -53,6 +53,9 @@ namespace Questor.Modules.Combat
         private static double _activeDronesShieldTotalOnLastPulse;
         private static double _activeDronesArmorTotalOnLastPulse;
         private static double _activeDronesStructureTotalOnLastPulse;
+        private static double _activeDronesShieldPercentageOnLastPulse;
+        private static double _activeDronesArmorPercentageOnLastPulse;
+        private static double _activeDronesStructurePercentageOnLastPulse;
         public static bool WarpScrambled; //false
         private static DateTime _nextDroneAction = DateTime.UtcNow;
         private static DateTime _nextWarpScrambledWarning = DateTime.MinValue;
@@ -817,7 +820,7 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.ShieldHitPoints * 100);
+            return Drones.ActiveDrones.Sum(d => d.ShieldHitPoints);
         }
 
         private static double GetActiveDroneArmorTotal()
@@ -825,7 +828,7 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.ArmorHitPoints * 100);
+            return Drones.ActiveDrones.Sum(d => d.ArmorHitPoints);
         }
 
         private static double GetActiveDroneStructureTotal()
@@ -833,7 +836,31 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
-            return Drones.ActiveDrones.Sum(d => d.StructureHitPoints * 100);
+            return Drones.ActiveDrones.Sum(d => d.StructureHitPoints);
+        }
+
+        private static double GetActiveDroneShieldPercentage()
+        {
+            if (!Drones.ActiveDrones.Any())
+                return 0;
+
+            return Drones.ActiveDrones.Sum(d => d.ShieldPct * 100);
+        }
+
+        private static double GetActiveDroneArmorPercentage()
+        {
+            if (!Drones.ActiveDrones.Any())
+                return 0;
+
+            return Drones.ActiveDrones.Sum(d => d.ArmorPct * 100);
+        }
+
+        private static double GetActiveDroneStructurePercentage()
+        {
+            if (!Drones.ActiveDrones.Any())
+                return 0;
+
+            return Drones.ActiveDrones.Sum(d => d.StructurePct * 100);
         }
 
         /// <summary>
@@ -1194,6 +1221,24 @@ namespace Questor.Modules.Combat
                 if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal())
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructureTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructureTotal().ToString("N2") + "]", Logging.Magenta);
+                    return true;
+                }
+
+                if (_activeDronesShieldPercentageOnLastPulse > GetActiveDroneShieldPercentage())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldPercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldPercentage().ToString("N2") + "]", Logging.Magenta);
+                    return true;
+                }
+
+                if (_activeDronesArmorPercentageOnLastPulse > GetActiveDroneArmorPercentage())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorPercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorPercentage().ToString("N2") + "]", Logging.Magenta);
+                    return true;
+                }
+
+                if (_activeDronesStructurePercentageOnLastPulse > GetActiveDroneStructurePercentage())
+                {
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructurePercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructurePercentage().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
@@ -1576,6 +1621,9 @@ namespace Questor.Modules.Combat
                 _activeDronesShieldTotalOnLastPulse = GetActiveDroneShieldTotal();
                 _activeDronesArmorTotalOnLastPulse = GetActiveDroneArmorTotal();
                 _activeDronesStructureTotalOnLastPulse = GetActiveDroneStructureTotal();
+                _activeDronesShieldPercentageOnLastPulse = GetActiveDroneShieldPercentage();
+                _activeDronesArmorPercentageOnLastPulse = GetActiveDroneArmorPercentage();
+                _activeDronesStructurePercentageOnLastPulse = GetActiveDroneStructurePercentage();
                 _lastDroneCount = Drones.ActiveDrones.Count();
             }
             catch (Exception ex)

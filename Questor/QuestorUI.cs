@@ -807,8 +807,7 @@ namespace Questor
                     // closing eve would be a very good idea here
                     //
                     Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
-
-                    //Application.Exit();
+                    Application.Exit();
                 }
             }
 
@@ -820,8 +819,7 @@ namespace Questor
                     Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
                     Cache.Instance.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
                     Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
-
-                    //Application.Exit();
+                    Application.Exit();
                 }
             }
         }

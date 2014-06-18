@@ -1544,18 +1544,18 @@ namespace Questor.Modules.Activities
             bool usedrones;
             if (!bool.TryParse(action.GetParameterValue("use"), out usedrones))
             {
-                usedrones = true;
+                usedrones = false;
             }
 
             if (!usedrones)
             {
                 Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "Disable launch of drones", Logging.Teal);
-                MissionSettings.MissionUseDrones = false;
+                MissionSettings.PocketUseDrones = false;
             }
             else
             {
                 Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "Enable launch of drones", Logging.Teal);
-                MissionSettings.MissionUseDrones = true;
+                MissionSettings.PocketUseDrones = true;
             }
             Nextaction();
             return;

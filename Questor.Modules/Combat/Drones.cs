@@ -80,7 +80,7 @@ namespace Questor.Modules.Combat
                         return _activeDrones;
                     }
 
-                    return null;
+                    return new List<EntityCache>();
                 }
 
                 return _activeDrones;
@@ -1074,6 +1074,13 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
+            if (Drones.ActiveDrones == null)
+            {
+                if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "ActiveDrones == null", Logging.Debug);
+                _States.CurrentDroneState = DroneState.Idle;
+                return false;
+            }
+
             if (Cache.Instance.MyShipEntity.IsShipWithNoDroneBay)
             {
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "IsShipWithNoDronesBay - Setting useDrones to false.", Logging.Debug);
@@ -1082,7 +1089,7 @@ namespace Questor.Modules.Combat
                 return false;
             }
 
-            if ((!Drones.ActiveDrones.Any() && Cache.Instance.InWarp))
+            if (!Drones.ActiveDrones.Any() && Cache.Instance.InWarp)
             {
                 if (Logging.DebugDrones) Logging.Log("Drones.ProcessState", "No Active Drones in space and we are InWarp - doing nothing", Logging.Debug);
                 RemoveDronePriorityTargets(Drones.DronePriorityEntities.ToList());

@@ -54,7 +54,7 @@ namespace Questor
 
         public Questor()
         {
-            Logging.tryToLogToFile = true;
+            //Logging.tryToLogToFile = true;
             _lastQuestorPulse = DateTime.UtcNow;
 
             //_defense = new Defense();

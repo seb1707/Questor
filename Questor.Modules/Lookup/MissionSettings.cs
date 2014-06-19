@@ -389,6 +389,7 @@ namespace Questor.Modules.Lookup
             AmmoToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
         }
 
+        /*
         public static void GetDungeonId(string html)
         {
             HtmlAgilityPack.HtmlDocument missionHtml = new HtmlAgilityPack.HtmlDocument();
@@ -413,6 +414,7 @@ namespace Questor.Modules.Lookup
                 Logging.Log("GetDungeonId", "if (nd.Attributes[href].Value.Contains(dungeonID=)) - Exception: [" + exception + "]", Logging.White);
             }
         }
+        */
 
         public static void GetFactionName(string html)
         {

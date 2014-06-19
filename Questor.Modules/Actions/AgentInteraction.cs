@@ -519,7 +519,7 @@ namespace Questor.Modules.Actions
             {
                 MissionSettings.loadedAmmo = false;
                 MissionSettings.GetFactionName(html);
-                MissionSettings.GetDungeonId(html);
+                //MissionSettings.GetDungeonId(html);
                 MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(MissionName));
 
                 MissionSettings.MissionAmmo = new List<Ammo>();

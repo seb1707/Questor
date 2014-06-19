@@ -37,10 +37,10 @@ Echo Done building [ %nameofproject% ] - see above for any errors - 2 of 6 build
 :: Build Project: QuestorLoader
 ::
 set nameofproject=QuestorLoader
-set csproj=.\QuestorLoader\QuestorLoader.csproj
+set csproj=.\%nameofproject%\%nameofproject%.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
 Echo Done building [ %nameofproject% ] - see above for any errors - 3 of 6 builds
-pause
+%pause%
 ::
 :: Build Project valuedump
 ::

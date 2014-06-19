@@ -344,6 +344,8 @@
   <VolleyStatsLog>true</VolleyStatsLog>
   <!-- Enable or Disable the WindowStats logs each window being opened / closed -->
   <WindowStatsLog>true</WindowStatsLog>
+  <!-- Enable or Disable the logging to file, I highly recommend you keep this true  -->
+  <tryToLogToFile>true</tryToLogToFile>
 
   
   <!--                                                -->

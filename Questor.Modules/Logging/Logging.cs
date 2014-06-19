@@ -109,29 +109,23 @@ namespace Questor.Modules.Logging
             try
             {
                 DateTimeForLogs = DateTime.Now;
-                //colorLogLine contains color and is for the InnerSpace console
+                
                 colorLogLine = line;
-
-                //Logging when using Innerspace
+                string plainLogLine = FilterColorsFromLogs(line);
+                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                
+                //
+                // Innerspace Console logging
+                //
                 if (!Logging.standaloneInstance)
                 {
                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
                 }
-                // probably want some sort of extra logging if using the standalone version? we dont have any output until q window is up
-
-                string plainLogLine = FilterColorsFromLogs(line);
-
-                //
-                // plainLogLine contains plain text and is for the log file and the GUI console (why cant the GUI be made to use color too?)
-                // we now filter sensitive info by default
-                //
-                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
-                plainLogLine = FilterColorsFromLogs(line);
-                if (Logging.standaloneInstance)
+                else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
                     Console.WriteLine(plainLogLine);
                 }
-
+                
                 if (Logging.tryToLogToFile)
                 {
                     if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
@@ -219,7 +213,27 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                Logging.Log("Logging", "Exception while write a log entry [" + exception + "]", Logging.Debug);
+                LogExceptions(module, exception);
+            }
+        }
+
+        private static void LogExceptions(string module, Exception exception)
+        {
+            Console.WriteLine(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));
+            if (Logging.SaveLogRedacted && Logging.ConsoleLogFileRedacted != null)
+            {
+                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFileRedacted)))
+                {
+                    File.AppendAllText(Logging.ConsoleLogFileRedacted, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));        
+                }
+            }
+
+            if (Logging.SaveLogRedacted && Logging.ConsoleLogFile != null)
+            {
+                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
+                {
+                    File.AppendAllText(Logging.ConsoleLogFile, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));        
+                }
             }
         }
 
@@ -279,11 +293,9 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                Logging.Log("Logging", "Exception in FilterSensitiveInfo [" + exception + "]", Logging.Debug);
+                LogExceptions("FilterSensitiveInfo", exception);
                 return line;
             }
-
-            return null;
         }
 
         public static class RichTextBoxExtensions
@@ -321,7 +333,7 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                Logging.Log("Logging", "Exception in FilterColorsFromLogs [" + exception + "]", Logging.Debug);
+                LogExceptions("FilterSensitiveInfo", exception);
                 return null;
             }
         }
@@ -365,7 +377,7 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                Logging.Log("Logging.MaintainConsoleLogs", "Unable to maintain console logs: [" + exception + "]", Logging.Teal);
+                LogExceptions("FilterSensitiveInfo", exception);
             }
         }
 

@@ -902,6 +902,7 @@ namespace Questor.Modules.Lookup
             // number of days of console logs to keep (anything older will be deleted on startup)
             //
             Logging.ConsoleLogDaysOfLogsToKeep = (int?)CharacterSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? (int?)CommonSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
+            Logging.tryToLogToFile = (bool?)CharacterSettingsXml.Element("tryToLogToFile") ?? (bool?)CommonSettingsXml.Element("tryToLogToFile") ?? true;
 
             //
             // Ammo settings

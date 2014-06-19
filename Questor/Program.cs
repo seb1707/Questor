@@ -57,7 +57,17 @@
         private static int _maxRuntime;
         private static bool _chantlingScheduler;
         private static bool _loginNowIgnoreScheduler;
-        private static bool _standaloneInstance;
+        private static bool _standaloneInstance
+        {
+            get
+            {
+                return !Logging.UseInnerspace;
+            }
+            set
+            {
+                Logging.UseInnerspace = !value;
+            }
+        }
         private static double _minutesToStart;
         private static bool? _readyToLoginEVEAccount;
         private static bool ReadyToLoginToEVEAccount
@@ -108,6 +118,13 @@
 
         public static void Main(string[] args)
         {
+            int i = 0;
+            foreach (var arg in args)
+            {
+                Logging.BasicLog("[Startup]", " *** Questor Parameters we were passed [" + i + "] - [" + arg + "] \r\n");
+                i++;
+            }
+
             _maxRuntime = Int32.MaxValue;
             OptionSet p = new OptionSet
             {
@@ -206,7 +223,7 @@
                     //{
                     //    System.Threading.Thread.Sleep(50); //this pauses forever...
                     //}
-                    if (_standaloneInstance)
+                    if (!Logging.UseInnerspace)
                     {
                         Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
                         Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());

@@ -70,16 +70,28 @@ namespace Questor.Modules.Logging
 
         public static string _username;
         public static string _password;
-        public static string _character;
+
+        private static string __character;
+        public static string _character
+        {
+            get
+            {
+                return __character;
+            }
+            set
+            {
+                __character = ReplaceUnderscoresWithSpaces(value);
+            }
+        }
+
         public static string CharacterSettingsPath;
 
-        public static bool standaloneInstance;
-        public static bool tryToLogToFile;
+        public static bool tryToLogToFile;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static List<string> _QuestorParamaters;
 
         private static string colorLogLine;
         private static string ConsoleLogText;
-        public static bool SaveConsoleLog;
+        public static bool SaveConsoleLog;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static bool ConsoleLogOpened = false;
         public static string ExtConsole { get; set; }
         //public static string ConsoleLog { get; set; }
@@ -88,13 +100,13 @@ namespace Questor.Modules.Logging
         public static bool InnerspaceGeneratedConsoleLog { get; set; }
         public static bool UseInnerspace { get; set; }
         //public static bool ConsoleLog { get; set; }
-        public static string ConsoleLogPath { get; set; }
-        public static string ConsoleLogFile { get; set; }
-        public static bool SaveLogRedacted { get; set; }
+        public static string ConsoleLogPath { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
+        public static string ConsoleLogFile { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
+        public static bool SaveLogRedacted { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
         //public static bool ConsoleLogRedacted { get; set; }
         public static string redactedLogLine { get; set; }
-        public static string ConsoleLogPathRedacted { get; set; }
-        public static string ConsoleLogFileRedacted { get; set; }
+        public static string ConsoleLogPathRedacted { get; set; }  //we should set this to a sane value (via get { blah } when we are pre-login.... 
+        public static string ConsoleLogFileRedacted { get; set; }  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         
         //
         // number of days of console logs to keep (anything older will be deleted on startup)
@@ -117,7 +129,7 @@ namespace Questor.Modules.Logging
                 //
                 // Innerspace Console logging
                 //
-                if (!Logging.standaloneInstance)
+                if (Logging.UseInnerspace)
                 {
                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
                 }
@@ -213,18 +225,18 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                LogExceptions(module, exception);
+                BasicLog(module, exception.Message);
             }
         }
 
-        private static void LogExceptions(string module, Exception exception)
+        public static void BasicLog(string module, string logmessage)
         {
-            Console.WriteLine(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));
+            Console.WriteLine(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFileRedacted != null)
             {
                 if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFileRedacted)))
                 {
-                    File.AppendAllText(Logging.ConsoleLogFileRedacted, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));        
+                    File.AppendAllText(Logging.ConsoleLogFileRedacted, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
                 }
             }
 
@@ -232,7 +244,7 @@ namespace Questor.Modules.Logging
             {
                 if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
                 {
-                    File.AppendAllText(Logging.ConsoleLogFile, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + "Exception [" + exception + "]" + "\r\n"));        
+                    File.AppendAllText(Logging.ConsoleLogFile, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + logmessage));
                 }
             }
         }
@@ -293,7 +305,27 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                LogExceptions("FilterSensitiveInfo", exception);
+                BasicLog("FilterSensitiveInfo", exception.Message);
+                return line;
+            }
+        }
+
+         public static string ReplaceUnderscoresWithSpaces(string line)
+        {
+            try
+            {
+                if (line == null)
+                    return string.Empty;
+                if (!string.IsNullOrEmpty(line))
+                {
+                    line = line.Replace("_", " ");
+                }
+
+                return line;
+            }
+            catch (Exception exception)
+            {
+                BasicLog("ReplaceUnderscoresWithSpaces", exception.Message);
                 return line;
             }
         }
@@ -333,7 +365,7 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                LogExceptions("FilterSensitiveInfo", exception);
+                BasicLog("FilterSensitiveInfo", exception.Message);
                 return null;
             }
         }
@@ -377,7 +409,38 @@ namespace Questor.Modules.Logging
             }
             catch (Exception exception)
             {
-                LogExceptions("FilterSensitiveInfo", exception);
+                BasicLog("FilterSensitiveInfo", exception.Message);
+            }
+        }
+
+        public static IEnumerable<string> SplitArguments(string commandLine)
+        {
+            try
+            {
+                char[] parmChars = commandLine.ToCharArray();
+                bool inSingleQuote = false;
+                bool inDoubleQuote = false;
+                for (int index = 0; index < parmChars.Length; index++)
+                {
+                    if (parmChars[index] == '"' && !inSingleQuote)
+                    {
+                        inDoubleQuote = !inDoubleQuote;
+                        parmChars[index] = '\n';
+                    }
+                    if (parmChars[index] == '\'' && !inDoubleQuote)
+                    {
+                        inSingleQuote = !inSingleQuote;
+                        parmChars[index] = '\n';
+                    }
+                    if (!inSingleQuote && !inDoubleQuote && parmChars[index] == ' ')
+                        parmChars[index] = '\n';
+                }
+                return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+            catch (Exception exception)
+            {
+                BasicLog("SplitArguments", exception.Message);
+                return null;
             }
         }
 

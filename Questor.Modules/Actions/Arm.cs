@@ -602,11 +602,7 @@ namespace Questor.Modules.Actions
                 {
                     if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return false; //attempt to use repair facilities if avail in station
                 }
-                else if (Cache.Instance.DirectEve.HasSupportInstances() && Panic.UseStationRepair && Drones.UseDrones)
-                {
-                    if (!Cache.Instance.RepairDrones("Arm.RepairShop [Drones]")) return false; //attempt to use repair facilities if avail in station
-                }
-
+                
                 _States.CurrentArmState = ArmState.LoadSavedFitting;
                 return true;
             }

@@ -828,6 +828,11 @@ namespace Questor.Modules.Combat
             if (!Drones.ActiveDrones.Any())
                 return 0;
 
+            if (Drones.ActiveDrones.Any(i => i.ArmorPct * 100 < 100))
+            {
+                Cache.Instance.RepairAll = true;
+            }
+            
             return Drones.ActiveDrones.Sum(d => d.ArmorHitPoints);
         }
 
@@ -835,6 +840,11 @@ namespace Questor.Modules.Combat
         {
             if (!Drones.ActiveDrones.Any())
                 return 0;
+
+            if (Drones.ActiveDrones.Any(i => i.StructurePct * 100 < 100))
+            {
+                Cache.Instance.RepairAll = true;
+            }
 
             return Drones.ActiveDrones.Sum(d => d.StructureHitPoints);
         }

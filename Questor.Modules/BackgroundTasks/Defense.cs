@@ -700,6 +700,10 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         perc = Cache.Instance.ActiveShip.ShieldPercentage;
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
+                        if (Cache.Instance.ActiveShip.ArmorPercentage * 100 < 100)
+                        {
+                            Cache.Instance.RepairAll = true; //triggers repairing during panic recovery, and arm
+                        }
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
                     {
@@ -710,6 +714,10 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
                             Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds", Logging.White);
+                        }
+                        if (Cache.Instance.ActiveShip.StructurePercentage * 100 < 100)
+                        {
+                            Cache.Instance.RepairAll = true; //triggers repairing during panic recovery, and arm
                         }
                     }
 

@@ -1205,7 +1205,15 @@ namespace Questor.Modules.Combat
                     {
                         TargtedByCount = Combat.TargetedBy.Count();
                     }
-                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: no NPC is targeting us within [" + Math.Round(MaxDroneRange / 1000, 0) + "] DroneControlRange Is [" + Math.Round((double)DroneControlRange / 1000, 0) + "] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us", Logging.Magenta);
+                    Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: There are [" + Combat.PotentialCombatTargets.Count(e => e.IsInDroneRange && (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))) + "] PotentialCombatTargets not targeting us within My MaxDroneRange: [" + Math.Round(MaxDroneRange / 1000, 0) + "k] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us and [" + Combat.PotentialCombatTargets.Count(e => !e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) + "] total PotentialCombatTargets", Logging.Magenta);
+                    if (Logging.DebugDrones)
+                    {
+                        foreach (EntityCache PCTInDroneRange in Combat.PotentialCombatTargets.Where(i => i.IsInDroneRange && i.IsTargetedBy))
+                        {
+                            Logging.Log("Drones", "Recalling Drones Details:  PCTInDroneRange [" + PCTInDroneRange.Name + "][" + PCTInDroneRange.MaskedId + "] at [" + Math.Round(PCTInDroneRange.Distance /1000, 2) + "] not targeting us yet", Logging.Magenta);        
+                        }
+                    }
+
                     return true;
                 }
 

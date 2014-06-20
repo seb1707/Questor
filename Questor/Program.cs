@@ -1,4 +1,6 @@
-﻿namespace Questor
+﻿using SlimDX.Direct3D10;
+
+namespace Questor
 {
     using System;
     using System.Collections.Generic;
@@ -17,31 +19,13 @@
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
 
-    public class BeforeLogin
+    public static class BeforeLogin
     {
-        public static IEnumerable<string> SplitArguments(string commandLine)
+        static BeforeLogin ()
         {
-            var parmChars = commandLine.ToCharArray();
-            var inSingleQuote = false;
-            var inDoubleQuote = false;
-            for (var index = 0; index < parmChars.Length; index++)
-            {
-                if (parmChars[index] == '"' && !inSingleQuote)
-                {
-                    inDoubleQuote = !inDoubleQuote;
-                    parmChars[index] = '\n';
-                }
-                if (parmChars[index] == '\'' && !inDoubleQuote)
-                {
-                    inSingleQuote = !inSingleQuote;
-                    parmChars[index] = '\n';
-                }
-                if (!inSingleQuote && !inDoubleQuote && parmChars[index] == ' ')
-                    parmChars[index] = '\n';
-            }
-            return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            Logging.UseInnerspace = true; //(defaults to true, will change to false IF passed -i Or -
         }
-        
+
         private static bool loggedInAndreadyToStartQuestorUI;
         public static List<CharSchedule> CharSchedules { get; private set; }
         public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
@@ -50,8 +34,8 @@
         public static DateTime EVEAccountLoginStarted = DateTime.UtcNow;
         //public static DateTime EVECharacterSelected = DateTime.UtcNow;
         public static DateTime NextSlotActivate = DateTime.UtcNow;
-        private static string _scriptFile;
-        private static string _scriptAfterLoginFile;
+        //private static string _scriptFile;
+        //private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
         private static bool _showHelp;
         private static int _maxRuntime;
@@ -65,8 +49,10 @@
             }
             set
             {
-                Logging.UseInnerspace = !value;
+                Logging.Log("Startup", "! Logging.UseInnerspace = false; !", Logging.White);
+                Logging.UseInnerspace = false;
             }
+
         }
         private static double _minutesToStart;
         private static bool? _readyToLoginEVEAccount;
@@ -106,6 +92,8 @@
         public static DateTime StartTime = DateTime.MaxValue;
         public static DateTime StopTime = DateTime.MinValue;
         private static Questor _questor;
+        public static List<string> _QuestorParamaters;
+
         public static bool Stop { get; set; }
 
         public static int MaxRuntime
@@ -118,13 +106,6 @@
 
         public static void Main(string[] args)
         {
-            int i = 0;
-            foreach (var arg in args)
-            {
-                Logging.BasicLog("[Startup]", " *** Questor Parameters we were passed [" + i + "] - [" + arg + "] \r\n");
-                i++;
-            }
-
             _maxRuntime = Int32.MaxValue;
             OptionSet p = new OptionSet
             {
@@ -135,18 +116,16 @@
                 {"u|user=", "the {USER} we are logging in as.", v => Logging._username = v},
                 {"p|password=", "the user's {PASSWORD}.", v => Logging._password = v},
                 {"c|character=", "the {CHARACTER} to use.", v => Logging._character = v},
-                {"s|script=", "a {SCRIPT} file to execute before login.", v => _scriptFile = v},
-                {"t|scriptAfterLogin=", "a {SCRIPT} file to execute after login.", v => _scriptAfterLoginFile = v},
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
                 {"x|chantling|scheduler", "use scheduler (thank you chantling!)", v => _chantlingScheduler = v != null},
                 {"n|loginNow", "Login using info in scheduler", v => _loginNowIgnoreScheduler = v != null},
-                {"i|standalone instance", "Standalone instance, hook D3D w/o Innerspace!", v => _standaloneInstance = v != null},
+                {"i|standalone", "Standalone instance, hook D3D w/o Innerspace!", v => _standaloneInstance = v != null},
                 {"h|help", "show this message and exit", v => _showHelp = v != null}
             };
 
             try
             {
-                Logging._QuestorParamaters = p.Parse(args);
+                _QuestorParamaters = p.Parse(args);
                 //Logging.Log(string.Format("questor: extra = {0}", string.Join(" ", extra.ToArray())));
             }
             catch (OptionException ex)
@@ -165,6 +144,16 @@
                 return;
             }
 
+            Logging.Log("Startup", "Starting Questor Login...!", Logging.White);
+            if (_QuestorParamaters.Any()) Logging.Log("Startup", "We have [" + _QuestorParamaters.Count() + "] parameters passed to us", Logging.White);
+            
+            int i = 0;
+            foreach (string arg in _QuestorParamaters)
+            {
+                Logging.Log("Startup", " *** Questor Parameters we have parsed [" + i + "] - [" + arg + "]", Logging.Debug);
+                i++;
+            }
+            
             if (_loginNowIgnoreScheduler && !_chantlingScheduler)
             {
                 _chantlingScheduler = true;
@@ -317,12 +306,12 @@
                 }
 
 
-                if (!string.IsNullOrEmpty(_scriptAfterLoginFile))
-                {
-                    Logging.Log("Startup", "Running Script After Login: [ timedcommand 150 runscript " + _scriptAfterLoginFile + " ]", Logging.Teal);
-                    LavishScript.ExecuteCommand("timedcommand 150 runscript " + _scriptAfterLoginFile);
-                    return;
-                }
+                //if (!string.IsNullOrEmpty(_scriptAfterLoginFile))
+                //{
+                //    Logging.Log("Startup", "Running Script After Login: [ timedcommand 150 runscript " + _scriptAfterLoginFile + " ]", Logging.Teal);
+                //    LavishScript.ExecuteCommand("timedcommand 150 runscript " + _scriptAfterLoginFile);
+                //    return;
+                //}
 
                 // If the last parameter is false, then we only auto-login
                 if (_loginOnly)
@@ -782,36 +771,6 @@
                 return;
             }
 
-            if (!string.IsNullOrEmpty(_scriptFile))
-            {
-                try
-                {
-                    // Replace this try block with the following once new DirectEve is pushed
-                    // _directEve.RunScript(_scriptFile);
-
-                    System.Reflection.MethodInfo info = Cache.Instance.DirectEve.GetType().GetMethod("RunScript");
-
-                    if (info == null)
-                    {
-                        Logging.Log("Startup", "DirectEve.RunScript() does not exist.  Upgrade DirectEve.dll!", Logging.Red);
-                    }
-                    else
-                    {
-                        Logging.Log("Startup", string.Format("Running {0}...", _scriptFile), Logging.White);
-                        info.Invoke(Cache.Instance.DirectEve, new Object[] {_scriptFile});
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Logging.Log("Startup", string.Format("Exception {0}...", ex), Logging.White);
-                }
-                finally
-                {
-                    _scriptFile = null;
-                }
-                return;
-            }
-
             if (Cache.Instance.DirectEve.Login.AtLogin && Cache.Instance.DirectEve.Login.ServerStatus != "Status: OK")
             {
                 if (ServerStatusCheck <= 20) // at 10 sec a piece this would be 200+ seconds
@@ -896,5 +855,27 @@
             return random.Next(min, max);
         }
 
+        public static IEnumerable<string> SplitArguments(string commandLine)
+        {
+            var parmChars = commandLine.ToCharArray();
+            var inSingleQuote = false;
+            var inDoubleQuote = false;
+            for (var index = 0; index < parmChars.Length; index++)
+            {
+                if (parmChars[index] == '"' && !inSingleQuote)
+                {
+                    inDoubleQuote = !inDoubleQuote;
+                    parmChars[index] = '\n';
+                }
+                if (parmChars[index] == '\'' && !inDoubleQuote)
+                {
+                    inSingleQuote = !inSingleQuote;
+                    parmChars[index] = '\n';
+                }
+                if (!inSingleQuote && !inDoubleQuote && parmChars[index] == ' ')
+                    parmChars[index] = '\n';
+            }
+            return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        }
     }
 }

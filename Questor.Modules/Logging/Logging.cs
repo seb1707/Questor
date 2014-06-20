@@ -86,8 +86,8 @@ namespace Questor.Modules.Logging
 
         public static string CharacterSettingsPath;
 
-        public static bool tryToLogToFile;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
-        public static List<string> _QuestorParamaters;
+        public static bool tryToLogToFile = true;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
+        //public static List<string> _QuestorParamaters;
 
         private static string colorLogLine;
         private static string ConsoleLogText;
@@ -129,6 +129,8 @@ namespace Questor.Modules.Logging
                 //
                 // Innerspace Console logging
                 //
+                
+                //Logging.UseInnerspace = true;
                 if (Logging.UseInnerspace)
                 {
                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));

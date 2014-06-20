@@ -244,6 +244,11 @@ namespace Questor.Modules.Combat
                             }
                         }
 
+                        if (_potentialCombatTargets == null || !_potentialCombatTargets.Any())
+                        {
+                            _potentialCombatTargets = new List<EntityCache>();
+                        }
+
                         return _potentialCombatTargets;
                     }
 

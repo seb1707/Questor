@@ -263,13 +263,13 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         tractorsProcessedThisTick++;
                         Time.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                        if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                        if (tractorsProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)
                         {
                             if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: Process Next Tractorbeam", Logging.Teal);
                             continue;
                         }
 
-                        if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: We have processed [" + Settings.Instance.NumberOfModulesToActivateInCycle + "] tractors this tick, return", Logging.Teal);
+                        if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: We have processed [" + Settings.NumberOfModulesToActivateInCycle + "] tractors this tick, return", Logging.Teal);
                         return;
                     }
 
@@ -352,7 +352,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
                 }
 
-                if (tractorsProcessedThisTick > Settings.Instance.NumberOfModulesToActivateInCycle)
+                if (tractorsProcessedThisTick > Settings.NumberOfModulesToActivateInCycle)
                 {
                     //
                     // if we have processed 'enough' wrecks this tick, return
@@ -462,9 +462,9 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         salvagersProcessedThisTick++;
                         Time.Instance.NextSalvageAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                        if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                        if (salvagersProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)
                         {
-                            if (Logging.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.Teal);
+                            if (Logging.DebugSalvage) Logging.Log("Salvage.ActivateSalvagers", "Debug: if (salvagersProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)", Logging.Teal);
                             continue;
                         }
 
@@ -617,7 +617,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (WreckBlackList.Any(a => a == wreck.TypeId) && !Cache.Instance.ListofContainersToLoot.Contains(wreck.Id))
                     {
                         Cache.Instance.LootedContainers.Add(wreck.Id);
-                        if (Logging.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Settings.Instance.WreckBlackList.Any(a => a == wreck.TypeId)", Logging.Teal);
+                        if (Logging.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (Settings.WreckBlackList.Any(a => a == wreck.TypeId)", Logging.Teal);
                         continue;
                     }
                 }
@@ -677,9 +677,9 @@ namespace Questor.Modules.BackgroundTasks
                         }
                     }
 
-                    if (wrecksProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                    if (wrecksProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)
                     {
-                        if (Logging.DebugTargetWrecks) Logging.Log("Salvage", "if (wrecksProcessedThisTick [" + wrecksProcessedThisTick + "] < Settings.Instance.NumberOfModulesToActivateInCycle [" + Settings.Instance.NumberOfModulesToActivateInCycle + "])", Logging.Teal);
+                        if (Logging.DebugTargetWrecks) Logging.Log("Salvage", "if (wrecksProcessedThisTick [" + wrecksProcessedThisTick + "] < Settings.NumberOfModulesToActivateInCycle [" + Settings.NumberOfModulesToActivateInCycle + "])", Logging.Teal);
                         continue;
                     }
                 }
@@ -767,7 +767,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 // We should not loot this container
-                //if (Settings.Instance.FleetSupportSlave && Cache.Instance.ListofContainersToLoot.Contains(containerEntity.Id))
+                //if (Settings.FleetSupportSlave && Cache.Instance.ListofContainersToLoot.Contains(containerEntity.Id))
                 //{
                 //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We are not supposed to loot [" + containerEntity.Id + "]. Leaving it for the Master.", Logging.White);
                 //    continue;
@@ -790,7 +790,7 @@ namespace Questor.Modules.BackgroundTasks
                 // Don't even try to open a wreck if you are specified LootEverything as false and you are not processing a loot action
                 //      this is currently commented out as it would keep Golems and other non-speed tanked ships from looting the field as they cleared
                 //      missions, but NOT stick around after killing things to clear it ALL. Looteverything==false does NOT mean loot nothing
-                //if (Settings.Instance.LootEverything == false && Cache.Instance.OpenWrecks == false)
+                //if (Settings.LootEverything == false && Cache.Instance.OpenWrecks == false)
                 //    continue;
 
                 // Open the container
@@ -855,7 +855,7 @@ namespace Questor.Modules.BackgroundTasks
                             bool _isMissionItem = MissionSettings.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
                             if (MissionSettings.MissionItems.Any())
                             {
-                                if (Settings.Instance.FleetSupportSlave && !Settings.Instance.FleetSupportMaster)
+                                if (Settings.FleetSupportSlave && !Settings.FleetSupportMaster)
                                 {
                                     if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name))
                                     {
@@ -1036,9 +1036,9 @@ namespace Questor.Modules.BackgroundTasks
                 }
 
                 //add cont proceed this tick
-                //if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                //if (containersProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)
                 //{
-                //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.White);
+                //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containersProcessedThisTick < Settings.NumberOfModulesToActivateInCycle)", Logging.White);
                 //    continue;
                 //}
                 return;
@@ -1181,8 +1181,8 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.InSpace &&
                         (Cache.Instance.ActiveShip.Entity != null &&
                         !Cache.Instance.ActiveShip.Entity.IsCloaked &&
-                        (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower() ||
-                        Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
+                        (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.CombatShipName.ToLower() ||
+                        Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.SalvageShipName.ToLower()) &&
                         !Cache.Instance.InWarp))
                     {
                         if (Logging.DebugSalvage) Logging.Log("Salvage", "SalvageState.Idle:", Logging.Debug);

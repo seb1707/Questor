@@ -142,7 +142,7 @@ namespace Questor.Modules.Logging
                 
                 if (Logging.tryToLogToFile)
                 {
-                    if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
+                    if (Logging.SaveConsoleLog)//(Settings.SaveConsoleLog)
                     {
                         if (!Logging.ConsoleLogOpened)
                         {
@@ -376,7 +376,7 @@ namespace Questor.Modules.Logging
         {
             const string searchpattern = ".log";
 
-            //calculate the current date - the number of keep days (make sure you use the negative value if Settings.Instance.ConsoleLogDaysOfLogsToKeep as we want to keep that many days in the past, not that many days in the future)
+            //calculate the current date - the number of keep days (make sure you use the negative value if Settings.ConsoleLogDaysOfLogsToKeep as we want to keep that many days in the past, not that many days in the future)
             DateTime keepdate = DateTime.UtcNow.AddDays(-Logging.ConsoleLogDaysOfLogsToKeep);
 
             //this is where it gets the directory and looks at

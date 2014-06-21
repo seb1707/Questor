@@ -763,7 +763,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                if (Settings.CharacterXMLExists)
                 {
                     if (_agentName == "")
                     {
@@ -906,7 +906,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                if (Settings.CharacterXMLExists)
                 {
                     try
                     {
@@ -929,7 +929,7 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                if (Settings.CharacterXMLExists)
                 {
                     try
                     {
@@ -2320,7 +2320,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Salvage.CreateSalvageBookmarksIn.ToLower() == "corp".ToLower())
                     {
-                        DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.FirstOrDefault(i => i.Name == Settings.Instance.BookmarkFolder);
+                        DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.FirstOrDefault(i => i.Name == Settings.BookmarkFolder);
                         if (folder != null)
                         {
                             Cache.Instance.DirectEve.CorpBookmarkCurrentLocation(label, "", folder.Id);
@@ -2332,7 +2332,7 @@ namespace Questor.Modules.Caching
                     }
                     else
                     {
-                        DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.FirstOrDefault(i => i.Name == Settings.Instance.BookmarkFolder);
+                        DirectBookmarkFolder folder = Cache.Instance.DirectEve.BookmarkFolders.FirstOrDefault(i => i.Name == Settings.BookmarkFolder);
                         if (folder != null)
                         {
                             Cache.Instance.DirectEve.BookmarkCurrentLocation(label, "", folder.Id);
@@ -3157,9 +3157,9 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(10))
                 {
                     string CorpHangarName;
-                    if (Settings.Instance.AmmoHangarTabName != null)
+                    if (Settings.AmmoHangarTabName != null)
                     {
-                        CorpHangarName = Settings.Instance.AmmoHangarTabName;
+                        CorpHangarName = Settings.AmmoHangarTabName;
                         if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ AmmoHangarID was: " + Cache.Instance.AmmoHangarID + "]", Logging.White);
                     }
                     else
@@ -3171,7 +3171,7 @@ namespace Questor.Modules.Caching
                     if (CorpHangarName != string.Empty) //&& Cache.Instance.AmmoHangarID == -99)
                     {
                         Cache.Instance.AmmoHangarID = -99;
-                        Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.AmmoHangarTabName); //- 1;
+                        Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.AmmoHangarTabName); //- 1;
                         if (Logging.DebugHangars) Logging.Log("GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
                         
                         Cache.Instance.AmmoHangar = null;
@@ -3205,9 +3205,9 @@ namespace Questor.Modules.Caching
                 if (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(10))
                 {
                     string CorpHangarName;
-                    if (Settings.Instance.LootHangarTabName != null)
+                    if (Settings.LootHangarTabName != null)
                     {
-                        CorpHangarName = Settings.Instance.LootHangarTabName;
+                        CorpHangarName = Settings.LootHangarTabName;
                         if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "CorpHangarName we are looking for is [" + CorpHangarName + "][ LootHangarID was: " + Cache.Instance.LootHangarID + "]", Logging.White);
                     }
                     else
@@ -3219,7 +3219,7 @@ namespace Questor.Modules.Caching
                     if (CorpHangarName != string.Empty) //&& Cache.Instance.LootHangarID == -99)
                     {
                         Cache.Instance.LootHangarID = -99;
-                        Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName);  //- 1;
+                        Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.LootHangarTabName);  //- 1;
                         if (Logging.DebugHangars) Logging.Log("GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                         Cache.Instance.LootHangar = null;
@@ -3291,7 +3291,7 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
                     {
                         if (AmmoHangar != null && AmmoHangar.IsValid)
                         {
@@ -3308,7 +3308,7 @@ namespace Questor.Modules.Caching
                                     return true;
                                 }
 
-                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
+                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.AmmoHangarTabName + "]", Logging.White);
                                 return true;
                             }
                             catch (Exception exception)
@@ -3424,7 +3424,7 @@ namespace Questor.Modules.Caching
 
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                     {
                         if (LootHangar != null && LootHangar.IsValid)
                         {
@@ -3442,7 +3442,7 @@ namespace Questor.Modules.Caching
                                     return true;
                                 }
 
-                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
+                                Logging.Log(module, "Not Stacking AmmoHangar [" + Settings.AmmoHangarTabName + "]", Logging.White);
                                 return true;
                             }
                             catch (Exception exception)
@@ -3482,7 +3482,7 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                 {
                     if (LootHangar != null && LootHangar.IsValid)
                     {
@@ -3520,8 +3520,8 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                Cache.Instance.CorpBookmarkHangar = !string.IsNullOrEmpty(Settings.Instance.BookmarkHangar)
-                                      ? Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.BookmarkHangar)
+                Cache.Instance.CorpBookmarkHangar = !string.IsNullOrEmpty(Settings.BookmarkHangar)
+                                      ? Cache.Instance.DirectEve.GetCorporationHangar(Settings.BookmarkHangar)
                                       : null;
 
                 // Is the corpHangar open?
@@ -3554,7 +3554,7 @@ namespace Questor.Modules.Caching
                 }
                 if (Cache.Instance.CorpBookmarkHangar == null)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.BookmarkHangar))
+                    if (!string.IsNullOrEmpty(Settings.BookmarkHangar))
                     {
                         Logging.Log(module, "Opening Corporate Bookmark Hangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
                     }
@@ -3637,14 +3637,14 @@ namespace Questor.Modules.Caching
                     {
                         if (_lootContainer == null)
                         {
-                            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                            if (!string.IsNullOrEmpty(Settings.LootContainerName))
                             {
-                                //if (Logging.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                                //if (Logging.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.LootContainer))", Logging.Teal);
 
-                                DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
+                                DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.LootContainerName.ToLower());
                                 if (firstLootContainer == null && Cache.Instance.LootHangar.Items.Any(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer)))
                                 {
-                                    Logging.Log("LootContainer", "Unable to find a container named [" + Settings.Instance.LootContainerName + "], using the available unnamed container", Logging.Teal);
+                                    Logging.Log("LootContainer", "Unable to find a container named [" + Settings.LootContainerName + "], using the available unnamed container", Logging.Teal);
                                     firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer));
                                 }
 
@@ -3664,7 +3664,7 @@ namespace Questor.Modules.Caching
                                     return null;
                                 }
 
-                                Logging.Log("LootContainer", "unable to find LootContainer named [ " + Settings.Instance.LootContainerName.ToLower() + " ]", Logging.Orange);
+                                Logging.Log("LootContainer", "unable to find LootContainer named [ " + Settings.LootContainerName.ToLower() + " ]", Logging.Orange);
                                 DirectItem firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
 
                                 if (firstOtherContainer != null)
@@ -3710,11 +3710,11 @@ namespace Questor.Modules.Caching
 
             if (Cache.Instance.InStation)
             {
-                if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                if (!string.IsNullOrEmpty(Settings.LootContainerName))
                 {
-                    if (Logging.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.HighTierLootContainer))", Logging.Teal);
+                    if (Logging.DebugHangars) Logging.Log("OpenLootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.HighTierLootContainer))", Logging.Teal);
 
-                    DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
+                    DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.HighTierLootContainer.ToLower());
                     if (firstLootContainer != null)
                     {
                         long highTierLootContainerID = firstLootContainer.ItemId;
@@ -3728,7 +3728,7 @@ namespace Questor.Modules.Caching
 
                         if (Cache.Instance.HighTierLootContainer == null)
                         {
-                            if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                            if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                                 Logging.Log(module, "Opening HighTierLootContainer: failed! lag?", Logging.Orange);
                             return false;
                         }
@@ -3737,7 +3737,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    Logging.Log(module, "unable to find HighTierLootContainer named [ " + Settings.Instance.HighTierLootContainer.ToLower() + " ]", Logging.Orange);
+                    Logging.Log(module, "unable to find HighTierLootContainer named [ " + Settings.HighTierLootContainer.ToLower() + " ]", Logging.Orange);
                     DirectItem firstOtherContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer);
 
                     if (firstOtherContainer != null)
@@ -3773,7 +3773,7 @@ namespace Questor.Modules.Caching
                 Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                 if (HighTierLootContainer.Window == null)
                 {
-                    DirectItem firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.HighTierLootContainer.ToLower());
+                    DirectItem firstLootContainer = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.HighTierLootContainer.ToLower());
                     if (firstLootContainer != null)
                     {
                         long highTierLootContainerID = firstLootContainer.ItemId;
@@ -3964,7 +3964,7 @@ namespace Questor.Modules.Caching
                 {
                     if (LootContainer.Window == null)
                     {
-                        DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
+                        DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && i.GroupId == (int)Group.FreightContainer && i.GivenName.ToLower() == Settings.LootContainerName.ToLower());
                         if (firstLootContainer != null)
                         {
                             long lootContainerID = firstLootContainer.ItemId;
@@ -4000,15 +4000,15 @@ namespace Questor.Modules.Caching
         {
             try
             {
-                if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                if (!string.IsNullOrEmpty(Settings.LootContainerName))
                 {
-                    if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                    DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.Instance.LootContainerName);
+                    if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.LootContainer))", Logging.Teal);
+                    DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.Inventory") && w.Caption == Settings.LootContainerName);
 
                     if (lootHangarWindow != null)
                     {
                         lootHangarWindow.Close();
-                        Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                        Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.LootHangarTabName + "]");
                         return false;
                     }
 
@@ -4071,16 +4071,17 @@ namespace Questor.Modules.Caching
                     {
                         if (_lootHangar == null)
                         {
-                            if (Settings.Instance.LootHangarTabName != string.Empty)
+                            if (Settings.LootHangarTabName != string.Empty)
                             {
                                 Cache.Instance.LootHangarID = -99;
-                                Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName); //- 1;
+                                Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.LootHangarTabName); //- 1;
                                 if (Logging.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                                 _lootHangar = null;
-                                _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.LootHangarID);
+                                _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int) Cache.Instance.LootHangarID);
 
-                                if (_lootHangar != null && _lootHangar.IsValid) //do we have a corp hangar tab setup with that name?
+                                if (_lootHangar != null && _lootHangar.IsValid)
+                                    //do we have a corp hangar tab setup with that name?
                                 {
                                     if (Logging.DebugHangars)
                                     {
@@ -4090,7 +4091,7 @@ namespace Questor.Modules.Caching
                                             if (_lootHangar.Items.Any())
                                             {
                                                 int LootHangarItemCount = _lootHangar.Items.Count();
-                                                if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar [" + Settings.Instance.LootHangarTabName + "] has [" + LootHangarItemCount + "] items", Logging.Debug);
+                                                if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar [" + Settings.LootHangarTabName + "] has [" + LootHangarItemCount + "] items", Logging.Debug);
                                             }
                                         }
                                         catch (Exception exception)
@@ -4104,11 +4105,19 @@ namespace Questor.Modules.Caching
 
                                 Logging.Log("LootHangar", "Opening Corporate LootHangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
                                 return Cache.Instance.ItemHangar;
+
                             }
 
-                            //if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
-                            _lootHangar = null;
-                            return Cache.Instance.ItemHangar;
+                            if (Settings.AmmoHangarTabName == string.Empty && Cache.Instance.AmmoHangar != null)
+                            {
+                                _lootHangar = Cache.Instance.AmmoHangar;
+                            }
+                            else
+                            {
+                                _lootHangar = Cache.Instance.ItemHangar;
+                            }
+
+                            return _lootHangar;
                         }
 
                         return _lootHangar;
@@ -4120,7 +4129,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log("LootHangar", "Unable to define LootHangar [" + exception + "]", Logging.Teal);
                     return null;
-                }     
+                }
             }
             set
             {
@@ -4141,21 +4150,21 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                     {
-                        Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.LootHangarTabName);
+                        Cache.Instance.LootHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.LootHangarTabName);
 
                         // Is the corp loot Hangar open?
                         if (Cache.Instance.LootHangar != null)
                         {
-                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootHangarTabName));
+                            Cache.Instance.corpLootHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.LootHangarTabName));
                             if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: if (Cache.Instance.LootHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpLootHangarSecondaryWindow != null)
                             {
                                 // if open command it to close
                                 Cache.Instance.corpLootHangarSecondaryWindow.Close();
-                                Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                                Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.LootHangarTabName + "]");
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                                 Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
@@ -4166,7 +4175,7 @@ namespace Questor.Modules.Caching
 
                         if (Cache.Instance.LootHangar == null)
                         {
-                            if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                            if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                             {
                                 Logging.Log(module, "Closing Corporate Hangar: failed! No Corporate Hangar in this station! lag or setting misconfiguration?", Logging.Orange);
                                 return true;
@@ -4174,15 +4183,15 @@ namespace Questor.Modules.Caching
                             return false;
                         }
                     }
-                    else if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                    else if (!string.IsNullOrEmpty(Settings.LootContainerName))
                     {
-                        if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
-                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.LootContainerName));
+                        if (Logging.DebugHangars) Logging.Log("CloseCorpLootHangar", "Debug: else if (!string.IsNullOrEmpty(Settings.LootContainer))", Logging.Teal);
+                        DirectContainerWindow lootHangarWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.LootContainerName));
 
                         if (lootHangarWindow != null)
                         {
                             lootHangarWindow.Close();
-                            Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                            Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.LootHangarTabName + "]");
                             return false;
                         }
                         return true;
@@ -4252,7 +4261,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
                     {
                         if (Logging.DebugHangars) Logging.Log("StackLootHangar", "Starting [Cache.Instance.StackCorpLootHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpLootHangar("Cache.StackCorpLootHangar")) return false;
@@ -4261,9 +4270,9 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                    if (!string.IsNullOrEmpty(Settings.LootContainerName))
                     {
-                        if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.LootContainer))", Logging.Teal);
                         //if (!Cache.Instance.StackLootContainer("Cache.StackLootContainer")) return false;
                         Logging.Log("StackLootHangar", "We do not stack containers, you will need to do so manually. StackAll does not seem to work with Primary Inventory windows.", Logging.Teal);
                         StackLoothangarAttempts = 0; 
@@ -4336,10 +4345,10 @@ namespace Questor.Modules.Caching
                     {
                         if (_ammoHangar == null)
                         {
-                            if (Settings.Instance.AmmoHangarTabName != string.Empty)
+                            if (Settings.AmmoHangarTabName != string.Empty)
                             {
                                 Cache.Instance.AmmoHangarID = -99;
-                                Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.AmmoHangarTabName); //- 1;
+                                Cache.Instance.AmmoHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.AmmoHangarTabName); //- 1;
                                 if (Logging.DebugHangars) Logging.Log("AmmoHangar: GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
 
                                 _ammoHangar = null;
@@ -4356,7 +4365,7 @@ namespace Questor.Modules.Caching
                                             if (AmmoHangar.Items.Any())
                                             {
                                                 int AmmoHangarItemCount = AmmoHangar.Items.Count();
-                                                if (Logging.DebugHangars) Logging.Log("AmmoHangar", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] has [" + AmmoHangarItemCount + "] items", Logging.Debug);
+                                                if (Logging.DebugHangars) Logging.Log("AmmoHangar", "AmmoHangar [" + Settings.AmmoHangarTabName + "] has [" + AmmoHangarItemCount + "] items", Logging.Debug);
                                             }
                                         }
                                         catch (Exception exception)
@@ -4373,8 +4382,16 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            _ammoHangar = null;
-                            return Cache.Instance.ItemHangar;
+                            if (Settings.LootHangarTabName == string.Empty && Cache.Instance.LootHangar != null)
+                            {
+                                _ammoHangar = Cache.Instance.LootHangar;
+                            }
+                            else
+                            {
+                                _ammoHangar = Cache.Instance.ItemHangar;
+                            }
+
+                            return _ammoHangar;
                         }
 
                         return _ammoHangar;
@@ -4429,7 +4446,7 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
                     {
                         if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpAmmoHangar(module)) return false;
@@ -4438,9 +4455,9 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
-                    //if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))
+                    //if (!string.IsNullOrEmpty(Settings.LootContainer))
                     //{
-                    //    if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
+                    //    if (Logging.DebugHangars) Logging.Log("StackLootHangar", "if (!string.IsNullOrEmpty(Settings.LootContainer))", Logging.Teal);
                     //    if (!Cache.Instance.StackLootContainer("Cache.StackLootHangar")) return false;
                     //    StackLoothangarAttempts = 0;
                     //    return true;
@@ -4473,19 +4490,19 @@ namespace Questor.Modules.Caching
             {
                 if (Cache.Instance.InStation)
                 {
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
                     {
-                        if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangar))", Logging.Teal);
+                        if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (!string.IsNullOrEmpty(Settings.AmmoHangar))", Logging.Teal);
 
                         if (Cache.Instance.AmmoHangar == null)
                         {
-                            Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.Instance.AmmoHangarTabName);
+                            Cache.Instance.AmmoHangar = Cache.Instance.DirectEve.GetCorporationHangar(Settings.AmmoHangarTabName);
                         }
 
                         // Is the corp Ammo Hangar open?
                         if (Cache.Instance.AmmoHangar != null)
                         {
-                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.Instance.AmmoHangarTabName));
+                            Cache.Instance.corpAmmoHangarSecondaryWindow = (DirectContainerWindow)Cache.Instance.Windows.FirstOrDefault(w => w.Type.Contains("form.InventorySecondary") && w.Caption.Contains(Settings.AmmoHangarTabName));
                             if (Logging.DebugHangars) Logging.Log("CloseCorpAmmoHangar", "Debug: if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             if (Cache.Instance.corpAmmoHangarSecondaryWindow != null)
@@ -4505,7 +4522,7 @@ namespace Questor.Modules.Caching
 
                         if (Cache.Instance.AmmoHangar == null)
                         {
-                            if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+                            if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
                             {
                                 Logging.Log(module, "Closing Corporate Hangar: failed! No Corporate Hangar in this station! lag or setting misconfiguration?", Logging.Orange);
                             }
@@ -4696,7 +4713,7 @@ namespace Questor.Modules.Caching
 
         public bool CloseFittingManager(string module)
         {
-            if (Settings.Instance.UseFittingManager)
+            if (Settings.UseFittingManager)
             {
                 if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
                 {
@@ -4920,7 +4937,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.RandomNumber(2, 4));
 
                 if (Cache.Instance.InStation && !Cache.Instance.DirectEve.hasRepairFacility())
                 {
@@ -4973,7 +4990,7 @@ namespace Questor.Modules.Caching
                         Logging.Log(module, "Opening repairshop window", Logging.White);
                         Cache.Instance.DirectEve.OpenRepairShop();
                         Statistics.LogWindowActionToWindowLog("RepairWindow", "Opening RepairWindow");
-                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(1, 3));
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.RandomNumber(1, 3));
                         return false;
                     }
 
@@ -5000,7 +5017,7 @@ namespace Questor.Modules.Caching
                         {
                             Logging.Log(module, "Add items to repair list", Logging.White);
                             repairWindow.RepairItems(repairAllItems);
-                            Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                            Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.RandomNumber(2, 4));
                             return false;
                         }
 
@@ -5016,7 +5033,7 @@ namespace Questor.Modules.Caching
 
                         repairWindow.RepairAll();
                         Cache.Instance.RepairAll = false;
-                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
+                        Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.RandomNumber(2, 4));
                         return false;
                     }
 
@@ -5046,9 +5063,9 @@ namespace Questor.Modules.Caching
                     {
                         if (ListOfUndockBookmarks == null)
                         {
-                            if (Settings.Instance.UndockBookmarkPrefix != "")
+                            if (Settings.UndockBookmarkPrefix != "")
                             {
-                                ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix);    
+                                ListOfUndockBookmarks = Cache.Instance.BookmarksByLabel(Settings.UndockBookmarkPrefix);    
                             }
                         }
                         if (ListOfUndockBookmarks != null && ListOfUndockBookmarks.Any())
@@ -5090,7 +5107,7 @@ namespace Questor.Modules.Caching
 
                     if (_safeSpotBookmarks == null)
                     {
-                        _safeSpotBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.SafeSpotBookmarkPrefix).ToList();    
+                        _safeSpotBookmarks = Cache.Instance.BookmarksByLabel(Settings.SafeSpotBookmarkPrefix).ToList();    
                     }
 
                     if (_safeSpotBookmarks != null && _safeSpotBookmarks.Any())
@@ -5115,7 +5132,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    string _bookmarkprefix = Settings.Instance.BookmarkPrefix;
+                    string _bookmarkprefix = Settings.BookmarkPrefix;
 
                     if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                     {
@@ -5167,7 +5184,7 @@ namespace Questor.Modules.Caching
                         if (Salvage.FirstSalvageBookmarksInSystem)
                         {
                             Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first bookmark from system", Logging.White);
-                            _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                            _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.BookmarkPrefix + " ");
                             if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
                             {
                                 _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
@@ -5178,7 +5195,7 @@ namespace Questor.Modules.Caching
                         }
 
                         Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Salvaging at first oldest bookmarks", Logging.White);
-                        _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                        _SalvagingBookmarks = Cache.Instance.BookmarksByLabel(Settings.BookmarkPrefix + " ");
                         if (_SalvagingBookmarks != null && _SalvagingBookmarks.Any())
                         {
                             _SalvagingBookmark = _SalvagingBookmarks.OrderBy(b => b.CreatedOn).FirstOrDefault();
@@ -5204,8 +5221,8 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    DirectBookmark bm = Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ??
-                                    Cache.Instance.BookmarksByLabel(Settings.Instance.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
+                    DirectBookmark bm = Cache.Instance.BookmarksByLabel(Settings.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault(c => c.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId) ??
+                                    Cache.Instance.BookmarksByLabel(Settings.TravelToBookmarkPrefix).OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
                                     Cache.Instance.BookmarksByLabel("Jita").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
                                     Cache.Instance.BookmarksByLabel("Rens").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
                                     Cache.Instance.BookmarksByLabel("Amarr").OrderByDescending(b => b.CreatedOn).FirstOrDefault() ??
@@ -5256,7 +5273,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
+                NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.RandomNumber(1, 5));
 
                 //
                 // remove all salvage bookmarks over 48hrs old - they have long since been rendered useless
@@ -5320,7 +5337,7 @@ namespace Questor.Modules.Caching
                     if (_bookmarkDeletionAttempt <= uselessSalvageBookmarks.Count(e => e.CreatedOn != null && e.CreatedOn.Value.CompareTo(bmExpirationDate) < 0) + 60)
                     {
                         Logging.Log(module, "removing a salvage bookmark that aged more than [" + Salvage.AgeofSalvageBookmarksToExpire + "]" + uselessSalvageBookmark.Title, Logging.White);
-                        NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.Instance.RandomNumber(1, 5));
+                        NextBookmarkDeletionAttempt = DateTime.UtcNow.AddSeconds(5 + Settings.RandomNumber(1, 5));
                         uselessSalvageBookmark.Delete();
                         return false;
                     }

@@ -128,7 +128,7 @@ namespace Questor.Modules.Lookup
         {
             try
             {
-                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //if (Settings.CharacterMode.ToLower() == "Combat Missions".ToLower())
                 //{
                 //
                 // Mission Blacklist
@@ -160,7 +160,7 @@ namespace Questor.Modules.Lookup
         {
             try
             {
-                //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
+                //if (Settings.CharacterMode.ToLower() == "Combat Missions".ToLower())
                 //{
                 //
                 // Mission Greylist
@@ -428,7 +428,7 @@ namespace Questor.Modules.Lookup
                 string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
-                string factionsXML = Path.Combine(Settings.Instance.Path, "Factions.xml");
+                string factionsXML = Path.Combine(Settings.Path, "Factions.xml");
                 try
                 {
                     XDocument xml = XDocument.Load(factionsXML);
@@ -528,7 +528,7 @@ namespace Questor.Modules.Lookup
                 string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
-                XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
+                XDocument xml = XDocument.Load(Path.Combine(Settings.Path, "Factions.xml"));
                 if (xml.Root != null)
                 {
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
@@ -555,17 +555,17 @@ namespace Questor.Modules.Lookup
                     // Update loyalty points again (the first time might return -1)
                     Statistics.LoyaltyPoints = Cache.Instance.Agent.LoyaltyPoints;
                     MissionSettings.MissionName = MissionSettings.Mission.Name;
-                    if (Settings.Instance.UseInnerspace)
+                    if (Settings.UseInnerspace)
                     {
-                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName + " - " + MissionSettings.MissionName);
+                        LavishScript.ExecuteCommand("WindowText EVE - " + Settings.CharacterName + " - " + MissionSettings.MissionName);
                     }
                 }
             }
             else
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Settings.UseInnerspace)
                 {
-                    LavishScript.ExecuteCommand("WindowText EVE - " + Settings.Instance.CharacterName);
+                    LavishScript.ExecuteCommand("WindowText EVE - " + Settings.CharacterName);
                 }
             }
         }
@@ -615,7 +615,7 @@ namespace Questor.Modules.Lookup
             
             if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
             {
-                Settings.Instance.UseFittingManager = false;
+                Settings.UseFittingManager = false;
 
                 //Logging.Log("Cache.RefreshMissionItems", "We are not running missions so we have no mission items to refresh", Logging.Teal);
                 return;
@@ -632,7 +632,7 @@ namespace Questor.Modules.Lookup
                 FactionName = "Default";
             }
 
-            if (Settings.Instance.UseFittingManager)
+            if (Settings.UseFittingManager)
             {
                 //Set fitting to default
                 DefaultFittingName = DefaultFitting.FittingName;

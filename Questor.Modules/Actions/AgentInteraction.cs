@@ -702,7 +702,7 @@ namespace Questor.Modules.Actions
                 //
                 if (Cache.Instance.StandingUsedToAccessAgent <= MissionSettings.MinAgentBlackListStandings)
                 {
-                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent <= Settings.Instance.MinAgentBlackListStandings)", Logging.Debug);
+                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Cache.Instance.StandingUsedToAccessAgent <= Settings.MinAgentBlackListStandings)", Logging.Debug);
                     
                     //
                     // If we have multiple agents defined - switch agents
@@ -710,7 +710,7 @@ namespace Questor.Modules.Actions
                     if (MissionSettings.MultiAgentSupport)
                     {
                         //TODO - We should probably check if there are other agents who's effective standing is above the minAgentBlackListStanding.
-                        if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
+                        if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.MultiAgentSupport)", Logging.Debug);
                         if (Cache.Instance.AllAgentsStillInDeclineCoolDown)
                         {
                             //
@@ -733,7 +733,7 @@ namespace Questor.Modules.Actions
 
                 if (MissionSettings.MultiAgentSupport && !Cache.Instance.AllAgentsStillInDeclineCoolDown)
                 {
-                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.Instance.MultiAgentSupport)", Logging.Debug);
+                    if (Logging.DebugDecline) Logging.Log("AgentInteraction.DeclineMission", "if (Settings.MultiAgentSupport)", Logging.Debug);
 
                     //
                     //Change Agents
@@ -762,7 +762,7 @@ namespace Questor.Modules.Actions
                 _States.CurrentStorylineState = StorylineState.Idle;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                if (Settings.Instance.DeclineStorylinesInsteadofBlacklistingfortheSession)
+                if (Settings.DeclineStorylinesInsteadofBlacklistingfortheSession)
                 {
                     decline.Say();
                     _nextAgentAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 7));
@@ -799,7 +799,7 @@ namespace Questor.Modules.Actions
                 string logo = logoMatch.Groups["factionlogo"].Value;
 
                 // Load faction xml
-                XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
+                XDocument xml = XDocument.Load(Path.Combine(Settings.Path, "Factions.xml"));
                 if (xml.Root != null)
                 {
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
@@ -817,7 +817,7 @@ namespace Questor.Modules.Actions
                             return true;
                         }
 
-                        if (Settings.Instance.UseFittingManager && MissionSettings.ListofFactionFittings.Any(m => m.FactionName.ToLower() == factionName.ToLower()))
+                        if (Settings.UseFittingManager && MissionSettings.ListofFactionFittings.Any(m => m.FactionName.ToLower() == factionName.ToLower()))
                         {
                             FactionFitting _factionFittingForThisMissionsFaction = MissionSettings.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == factionName.ToLower());
                             if (_factionFittingForThisMissionsFaction != null)
@@ -848,7 +848,7 @@ namespace Questor.Modules.Actions
                     }
                 }
             }
-            else if (Settings.Instance.UseFittingManager) //only load the default fitting if we did not find the faction logo in the mission html.
+            else if (Settings.UseFittingManager) //only load the default fitting if we did not find the faction logo in the mission html.
             {
                 MissionSettings.FactionName = "Default";
                 FactionFitting factionFitting = MissionSettings.ListofFactionFittings.FirstOrDefault(m => m.FactionName.ToLower() == "default");
@@ -948,7 +948,7 @@ namespace Questor.Modules.Actions
                             if (MissionSettings.MissionXMLIsAvailable)
                             {
                                 Logging.Log("AgentInteraction", "ERROR: Mission XML is available for [" + MissionSettings.MissionName + "] but we still did not complete the mission after 3 tries! - ERROR!", Logging.White);
-                                Settings.Instance.AutoStart = false;
+                                Settings.AutoStart = false;
 
                                 //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
@@ -960,7 +960,7 @@ namespace Questor.Modules.Actions
                             else
                             {
                                 Logging.Log("AgentInteraction", "ERROR: Mission XML is missing for [" + MissionSettings.MissionName + "] and we we unable to complete the mission after 3 tries! - ERROR!", Logging.White);
-                                Settings.Instance.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
+                                Settings.AutoStart = false; //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
 
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;

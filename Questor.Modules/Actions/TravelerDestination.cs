@@ -104,7 +104,7 @@ namespace Questor.Modules.Actions
                             return true;
                         }
 
-                        if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "No undock bookmarks in local matching our undockPrefix [" + Settings.Instance.UndockBookmarkPrefix + "] continuing without it.", Logging.Debug);
+                        if (Logging.DebugUndockBookmarks) Logging.Log("useInstaBookmark", "No undock bookmarks in local matching our undockPrefix [" + Settings.UndockBookmarkPrefix + "] continuing without it.", Logging.Debug);
                         return true;
                     }
 
@@ -232,7 +232,7 @@ namespace Questor.Modules.Actions
 
             if (!useInstaBookmark()) return false;
 
-            //else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.Instance.UndockPrefix + " did not both exist in a bookmark");
+            //else Logging.Log("TravelerDestination.BookmarkDestination","undock bookmark missing: " + Cache.Instance.DirectEve.GetLocationName((long)Cache.Instance.DirectEve.Session.StationId) + " and " + Settings.UndockPrefix + " did not both exist in a bookmark");
 
             if (Cache.Instance.Stations == null)
             {
@@ -401,8 +401,8 @@ namespace Questor.Modules.Actions
 
             Defense.DoNotBreakInvul = false;
             string nameOfBookmark = "";
-            if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
-            if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+            if (Settings.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+            if (Settings.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
             if (nameOfBookmark == "") nameOfBookmark = "Encounter";
             //if (!Combat.ReloadAll(Cache.Instance.EntitiesNotSelf.OrderBy(t => t.Distance).FirstOrDefault(t => t.Distance < (double)Distance.OnGridWithMe))) return false;
             if (MissionSettings.MissionWarpAtDistanceRange != 0 && bookmark.Title.Contains(nameOfBookmark))

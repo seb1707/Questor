@@ -141,7 +141,7 @@ namespace Questor.Modules.Logging
 
         public static bool WreckStatistics(IEnumerable<ItemCache> items, EntityCache containerEntity)
         {
-            //if (Settings.Instance.DateTimeForLogs = EveTime)
+            //if (Settings.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -346,7 +346,6 @@ namespace Questor.Modules.Logging
                 //Logging.Log("debug", "Entities: [" + Cache.Instance.Entities.Count() + "] EntityCache  Class Instances: [" + EntityCache.EntityCacheInstances + "]", Logging.Debug);
                 Logging.Log("debug", "InvType Class Instances: [" + InvType.InvTypeInstances + "]", Logging.Debug); 
                 Logging.Log("debug", "Cache Class Instances: [" + Cache.CacheInstances + "]", Logging.Debug);
-                Logging.Log("debug", "Settings Class Instances: [" + Settings.SettingsInstances + "]", Logging.Debug);
             }
             Logging.Log("debug", "--------------------------- Done  (listed above) -----------------------------", Logging.Yellow);
             
@@ -461,7 +460,7 @@ namespace Questor.Modules.Logging
                         Directory.CreateDirectory(VolleyStatsLogPath);
                     }
 
-                    VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, Settings.Instance.characterNameForLogs + ".VolleyStats[" + DateTime.UtcNow.DayOfYear + "].log");
+                    VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, Settings.characterNameForLogs + ".VolleyStats[" + DateTime.UtcNow.DayOfYear + "].log");
 
                     if (!File.Exists(VolleyStatslogFile))
                     {
@@ -548,7 +547,7 @@ namespace Questor.Modules.Logging
 
         public static bool WriteDroneStatsLog()
         {
-            //if (Settings.Instance.DateTimeForLogs = EveTime)
+            //if (Settings.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -595,7 +594,7 @@ namespace Questor.Modules.Logging
 
         public static void WriteSessionLogStarting()
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.DateTimeForLogs = EVETIme)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -651,7 +650,7 @@ namespace Questor.Modules.Logging
 
         public static bool WriteSessionLogClosing()
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.DateTimeForLogs = EVETIme)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -715,7 +714,7 @@ namespace Questor.Modules.Logging
 
         public static void WritePocketStatistics()
         {
-            //if (Settings.Instance.DateTimeForLogs = EVETIme)
+            //if (Settings.DateTimeForLogs = EVETIme)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}
@@ -726,7 +725,7 @@ namespace Questor.Modules.Logging
             //}
 
             // We are not supposed to create bookmarks
-            //if (!Settings.Instance.LogBounties)
+            //if (!Settings.LogBounties)
             //    return;
 
             //agentID needs to change if its a storyline mission - so its assigned in storyline.cs to the various modules directly.
@@ -801,7 +800,7 @@ namespace Questor.Modules.Logging
 
         public static void WriteMissionStatistics(long statisticsForThisAgent)
         {
-            //if (Settings.Instance.DateTimeForLogs = EveTime)
+            //if (Settings.DateTimeForLogs = EveTime)
             //{
             //    DateTimeForLogs = DateTime.UtcNow;
             //}

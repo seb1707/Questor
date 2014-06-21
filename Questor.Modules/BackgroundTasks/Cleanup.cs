@@ -70,13 +70,13 @@ namespace Questor.Modules.BackgroundTasks
 
             //if (_traveler.State == TravelerState.AtDestination ||
             //    DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalSeconds >
-            //   Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE)
+            //   Settings.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE)
             //{
             //Logging.Log("QuestorState.CloseQuestor: At Station: Docked");
             // Write to Session log
             if (!Statistics.WriteSessionLogClosing()) return false;
 
-            if ((Settings.Instance.AutoStart && Settings.Instance.CloseQuestorAllowRestart) || restart)
+            if ((Settings.AutoStart && Settings.CloseQuestorAllowRestart) || restart)
             //if autostart is disabled do not schedule a restart of questor - let it stop gracefully.
             {
                 if (Cache.Instance.CloseQuestorCMDLogoff)
@@ -84,7 +84,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (CloseQuestorFlag)
                     {
                         Logging.Log("Questor", "Logging off EVE: EVE and questor should restart on their own when the client comes back up", Logging.White);
-                        if (Settings.Instance.UseInnerspace)
+                        if (Settings.UseInnerspace)
                         {
                             LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
                         }
@@ -111,23 +111,23 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.CloseQuestorCMDExitGame)
                 {
-                    if (Settings.Instance.UseInnerspace)
+                    if (Settings.UseInnerspace)
                     {
                         //Logging.Log("Questor: We are in station: Exit option has been configured.");
-                        if (((Settings.Instance.CloseQuestorArbitraryOSCmd) && (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)) ||
-                             (Settings.Instance.CloseQuestorArbitraryOSCmd) && (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
+                        if (((Settings.CloseQuestorArbitraryOSCmd) && (Settings.CloseQuestorCMDUplinkIsboxerCharacterSet)) ||
+                             (Settings.CloseQuestorArbitraryOSCmd) && (Settings.CloseQuestorCMDUplinkInnerspaceProfile))
                         {
                             Logging.Log("Questor", "You can't combine CloseQuestorArbitraryOSCmd with either of the other two options, fix your settings", Logging.White);
                             return false;
                         }
 
-                        if ((Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) && (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile))
+                        if ((Settings.CloseQuestorCMDUplinkIsboxerCharacterSet) && (Settings.CloseQuestorCMDUplinkInnerspaceProfile))
                         {
                             Logging.Log("Questor", "You cant use both the CloseQuestorCMDUplinkIsboxerProfile and the CloseQuestorCMDUplinkIsboxerProfile setting, choose one", Logging.White);
                             return false;
                         }
 
-                        if (Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile)
+                        if (Settings.CloseQuestorCMDUplinkInnerspaceProfile)
 
                         //if configured as true we will use the innerspace profile to restart this session
                         {
@@ -135,7 +135,7 @@ namespace Questor.Modules.BackgroundTasks
                             if (_closeQuestorCMDUplink)
                             {
                                 Logging.Log("Questor", "Starting a timer in the innerspace uplink to restart this innerspace profile session", Logging.White);
-                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.Instance.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
+                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
                                 LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
                                 LavishScript.ExecuteCommand("uplink exec timedcommand " + secRestart + " open \\\"${Game}\\\" \\\"${Profile}\\\"");
                                 Logging.Log("Questor", "Done: quitting this session so the new innerspace session can take over", Logging.White);
@@ -160,13 +160,13 @@ namespace Questor.Modules.BackgroundTasks
                             return false;
                         }
 
-                        if (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet) //if configured as true we will use isboxer to restart this session
+                        if (Settings.CloseQuestorCMDUplinkIsboxerCharacterSet) //if configured as true we will use isboxer to restart this session
                         {
                             //Logging.Log("Questor: We are in station: CloseQuestorCMDUplinkIsboxerProfile is ["+ CloseQuestorCMDUplinkIsboxerProfile.tostring() +"]");
                             if (_closeQuestorCMDUplink)
                             {
                                 Logging.Log("Questor", "Starting a timer in the innerspace uplink to restart this isboxer character set", Logging.White);
-                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.Instance.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
+                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
                                 LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " runscript isboxer -launchslot \\\"${ISBoxerCharacterSet}\\\" \\\"${ISBoxerSlot}\\\"");
                                 LavishScript.ExecuteCommand("uplink timedcommand " + secRestart + " runscript isboxer -launchslot \\\"${ISBoxerCharacterSet}\\\" \\\"${ISBoxerSlot}\\\"");
                                 Logging.Log("Questor", "Done: quitting this session so the new isboxer session can take over", Logging.White);
@@ -191,14 +191,14 @@ namespace Questor.Modules.BackgroundTasks
                             return false;
                         }
 
-                        if (Settings.Instance.CloseQuestorArbitraryOSCmd) // will execute an arbitrary OS command through the IS Uplink
+                        if (Settings.CloseQuestorArbitraryOSCmd) // will execute an arbitrary OS command through the IS Uplink
                         {
                             if (_closeQuestorCMDUplink)
                             {
                                 Logging.Log("Questor", "Starting a timer in the innerspace uplink to execute an arbitrary OS command", Logging.White);
-                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.Instance.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
-                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute " + Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
-                                LavishScript.ExecuteCommand("uplink exec timedcommand " + secRestart + " OSExecute " + Settings.Instance.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
+                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] " + Settings.CharacterName + "'s Questor is starting a timedcommand to restart itself in a moment");
+                                LavishScript.ExecuteCommand("uplink exec Echo [${Time}] timedcommand " + secRestart + " OSExecute " + Settings.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
+                                LavishScript.ExecuteCommand("uplink exec timedcommand " + secRestart + " OSExecute " + Settings.CloseQuestorOSCmdContents.ToString(CultureInfo.InvariantCulture));
                                 Logging.Log("Questor", "Done: quitting this session", Logging.White);
                                 Logging.Log("Questor", "Exiting eve in 15 seconds.", Logging.White);
                                 _closeQuestorCMDUplink = false;
@@ -221,7 +221,7 @@ namespace Questor.Modules.BackgroundTasks
                             return false;
                         }
 
-                        if (!Settings.Instance.CloseQuestorCMDUplinkInnerspaceProfile && !Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet && !Settings.Instance.CloseQuestorArbitraryOSCmd)
+                        if (!Settings.CloseQuestorCMDUplinkInnerspaceProfile && !Settings.CloseQuestorCMDUplinkIsboxerCharacterSet && !Settings.CloseQuestorArbitraryOSCmd)
                         {
                             Logging.Log("Questor", "CloseQuestorArbitraryOSCmd, CloseQuestorCMDUplinkInnerspaceProfile and CloseQuestorCMDUplinkIsboxerProfile all false", Logging.White);
                             if (_closeQuestorCMDUplink)
@@ -384,7 +384,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 Logging.Log("Cleanup", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
 
-                if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50))
+                if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.EVEProcessMemoryCeiling - 50))
                 {
                     Logging.Log("Cleanup", "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
                     Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
@@ -460,7 +460,7 @@ namespace Questor.Modules.BackgroundTasks
                     //
                     // go through *every* window
                     //
-                    if (!Cache.Instance.InSpace && !Cache.Instance.InStation && Settings.Instance.CharacterName != "AtLoginScreenNoCharactersLoggedInYet")
+                    if (!Cache.Instance.InSpace && !Cache.Instance.InStation && Settings.CharacterName != "AtLoginScreenNoCharactersLoggedInYet")
                     {
                         if (Logging.DebugCleanup) Logging.Log("Cleanup", "CheckModalWindows: We are in a session change, waiting 4 seconds", Logging.White);
                         _lastCleanupAction = DateTime.UtcNow;
@@ -468,11 +468,11 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
 
-                    if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Time.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
+                    if (Settings.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Time.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
                     {
                         Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White);
-                        Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
+                        Settings.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                         Cache.Instance.SessionState = "Quitting";
                         Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                         return;
@@ -604,7 +604,7 @@ namespace Questor.Modules.BackgroundTasks
                                 //
                                 // Accept fleet invites from this specific character
                                 //
-                                sayYes |= window.Html.Contains(Settings.Instance.CharacterToAcceptInvitesFrom + " wants you to join their fleet");
+                                sayYes |= window.Html.Contains(Settings.CharacterToAcceptInvitesFrom + " wants you to join their fleet");
 
                                 //sayyes |= window.Html.Contains("Repairing these items will cost");
                                 sayYes |= window.Html.Contains("Are you sure you would like to decline this mission");
@@ -640,7 +640,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = true;
                                 Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
-                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
+                                Settings.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                                 Cache.Instance.SessionState = "Quitting";
                                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                                 return;
@@ -655,7 +655,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorEndProcess = false;
                                 Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
                                 Cache.Instance.SessionState = "Quitting";
-                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
+                                Settings.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
                                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
                                 return;
@@ -695,7 +695,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Logging.Log("Cleanup", "Evidently the cluster is dieing... and CCP is restarting the server", Logging.White);
                                 Logging.Log("Cleanup", "Content of modal window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.White);
                                 Cache.Instance.GotoBaseNow = true;
-                                Settings.Instance.AutoStart = false;
+                                Settings.AutoStart = false;
 
                                 //
                                 // do not close eve, let the shutdown of the server do that
@@ -779,7 +779,7 @@ namespace Questor.Modules.BackgroundTasks
                     break;
 
                 case CleanupState.CleanupTasks:
-                    if (Settings.Instance.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
+                    if (Settings.EVEMemoryManager) //https://github.com/VendanAndrews/EveMemManager
                     {
                         if (!MemoryManagerHasBeenRunThisIteration && Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(20))
                         {
@@ -792,9 +792,9 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.TotalMegaBytesOfMemoryUsed = ((currentProcess.WorkingSet64 / 1024) / 1024 + 1);    
                             }
                             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-                            string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.Instance.MemoryManagerTrimThreshold;
+                            string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.MemoryManagerTrimThreshold;
                             Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [ " + MemoryManagerCommandToRun + " ]", Logging.White);
-                            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand(MemoryManagerCommandToRun);
+                            if (Settings.UseInnerspace) LavishScript.ExecuteCommand(MemoryManagerCommandToRun);
                             MemoryManagerHasBeenRunThisIteration = true;
                         }
 
@@ -813,14 +813,14 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior ||
                         _States.CurrentQuestorState == QuestorState.Idle ||
                         _States.CurrentQuestorState == QuestorState.Cleanup) &&
-                        string.Compare(Cache.Instance.FilterPath(Settings.Instance.CharacterName).ToUpperInvariant(), Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name).ToUpperInvariant(), StringComparison.OrdinalIgnoreCase) == 1
+                        string.Compare(Cache.Instance.FilterPath(Settings.CharacterName).ToUpperInvariant(), Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name).ToUpperInvariant(), StringComparison.OrdinalIgnoreCase) == 1
                        )
                     {
-                        Logging.Log("Cleanup", "DebugInfo:  Settings.Instance.CharacterName [" + Settings.Instance.CharacterName + "]", Logging.White);
+                        Logging.Log("Cleanup", "DebugInfo:  Settings.CharacterName [" + Settings.CharacterName + "]", Logging.White);
                         Logging.Log("Cleanup", "DebugInfo: Cache.Instance.DirectEve.Me.Name [" + Cache.Instance.DirectEve.Me.Name + "]", Logging.White);
                         Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                         Logging.Log("Cleanup", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
-                        Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
+                        Settings.CharacterName = "NoCharactersLoggedInAnymore";
                         Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                         Cache.Instance.SessionState = "Quitting";
                         _States.CurrentQuestorState = QuestorState.CloseQuestor;

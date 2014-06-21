@@ -1779,7 +1779,7 @@ namespace Questor.Modules.Caching
                 {
                     if (_directEntity != null && _directEntity.IsValid)
                     {
-                        if (Settings.Instance.FleetSupportSlave)
+                        if (Settings.FleetSupportSlave)
                         {
                             return false;
                         }

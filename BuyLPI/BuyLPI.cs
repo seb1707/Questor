@@ -120,7 +120,7 @@ namespace BuyLPI
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.Instance.AutoStart = true;
+                Settings.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
@@ -175,9 +175,9 @@ namespace BuyLPI
             if (Cache.Instance.SessionState != "Quitting")
             {
                 // Update settings (settings only load if character name changed)
-                if (!Settings.Instance.DefaultSettingsLoaded)
+                if (!Settings.DefaultSettingsLoaded)
                 {
-                    Settings.Instance.LoadSettings();
+                    Settings.LoadSettings();
                 }
             }
 

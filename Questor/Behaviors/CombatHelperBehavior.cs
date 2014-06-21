@@ -62,12 +62,7 @@ namespace Questor.Behaviors
             _unloadLoot = new UnloadLoot();
             _watch = new Stopwatch();
 
-            //
-            // this is combat mission specific and needs to be generalized
-            //
-            Settings.Instance.SettingsLoaded += SettingsLoaded;
-
-            //Settings.Instance.UseFittingManager = false;
+            //Settings.UseFittingManager = false;
 
             // States.CurrentCombatHelperBehaviorState fixed on ExecuteMission
             _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.UnloadLoot;
@@ -86,11 +81,6 @@ namespace Questor.Behaviors
             Interlocked.Decrement(ref CombatHelperBehaviorInstances);
         }
 
-        public void SettingsLoaded(object sender, EventArgs e)
-        {
-            ValidateCombatMissionSettings();
-        }
-
         public void DebugPerformanceClearandStartTimer()
         {
             _watch.Reset();
@@ -103,38 +93,6 @@ namespace Questor.Behaviors
             if (Logging.DebugPerformance) Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
         }
 
-        public void ValidateCombatMissionSettings()
-        {
-            ValidSettings = true;
-            if (Combat.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
-            {
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.EM))
-                    Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Thermal))
-                    Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Kinetic))
-                    Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Explosive))
-                    Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
-
-                Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
-                ValidSettings = false;
-            }
-
-            DirectAgent agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
-
-            if (agent == null || !agent.IsValid)
-            {
-                Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
-                ValidSettings = false;
-            }
-            else
-            {
-                Arm.AgentId = agent.AgentId;
-                AgentID = agent.AgentId;
-            }
-        }
-
         private void BeginClosingQuestor()
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
@@ -143,22 +101,10 @@ namespace Questor.Behaviors
 
         public void ProcessState()
         {
-            // Invalid settings, quit while we're ahead
-            if (!ValidSettings)
-            {
-                if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
-                {
-                    Logging.Log("CombatHelperBehavior", "Invalid Settings: Running ValidateCombatMissionSettings();", Logging.Orange);
-                    ValidateCombatMissionSettings();
-                    LastAction = DateTime.UtcNow;
-                }
-                return;
-            }
-
-            if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentCombatHelperBehaviorState != CombatHelperBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
+            if (Settings.FinishWhenNotSafe && (_States.CurrentCombatHelperBehaviorState != CombatHelperBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
             {
                 //need to remove spam
-                if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
+                if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.LocalBadStandingPilotsToTolerate, Settings.LocalBadStandingLevelToConsiderBad))
                 {
                     EntityCache station = null;
                     if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
@@ -438,16 +384,16 @@ namespace Questor.Behaviors
                         }
 
                         _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.Arm;
-                        Logging.Log("CombatHelperBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatHelperBehaviorState: [" + _States.CurrentCombatHelperBehaviorState + "]", Logging.White);
+                        Logging.Log("CombatHelperBehavior.Unloadloot", "CharacterMode: [" + Settings.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatHelperBehaviorState: [" + _States.CurrentCombatHelperBehaviorState + "]", Logging.White);
                         Statistics.FinishedMission = DateTime.UtcNow;
                         return;
                     }
                     break;
 
                 case CombatHelperBehaviorState.WarpOutStation:
-                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    DirectBookmark warpOutBookmark = Cache.Instance.BookmarksByLabel(Settings.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
 
-                    //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.Instance.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
+                    //DirectBookmark _bookmark = Cache.Instance.BookmarksByLabel(Settings.bookmarkWarpOut + "-" + Cache.Instance.CurrentAgent ?? "").OrderBy(b => b.CreatedOn).FirstOrDefault();
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (warpOutBookmark == null)

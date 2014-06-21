@@ -59,17 +59,10 @@ namespace Questor.Behaviors
             //
             // this is combat mission specific and needs to be generalized
             //
-            Settings.Instance.SettingsLoaded += SettingsLoaded;
-
             _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
-        }
-
-        public void SettingsLoaded(object sender, EventArgs e)
-        {
-            ValidateCombatMissionSettings();
         }
 
         public void DebugPerformanceClearandStartTimer()
@@ -84,39 +77,7 @@ namespace Questor.Behaviors
             if (Logging.DebugPerformance)
                 Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
         }
-
-        public void ValidateCombatMissionSettings()
-        {
-            ValidSettings = true;
-            if (Combat.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
-            {
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.EM))
-                    Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Thermal))
-                    Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Kinetic))
-                    Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Explosive))
-                    Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
-
-                Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
-                ValidSettings = false;
-            }
-
-            DirectAgent agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
-
-            if (agent == null || !agent.IsValid)
-            {
-                Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
-                ValidSettings = false;
-            }
-            else
-            {
-                Arm.AgentId = agent.AgentId;
-                AgentID = agent.AgentId;
-            }
-        }
-
+        
         private void BeginClosingQuestor()
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
@@ -423,7 +384,7 @@ namespace Questor.Behaviors
                         }
 
                         _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Idle;
-                        Logging.Log("DebugHangarsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], DebugHangarsBehaviorState: [" + _States.CurrentDebugHangarBehaviorState + "]", Logging.White);
+                        Logging.Log("DebugHangarsBehavior.Unloadloot", "CharacterMode: [" + Settings.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], DebugHangarsBehaviorState: [" + _States.CurrentDebugHangarBehaviorState + "]", Logging.White);
                         Statistics.FinishedMission = DateTime.UtcNow;
                         return;
                     }

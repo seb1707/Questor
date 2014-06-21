@@ -114,7 +114,7 @@ namespace Questor.Modules.Activities
                 if (Cache.Instance.UnlootedContainers.Count() < Salvage.MinimumWreckCount)
                 {
                     if (Logging.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "LootEverything [" + Salvage.LootEverything + "] UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] MinimumWreckCount [" + Salvage.MinimumWreckCount + "] We will wait until everything in range is looted.", Logging.Debug);
-                    // If Settings.Instance.LootEverything is false we may leave behind a lot of unlooted containers.
+                    // If Settings.LootEverything is false we may leave behind a lot of unlooted containers.
                     // This scenario only happens when all wrecks are within tractor range and you have a salvager
                     // ( typically only with a Golem ).  Check to see if there are any cargo containers in space.  Cap
                     // boosters may cause an unneeded salvage trip but that is better than leaving millions in loot behind.
@@ -136,7 +136,7 @@ namespace Questor.Modules.Activities
                 }
 
                 // Do we already have a bookmark?
-                List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                List<DirectBookmark> bookmarks = Cache.Instance.BookmarksByLabel(Settings.BookmarkPrefix + " ");
                 if (bookmarks != null && bookmarks.Any())
                 {
                     DirectBookmark bookmark = bookmarks.FirstOrDefault(b => Cache.Instance.DistanceFromMe(b.X ?? 0, b.Y ?? 0, b.Z ?? 0) < (int)Distances.OnGridWithMe);
@@ -152,7 +152,7 @@ namespace Questor.Modules.Activities
                 }
 
                 // No, create a bookmark
-                string label = string.Format("{0} {1:HHmm}", Settings.Instance.BookmarkPrefix, DateTime.UtcNow);
+                string label = string.Format("{0} {1:HHmm}", Settings.BookmarkPrefix, DateTime.UtcNow);
                 Logging.Log("CombatMissionCtrl", "Bookmarking pocket for salvaging [" + label + "]", Logging.Teal);
                 Cache.Instance.CreateBookmark(label);
                 return true;
@@ -402,7 +402,7 @@ namespace Questor.Modules.Activities
                 DistanceToClear = (int)Distances.OnGridWithMe;
             }
 
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
             if (Combat.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Combat.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                     _clearPocketTimeout = null;
@@ -456,7 +456,7 @@ namespace Questor.Modules.Activities
                 if (Logging.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "Cache.Instance.__GetBestWeaponTargets(DistanceToClear);", Logging.Debug);
 
                 // Target
-                //if (Settings.Instance.TargetSelectionMethod == "isdp")
+                //if (Settings.TargetSelectionMethod == "isdp")
                 //{
                     if (Combat.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat"))
                         _clearPocketTimeout = null;
@@ -543,7 +543,7 @@ namespace Questor.Modules.Activities
             //
 
             // Target
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 if (Combat.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat"))
                     _clearPocketTimeout = null;
@@ -597,7 +597,7 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 if (Combat.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Combat.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                     _clearPocketTimeout = null;
@@ -808,7 +808,7 @@ namespace Questor.Modules.Activities
 
             EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
 
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 Combat.GetBestPrimaryWeaponTarget(Combat.MaxRange, false, "Combat");
             //}
@@ -863,7 +863,7 @@ namespace Questor.Modules.Activities
                         }
                     }
 
-                    //if (Settings.Instance.SpeedTank)
+                    //if (Settings.SpeedTank)
                     //{
                     //    //this should at least keep speed tanked ships from going poof if a mission XML uses moveto
                     //    closest.Orbit(Cache.Instance.OrbitDistance);
@@ -1096,7 +1096,7 @@ namespace Questor.Modules.Activities
             //
             // the important bit is here... Adds target to the PrimaryWeapon or Drone Priority Target Lists so that they get killed (we basically wait for combat.cs to do that before proceeding)
             //
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 if (Combat.GetBestPrimaryWeaponTarget(DistanceToClear, false, "combat", Combat.combatTargets.Where(t => t.IsTargetedBy).ToList()))
                     _clearPocketTimeout = null;
@@ -1524,7 +1524,7 @@ namespace Questor.Modules.Activities
                 if (Combat.PreferredPrimaryWeaponTarget != killTargets.FirstOrDefault())
                 {
                     // GetTargets
-                    //if (Settings.Instance.TargetSelectionMethod == "isdp")
+                    //if (Settings.TargetSelectionMethod == "isdp")
                     //{
                         Combat.GetBestPrimaryWeaponTarget(Combat.MaxRange, false, "Combat");
                     //}
@@ -1587,14 +1587,14 @@ namespace Questor.Modules.Activities
 
             Combat.AddPrimaryWeaponPriorityTarget(Combat.PotentialCombatTargets.Where(t => targetNames.Contains(t.Name)).OrderBy(t => t.Distance).Take(1).FirstOrDefault(),PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.KillClosestByName");
 
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 if (Combat.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Combat.PotentialCombatTargets.OrderBy(t => t.Distance).Take(1).ToList()))
                     _clearPocketTimeout = null;
             //}
             //else //use new target selection method
             //{
-            //    if (Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe, Combat.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()).Any())
+            //    if (Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe, Combat.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()).Any())
             //        _clearPocketTimeout = null;
             //}
 
@@ -1625,14 +1625,14 @@ namespace Questor.Modules.Activities
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given, in this everything on grid
             //
 
-            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+            //if (Settings.TargetSelectionMethod == "isdp")
             //{
                 if (Combat.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Combat.PotentialCombatTargets.OrderBy(t => t.Distance).Take(1).ToList()))
                     _clearPocketTimeout = null;
             //}
             //else //use new target selection method
             //{
-            //    if (Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe, Combat.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.Instance.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()).Any())
+            //    if (Cache.Instance.__GetBestWeaponTargets((double)Distances.OnGridWithMe, Combat.PotentialCombatTargets.Where(e => !e.IsSentry || (e.IsSentry && Settings.KillSentries)).OrderBy(t => t.Distance).Take(1).ToList()).Any())
             //        _clearPocketTimeout = null;
             //}
 

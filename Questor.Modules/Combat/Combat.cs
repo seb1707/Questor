@@ -903,37 +903,37 @@ namespace Questor.Modules.Combat
             try
             {
                 // Do we have ANY warp scrambling entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.WarpScrambler, Combat.AddWarpScramblersToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY ECM entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Jamming, Combat.AddECMsToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY tracking disrupting entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.TrackingDisrupting, Combat.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY Neutralizing entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Neutralizing, Combat.AddNeutralizersToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY Target Painting entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.TargetPainting, Combat.AddTargetPaintersToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Dampening, Combat.AddDampenersToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
                 // Do we have ANY Webbing entities targeted starting with currentTarget
-                // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+                // this needs Settings.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
                 if (FindPrimaryWeaponPriorityTarget(currentTarget, PrimaryWeaponPriority.Webbing, Combat.AddWebifiersToPrimaryWeaponsPriorityTargetList, distance) != null)
                     return true;
 
@@ -1024,7 +1024,7 @@ namespace Questor.Modules.Combat
                 // Current Target Health Logging
                 //
                 bool currentTargetHealthLogNow = true;
-                if (Settings.Instance.DetailedCurrentTargetHealthLogging)
+                if (Settings.DetailedCurrentTargetHealthLogging)
                 {
                     if ((int)currentTarget.Id != (int)TargetingCache.CurrentTargetID)
                     {
@@ -1348,27 +1348,27 @@ namespace Questor.Modules.Combat
                         // this needs one more layer somewhere to determine the right damage type for battleships, etc (EM, kinetic, etc) and it needs to do it for 
                         // default, faction and mission specific layers
                         //
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList(); 
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList(); 
                     }
                     else if (entity.IsBattlecruiser)
                     {
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList();
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList();
                     }
                     else if (entity.IsCruiser)
                     {
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList();
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.BattleShip_EM).ToList();
                     }
                     else if (entity.IsFrigate)
                     {
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.Frigate_EM).ToList();
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.Frigate_EM).ToList();
                     }
                     else if (entity.IsLargeCollidable)
                     {
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.LargeCollidable_EM).ToList();
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.LargeCollidable_EM).ToList();
                     }
                     else if (entity.IsPlayer)
                     {
-                        //correctAmmoToUse = Settings.Instance.Ammo.Where(a => a.DamageType == DamageType.PVP_EM).ToList();
+                        //correctAmmoToUse = Settings.Ammo.Where(a => a.DamageType == DamageType.PVP_EM).ToList();
                     }
 
                     // Check if we still have that ammo in our cargo
@@ -1460,12 +1460,12 @@ namespace Questor.Modules.Combat
                         Time.Instance.LastLoggingAction = DateTime.UtcNow;
                         try
                         {
-                            if (Settings.Instance.Ammo.Any())
+                            if (Settings.Ammo.Any())
                             {
-                                DirectItem availableAmmo = cargo.Items.OrderByDescending(i => i.Quantity).Where(a => Settings.Instance.Ammo.Any(i => i.TypeId == a.TypeId)).ToList().FirstOrDefault();
+                                DirectItem availableAmmo = cargo.Items.OrderByDescending(i => i.Quantity).Where(a => Settings.Ammo.Any(i => i.TypeId == a.TypeId)).ToList().FirstOrDefault();
                                 if (availableAmmo != null)
                                 {
-                                    Cache.Instance.DamageType = Settings.Instance.Ammo.ToList().OrderByDescending(i => i.Quantity).Where(a => a.TypeId == availableAmmo.TypeId).ToList().FirstOrDefault().DamageType;
+                                    Cache.Instance.DamageType = Settings.Ammo.ToList().OrderByDescending(i => i.Quantity).Where(a => a.TypeId == availableAmmo.TypeId).ToList().FirstOrDefault().DamageType;
                                     Logging.Log("Combat", "ReloadNormalAmmo: found [" + availableAmmo.Quantity + "] units of  [" + availableAmmo.TypeName + "] changed DamageType to [" + Cache.Instance.DamageType.ToString() + "]", Logging.Orange);
                                     return false;
                                 }
@@ -1566,7 +1566,7 @@ namespace Questor.Modules.Combat
                 return true;
             }
 
-            //if (weapon.AutoReload && Settings.Instance.disableAutoreload)
+            //if (weapon.AutoReload && Settings.disableAutoreload)
             //{
             //    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "weapon.AutoReload [" + weapon.AutoReload + "] setting it to false", Logging.Orange);
             //    weapon.SetAutoReload(false);
@@ -1726,15 +1726,15 @@ namespace Questor.Modules.Combat
         {
             if (Logging.DebugReloadAll)
             {
-                if (Cache.Instance.MyShipEntity.Name == Settings.Instance.TransportShipName)
+                if (Cache.Instance.MyShipEntity.Name == Settings.TransportShipName)
                 {
-                    Logging.Log("ReloadAll", "You are in your TransportShip named [" + Settings.Instance.TransportShipName + "], no need to reload ammo!", Logging.Debug);
+                    Logging.Log("ReloadAll", "You are in your TransportShip named [" + Settings.TransportShipName + "], no need to reload ammo!", Logging.Debug);
                     return true;
                 }
 
-                if (Cache.Instance.MyShipEntity.Name == Settings.Instance.TravelShipName)
+                if (Cache.Instance.MyShipEntity.Name == Settings.TravelShipName)
                 {
-                    Logging.Log("ReloadAll", "You are in your TravelShipName named [" + Settings.Instance.TravelShipName + "], no need to reload ammo!", Logging.Debug);
+                    Logging.Log("ReloadAll", "You are in your TravelShipName named [" + Settings.TravelShipName + "], no need to reload ammo!", Logging.Debug);
                     return true;
                 }
 
@@ -1909,7 +1909,7 @@ namespace Questor.Modules.Combat
                 if (Logging.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are NOT in a mission: NavigateInToRange", Logging.Teal);
                 NavigateOnGrid.NavigateIntoRange(target, "Combat");
             }
-            if (Settings.Instance.SpeedTank)
+            if (Settings.SpeedTank)
             {
                 if (Logging.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: We are Speed Tanking: NavigateInToRange", Logging.Teal);
                 NavigateOnGrid.NavigateIntoRange(target, "Combat");
@@ -3349,10 +3349,10 @@ namespace Questor.Modules.Combat
                     if (!Cache.Instance.InWarp && 
                         !Cache.Instance.MyShipEntity.IsFrigate && 
                         !Cache.Instance.MyShipEntity.IsCruiser && 
-                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.SalvageShipName &&
-                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TransportShipName &&
-                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.TravelShipName &&
-                        Cache.Instance.ActiveShip.GivenName != Settings.Instance.MiningShipName)
+                        Cache.Instance.ActiveShip.GivenName != Settings.SalvageShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.TransportShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.TravelShipName &&
+                        Cache.Instance.ActiveShip.GivenName != Settings.MiningShipName)
                     {
                         //
                         // we are not in something light and fast so assume we need weapons and assume we should be in the defined combatship
@@ -3363,9 +3363,9 @@ namespace Questor.Modules.Combat
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
                         }
 
-                        if (Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
+                        if (Cache.Instance.ActiveShip.GivenName != Settings.CombatShipName)
                         {
-                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + Settings.Instance.CombatShipName + "]", Logging.Red);
+                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + Settings.CombatShipName + "]", Logging.Red);
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
                         }
                     }
@@ -3376,14 +3376,14 @@ namespace Questor.Modules.Combat
                 }
                 catch (Exception exception)
                 {
-                    if (Logging.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName ) - exception [" + exception + "]", Logging.White);
+                    if (Logging.DebugExceptions) Logging.Log("Combat", "if (!Cache.Instance.Weapons.Any() && Cache.Instance.ActiveShip.GivenName == Settings.CombatShipName ) - exception [" + exception + "]", Logging.White);
                 }
 
                 switch (_States.CurrentCombatState)
                 {
                     case CombatState.CheckTargets:
                         _States.CurrentCombatState = CombatState.KillTargets; //this MUST be before TargetCombatants() or the combat state will potentially get reset (important for the OutOfAmmo state)
-                        //if (Settings.Instance.TargetSelectionMethod == "isdp")
+                        //if (Settings.TargetSelectionMethod == "isdp")
                         //{
                             TargetCombatants();    
                         //}
@@ -3483,7 +3483,7 @@ namespace Questor.Modules.Combat
                         //ok so we do need this, but only use it if we actually have some potential targets
                         if (Combat.PrimaryWeaponPriorityTargets.Any() || (Combat.PotentialCombatTargets.Any() && Cache.Instance.Targets.Any() && (!Cache.Instance.InMission || NavigateOnGrid.SpeedTank)))
                         {
-                            //if (Settings.Instance.TargetSelectionMethod == "isdp")
+                            //if (Settings.TargetSelectionMethod == "isdp")
                             //{
                                 Combat.GetBestPrimaryWeaponTarget(Combat.MaxRange, false, "Combat");
                             //}
@@ -3512,7 +3512,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
                             (Cache.Instance.ActiveShip.Entity != null &&  // we are in a ship!
                             !Cache.Instance.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
-                            Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
+                            Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.CombatShipName.ToLower() && //we are in our combat ship
                             !Cache.Instance.InWarp)) // no longer in warp
                         {
                             _States.CurrentCombatState = CombatState.CheckTargets;

@@ -66,7 +66,7 @@ namespace Questor
             foreach (string text in Enum.GetNames(typeof(QuestorState)))
                 QuestorStateComboBox.Items.Add(text);
 
-            if (Settings.Instance.CharacterMode != null)
+            if (Settings.CharacterMode != null)
             {
                 //if (Logging.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
                 //SkillTrainerStateComboBox.Items.Clear();
@@ -218,27 +218,27 @@ namespace Questor
                         NextDroneRecallData.Text = Time.Instance.NextDroneRecall.ToLongTimeString();
                         NextStartupActionData.Text = Time.Instance.NextStartupAction.ToLongTimeString();
                         LastSessionChangeData.Text = Time.Instance.LastSessionChange.ToLongTimeString();
-                        AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
+                        AutostartData.Text = Settings.AutoStart.ToString(CultureInfo.InvariantCulture);
                         useDronesData.Text = Drones.UseDrones.ToString(CultureInfo.InvariantCulture);
 
-                        if (Settings.Instance.UserDefinedLavishScriptScript1Description != string.Empty)
+                        if (Settings.UserDefinedLavishScriptScript1Description != string.Empty)
                         {
-                            lblUserDefinedScript1.Text = Settings.Instance.UserDefinedLavishScriptScript1Description;    
+                            lblUserDefinedScript1.Text = Settings.UserDefinedLavishScriptScript1Description;    
                         }
 
-                        if (Settings.Instance.UserDefinedLavishScriptScript2Description != string.Empty)
+                        if (Settings.UserDefinedLavishScriptScript2Description != string.Empty)
                         {
-                            lblUserDefinedScript2.Text = Settings.Instance.UserDefinedLavishScriptScript2Description;
+                            lblUserDefinedScript2.Text = Settings.UserDefinedLavishScriptScript2Description;
                         }
 
-                        if (Settings.Instance.UserDefinedLavishScriptScript3Description != string.Empty)
+                        if (Settings.UserDefinedLavishScriptScript3Description != string.Empty)
                         {
-                            lblUserDefinedScript3.Text = Settings.Instance.UserDefinedLavishScriptScript3Description;
+                            lblUserDefinedScript3.Text = Settings.UserDefinedLavishScriptScript3Description;
                         }
 
-                        if (Settings.Instance.UserDefinedLavishScriptScript4Description != string.Empty)
+                        if (Settings.UserDefinedLavishScriptScript4Description != string.Empty)
                         {
-                            lblUserDefinedScript4.Text = Settings.Instance.UserDefinedLavishScriptScript4Description;
+                            lblUserDefinedScript4.Text = Settings.UserDefinedLavishScriptScript4Description;
                         }
 
                         DamageTypeData.Text = MissionSettings.MissionDamageType.ToString();
@@ -285,9 +285,9 @@ namespace Questor
                         UnlootedContainersData.Text = Resources.QuestorfrmMain_RefreshInfoDisplayedInUI_n_a;
 
                         DataAmmoHangarID.Text = Cache.Instance.AmmoHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataAmmoHangarName.Text = Settings.Instance.AmmoHangarTabName;
+                        DataAmmoHangarName.Text = Settings.AmmoHangarTabName;
                         DataLootHangarID.Text = Cache.Instance.LootHangarID.ToString(CultureInfo.InvariantCulture);
-                        DataLootHangarName.Text = Settings.Instance.LootHangarTabName;
+                        DataLootHangarName.Text = Settings.LootHangarTabName;
                     }
                 }
                 catch (Exception ex)
@@ -357,7 +357,7 @@ namespace Questor
         private void PopulateBehaviorStateComboBox()
         {
             if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
-            if (Settings.Instance.CharacterMode != null)
+            if (Settings.CharacterMode != null)
             {
                 //
                 // populate combo boxes with the various states that are possible
@@ -428,13 +428,13 @@ namespace Questor
             //if (Logging.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
             // The if's in here stop the UI from flickering
             string text = "Questor";
-            if (Settings.Instance.CharacterName != string.Empty)
+            if (Settings.CharacterName != string.Empty)
             {
-                text = "Questor [" + Settings.Instance.CharacterName + "]";
+                text = "Questor [" + Settings.CharacterName + "]";
             }
-            if (Settings.Instance.CharacterName != string.Empty && Cache.Instance.Wealth > 10000000)
+            if (Settings.CharacterName != string.Empty && Cache.Instance.Wealth > 10000000)
             {
-                text = "Questor [" + Settings.Instance.CharacterName + "][" + String.Format("{0:0,0}", Cache.Instance.Wealth / 1000000) + "mil isk]";
+                text = "Questor [" + Settings.CharacterName + "][" + String.Format("{0:0,0}", Cache.Instance.Wealth / 1000000) + "mil isk]";
             }
 
             if (Text != text)
@@ -600,14 +600,14 @@ namespace Questor
                 AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
             }
 
-            //if (Settings.Instance.CharacterMode.ToLower() == "dps" || Settings.Instance.CharacterMode.ToLower() == "combat missions")
+            //if (Settings.CharacterMode.ToLower() == "dps" || Settings.CharacterMode.ToLower() == "combat missions")
             //{
             //
             //}
 
-            if (AutoStartCheckBox.Checked != Settings.Instance.AutoStart)
+            if (AutoStartCheckBox.Checked != Settings.AutoStart)
             {
-                AutoStartCheckBox.Checked = Settings.Instance.AutoStart;
+                AutoStartCheckBox.Checked = Settings.AutoStart;
                 _States.LavishEvent_QuestorAutoStartState();
             }
 
@@ -617,22 +617,22 @@ namespace Questor
                 _States.LavishEvent_QuestorPausedState();
             }
 
-            if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
+            if (Disable3DCheckBox.Checked != Settings.Disable3D)
             {
-                Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
+                Disable3DCheckBox.Checked = Settings.Disable3D;
                 _States.LavishEvent_QuestorDisable3DState();
             }
 
-            if (Settings.Instance.WindowXPosition.HasValue)
+            if (Settings.WindowXPosition.HasValue)
             {
-                Left = Settings.Instance.WindowXPosition.Value;
-                Settings.Instance.WindowXPosition = null;
+                Left = Settings.WindowXPosition.Value;
+                Settings.WindowXPosition = null;
             }
 
-            if (Settings.Instance.WindowYPosition.HasValue)
+            if (Settings.WindowYPosition.HasValue)
             {
-                Top = Settings.Instance.WindowYPosition.Value;
-                Settings.Instance.WindowYPosition = null;
+                Top = Settings.WindowYPosition.Value;
+                Settings.WindowYPosition = null;
             }
 
             if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission && Cache.Instance.CurrentPocketAction != null)
@@ -699,7 +699,7 @@ namespace Questor
                 buttonOpenMissionXML.Enabled = false;
             }
 
-            if (Settings.Instance.DefaultSettingsLoaded)
+            if (Settings.DefaultSettingsLoaded)
             {
                 buttonOpenCharacterXML.Enabled = false;
                 buttonOpenSchedulesXML.Enabled = false;
@@ -709,71 +709,71 @@ namespace Questor
             }
             else
             {
-                if (Settings.Instance.CharacterXMLExists)
+                if (Settings.CharacterXMLExists)
                 {
                     buttonOpenCharacterXML.Enabled = true;
-                    Settings.Instance.CharacterXMLExists = true;
+                    Settings.CharacterXMLExists = true;
                 }
                 else
                 {
                     buttonOpenCharacterXML.Enabled = false;
-                    Settings.Instance.CharacterXMLExists = false;
+                    Settings.CharacterXMLExists = false;
                 }
 
                 //
                 // Does Schedules.xml exist in the directory where we started questor?
                 //
-                if (Settings.Instance.SchedulesXMLExists)
+                if (Settings.SchedulesXMLExists)
                 {
                     buttonOpenCharacterXML.Enabled = true;
-                    Settings.Instance.SchedulesXMLExists = true;
+                    Settings.SchedulesXMLExists = true;
                 }
                 else
                 {
                     buttonOpenSchedulesXML.Enabled = false;
-                    Settings.Instance.SchedulesXMLExists = false;
+                    Settings.SchedulesXMLExists = false;
                 }
 
                 //
                 // Does QuestorStatistics.exe exist in the directory where we started questor?
                 //
-                if (Settings.Instance.QuestorStatisticsExists)
+                if (Settings.QuestorStatisticsExists)
                 {
                     buttonQuestorStatistics.Enabled = true;
-                    Settings.Instance.QuestorStatisticsExists = true;
+                    Settings.QuestorStatisticsExists = true;
                 }
                 else
                 {
                     buttonQuestorStatistics.Enabled = false;
-                    Settings.Instance.QuestorStatisticsExists = false;
+                    Settings.QuestorStatisticsExists = false;
                 }
 
                 //
                 // Does QuestorSettings.exe exist in the directory where we started questor?
                 //
-                if (Settings.Instance.QuestorSettingsExists)
+                if (Settings.QuestorSettingsExists)
                 {
                     buttonOpenCommonSettingsXML.Enabled = true;
-                    Settings.Instance.QuestorSettingsExists = true;
+                    Settings.QuestorSettingsExists = true;
                 }
                 else
                 {
                     buttonOpenCommonSettingsXML.Enabled = false;
-                    Settings.Instance.QuestorSettingsExists = false;
+                    Settings.QuestorSettingsExists = false;
                 }
 
                 //
                 // Does Questormanager.exe exist in the directory where we started questor?
                 //
-                if (Settings.Instance.QuestorManagerExists)
+                if (Settings.QuestorManagerExists)
                 {
                     buttonQuestormanager.Enabled = true;
-                    Settings.Instance.QuestorManagerExists = true;
+                    Settings.QuestorManagerExists = true;
                 }
                 else
                 {
                     buttonQuestormanager.Enabled = false;
-                    Settings.Instance.QuestorManagerExists = false;
+                    Settings.QuestorManagerExists = false;
                 }
             }
 
@@ -781,7 +781,7 @@ namespace Questor
             {
                 if (DateTime.UtcNow > _nextConsoleLogRefresh)
                 {
-                    if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                    if (txtExtConsole.Lines.Count() >= Settings.MaxLineConsole)
                     {
                         txtExtConsole.Text = "";
                     }
@@ -837,7 +837,7 @@ namespace Questor
 
         private void Disable3DCheckBoxCheckedChanged(object sender, EventArgs e)
         {
-            Settings.Instance.Disable3D = Disable3DCheckBox.Checked;
+            Settings.Disable3D = Disable3DCheckBox.Checked;
             _States.LavishEvent_QuestorDisable3DState();
         }
 
@@ -845,7 +845,7 @@ namespace Questor
         {
             if (e.KeyChar == (char)13)
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Settings.UseInnerspace)
                 {
                     LavishScript.ExecuteCommand(txtComand.Text);
                 }
@@ -1051,7 +1051,7 @@ namespace Questor
 
         private void AutoStartCheckBoxCheckedChanged(object sender, EventArgs e)
         {
-            Settings.Instance.AutoStart = AutoStartCheckBox.Checked;
+            Settings.AutoStart = AutoStartCheckBox.Checked;
             _States.LavishEvent_QuestorAutoStartState();
         }
 
@@ -1070,7 +1070,7 @@ namespace Questor
 
         private void ButtonOpenSchedulesXMLClick(object sender, EventArgs e)
         {
-            string schedulesXmlPath = Path.Combine(Settings.Instance.Path, "Schedules.xml");
+            string schedulesXmlPath = Path.Combine(Settings.Path, "Schedules.xml");
             if (File.Exists(schedulesXmlPath))
             {
                 Logging.Log("QuestorUI", "Launching [" + schedulesXmlPath + "]", Logging.White);
@@ -1084,10 +1084,10 @@ namespace Questor
 
         private void ButtonQuestormanagerClick(object sender, EventArgs e)
         {
-            string questorManagerPath = Path.Combine(Settings.Instance.Path, "QuestorManager.exe");
+            string questorManagerPath = Path.Combine(Settings.Path, "QuestorManager.exe");
             if (File.Exists(questorManagerPath))
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Settings.UseInnerspace)
                 {
                     Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
@@ -1108,14 +1108,14 @@ namespace Questor
 
         private void ButtonOpenCommonSettingsXMLClick(object sender, EventArgs e)
         {
-            if (File.Exists(Settings.Instance.CommonSettingsPath))
+            if (File.Exists(Settings.CommonSettingsPath))
             {
-                Logging.Log("QuestorUI", "Launching [" + Settings.Instance.CommonSettingsPath + "]", Logging.White);
-                System.Diagnostics.Process.Start(Settings.Instance.CommonSettingsPath);
+                Logging.Log("QuestorUI", "Launching [" + Settings.CommonSettingsPath + "]", Logging.White);
+                System.Diagnostics.Process.Start(Settings.CommonSettingsPath);
             }
             else
             {
-                Logging.Log("QuestorUI", "Unable to open [" + Settings.Instance.CommonSettingsPath + "] file not found", Logging.Orange);
+                Logging.Log("QuestorUI", "Unable to open [" + Settings.CommonSettingsPath + "] file not found", Logging.Orange);
             }
         }
 
@@ -1123,7 +1123,7 @@ namespace Questor
         {
             Cache.Instance.ExitWhenIdle = ExitWhenIdleCheckBox.Checked;
             AutoStartCheckBox.Checked = false;
-            Settings.Instance.AutoStart = false;
+            Settings.AutoStart = false;
             _States.LavishEvent_QuestorExitWhenIdleState();
         }
 
@@ -1377,9 +1377,9 @@ namespace Questor
         private void bttnResizeEVEWindow_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960, Logging.White);
-            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
+            if (Settings.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0, Logging.White);
-            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
+            if (Settings.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
         }
 
         private void bttnLogEntitiesOnGrid_Click(object sender, EventArgs e)
@@ -1436,10 +1436,10 @@ namespace Questor
 
         private void bttnUserDefinedScript1_Click(object sender, EventArgs e)
         {
-            if (Settings.Instance.UserDefinedLavishScriptScript1 != string.Empty)
+            if (Settings.UserDefinedLavishScriptScript1 != string.Empty)
             {
-                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript1 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
+                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.UserDefinedLavishScriptScript1 + "]", Logging.Debug);
+                if (Settings.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.UserDefinedLavishScriptScript1);    
             }
             else
             {
@@ -1449,10 +1449,10 @@ namespace Questor
 
         private void bttnUserDefinedScript2_Click(object sender, EventArgs e)
         {
-            if (Settings.Instance.UserDefinedLavishScriptScript2 != string.Empty)
+            if (Settings.UserDefinedLavishScriptScript2 != string.Empty)
             {
-                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript2 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
+                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.UserDefinedLavishScriptScript2 + "]", Logging.Debug);
+                if (Settings.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.UserDefinedLavishScriptScript2);
             }
             else
             {
@@ -1462,10 +1462,10 @@ namespace Questor
 
         private void bttnUserDefinedScript3_Click(object sender, EventArgs e)
         {
-            if (Settings.Instance.UserDefinedLavishScriptScript3 != string.Empty)
+            if (Settings.UserDefinedLavishScriptScript3 != string.Empty)
             {
-                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript3 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
+                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.UserDefinedLavishScriptScript3 + "]", Logging.Debug);
+                if (Settings.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.UserDefinedLavishScriptScript3);
             }
             else
             {
@@ -1475,10 +1475,10 @@ namespace Questor
 
         private void bttnUserDefinedScript4_Click(object sender, EventArgs e)
         {
-            if (Settings.Instance.UserDefinedLavishScriptScript4 != string.Empty)
+            if (Settings.UserDefinedLavishScriptScript4 != string.Empty)
             {
-                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript4 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
+                Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.UserDefinedLavishScriptScript4 + "]", Logging.Debug);
+                if (Settings.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.UserDefinedLavishScriptScript4);
             }
             else
             {

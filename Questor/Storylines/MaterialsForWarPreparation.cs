@@ -34,13 +34,13 @@ namespace Questor.Storylines
                 return StorylineState.Arm;
             }
 
-            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.TransportShipName.ToLower())
             {
                 // Open the ship hangar
                 if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreparation")) return StorylineState.Arm;
 
                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))
+                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.TransportShipName.ToLower()))
                 {
                     Logging.Log("MaterialsForWarPreparation", "Making [" + ship.GivenName + "] active", Logging.White);
                     ship.ActivateShip();
@@ -48,9 +48,9 @@ namespace Questor.Storylines
                     return StorylineState.Arm;
                 }
 
-                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.TransportShipName.ToLower())
                 {
-                    Logging.Log("StorylineState.Arm", "Missing TransportShip named [" + Settings.Instance.TransportShipName + "]", Logging.Debug);
+                    Logging.Log("StorylineState.Arm", "Missing TransportShip named [" + Settings.TransportShipName + "]", Logging.Debug);
                     return StorylineState.GotoAgent;
                 }
             }

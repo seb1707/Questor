@@ -480,7 +480,7 @@ namespace Questor.Modules.Caching
 
                 if (Time.Instance.LastClickedTimeStamp != null && Time.Instance.LastClickedTimeStamp.ContainsKey(ItemId))
                 {
-                    if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
+                    if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.EnforcedDelayBetweenModuleClicks))
                     {
                         //if (Logging.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
                         return false;
@@ -595,7 +595,7 @@ namespace Questor.Modules.Caching
                     return false;
                 }
 
-                if (IsMissileLauncher && Settings.Instance.AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley)
+                if (IsMissileLauncher && Settings.AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley)
                 {
                     //TRUE Max Missile Range
                     //

@@ -93,9 +93,9 @@ namespace Questor.Modules.BackgroundTasks
                 return false;
             }
 
-            if (Settings.Instance.WatchForActiveWars && Cache.Instance.IsCorpInWar)
+            if (Settings.WatchForActiveWars && Cache.Instance.IsCorpInWar)
             {
-                Logging.Log("Cache", "Your corp is involved in a war [" + Cache.Instance.IsCorpInWar + "] and WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "], Starting panic!", Logging.Orange);
+                Logging.Log("Cache", "Your corp is involved in a war [" + Cache.Instance.IsCorpInWar + "] and WatchForActiveWars [" + Settings.WatchForActiveWars + "], Starting panic!", Logging.Orange);
                 _States.CurrentPanicState = PanicState.StartPanicking;
                 //return;
             }
@@ -257,7 +257,7 @@ namespace Questor.Modules.BackgroundTasks
                     int cruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsCruiser && e.IsPlayer);
                     int battlecruisers = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattlecruiser && e.IsPlayer);
                     int battleships = Cache.Instance.EntitiesNotSelf.Count(e => e.IsBattleship && e.IsPlayer);
-                    if (Settings.Instance.FrigateInvasionLimit > 0 && frigates >= Settings.Instance.FrigateInvasionLimit)
+                    if (Settings.FrigateInvasionLimit > 0 && frigates >= Settings.FrigateInvasionLimit)
                     {
                         _delayedResume = true;
 
@@ -267,7 +267,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Panic", "Start panicking, mission invaded by [" + frigates + "] Frigates", Logging.Red);
                     }
 
-                    if (Settings.Instance.CruiserInvasionLimit > 0 && cruisers >= Settings.Instance.CruiserInvasionLimit)
+                    if (Settings.CruiserInvasionLimit > 0 && cruisers >= Settings.CruiserInvasionLimit)
                     {
                         _delayedResume = true;
 
@@ -277,7 +277,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Panic", "Start panicking, mission invaded by [" + cruisers + "] Cruisers", Logging.Red);
                     }
 
-                    if (Settings.Instance.BattlecruiserInvasionLimit > 0 && battlecruisers >= Settings.Instance.BattlecruiserInvasionLimit)
+                    if (Settings.BattlecruiserInvasionLimit > 0 && battlecruisers >= Settings.BattlecruiserInvasionLimit)
                     {
                         _delayedResume = true;
 
@@ -287,7 +287,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Panic", "Start panicking, mission invaded by [" + battlecruisers + "] BattleCruisers", Logging.Red);
                     }
 
-                    if (Settings.Instance.BattleshipInvasionLimit > 0 && battleships >= Settings.Instance.BattleshipInvasionLimit)
+                    if (Settings.BattleshipInvasionLimit > 0 && battleships >= Settings.BattleshipInvasionLimit)
                     {
                         _delayedResume = true;
 
@@ -299,8 +299,8 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (_delayedResume)
                     {
-                        _randomDelay = (Settings.Instance.InvasionRandomDelay > 0 ? _random.Next(Settings.Instance.InvasionRandomDelay) : 0);
-                        _randomDelay += Settings.Instance.InvasionMinimumDelay;
+                        _randomDelay = (Settings.InvasionRandomDelay > 0 ? _random.Next(Settings.InvasionRandomDelay) : 0);
+                        _randomDelay += Settings.InvasionMinimumDelay;
                         foreach (EntityCache enemy in Cache.Instance.EntitiesNotSelf.Where(e => e.IsPlayer))
                         {
                             Logging.Log("Panic", "Invaded by: PlayerName [" + enemy.Name + "] ShipTypeID [" + enemy.TypeId + "] Distance [" + Math.Round(enemy.Distance, 0) / 1000 + "k] Velocity [" + Math.Round(enemy.Velocity, 0) + "]", Logging.Red);
@@ -337,7 +337,7 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.InStation)
             {
                 Logging.Log("Panic", "Entered a station, lower panic mode", Logging.White);
-                //Settings.Instance.LoadSettings(false);
+                //Settings.LoadSettings(false);
                 _States.CurrentPanicState = PanicState.Panic;
                 return;
             }
@@ -524,7 +524,7 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             Logging.Log("Panic", "At a safe location, lower panic mode", Logging.Red);
-            //Settings.Instance.LoadSettings(false);
+            //Settings.LoadSettings(false);
             _States.CurrentPanicState = PanicState.Panic;
             return;
         }
@@ -532,9 +532,9 @@ namespace Questor.Modules.BackgroundTasks
         private static void BookmarkMyWreckPanicState()
         {
             BookmarkMyWreckAttempts++;
-            if (Cache.Instance.Wrecks.Any(i => i.Name.Contains(Settings.Instance.CombatShipName)))
+            if (Cache.Instance.Wrecks.Any(i => i.Name.Contains(Settings.CombatShipName)))
             {
-                Cache.Instance.CreateBookmark("Wreck: " + Settings.Instance.CombatShipName);
+                Cache.Instance.CreateBookmark("Wreck: " + Settings.CombatShipName);
                 _States.CurrentPanicState = PanicState.StartPanicking;
                 return;
             }
@@ -556,11 +556,11 @@ namespace Questor.Modules.BackgroundTasks
 
             if (Cache.Instance.InStation)
             {
-                if (Cache.Instance.IsCorpInWar && Settings.Instance.WatchForActiveWars)
+                if (Cache.Instance.IsCorpInWar && Settings.WatchForActiveWars)
                 {
-                    if (Logging.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.Instance.WatchForActiveWars [" + Settings.Instance.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
+                    if (Logging.DebugWatchForActiveWars) Logging.Log("Panic", "Cache.Instance.IsCorpInWar [" + Cache.Instance.IsCorpInWar + "] and Settings.WatchForActiveWars [" + Settings.WatchForActiveWars + "] staying in panic (effectively paused in station)", Logging.Debug);
                     Cache.Instance.Paused = true;
-                    Settings.Instance.AutoStart = false;
+                    Settings.AutoStart = false;
                     return false;
                 }
 

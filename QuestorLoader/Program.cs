@@ -27,17 +27,16 @@ namespace QuestorLoader
         public static string _EVELoginUserName;
         public static string _EVELoginPassword;
 
-        public Main(RemoteHooking.IContext InContext, string questorLoaderParameters)
+        public Main(RemoteHooking.IContext InContext, string[] questorLoaderParameters)
         {
             //RemoteHooking.WakeUpProcess();
         }
 
-
-        public void Run(RemoteHooking.IContext InContext, string questorLoaderParameters)
+        public void Run(RemoteHooking.IContext InContext, string[] questorLoaderParameters)
         {
             Logging.Log("QuestorLauncher", "QuestorLauncher has started", Logging.White);
 
-            questorLoaderArgsArray = SplitArguments(questorLoaderParameters).ToArray();
+            //questorLoaderArgsArray = SplitArguments(questorLoaderParameters).ToArray();
 
             int i = 0;
             foreach (var arg in questorLoaderArgsArray)
@@ -183,7 +182,7 @@ namespace QuestorLoader
                 System.AppDomain NewAppDomain = System.AppDomain.CreateDomain(Main._appDomainNameToUse);
                 Logging.Log("EXEBootStrapper", "AppDomain [" + Main._appDomainNameToUse + "] created", Logging.White);
                 // Load the assembly and call the default entry point:
-                NewAppDomain.ExecuteAssembly(Main._pathToQuestorEXE, Main.ParamatersToPassToQuestorArray);
+                NewAppDomain.ExecuteAssembly(Main._pathToQuestorEXE, Main.questorLoaderArgsArray);
                 Logging.Log("EXEBootStrapper", "ExecuteAssembly [" + Main._pathToQuestorEXE + "] finished", Logging.White);
                 //Main.UnthawEVEProcess = true;
             }

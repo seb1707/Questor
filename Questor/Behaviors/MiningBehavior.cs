@@ -174,7 +174,7 @@ namespace Questor.Behaviors
 
                         _States.CurrentMiningState = MiningState.Idle;
                         _States.CurrentQuestorState = QuestorState.Idle;
-                        Logging.Log("MiningBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], MiningState: [" + _States.CurrentMiningState + "]", Logging.White);
+                        Logging.Log("MiningBehavior.Unloadloot", "CharacterMode: [" + Settings.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], MiningState: [" + _States.CurrentMiningState + "]", Logging.White);
                         return;
                     }
                     break;
@@ -319,7 +319,7 @@ namespace Questor.Behaviors
 
                     _States.CurrentMiningState = MiningState.GotoBase;
                     Logging.Log("MiningBehavior", "Could not find a suitable Asteroid belt.", Logging.White);
-                    Settings.Instance.AutoStart = false;
+                    Settings.AutoStart = false;
                     break;
 
                 case MiningState.Mine:

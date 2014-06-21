@@ -1889,7 +1889,6 @@ namespace Questor.Modules.Combat
                     Drones.RemoveDronePriorityTargets(Drones.DronePriorityEntities.ToList());
                 }
 
-                Cache.Instance.ClearPerPocketCache();
                 if (Logging.DebugActivateWeapons) Logging.Log("Combat", "ActivateWeapons: deactivate: we are in warp! doing nothing", Logging.Teal);
                 return;
             }

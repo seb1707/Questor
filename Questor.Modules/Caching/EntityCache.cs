@@ -4967,6 +4967,7 @@ namespace Questor.Modules.Caching
                             if (Distance < 2500)
                             {
                                 _directEntity.Jump();
+                                Cache.Instance.ClearPerPocketCache("Jump()");
                                 Time.Instance.NextInSpaceorInStation = DateTime.UtcNow;
                                 Time.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
                                 Time.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
@@ -5048,6 +5049,7 @@ namespace Questor.Modules.Caching
                         }
 
                         _directEntity.Activate();
+                        Cache.Instance.ClearPerPocketCache("Activate");
                         Time.Instance.LastInWarp = DateTime.UtcNow;
                         Time.Instance.NextActivateAction = DateTime.UtcNow.AddSeconds(15);
                         return true;
@@ -5235,6 +5237,7 @@ namespace Questor.Modules.Caching
                                     }
 
                                     _directEntity.WarpTo();
+                                    Cache.Instance.ClearPerPocketCache("WarpTo");
                                     Time.Instance.WehaveMoved = DateTime.UtcNow;
                                     Time.Instance.LastInWarp = DateTime.UtcNow;
                                     Time.Instance.NextWarpAction = DateTime.UtcNow.AddSeconds(Time.Instance.WarptoDelay_seconds);

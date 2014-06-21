@@ -741,7 +741,6 @@ namespace Questor.Modules.Caching
             set
             {
                 _paused = value;
-                Cache.Instance.ClearPerPocketCache();
             }
         }
 
@@ -2449,58 +2448,67 @@ namespace Questor.Modules.Caching
         
         //public int MyMissileProjectionSkillLevel;
 
-        public void ClearPerPocketCache()
+        public void ClearPerPocketCache(string callingroutine)
         {
             try
             {
-                MissionSettings.ClearPocketSpecificSettings();
-                Combat._doWeCurrentlyHaveTurretsMounted = null;
-                Combat.LastTargetPrimaryWeaponsWereShooting = null;
-                Drones.LastTargetIDDronesEngaged = null;
+                if (DateTime.Now > Time.NextClearPocketCache)
+                {
+                    MissionSettings.ClearPocketSpecificSettings();
+                    Combat._doWeCurrentlyHaveTurretsMounted = null;
+                    Combat.LastTargetPrimaryWeaponsWereShooting = null;
+                    Drones.LastTargetIDDronesEngaged = null;
 
-                ListOfWarpScramblingEntities.Clear();
-                ListOfJammingEntities.Clear();
-                ListOfTrackingDisruptingEntities.Clear();
-                ListNeutralizingEntities.Clear();
-                ListOfTargetPaintingEntities.Clear();
-                ListOfDampenuingEntities.Clear();
-                ListofWebbingEntities.Clear();
-                ListofContainersToLoot.Clear();
-                ListofMissionCompletionItemsToLoot.Clear();
-                Statistics.IndividualVolleyDataStatistics(Cache.Instance.ListofEachWeaponsVolleyData);
-                ListofEachWeaponsVolleyData.Clear();
-                ListOfUndockBookmarks = null;
+                    ListOfWarpScramblingEntities.Clear();
+                    ListOfJammingEntities.Clear();
+                    ListOfTrackingDisruptingEntities.Clear();
+                    ListNeutralizingEntities.Clear();
+                    ListOfTargetPaintingEntities.Clear();
+                    ListOfDampenuingEntities.Clear();
+                    ListofWebbingEntities.Clear();
+                    ListofContainersToLoot.Clear();
+                    ListofMissionCompletionItemsToLoot.Clear();
+                    Statistics.IndividualVolleyDataStatistics(Cache.Instance.ListofEachWeaponsVolleyData);
+                    ListofEachWeaponsVolleyData.Clear();
+                    ListOfUndockBookmarks = null;
 
-                //MyMissileProjectionSkillLevel = SkillPlan.MissileProjectionSkillLevel();
+                    //MyMissileProjectionSkillLevel = SkillPlan.MissileProjectionSkillLevel();
 
-                EntityNames.Clear();
-                EntityTypeID.Clear();
-                EntityGroupID.Clear();
-                EntityBounty.Clear();
-                EntityIsFrigate.Clear();
-                EntityIsNPCFrigate.Clear();
-                EntityIsCruiser.Clear();
-                EntityIsNPCCruiser.Clear();
-                EntityIsBattleCruiser.Clear();
-                EntityIsNPCBattleCruiser.Clear();
-                EntityIsBattleShip.Clear();
-                EntityIsNPCBattleShip.Clear();
-                EntityIsHighValueTarget.Clear();
-                EntityIsLowValueTarget.Clear();
-                EntityIsLargeCollidable.Clear();
-                EntityIsSentry.Clear();
-                EntityIsMiscJunk.Clear();
-                EntityIsBadIdea.Clear();
-                EntityIsFactionWarfareNPC.Clear();
-                EntityIsNPCByGroupID.Clear();
-                EntityIsEntutyIShouldLeaveAlone.Clear();
-                EntityHaveLootRights.Clear();
-                EntityIsStargate.Clear();
+                    EntityNames.Clear();
+                    EntityTypeID.Clear();
+                    EntityGroupID.Clear();
+                    EntityBounty.Clear();
+                    EntityIsFrigate.Clear();
+                    EntityIsNPCFrigate.Clear();
+                    EntityIsCruiser.Clear();
+                    EntityIsNPCCruiser.Clear();
+                    EntityIsBattleCruiser.Clear();
+                    EntityIsNPCBattleCruiser.Clear();
+                    EntityIsBattleShip.Clear();
+                    EntityIsNPCBattleShip.Clear();
+                    EntityIsHighValueTarget.Clear();
+                    EntityIsLowValueTarget.Clear();
+                    EntityIsLargeCollidable.Clear();
+                    EntityIsSentry.Clear();
+                    EntityIsMiscJunk.Clear();
+                    EntityIsBadIdea.Clear();
+                    EntityIsFactionWarfareNPC.Clear();
+                    EntityIsNPCByGroupID.Clear();
+                    EntityIsEntutyIShouldLeaveAlone.Clear();
+                    EntityHaveLootRights.Clear();
+                    EntityIsStargate.Clear();
+                }
+
+                Logging.Log("ClearPerPocketCache", "[ " + callingroutine + " ] Attempted to ClearPocketCache within 5 seconds of a previous ClearPocketCache, aborting attempt", Logging.Debug);
             }
             catch (Exception ex)
             {
                 Logging.Log("ClearPerPocketCache", "Exception [" + ex + "]", Logging.Debug);
                 return;
+            }
+            finally
+            {
+                Time.NextClearPocketCache = DateTime.UtcNow.AddSeconds(5);
             }
         }
         

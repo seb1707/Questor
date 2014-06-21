@@ -34,11 +34,9 @@ namespace Questor.Modules.Actions
         private static IEnumerable<DirectItem> scriptsToMove;
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
         private static IEnumerable<DirectItem> missionGateKeysToMove;
-        private static DirectContainer PutLootHere;
+        private static DirectContainer PutLootHere = null;
         private static string PutLootHere_Description;
-
-        public UnloadLoot(){}
-
+        
         //public double LootValue { get; set; }
         private bool MoveAmmo()
         {
@@ -425,39 +423,59 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        public void ProcessState()
+        private bool EveryUnloadLootPulse()
         {
-            if (!Cache.Instance.InStation)
-                return;
-
-            if (Cache.Instance.InSpace)
-                return;
-
-            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-                return;
-
-            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+            try
             {
-                if (Cache.Instance.LootContainer == null)
+                if (!Cache.Instance.InStation)
+                    return false;
+
+                if (Cache.Instance.InSpace)
+                    return false;
+
+                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                    return false;
+
+                if (PutLootHere == null)
                 {
-                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.ProcessState", "if (Cache.Instance.LootContainer == null)", Logging.Debug);
-                    return;
+                    if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
+                    {
+                        if (Cache.Instance.LootContainer == null)
+                        {
+                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.ProcessState", "if (Cache.Instance.LootContainer == null)", Logging.Debug);
+                            return false;
+                        }
+
+                        PutLootHere = Cache.Instance.LootContainer;
+                        PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
+                    }
+                    else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
+                    {
+                        PutLootHere = Cache.Instance.LootHangar;
+                        PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";
+                    }
+                    else
+                    {
+                        PutLootHere = Cache.Instance.ItemHangar;
+                        PutLootHere_Description = "ItemHangar";
+                    }
+
+                    return false;
                 }
 
-                PutLootHere = Cache.Instance.LootContainer;
-                PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
+                return true;
             }
-            else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName)  && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
+            catch (Exception exception)
             {
-                PutLootHere = Cache.Instance.LootHangar;
-                PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";
+                Logging.Log("UnloadLoot", "Exception [" + exception + "]", Logging.White);
+                return false;
             }
-            else
-            {
-                PutLootHere = Cache.Instance.ItemHangar;
-                PutLootHere_Description = "ItemHangar";
-            }
+        }
 
+        public void ProcessState()
+        {
+            if (!EveryUnloadLootPulse()) return;
+            
             switch (_States.CurrentUnloadLootState)
             {
                 case UnloadLootState.Idle:

@@ -2198,7 +2198,6 @@ namespace Questor.Modules.Caching
                 //
                 _agent = null;
                 _allBookmarks = null;
-                _ammoHangar = null;
                 _approaching = null;
                 _bigObjects = null;
                 _bigObjectsAndGates = null;
@@ -2215,8 +2214,6 @@ namespace Questor.Modules.Caching
                 _IDsinInventoryTree = null;
                 _itemHangar = null;
                 _jumpBridges = null;
-                _lootContainer = null;
-                _lootHangar = null;
                 _lpStore = null;
                 _maxLockedTargets = null;
                 _modules = null;
@@ -2458,6 +2455,10 @@ namespace Questor.Modules.Caching
                     Combat._doWeCurrentlyHaveTurretsMounted = null;
                     Combat.LastTargetPrimaryWeaponsWereShooting = null;
                     Drones.LastTargetIDDronesEngaged = null;
+
+                    _ammoHangar = null;
+                    _lootHangar = null;
+                    _lootContainer = null;
 
                     ListOfWarpScramblingEntities.Clear();
                     ListOfJammingEntities.Clear();
@@ -4077,17 +4078,19 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.InStation)
                     {
-                        if (_lootHangar == null)
+                        if (_lootHangar == null &&  DateTime.UtcNow > Time.Instance.NextOpenHangarAction)
                         {
                             if (Settings.Instance.LootHangarTabName != string.Empty)
                             {
+                                
                                 Cache.Instance.LootHangarID = -99;
                                 Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName); //- 1;
                                 if (Logging.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);
 
                                 _lootHangar = null;
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _lootHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.LootHangarID);
-
+                                
                                 if (_lootHangar != null && _lootHangar.IsValid) //do we have a corp hangar tab setup with that name?
                                 {
                                     if (Logging.DebugHangars)
@@ -4117,10 +4120,12 @@ namespace Questor.Modules.Caching
 
                             if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance.AmmoHangar != null)
                             {
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _lootHangar = Cache.Instance.AmmoHangar;
                             }
                             else
                             {
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _lootHangar = Cache.Instance.ItemHangar;
                             }
 
@@ -4350,7 +4355,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.InStation)
                     {
-                        if (_ammoHangar == null)
+                        if (_ammoHangar == null && DateTime.UtcNow > Time.Instance.NextOpenHangarAction)
                         {
                             if (Settings.Instance.AmmoHangarTabName != string.Empty)
                             {
@@ -4359,6 +4364,7 @@ namespace Questor.Modules.Caching
                                 if (Logging.DebugHangars) Logging.Log("AmmoHangar: GetCorpAmmoHangarID", "AmmoHangarID is [" + Cache.Instance.AmmoHangarID + "]", Logging.Teal);
 
                                 _ammoHangar = null;
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _ammoHangar = Cache.Instance.DirectEve.GetCorporationHangar((int)Cache.Instance.AmmoHangarID);
                                 Statistics.LogWindowActionToWindowLog("AmmoHangar", "AmmoHangar Defined (not opened?)");
 
@@ -4385,16 +4391,18 @@ namespace Questor.Modules.Caching
                                 }
 
                                 Logging.Log("AmmoHangar", "Opening Corporate Ammo Hangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
-                                return Cache.Instance.ItemHangar;
+                                return _ammoHangar;
 
                             }
 
                             if (Settings.Instance.LootHangarTabName == string.Empty && Cache.Instance.LootHangar != null)
                             {
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _ammoHangar = Cache.Instance.LootHangar;
                             }
                             else
                             {
+                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _ammoHangar = Cache.Instance.ItemHangar;
                             }
 

@@ -39,15 +39,11 @@ namespace Questor
             Show();
             if (Logging.DebugAttachVSDebugger)
             {
-                //if (!System.Diagnostics.Debugger.IsAttached)
-                //{
-                    //
-                    // this is temporarily disabled as CCP is crazy and is now detecting that a debugger is attached (thinking it is a way to catch bots? no idea but odd)
-                    //
-
-                    //Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.Teal);
-                    //System.Diagnostics.Debugger.Launch();
-                //}
+                if (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.Teal);
+                    System.Diagnostics.Debugger.Launch();
+                }
             }
         }
 

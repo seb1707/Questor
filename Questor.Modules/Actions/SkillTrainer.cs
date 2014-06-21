@@ -88,7 +88,7 @@ namespace Questor.Modules.Actions
 					Cache.Instance.CloseQuestorCMDLogoff = false;
 					Cache.Instance.CloseQuestorCMDExitGame = true;
 					Cache.Instance.CloseQuestorEndProcess = true;
-					Settings.AutoStart = false;
+					Settings.Instance.AutoStart = false;
 					Cache.Instance.ReasonToStopQuestor = "Done Processing Skill Training Plan and adding skills as needed to the training queue";
 					Cache.Instance.SessionState = "Quitting";
 					Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
@@ -96,8 +96,8 @@ namespace Questor.Modules.Actions
 
 				case SkillTrainerState.GenerateInnerspaceProfile:
 					Logging.Log("SkillTrainer", "Generating Innerspace Profile for this toon: running [GenerateInnerspaceProfile.iss] from your innerspace scripts directory", Logging.Teal);
-                    if (Settings.UseInnerspace) LavishScript.ExecuteCommand("echo runscript GenerateInnerspaceProfile \"" + Settings.CharacterName + "\"");
-                    if (Settings.UseInnerspace) LavishScript.ExecuteCommand("runscript GenerateInnerspaceProfile \"" + Settings.CharacterName + "\"");
+                    if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("echo runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
+                    if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript GenerateInnerspaceProfile \"" + Settings.Instance.CharacterName + "\"");
 					_State.CurrentSkillTrainerState = SkillTrainerState.Idle;
 					break;
 

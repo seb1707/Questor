@@ -117,9 +117,6 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow < Time.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
                 return;
 
-            //
-            // Load Scripts
-            //
             ModuleNumber = 0;
             foreach (ModuleCache module in Cache.Instance.Modules)
             {
@@ -146,7 +143,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _trackingDisruptorScriptAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingDisruptor Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.TrackingDisruptorScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
 
                             // this needs a counter and an abort after 10 tries or so... or it will keep checking the cargo for a script that may not exist
                             // every second we are in space!
@@ -184,7 +181,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _trackingComputerScriptAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingComputer Found", Logging.White);
-                            DirectItem TrackingComputerScript = Cache.Instance.CheckCargoForItem(Settings.TrackingComputerScript, 1);
+                            DirectItem TrackingComputerScript = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
                             
                             EntityCache EntityTrackingDisruptingMe = Combat.TargetedBy.FirstOrDefault(t => t.IsTrackingDisruptingMe);
                             if (EntityTrackingDisruptingMe != null || TrackingComputerScript == null)
@@ -227,7 +224,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _trackingLinkScriptAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "TrackingLink Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.TrackingLinkScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingLinkScript, 1);
                             if (scriptToLoad != null)
                             {
                                 if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for TrackingLink", Logging.White);
@@ -262,7 +259,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _sensorBoosterScriptAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "SensorBooster Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.SensorBoosterScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorBoosterScript, 1);
                             if (scriptToLoad != null)
                             {
                                 if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorBooster", Logging.White);
@@ -297,7 +294,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             _sensorDampenerScriptAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "SensorDampener Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.SensorDampenerScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorDampenerScript, 1);
                             if (scriptToLoad != null)
                             {
                                 if (Logging.DebugLoadScripts) Logging.Log("Defense", "Script Found for SensorDampener", Logging.White);
@@ -332,7 +329,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             //_ancillaryShieldBoosterAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "ancillaryShieldBooster Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.AncillaryShieldBoosterScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.AncillaryShieldBoosterScript, 1);
                             if (scriptToLoad != null)
                             {
                                 if (Logging.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for ancillaryShieldBooster", Logging.White);
@@ -368,7 +365,7 @@ namespace Questor.Modules.BackgroundTasks
                         {
                             //_capacitorInjectorAttempts++;
                             if (Logging.DebugLoadScripts) Logging.Log("Defense", "capacitorInjector Found", Logging.White);
-                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.CapacitorInjectorScript, 1);
+                            scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.CapacitorInjectorScript, 1);
                             if (scriptToLoad != null)
                             {
                                 if (Logging.DebugLoadScripts) Logging.Log("Defense", "CapBoosterCharges Found for capacitorInjector", Logging.White);
@@ -397,7 +394,7 @@ namespace Questor.Modules.BackgroundTasks
                             }
                             else if (module.CurrentCharges == 0)
                             {
-                                Logging.Log("Defense", "ReloadCapBooster: ran out of cap booster with typeid: [ " + Settings.CapacitorInjectorScript + " ]", Logging.Orange);
+                                Logging.Log("Defense", "ReloadCapBooster: ran out of cap booster with typeid: [ " + Settings.Instance.CapacitorInjectorScript + " ]", Logging.Orange);
                                 _States.CurrentCombatState = CombatState.OutOfAmmo;
                                 continue;
                             }
@@ -486,7 +483,7 @@ namespace Questor.Modules.BackgroundTasks
                     // this should only kick in when using frigates as the combatship
                     //
                     if (Cache.Instance.ActiveShip.Capacitor < 400 && !Combat.TargetedBy.Any() &&
-                        Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.CombatShipName.ToLower())
+                        Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
                     {
                         if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 400 units total cap and nothing is targeting you yet, no need for hardeners yet.", Logging.Debug);
                         continue;
@@ -512,7 +509,7 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow < _nextOverloadAttempt) //if we just did something wait a bit
                 return true;
 
-            if (!Settings.OverloadWeapons)
+            if (!Settings.Instance.OverloadWeapons)
             {
                 // if we do not have the OverLoadWeapons setting set to true then just return.
                 _nextOverloadAttempt = DateTime.UtcNow.AddSeconds(30);
@@ -809,7 +806,7 @@ namespace Questor.Modules.BackgroundTasks
                         deactivate = true;
                         if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.CombatShipName)
+                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
                     {
                         deactivate = true;
                         if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
@@ -877,7 +874,7 @@ namespace Questor.Modules.BackgroundTasks
                     }    
                     
                     // If we have less then x% cap, do not activate the module
-                    //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.MinimumPropulsionModuleCapacitor + "]");
+                    //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < Defense.MinimumPropulsionModuleCapacitor)
                     {
                         activate = false;

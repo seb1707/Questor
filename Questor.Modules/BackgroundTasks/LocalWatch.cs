@@ -28,7 +28,7 @@
                     // this ought to cache the name of the system, and the number of people in local (or similar)
                     // and only query everyone in local for standings changes if something has changed...
                     //
-                    Cache.Instance.LocalSafe(Settings.LocalBadStandingPilotsToTolerate, Settings.LocalBadStandingLevelToConsiderBad);
+                    Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad);
 
                     _lastAction = DateTime.UtcNow;
                     _States.CurrentLocalWatchState = LocalWatchState.Idle;

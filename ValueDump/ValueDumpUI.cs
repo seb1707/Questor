@@ -73,7 +73,7 @@ namespace ValueDump
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.AutoStart = true;
+                Settings.Instance.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
@@ -158,9 +158,9 @@ namespace ValueDump
             Cache.Instance.InvalidateCache();
 
             // Update settings (settings only load if character name changed)
-            if (!Settings.DefaultSettingsLoaded)
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
-                Settings.LoadSettings();
+                Settings.Instance.LoadSettings();
             }
 
             if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)

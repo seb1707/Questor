@@ -131,11 +131,11 @@ namespace Questor.Modules.Activities
                     {
                         from = Cache.Instance.ItemHangar;
                     }
-                    else if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    else if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.AmmoHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                     {
                         from = Cache.Instance.AmmoHangar;
                     }
-                    else if (!string.IsNullOrEmpty(Settings.LootHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
+                    else if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.DirectEve.Session.SolarSystemId == Cache.Instance.AgentSolarSystemID && Cache.Instance.LootHangar.Items.OrderBy(i => i.IsSingleton).ThenBy(i => i.Quantity).Any(i => i.TypeName == missionItem))
                     {
                         from = Cache.Instance.LootHangar;
                     }

@@ -27,16 +27,19 @@ namespace Questor.Modules.Lookup
     using Questor.Modules.Logging;
     using Questor.Modules.States;
 
-    public static class Settings
+    public class Settings
     {
-        //public static Settings Instance = new Settings();
-        public static string CharacterName;
-        private static DateTime _lastModifiedDate;
-        //private static int SettingsLoadedICount = 0;
+        /// <summary>
+        /// Singleton implementation
+        /// </summary>
+        public static Settings Instance = new Settings();
+        public string CharacterName;
+        private DateTime _lastModifiedDate;
+        private int SettingsLoadedICount = 0;
 
-        //public static int SettingsInstances = 0;
+        public static int SettingsInstances = 0;
 
-        static Settings()
+        public Settings()
         {
             try
             {
@@ -44,7 +47,7 @@ namespace Questor.Modules.Lookup
                 //ItemsBlackList = new List<int>();
                 CharacterNamesForMasterToInviteToFleet = new List<string>();
                 UseFittingManager = true;
-                //Interlocked.Increment(ref SettingsInstances);
+                Interlocked.Increment(ref SettingsInstances);
             }
             catch (Exception exception)
             {
@@ -53,29 +56,29 @@ namespace Questor.Modules.Lookup
             }
         }
 
-        //~Settings()
-        //{
-        //    Interlocked.Decrement(ref SettingsInstances);
-        //}
+        ~Settings()
+        {
+            Interlocked.Decrement(ref SettingsInstances);
+        }
 
-        public static bool CharacterXMLExists = true;
-        public static bool CommonXMLExists = false;
-        public static bool SchedulesXMLExists = true;
-        public static bool EVEMemoryManager = false;
-        public static long MemoryManagerTrimThreshold = 524288000;
-        public static bool FactionXMLExists = true;
-        public static bool QuestorStatisticsExists = true;
-        public static bool QuestorSettingsExists = true;
-        public static bool QuestorManagerExists = true;
+        public bool CharacterXMLExists = true;
+        public bool CommonXMLExists = false;
+        public bool SchedulesXMLExists = true;
+        public bool EVEMemoryManager = false;
+        public long MemoryManagerTrimThreshold = 524288000;
+        public bool FactionXMLExists = true;
+        public bool QuestorStatisticsExists = true;
+        public bool QuestorSettingsExists = true;
+        public bool QuestorManagerExists = true;
 
-        public static string characterNameForLogs = "NoCharacterNameDefinedYet";
-
-
-        public static string TargetSelectionMethod { get; set; }
-        public static bool DetailedCurrentTargetHealthLogging { get; set; }
-        public static bool DefendWhileTraveling { get; set; }
-        public static bool _useInnerspace;
-        public static bool UseInnerspace
+        public string characterNameForLogs = "NoCharacterNameDefinedYet";
+            
+        
+        public string TargetSelectionMethod { get; set; }
+        public bool DetailedCurrentTargetHealthLogging { get; set; }
+        public bool DefendWhileTraveling { get; set; }
+        public bool _useInnerspace;
+        public bool UseInnerspace
         {
             get
             {
@@ -88,196 +91,196 @@ namespace Questor.Modules.Lookup
             }
         }
         //public bool setEveClientDestinationWhenTraveling { get; set; }
-        public static string EveServerName { get; set; }
-        public static int EnforcedDelayBetweenModuleClicks { get; set; }
-        public static bool AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley { get; set; }
-        public static string CharacterToAcceptInvitesFrom { get; set; }
+        public string EveServerName { get; set; }
+        public int EnforcedDelayBetweenModuleClicks { get; set; }
+        public bool AvoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley { get; set; }
+        public string CharacterToAcceptInvitesFrom { get; set; }
 
         //
         // Misc Settings
         //
-        public static string CharacterMode { get; set; }
-        public static bool AutoStart { get; set; }
-        public static bool Disable3D { get; set; }
-        public static int MinimumDelay { get; set; }
-        public static int RandomDelay { get; set; }
+        public string CharacterMode { get; set; }
+        public bool AutoStart { get; set; }
+        public bool Disable3D { get; set; }
+        public int MinimumDelay { get; set; }
+        public int RandomDelay { get; set; }
 
         //
         // Console Log Settings
         //
-        public static int MaxLineConsole { get; set; }
+        public int MaxLineConsole { get; set; }
 
         //
         // Enable / Disable Major Features that do not have categories of their own below
         //
-        public static bool EnableStorylines { get; set; }
-        public static bool DeclineStorylinesInsteadofBlacklistingfortheSession { get; set; }
-        public static bool UseLocalWatch { get; set; }
-        public static bool UseFittingManager { get; set; }
+        public bool EnableStorylines { get; set; }
+        public bool DeclineStorylinesInsteadofBlacklistingfortheSession { get; set; }
+        public bool UseLocalWatch { get; set; }
+        public bool UseFittingManager { get; set; }
 
-        public static bool WatchForActiveWars { get; set; }
+        public bool WatchForActiveWars { get; set; }
 
-        public static bool FleetSupportSlave { get; set; }
+        public bool FleetSupportSlave { get; set; }
 
-        public static bool FleetSupportMaster { get; set; }
+        public bool FleetSupportMaster { get; set; }
 
-        public static string FleetName { get; set; }
-        public static List<string> CharacterNamesForMasterToInviteToFleet { get; set; }
+        public string FleetName { get; set; }
+        public List<string> CharacterNamesForMasterToInviteToFleet { get; set; }
 
-        public static int NumberOfModulesToActivateInCycle = 4;
-        public static int NoOfBookmarksDeletedAtOnce = 3;
+        public int NumberOfModulesToActivateInCycle = 4;
+        public int NoOfBookmarksDeletedAtOnce = 3;
 
         //
         // Local Watch settings - if enabled
         //
-        public static int LocalBadStandingPilotsToTolerate { get; set; }
-        public static double LocalBadStandingLevelToConsiderBad { get; set; }
-        public static bool FinishWhenNotSafe { get; set; }
+        public int LocalBadStandingPilotsToTolerate { get; set; }
+        public double LocalBadStandingLevelToConsiderBad { get; set; }
+        public bool FinishWhenNotSafe { get; set; }
 
         //
         // Invasion Settings
         //
-        public static int BattleshipInvasionLimit { get; set; }
-        public static int BattlecruiserInvasionLimit { get; set; }
-        public static int CruiserInvasionLimit { get; set; }
-        public static int FrigateInvasionLimit { get; set; }
-        public static int InvasionMinimumDelay { get; set; }
-        public static int InvasionRandomDelay { get; set; }
+        public int BattleshipInvasionLimit { get; set; }
+        public int BattlecruiserInvasionLimit { get; set; }
+        public int CruiserInvasionLimit { get; set; }
+        public int FrigateInvasionLimit { get; set; }
+        public int InvasionMinimumDelay { get; set; }
+        public int InvasionRandomDelay { get; set; }
 
         //
         // Ship Names
         //
-        public static string CombatShipName { get; set; }
-        public static string SalvageShipName { get; set; }
-        public static string TransportShipName { get; set; }
-        public static string TravelShipName { get; set; }
-        public static string MiningShipName { get; set; }
+        public string CombatShipName { get; set; }
+        public string SalvageShipName { get; set; }
+        public string TransportShipName { get; set; }
+        public string TravelShipName { get; set; }
+        public string MiningShipName { get; set; }
 
         //
         //Use HomeBookmark
         //
-        public static bool UseHomebookmark { get; set; }
+        public bool UseHomebookmark { get; set; }
 
         //
         // Storage location for loot, ammo, and bookmarks
         //
-        public static string HomeBookmarkName { get; set; }
-        public static string LootHangarTabName { get; set; }
-        public static string AmmoHangarTabName { get; set; }
-        public static string BookmarkHangar { get; set; }
-        public static string LootContainerName { get; set; }
+        public string HomeBookmarkName { get; set; }
+        public string LootHangarTabName { get; set; }
+        public string AmmoHangarTabName { get; set; }
+        public string BookmarkHangar { get; set; }
+        public string LootContainerName { get; set; }
 
-        public static string HighTierLootContainer { get; set; }
+        public string HighTierLootContainer { get; set; }
 
         //
         // Travel and Undock Settings
         //
-        public static string BookmarkPrefix { get; set; }
-        public static string SafeSpotBookmarkPrefix { get; set; }
-        public static string BookmarkFolder { get; set; }
+        public string BookmarkPrefix { get; set; }
+        public string SafeSpotBookmarkPrefix { get; set; }
+        public string BookmarkFolder { get; set; }
 
-        public static string TravelToBookmarkPrefix { get; set; }
+        public string TravelToBookmarkPrefix { get; set; }
 
-        public static string UndockBookmarkPrefix { get; set; }
+        public string UndockBookmarkPrefix { get; set; }
         
         //
         // EVE Process Memory Ceiling and EVE wallet balance Change settings
         //
-        public static int WalletBalanceChangeLogOffDelay { get; set; }
+        public int WalletBalanceChangeLogOffDelay { get; set; }
 
-        public static string WalletBalanceChangeLogOffDelayLogoffOrExit { get; set; }
+        public string WalletBalanceChangeLogOffDelayLogoffOrExit { get; set; }
 
-        public static Int64 EVEProcessMemoryCeiling { get; set; }
-        public static bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
-        public static bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
-        public static bool CloseQuestorAllowRestart { get; set; }
-        public static bool CloseQuestorArbitraryOSCmd { get; set; }
-        public static string CloseQuestorOSCmdContents { get; set; }
-        public static bool LoginQuestorArbitraryOSCmd { get; set; }
-        public static string LoginQuestorOSCmdContents { get; set; }
-        public static bool LoginQuestorLavishScriptCmd { get; set; }
-        public static string LoginQuestorLavishScriptContents { get; set; }
-        public static bool MinimizeEveAfterStartingUp { get; set; }
-        public static int SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
+        public Int64 EVEProcessMemoryCeiling { get; set; }
+        public bool CloseQuestorCMDUplinkInnerspaceProfile { get; set; }
+        public bool CloseQuestorCMDUplinkIsboxerCharacterSet { get; set; }
+        public bool CloseQuestorAllowRestart { get; set; }
+        public bool CloseQuestorArbitraryOSCmd { get; set; }
+        public string CloseQuestorOSCmdContents { get; set; }
+        public bool LoginQuestorArbitraryOSCmd { get; set; }
+        public string LoginQuestorOSCmdContents { get; set; }
+        public bool LoginQuestorLavishScriptCmd { get; set; }
+        public string LoginQuestorLavishScriptContents { get; set; }
+        public bool MinimizeEveAfterStartingUp { get; set; }
+        public int SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
 
-        public static string LavishIsBoxerCharacterSet { get; set; }
-        public static string LavishInnerspaceProfile { get; set; }
-        public static string LavishGame { get; set; }
-
-        public static string CachePath { get; set; }
+        public string LavishIsBoxerCharacterSet { get; set; }
+        public string LavishInnerspaceProfile { get; set; }
+        public string LavishGame { get; set; }
 
         //
         // Script Settings - TypeIDs for the scripts you would like to use in these modules
         //
-        public static int TrackingDisruptorScript { get; private set; }
-        public static int TrackingComputerScript { get; private set; }
-        public static int TrackingLinkScript { get; private set; }
-        public static int SensorBoosterScript { get; private set; }
-        public static int SensorDampenerScript { get; private set; }
-        public static int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
-        public static int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
-        public static int CapBoosterToLoad { get; private set; } 
+        public int TrackingDisruptorScript { get; private set; }
+        public int TrackingComputerScript { get; private set; }
+        public int TrackingLinkScript { get; private set; }
+        public int SensorBoosterScript { get; private set; }
+        public int SensorDampenerScript { get; private set; }
+        public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
+        public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
+        public int CapBoosterToLoad { get; private set; } 
         //
         // OverLoad Settings (this WILL burn out modules, likely very quickly!
         // If you enable the overloading of a slot it is HIGHLY recommended you actually have something overloadable in that slot =/ 
         //
-        public static bool OverloadWeapons { get; set; }
+        public bool OverloadWeapons { get; set; }
         
         //
         // Questor GUI location settings
         //
-        public static int? WindowXPosition { get; set; }
-        public static int? WindowYPosition { get; set; }
-        public static int? EVEWindowXPosition { get; set; }
-        public static int? EVEWindowYPosition { get; set; }
-        public static int? EVEWindowXSize { get; set; }
-        public static int? EVEWindowYSize { get; set; }
+        public int? WindowXPosition { get; set; }
+        public int? WindowYPosition { get; set; }
+        public int? EVEWindowXPosition { get; set; }
+        public int? EVEWindowYPosition { get; set; }
+        public int? EVEWindowXSize { get; set; }
+        public int? EVEWindowYSize { get; set; }
 
         //
         // Email SMTP settings
         //
-        public static bool EmailSupport { get; private set; }
-        public static string EmailAddress { get; private set; }
-        public static string EmailPassword { get; private set; }
-        public static string EmailSMTPServer { get; private set; }
-        public static int EmailSMTPPort { get; private set; }
-        public static string EmailAddressToSendAlerts { get; set; }
-        public static bool? EmailEnableSSL { get; private set; }
+        public bool EmailSupport { get; private set; }
+        public string EmailAddress { get; private set; }
+        public string EmailPassword { get; private set; }
+        public string EmailSMTPServer { get; private set; }
+        public int EmailSMTPPort { get; private set; }
+        public string EmailAddressToSendAlerts { get; set; }
+        public bool? EmailEnableSSL { get; private set; }
 
         //
         // Skill Training Settings
         //
-        public static bool ThisToonShouldBeTrainingSkills { get; set; } //as opposed to another toon on the same account
+        public bool ThisToonShouldBeTrainingSkills { get; set; } //as opposed to another toon on the same account
 
-        public static string UserDefinedLavishScriptScript1 { get; set; }
-        public static string UserDefinedLavishScriptScript1Description { get; set; }
-        public static string UserDefinedLavishScriptScript2 { get; set; }
-        public static string UserDefinedLavishScriptScript2Description { get; set; }
-        public static string UserDefinedLavishScriptScript3 { get; set; }
-        public static string UserDefinedLavishScriptScript3Description { get; set; }
-        public static string UserDefinedLavishScriptScript4 { get; set; }
-        public static string UserDefinedLavishScriptScript4Description { get; set; }
+        public string UserDefinedLavishScriptScript1 { get; set; }
+        public string UserDefinedLavishScriptScript1Description { get; set; }
+        public string UserDefinedLavishScriptScript2 { get; set; }
+        public string UserDefinedLavishScriptScript2Description { get; set; }
+        public string UserDefinedLavishScriptScript3 { get; set; }
+        public string UserDefinedLavishScriptScript3Description { get; set; }
+        public string UserDefinedLavishScriptScript4 { get; set; }
+        public string UserDefinedLavishScriptScript4Description { get; set; }
 
-        public static string LoadQuestorDebugInnerspaceCommandAlias { get; set; }
-        public static string LoadQuestorDebugInnerspaceCommand { get; set; }
-        public static string UnLoadQuestorDebugInnerspaceCommandAlias { get; set; }
-        public static string UnLoadQuestorDebugInnerspaceCommand { get; set; }
+        public string LoadQuestorDebugInnerspaceCommandAlias { get; set; }
+        public string LoadQuestorDebugInnerspaceCommand { get; set; }
+        public string UnLoadQuestorDebugInnerspaceCommandAlias { get; set; }
+        public string UnLoadQuestorDebugInnerspaceCommand { get; set; }
 
         //
         // path information - used to load the XML and used in other modules
         //
-        public static string Path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public string Path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public static string CommonSettingsPath { get; private set; }
-        public static string CommonSettingsFileName { get; private set; }
+        public string CommonSettingsPath { get; private set; }
+        public string CommonSettingsFileName { get; private set; }
 
-        public static bool DefaultSettingsLoaded;
+        public event EventHandler<EventArgs> SettingsLoaded;
 
-        public static void ReadSettingsFromXML(XElement CharacterSettingsXml)
+        public bool DefaultSettingsLoaded;
+
+        public void ReadSettingsFromXML(XElement CharacterSettingsXml)
         {
-            if (!String.IsNullOrEmpty(Settings.CharacterName))
+            if (!String.IsNullOrEmpty(Settings.Instance.CharacterName))
             {
-                characterNameForLogs = Cache.Instance.FilterPath(Settings.CharacterName);
+                characterNameForLogs = Cache.Instance.FilterPath(Settings.Instance.CharacterName);
             }
             else if (!string.IsNullOrEmpty(CharacterName))
             {
@@ -288,22 +291,22 @@ namespace Questor.Modules.Lookup
                 characterNameForLogs = "UnknownCharacterName";
             }
 
-            Settings.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
-            Settings.CommonSettingsPath = System.IO.Path.Combine(Settings.Path, Settings.CommonSettingsFileName);
+            Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
+            Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
 
             XElement CommonSettingsXml;
-            if (File.Exists(Settings.CommonSettingsPath))
+            if (File.Exists(Settings.Instance.CommonSettingsPath))
             {
-                Settings.CommonXMLExists = true;
-                CommonSettingsXml = XDocument.Load(Settings.CommonSettingsPath).Root;
+                Settings.Instance.CommonXMLExists = true;
+                CommonSettingsXml = XDocument.Load(Settings.Instance.CommonSettingsPath).Root;
                 if (CommonSettingsXml == null)
                 {
-                    Logging.Log("Settings", "found [" + Settings.CommonSettingsPath + "] but was unable to load it: FATAL ERROR - use the provided settings.xml to create that file.", Logging.Red);
+                    Logging.Log("Settings", "found [" + Settings.Instance.CommonSettingsPath + "] but was unable to load it: FATAL ERROR - use the provided settings.xml to create that file.", Logging.Red);
                 }
             }
             else
             {
-                Settings.CommonXMLExists = false;
+                Settings.Instance.CommonXMLExists = false;
                 //
                 // if the common XML does not exist, load the characters XML into the CommonSettingsXml just so we can simplify the XML element loading stuff.
                 //
@@ -312,7 +315,7 @@ namespace Questor.Modules.Lookup
 
             if (CommonSettingsXml == null) return; // this should never happen as we load the characters xml here if the common xml is missing. adding this does quiet some warnings though
 
-            if (Settings.CommonXMLExists) Logging.Log("Settings", "Loading Settings from [" + Settings.CommonSettingsPath + "] and", Logging.Green);
+            if (Settings.Instance.CommonXMLExists) Logging.Log("Settings", "Loading Settings from [" + Settings.Instance.CommonSettingsPath + "] and", Logging.Green);
             Logging.Log("Settings", "Loading Settings from [" + Logging.CharacterSettingsPath + "]", Logging.Green);
             //
             // these are listed by feature and should likely be re-ordered to reflect that
@@ -419,7 +422,7 @@ namespace Questor.Modules.Lookup
             UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
             //setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
             TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
-            CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.CharacterName;
+            CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
             MemoryManagerTrimThreshold = (long?)CharacterSettingsXml.Element("memoryManagerTrimThreshold") ?? (long?)CommonSettingsXml.Element("memoryManagerTrimThreshold") ?? 524288000;
             EveServerName = (string)CharacterSettingsXml.Element("eveServerName") ?? (string)CommonSettingsXml.Element("eveServerName") ?? "Tranquility";
             EnforcedDelayBetweenModuleClicks = (int?)CharacterSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? (int?)CommonSettingsXml.Element("enforcedDelayBetweenModuleClicks") ?? 3000;
@@ -431,9 +434,9 @@ namespace Questor.Modules.Lookup
 
             //other option is "salvage"
 
-            if (Settings.CharacterMode.ToLower() == "dps".ToLower())
+            if (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
             {
-                Settings.CharacterMode = "Combat Missions".ToLower();
+                Settings.Instance.CharacterMode = "Combat Missions".ToLower();
             }
 
             AutoStart = (bool?)CharacterSettingsXml.Element("autoStart") ?? (bool?)CommonSettingsXml.Element("autoStart") ?? false; // auto Start enabled or disabled by default?
@@ -459,7 +462,7 @@ namespace Questor.Modules.Lookup
             //
             //CharacterNamesForMasterToInviteToFleet
             //
-            Settings.CharacterNamesForMasterToInviteToFleet.Clear();
+            Settings.Instance.CharacterNamesForMasterToInviteToFleet.Clear();
             XElement xmlCharacterNamesForMasterToInviteToFleet = CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet") ?? CharacterSettingsXml.Element("characterNamesForMasterToInviteToFleet");
             if (xmlCharacterNamesForMasterToInviteToFleet != null)
             {
@@ -467,24 +470,24 @@ namespace Questor.Modules.Lookup
                 int i = 1;
                 foreach (XElement CharacterToInvite in xmlCharacterNamesForMasterToInviteToFleet.Elements("character"))
                 {
-                    Settings.CharacterNamesForMasterToInviteToFleet.Add((string)CharacterToInvite);
+                    Settings.Instance.CharacterNamesForMasterToInviteToFleet.Add((string)CharacterToInvite);
                     if (Logging.DebugFleetSupportMaster) Logging.Log("Settings.LoadFleetList", "[" + i + "] CharacterName [" + (string)CharacterToInvite + "]", Logging.Teal);
                     i++;
                 }
-                if (Settings.FleetSupportMaster) Logging.Log("Settings", "        CharacterNamesForMasterToInviteToFleet now has [" + CharacterNamesForMasterToInviteToFleet.Count + "] entries", Logging.White);
+                if (Settings.Instance.FleetSupportMaster) Logging.Log("Settings", "        CharacterNamesForMasterToInviteToFleet now has [" + CharacterNamesForMasterToInviteToFleet.Count + "] entries", Logging.White);
             }
 
             //
             // Agent Standings and Mission Settings
             //
-            //if (Settings.CharacterMode.ToLower() == "Combat Missions".ToLower())
+            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
             //{
             MissionSettings.MinAgentBlackListStandings = (float?)CharacterSettingsXml.Element("minAgentBlackListStandings") ?? (float?)CommonSettingsXml.Element("minAgentBlackListStandings") ?? (float)6.0;
             MissionSettings.MinAgentGreyListStandings = (float?)CharacterSettingsXml.Element("minAgentGreyListStandings") ?? (float?)CommonSettingsXml.Element("minAgentGreyListStandings") ?? (float)5.0;
             MissionSettings.WaitDecline = (bool?)CharacterSettingsXml.Element("waitDecline") ?? (bool?)CommonSettingsXml.Element("waitDecline") ?? false;
 
             string relativeMissionsPath = (string)CharacterSettingsXml.Element("missionsPath") ?? (string)CommonSettingsXml.Element("missionsPath");
-            MissionSettings.MissionsPath = System.IO.Path.Combine(Settings.Path, relativeMissionsPath);
+            MissionSettings.MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
             Logging.Log("Settings", "MissionsPath is: [" + MissionSettings.MissionsPath + "]", Logging.White);
 
             MissionSettings.RequireMissionXML = (bool?)CharacterSettingsXml.Element("requireMissionXML") ?? (bool?)CommonSettingsXml.Element("requireMissionXML") ?? false;
@@ -601,22 +604,22 @@ namespace Questor.Modules.Lookup
                 //
                 HomeBookmarkName = (string)CharacterSettingsXml.Element("homeBookmarkName") ?? (string)CommonSettingsXml.Element("homeBookmarkName") ?? "myHomeBookmark";
                 LootHangarTabName = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
-                if (string.IsNullOrEmpty(Settings.LootHangarTabName))
+                if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                 {
                     Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
                 }
                 else
                 {
-                    Logging.Log("Settings", "Loothangar [" + Settings.LootHangarTabName + "]", Logging.White);
+                    Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangarTabName + "]", Logging.White);
                 }
                 AmmoHangarTabName = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
-                if (string.IsNullOrEmpty(Settings.AmmoHangarTabName))
+                if (string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                 {
                     Logging.Log("Settings", "AmmoHangar [" + "ItemHangar" + "]", Logging.White);
                 }
                 else
                 {
-                    Logging.Log("Settings", "AmmoHangar [" + Settings.AmmoHangarTabName + "]", Logging.White);
+                    Logging.Log("Settings", "AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "]", Logging.White);
                 }
                 BookmarkHangar = (string)CharacterSettingsXml.Element("bookmarkHangar") ?? (string)CommonSettingsXml.Element("bookmarkHangar");
                 LootContainerName = (string)CharacterSettingsXml.Element("lootContainer") ?? (string)CommonSettingsXml.Element("lootContainer");
@@ -921,7 +924,7 @@ namespace Questor.Modules.Lookup
             //
             // List of Agents we should use
             //
-            //if (Settings.CharacterMode.ToLower() == "Combat Missions".ToLower())
+            //if (Settings.Instance.CharacterMode.ToLower() == "Combat Missions".ToLower())
             //{
             MissionSettings.ListOfAgents.Clear();
             XElement agentList = CharacterSettingsXml.Element("agentsList") ?? CommonSettingsXml.Element("agentsList");
@@ -1046,37 +1049,37 @@ namespace Questor.Modules.Lookup
             MissionSettings.LoadFactionBlacklist(CharacterSettingsXml, CommonSettingsXml);
         }
 
-        public static void LoadSettings(bool forcereload = false)
+        public void LoadSettings(bool forcereload = false)
         {
             try
             {
                 if (Cache.Instance.ScheduleCharacterName != null)
                 {
-                    Settings.CharacterName = Cache.Instance.ScheduleCharacterName;
-                    //Logging.Log("Settings", "CharacterName was pulled from the Scheduler: [" + Settings.CharacterName + "]", Logging.White);
+                    Settings.Instance.CharacterName = Cache.Instance.ScheduleCharacterName;
+                    //Logging.Log("Settings", "CharacterName was pulled from the Scheduler: [" + Settings.Instance.CharacterName + "]", Logging.White);
                 }
                 else
                 {
-                    Settings.CharacterName = Cache.Instance.DirectEve.Me.Name;
-                    //Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.CharacterName + "]", Logging.White);
+                    Settings.Instance.CharacterName = Cache.Instance.DirectEve.Me.Name;
+                    //Logging.Log("Settings", "CharacterName was pulled from your live EVE session: [" + Settings.Instance.CharacterName + "]", Logging.White);
                 }
             }
             catch (Exception ex)
             {
                 Logging.Log("Settings", "Exception trying to find CharacterName [" + ex + "]", Logging.White);
-                Settings.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
+                Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
             }
 
-            Logging.CharacterSettingsPath = System.IO.Path.Combine(Settings.Path, Cache.Instance.FilterPath(Settings.CharacterName) + ".xml");
-            //Settings.CommonSettingsPath = System.IO.Path.Combine(Settings.Path, Settings.CommonSettingsFileName);
+            Logging.CharacterSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Cache.Instance.FilterPath(Settings.Instance.CharacterName) + ".xml");
+            //Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
 
-            if (Logging.CharacterSettingsPath == System.IO.Path.Combine(Settings.Path, ".xml"))
+            if (Logging.CharacterSettingsPath == System.IO.Path.Combine(Settings.Instance.Path, ".xml"))
             {
                 if (DateTime.UtcNow > Time.Instance.LastSessionChange.AddSeconds(30))
                 {
                     Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
-                    Settings.CharacterName = "NoCharactersLoggedInAnymore";
+                    Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
                     Cache.Instance.SessionState = "Quitting";
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
@@ -1085,13 +1088,10 @@ namespace Questor.Modules.Lookup
                 }
 
                 Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
-                Settings.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
+                Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
                 //Cache.Instance.SessionState = "Quitting";
             }
 
-            //
-            // this will stop ALL reloading of settings if the file doesnt get updated. We should be able to force a reloading manually (not working atm)
-            //
             bool reloadSettings = true;
             if (File.Exists(Logging.CharacterSettingsPath))
             {
@@ -1101,9 +1101,9 @@ namespace Questor.Modules.Lookup
                 //}
             }
 
-            //if (File.Exists(Settings.CommonSettingsPath))
+            //if (File.Exists(Settings.Instance.CommonSettingsPath))
             //{
-            //    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.CommonSettingsPath);
+            //    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.CommonSettingsPath);
             //}
 
             if (!reloadSettings)
@@ -1111,19 +1111,19 @@ namespace Questor.Modules.Lookup
 
             _lastModifiedDate = File.GetLastWriteTime(Logging.CharacterSettingsPath);
 
-            Settings.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
-            Settings.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Path, "faction.XML"));
-            Settings.SchedulesXMLExists = File.Exists(System.IO.Path.Combine(Settings.Path, "schedules.XML"));
-            Settings.QuestorManagerExists = File.Exists(System.IO.Path.Combine(Settings.Path, "QuestorManager.exe"));
-            Settings.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Path, "QuestorSettings.exe"));
-            Settings.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Path, "QuestorStatistics.exe"));
+            Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
+            Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
+            Settings.Instance.SchedulesXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "schedules.XML"));
+            Settings.Instance.QuestorManagerExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorManager.exe"));
+            Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
+            Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
 
-            if (!File.Exists(Logging.CharacterSettingsPath) && !Settings.DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
+            if (!File.Exists(Logging.CharacterSettingsPath) && !Settings.Instance.DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
-                Settings.CharacterXMLExists = false;
+                Settings.Instance.CharacterXMLExists = false;
                 DefaultSettingsLoaded = true;
                 //LavishScript.ExecuteCommand("log " + Cache.Instance.DirectEve.Me.Name + ".log");
-                //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
+                //LavishScript.ExecuteCommand("uplink echo Settings: unable to find [" + Settings.Instance.SettingsPath + "] loading default (bad! bad! bad!) settings: you should fix this! NOW.");
                 Logging.Log("Settings", "WARNING! unable to find [" + Logging.CharacterSettingsPath + "] loading default generic, and likely incorrect, settings: WARNING!", Logging.Orange);
                 Logging.DebugActivateGate = false;
                 Logging.DebugActivateWeapons = false;
@@ -1208,7 +1208,7 @@ namespace Questor.Modules.Lookup
                 UseInnerspace = true;
                 // setEveClientDestinationWhenTraveling = false;
 
-                CharacterToAcceptInvitesFrom = Settings.CharacterName;
+                CharacterToAcceptInvitesFrom = Settings.Instance.CharacterName;
                 //
                 // Misc Settings
                 //
@@ -1243,7 +1243,7 @@ namespace Questor.Modules.Lookup
                 MissionSettings.MinAgentGreyListStandings = (float)-1.7;
                 MissionSettings.WaitDecline = false;
                 const string relativeMissionsPath = "Missions";
-                MissionSettings.MissionsPath = System.IO.Path.Combine(Settings.Path, relativeMissionsPath);
+                MissionSettings.MissionsPath = System.IO.Path.Combine(Settings.Instance.Path, relativeMissionsPath);
                 //Logging.Log("Settings","Default MissionXMLPath is: [" + MissionsPath + "]",Logging.White);
                 MissionSettings.RequireMissionXML = false;
                 MissionSettings.AllowNonStorylineCourierMissionsInLowSec = false;
@@ -1579,7 +1579,7 @@ namespace Questor.Modules.Lookup
             }
             else //if the settings file exists - load the characters settings XML
             {
-                Settings.CharacterXMLExists = true;
+                Settings.Instance.CharacterXMLExists = true;
                 XElement CharacterSettingsXml;
                 using (XmlTextReader reader = new XmlTextReader(Logging.CharacterSettingsPath))
                 {
@@ -1607,7 +1607,6 @@ namespace Questor.Modules.Lookup
             // Log location and log names defined here
             //
             Logging.Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + characterNameForLogs + "\\");
-            CachePath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\cache\\" + characterNameForLogs + "\\");
 
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
             Logging.ConsoleLogPath = System.IO.Path.Combine(Logging.Logpath, "Console\\");
@@ -1641,7 +1640,6 @@ namespace Questor.Modules.Lookup
             try
             {
                 Directory.CreateDirectory(Logging.Logpath);
-                Directory.CreateDirectory(CachePath);
                 Directory.CreateDirectory(Logging.ConsoleLogPath);
                 Directory.CreateDirectory(Statistics.SessionsLogPath);
                 Directory.CreateDirectory(Statistics.DroneStatsLogPath);
@@ -1660,14 +1658,21 @@ namespace Questor.Modules.Lookup
                 Logging.Log("Settings", "Problem creating directories for logs [" + exception + "]", Logging.Debug);
             }
             //create all the logging directories even if they are not configured to be used - we can adjust this later if it really bugs people to have some potentially empty directories.
-
-            if (!Settings.DefaultSettingsLoaded)
+            
+            if (!Settings.Instance.DefaultSettingsLoaded)
             {
-                Settings.LoadSettings();
+                if (SettingsLoaded != null)
+                {
+                    SettingsLoadedICount++;
+                    if (Settings.Instance.CommonXMLExists) Logging.Log("Settings", "[" + SettingsLoadedICount + "] Done Loading Settings from [" + Settings.Instance.CommonSettingsPath + "] and", Logging.Green);
+                    Logging.Log("Settings", "[" + SettingsLoadedICount + "] Done Loading Settings from [" + Logging.CharacterSettingsPath + "]", Logging.Green);
+
+                    SettingsLoaded(this, new EventArgs());
+                }
             }
         }
 
-        public static int RandomNumber(int min, int max)
+        public int RandomNumber(int min, int max)
         {
             Random random = new Random();
             return random.Next(min, max);

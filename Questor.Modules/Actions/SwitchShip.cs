@@ -52,7 +52,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case SwitchShipState.ActivateCombatShip:
-                    string shipName = Settings.CombatShipName.ToLower();
+                    string shipName = Settings.Instance.CombatShipName.ToLower();
 
                     if (Cache.Instance.ActiveShip == null || (!string.IsNullOrEmpty(shipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != shipName))
                     {
@@ -78,7 +78,7 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    _States.CurrentSwitchShipState = Settings.UseFittingManager ? SwitchShipState.OpenFittingWindow : SwitchShipState.Cleanup;
+                    _States.CurrentSwitchShipState = Settings.Instance.UseFittingManager ? SwitchShipState.OpenFittingWindow : SwitchShipState.Cleanup;
 
                     break;
 

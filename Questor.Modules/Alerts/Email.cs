@@ -40,8 +40,8 @@ namespace Questor.Modules.Alerts
                 
                 if (!ShipLostEmailSent)
                 {
-                    string subject = "ShipLostEmail: [" + Settings.CharacterName + "] is in a pod";
-                    string body = "ShipLostEmail: [" + Settings.CharacterName + "] is in a pod in [" + _locationName + "]";
+                    string subject = "ShipLostEmail: [" + Settings.Instance.CharacterName + "] is in a pod";
+                    string body = "ShipLostEmail: [" + Settings.Instance.CharacterName + "] is in a pod in [" + _locationName + "]";
                     if (SendEmail(subject, body))
                     {
                         ShipLostEmailSent = true;
@@ -69,33 +69,33 @@ namespace Questor.Modules.Alerts
 
         public static bool SendEmail(string subject, string body)
         {
-            if (Settings.EmailSupport)
+            if (Settings.Instance.EmailSupport)
             {
                 bool _useSSL;
-                if (Settings.EmailEnableSSL != null)
+                if (Settings.Instance.EmailEnableSSL != null)
                 {
-                    _useSSL = (bool)Settings.EmailEnableSSL;
+                    _useSSL = (bool)Settings.Instance.EmailEnableSSL;
                 }
                 else
                 {
                     _useSSL = false;
                 }
 
-                if (!String.IsNullOrEmpty(Settings.EmailAddress) &&
-                    !String.IsNullOrEmpty(Settings.EmailPassword) &&
-                    !String.IsNullOrEmpty(Settings.EmailSMTPServer) &&
-                    !String.IsNullOrEmpty(Settings.EmailAddressToSendAlerts)
+                if (!String.IsNullOrEmpty(Settings.Instance.EmailAddress) &&
+                    !String.IsNullOrEmpty(Settings.Instance.EmailPassword) &&
+                    !String.IsNullOrEmpty(Settings.Instance.EmailSMTPServer) &&
+                    !String.IsNullOrEmpty(Settings.Instance.EmailAddressToSendAlerts)
                     )
                 {
                     try
                     {
-                        SmtpClient smtpClient = new SmtpClient(Settings.EmailSMTPServer, Settings.EmailSMTPPort) //587
+                        SmtpClient smtpClient = new SmtpClient(Settings.Instance.EmailSMTPServer, Settings.Instance.EmailSMTPPort) //587
                         {
-                            Credentials = new NetworkCredential(Settings.EmailAddress, Settings.EmailPassword),
+                            Credentials = new NetworkCredential(Settings.Instance.EmailAddress, Settings.Instance.EmailPassword),
                             EnableSsl = _useSSL
                         };
-                        smtpClient.Send(Settings.EmailAddress, Settings.EmailAddressToSendAlerts, subject, body);
-                        Logging.Log("Email.SendEmail", "Sent Email to [" + Settings.EmailAddressToSendAlerts + "]", Logging.Debug);
+                        smtpClient.Send(Settings.Instance.EmailAddress, Settings.Instance.EmailAddressToSendAlerts, subject, body);
+                        Logging.Log("Email.SendEmail", "Sent Email to [" + Settings.Instance.EmailAddressToSendAlerts + "]", Logging.Debug);
                     }
                     catch (Exception exception)
                     {

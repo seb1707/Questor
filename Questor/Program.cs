@@ -528,9 +528,9 @@ namespace Questor
             //if (Cache.Instance.SessionState != "Quitting")
             //{
             //    // Update settings (settings only load if character name changed)
-            //    if (!Settings.DefaultSettingsLoaded)
+            //    if (!Settings.Instance.DefaultSettingsLoaded)
             //    {
-            //        Settings.LoadSettings();
+            //        Settings.Instance.LoadSettings();
             //    }
             //}
 

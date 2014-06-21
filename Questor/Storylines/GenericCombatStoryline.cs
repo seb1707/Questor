@@ -45,6 +45,13 @@ namespace Questor.Storylines
             //_salvage = new Salvage();
             //_statistics = new Statistics();
             _combatMissionCtrl = new CombatMissionCtrl();
+
+            Settings.Instance.SettingsLoaded += ApplySettings;
+        }
+
+        private void ApplySettings(object sender, EventArgs e)
+        {
+            Settings.Instance.LoadSettings(true);
         }
 
         /// <summary>
@@ -181,7 +188,7 @@ namespace Questor.Storylines
             switch (_state)
             {
                 case GenericCombatStorylineState.WarpOutStation:
-                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
+                    DirectBookmark warpOutBookMark = Cache.Instance.BookmarksByLabel(Settings.Instance.UndockBookmarkPrefix ?? "").OrderByDescending(b => b.CreatedOn).FirstOrDefault(b => b.LocationId == Cache.Instance.DirectEve.Session.SolarSystemId);
                     long solarid = Cache.Instance.DirectEve.Session.SolarSystemId ?? -1;
 
                     if (warpOutBookMark == null)
@@ -227,8 +234,8 @@ namespace Questor.Storylines
                     if (missionDestination == null || missionDestination.AgentId != Cache.Instance.CurrentStorylineAgentId) // We assume that this will always work "correctly" (tm)
                     {
                         string nameOfBookmark ="";
-                        if (Settings.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
-                        if (Settings.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+                        if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+                        if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
                         if (nameOfBookmark == "") nameOfBookmark = "Encounter";
                         Logging.Log("GenericCombatStoryline", "Setting Destination to 1st bookmark from AgentID: [" + Cache.Instance.CurrentStorylineAgentId + "] with [" + nameOfBookmark + "] in the title", Logging.White);
                         Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(Cache.Instance.CurrentStorylineAgentId, nameOfBookmark));

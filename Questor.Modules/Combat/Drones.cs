@@ -624,37 +624,37 @@ namespace Questor.Modules.Combat
             //
 
             // Do we have ANY warp scrambling entities targeted starting with currentTarget
-            // this needs Settings.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddWarpScramblersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.WarpScrambler, Drones.AddWarpScramblersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY ECM entities targeted starting with currentTarget
-            // this needs Settings.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddECMsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.Webbing, Drones.AddECMsToDroneTargetList, distance) != null)
                 return true;
 
             // Do we have ANY tracking disrupting entities targeted starting with currentTarget
-            // this needs Settings.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddTrackingDisruptorsToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Drones.AddTrackingDisruptorsToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Neutralizing entities targeted starting with currentTarget
-            // this needs Settings.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddNeutralizersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Drones.AddNeutralizersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Target Painting entities targeted starting with currentTarget
-            // this needs Settings.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddTargetPaintersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Drones.AddTargetPaintersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Sensor Dampening entities targeted starting with currentTarget
-            // this needs Settings.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddDampenersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Drones.AddDampenersToDronePriorityTargetList, distance) != null)
                 return true;
 
             // Do we have ANY Webbing entities targeted starting with currentTarget
-            // this needs Settings.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
+            // this needs Settings.Instance.AddWebifiersToPrimaryWeaponsPriorityTargetList true, otherwise they will just get handled in any order below...
             if (FindDronePriorityTarget(currentDroneTarget, DronePriority.PriorityKillTarget, Drones.AddWebifiersToDronePriorityTargetList, distance) != null)
                 return true;
 
@@ -1198,7 +1198,7 @@ namespace Questor.Modules.Combat
                 }
 
                 // Are we done (for now) ?
-                if (!Combat.TargetedBy.All(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.IsInDroneRange) && !WarpScrambled && !Settings.FleetSupportSlave)
+                if (!Combat.TargetedBy.All(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.IsInDroneRange) && !WarpScrambled && !Settings.Instance.FleetSupportSlave)
                 {
                     int TargtedByCount = 0;
                     if (Combat.TargetedBy.Any())
@@ -1420,7 +1420,7 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.InSpace &&
                 Cache.Instance.ActiveShip.Entity != null &&
                 !Cache.Instance.ActiveShip.Entity.IsCloaked &&
-                Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.CombatShipName &&
+                Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
                 Drones.UseDrones &&
                 !Cache.Instance.InWarp)
             {
@@ -1502,7 +1502,7 @@ namespace Questor.Modules.Combat
 
         private static bool OutOfDronesDronesState()
         {
-            if (Drones.UseDrones && Settings.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
+            if (Drones.UseDrones && Settings.Instance.CharacterMode == "CombatMissions" && _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
             {
                 if (Statistics.OutOfDronesCount >= 3)
                 {

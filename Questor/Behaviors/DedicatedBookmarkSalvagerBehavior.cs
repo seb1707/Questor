@@ -64,10 +64,17 @@ namespace Questor.Behaviors
             //
             // this is combat mission specific and needs to be generalized
             //
+            Settings.Instance.SettingsLoaded += SettingsLoaded;
+
             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
             _States.CurrentUnloadLootState = UnloadLootState.Idle;
             _States.CurrentTravelerState = TravelerState.Idle;
+        }
+
+        public void SettingsLoaded(object sender, EventArgs e)
+        {
+            ValidateDedicatedSalvageSettings();
         }
 
         public void DebugPerformanceClearandStartTimer()
@@ -83,6 +90,25 @@ namespace Questor.Behaviors
                 Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
         }
 
+        public void ValidateDedicatedSalvageSettings()
+        {
+            ValidSettings = true;
+            DirectAgent agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
+
+            if (agent == null || !agent.IsValid)
+            {
+                Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
+                ValidSettings = false;
+            }
+            else
+            {
+                //Settings.Instance.LoadSettings(true);
+                Arm.AgentId = agent.AgentId;
+                Statistics.AgentID = agent.AgentId;
+                AgentID = agent.AgentId;
+            }
+        }
+
         private void BeginClosingQuestor()
         {
             Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
@@ -91,14 +117,25 @@ namespace Questor.Behaviors
 
         public void ProcessState()
         {
+            // Invalid settings, quit while we're ahead
+            if (!ValidSettings)
+            {
+                if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
+                {
+                    ValidateDedicatedSalvageSettings();
+                    LastAction = DateTime.UtcNow;
+                }
+                return;
+            }
+
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //this local is safe check is useless as their is no LocalWatch processstate running every tick...
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //If local unsafe go to base and do not start mission again
-            if (Settings.FinishWhenNotSafe && (_States.CurrentDedicatedBookmarkSalvagerBehaviorState != DedicatedBookmarkSalvagerBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
+            if (Settings.Instance.FinishWhenNotSafe && (_States.CurrentDedicatedBookmarkSalvagerBehaviorState != DedicatedBookmarkSalvagerBehaviorState.GotoNearestStation /*|| State!=QuestorState.GotoBase*/))
             {
                 //need to remove spam
-                if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.LocalBadStandingPilotsToTolerate, Settings.LocalBadStandingLevelToConsiderBad))
+                if (Cache.Instance.InSpace && !Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                 {
                     EntityCache station = null;
                     if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
@@ -187,7 +224,7 @@ namespace Questor.Behaviors
                     }
 
                     // only attempt to write the mission statistics logs if one of the mission stats logs is enabled in settings
-                    //if (Settings.SalvageStats1Log)
+                    //if (Settings.Instance.SalvageStats1Log)
                     //{
                     //    if (!Statistics.Instance.SalvageLoggingCompleted)
                     //    {
@@ -196,7 +233,7 @@ namespace Questor.Behaviors
                     //    }
                     //}
 
-                    if (Settings.AutoStart)
+                    if (Settings.Instance.AutoStart)
                     {
                         //we know we are connected here
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
@@ -267,14 +304,15 @@ namespace Questor.Behaviors
 
                 case DedicatedBookmarkSalvagerBehaviorState.Start:
                     Salvage.OpenWrecks = true;
+                    ValidateDedicatedSalvageSettings();
                     _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.UnloadLoot;
                     break;
 
                 case DedicatedBookmarkSalvagerBehaviorState.LocalWatch:
-                    if (Settings.UseLocalWatch)
+                    if (Settings.Instance.UseLocalWatch)
                     {
                         Time.Instance.LastLocalWatchAction = DateTime.UtcNow;
-                        if (Cache.Instance.LocalSafe(Settings.LocalBadStandingPilotsToTolerate, Settings.LocalBadStandingLevelToConsiderBad))
+                        if (Cache.Instance.LocalSafe(Settings.Instance.LocalBadStandingPilotsToTolerate, Settings.Instance.LocalBadStandingLevelToConsiderBad))
                         {
                             Logging.Log("DedicatedBookmarkSalvagerBehavior.LocalWatch", "local is clear", Logging.White);
                             _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.BeginAfterMissionSalvaging;
@@ -344,7 +382,7 @@ namespace Questor.Behaviors
                     {
                         if (Cache.Instance.GetSalvagingBookmark == null)
                         {
-                            BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.BookmarkPrefix + " ");
+                            BookmarksThatAreNotReadyYet = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
                             if (BookmarksThatAreNotReadyYet != null &&  BookmarksThatAreNotReadyYet.Any())
                             {
                                 Logging.Log("DedicatedBookmarkSalvagerBehavior", "CheckBookmarkAge: There are [" + BookmarksThatAreNotReadyYet.Count() + "] Salvage Bookmarks that have not yet aged [" + Salvage.AgeofBookmarksForSalvageBehavior + "] min.", Logging.White);

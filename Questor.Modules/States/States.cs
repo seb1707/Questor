@@ -10,7 +10,7 @@ namespace Questor.Modules.States
     {
         public static void LavishEvent_QuestorIdle()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorIdleEvent = LavishScript.Events.RegisterEvent("QuestorIdle");
                 LavishScript.Events.ExecuteEvent(QuestorIdleEvent, "");
@@ -19,7 +19,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorStateEvent = LavishScript.Events.RegisterEvent("QuestorState");
                 LavishScript.Events.ExecuteEvent(QuestorStateEvent, _States.CurrentQuestorState.ToString());
@@ -28,7 +28,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_SkillQueueHasRoom()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint SkillQueueHasRoomEvent = LavishScript.Events.RegisterEvent("SkillQueueHasRoom");
                 LavishScript.Events.ExecuteEvent(SkillQueueHasRoomEvent, "");
@@ -37,7 +37,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorCombatMissionsBehaviorState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorCombatMissionsBehaviorStateEvent = LavishScript.Events.RegisterEvent("QuestorCombatMissionsBehaviorState");
                 LavishScript.Events.ExecuteEvent(QuestorCombatMissionsBehaviorStateEvent, _States.CurrentCombatMissionBehaviorState.ToString());
@@ -46,7 +46,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorDedicatedBookmarkSalvagerBehaviorState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorDedicatedBookmarkSalvagerBehaviorStateEvent = LavishScript.Events.RegisterEvent("QuestorDedicatedBookmarkSalvagerBehaviorState");
                 LavishScript.Events.ExecuteEvent(QuestorDedicatedBookmarkSalvagerBehaviorStateEvent, _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString());
@@ -55,16 +55,16 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorAutoStartState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorAutoStartStateEvent = LavishScript.Events.RegisterEvent("QuestorAutoStartState");
-                LavishScript.Events.ExecuteEvent(QuestorAutoStartStateEvent, Settings.AutoStart.ToString());
+                LavishScript.Events.ExecuteEvent(QuestorAutoStartStateEvent, Settings.Instance.AutoStart.ToString());
             }
         }
 
         public static void LavishEvent_QuestorExitWhenIdleState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorExitWhenIdleStateEvent = LavishScript.Events.RegisterEvent("QuestorExitWhenIdleState");
                 LavishScript.Events.ExecuteEvent(QuestorExitWhenIdleStateEvent, Cache.Instance.ExitWhenIdle.ToString());
@@ -73,16 +73,16 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorDisable3DState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorDisable3DStateEvent = LavishScript.Events.RegisterEvent("QuestorDisable3DState");
-                LavishScript.Events.ExecuteEvent(QuestorDisable3DStateEvent, Settings.Disable3D.ToString());
+                LavishScript.Events.ExecuteEvent(QuestorDisable3DStateEvent, Settings.Instance.Disable3D.ToString());
             }
         }
 
         public static void LavishEvent_QuestorPanicState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorPanicStateEvent = LavishScript.Events.RegisterEvent("QuestorPanicState");
                 LavishScript.Events.ExecuteEvent(QuestorPanicStateEvent, _States.CurrentPanicState.ToString());
@@ -91,7 +91,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorPausedState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorPausedStateEvent = LavishScript.Events.RegisterEvent("QuestorPausedState");
                 LavishScript.Events.ExecuteEvent(QuestorPausedStateEvent, Cache.Instance.Paused.ToString());
@@ -100,7 +100,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorDronesState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorDronesStateEvent = LavishScript.Events.RegisterEvent("QuestorDronesState");
                 LavishScript.Events.ExecuteEvent(QuestorDronesStateEvent, _States.CurrentDroneState.ToString());
@@ -109,7 +109,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorCombatState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorCombatStateEvent = LavishScript.Events.RegisterEvent("QuestorCombatState");
                 LavishScript.Events.ExecuteEvent(QuestorCombatStateEvent, _States.CurrentCombatState.ToString());
@@ -118,7 +118,7 @@ namespace Questor.Modules.States
 
         public static void LavishEvent_QuestorTravelerState()
         {
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 uint QuestorTravelerStateEvent = LavishScript.Events.RegisterEvent("QuestorTravelerState");
                 LavishScript.Events.ExecuteEvent(QuestorTravelerStateEvent, _States.CurrentTravelerState.ToString());
@@ -127,7 +127,7 @@ namespace Questor.Modules.States
 
         //public static void LavishEvent_QuestorCurrentSolarSystem()
         //{
-        //    if (Settings.UseInnerspace)
+        //    if (Settings.Instance.UseInnerspace)
         //    {
         //        uint QuestorCurrentSolarSystemEvent = LavishScript.Events.RegisterEvent("QuestorCurrentSolarSystem");
         //        LavishScript.Events.ExecuteEvent(QuestorCurrentSolarSystemEvent, );
@@ -136,7 +136,7 @@ namespace Questor.Modules.States
 
         //public static void LavishEvent_QuestorisInSpace()
         //{
-        //    if (Settings.UseInnerspace)
+        //    if (Settings.Instance.UseInnerspace)
         //    {
         //        uint QuestorIsInSpaceEvent = LavishScript.Events.RegisterEvent("QuestorIsInSpace");
         //        LavishScript.Events.ExecuteEvent(QuestorIsInSpaceEvent, Cache.Instance.InSpace.ToString());

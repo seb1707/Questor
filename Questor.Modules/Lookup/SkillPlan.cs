@@ -108,7 +108,7 @@ namespace Questor.Modules.Lookup
             {
 				if (skillPreReqs == null) 
                 {
-					skillPreReqs = XDocument.Load(Settings.Path + "\\Skill_Prerequisites.xml");
+					skillPreReqs = XDocument.Load(Settings.Instance.Path + "\\Skill_Prerequisites.xml");
 					if (Logging.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites","Skill_Prerequisites.xml Loaded.", Logging.Debug);
 				}
 			} 
@@ -261,11 +261,11 @@ namespace Questor.Modules.Lookup
 			myRawSkillPlan.Clear();
 			try
 			{
-				string SkillPlanFile = Settings.Path + "\\skillPlan-" + Cache.Instance.DirectEve.Me.Name + ".txt".ToLower() ;
+				string SkillPlanFile = Settings.Instance.Path + "\\skillPlan-" + Cache.Instance.DirectEve.Me.Name + ".txt".ToLower() ;
 
 				if (!File.Exists(SkillPlanFile))
 				{
-					string GenericSkillPlanFile = Settings.Path + "\\" + "skillPlan.txt".ToLower();
+					string GenericSkillPlanFile = Settings.Instance.Path + "\\" + "skillPlan.txt".ToLower();
 					Logging.Log("importSkillPlan", "Missing Character Specific skill plan file [" + SkillPlanFile + "], trying generic file ["  + GenericSkillPlanFile +  "]", Logging.Teal);
 					SkillPlanFile = GenericSkillPlanFile;
 				}
@@ -482,7 +482,7 @@ namespace Questor.Modules.Lookup
 				
 				if (skillPreReqs == null) 
                 {
-					skillPreReqs = XDocument.Load(Settings.Path + "\\Skill_Prerequisites.xml");
+					skillPreReqs = XDocument.Load(Settings.Instance.Path + "\\Skill_Prerequisites.xml");
 					if (Logging.DebugSkillTraining) Logging.Log("DoWeHaveTheRightPrerequisites","Skill_Prerequisites.xml Loaded.", Logging.Debug);
 				}
 

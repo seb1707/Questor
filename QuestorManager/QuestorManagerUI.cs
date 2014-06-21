@@ -133,7 +133,7 @@ namespace QuestorManager
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.AutoStart = true;
+                Settings.Instance.AutoStart = true;
                 Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
                 Cache.Instance.SessionState = "Quitting";
                 Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
@@ -147,17 +147,17 @@ namespace QuestorManager
             //
             try
             {
-                MissionSettings.InvIgnore = XDocument.Load(Settings.Path + "\\InvIgnore.xml"); //items to ignore
+                MissionSettings.InvIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
             }
             catch (Exception exception)
             {
-                Logging.Log("QuestorManager.Valuedump", "Unable to load [" + Settings.Path + "\\InvIgnore.xml" + "][" + exception + "]", Logging.Teal);
+                Logging.Log("QuestorManager.Valuedump", "Unable to load [" + Settings.Instance.Path + "\\InvIgnore.xml" + "][" + exception + "]", Logging.Teal);
             }
 
             RefreshAvailableXMLJobs();
             Cache.Instance.DirectEve.OnFrame += OnFrame;
 
-            if (Settings.UseInnerspace)
+            if (Settings.Instance.UseInnerspace)
             {
                 LavishScript.Commands.AddCommand("QMStart", StartProcessing);
                 LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
@@ -216,16 +216,16 @@ namespace QuestorManager
                 Cache.Instance.InvalidateCache();
 
                 // Update settings (settings only load if character name changed)
-                if (!Settings.DefaultSettingsLoaded)
+                if (!Settings.Instance.DefaultSettingsLoaded)
                 {
-                    Settings.LoadSettings();
+                    Settings.Instance.LoadSettings();
                 }
                 CharacterName = Cache.Instance.DirectEve.Me.Name;
 
                 // Check 3D rendering
-                if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Disable3D)
+                if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
                 {
-                    Cache.Instance.DirectEve.Rendering3D = !Settings.Disable3D;
+                    Cache.Instance.DirectEve.Rendering3D = !Settings.Instance.Disable3D;
                 }
 
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastUpdateOfSessionRunningTime).TotalSeconds < Time.Instance.SessionRunningTimeUpdate_seconds)
@@ -382,7 +382,7 @@ namespace QuestorManager
 
                     case QuestormanagerState.CmdLine:
 
-                        if (Settings.UseInnerspace)
+                        if (Settings.Instance.UseInnerspace)
                         {
                             Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
                             LavishScript.ExecuteCommand(LstTask.Items[0].SubItems[1].Text);
@@ -1157,7 +1157,7 @@ namespace QuestorManager
                 return;
             }
 
-            string fic = Path.Combine(Settings.Path, cmbXML.Text + ".jobs");
+            string fic = Path.Combine(Settings.Instance.Path, cmbXML.Text + ".jobs");
             string strXml = "<Jobs>";
 
             for (int o = 0; o < LstTask.Items.Count; o++)
@@ -1178,7 +1178,7 @@ namespace QuestorManager
         {
             cmbXML.Items.Clear();
 
-            DirectoryInfo o = new System.IO.DirectoryInfo(Settings.Path);
+            DirectoryInfo o = new System.IO.DirectoryInfo(Settings.Instance.Path);
 
             FileInfo[] myfiles = o.GetFiles("*.jobs");
             for (int y = 0; y <= myfiles.Length - 1; y++)
@@ -1262,7 +1262,7 @@ namespace QuestorManager
                     return -1;
                 }
 
-                string savedjobtoload = Path.Combine(Settings.Path, args[1] + ".jobs");
+                string savedjobtoload = Path.Combine(Settings.Instance.Path, args[1] + ".jobs");
                 if (File.Exists(savedjobtoload))
                 {
                     try
@@ -1317,7 +1317,7 @@ namespace QuestorManager
 
         private void CmbXMLSelectedIndexChanged(object sender, EventArgs e)
         {
-            string fic = Path.Combine(Settings.Path, cmbXML.Text + ".jobs");
+            string fic = Path.Combine(Settings.Instance.Path, cmbXML.Text + ".jobs");
             ReadXML(fic);
         }
 
@@ -1358,7 +1358,7 @@ namespace QuestorManager
         public void Required()
         {
             DirectLoyaltyPointStoreWindow lpstore = Cache.Instance.Windows.OfType<DirectLoyaltyPointStoreWindow>().FirstOrDefault();
-            XDocument invTypes = XDocument.Load(Path.GetDirectoryName(Settings.Path) + "\\InvTypes.xml");
+            XDocument invTypes = XDocument.Load(Path.GetDirectoryName(Settings.Instance.Path) + "\\InvTypes.xml");
             if (invTypes.Root != null)
             {
                 IEnumerable<XElement> invType = invTypes.Root.Elements("invtype").ToList();
@@ -1500,10 +1500,10 @@ namespace QuestorManager
 
         private void StartQuestor_Click(object sender, EventArgs e)
         {
-            string questorPath = Path.Combine(Settings.Path, "Questor.exe");
+            string questorPath = Path.Combine(Settings.Instance.Path, "Questor.exe");
             if (File.Exists(questorPath))
             {
-                if (Settings.UseInnerspace)
+                if (Settings.Instance.UseInnerspace)
                 {
                     Logging.Log("QuestorManagerUI", "Launching [ dotnet q1 questor.exe ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet q1 questor.exe");

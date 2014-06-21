@@ -133,7 +133,7 @@ namespace Questor.Modules.Actions
                     Logging.Log("Arm.LoadFitting", "Error! Could not find Default Fitting [" + MissionSettings.DefaultFittingName.ToLower() + "].  Disabling fitting manager.", Logging.Orange);
                     DefaultFittingChecked = true;
                     DefaultFittingFound = false;
-                    Settings.UseFittingManager = false;
+                    Settings.Instance.UseFittingManager = false;
                     Logging.Log("Arm.LoadFitting", "Closing Fitting Manager", Logging.White);
                     Cache.Instance.FittingManagerWindow.Close();
 
@@ -217,7 +217,7 @@ namespace Questor.Modules.Actions
                 if (!Drones.CloseDroneBay("Arm.Cleanup")) return false;
             }
 
-            if (Settings.UseFittingManager)
+            if (Settings.Instance.UseFittingManager)
             {
                 if (!Cache.Instance.CloseFittingManager("Arm")) return false;
             }
@@ -240,19 +240,19 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
 
-            if (string.IsNullOrEmpty(Settings.CombatShipName) || string.IsNullOrEmpty(Settings.SalvageShipName))
+            if (string.IsNullOrEmpty(Settings.Instance.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, "CombatShipName and SalvageShipName both have to be populated! Fix your characters config.")) return false;
                 return false;
             }
 
-            if (Settings.CombatShipName == Settings.SalvageShipName)
+            if (Settings.Instance.CombatShipName == Settings.Instance.SalvageShipName)
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.")) return false;
                 return false;
             }
 
-            if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.CharacterMode == "mining")
+            if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.Instance.CharacterMode == "mining")
             {
                 if (!ChangeArmState(ArmState.ActivateMiningShip, "Changing to ArmState.ActivateMiningShip")) return false;
                 return true;
@@ -291,9 +291,9 @@ namespace Questor.Modules.Actions
             {
                 if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
 
-                if (Cache.Instance.ShipHangar.Items.Any(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.MiningShipName.ToLower()))
+                if (Cache.Instance.ShipHangar.Items.Any(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                 {
-                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.MiningShipName.ToLower()))
+                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                     {
                         if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
@@ -302,17 +302,17 @@ namespace Questor.Modules.Actions
                         return true;
                     }
 
-                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.MiningShipName + "] !?! - retrying")) return false;
+                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
                 }
 
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.MiningShipName + "] in ShipHangar")) return false;
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
                 return true;
             }
 
             //
             // the configured MiningShipName is already the current ship
             //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.MiningShipName.ToLower())
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
             {
                 if (!ChangeArmState(ArmState.MoveDrones, "Done")) return false;
                 return true;
@@ -325,7 +325,7 @@ namespace Questor.Modules.Actions
         {
             if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-            if (string.IsNullOrEmpty(Settings.MiningShipName))
+            if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, "Could not find miningShipName in settings!")) return false;
                 return false;
@@ -334,13 +334,13 @@ namespace Questor.Modules.Actions
             //
             // we have the mining shipname configured but it is not the current ship
             // 
-            if ((!string.IsNullOrEmpty(Settings.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.MiningShipName.ToLower()))
+            if ((!string.IsNullOrEmpty(Settings.Instance.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.MiningShipName.ToLower()))
             {
                 if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
 
-                if (Cache.Instance.ShipHangar.Items.Any(ship =>ship.GivenName != null && ship.GivenName.ToLower() == Settings.MiningShipName.ToLower()))
+                if (Cache.Instance.ShipHangar.Items.Any(ship =>ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                 {
-                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.MiningShipName.ToLower()))
+                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
                     {
 
                         if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return false; 
@@ -350,17 +350,17 @@ namespace Questor.Modules.Actions
                         return true;
                     }
 
-                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.MiningShipName + "] !?! - retrying")) return false;
+                    if (!ChangeArmState(ArmState.ActivateMiningShip, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
                 }
                 
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.MiningShipName + "] in ShipHangar")) return false;
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
                 return true;
             }
 
             //
             // the configured MiningShipName is already the current ship
             //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.MiningShipName.ToLower())
+            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
             {
                 if (!ChangeArmState(ArmState.MoveDrones, "Done")) return false;
                 return true;
@@ -409,19 +409,19 @@ namespace Questor.Modules.Actions
 
             //if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
 
-            if (string.IsNullOrEmpty(Settings.TransportShipName))
+            if (string.IsNullOrEmpty(Settings.Instance.TransportShipName))
             {
                 _States.CurrentArmState = ArmState.NotEnoughAmmo;
                 Logging.Log("Arm.ActivateTransportShip", "Could not find transportshipName in settings!", Logging.Orange);
                 return false;
             }
 
-            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.TransportShipName.ToLower())
+            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
             {
                 if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
 
                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.TransportShipName.ToLower()))
+                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))
                 {
                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                     ship.ActivateShip();
@@ -441,7 +441,7 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                string salvageshipName = Settings.SalvageShipName.ToLower();
+                string salvageshipName = Settings.Instance.SalvageShipName.ToLower();
 
                 if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
@@ -493,7 +493,7 @@ namespace Questor.Modules.Actions
             {
                 if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-                string shipNameToUseNow = Settings.CombatShipName;
+                string shipNameToUseNow = Settings.Instance.CombatShipName;
                 if (string.IsNullOrEmpty(shipNameToUseNow))
                 {
                     _States.CurrentArmState = ArmState.NotEnoughAmmo;
@@ -619,7 +619,7 @@ namespace Questor.Modules.Actions
             {
                 if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-                if (Settings.UseFittingManager)
+                if (Settings.Instance.UseFittingManager)
                 {
                     //If we are already loading a fitting...
                     if (WaitForFittingToLoad)
@@ -662,12 +662,12 @@ namespace Questor.Modules.Actions
                         if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "DefaultFittingFound [" + DefaultFittingFound + "]", Logging.Teal);
                         if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "UseMissionShip [" + UseMissionShip + "]", Logging.Teal);
                         if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "Cache.Instance.ChangeMissionShipFittings [" + MissionSettings.ChangeMissionShipFittings + "]", Logging.Teal);
-                        if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings)) then do not use fitting manager", Logging.Teal);
+                        if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings)) then do not use fitting manager", Logging.Teal);
                         if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "These are the reasons we would use or not use the fitting manager.(above)", Logging.Teal);
 
                         if ((!DefaultFittingFound) || (UseMissionShip && !MissionSettings.ChangeMissionShipFittings))
                         {
-                            if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
+                            if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
                             _States.CurrentArmState = ArmState.MoveDrones;
                             return false;
                         }
@@ -746,7 +746,7 @@ namespace Questor.Modules.Actions
                     (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
                      Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
                      Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                     Cache.Instance.ActiveShip.GivenName != Settings.CombatShipName))
+                     Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName))
                 {
                     _States.CurrentArmState = ArmState.MoveItems;
                     return false;
@@ -800,18 +800,18 @@ namespace Questor.Modules.Actions
                     ItemHangarDronesQuantity = ItemHangarDrones.Sum(item => item.Stacksize);
                     if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + ItemHangarDronesQuantity + "] Drones available in the ItemHangar", Logging.Debug);
 
-                    if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                     {
                         AmmoHangarDrones = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
                         AmmoHangarDronesQuantity = AmmoHangarDrones.Sum(item => item.Stacksize);
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
+                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
                     }
 
-                    if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
+                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                     {
                         LootHangarDrones = Cache.Instance.LootHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
                         LootHangarDronesQuantity = LootHangarDrones.Sum(item => item.Stacksize);
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.LootHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
+                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.Instance.LootHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
                     }
                 }
                 catch (Exception exception)
@@ -832,7 +832,7 @@ namespace Questor.Modules.Actions
                     }
                 }
 
-                if (!string.IsNullOrEmpty(Settings.AmmoHangarTabName))
+                if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                 {
                     if (drone == null && AmmoHangarDrones != null && AmmoHangarDrones.Any())
                     {
@@ -842,12 +842,12 @@ namespace Questor.Modules.Actions
                         drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
                         if (drone != null)
                         {
-                            Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.AmmoHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                            Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
                         }
                     }
                 }
 
-                if (!string.IsNullOrEmpty(Settings.LootHangarTabName))
+                if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                 {
                     if (drone == null && LootHangarDrones != null && LootHangarDrones.Any())
                     {
@@ -857,14 +857,14 @@ namespace Questor.Modules.Actions
                         drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
                         if (drone != null)
                         {
-                            Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.LootHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
+                            Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
                         }
                     }
                 }
 
                 if (drone == null || drone.Quantity < -1 || retryCount > 30)
                 {
-                    string droneHangarName = string.IsNullOrEmpty(Settings.AmmoHangarTabName) ? "ItemHangar" : Settings.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture);
+                    string droneHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) ? "ItemHangar" : Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture);
                     Logging.Log("Arm.MoveDrones", "Out of drones with typeID [" + Drones.DroneTypeID + "] in [" + droneHangarName + "] retryCount [" + retryCount + "]", Logging.Orange);
                     if (drone != null && Logging.DebugArm)
                     {
@@ -918,7 +918,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
                  Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
                  Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                 Cache.Instance.ActiveShip.GivenName != Settings.CombatShipName)
+                 Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
             {
                 _States.CurrentArmState = ArmState.Cleanup;
                 return false;
@@ -982,12 +982,12 @@ namespace Questor.Modules.Actions
                     hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                 }
 
-                if (hangarItem == null && !string.IsNullOrEmpty(Settings.AmmoHangarTabName) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
                 {
                     hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                 }
 
-                if (hangarItem == null && !string.IsNullOrEmpty(Settings.LootHangarTabName) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
+                if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
                 {
                     hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
                 }
@@ -1186,14 +1186,14 @@ namespace Questor.Modules.Actions
                     int capsIncargo = 0;
                     foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items)
                     {
-                        if (cargoItem.TypeId != Settings.CapacitorInjectorScript)
+                        if (cargoItem.TypeId != Settings.Instance.CapacitorInjectorScript)
                             continue;
 
                         capsIncargo += cargoItem.Quantity;
                         continue;
                     }
 
-                    int capsToLoad = Settings.CapBoosterToLoad - capsIncargo;
+                    int capsToLoad = Settings.Instance.CapBoosterToLoad - capsIncargo;
                     if (capsToLoad <= 0)
                     {
                         capsMoved = true;
@@ -1207,7 +1207,7 @@ namespace Questor.Modules.Actions
                             if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
                                 continue;
 
-                            if (item.TypeId != Settings.CapacitorInjectorScript)
+                            if (item.TypeId != Settings.Instance.CapacitorInjectorScript)
                                 continue;
 
                             int moveCapQuantity = Math.Min(item.Stacksize, capsToLoad);
@@ -1216,7 +1216,7 @@ namespace Questor.Modules.Actions
                             return false; // you can only move one set of items per frame
                         }
 
-                        Logging.Log("Arm", "Missing [" + capsToLoad + "] units of Cap Booster with TypeId [" + Settings.CapacitorInjectorScript + "]", Logging.Orange);
+                        Logging.Log("Arm", "Missing [" + capsToLoad + "] units of Cap Booster with TypeId [" + Settings.Instance.CapacitorInjectorScript + "]", Logging.Orange);
                         _States.CurrentArmState = ArmState.NotEnoughAmmo;
                         return false;
                     }
@@ -1698,7 +1698,7 @@ namespace Questor.Modules.Actions
                                 DirectItem scriptToLoad;
                                 if (module.GroupId == (int)Group.TrackingDisruptor)
                                 {
-                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.TrackingDisruptorScript, 1);
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingDisruptorScript, 1);
                                     if (scriptToLoad !=null)
                                     {
                                         TrackingDisruptorScriptsToLoad++;
@@ -1706,7 +1706,7 @@ namespace Questor.Modules.Actions
                                 }
                                 if (module.GroupId == (int)Group.TrackingComputer)
                                 {
-                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.TrackingComputerScript, 1);
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingComputerScript, 1);
                                     if (scriptToLoad != null)
                                     {
                                         TrackingComputerScriptsToLoad++;
@@ -1714,7 +1714,7 @@ namespace Questor.Modules.Actions
                                 }
                                 if (module.GroupId == (int)Group.TrackingLink)
                                 {
-                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.TrackingLinkScript, 1);
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.TrackingLinkScript, 1);
                                     if (scriptToLoad != null)
                                     {
                                         TrackingLinkScriptsToLoad++;
@@ -1722,7 +1722,7 @@ namespace Questor.Modules.Actions
                                 }
                                 if (module.GroupId == (int)Group.SensorBooster)
                                 {
-                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.SensorBoosterScript, 1);
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorBoosterScript, 1);
                                     if (scriptToLoad != null)
                                     {
                                         SensorBoosterScriptsToLoad++;
@@ -1730,7 +1730,7 @@ namespace Questor.Modules.Actions
                                 }
                                 if (module.GroupId == (int)Group.SensorDampener)
                                 {
-                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.SensorDampenerScript, 1);
+                                    scriptToLoad = Cache.Instance.CheckCargoForItem(Settings.Instance.SensorDampenerScript, 1);
                                     if (scriptToLoad != null)
                                     {
                                         SensorDampenerScriptsToLoad++;

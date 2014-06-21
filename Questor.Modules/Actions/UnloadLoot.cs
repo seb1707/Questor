@@ -106,7 +106,7 @@ namespace Questor.Modules.Actions
                             //
                             try
                             {
-                                ammoToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i => Combat.Ammo.Any(a => a.TypeId == i.TypeId) || Settings.CapacitorInjectorScript == i.TypeId).ToList();
+                                ammoToMove = Cache.Instance.CurrentShipsCargo.Items.Where(i => Combat.Ammo.Any(a => a.TypeId == i.TypeId) || Settings.Instance.CapacitorInjectorScript == i.TypeId).ToList();
                             }
                             catch (Exception exception)
                             {
@@ -344,7 +344,7 @@ namespace Questor.Modules.Actions
                 {
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
 
-                    if (string.IsNullOrEmpty(Settings.LootHangarTabName)) // if we do NOT have the loot hangar configured.
+                    if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName)) // if we do NOT have the loot hangar configured.
                     {
                         /*
                         if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.Moveloot", "LootHangar setting is not configured, assuming lothangar is local items hangar (and its 999 item limit)", Logging.White);
@@ -365,12 +365,12 @@ namespace Questor.Modules.Actions
                         if (roominHangar > 50)
                         {
                             if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has more than 50 item slots left", Logging.White);
-                            somelootToMove = lootToMove.Where(i => Settings.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 49).ToList();
+                            somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 49).ToList();
                         }
                         else if (roominHangar > 20)
                         {
                             if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot", "LootHangar has more than 20 item slots left", Logging.White);
-                            somelootToMove = lootToMove.Where(i => Settings.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 19).ToList();
+                            somelootToMove = lootToMove.Where(i => Settings.Instance.Ammo.All(a => a.TypeId != i.TypeId)).ToList().GetRange(0, 19).ToList();
                         }
 
                         if (somelootToMove.Any())
@@ -436,7 +436,7 @@ namespace Questor.Modules.Actions
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                 return;
 
-            if (!string.IsNullOrEmpty(Settings.LootContainerName))
+            if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
             {
                 if (Cache.Instance.LootContainer == null)
                 {
@@ -445,12 +445,12 @@ namespace Questor.Modules.Actions
                 }
 
                 PutLootHere = Cache.Instance.LootContainer;
-                PutLootHere_Description = "LootContainer Named: [" + Settings.LootContainerName + "]";
+                PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
             }
-            else if (!String.IsNullOrEmpty(Settings.LootHangarTabName)  && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
+            else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName)  && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
             {
                 PutLootHere = Cache.Instance.LootHangar;
-                PutLootHere_Description = "LootHangar Named: [" + Settings.LootHangarTabName + "]";
+                PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";
             }
             else
             {

@@ -52,7 +52,7 @@ namespace Questor.Storylines
             //    return StorylineState.GotoAgent;
             //}
 
-            if (string.IsNullOrEmpty(Settings.TransportShipName.ToLower()))
+            if (string.IsNullOrEmpty(Settings.Instance.TransportShipName.ToLower()))
             {
                 _States.CurrentArmState = ArmState.NotEnoughAmmo;
                 Logging.Log("Arm.ActivateTransportShip", "Could not find transportshipName in settings!", Logging.Orange);
@@ -62,7 +62,7 @@ namespace Questor.Storylines
             try
             {
                 if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "try", Logging.White);
-                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
                 {
                     if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "if (Cache.Instance.ActiveShip.GivenName.ToLower() != transportshipName.ToLower())", Logging.White);
                     if (!Cache.Instance.ShipHangar.Items.Any()) return StorylineState.Arm; //no ships?!?
@@ -72,7 +72,7 @@ namespace Questor.Storylines
                     List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                     if (Logging.DebugArm) Logging.Log("Arm.ActivateTransportShip", "List<DirectItem> ships = Cache.Instance.ShipHangar.Items;", Logging.White);
 
-                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.TransportShipName.ToLower()))
+                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))
                     {
                         Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                         ship.ActivateShip();
@@ -86,13 +86,13 @@ namespace Questor.Storylines
             catch (Exception exception)
             {
                 Logging.Log("GenericCourierStoryline", "Exception thrown while attempting to switch to transport ship: [" + exception + "]", Logging.White);
-                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session because we could not switch to the configured TransportShip named [" + Settings.TransportShipName + "]", Logging.White);
+                Logging.Log("GenericCourierStoryline", "blacklisting this storyline agent for this session because we could not switch to the configured TransportShip named [" + Settings.Instance.TransportShipName + "]", Logging.White);
                 return StorylineState.BlacklistAgent;
             }
 
             if (DateTime.UtcNow > Time.Instance.NextArmAction) //default 7 seconds
             {
-                if (Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.TransportShipName.ToLower())
+                if (Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower())
                 {
                     Logging.Log("Arm.ActivateTransportShip", "Done", Logging.White);
                     _States.CurrentArmState = ArmState.Done;

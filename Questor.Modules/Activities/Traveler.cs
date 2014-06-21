@@ -195,7 +195,7 @@ namespace Questor.Modules.Activities
                 if (solarSystemInRoute.Security < 0.45 && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle || Cache.Instance.ActiveShip.GroupId != (int)Group.Frigate || Cache.Instance.ActiveShip.GroupId != (int)Group.Interceptor))
                 {
                     Logging.Log("Traveler", "NavigateToBookmarkSystem: Next Waypoint is: [" + _locationName + "] which is LOW SEC! This should never happen. Turning off AutoStart and going home.", Logging.Teal);
-                    Settings.AutoStart = false;
+                    Settings.Instance.AutoStart = false;
                     if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                     {
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
@@ -272,7 +272,7 @@ namespace Questor.Modules.Activities
             //
             // defending yourself is more important that the traveling part... so it comes first.
             //
-            if (Cache.Instance.InSpace && Settings.DefendWhileTraveling)
+            if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
@@ -366,7 +366,7 @@ namespace Questor.Modules.Activities
             if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior || _States.CurrentQuestorState == QuestorState.CloseQuestor)
             {
                 //
-                // if we got this far it is because we have not setup Settings.HomeBookmarkName yet or we do not have a
+                // if we got this far it is because we have not setup Settings.Instance.HomeBookmarkName yet or we do not have a
                 // bookmark in game with the configured prefix at the start of the name of the bookmark
                 // we will instead use the AgentID to find the station
                 //
@@ -376,13 +376,13 @@ namespace Questor.Modules.Activities
             }
 
             //only call bookmark stuff if UseHomebookmark is true
-            if (Settings.UseHomebookmark)
+            if (Settings.Instance.UseHomebookmark)
             {
                 TravelHomeCounter++;
                 if (myHomeBookmarks == null || TravelHomeCounter > 30)
                 {
                     TravelHomeCounter = 0;
-                    myHomeBookmarks = Cache.Instance.BookmarksByLabel(Settings.HomeBookmarkName).ToList();
+                    myHomeBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.HomeBookmarkName).ToList();
                 }
 
                 if (myHomeBookmarks.Any())
@@ -396,7 +396,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                Logging.Log("Traveler.TravelHome", "HomeBookmarkName bookmark not found! using AgentsStation info instead: We were Looking for bookmark starting with [" + Settings.HomeBookmarkName + "] found none.", Logging.Orange);
+                Logging.Log("Traveler.TravelHome", "HomeBookmarkName bookmark not found! using AgentsStation info instead: We were Looking for bookmark starting with [" + Settings.Instance.HomeBookmarkName + "] found none.", Logging.Orange);
             }
 
             TravelToAgentsStation(module);
@@ -408,7 +408,7 @@ namespace Questor.Modules.Activities
             //
             // defending yourself is more important that the traveling part... so it comes first.
             //
-            if (Cache.Instance.InSpace && Settings.DefendWhileTraveling)
+            if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
@@ -511,7 +511,7 @@ namespace Questor.Modules.Activities
             //
             // defending yourself is more important that the traveling part... so it comes first.
             //
-            if (Cache.Instance.InSpace && Settings.DefendWhileTraveling)
+            if (Cache.Instance.InSpace && Settings.Instance.DefendWhileTraveling)
             {
                 if (!Cache.Instance.ActiveShip.Entity.IsCloaked || (Time.Instance.LastSessionChange.AddSeconds(60) > DateTime.UtcNow))
                 {
@@ -537,7 +537,7 @@ namespace Questor.Modules.Activities
             if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
 
             /*
-            if (Settings.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
+            if (Settings.Instance.setEveClientDestinationWhenTraveling) //sets destination to Questors destination, so they match... (defaults to false, needs testing again and probably needs to be exposed as a setting)
             {
                 if (DateTime.UtcNow > _nextGetDestinationPath || EVENavdestination == null)
                 {

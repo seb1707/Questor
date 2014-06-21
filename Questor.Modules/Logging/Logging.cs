@@ -90,6 +90,7 @@ namespace Questor.Modules.Logging
         //public static List<string> _QuestorParamaters;
 
         private static string colorLogLine;
+        private static string plainLogLine;
         private static string ConsoleLogText;
         public static bool SaveConsoleLog;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static bool ConsoleLogOpened = false;
@@ -104,7 +105,8 @@ namespace Questor.Modules.Logging
         public static string ConsoleLogFile { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static bool SaveLogRedacted { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
         //public static bool ConsoleLogRedacted { get; set; }
-        public static string redactedLogLine { get; set; }
+        public static string redactedPlainLogLine { get; set; }
+        public static string redactedColorLogLine { get; set; }
         public static string ConsoleLogPathRedacted { get; set; }  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static string ConsoleLogFileRedacted { get; set; }  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         
@@ -121,15 +123,24 @@ namespace Questor.Modules.Logging
             try
             {
                 DateTimeForLogs = DateTime.Now;
-                
+
+                if (verbose) //tons of info
+                {
+                    //
+                    // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
+                    //
+                    System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
+                    module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
+                }
+
                 colorLogLine = line;
-                string plainLogLine = FilterColorsFromLogs(line);
-                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                plainLogLine = FilterColorsFromLogs(line);
+                redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
                 
                 //
                 // Innerspace Console logging
                 //
-                
                 //Logging.UseInnerspace = true;
                 if (Logging.UseInnerspace)
                 {
@@ -137,7 +148,7 @@ namespace Questor.Modules.Logging
                 }
                 else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
-                    Console.WriteLine(plainLogLine);
+                    Console.WriteLine(redactedPlainLogLine);
                 }
                 
                 if (Logging.tryToLogToFile)
@@ -151,7 +162,6 @@ namespace Questor.Modules.Logging
                             //
                             if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
                             {
-                                module = "Logging";
                                 if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
                                 {
                                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
@@ -165,7 +175,7 @@ namespace Questor.Modules.Logging
                                     Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
                                     if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
                                     {
-                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + "Logging" + "]" + plainLogLine + "\r\n");
                                         Logging.ConsoleLogOpened = true;
                                     }
                                     else
@@ -178,7 +188,7 @@ namespace Questor.Modules.Logging
                                 {
                                     line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
                                     if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + "Logging" + "] " + plainLogLine + "\r\n");
                                 }
                             }
                         }
@@ -188,37 +198,23 @@ namespace Questor.Modules.Logging
                             //
                             // log file ready: add next logging entry...
                             //
+                            //
+                            // normal text logging
+                            //
                             if (Logging.ConsoleLogFile != null && !verbose) //normal
                             {
-
-                                //
-                                // normal text logging
-                                //
                                 Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                             }
 
-                            if (Logging.ConsoleLogFile != null && verbose) //tons of info
-                            {
-                                //
-                                // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
-                                //
-                                System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
-                                module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
-                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
-                                File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
-                            }
-                            //Cache.Instance.ConsoleLog = null;
-
+                            //
+                            // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
+                            //
                             if (Logging.ConsoleLogFileRedacted != null)
                             {
-                                //
-                                // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
-                                //
                                 Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
-                                File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedLogLine);               //Write In Memory Console log to File
+                                File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedPlainLogLine);               //Write In Memory Console log to File
                             }
-                            //Cache.Instance.ConsoleLogRedacted = null;
                         }
 
                         Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");

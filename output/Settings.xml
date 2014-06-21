@@ -121,6 +121,9 @@
   <!-- Maximum number of lines in the external console -->
   <maxLineConsole>1000</maxLineConsole><!-- default is 1000 -->
   
+  <!-- Debug Logging, generate Innerspace Console Log - Default is False, leave this at false unless you know what you are doing -->
+  <innerspaceGeneratedConsoleLog>false</innerspaceGeneratedConsoleLog>
+  
   <!--                                                -->
   <!--       MAJOR FEATURES          -->
   <!--                                                -->

@@ -4104,11 +4104,19 @@ namespace Questor.Modules.Caching
 
                                 Logging.Log("LootHangar", "Opening Corporate LootHangar: failed! No Corporate Hangar in this station! lag?", Logging.Orange);
                                 return Cache.Instance.ItemHangar;
+
                             }
 
-                            //if (Logging.DebugHangars) Logging.Log("LootHangar", "LootHangar is not defined", Logging.DebugHangars);
-                            _lootHangar = null;
-                            return Cache.Instance.ItemHangar;
+                            if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance.AmmoHangar != null)
+                            {
+                                _lootHangar = Cache.Instance.AmmoHangar;
+                            }
+                            else
+                            {
+                                _lootHangar = Cache.Instance.ItemHangar;
+                            }
+
+                            return _lootHangar;
                         }
 
                         return _lootHangar;
@@ -4120,7 +4128,7 @@ namespace Questor.Modules.Caching
                 {
                     Logging.Log("LootHangar", "Unable to define LootHangar [" + exception + "]", Logging.Teal);
                     return null;
-                }     
+                }
             }
             set
             {
@@ -4373,8 +4381,16 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            _ammoHangar = null;
-                            return Cache.Instance.ItemHangar;
+                            if (Settings.Instance.LootHangarTabName == string.Empty && Cache.Instance.LootHangar != null)
+                            {
+                                _ammoHangar = Cache.Instance.LootHangar;
+                            }
+                            else
+                            {
+                                _ammoHangar = Cache.Instance.ItemHangar;
+                            }
+
+                            return _ammoHangar;
                         }
 
                         return _ammoHangar;

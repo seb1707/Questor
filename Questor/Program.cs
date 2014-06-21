@@ -350,7 +350,7 @@ namespace Questor
                 }
                 finally
                 {
-                    //Cache.Instance.DirecteveDispose();
+                    Cleanup.DirecteveDispose();
                 }
             }
         }

@@ -97,7 +97,9 @@ namespace Questor.Modules.Logging
         public static string ExtConsole { get; set; }
         //public static string ConsoleLog { get; set; }
         //public static string ConsoleLogRedacted { get; set; }
+        public static string SessionDataCachePath { get; set; }
         public static string Logpath { get; set; }
+
         public static bool InnerspaceGeneratedConsoleLog { get; set; }
         public static bool UseInnerspace { get; set; }
         //public static bool ConsoleLog { get; set; }

@@ -68,7 +68,6 @@ namespace Questor.Modules.Lookup
         public static bool RequireMissionXML { get; set; }
         public static bool AllowNonStorylineCourierMissionsInLowSec { get; set; }
         public static bool WaitDecline { get; set; }
-        public static bool MultiAgentSupport { get; set; }
         public static int NumberOfTriesToDeleteBookmarks = 3;
         public static int MaterialsForWarOreID { get; set; }
         public static int MaterialsForWarOreQty { get; set; }

@@ -33,6 +33,7 @@
         Panic,
         Traveler,
         Storyline,
+        StorylineReturnToBase,
         StorylinePanic,
         PrepareStorylineSwitchAgents,
         PrepareStorylineGotoBase,

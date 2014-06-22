@@ -114,6 +114,7 @@ namespace Questor.Modules.Lookup
         // Enable / Disable Major Features that do not have categories of their own below
         //
         public bool EnableStorylines { get; set; }
+        public string StoryLineBaseBookmark { get; set; }
         public bool DeclineStorylinesInsteadofBlacklistingfortheSession { get; set; }
         public bool UseLocalWatch { get; set; }
         public bool UseFittingManager { get; set; }
@@ -451,6 +452,7 @@ namespace Questor.Modules.Lookup
             //
             UseFittingManager = (bool?)CharacterSettingsXml.Element("UseFittingManager") ?? (bool?)CommonSettingsXml.Element("UseFittingManager") ?? true;
             EnableStorylines = (bool?)CharacterSettingsXml.Element("enableStorylines") ?? (bool?)CommonSettingsXml.Element("enableStorylines") ?? false;
+            StoryLineBaseBookmark = (string)CharacterSettingsXml.Element("storyLineBaseBookmark") ?? (string)CommonSettingsXml.Element("storyLineBaseBookmark") ?? string.Empty;
             DeclineStorylinesInsteadofBlacklistingfortheSession = (bool?)CharacterSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? (bool?)CommonSettingsXml.Element("declineStorylinesInsteadofBlacklistingfortheSession") ?? false;
             UseLocalWatch = (bool?)CharacterSettingsXml.Element("UseLocalWatch") ?? (bool?)CommonSettingsXml.Element("UseLocalWatch") ?? true;
             WatchForActiveWars = (bool?)CharacterSettingsXml.Element("watchForActiveWars") ?? (bool?)CommonSettingsXml.Element("watchForActiveWars") ?? true;
@@ -933,21 +935,9 @@ namespace Questor.Modules.Lookup
             {
                 if (agentList.HasElements)
                 {
-                    int i = 0;
                     foreach (XElement agent in agentList.Elements("agentList"))
                     {
                         MissionSettings.ListOfAgents.Add(new AgentsList(agent));
-                        i++;
-                    }
-                    if (i >= 2)
-                    {
-                        MissionSettings.MultiAgentSupport = true;
-                        Logging.Log("Settings", "Found more than one agent in your character XML: MultiAgentSupport is [" + MissionSettings.MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
-                    }
-                    else
-                    {
-                        MissionSettings.MultiAgentSupport = false;
-                        Logging.Log("Settings", "Found only one agent in your character XML: MultiAgentSupport is [" + MissionSettings.MultiAgentSupport.ToString(CultureInfo.InvariantCulture) + "]", Logging.White);
                     }
                 }
                 else
@@ -1606,6 +1596,7 @@ namespace Questor.Modules.Lookup
             //
             // Log location and log names defined here
             //
+            Logging.SessionDataCachePath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\SessionDataCache\\" + characterNameForLogs + "\\");
             Logging.Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + characterNameForLogs + "\\");
 
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
@@ -1640,6 +1631,7 @@ namespace Questor.Modules.Lookup
             try
             {
                 Directory.CreateDirectory(Logging.Logpath);
+                Directory.CreateDirectory(Logging.SessionDataCachePath);
                 Directory.CreateDirectory(Logging.ConsoleLogPath);
                 Directory.CreateDirectory(Statistics.SessionsLogPath);
                 Directory.CreateDirectory(Statistics.DroneStatsLogPath);

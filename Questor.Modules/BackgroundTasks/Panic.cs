@@ -209,11 +209,7 @@ namespace Questor.Modules.BackgroundTasks
                     // do not return here, we are just setting a flag for use by arm to repair or not repair...
                     //
                 }
-                else
-                {
-                    Arm.NeedRepair = false;
-                }
-
+                
                 if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
                 {
                     // Only check for cap-panic while in a mission, not while doing anything else

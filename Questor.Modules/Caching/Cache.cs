@@ -2476,6 +2476,7 @@ namespace Questor.Modules.Caching
                     EntityIsEntutyIShouldLeaveAlone.Clear();
                     EntityHaveLootRights.Clear();
                     EntityIsStargate.Clear();
+                    return;
                 }
 
                 Logging.Log("ClearPerPocketCache", "[ " + callingroutine + " ] Attempted to ClearPocketCache within 5 seconds of a previous ClearPocketCache, aborting attempt", Logging.Debug);

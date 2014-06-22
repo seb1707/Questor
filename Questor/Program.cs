@@ -379,8 +379,18 @@ namespace Questor
                 //
                 try
                 {
-                    //Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
+                	if(!_standaloneInstance){
+                		Application.EnableVisualStyles();
+                		Application.SetCompatibleTextRenderingDefault(false);
+                	}
+                }
+                catch (Exception ex)
+                {
+                	Logging.Log("Startup", "Exception [" + ex + "]", Logging.Teal);
+                }
+                try
+                {
+                	
                     Logging.Log("Startup", "We are logged in.", Logging.Teal);
                     Logging.Log("Startup", "Launching Questor", Logging.Teal);
                     _questor = new Questor();

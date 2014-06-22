@@ -4118,10 +4118,10 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance.AmmoHangar != null)
+                            if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance._ammoHangar != null)
                             {
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
-                                _lootHangar = Cache.Instance.AmmoHangar;
+                                _lootHangar = _ammoHangar;
                             }
                             else
                             {
@@ -4395,10 +4395,10 @@ namespace Questor.Modules.Caching
 
                             }
 
-                            if (Settings.Instance.LootHangarTabName == string.Empty && Cache.Instance.LootHangar != null)
+                            if (Settings.Instance.LootHangarTabName == string.Empty && Cache.Instance._lootHangar != null)
                             {
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
-                                _ammoHangar = Cache.Instance.LootHangar;
+                                _ammoHangar = Cache.Instance._lootHangar;
                             }
                             else
                             {

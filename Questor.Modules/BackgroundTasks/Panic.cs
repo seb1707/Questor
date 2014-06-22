@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Actions;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -202,14 +204,14 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.ActiveShip.ArmorPercentage < 100)
                 {
-                    Cache.Instance.NeedRepair = true;
+                    Arm.NeedRepair = true;
                     //
                     // do not return here, we are just setting a flag for use by arm to repair or not repair...
                     //
                 }
                 else
                 {
-                    Cache.Instance.NeedRepair = false;
+                    Arm.NeedRepair = false;
                 }
 
                 if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
@@ -579,7 +581,7 @@ namespace Questor.Modules.BackgroundTasks
             {
                 if (Cache.Instance.InSpace)
                 {
-                    Cache.Instance.RepairAll = true;
+                    Arm.NeedRepair = true;
                 }
                 Logging.Log("Panic", "We have recovered, resume mission", Logging.Red);
                 _States.CurrentPanicState = _delayedResume ? PanicState.DelayedResume : PanicState.Resume;

@@ -62,11 +62,12 @@ namespace Questor.Modules.Actions
         private static bool CustomFittingFound;
         private static bool WaitForFittingToLoad = true;
         private static bool capsMoved = false;
+        
         //private bool ammoMoved = false;
         private static int retryCount = 0;
         private static int ItemHangarRetries = 0;
         public static bool ArmLoadCapBoosters { get; set; }
-        
+        public static bool NeedRepair { get; set; }
 
         public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
         {
@@ -598,7 +599,7 @@ namespace Questor.Modules.Actions
             {
                 if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
 
-                if (Cache.Instance.DirectEve.HasSupportInstances() && Panic.UseStationRepair && Cache.Instance.RepairAll)
+                if (Cache.Instance.DirectEve.HasSupportInstances() && Panic.UseStationRepair && Arm.NeedRepair)
                 {
                     if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return false; //attempt to use repair facilities if avail in station
                 }
@@ -1528,7 +1529,7 @@ namespace Questor.Modules.Actions
 
                         if (!string.IsNullOrEmpty(AgentInteraction.MissionName))
                         {
-                            MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(AgentInteraction.MissionName));
+                            MissionSettings.SetmissionXmlPath(Logging.FilterPath(AgentInteraction.MissionName));
                             if (File.Exists(MissionSettings.MissionXmlPath))
                             {
                                 XDocument missionXml = XDocument.Load(MissionSettings.MissionXmlPath);
@@ -1663,10 +1664,11 @@ namespace Questor.Modules.Actions
                         break;
 
                     case ArmState.MoveMiningCrystals:
-
+                        if (!MoveMiningCrystalsArmState()) return;
                         break;
 
                     case ArmState.WaitForItems:
+                        if (!WaitForItemsArmState()) return;
                         break;
                 }
             }

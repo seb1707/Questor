@@ -134,9 +134,9 @@ namespace QuestorManager
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cleanup.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 return;
             }
             #endregion Load DirectEVE
@@ -243,11 +243,11 @@ namespace QuestorManager
                     Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                     Cache.Instance.GotoBaseNow = false;
-                    Cache.Instance.SessionState = string.Empty;
+                    Cleanup.SessionState = string.Empty;
                     return;
                 }
 
-                //if (Cache.Instance.SessionState == "Quitting")
+                //if (Cleanup.SessionState == "Quitting")
                 //{
                 //    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 //    {

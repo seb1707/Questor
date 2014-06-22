@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Reflection;
+
 namespace Questor.Modules.Logging
 {
     using System;
@@ -31,6 +33,7 @@ namespace Questor.Modules.Logging
         static Logging()
         {
             Interlocked.Increment(ref LoggingInstances);
+            Logging.PathToCurrentDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
         //~Logging()
@@ -38,6 +41,7 @@ namespace Questor.Modules.Logging
         //    Interlocked.Decrement(ref LoggingInstances);
         //}
 
+        public static string PathToCurrentDirectory;
         public static bool DebugMaintainConsoleLogs { get; set; }
         
         public static DateTime DateTimeForLogs;
@@ -68,21 +72,9 @@ namespace Questor.Modules.Logging
         public const string TravelerGenericLogging = White;
         public const string TravelerDestinationColor = White;
 
-        public static string _username;
-        public static string _password;
-
-        private static string __character;
-        public static string _character
-        {
-            get
-            {
-                return __character;
-            }
-            set
-            {
-                __character = ReplaceUnderscoresWithSpaces(value);
-            }
-        }
+        public static string EVELoginUserName;
+        public static string EVELoginPassword;
+        public static string MyCharacterName;
 
         public static string CharacterSettingsPath;
 
@@ -174,10 +166,11 @@ namespace Questor.Modules.Logging
 
                                 if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
                                 {
-                                    Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
-                                    if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
+                                    Directory.CreateDirectory(Logging.ConsoleLogPath);
+                                    if (Directory.Exists(Logging.ConsoleLogPath))
                                     {
                                         Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + "Logging" + "]" + plainLogLine + "\r\n");
+                                        File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                                         Logging.ConsoleLogOpened = true;
                                     }
                                     else
@@ -234,7 +227,7 @@ namespace Questor.Modules.Logging
             Console.WriteLine(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFileRedacted != null)
             {
-                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFileRedacted)))
+                if (Directory.Exists(Logging.ConsoleLogPathRedacted))
                 {
                     File.AppendAllText(Logging.ConsoleLogFileRedacted, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
                 }
@@ -242,7 +235,7 @@ namespace Questor.Modules.Logging
 
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFile != null)
             {
-                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
+                if (Directory.Exists(Logging.ConsoleLogPath))
                 {
                     File.AppendAllText(Logging.ConsoleLogFile, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + logmessage));
                 }
@@ -258,13 +251,13 @@ namespace Questor.Modules.Logging
             {
                 if (line == null)
                     return string.Empty;
-                if (!string.IsNullOrEmpty(Logging._character))
+                if (!string.IsNullOrEmpty(Logging.MyCharacterName))
                 {
-                    line = line.Replace(Logging._character, Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                    line = line.Replace("/" + Logging._character, "/" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                    line = line.Replace("\\" + Logging._character, "\\" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
-                    line = line.Replace("[" + Logging._character + "]", "[" + Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
-                    line = line.Replace(Logging._character + ".xml", Logging._character.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
+                    line = line.Replace(Logging.MyCharacterName, Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("/" + Logging.MyCharacterName, "/" + Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("\\" + Logging.MyCharacterName, "\\" + Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_");
+                    line = line.Replace("[" + Logging.MyCharacterName + "]", "[" + Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_]");
+                    line = line.Replace(Logging.MyCharacterName + ".xml", Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
                 }
 
                 if (!string.IsNullOrEmpty(Logging.CharacterSettingsPath))
@@ -284,13 +277,13 @@ namespace Questor.Modules.Logging
                 //    line = line.Replace(" " + Cache.Instance.AgentId + " ", " _MyAgentIdRedacted_ ");
                 //    line = line.Replace("[" + Cache.Instance.AgentId + "]", "[_MyAgentIdRedacted_]");
                 //}
-                if (!String.IsNullOrEmpty(Logging._username))
+                if (!String.IsNullOrEmpty(Logging.EVELoginUserName))
                 {
-                    line = line.Replace(Logging._username, Logging._username.Substring(0, 2) + "_HiddenEVELoginName_");
+                    line = line.Replace(Logging.EVELoginUserName, Logging.EVELoginUserName.Substring(0, 2) + "_HiddenEVELoginName_");
                 }
-                if (!String.IsNullOrEmpty(Logging._password))
+                if (!String.IsNullOrEmpty(Logging.EVELoginPassword))
                 {
-                    line = line.Replace(Logging._password, "_HiddenPassword_");
+                    line = line.Replace(Logging.EVELoginPassword, "_HiddenPassword_");
                 }
                 if (!string.IsNullOrEmpty(Environment.UserName))
                 {
@@ -340,6 +333,38 @@ namespace Questor.Modules.Logging
                 box.SelectionColor = color;
                 box.AppendText(text);
                 box.SelectionColor = box.ForeColor;
+            }
+        }
+
+        public static string FilterPath(string path)
+        {
+            try
+            {
+                if (path == null)
+                {
+                    return string.Empty;
+                }
+
+                path = path.Replace("\"", "");
+                path = path.Replace("?", "");
+                path = path.Replace("\\", "");
+                path = path.Replace("/", "");
+                path = path.Replace("'", "");
+                path = path.Replace("*", "");
+                path = path.Replace(":", "");
+                path = path.Replace(">", "");
+                path = path.Replace("<", "");
+                path = path.Replace(".", "");
+                path = path.Replace(",", "");
+                path = path.Replace("'", "");
+                while (path.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
+                    path = path.Replace("  ", " ");
+                return path.Trim();
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.FilterPath", "Exception [" + exception + "]", Logging.Debug);
+                return null;
             }
         }
 
@@ -618,6 +643,7 @@ namespace Questor.Modules.Logging
         public static bool DebugPerformance { get; set; }
         public static bool DebugPotentialCombatTargets { get; set; }
         public static bool DebugPreferredPrimaryWeaponTarget { get; set; }
+        public static bool DebugPreLogin { get; set; }
         public static bool DebugQuestorManager { get; set; }
         public static bool DebugReloadAll { get; set; }
         public static bool DebugReloadorChangeAmmo { get; set; }

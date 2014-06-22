@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Combat;
 
 namespace Questor.Modules.Actions
@@ -370,9 +371,9 @@ namespace Questor.Modules.Actions
                     {
                         Cache.Instance.CloseQuestorCMDLogoff = false;
                         Cache.Instance.CloseQuestorCMDExitGame = true;
-                        Cache.Instance.ReasonToStopQuestor = "AgentInteraction: WaitforMission: Journal would not open/refresh - mission was null: restarting EVE Session";
-                        Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.Yellow);
-                        Cache.Instance.SessionState = "Quitting";
+                        Cleanup.ReasonToStopQuestor = "AgentInteraction: WaitforMission: Journal would not open/refresh - mission was null: restarting EVE Session";
+                        Logging.Log("ReasonToStopQuestor", Cleanup.ReasonToStopQuestor, Logging.Yellow);
+                        Cleanup.SessionState = "Quitting";
                     }
                 }
                 return;
@@ -380,7 +381,7 @@ namespace Questor.Modules.Actions
 
             _waitingOnMission = false;
 
-            MissionName = Cache.Instance.FilterPath(MissionSettings.Mission.Name);
+            MissionName = Logging.FilterPath(MissionSettings.Mission.Name);
 
             Logging.Log("AgentInteraction", "[" + Agent.Name + "] standing toward me is [" + Cache.Instance.AgentEffectiveStandingtoMeText + "], minAgentGreyListStandings: [" + MissionSettings.MinAgentGreyListStandings + "]", Logging.Yellow);
             string html = Agent.Window.Objective;
@@ -515,7 +516,7 @@ namespace Questor.Modules.Actions
                 MissionSettings.loadedAmmo = false;
                 MissionSettings.GetFactionName(html);
                 //MissionSettings.GetDungeonId(html);
-                MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(MissionName));
+                MissionSettings.SetmissionXmlPath(Logging.FilterPath(MissionName));
 
                 MissionSettings.MissionAmmo = new List<Ammo>();
                 if (File.Exists(MissionSettings.MissionXmlPath))
@@ -934,8 +935,8 @@ namespace Questor.Modules.Actions
                                 //we purposely disable autostart so that when we quit eve and questor here it stays closed until manually restarted as this error is fatal (and repeating)
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                //Cache.Instance.SessionState = "Exiting";
+                                //Cleanup.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cleanup.SessionState = "Exiting";
                                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                             }
                             else
@@ -945,8 +946,8 @@ namespace Questor.Modules.Actions
 
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                //Cache.Instance.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
-                                //Cache.Instance.SessionState = "Exiting";
+                                //Cleanup.ReasonToStopQuestor = "Could not complete the mission: [" + Cache.Instance.MissionName + "] after [" + Statistics.Instance.MissionCompletionErrors + "] attempts: objective not complete or missing mission completion item or ???";
+                                //Cleanup.SessionState = "Exiting";
                                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                             }
                         }

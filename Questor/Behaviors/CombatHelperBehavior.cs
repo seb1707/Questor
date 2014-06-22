@@ -137,7 +137,7 @@ namespace Questor.Behaviors
 
         private void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+            Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
@@ -180,7 +180,7 @@ namespace Questor.Behaviors
                 }
             }
 
-            if (Cache.Instance.SessionState == "Quitting")
+            if (Cleanup.SessionState == "Quitting")
             {
                 BeginClosingQuestor();
             }
@@ -195,7 +195,7 @@ namespace Questor.Behaviors
                 if (Cache.Instance.QuestorJustStarted)
                 {
                     Cache.Instance.QuestorJustStarted = false;
-                    Cache.Instance.SessionState = "Starting Up";
+                    Cleanup.SessionState = "Starting Up";
 
                     // write session log
                     Statistics.WriteSessionLogStarting();
@@ -404,7 +404,7 @@ namespace Questor.Behaviors
 
                     Traveler.TravelHome("CombatHelperBehavior.TravelHome");
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Time.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Logging.DebugGotobase) Logging.Log("CombatHelperBehavior", "GotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase

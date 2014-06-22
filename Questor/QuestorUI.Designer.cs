@@ -42,7 +42,7 @@
             this.Disable3DCheckBox = new System.Windows.Forms.CheckBox();
             this.chkShowDetails = new System.Windows.Forms.CheckBox();
             this.lblMissionName = new System.Windows.Forms.Label();
-            this.lblCurrentMissionInfo = new System.Windows.Forms.Label();
+            lblCurrentMissionInfo = new System.Windows.Forms.Label();
             this.lblPocketAction = new System.Windows.Forms.Label();
             this.lblCurrentPocketAction = new System.Windows.Forms.Label();
             this.buttonQuestorStatistics = new System.Windows.Forms.Button();
@@ -695,13 +695,13 @@
             // 
             // lblCurrentMissionInfo
             // 
-            this.lblCurrentMissionInfo.Location = new System.Drawing.Point(3, 55);
-            this.lblCurrentMissionInfo.MaximumSize = new System.Drawing.Size(250, 13);
-            this.lblCurrentMissionInfo.MinimumSize = new System.Drawing.Size(275, 13);
-            this.lblCurrentMissionInfo.Name = "lblCurrentMissionInfo";
-            this.lblCurrentMissionInfo.Size = new System.Drawing.Size(275, 13);
-            this.lblCurrentMissionInfo.TabIndex = 93;
-            this.lblCurrentMissionInfo.Text = "[ No Mission Selected Yet ]";
+            lblCurrentMissionInfo.Location = new System.Drawing.Point(3, 55);
+            lblCurrentMissionInfo.MaximumSize = new System.Drawing.Size(250, 13);
+            lblCurrentMissionInfo.MinimumSize = new System.Drawing.Size(275, 13);
+            lblCurrentMissionInfo.Name = "lblCurrentMissionInfo";
+            lblCurrentMissionInfo.Size = new System.Drawing.Size(275, 13);
+            lblCurrentMissionInfo.TabIndex = 93;
+            lblCurrentMissionInfo.Text = "[ No Mission Selected Yet ]";
             // 
             // lblPocketAction
             // 
@@ -6183,7 +6183,7 @@
             this.Controls.Add(this.QuestorStateComboBox);
             this.Controls.Add(this.QuestorStatelbl);
             this.Controls.Add(this.lblPocketAction);
-            this.Controls.Add(this.lblCurrentMissionInfo);
+            this.Controls.Add(lblCurrentMissionInfo);
             this.Controls.Add(this.lblMissionName);
             this.Controls.Add(this.chkShowDetails);
             this.Controls.Add(this.Disable3DCheckBox);
@@ -6256,7 +6256,7 @@
         //private System.Windows.Forms.CheckBox Anomaly_chk;
         private System.Windows.Forms.CheckBox chkShowDetails;
         private System.Windows.Forms.Label lblMissionName;
-        private System.Windows.Forms.Label lblCurrentMissionInfo;
+        public static System.Windows.Forms.Label lblCurrentMissionInfo;
         private System.Windows.Forms.Label lblPocketAction;
         private System.Windows.Forms.Label lblCurrentPocketAction;
         private System.Windows.Forms.Button buttonQuestorStatistics;

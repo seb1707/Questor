@@ -70,7 +70,6 @@ namespace Questor
             _innerspaceCommands = new InnerspaceCommands();
             //_statistics = new Statistics();
 
-            Cache.Instance.ScheduleCharacterName = Logging._character;
             Time.Instance.NextStartupAction = DateTime.UtcNow;
             // State fixed on ExecuteMission
             _States.CurrentQuestorState = QuestorState.Idle;
@@ -82,9 +81,9 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cleanup.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 return;
             }
 
@@ -104,8 +103,6 @@ namespace Questor
                 Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() in questor.cs - exception was: [" + exception + "]", Logging.Orange);
             }
 
-            Time.Instance.StopTimeSpecified = BeforeLogin.StopTimeSpecified;
-            Time.Instance.MaxRuntime = BeforeLogin.MaxRuntime;
             if (BeforeLogin.StartTime.AddMinutes(10) < BeforeLogin.StopTime)
             {
                 Time.Instance.StopTime = BeforeLogin.StopTime;
@@ -149,9 +146,9 @@ namespace Questor
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe the DirectEVE license server is down";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                Cleanup.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe the DirectEVE license server is down";
+                Cleanup.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
             }
         }
 
@@ -278,6 +275,7 @@ namespace Questor
                     if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours < 24)
                     {
                         Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
+                        QuestorUI.lblCurrentMissionInfo.Text = "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]";
                         _States.LavishEvent_SkillQueueHasRoom();
                         _States.CurrentQuestorState = QuestorState.SkillTrainer;
                         return false;
@@ -311,11 +309,11 @@ namespace Questor
             {
                 // quit questor
                 Logging.Log("Questor", "Maximum runtime exceeded.  Quitting...", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "Maximum runtime specified and reached.";
+                Cleanup.ReasonToStopQuestor = "Maximum runtime specified and reached.";
                 Settings.Instance.AutoStart = false;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.SessionState = "Exiting";
+                Cleanup.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
                 return true;
             }
@@ -325,11 +323,11 @@ namespace Questor
                 if (DateTime.Now >= Time.Instance.StopTime)
                 {
                     Logging.Log("Questor", "Time to stop. StopTimeSpecified and reached. Quitting game.", Logging.White);
-                    Cache.Instance.ReasonToStopQuestor = "StopTimeSpecified and reached.";
+                    Cleanup.ReasonToStopQuestor = "StopTimeSpecified and reached.";
                     Settings.Instance.AutoStart = false;
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
-                    Cache.Instance.SessionState = "Exiting";
+                    Cleanup.SessionState = "Exiting";
                     Cleanup.BeginClosingQuestor();
                     return true;
                 }
@@ -338,11 +336,11 @@ namespace Questor
             if (DateTime.Now >= Time.Instance.ManualRestartTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualRestartTime reached. Quitting game.", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "ManualRestartTime reached.";
+                Cleanup.ReasonToStopQuestor = "ManualRestartTime reached.";
                 Settings.Instance.AutoStart = true;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.SessionState = "Exiting";
+                Cleanup.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
                 return true;
             }
@@ -350,11 +348,11 @@ namespace Questor
             if (DateTime.Now >= Time.Instance.ManualStopTime)
             {
                 Logging.Log("Questor", "Time to stop. ManualStopTime reached. Quitting game.", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "ManualStopTime reached.";
+                Cleanup.ReasonToStopQuestor = "ManualStopTime reached.";
                 Settings.Instance.AutoStart = false;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.SessionState = "Exiting";
+                Cleanup.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
                 return true;
             }
@@ -362,11 +360,11 @@ namespace Questor
             if (Cache.Instance.ExitWhenIdle)
             {
                 Logging.Log("Questor", "ExitWhenIdle set to true.  Quitting game.", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "ExitWhenIdle set to true";
+                Cleanup.ReasonToStopQuestor = "ExitWhenIdle set to true";
                 Settings.Instance.AutoStart = false;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.SessionState = "Exiting";
+                Cleanup.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
                 return true;
             }
@@ -374,11 +372,11 @@ namespace Questor
             if (Statistics.MissionsThisSession > MissionSettings.StopSessionAfterMissionNumber)
             {
                 Logging.Log("Questor", "MissionsThisSession [" + Statistics.MissionsThisSession + "] is greater than StopSessionAfterMissionNumber [" + MissionSettings.StopSessionAfterMissionNumber + "].  Quitting game.", Logging.White);
-                Cache.Instance.ReasonToStopQuestor = "MissionsThisSession > StopSessionAfterMissionNumber";
+                Cleanup.ReasonToStopQuestor = "MissionsThisSession > StopSessionAfterMissionNumber";
                 Settings.Instance.AutoStart = false;
                 Cache.Instance.CloseQuestorCMDLogoff = false;
                 Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.SessionState = "Exiting";
+                Cleanup.SessionState = "Exiting";
                 Cleanup.BeginClosingQuestor();
                 return true;
             }
@@ -433,10 +431,10 @@ namespace Questor
                 if ((Cache.Instance.InStation) || (Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes) > Settings.Instance.WalletBalanceChangeLogOffDelay + 5))
                 {
                     Logging.Log("Questor", String.Format("Questor: Wallet Balance Has Not Changed in [ {0} ] minutes. Switching to QuestorState.CloseQuestor", Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0)), Logging.White);
-                    Cache.Instance.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.WalletBalanceChangeLogOffDelay + "min";
+                    Cleanup.ReasonToStopQuestor = "Wallet Balance did not change for over " + Settings.Instance.WalletBalanceChangeLogOffDelay + "min";
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
-                    Cache.Instance.SessionState = "Exiting";
+                    Cleanup.SessionState = "Exiting";
                     Cleanup.BeginClosingQuestor();
                     return;
                 }
@@ -482,7 +480,7 @@ namespace Questor
 
             _lastQuestorPulse = DateTime.UtcNow;
 
-            if (Cache.Instance.SessionState != "Quitting")
+            if (Cleanup.SessionState != "Quitting")
             {
                 // Update settings (settings only load if character name changed)
                 if (!Settings.Instance.DefaultSettingsLoaded)
@@ -575,11 +573,11 @@ namespace Questor
                 Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 Cache.Instance.GotoBaseNow = false;
-                Cache.Instance.SessionState = string.Empty;
+                Cleanup.SessionState = string.Empty;
                 return;
             }
 
-            if (Cache.Instance.SessionState == "Quitting")
+            if (Cleanup.SessionState == "Quitting")
             {
                 if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
@@ -703,12 +701,12 @@ namespace Questor
                     break;
 
                 case QuestorState.CloseQuestor:
-                    if (Cache.Instance.ReasonToStopQuestor == string.Empty)
+                    if (Cleanup.ReasonToStopQuestor == string.Empty)
                     {
-                        Cache.Instance.ReasonToStopQuestor = "case QuestorState.CloseQuestor:";
+                        Cleanup.ReasonToStopQuestor = "case QuestorState.CloseQuestor:";
                     }
 
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                     return;
 
                 case QuestorState.DebugCloseQuestor:
@@ -726,7 +724,7 @@ namespace Questor
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorCMDExitGame: " + Cache.Instance.CloseQuestorCMDExitGame, Logging.White);
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorCMDLogoff: " + Cache.Instance.CloseQuestorCMDLogoff, Logging.White);
                     Logging.Log("Questor", "Cache.Instance.CloseQuestorEndProcess: " + Cache.Instance.CloseQuestorEndProcess, Logging.White);
-                    Logging.Log("Questor", "Cache.Instance.EnteredCloseQuestor_DateTime: " + Cache.Instance.EnteredCloseQuestor_DateTime.ToShortTimeString(), Logging.White);
+                    Logging.Log("Questor", "Time.EnteredCloseQuestor_DateTime: " + Time.EnteredCloseQuestor_DateTime.ToShortTimeString(), Logging.White);
                     _States.CurrentQuestorState = QuestorState.Error;
                     return;
 

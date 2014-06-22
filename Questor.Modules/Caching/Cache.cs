@@ -215,7 +215,7 @@ namespace Questor.Modules.Caching
                 }
                 
             }
-            else
+            elsef
             {
                 Logging.Log(module, "IterateInvTypes - unable to find [" + System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "]", Logging.White);
             }
@@ -224,7 +224,7 @@ namespace Questor.Modules.Caching
         
         public void IterateShipTargetValues(string module)
         {
-            string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Logging.PathToCurrentDirectory;
 
             if (path != null)
             {
@@ -258,7 +258,7 @@ namespace Questor.Modules.Caching
 
         public void IterateUnloadLootTheseItemsAreLootItems(string module)
         {
-            string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Logging.PathToCurrentDirectory;
 
             if (path != null)
             {
@@ -291,7 +291,7 @@ namespace Questor.Modules.Caching
             }
             else
             {
-                Logging.Log(module, "IterateUnloadLootTheseItemsAreLootItems - unable to find [" + System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "]", Logging.White);
+                Logging.Log(module, "IterateUnloadLootTheseItemsAreLootItems - unable to find [" + Logging.PathToCurrentDirectory + "]", Logging.White);
             }
         }
 
@@ -338,15 +338,13 @@ namespace Questor.Modules.Caching
         public bool StopBot;
         public bool LootAlreadyUnloaded;
         public bool RouteIsAllHighSecBool;
-        public bool NeedRepair;
+
         public double Wealth { get; set; }
         public double WealthatStartofPocket { get; set; }
         public int StackLootHangarAttempts { get; set; }
         public int StackAmmoHangarAttempts { get; set; }
-        public string ScheduleCharacterName; //= Program._character;
         public bool NormalApproach = true;
         public bool CourierMission;
-        public bool RepairAll;
         public bool doneUsingRepairWindow;
         
         public long AmmoHangarID = -99;
@@ -1951,13 +1949,7 @@ namespace Questor.Modules.Caching
 
         public bool GotoBaseNow; //false;
 
-        public string ReasonToStopQuestor { get; set; }
-
-        public string SessionState { get; set; }
-
         public bool QuestorJustStarted = true;
-
-        public DateTime EnteredCloseQuestor_DateTime;
 
         //public bool DropMode;
 
@@ -2260,39 +2252,6 @@ namespace Questor.Modules.Caching
             }
         }
 
-        public string FilterPath(string path)
-        {
-            try
-            {
-                if (path == null)
-                {
-                    return string.Empty;
-                }
-
-                path = path.Replace("\"", "");
-                path = path.Replace("?", "");
-                path = path.Replace("\\", "");
-                path = path.Replace("/", "");
-                path = path.Replace("'", "");
-                path = path.Replace("*", "");
-                path = path.Replace(":", "");
-                path = path.Replace(">", "");
-                path = path.Replace("<", "");
-                path = path.Replace(".", "");
-                path = path.Replace(",", "");
-                path = path.Replace("'", "");
-                while (path.IndexOf("  ", System.StringComparison.Ordinal) >= 0)
-                    path = path.Replace("  ", " ");
-                return path.Trim();
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Cache.FilterPath", "Exception [" + exception + "]", Logging.Debug);
-                return null;
-            }
-        }
-
-        
         /// <summary>
         ///   Calculate distance from me
         /// </summary>
@@ -5061,12 +5020,12 @@ namespace Questor.Modules.Caching
                             Logging.Log(module, "Repairing Items: Zero Damage: skipping repair.", Logging.White);
                             repairWindow.Close();
                             Statistics.LogWindowActionToWindowLog("RepairWindow", "Closing RepairWindow");
-                            Cache.Instance.RepairAll = false;
+                            Arm.NeedRepair = false;
                             return true;
                         }
 
                         repairWindow.RepairAll();
-                        Cache.Instance.RepairAll = false;
+                        Arm.NeedRepair = false;
                         Time.Instance.NextRepairItemsAction = DateTime.UtcNow.AddSeconds(Settings.Instance.RandomNumber(2, 4));
                         return false;
                     }

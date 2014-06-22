@@ -27,11 +27,14 @@ namespace Questor.Modules.BackgroundTasks
         public static bool CloseQuestorFlag = true;
         private static bool FoundDuelInvitation;
         private static DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
+        public static string ReasonToStopQuestor { get; set; }
+        public static string SessionState { get; set; }
+
 
         public static void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-            Cache.Instance.SessionState = "Quitting";
+            Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+            Cleanup.SessionState = "Quitting";
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
             //Cleanup.CloseQuestor();
         }
@@ -53,7 +56,7 @@ namespace Questor.Modules.BackgroundTasks
             // so that IF we changed the state we would not be caught in a loop of re-entering QuestorState.CloseQuestor
             // keep in mind that CloseQuestor() itself DOES need to run multiple times across multiple iterations 
             // (roughly 20x before the timer expires and we actually close questor)
-            Cache.Instance.SessionState = "Quitting!!"; 
+            SessionState = "Quitting!!"; 
             
             if (!Cache.Instance.CloseQuestorCMDLogoff && !Cache.Instance.CloseQuestorCMDExitGame)
             {
@@ -69,7 +72,7 @@ namespace Questor.Modules.BackgroundTasks
             //TravelToAgentsStation();
 
             //if (_traveler.State == TravelerState.AtDestination ||
-            //    DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalSeconds >
+            //    DateTime.UtcNow.Subtract(Time.EnteredCloseQuestor_DateTime).TotalSeconds >
             //   Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE)
             //{
             //Logging.Log("QuestorState.CloseQuestor: At Station: Docked");
@@ -387,15 +390,15 @@ namespace Questor.Modules.BackgroundTasks
                 if (Cache.Instance.TotalMegaBytesOfMemoryUsed > (Settings.Instance.EVEProcessMemoryCeiling - 50))
                 {
                     Logging.Log("Cleanup", "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
-                    Cache.Instance.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
+                    Cleanup.ReasonToStopQuestor = "Memory usage is above the EVEProcessMemoryCeiling threshold. EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB";
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
-                    Cache.Instance.SessionState = "Exiting";
+                    Cleanup.SessionState = "Exiting";
                     BeginClosingQuestor();
                     return;
                 }
                 
-                Cache.Instance.SessionState = "Running";
+                Cleanup.SessionState = "Running";
             }
             catch (System.Exception ex)
             {
@@ -470,11 +473,11 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (Settings.Instance.CharacterName == "AtLoginScreenNoCharactersLoggedInYet" && Time.Instance.LastInStation.AddHours(1) > DateTime.UtcNow)
                     {
-                        Cache.Instance.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
-                        Logging.Log("Cleanup", Cache.Instance.ReasonToStopQuestor, Logging.White);
+                        Cleanup.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
+                        Logging.Log("Cleanup", Cleanup.ReasonToStopQuestor, Logging.White);
                         Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
-                        Cache.Instance.SessionState = "Quitting";
-                        Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                        Cleanup.SessionState = "Quitting";
+                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                         return;
                     }
 
@@ -639,10 +642,10 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDLogoff = false;
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = true;
-                                Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
+                                Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
-                                Cache.Instance.SessionState = "Quitting";
-                                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                                Cleanup.SessionState = "Quitting";
+                                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                                 return;
                             }
 
@@ -653,11 +656,11 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDLogoff = false;
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = false;
-                                Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
-                                Cache.Instance.SessionState = "Quitting";
+                                Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
+                                Cleanup.SessionState = "Quitting";
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
-                                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                                 return;
                             }
 
@@ -702,8 +705,8 @@ namespace Questor.Modules.BackgroundTasks
                                 //
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;
-                                //Cache.Instance.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
-                                //Cache.Instance.SessionState = "Quitting";
+                                //Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
+                                //Cleanup.SessionState = "Quitting";
                                 window.Close();
                                 continue;
                             }
@@ -813,18 +816,18 @@ namespace Questor.Modules.BackgroundTasks
                         _States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior ||
                         _States.CurrentQuestorState == QuestorState.Idle ||
                         _States.CurrentQuestorState == QuestorState.Cleanup) &&
-                        string.Compare(Cache.Instance.FilterPath(Settings.Instance.CharacterName).ToUpperInvariant(), Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name).ToUpperInvariant(), StringComparison.OrdinalIgnoreCase) == 1
+                        string.Compare(Logging.FilterPath(Settings.Instance.CharacterName).ToUpperInvariant(), Logging.FilterPath(Cache.Instance.DirectEve.Me.Name).ToUpperInvariant(), StringComparison.OrdinalIgnoreCase) == 1
                        )
                     {
                         Logging.Log("Cleanup", "DebugInfo:  Settings.Instance.CharacterName [" + Settings.Instance.CharacterName + "]", Logging.White);
                         Logging.Log("Cleanup", "DebugInfo: Cache.Instance.DirectEve.Me.Name [" + Cache.Instance.DirectEve.Me.Name + "]", Logging.White);
-                        Cache.Instance.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
+                        Cleanup.ReasonToStopQuestor = "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.";
                         Logging.Log("Cleanup", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                         Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
-                        Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-                        Cache.Instance.SessionState = "Quitting";
+                        Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+                        Cleanup.SessionState = "Quitting";
                         _States.CurrentQuestorState = QuestorState.CloseQuestor;
-                        Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                         return;
                     }
 

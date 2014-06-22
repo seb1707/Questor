@@ -9,6 +9,8 @@
 // -------------------------------------------------------------------------------
 
 
+using Questor.Modules.Actions;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -702,7 +704,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
                         if (Cache.Instance.ActiveShip.ArmorPercentage * 100 < 100)
                         {
-                            Cache.Instance.RepairAll = true; //triggers repairing during panic recovery, and arm
+                            Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
                         }
                     }
                     else if (module.GroupId == (int)Group.ArmorRepairer)
@@ -717,7 +719,7 @@ namespace Questor.Modules.BackgroundTasks
                         }
                         if (Cache.Instance.ActiveShip.StructurePercentage * 100 < 100)
                         {
-                            Cache.Instance.RepairAll = true; //triggers repairing during panic recovery, and arm
+                            Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
                         }
                     }
 

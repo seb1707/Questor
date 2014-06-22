@@ -38,9 +38,38 @@ namespace Questor
         //private static string _scriptAfterLoginFile;
         private static bool _loginOnly;
         private static bool _showHelp;
-        private static int _maxRuntime;
-        private static bool _chantlingScheduler;
-        private static bool _loginNowIgnoreScheduler;
+
+        private static bool __chantlingScheduler;
+        private static bool _chantlingScheduler
+        {
+            get
+            {
+                return __chantlingScheduler;
+            }
+            set
+            {
+                __chantlingScheduler = value;
+                if (__chantlingScheduler == false && string.IsNullOrEmpty(Logging.MyCharacterName))
+                {
+                    Logging.Log("Startup", "We were told to use the scheduler but we are Missing the CharacterName to login with...", Logging.Debug);
+                }
+            }
+        }
+
+        private static bool __loginNowIgnoreScheduler;
+        private static bool _loginNowIgnoreScheduler
+        {
+            get
+            {
+                return __loginNowIgnoreScheduler;
+            }
+            set
+            {
+                __loginNowIgnoreScheduler = value;
+                _chantlingScheduler = false;
+            }
+        }
+
         private static bool _standaloneInstance
         {
             get
@@ -85,7 +114,6 @@ namespace Questor
         private static readonly System.Timers.Timer Timer = new System.Timers.Timer();
         private const int RandStartDelay = 30; //Random startup delay in minutes
         private static readonly Random R = new Random();
-        public static bool StopTimeSpecified; //false;
         private static int ServerStatusCheck = 0;
         private static DateTime _nextPulse;
         private static DateTime _lastServerStatusCheckWasNotOK = DateTime.MinValue;
@@ -93,29 +121,31 @@ namespace Questor
         public static DateTime StopTime = DateTime.MinValue;
         private static Questor _questor;
         public static List<string> _QuestorParamaters;
+        public static bool standalone = true;
+        public static string PreLoginSettingsINI;
 
         public static bool Stop { get; set; }
 
-        public static int MaxRuntime
-        {
-            get
-            {
-                return _maxRuntime;
-            }
-        }
+        
 
-        public static void Main(string[] args)
+        private static void ParseArgs(IEnumerable<string> args)
         {
-            _maxRuntime = Int32.MaxValue;
+            if (!string.IsNullOrEmpty(Logging.EVELoginUserName) &&
+                !string.IsNullOrEmpty(Logging.EVELoginPassword) &&
+                !string.IsNullOrEmpty(Logging.MyCharacterName))
+            {
+                return;
+            }
+
             OptionSet p = new OptionSet
             {
                 "Usage: questor [OPTIONS]",
                 "Run missions and make uber ISK.",
                 "",
                 "Options:",
-                {"u|user=", "the {USER} we are logging in as.", v => Logging._username = v},
-                {"p|password=", "the user's {PASSWORD}.", v => Logging._password = v},
-                {"c|character=", "the {CHARACTER} to use.", v => Logging._character = v},
+                {"u|user=", "the {USER} we are logging in as.", v => Logging.EVELoginUserName = v},
+                {"p|password=", "the user's {PASSWORD}.", v => Logging.EVELoginPassword = v},
+                {"c|character=", "the {CHARACTER} to use.", v => Logging.MyCharacterName = v},
                 {"l|loginOnly", "login only and exit.", v => _loginOnly = v != null},
                 {"x|chantling|scheduler", "use scheduler (thank you chantling!)", v => _chantlingScheduler = v != null},
                 {"n|loginNow", "Login using info in scheduler", v => _loginNowIgnoreScheduler = v != null},
@@ -143,55 +173,66 @@ namespace Questor
                 Logging.Log("Startup", sw.ToString(), Logging.White);
                 return;
             }
+        }
 
-            Logging.Log("Startup", "Starting Questor Login...!", Logging.White);
-            if (_QuestorParamaters.Any()) Logging.Log("Startup", "We have [" + _QuestorParamaters.Count() + "] parameters passed to us", Logging.White);
-            
-            int i = 0;
-            foreach (string arg in _QuestorParamaters)
+        private static void OptionallyLoadPreLoginSettingsFromINI(IList<string> args)
+        {
+            if (!string.IsNullOrEmpty(Logging.EVELoginUserName) &&
+                !string.IsNullOrEmpty(Logging.EVELoginPassword) &&
+                !string.IsNullOrEmpty(Logging.MyCharacterName))
             {
-                Logging.Log("Startup", " *** Questor Parameters we have parsed [" + i + "] - [" + arg + "]", Logging.Debug);
-                i++;
-            }
-            
-            if (_loginNowIgnoreScheduler && !_chantlingScheduler)
-            {
-                _chantlingScheduler = true;
-            }
-
-            if (_chantlingScheduler && string.IsNullOrEmpty(Logging._character))
-            {
-                Logging.Log("Startup", "Error: to use chantling's scheduler, you also need to provide a character name!", Logging.Red);
                 return;
             }
 
             //
-            // login using info from schedules.xml
+            // (optionally) Load EVELoginUserName, EVELoginPassword, MyCharacterName (and other settings) from an ini
             //
-            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character))
+            if (args.Count() == 1 && args[0].ToLower().EndsWith(".ini"))
             {
-                Cache.Instance.ScheduleCharacterName = Logging._character;
-                LoginUsingScheduler();
+                PreLoginSettingsINI = System.IO.Path.Combine(Logging.PathToCurrentDirectory, args[0]);
+            }
+            else if (args.Count() == 2 && args[1].ToLower().EndsWith(".ini"))
+            {
+                PreLoginSettingsINI = System.IO.Path.Combine(Logging.PathToCurrentDirectory, args[0] + " " + args[1]);
+            }
+            if (!string.IsNullOrEmpty(PreLoginSettingsINI) && File.Exists(PreLoginSettingsINI))
+            {
+                Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
+                if (!PreLoginSettings(PreLoginSettingsINI)) Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + PreLoginSettingsINI + "]", Logging.Debug);
+            }
+        }
+
+        public static void Main(string[] args)
+        {
+            //if (Logging.DebugPreLogin)
+            //{
+                int i = 0;
+                foreach (string arg in args)
+                {
+                    Logging.Log("Startup", " *** Questor Parameters we have parsed [" + i + "] - [" + arg + "]", Logging.Debug);
+                    i++;
+                }
+            //}
+
+            ParseArgs(args);
+            OptionallyLoadPreLoginSettingsFromINI(args);
+            
+            //
+            // Wait to login based on schedule info from schedules.xml
+            //
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging.MyCharacterName))
+            {
+                WaitToLoginUntilSchedulerSaysWeShould();
             }
 
             //
             // direct login, no schedules.xml
             //
-            if (!string.IsNullOrEmpty(Logging._username) && !string.IsNullOrEmpty(Logging._password) && !string.IsNullOrEmpty(Logging._character))
+            if (!string.IsNullOrEmpty(Logging.EVELoginUserName) && !string.IsNullOrEmpty(Logging.EVELoginPassword) && !string.IsNullOrEmpty(Logging.MyCharacterName))
             {
-                Cache.Instance.ScheduleCharacterName = Logging._character;
                 ReadyToLoginToEVEAccount = true;
             }
 
-
-            bool EasyHookExists = File.Exists(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EasyHook.dll"));
-            if (!EasyHookExists && !MissingEasyHookWarningGiven)
-            {
-                Logging.Log("Startup", "EasyHook DLL's are missing. Please copy them into the same directory as your questor.exe", Logging.Orange);
-                Logging.Log("Startup", "halting!", Logging.Orange);
-                MissingEasyHookWarningGiven = true;
-                return;
-            }
 
             #region Load DirectEVE
 
@@ -201,6 +242,15 @@ namespace Questor
 
             try
             {
+                bool EasyHookExists = File.Exists(System.IO.Path.Combine(Logging.PathToCurrentDirectory, "EasyHook.dll"));
+                if (!EasyHookExists && !MissingEasyHookWarningGiven)
+                {
+                    Logging.Log("Startup", "EasyHook DLL's are missing. Please copy them into the same directory as your questor.exe", Logging.Orange);
+                    Logging.Log("Startup", "halting!", Logging.Orange);
+                    MissingEasyHookWarningGiven = true;
+                    return;
+                }
+
                 if (Cache.Instance.DirectEve == null)
                 {
                     //
@@ -235,9 +285,9 @@ namespace Questor
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.CloseQuestorEndProcess = true;
-                    Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                    Cache.Instance.SessionState = "Quitting";
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
+                    Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                    Cleanup.SessionState = "Quitting";
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor, true);
                     return;
                 }
                 catch (Exception exception)
@@ -355,10 +405,10 @@ namespace Questor
             }
         }
 
-        private static void LoginUsingScheduler()
+        private static void WaitToLoginUntilSchedulerSaysWeShould()
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Logging._character = Logging._character.Replace("\"", ""); // strip quotation marks if any are present
+            string path = Logging.PathToCurrentDirectory;
+            Logging.MyCharacterName = Logging.MyCharacterName.Replace("\"", ""); // strip quotation marks if any are present
 
 
             CharSchedules = new List<CharSchedule>();
@@ -380,10 +430,10 @@ namespace Questor
             //
             // chantling scheduler
             //
-            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == Logging._character);
+            CharSchedule schedule = CharSchedules.FirstOrDefault(v => v.ScheduleCharacterName == Logging.MyCharacterName);
             if (schedule == null)
             {
-                Logging.Log("Startup", "Error - character [" + Logging._character + "] not found in Schedules.xml!", Logging.Red);
+                Logging.Log("Startup", "Error - character [" + Logging.MyCharacterName + "] not found in Schedules.xml!", Logging.Red);
                 return;
             }
 
@@ -393,8 +443,8 @@ namespace Questor
                 return;
             }
 
-            Logging._username = schedule.LoginUserName;
-            Logging._password = schedule.LoginPassWord;
+            Logging.EVELoginUserName = schedule.LoginUserName;
+            Logging.EVELoginPassword = schedule.LoginPassWord;
             Logging.Log("Startup", "User: " + schedule.LoginUserName + " Name: " + schedule.ScheduleCharacterName, Logging.White);
 
             if (schedule.StartTimeSpecified)
@@ -404,7 +454,7 @@ namespace Questor
                 {
                     StartTime = schedule.Start1;
                     StopTime = schedule.Stop1;
-                    StopTimeSpecified = true;
+                    Time.Instance.StopTimeSpecified = true;
                     Logging.Log("Startup", "Schedule1: Start1: " + schedule.Start1 + " Stop1: " + schedule.Stop1, Logging.White);
                 }
             }
@@ -416,7 +466,7 @@ namespace Questor
                 {
                     StartTime = schedule.Start2;
                     StopTime = schedule.Stop2;
-                    StopTimeSpecified = true;
+                    Time.Instance.StopTimeSpecified = true;
                     Logging.Log("Startup", "Schedule2: Start2: " + schedule.Start2 + " Stop2: " + schedule.Stop2, Logging.White);
                 }
             }
@@ -428,7 +478,7 @@ namespace Questor
                 {
                     StartTime = schedule.Start3;
                     StopTime = schedule.Stop3;
-                    StopTimeSpecified = true;
+                    Time.Instance.StopTimeSpecified = true;
                     Logging.Log("Startup", "Schedule3: Start3: " + schedule.Start3 + " Stop3: " + schedule.Stop3, Logging.White);
                 }
             }
@@ -525,7 +575,7 @@ namespace Questor
             Time.Instance.LastSessionIsReady = DateTime.UtcNow;
                 //update this regardless before we login there is no session
 
-            //if (Cache.Instance.SessionState != "Quitting")
+            //if (Cleanup.SessionState != "Quitting")
             //{
             //    // Update settings (settings only load if character name changed)
             //    if (!Settings.Instance.DefaultSettingsLoaded)
@@ -547,6 +597,7 @@ namespace Questor
                 //Logging.Log("if (DateTime.UtcNow.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
                 return;
             }
+
             _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
             if (DateTime.UtcNow < QuestorProgramLaunched.AddSeconds(5))
@@ -563,7 +614,7 @@ namespace Questor
                 return;
             }
 
-            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) &&
+            if (_chantlingScheduler && !string.IsNullOrEmpty(Logging.MyCharacterName) &&
                 !_questorScheduleSaysWeShouldLoginNow)
             {
                 Logging.Log("Startup", "if (_chantlingScheduler && !string.IsNullOrEmpty(Logging._character) && !_questorScheduleSaysWeShouldLoginNow)", Logging.White);
@@ -787,10 +838,10 @@ namespace Questor
                 }
 
                 ServerStatusCheck = 0;
-                Cache.Instance.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
-                Logging.Log("Startup", Cache.Instance.ReasonToStopQuestor, Logging.Red);
-                Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor, true);
+                Cleanup.ReasonToStopQuestor = "Server Status Check shows server still not ready after more than 3 min. Restarting Questor. ServerStatusCheck is [" + ServerStatusCheck + "]";
+                Logging.Log("Startup", Cleanup.ReasonToStopQuestor, Logging.Red);
+                Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor, true);
                 return;
             }
 
@@ -809,8 +860,8 @@ namespace Questor
                 //
                 if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds > RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds*1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds*1000))
                 {
-                    Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
-                    Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
+                    Logging.Log("Startup", "Login account [" + Logging.EVELoginUserName + "]", Logging.White);
+                    Cache.Instance.DirectEve.Login.Login(Logging.EVELoginUserName, Logging.EVELoginPassword);
                     EVEAccountLoginStarted = DateTime.UtcNow;
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     return;
@@ -823,7 +874,7 @@ namespace Questor
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {
-                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != Logging._character && System.String.Compare(slot.CharName, Logging._character, System.StringComparison.OrdinalIgnoreCase) != 0)
+                        if (slot.CharId.ToString(CultureInfo.InvariantCulture) != Logging.MyCharacterName && System.String.Compare(slot.CharName, Logging.MyCharacterName, System.StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             continue;
                         }
@@ -835,7 +886,7 @@ namespace Questor
                         return;
                     }
                     Logging.Log("Startup",
-                        "Character id/name [" + Logging._character + "] not found, retrying in 10 seconds",
+                        "Character id/name [" + Logging.MyCharacterName + "] not found, retrying in 10 seconds",
                         Logging.White);
                 }
             }
@@ -876,6 +927,90 @@ namespace Questor
                     parmChars[index] = '\n';
             }
             return (new string(parmChars)).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static bool PreLoginSettings(string iniFile)
+        {
+            try
+            {
+                if (!File.Exists(iniFile))
+                {
+                    Logging.Log("PreLoginSettings", "Could not find a file named [" + iniFile + "]", Logging.Debug);
+                }
+
+                int index = 0;
+                foreach (string line in File.ReadAllLines(iniFile))
+                {
+                    index++;
+                    if (line.StartsWith(";"))
+                        continue;
+
+                    if (line.StartsWith("["))
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    
+                    string[] sLine = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                    //if (sLine.Count() != 2 && !sLine[0].Equals(ProxyUsername) && !sLine[0].Equals(ProxyPassword) )
+                    if (sLine.Count() != 2)
+                    {
+                        Logging.Log("PreLoginSettings", "IniFile not right format at line: [" + index + "]", Logging.Debug);
+                    }
+
+                    switch (sLine[0].ToLower())
+                    {
+                        case "eveloginusername":
+                            Logging.EVELoginUserName = sLine[1];
+                            break;
+
+                        case "eveloginpassword":
+                            Logging.EVELoginPassword = sLine[1];
+                            break;
+
+                        case "characternametologin":
+                            Logging.MyCharacterName = sLine[1];
+                            break;
+
+                        case "questorloginonly":
+                            _loginOnly = bool.Parse(sLine[1]);
+                            break;
+
+                        case "questorusescheduler":
+                            _chantlingScheduler = bool.Parse(sLine[1]);
+                            break;
+
+                        case "standaloneinstance":
+                            _standaloneInstance = bool.Parse(sLine[1]);
+                            break;
+                    }
+                }
+
+                if (Logging.EVELoginUserName == null)
+                {
+                    Logging.Log("PreLoginSettings", "Missing: EVELoginUserName in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE Login UserName", Logging.Debug);
+                }
+
+                if (Logging.EVELoginPassword == null)
+                {
+                    Logging.Log("PreLoginSettings", "Missing: EVELoginPassword in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE Login Password!", Logging.Debug);
+                }
+
+                if (Logging.MyCharacterName == null)
+                {
+                    Logging.Log("PreLoginSettings", "Missing: CharacterNameToLogin in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE CharacterName to choose", Logging.Debug);
+                }
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Startup.PreLoginSettings", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
         }
     }
 }

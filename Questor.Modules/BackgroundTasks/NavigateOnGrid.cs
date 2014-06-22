@@ -124,9 +124,9 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     Cache.Instance.CloseQuestorCMDLogoff = false;
                                     Cache.Instance.CloseQuestorCMDExitGame = true;
-                                    Cache.Instance.ReasonToStopQuestor = "navigateOnGrid: We have been stuck on an object for over 15 min";
-                                    Logging.Log("ReasonToStopQuestor", Cache.Instance.ReasonToStopQuestor, Logging.Yellow);
-                                    Cache.Instance.SessionState = "Quitting";
+                                    Cleanup.ReasonToStopQuestor = "navigateOnGrid: We have been stuck on an object for over 15 min";
+                                    Logging.Log("ReasonToStopQuestor", Cleanup.ReasonToStopQuestor, Logging.Yellow);
+                                    Cleanup.SessionState = "Quitting";
                                 }
                             }
 

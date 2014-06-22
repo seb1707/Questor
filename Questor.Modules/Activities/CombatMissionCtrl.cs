@@ -2519,7 +2519,7 @@ namespace Questor.Modules.Activities
 
                 if (missiondetails != null)
                 {
-                    MissionSettings.SetmissionXmlPath(Cache.Instance.FilterPath(missiondetails.Name));
+                    MissionSettings.SetmissionXmlPath(Logging.FilterPath(missiondetails.Name));
                     if (!File.Exists(MissionSettings.MissionXmlPath))
                     {
                         //No mission file but we need to set some cache settings

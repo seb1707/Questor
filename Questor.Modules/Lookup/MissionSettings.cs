@@ -140,8 +140,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement BlacklistedMission in xmlElementBlackListSection.Elements("mission"))
                     {
-                        MissionBlacklist.Add(Cache.Instance.FilterPath((string)BlacklistedMission));
-                        if (Logging.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + Cache.Instance.FilterPath((string)BlacklistedMission) + "]", Logging.Teal);
+                        MissionBlacklist.Add(Logging.FilterPath((string)BlacklistedMission));
+                        if (Logging.DebugBlackList) Logging.Log("Settings.LoadBlackList", "[" + i + "] Blacklisted mission Name [" + Logging.FilterPath((string)BlacklistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Blacklist now has [" + MissionBlacklist.Count + "] entries", Logging.White);
@@ -173,8 +173,8 @@ namespace Questor.Modules.Lookup
                     int i = 1;
                     foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
                     {
-                        MissionGreylist.Add(Cache.Instance.FilterPath((string)GreylistedMission));
-                        if (Logging.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + Cache.Instance.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
+                        MissionGreylist.Add(Logging.FilterPath((string)GreylistedMission));
+                        if (Logging.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + Logging.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
                         i++;
                     }
                     Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
@@ -575,14 +575,14 @@ namespace Questor.Modules.Lookup
             {
                 if (!string.IsNullOrEmpty(FactionName))
                 {
-                    MissionXmlPath = System.IO.Path.Combine(MissionsPath, Cache.Instance.FilterPath(missionName) + "-" + FactionName + ".xml");
+                    MissionXmlPath = System.IO.Path.Combine(MissionsPath, Logging.FilterPath(missionName) + "-" + FactionName + ".xml");
                     if (!File.Exists(MissionXmlPath))
                     {
                         //
                         // This will always fail for courier missions, can we detect those and suppress these log messages?
                         //
                         Logging.Log("Cache.SetmissionXmlPath", "[" + MissionXmlPath + "] not found.", Logging.White);
-                        MissionXmlPath = System.IO.Path.Combine(MissionsPath, Cache.Instance.FilterPath(missionName) + ".xml");
+                        MissionXmlPath = System.IO.Path.Combine(MissionsPath, Logging.FilterPath(missionName) + ".xml");
                         if (!File.Exists(MissionXmlPath))
                         {
                             Logging.Log("Cache.SetmissionXmlPath", "[" + MissionXmlPath + "] not found", Logging.White);
@@ -596,7 +596,7 @@ namespace Questor.Modules.Lookup
                 }
                 else
                 {
-                    MissionXmlPath = System.IO.Path.Combine(MissionsPath, Cache.Instance.FilterPath(missionName) + ".xml");
+                    MissionXmlPath = System.IO.Path.Combine(MissionsPath, Logging.FilterPath(missionName) + ".xml");
                 }
             }
             catch (Exception exception)
@@ -705,7 +705,7 @@ namespace Questor.Modules.Lookup
                 }
             }
 
-            string missionName = Cache.Instance.FilterPath(missionDetailsForMissionItems.Name);
+            string missionName = Logging.FilterPath(missionDetailsForMissionItems.Name);
             MissionXmlPath = System.IO.Path.Combine(MissionsPath, missionName + ".xml");
             if (!File.Exists(MissionXmlPath))
             {

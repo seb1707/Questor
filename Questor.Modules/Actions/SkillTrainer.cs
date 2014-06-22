@@ -89,9 +89,9 @@ namespace Questor.Modules.Actions
 					Cache.Instance.CloseQuestorCMDExitGame = true;
 					Cache.Instance.CloseQuestorEndProcess = true;
 					Settings.Instance.AutoStart = false;
-					Cache.Instance.ReasonToStopQuestor = "Done Processing Skill Training Plan and adding skills as needed to the training queue";
-					Cache.Instance.SessionState = "Quitting";
-					Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+					Cleanup.ReasonToStopQuestor = "Done Processing Skill Training Plan and adding skills as needed to the training queue";
+					Cleanup.SessionState = "Quitting";
+					Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
 					break;
 
 				case SkillTrainerState.GenerateInnerspaceProfile:

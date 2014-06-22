@@ -173,13 +173,15 @@ namespace Questor.Modules.Lookup
         public DateTime NextModuleDisableAutoReload { get; set; }
 
         public DateTime QuestorStarted_DateTime = DateTime.UtcNow;
+        public static DateTime EnteredCloseQuestor_DateTime { get; set; }
+
         public DateTime StartedBoosting { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime StopTime = DateTime.Now.AddHours(10);
         public DateTime WehaveMoved = DateTime.UtcNow;
         
         public bool StopTimeSpecified = true;
-        public int MaxRuntime { get; set; }
+        public int MaxRuntime = int.MaxValue;
 
         /// <summary>
         ///   Modules last reload time

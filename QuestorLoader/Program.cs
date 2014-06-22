@@ -1,31 +1,20 @@
 ﻿
-using System.CodeDom;
-using System.Linq;
-
 namespace QuestorLoader
 {
     using System;
+    using System.IO;
+    using System.Linq;
     using EasyHook;
-    using Mono.Options;
     using System.Collections.Generic;
 
-    //using System.Runtime.InteropServices;
-    //using mscoree;
-
+    
     public class Main : IEntryPoint
     {
-        public static bool _showHelp;
         public static bool UnthawEVEProcess = false;
         public static string _appDomainNameToUse;
         public static string _pathToQuestorEXE;
-        public static string[] questorLoaderArgsArray;
-        public static string[] ParamatersToPassToQuestorArray;
-        public static string TempArgString = string.Empty;
         public static EXEBootStrapper _exeBootStrapper;
-        public static string _UseSchedule;
-        public static string _EVECharacterName;
-        public static string _EVELoginUserName;
-        public static string _EVELoginPassword;
+        public static string QuestorDLLSettingsINI;
 
         public Main(RemoteHooking.IContext InContext, string questorLoaderParameters)
         {
@@ -33,73 +22,65 @@ namespace QuestorLoader
         }
 
 
-        public void Run(RemoteHooking.IContext InContext, string questorLoaderParameters)
+        public void Run(RemoteHooking.IContext InContext,string questorLoaderParameters)
         {
             Logging.Log("QuestorLauncher", "QuestorLauncher has started", Logging.White);
 
-            questorLoaderArgsArray = SplitArguments(questorLoaderParameters).ToArray();
-
+            
             int i = 0;
-            foreach (var arg in questorLoaderArgsArray)
+            Console.WriteLine("QuestorLoader Parameters we were passed [" + i + "] - [" + questorLoaderParameters + "] \r\n");
+            
+            if (PrepareToLoadPreLoginSettingsFromINI(questorLoaderParameters))
             {
-                if (questorLoaderArgsArray[i].ToLower() == "-PathToQuestorEXE".ToLower())
+                EXEBootstrapper_StartQuestor();
+
+                while (!UnthawEVEProcess)
                 {
-                    _pathToQuestorEXE = questorLoaderArgsArray[i + 1];
+                    System.Threading.Thread.Sleep(1000);
                 }
 
-                if (questorLoaderArgsArray[i].ToLower() == "-AppDomain".ToLower())
+                RemoteHooking.WakeUpProcess();
+
+                while (true)
                 {
-                    _appDomainNameToUse = questorLoaderArgsArray[i + 1];
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+            else
+            {
+                Console.WriteLine("QuestorLoader: unable to load settings from ini, halting\r\n");
+            }
+
+            Console.WriteLine("QuestorLoader: done.\r\n");
+        }
+
+        private static bool PrepareToLoadPreLoginSettingsFromINI(string arg)
+        {
+            //
+            // Load PathToQuestorEXE and AppDomainToCreateForQuestor from an ini
+            //
+            if (arg.ToLower().EndsWith(".ini"))
+            {
+                QuestorDLLSettingsINI = System.IO.Path.Combine(Directory.GetCurrentDirectory(), arg);
+                
+                if (!string.IsNullOrEmpty(QuestorDLLSettingsINI) && File.Exists(QuestorDLLSettingsINI))
+                {
+                    Logging.Log("Startup", "Found [" + QuestorDLLSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
+                    if (!PreLoginSettings(QuestorDLLSettingsINI))
+                    {
+                        Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + QuestorDLLSettingsINI + "]", Logging.Debug);
+                        return false;
+                    }
+
+                    Logging.Log("Startup.PreLoginSettings", "_pathToQuestorEXE is [" + _pathToQuestorEXE + "]", Logging.Debug);
+                    Logging.Log("Startup.PreLoginSettings", "_appDomainNameToUse is [" + _appDomainNameToUse + "]", Logging.Debug);
+                    return true;
                 }
 
-                //if (questorLoaderArgsArray[i].ToLower() == "-x".ToLower())
-                //{
-                //    _UseSchedule = questorLoaderArgsArray[i];
-                //}
-
-                //if (questorLoaderArgsArray[i].ToLower() == "-c".ToLower())
-                //{
-                //    _EVECharacterName = questorLoaderArgsArray[i + 1];
-                //}
-
-                //if (questorLoaderArgsArray[i].ToLower() == "-u".ToLower())
-                //{
-                //    _EVELoginUserName = questorLoaderArgsArray[i + 1];
-                //}
-
-                //if (questorLoaderArgsArray[i].ToLower() == "-p".ToLower())
-                //{
-                //    _EVELoginPassword = questorLoaderArgsArray[i + 1];
-                //}
-
-                if (arg == questorLoaderArgsArray[0]) continue;
-                if (arg == questorLoaderArgsArray[1]) continue;
-                if (arg == questorLoaderArgsArray[2]) continue;
-                if (arg == questorLoaderArgsArray[3]) continue;
-                Console.WriteLine("QuestorLoader Parameters we were passed [" + i + "] - [" + arg + "] \r\n");
-                TempArgString = TempArgString + " " + arg;
-                i++;
+                return false;
             }
 
-            //if (!String.IsNullOrEmpty(_EVELoginUserName)) TempArgList.Add("-u " +  _EVELoginUserName + " ");
-            //if (!String.IsNullOrEmpty(_EVELoginPassword)) TempArgList.Add(_EVELoginPassword);
-            //if (!String.IsNullOrEmpty(_UseSchedule)) TempArgList.Add("-x");
-            //if (_EVECharacterName != null) 
-            
-
-            EXEBootstrapper_StartQuestor();
-
-            while (!UnthawEVEProcess)
-            {
-                System.Threading.Thread.Sleep(1000);
-            }
-
-            RemoteHooking.WakeUpProcess();
-            
-            while (true)
-            {
-                System.Threading.Thread.Sleep(1000);
-            }
+            return false;
         }
 
         public static void EXEBootstrapper_StartQuestor()
@@ -107,8 +88,7 @@ namespace QuestorLoader
             try
             {
                 _exeBootStrapper = new EXEBootStrapper();
-                //EXEBootStrapper.StartQuestor(new string[] { TempArgString });
-                EXEBootStrapper.StartQuestor(questorLoaderArgsArray);
+                EXEBootStrapper.StartQuestor(); 
             }
             catch (Exception ex)
             {
@@ -154,6 +134,77 @@ namespace QuestorLoader
                 return null;
             }
         }
+
+        public static bool PreLoginSettings(string iniFile)
+        {
+            try
+            {
+                if (!File.Exists(iniFile))
+                {
+                    Logging.Log("PreLoginSettings", "Could not find a file named [" + iniFile + "]", Logging.Debug);
+                }
+
+                //foreach (string line in File.ReadAllLines(iniFile))
+                //{
+                //    Logging.Log("PreLoginSettings", "Contents of INI [" + line + "]", Logging.Debug);
+                //}
+
+                int index = 0;
+                foreach (string line in File.ReadAllLines(iniFile))
+                {    
+                    index++;
+                    if (line.StartsWith(";"))
+                        continue;
+
+                    if (line.StartsWith("["))
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    //Logging.Log("PreLoginSettings", "Contents of INI Lines we Process [" + line + "]", Logging.Debug);
+
+                    string[] sLine = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                    //if (sLine.Count() != 2 && !sLine[0].Equals(ProxyUsername) && !sLine[0].Equals(ProxyPassword) )
+                    if (sLine.Count() != 2)
+                    {
+                        Logging.Log("PreLoginSettings", "IniFile not right format at line: [" + index + "]", Logging.Debug);
+                    }
+
+                    //Logging.Log("PreLoginSettings", "Contents of INI Values we Processed [" + sLine[1] + "]", Logging.Debug);
+                    switch (sLine[0].ToLower())
+                    {
+                        case "pathtoquestorexe":
+                            _pathToQuestorEXE = sLine[1];
+                            break;
+
+                        case "appdomaintocreateforquestor":
+                            _appDomainNameToUse = sLine[1];
+                            break;
+                    }
+                }
+
+                if (_pathToQuestorEXE == null || string.IsNullOrEmpty(_pathToQuestorEXE))
+                {
+                    Logging.Log("PreLoginSettings", "Missing: PathToQuestorEXE in [" + iniFile + "]: We cannot launch EVE if we do not know where it is. Ex. PathToQuestorEXE=c:\\eveoffline\\DotNetPrograms\\Questor.exe", Logging.Debug);
+                }
+
+                if (_appDomainNameToUse == null || string.IsNullOrEmpty(_appDomainNameToUse))
+                {
+                    _appDomainNameToUse = "q1";
+                }
+
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Startup.PreLoginSettings", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
+        }
     }
     
     
@@ -169,7 +220,7 @@ namespace QuestorLoader
             
         }
 
-        public static void StartQuestor(string[] args)
+        public static void StartQuestor()
         {
             try
             {
@@ -183,7 +234,7 @@ namespace QuestorLoader
                 System.AppDomain NewAppDomain = System.AppDomain.CreateDomain(Main._appDomainNameToUse);
                 Logging.Log("EXEBootStrapper", "AppDomain [" + Main._appDomainNameToUse + "] created", Logging.White);
                 // Load the assembly and call the default entry point:
-                NewAppDomain.ExecuteAssembly(Main._pathToQuestorEXE, Main.ParamatersToPassToQuestorArray);
+                NewAppDomain.ExecuteAssembly(Main._pathToQuestorEXE, new string[] { Main.QuestorDLLSettingsINI });
                 Logging.Log("EXEBootStrapper", "ExecuteAssembly [" + Main._pathToQuestorEXE + "] finished", Logging.White);
                 //Main.UnthawEVEProcess = true;
             }
@@ -244,4 +295,6 @@ namespace QuestorLoader
         }
         */
     }
+
+
 }

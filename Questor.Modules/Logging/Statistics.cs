@@ -206,12 +206,12 @@ namespace Questor.Modules.Logging
         {
             if (PocketObjectStatisticsLog || force)
             {
-                string currentPocketName = Cache.Instance.FilterPath("Random-Grid");
+                string currentPocketName = Logging.FilterPath("Random-Grid");
                 try
                 {
                     if (!String.IsNullOrEmpty(MissionSettings.MissionName))
                     {
-                        currentPocketName = Cache.Instance.FilterPath(MissionSettings.MissionName);
+                        currentPocketName = Logging.FilterPath(MissionSettings.MissionName);
                     }
                 }
                 catch (Exception ex)
@@ -221,7 +221,7 @@ namespace Questor.Modules.Logging
 
                 PocketObjectStatisticsFile = Path.Combine(
                         PocketObjectStatisticsPath,
-                        Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " +
+                        Logging.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " +
                         CombatMissionCtrl.PocketNumber + " - ObjectStatistics.csv");
                 
                 Logging.Log("Statistics.ObjectStatistics", "Logging info on the [" + things.Count + "] objects in this pocket to [" + PocketObjectStatisticsFile + "]", Logging.White);
@@ -627,7 +627,7 @@ namespace Questor.Modules.Logging
                     // Build the line
                     string line = DateTimeForLogs + ";";                           //Date
                     line += "0" + ";";                                          //RunningTime
-                    line += Cache.Instance.SessionState + ";";                  //SessionState
+                    line += Cleanup.SessionState + ";";                  //SessionState
                     line += "" + ";";                                           //LastMission
                     line += Cache.Instance.MyWalletBalance + ";";               //WalletBalance
                     line += Cache.Instance.TotalMegaBytesOfMemoryUsed + ";";    //MemoryUsage
@@ -643,7 +643,7 @@ namespace Questor.Modules.Logging
                     // The mission is finished
                     File.AppendAllText(SessionsLogFile, line);
 
-                    Cache.Instance.SessionState = "";
+                    Cleanup.SessionState = "";
                     Logging.Log("Statistics: WriteSessionLogStarting", "Writing session data to [ " + SessionsLogFile + " ]", Logging.White);
                 }
             }
@@ -689,11 +689,11 @@ namespace Questor.Modules.Logging
                 // Build the line
                 string line = DateTimeForLogs + ";";                               // Date
                 line += SessionRunningTime + ";";                // RunningTime
-                line += Cache.Instance.SessionState + ";";                      // SessionState
+                line += Cleanup.SessionState + ";";                      // SessionState
                 line += MissionSettings.MissionName + ";";                       // LastMission
                 line += Cache.Instance.MyWalletBalance + ";";                   // WalletBalance
                 line += ((int)Cache.Instance.TotalMegaBytesOfMemoryUsed + ";"); // MemoryUsage
-                line += Cache.Instance.ReasonToStopQuestor + ";";               // Reason to Stop Questor
+                line += Cleanup.ReasonToStopQuestor + ";";               // Reason to Stop Questor
                 line += SessionIskGenerated + ";";               // Isk Generated This Session
                 line += SessionLootGenerated + ";";              // Loot Generated This Session
                 line += SessionLPGenerated + ";";                // LP Generated This Session
@@ -707,7 +707,7 @@ namespace Questor.Modules.Logging
                 File.AppendAllText(SessionsLogFile, line);
 
                 Logging.Log("Statistics: WriteSessionLogClosing", "Writing to session log [ " + SessionsLogFile, Logging.White);
-                Logging.Log("Statistics: WriteSessionLogClosing", "Questor is stopping because: " + Cache.Instance.ReasonToStopQuestor, Logging.White);
+                Logging.Log("Statistics: WriteSessionLogClosing", "Questor is stopping because: " + Cleanup.ReasonToStopQuestor, Logging.White);
                 SessionsLog = false; //so we don't write the session log more than once per session
             }
             return true;
@@ -730,12 +730,12 @@ namespace Questor.Modules.Logging
             //    return;
 
             //agentID needs to change if its a storyline mission - so its assigned in storyline.cs to the various modules directly.
-            string currentPocketName = Cache.Instance.FilterPath(MissionSettings.MissionName);
+            string currentPocketName = Logging.FilterPath(MissionSettings.MissionName);
             if (PocketStatistics)
             {
                 if (PocketStatsUseIndividualFilesPerPocket)
                 {
-                    PocketStatisticsFile = Path.Combine(PocketStatisticsPath, Cache.Instance.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + CombatMissionCtrl.PocketNumber + " - PocketStatistics.csv");
+                    PocketStatisticsFile = Path.Combine(PocketStatisticsPath, Logging.FilterPath(Cache.Instance.DirectEve.Me.Name) + " - " + currentPocketName + " - " + CombatMissionCtrl.PocketNumber + " - PocketStatistics.csv");
                 }
                 if (!Directory.Exists(PocketStatisticsPath))
                     Directory.CreateDirectory(PocketStatisticsPath);

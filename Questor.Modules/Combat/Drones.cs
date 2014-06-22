@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Actions;
+
 namespace Questor.Modules.Combat
 {
     using System;
@@ -830,7 +832,7 @@ namespace Questor.Modules.Combat
 
             if (Drones.ActiveDrones.Any(i => i.ArmorPct * 100 < 100))
             {
-                Cache.Instance.RepairAll = true;
+                Arm.NeedRepair = true;
             }
             
             return Drones.ActiveDrones.Sum(d => d.ArmorHitPoints);
@@ -843,7 +845,7 @@ namespace Questor.Modules.Combat
 
             if (Drones.ActiveDrones.Any(i => i.StructurePct * 100 < 100))
             {
-                Cache.Instance.RepairAll = true;
+                Arm.NeedRepair = true;
             }
 
             return Drones.ActiveDrones.Sum(d => d.StructureHitPoints);

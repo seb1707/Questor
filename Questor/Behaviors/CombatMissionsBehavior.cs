@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using DirectEve;
 using Questor.Modules.Caching;
 using Questor.Modules.Logging;
@@ -107,15 +108,25 @@ namespace Questor.Behaviors
         public void ValidateCombatMissionSettings()
         {
             ValidSettings = true;
-            if (Combat.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
+            if (Combat.Ammo.Any())
             {
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.EM)) Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Thermal)) Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Kinetic)) Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Explosive)) Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
+                if (Combat.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
+                {
+                    if (Combat.Ammo.All(a => a.DamageType != DamageType.EM)) Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
+                    if (Combat.Ammo.All(a => a.DamageType != DamageType.Thermal)) Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
+                    if (Combat.Ammo.All(a => a.DamageType != DamageType.Kinetic)) Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
+                    if (Combat.Ammo.All(a => a.DamageType != DamageType.Explosive)) Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
 
-                Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
+                    Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
+                    ValidSettings = false;
+                    return;
+                }    
+            }
+            else
+            {
+                Combat.Ammo = new List<Ammo>();
                 ValidSettings = false;
+                return;
             }
 
             if (Cache.Instance.Agent == null || !Cache.Instance.Agent.IsValid)
@@ -130,11 +141,12 @@ namespace Questor.Behaviors
             Arm.AgentId = Cache.Instance.AgentId;
             Statistics.AgentID = Cache.Instance.AgentId;
             AgentID = Cache.Instance.AgentId;
+            return;
         }
 
         private void BeginClosingQuestor()
         {
-            Cache.Instance.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
+            Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
 
@@ -263,6 +275,7 @@ namespace Questor.Behaviors
                 if (DateTime.UtcNow.Hour == 10)
                 {
                     if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Don't start a new action an hour before downtime, DateTime.UtcNow.Hour [" + DateTime.UtcNow.Hour + "]", Logging.White);
+                    QuestorUI.lblCurrentMissionInfo.Text = "less than 1 hour before downtime, waiting";
                     return;
                 }
 
@@ -270,6 +283,7 @@ namespace Questor.Behaviors
                 if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute < 15)
                 {
                     if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Don't start a new action near downtime, DateTime.UtcNow.Hour [" + DateTime.UtcNow.Hour + "] DateTime.UtcNow.Minute [" + DateTime.UtcNow.Minute + "]", Logging.White);
+                    QuestorUI.lblCurrentMissionInfo.Text = "less than 15min after downtime, waiting";
                     return;
                 }
 
@@ -278,6 +292,7 @@ namespace Questor.Behaviors
                     _randomDelay = (Settings.Instance.RandomDelay > 0 ? _random.Next(Settings.Instance.RandomDelay) : 0) + Settings.Instance.MinimumDelay;
                     LastCMBAction = DateTime.UtcNow;
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedStart;
+                    QuestorUI.lblCurrentMissionInfo.Text = "Random start delay of [" + _randomDelay + "] seconds";
                     Logging.Log("CombatMissionsBehavior", "Random start delay of [" + _randomDelay + "] seconds", Logging.White);
                     return;
                 }
@@ -624,7 +639,7 @@ namespace Questor.Behaviors
 
             Traveler.TravelHome("CombatMissionsBehavior.TravelHome");
 
-            if (_States.CurrentTravelerState == TravelerState.AtDestination && Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(Cache.Instance.RandomNumber(10, 15))) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+            if (_States.CurrentTravelerState == TravelerState.AtDestination && Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(Cache.Instance.RandomNumber(10, 15))) // || DateTime.UtcNow.Subtract(Time.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
             {
                 if (Logging.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: We are at destination", Logging.White);
                 Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
@@ -1383,7 +1398,7 @@ namespace Questor.Behaviors
                 }
             }
 
-            if (Cache.Instance.SessionState == "Quitting")
+            if (Cleanup.SessionState == "Quitting")
             {
                 BeginClosingQuestor();
             }
@@ -1398,7 +1413,7 @@ namespace Questor.Behaviors
                 if (Cache.Instance.QuestorJustStarted)
                 {
                     Cache.Instance.QuestorJustStarted = false;
-                    Cache.Instance.SessionState = "Starting Up";
+                    Cleanup.SessionState = "Starting Up";
 
                     // write session log
                     Statistics.WriteSessionLogStarting();
@@ -1589,7 +1604,7 @@ namespace Questor.Behaviors
                     else
                         Traveler.TravelHome("CombatMissionsBehavior.TravelHome");
 
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Cache.Instance.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
+                    if (_States.CurrentTravelerState == TravelerState.AtDestination && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(5)) // || DateTime.UtcNow.Subtract(Time.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
                     {
                         if (Logging.DebugGotobase) Logging.Log("CombatMissionsBehavior", "PrepareStorylineGotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase

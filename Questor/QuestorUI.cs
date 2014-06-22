@@ -443,16 +443,16 @@ namespace Questor
             lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
             dataStopTimeSpecified.Text = Time.Instance.StopTimeSpecified.ToString();
 
-            if (Cache.Instance.SessionState == "Quitting")
+            if (Cleanup.SessionState == "Quitting")
             {
                 if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
-                    if (Cache.Instance.ReasonToStopQuestor == string.Empty)
+                    if (Cleanup.ReasonToStopQuestor == string.Empty)
                     {
-                        Cache.Instance.ReasonToStopQuestor = "Cache.Instance.SessionState == Quitting";
+                        Cleanup.ReasonToStopQuestor = "Cleanup.SessionState == Quitting";
                     }
 
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 }
             }
 
@@ -660,40 +660,48 @@ namespace Questor
                 }
             }
 
-            if (!String.IsNullOrEmpty(MissionSettings.MissionName))
+            if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle && _States.CurrentQuestorState != QuestorState.Idle)
             {
-                if (!String.IsNullOrEmpty(MissionSettings.MissionsPath))
+                if (!String.IsNullOrEmpty(MissionSettings.MissionName))
                 {
-                    if (File.Exists(MissionSettings.MissionXmlPath))
+                    if (!String.IsNullOrEmpty(MissionSettings.MissionsPath))
                     {
-                        string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
-                        if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                        if (File.Exists(MissionSettings.MissionXmlPath))
                         {
-                            lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
-                            buttonOpenMissionXML.Enabled = true;
+                            string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
+                            if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                            {
+                                lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
+                                buttonOpenMissionXML.Enabled = true;
+                            }
                         }
-                    }
-                    else
-                    {
-                        string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
-                        if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                        else
                         {
-                            lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
-                            buttonOpenMissionXML.Enabled = false;
+                            string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
+                            if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                            {
+                                lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
+                                buttonOpenMissionXML.Enabled = false;
+                            }
                         }
                     }
                 }
-            }
-            else if (String.IsNullOrEmpty(MissionSettings.MissionName))
-            {
-                lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
-                buttonOpenMissionXML.Enabled = false;
+                else if (String.IsNullOrEmpty(MissionSettings.MissionName))
+                {
+                    lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
+                    buttonOpenMissionXML.Enabled = false;
+                }
+                else
+                {
+                    //lblCurrentMissionInfo.Text = "No Mission XML exists for this mission";
+                    buttonOpenMissionXML.Enabled = false;
+                }
             }
             else
             {
-                //lblCurrentMissionInfo.Text = "No Mission XML exists for this mission";
                 buttonOpenMissionXML.Enabled = false;
             }
+
 
             if (Settings.Instance.DefaultSettingsLoaded)
             {
@@ -798,11 +806,11 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 30)
                 {
                     Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cache.Instance.ReasonToStopQuestor = "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
+                    Cleanup.ReasonToStopQuestor = "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
                     //
                     // closing eve would be a very good idea here
                     //
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                     Application.Exit();
                 }
             }
@@ -813,8 +821,8 @@ namespace Questor
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 60)
                 {
                     Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cache.Instance.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                    Cleanup.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                     Application.Exit();
                 }
             }
@@ -865,7 +873,7 @@ namespace Questor
 
         private void ButtonQuestorStatisticsClick(object sender, EventArgs e)
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Logging.PathToCurrentDirectory;
             Process[] processes = System.Diagnostics.Process.GetProcessesByName("QuestorStatistics");
 
             if (processes.Length == 0)
@@ -1087,8 +1095,8 @@ namespace Questor
                 {
                     Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
-                    Cache.Instance.ReasonToStopQuestor = "Stating QuestorManager: closing questor";
-                    Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                    Cleanup.ReasonToStopQuestor = "Stating QuestorManager: closing questor";
+                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 }
                 else
                 {
@@ -1426,8 +1434,8 @@ namespace Questor
 
         private void btnSetQuestorQuittingFlag_Click_1(object sender, EventArgs e)
         {
-            Logging.Log("QuestorUI", "Setting: Cache.Instance.SessionState to [Quitting] - the next Questor.Idle state should see and process this.", Logging.Debug);
-            Cache.Instance.SessionState = "Quitting";
+            Logging.Log("QuestorUI", "Setting: Cleanup.SessionState to [Quitting] - the next Questor.Idle state should see and process this.", Logging.Debug);
+            Cleanup.SessionState = "Quitting";
         }
 
         private void bttnUserDefinedScript1_Click(object sender, EventArgs e)

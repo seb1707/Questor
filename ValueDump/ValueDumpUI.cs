@@ -74,9 +74,9 @@ namespace ValueDump
                 Cache.Instance.CloseQuestorCMDExitGame = true;
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
-                Cache.Instance.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cache.Instance.SessionState = "Quitting";
-                Cleanup.CloseQuestor(Cache.Instance.ReasonToStopQuestor);
+                Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
+                Cleanup.SessionState = "Quitting";
+                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 return;
             }
             #endregion Load DirectEVE

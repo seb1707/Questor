@@ -34,7 +34,7 @@ namespace QuestorLoader
         {
             Interlocked.Increment(ref LoggingInstances);
             string characterNameForLogs = "QuestorLoader";
-            Logging.Logpath = (System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\" + characterNameForLogs + "\\");
+            Logging.Logpath = Logging.CharacterSettingsPath + "\\log\\" + characterNameForLogs + "\\";
             //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
             Logging.ConsoleLogPath = System.IO.Path.Combine(Logging.Logpath, "Console\\");
             Logging.ConsoleLogFile = System.IO.Path.Combine(Logging.ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + characterNameForLogs + "-" + "console" + ".log");

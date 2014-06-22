@@ -56,10 +56,6 @@ namespace QuestorManager
         	
             try
             {
-            	if(!_standaloneInstance){
-            		Application.EnableVisualStyles();
-            		Application.SetCompatibleTextRenderingDefault(false);
-            	}
                 Application.Run(new QuestorManagerUI(_standaloneInstance));
             }
             catch (Exception) { }

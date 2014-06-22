@@ -79,6 +79,7 @@ namespace QuestorManager
 
         public QuestorManagerUI(bool _standaloneInstance)
         {
+            Application.EnableVisualStyles();
             InitializeComponent();
 
             _grab = new Grab();

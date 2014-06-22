@@ -27,6 +27,7 @@ namespace Questor
 
         public QuestorUI()
         {
+            Application.EnableVisualStyles();
             if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
             if (Logging.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
             InitializeComponent();

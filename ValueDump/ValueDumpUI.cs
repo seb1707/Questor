@@ -32,6 +32,7 @@ namespace ValueDump
 
         public ValueDumpUI(bool _standaloneInstance)
         {
+            Application.EnableVisualStyles();
             Logging.Log("ValueDump","Starting ValueDump",Logging.Orange);
             InitializeComponent();
             _market = new Market();

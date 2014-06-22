@@ -2931,7 +2931,7 @@ namespace Questor.Modules.Caching
                             //    _isIgnored = true;
                             //    return _isIgnored ?? true;
                             //}
-                            if (CombatMissionCtrl.IgnoreTargets.Any())
+                            if (CombatMissionCtrl.IgnoreTargets != null && CombatMissionCtrl.IgnoreTargets.Any())
                             {
                                 _isIgnored = CombatMissionCtrl.IgnoreTargets.Contains(Name.Trim());
                                 if ((bool)_isIgnored)

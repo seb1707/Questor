@@ -1247,6 +1247,7 @@ namespace Questor.Modules.Lookup
             if (!Cache.Instance.DirectEve.Login.AtLogin)
             {
                 _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
             }
 
             Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager

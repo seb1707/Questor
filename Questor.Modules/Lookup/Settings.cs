@@ -1222,32 +1222,35 @@ namespace Questor.Modules.Lookup
                 //Cleanup.SessionState = "Quitting";
             }
 
-            bool reloadSettings = true;
-            if (File.Exists(Logging.CharacterSettingsPath))
+            try
             {
-                //if (!forcereload)
-                //{
-                reloadSettings = _lastModifiedDateOfMySettingsFile != File.GetLastWriteTime(Logging.CharacterSettingsPath);
-                if (!reloadSettings)
+                bool reloadSettings = true;
+                if (File.Exists(Logging.CharacterSettingsPath))
                 {
-                    reloadSettings = _lastModifiedDateOfMyCommonSettingsFile != File.GetLastWriteTime(CommonSettingsPath);
+                    //if (!forcereload)
+                    //{
+                    reloadSettings = _lastModifiedDateOfMySettingsFile != File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                    if (!reloadSettings)
+                    {
+                        if (File.Exists(Settings.Instance.CommonSettingsPath)) reloadSettings = _lastModifiedDateOfMyCommonSettingsFile != File.GetLastWriteTime(CommonSettingsPath);
+                    }
+                    //}
+
+                    if (!reloadSettings)
+                        return;
                 }
-                //}
             }
-
-            //if (File.Exists(Settings.Instance.CommonSettingsPath))
-            //{
-            //    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.CommonSettingsPath);
-            //}
-
-            if (!reloadSettings)
-                return;
+            catch (Exception ex)
+            {
+                Logging.Log("Settings", "Exception [" + ex + "]", Logging.White);
+            }
+            
 
             // if we are at login still we want to re-load settings on the next attempt so do not record the last write time for settings until after we are in game
             if (!Cache.Instance.DirectEve.Login.AtLogin)
             {
-                _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
-                _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
+                if (File.Exists(Logging.CharacterSettingsPath)) _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                if (File.Exists(Settings.Instance.CommonSettingsPath)) _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
             }
 
             Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager

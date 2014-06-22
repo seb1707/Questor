@@ -1,4 +1,4 @@
-﻿using SlimDX.Direct3D10;
+﻿
 
 namespace Questor
 {
@@ -329,7 +329,7 @@ namespace Questor
                 //
                 try
                 {
-                    Application.EnableVisualStyles();
+                    //Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Logging.Log("Startup", "We are logged in.", Logging.Teal);
                     Logging.Log("Startup", "Launching Questor", Logging.Teal);

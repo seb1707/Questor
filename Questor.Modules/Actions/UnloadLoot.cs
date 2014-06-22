@@ -95,9 +95,9 @@ namespace Questor.Modules.Actions
                     {
                         if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
 
-                        if (Cache.Instance.AmmoHangar.IsValid)
+                        if (Cache.Instance.AmmoHangar != null)
                         {
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.AmmoHangar.IsValid)", Logging.Teal);
+                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             //
                             // Add Ammo to the list of things to move
@@ -316,7 +316,7 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (Cache.Instance.CurrentShipsCargo.IsValid)
+            if (Cache.Instance.CurrentShipsCargo != null && PutLootHere != null)
             {
                 if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.CargoHold.IsValid)", Logging.White);
                 IEnumerable<DirectItem> lootToMove = Cache.Instance.CurrentShipsCargo.Items.ToList();
@@ -419,7 +419,8 @@ namespace Questor.Modules.Actions
                 return true;
             }
 
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
+            if (Logging.DebugUnloadLoot && Cache.Instance.CurrentShipsCargo != null) Logging.Log("UnloadLoot.MoveLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
+            if (Logging.DebugUnloadLoot && PutLootHere != null) Logging.Log("UnloadLoot.MoveLoot", "PutLootHere is not yet valid", Logging.White);
             return false;
         }
 

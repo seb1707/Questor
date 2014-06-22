@@ -8,14 +8,13 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Reflection;
-
 namespace Questor.Modules.Logging
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Windows.Forms;
@@ -128,9 +127,15 @@ namespace Questor.Modules.Logging
                 }
 
                 colorLogLine = line;
-                redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                Logging.redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                
                 plainLogLine = FilterColorsFromLogs(line);
-                redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+
+                Logging.redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+
+                //Logging.ConsoleLogText = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");
+                Logging.ConsoleLogText = Logging.redactedPlainLogLine;
+                Logging.ExtConsole = Logging.ConsoleLogText;
                 
                 //
                 // Innerspace Console logging
@@ -138,11 +143,11 @@ namespace Questor.Modules.Logging
                 //Logging.UseInnerspace = true;
                 if (Logging.UseInnerspace)
                 {
-                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+                    InnerSpace.Echo(String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
                 }
                 else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
-                    Console.WriteLine(redactedPlainLogLine);
+                    Console.WriteLine(Logging.ConsoleLogText);
                 }
                 
                 if (Logging.tryToLogToFile)
@@ -162,15 +167,11 @@ namespace Questor.Modules.Logging
                                     LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
                                 }
 
-                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
-
                                 if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
                                 {
                                     Directory.CreateDirectory(Logging.ConsoleLogPath);
                                     if (Directory.Exists(Logging.ConsoleLogPath))
                                     {
-                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + "Logging" + "]" + plainLogLine + "\r\n");
-                                        File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                                         Logging.ConsoleLogOpened = true;
                                     }
                                     else
@@ -183,7 +184,6 @@ namespace Questor.Modules.Logging
                                 {
                                     line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
                                     if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + "Logging" + "] " + plainLogLine + "\r\n");
                                 }
                             }
                         }
@@ -198,7 +198,6 @@ namespace Questor.Modules.Logging
                             //
                             if (Logging.ConsoleLogFile != null && !verbose) //normal
                             {
-                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                             }
 
@@ -207,12 +206,9 @@ namespace Questor.Modules.Logging
                             //
                             if (Logging.ConsoleLogFileRedacted != null)
                             {
-                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedPlainLogLine);               //Write In Memory Console log to File
                             }
                         }
-
-                        Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
                     }
                 }
             }

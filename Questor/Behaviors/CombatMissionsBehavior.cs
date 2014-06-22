@@ -896,9 +896,7 @@ namespace Questor.Behaviors
         
         private void GotoMissionCMBState()
         {
-            Logging.Log("CombatMissionsBehavior", "WeShouldBeInSpaceORInStationAndOutOfSessionChange: Starting", Logging.White);
             if (!WeShouldBeInSpaceORInStationAndOutOfSessionChange()) return; //either in space or in station is fine, but we should not continue until we are not in a session change
-            Logging.Log("CombatMissionsBehavior", "WeShouldBeInSpaceORInStationAndOutOfSessionChange: Done", Logging.White);
             Statistics.MissionLoggingCompleted = false;
             Drones.IsMissionPocketDone = false;
 

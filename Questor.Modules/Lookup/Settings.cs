@@ -34,7 +34,8 @@ namespace Questor.Modules.Lookup
         /// </summary>
         public static Settings Instance = new Settings();
         public string CharacterName;
-        private DateTime _lastModifiedDate;
+        private DateTime _lastModifiedDateOfMySettingsFile;
+        private DateTime _lastModifiedDateOfMyCommonSettingsFile;
         private int SettingsLoadedICount = 0;
 
         public static int SettingsInstances = 0;
@@ -1226,7 +1227,11 @@ namespace Questor.Modules.Lookup
             {
                 //if (!forcereload)
                 //{
-                    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                reloadSettings = _lastModifiedDateOfMySettingsFile != File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                if (!reloadSettings)
+                {
+                    reloadSettings = _lastModifiedDateOfMyCommonSettingsFile != File.GetLastWriteTime(CommonSettingsPath);
+                }
                 //}
             }
 
@@ -1241,7 +1246,7 @@ namespace Questor.Modules.Lookup
             // if we are at login still we want to re-load settings on the next attempt so do not record the last write time for settings until after we are in game
             if (!Cache.Instance.DirectEve.Login.AtLogin)
             {
-                _lastModifiedDate = File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
             }
 
             Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager

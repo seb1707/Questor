@@ -165,7 +165,7 @@ namespace Questor
                     //Cache.Instance.IterateInvTypes("RunOnceAfterStartup");          // populates the prices of items (cant we use prices from the game now?!)
                     Cache.Instance.IterateUnloadLootTheseItemsAreLootItems("RunOnceAfterStartup");       // populates the list of items we never want in our local cargo (used mainly in unloadloot)
 
-                    if (Settings.Instance.UseInnerspace)
+                    if (Logging.UseInnerspace)
                     {
                         InnerspaceCommands.CreateLavishCommands();
 

@@ -19,7 +19,7 @@ namespace Questor.Modules.States
 
         //public static void LavishEvent_QuestorPausedState()
         //{
-        //    if (Settings.Instance.UseInnerspace)
+        //    if (Logging.UseInnerspace)
         //    {
         //        uint QuestorPausedStateEvent = LavishScript.Events.RegisterEvent("QuestorPausedState");
         //        LavishScript.Events.ExecuteEvent(QuestorPausedStateEvent, Cache.Instance.Paused.ToString());

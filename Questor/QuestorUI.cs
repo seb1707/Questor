@@ -850,7 +850,7 @@ namespace Questor
         {
             if (e.KeyChar == (char)13)
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Logging.UseInnerspace)
                 {
                     LavishScript.ExecuteCommand(txtComand.Text);
                 }
@@ -1092,7 +1092,7 @@ namespace Questor
             string questorManagerPath = Path.Combine(Settings.Instance.Path, "QuestorManager.exe");
             if (File.Exists(questorManagerPath))
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Logging.UseInnerspace)
                 {
                     Logging.Log("QuestorUI", "Launching [ dotnet QuestorManager QuestorManager ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet QuestorManager QuestorManager");
@@ -1382,9 +1382,9 @@ namespace Questor
         private void bttnResizeEVEWindow_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960, Logging.White);
-            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
+            if (Logging.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 150 WindowCharacteristics -size " + 1280 + "x" + 960);
             Logging.Log("QuestorUI", "Running Innerspace command: timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0, Logging.White);
-            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
+            if (Logging.UseInnerspace) LavishScript.ExecuteCommand("timedcommand 200 WindowCharacteristics -pos " + 0 + "," + 0);
         }
 
         private void bttnLogEntitiesOnGrid_Click(object sender, EventArgs e)
@@ -1444,7 +1444,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript1 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript1 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
+                if (Logging.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript1);    
             }
             else
             {
@@ -1457,7 +1457,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript2 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript2 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
+                if (Logging.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript2);
             }
             else
             {
@@ -1470,7 +1470,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript3 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript3 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
+                if (Logging.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript3);
             }
             else
             {
@@ -1483,7 +1483,7 @@ namespace Questor
             if (Settings.Instance.UserDefinedLavishScriptScript4 != string.Empty)
             {
                 Logging.Log("QuestorUI", "Running User Defined LavishScript Script #1 [" + Settings.Instance.UserDefinedLavishScriptScript4 + "]", Logging.Debug);
-                if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
+                if (Logging.UseInnerspace) LavishScript.ExecuteCommand("runscript " + Settings.Instance.UserDefinedLavishScriptScript4);
             }
             else
             {

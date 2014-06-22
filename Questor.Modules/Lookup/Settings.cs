@@ -74,19 +74,7 @@ namespace Questor.Modules.Lookup
         public string TargetSelectionMethod { get; set; }
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DefendWhileTraveling { get; set; }
-        public bool _useInnerspace;
-        public bool UseInnerspace
-        {
-            get
-            {
-                return _useInnerspace;
-            }
-            set
-            {
-                Logging.UseInnerspace = value;
-                _useInnerspace = value;
-            }
-        }
+        
         //public bool setEveClientDestinationWhenTraveling { get; set; }
         public string EveServerName { get; set; }
         public int EnforcedDelayBetweenModuleClicks { get; set; }
@@ -420,7 +408,7 @@ namespace Questor.Modules.Lookup
                 Logging.DebugWatchForActiveWars = (bool?)CharacterSettingsXml.Element("debugWatchForActiveWars") ?? (bool?)CommonSettingsXml.Element("debugWatchForActiveWars") ?? false;
                 DetailedCurrentTargetHealthLogging = (bool?)CharacterSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? (bool?)CommonSettingsXml.Element("detailedCurrentTargetHealthLogging") ?? true;
                 DefendWhileTraveling = (bool?)CharacterSettingsXml.Element("defendWhileTraveling") ?? (bool?)CommonSettingsXml.Element("defendWhileTraveling") ?? true;
-                UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
+                Logging.UseInnerspace = (bool?)CharacterSettingsXml.Element("useInnerspace") ?? (bool?)CommonSettingsXml.Element("useInnerspace") ?? true;
                 //setEveClientDestinationWhenTraveling = (bool?)CharacterSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? (bool?)CommonSettingsXml.Element("setEveClientDestinationWhenTraveling") ?? false;
                 TargetSelectionMethod = (string)CharacterSettingsXml.Element("targetSelectionMethod") ?? (string)CommonSettingsXml.Element("targetSelectionMethod") ?? "isdp"; //other choice is "old"
                 CharacterToAcceptInvitesFrom = (string)CharacterSettingsXml.Element("characterToAcceptInvitesFrom") ?? (string)CommonSettingsXml.Element("characterToAcceptInvitesFrom") ?? Settings.Instance.CharacterName;
@@ -1347,7 +1335,7 @@ namespace Questor.Modules.Lookup
                 Logging.DebugWatchForActiveWars = true;
                 DetailedCurrentTargetHealthLogging = false;
                 DefendWhileTraveling = true;
-                UseInnerspace = true;
+                Logging.UseInnerspace = true;
                 // setEveClientDestinationWhenTraveling = false;
 
                 CharacterToAcceptInvitesFrom = Settings.Instance.CharacterName;

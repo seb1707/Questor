@@ -158,7 +158,7 @@ namespace QuestorManager
             RefreshAvailableXMLJobs();
             Cache.Instance.DirectEve.OnFrame += OnFrame;
 
-            if (Settings.Instance.UseInnerspace)
+            if (Logging.UseInnerspace)
             {
                 LavishScript.Commands.AddCommand("QMStart", StartProcessing);
                 LavishScript.Commands.AddCommand("QMLoadSavedTaskList", LoadSavedTaskList);
@@ -383,7 +383,7 @@ namespace QuestorManager
 
                     case QuestormanagerState.CmdLine:
 
-                        if (Settings.Instance.UseInnerspace)
+                        if (Logging.UseInnerspace)
                         {
                             Logging.Log("QuestorManager", "CmdLine: " + LstTask.Items[0].SubItems[1].Text, Logging.White);
                             LavishScript.ExecuteCommand(LstTask.Items[0].SubItems[1].Text);
@@ -1504,7 +1504,7 @@ namespace QuestorManager
             string questorPath = Path.Combine(Settings.Instance.Path, "Questor.exe");
             if (File.Exists(questorPath))
             {
-                if (Settings.Instance.UseInnerspace)
+                if (Logging.UseInnerspace)
                 {
                     Logging.Log("QuestorManagerUI", "Launching [ dotnet q1 questor.exe ]", Logging.White);
                     LavishScript.ExecuteCommand("dotnet q1 questor.exe");

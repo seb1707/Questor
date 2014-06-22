@@ -72,20 +72,12 @@ namespace Questor.Behaviors
         {
             _lastPulse = DateTime.MinValue;
 
-            //_traveler = new Traveler();
             _random = new Random();
-            //_salvage = new Salvage();
-            //_combat = new Combat();
-            //_drones = new Drones();
             _unloadLoot = new UnloadLoot();
-            //_agentInteraction = new AgentInteraction();
-            //_arm = new Arm();
             _courierMissionCtrl = new CourierMissionCtrl();
             _switchShip = new SwitchShip();
             _combatMissionCtrl = new CombatMissionCtrl();
-            //_panic = new Panic();
             _storyline = new Storyline();
-            //_statistics = new Statistics();
             _watch = new Stopwatch();
 
             //

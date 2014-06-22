@@ -20,7 +20,7 @@ namespace Questor.Modules.Misc
         
         public static void CreateLavishCommands()
         {
-            if (Settings.Instance.UseInnerspace)
+            if (Logging.UseInnerspace)
             {
                 //Autostart on/off
                 LavishScript.Commands.AddCommand("SetAutoStart", SetAutoStart);

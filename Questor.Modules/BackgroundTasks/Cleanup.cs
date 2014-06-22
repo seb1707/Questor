@@ -87,7 +87,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (CloseQuestorFlag)
                     {
                         Logging.Log("Questor", "Logging off EVE: EVE and questor should restart on their own when the client comes back up", Logging.White);
-                        if (Settings.Instance.UseInnerspace)
+                        if (Logging.UseInnerspace)
                         {
                             LavishScript.ExecuteCommand("uplink echo Logging off EVE:  \\\"${Game}\\\" \\\"${Profile}\\\"");
                         }
@@ -114,7 +114,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Cache.Instance.CloseQuestorCMDExitGame)
                 {
-                    if (Settings.Instance.UseInnerspace)
+                    if (Logging.UseInnerspace)
                     {
                         //Logging.Log("Questor: We are in station: Exit option has been configured.");
                         if (((Settings.Instance.CloseQuestorArbitraryOSCmd) && (Settings.Instance.CloseQuestorCMDUplinkIsboxerCharacterSet)) ||
@@ -797,7 +797,7 @@ namespace Questor.Modules.BackgroundTasks
                             Logging.Log("Questor", "EVE instance: totalMegaBytesOfMemoryUsed - " + Cache.Instance.TotalMegaBytesOfMemoryUsed + " MB", Logging.White);
                             string MemoryManagerCommandToRun = "dotnet m1 memmanager.exe " + Settings.Instance.MemoryManagerTrimThreshold;
                             Logging.Log("Cleanup.CleanupTasks", "EVEMemoryManager: running [ " + MemoryManagerCommandToRun + " ]", Logging.White);
-                            if (Settings.Instance.UseInnerspace) LavishScript.ExecuteCommand(MemoryManagerCommandToRun);
+                            if (Logging.UseInnerspace) LavishScript.ExecuteCommand(MemoryManagerCommandToRun);
                             MemoryManagerHasBeenRunThisIteration = true;
                         }
 

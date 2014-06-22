@@ -95,8 +95,7 @@ namespace Questor.Modules.Actions
                     {
                         if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CargoHold.IsValid && Cache.Instance.CargoHold.Items.Any())", Logging.Teal);
 
-                        if (Cache.Instance.AmmoHangar != null)
-                        {
+                        
                             if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.AmmoHangar != null)", Logging.Teal);
 
                             //
@@ -250,10 +249,10 @@ namespace Questor.Modules.Actions
                             _nextUnloadAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
                             _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                             return true;
-                        }
+                        
 
-                        if (Logging.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.AmmoHangar is Not yet valid", Logging.Teal);
-                        return false;
+                        //if (Logging.DebugUnloadLoot) Logging.Log("Unloadloot.MoveAmmo", "Cache.Instance.AmmoHangar is Not yet valid", Logging.Teal);
+                        //return false;
                     }
 
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
@@ -316,8 +315,8 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (Cache.Instance.CurrentShipsCargo != null && PutLootHere != null)
-            {
+            
+            
                 if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.CargoHold.IsValid)", Logging.White);
                 IEnumerable<DirectItem> lootToMove = Cache.Instance.CurrentShipsCargo.Items.ToList();
 
@@ -417,11 +416,11 @@ namespace Questor.Modules.Actions
                 if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return false;
                 _States.CurrentUnloadLootState = UnloadLootState.Done;
                 return true;
-            }
+            
 
-            if (Logging.DebugUnloadLoot && Cache.Instance.CurrentShipsCargo != null) Logging.Log("UnloadLoot.MoveLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
-            if (Logging.DebugUnloadLoot && PutLootHere != null) Logging.Log("UnloadLoot.MoveLoot", "PutLootHere is not yet valid", Logging.White);
-            return false;
+            //if (Logging.DebugUnloadLoot && Cache.Instance.CurrentShipsCargo != null) Logging.Log("UnloadLoot.MoveLoot", "Cache.Instance.CargoHold is not yet valid", Logging.White);
+            //if (Logging.DebugUnloadLoot && PutLootHere != null) Logging.Log("UnloadLoot.MoveLoot", "PutLootHere is not yet valid", Logging.White);
+            //return false;
         }
 
         private bool EveryUnloadLootPulse()

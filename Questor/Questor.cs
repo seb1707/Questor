@@ -457,6 +457,13 @@ namespace Questor
                 return false;
             }
 
+            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(10))
+            {
+                //if we somehow manage to get the questor GUI running on the login screen, do nothing.
+                return false;
+            }
+
+
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
 

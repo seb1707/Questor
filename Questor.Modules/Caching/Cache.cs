@@ -761,31 +761,46 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                try
                 {
-                    if (_agentName == "")
+                    if (Settings.Instance.CharacterXMLExists)
                     {
-                        try
+                        if (_agentName == "")
                         {
-                            _agentName = SwitchAgent();
-                            Logging.Log("Cache.CurrentAgent", "[ " + _agentName + " ] AgentID [ " + AgentId + " ]", Logging.White);
-                            Cache.Instance.CurrentAgentText = CurrentAgent.ToString(CultureInfo.InvariantCulture);
+                            try
+                            {
+                                _agentName = SwitchAgent();
+                                Logging.Log("Cache.CurrentAgent", "[ " + _agentName + " ] AgentID [ " + AgentId + " ]", Logging.White);
+                                Cache.Instance.CurrentAgentText = CurrentAgent.ToString(CultureInfo.InvariantCulture);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logging.Log("Cache.AgentId", "Exception [" + ex + "]", Logging.Debug);
+                                return "";
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            Logging.Log("Cache.AgentId", "Exception [" + ex + "]",Logging.Debug);
-                            return "";
-                        }
-                    }
 
-                    return _agentName;
+                        return _agentName;
+                    }
+                    return "";
                 }
-                return "";
+                catch (Exception ex)
+                {
+                    Logging.Log("SelectNearestAgent", "Exception [" + ex + "]", Logging.Debug);
+                    return "";
+                }
             }
             set
             {
-                CurrentAgentText = value.ToString(CultureInfo.InvariantCulture);
-                _agentName = value;
+                try
+                {
+                    CurrentAgentText = value.ToString(CultureInfo.InvariantCulture);
+                    _agentName = value;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("SelectNearestAgent", "Exception [" + ex + "]", Logging.Debug);
+                }   
             }
         }
         private static readonly Func<DirectAgent, DirectSession, bool> AgentInThisSolarSystemSelector = (a, s) => a.SolarSystemId == s.SolarSystemId;
@@ -856,39 +871,51 @@ namespace Questor.Modules.Caching
 
         private string SelectFirstAgent(bool returnFirstOneIfNoneFound = false)
         {
-            AgentsList FirstAgent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
-
-            string agentName = null;
-
-            if (FirstAgent != null)
+            try
             {
-                agentName = FirstAgent.Name;
-            }
-            else
-            {
-                Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
-            }
+                AgentsList FirstAgent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
 
-            return agentName;
+                string agentName = null;
+
+                if (FirstAgent != null)
+                {
+                    agentName = FirstAgent.Name;
+                }
+                else
+                {
+                    Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
+                }
+
+                return agentName;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.SelectFirstAgent", "Exception [" + exception + "]", Logging.Debug);
+                return null;
+            }
         }
 
         public string SwitchAgent()
         {
-            string agentName = null;
+            try
+            {
+                string agentName = null;
 
-            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.PrepareStorylineSwitchAgents)
-            {
-                //TODO: must be a better way to achieve this
-                agentName = SelectFirstAgent();
-            }
-            else if (_agentName == "")
-            {
-                // it means that this is first switch for Questor, so we'll check missions, then station or system for agents.
-                AllAgentsStillInDeclineCoolDown = false;
-                agentName = SelectNearestAgent(true) ?? SelectNearestAgent(false);
-            }
-            else
-            {
+                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.PrepareStorylineSwitchAgents)
+                {
+                    //TODO: must be a better way to achieve this
+                    agentName = SelectFirstAgent();
+                    return agentName;
+                }
+                
+                if (_agentName == "")
+                {
+                    // it means that this is first switch for Questor, so we'll check missions, then station or system for agents.
+                    AllAgentsStillInDeclineCoolDown = false;
+                    agentName = SelectNearestAgent(true) ?? SelectNearestAgent(false);
+                    return agentName;
+                }
+               
                 // find agent by priority and with ok declineTimer 
                 AgentsList agent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault(i => DateTime.UtcNow >= i.DeclineTimer);
 
@@ -896,48 +923,59 @@ namespace Questor.Modules.Caching
                 {
                     agentName = agent.Name;
                     AllAgentsStillInDeclineCoolDown = false; //this literally means we DO have agents available (at least one agents decline timer has expired and is clear to use)
+                    return agentName;
                 }
-                else
+                
+                // Why try to find an agent at this point ?
+                /*
+                try
                 {
-                    // Why try to find an agent at this point ?
-                    /*
-                    try
-                    {
-                        agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache.SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
-                        Cache.Instance.Paused = true;
-                    }
-                    */
-                    AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
+                    agent = Settings.Instance.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
                 }
+                catch (Exception ex)
+                {
+                    Logging.Log("Cache.SwitchAgent", "Unable to process agent section of [" + Settings.Instance.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
+                    Cache.Instance.Paused = true;
+                }
+                */
+                AllAgentsStillInDeclineCoolDown = true; //this literally means we have no agents available at the moment (decline timer likely)
+                return null;
             }
-
-            return agentName;
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.SwitchAgent", "Exception [" + exception + "]", Logging.Debug);
+                return null;
+            }
         }
 
         public long AgentId
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                try
                 {
-                    try
+                    if (Settings.Instance.CharacterXMLExists)
                     {
-                        if (_agent == null) _agent = DirectEve.GetAgentByName(CurrentAgent);
-                        _agentId = _agent.AgentId;
+                        try
+                        {
+                            if (_agent == null) _agent = DirectEve.GetAgentByName(CurrentAgent);
+                            _agentId = _agent.AgentId;
 
-                        return (long)_agentId;
+                            return (long)_agentId;
+                        }
+                        catch (Exception ex)
+                        {
+                            Logging.Log("Cache.AgentId", "Is your Agent List defined properly? Unable to get agent details for the Agent Named [" + CurrentAgent + "][" + ex.Message + "]", Logging.Debug);
+                            return -1;
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache.AgentId", "Is your Agent List defined properly? Unable to get agent details for the Agent Named [" + CurrentAgent + "][" + ex.Message + "]", Logging.Debug);
-                        return -1;
-                    }
+                    return -1;
                 }
-                return -1;
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.AgentId", "Exception [" + exception + "]", Logging.Debug);
+                    return -1;
+                }
             }
         }
 
@@ -945,33 +983,41 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Settings.Instance.CharacterXMLExists)
+                try
                 {
-                    try
+                    if (Settings.Instance.CharacterXMLExists)
                     {
-                        if (_agent == null) _agent = DirectEve.GetAgentByName(CurrentAgent);
-                        if (_agent != null)
+                        try
                         {
-                            _agentId = _agent.AgentId;
-                            //Logging.Log("Cache: CurrentAgent", "Processing Agent Info...", Logging.White);
-                            Cache.Instance.AgentStationName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.StationId);
-                            Cache.Instance.AgentStationID = Cache.Instance._agent.StationId;
-                            //Cache.Instance.AgentSolarSystemName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.SolarSystemId);
-                            Cache.Instance.AgentSolarSystemID = Cache.Instance._agent.SolarSystemId;
-                            //Logging.Log("Cache: CurrentAgent", "AgentStationName [" + Cache.Instance.AgentStationName + "]", Logging.White);
-                            //Logging.Log("Cache: CurrentAgent", "AgentStationID [" + Cache.Instance.AgentStationID + "]", Logging.White);
-                            //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemName [" + Cache.Instance.AgentSolarSystemName + "]", Logging.White);
-                            //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemID [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
+                            if (_agent == null) _agent = DirectEve.GetAgentByName(CurrentAgent);
+                            if (_agent != null)
+                            {
+                                _agentId = _agent.AgentId;
+                                //Logging.Log("Cache: CurrentAgent", "Processing Agent Info...", Logging.White);
+                                Cache.Instance.AgentStationName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.StationId);
+                                Cache.Instance.AgentStationID = Cache.Instance._agent.StationId;
+                                //Cache.Instance.AgentSolarSystemName = Cache.Instance.DirectEve.GetLocationName(Cache.Instance._agent.SolarSystemId);
+                                Cache.Instance.AgentSolarSystemID = Cache.Instance._agent.SolarSystemId;
+                                //Logging.Log("Cache: CurrentAgent", "AgentStationName [" + Cache.Instance.AgentStationName + "]", Logging.White);
+                                //Logging.Log("Cache: CurrentAgent", "AgentStationID [" + Cache.Instance.AgentStationID + "]", Logging.White);
+                                //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemName [" + Cache.Instance.AgentSolarSystemName + "]", Logging.White);
+                                //Logging.Log("Cache: CurrentAgent", "AgentSolarSystemID [" + Cache.Instance.AgentSolarSystemID + "]", Logging.White);
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            Logging.Log("Cache.Agent", "Unable to process agent section of [" + Logging.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
+                            Cache.Instance.Paused = true;
+                        }
+                        if (_agentId != null) return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
                     }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Cache.Agent", "Unable to process agent section of [" + Logging.CharacterSettingsPath + "] make sure you have a valid agent listed! Pausing so you can fix it. [" + ex.Message + "]", Logging.Debug);
-                        Cache.Instance.Paused = true;
-                    }
-                    if (_agentId != null) return _agent ?? (_agent = DirectEve.GetAgentById(_agentId.Value));
+                    return null;
                 }
-                return null;
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.Agent", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
             }
         }
 

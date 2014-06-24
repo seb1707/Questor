@@ -875,18 +875,13 @@ namespace Questor.Modules.Caching
             {
                 AgentsList FirstAgent = MissionSettings.ListOfAgents.OrderBy(j => j.Priorit).FirstOrDefault();
 
-                string agentName = null;
-
                 if (FirstAgent != null)
                 {
-                    agentName = FirstAgent.Name;
-                }
-                else
-                {
-                    Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
+                    return FirstAgent.Name;
                 }
 
-                return agentName;
+                Logging.Log("SelectFirstAgent", "Unable to find the first agent, are your agents configured?", Logging.Debug);
+                return null;
             }
             catch (Exception exception)
             {
@@ -1148,13 +1143,21 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_maxLockedTargets == null)
+                try
                 {
-                    _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.ActiveShip.MaxLockedTargets);
-                    return (int) _maxLockedTargets;
-                }
+                    if (_maxLockedTargets == null)
+                    {
+                        _maxLockedTargets = Math.Min(Cache.Instance.DirectEve.Me.MaxLockedTargets, Cache.Instance.ActiveShip.MaxLockedTargets);
+                        return (int)_maxLockedTargets;
+                    }
 
-                return (int) _maxLockedTargets;
+                    return (int)_maxLockedTargets;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.MaxLockedTargets", "Exception [" + exception + "]", Logging.Debug);
+                    return -1;
+                }
             }
         }
 
@@ -1187,11 +1190,19 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
-                           e.IsContainer && 
-                           e.HaveLootRights && 
-                          //(e.GroupId == (int)Group.Wreck && !e.IsWreckEmpty) &&
+                try
+                {
+                    return _containers ?? (_containers = Cache.Instance.EntitiesOnGrid.Where(e =>
+                           e.IsContainer &&
+                           e.HaveLootRights &&
+                               //(e.GroupId == (int)Group.Wreck && !e.IsWreckEmpty) &&
                           (e.Name != "Abandoned Container")).ToList());
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.Containers", "Exception [" + exception + "]", Logging.Debug);
+                    return new List<EntityCache>();
+                }
             }
         }
 

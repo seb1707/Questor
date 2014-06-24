@@ -1169,6 +1169,13 @@ namespace Questor.Modules.Lookup
 
         public void LoadSettings(bool forcereload = false)
         {
+            if (DateTime.UtcNow < Time.Instance.NextLoadSettings)
+            {
+                return;
+            }
+
+            Time.Instance.NextLoadSettings = DateTime.UtcNow.AddSeconds(15);
+            
             try
             {
                 if (Logging.MyCharacterName != null)

@@ -128,6 +128,7 @@ namespace Questor.Modules.Lookup
         public DateTime NextQMJobCheckAction = DateTime.UtcNow;
         public DateTime NextSalvageTrip = DateTime.UtcNow;
         public static DateTime NextClearPocketCache = DateTime.UtcNow;
+        public DateTime NextLoadSettings { get; set; }
         public DateTime NextWindowAction { get; set; }
         public DateTime NextGetAgentMissionAction { get; set; }
         public DateTime NextOpenContainerInSpaceAction { get; set; }

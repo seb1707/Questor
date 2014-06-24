@@ -457,7 +457,7 @@ namespace Questor
                 return false;
             }
 
-            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(10))
+            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(Cache.Instance.RandomNumber(1,4)))
             {
                 //if we somehow manage to get the questor GUI running on the login screen, do nothing.
                 return false;

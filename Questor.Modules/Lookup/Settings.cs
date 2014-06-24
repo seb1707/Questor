@@ -423,8 +423,8 @@ namespace Questor.Modules.Lookup
 
                 //other option is "salvage"
 
-                if (!Cache.Instance.DirectEve.Login.AtLogin)
-                {
+                //if (!Cache.Instance.DirectEve.Login.AtLogin || DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddMinutes(1))
+                //{
                     Combat.Ammo = new List<Ammo>();
                     if (Settings.Instance.CharacterMode.ToLower() == "dps".ToLower())
                     {
@@ -432,7 +432,7 @@ namespace Questor.Modules.Lookup
                     }
 
                     AutoStart = (bool?)CharacterSettingsXml.Element("autoStart") ?? (bool?)CommonSettingsXml.Element("autoStart") ?? false; // auto Start enabled or disabled by default?
-                }
+                //}
 
                 MaxLineConsole = (int?)CharacterSettingsXml.Element("maxLineConsole") ?? (int?)CommonSettingsXml.Element("maxLineConsole") ?? 1000;
                 // maximum console log lines to show in the GUI
@@ -440,8 +440,8 @@ namespace Questor.Modules.Lookup
                 RandomDelay = (int?)CharacterSettingsXml.Element("randomDelay") ?? (int?)CommonSettingsXml.Element("randomDelay") ?? 0;
                 MinimumDelay = (int?)CharacterSettingsXml.Element("minimumDelay") ?? (int?)CommonSettingsXml.Element("minimumDelay") ?? 0;
 
-                if (!Cache.Instance.DirectEve.Login.AtLogin)
-                {
+                //if (!Cache.Instance.DirectEve.Login.AtLogin || DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddMinutes(1))
+                //{
                     //
                     // Enable / Disable Major Features that do not have categories of their own below
                     //
@@ -1040,7 +1040,7 @@ namespace Questor.Modules.Lookup
                     // Skill Training Settings
                     //
                     ThisToonShouldBeTrainingSkills = (bool?)CharacterSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? (bool?)CommonSettingsXml.Element("thisToonShouldBeTrainingSkills") ?? true;
-                }
+                //}
 
                 //
                 // Location of the Questor GUI on startup (default is off the screen)
@@ -1240,11 +1240,11 @@ namespace Questor.Modules.Lookup
             
 
             // if we are at login still we want to re-load settings on the next attempt so do not record the last write time for settings until after we are in game
-            if (!Cache.Instance.DirectEve.Login.AtLogin)
-            {
+            //if (!Cache.Instance.DirectEve.Login.AtLogin || DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddMinutes(1))
+            //{
                 if (File.Exists(Logging.CharacterSettingsPath)) _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
                 if (File.Exists(Settings.Instance.CommonSettingsPath)) _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
-            }
+            //}
 
             Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
             Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));

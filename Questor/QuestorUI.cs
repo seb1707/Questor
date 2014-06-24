@@ -27,157 +27,185 @@ namespace Questor
 
         public QuestorUI()
         {
-            Application.EnableVisualStyles();
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
-            InitializeComponent();
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.White);
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
-            PopulateStateComboBoxes();
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
-            PopulateBehaviorStateComboBox();
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
-            Show();
-            if (Logging.DebugAttachVSDebugger)
+            try
             {
-                if (!System.Diagnostics.Debugger.IsAttached)
+                if (Logging.EnableVisualStyles) Application.EnableVisualStyles();
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMain", Logging.White);
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "InitializeComponent", Logging.White);
+                InitializeComponent();
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "_questor = new Questor(this);", Logging.White);
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
+                PopulateStateComboBoxes();
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
+                PopulateBehaviorStateComboBox();
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "this.Show();", Logging.White);
+                Show();
+                if (Logging.DebugAttachVSDebugger)
                 {
-                    Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.Teal);
-                    System.Diagnostics.Debugger.Launch();
+                    if (!System.Diagnostics.Debugger.IsAttached)
+                    {
+                        Logging.Log("QuestorUI", "VS Debugger is not yet attached: System.Diagnostics.Debugger.Launch()", Logging.Teal);
+                        System.Diagnostics.Debugger.Launch();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
             }
         }
 
         private void QuestorfrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.White);
-
-            Cache.Instance.DirectEve.Dispose();
-            Cache.Instance.DirectEve = null;
+            try
+            {
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.White);
+                //Cache.Instance.DirectEve.Dispose();
+                //Cache.Instance.DirectEve = null;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
+            }
         }
 
         private void PopulateStateComboBoxes()
         {
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
-            QuestorStateComboBox.Items.Clear();
-            foreach (string text in Enum.GetNames(typeof(QuestorState)))
-                QuestorStateComboBox.Items.Add(text);
-
-            if (Settings.Instance.CharacterMode != null)
+            try
             {
-                //if (Logging.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
-                //SkillTrainerStateComboBox.Items.Clear();
-                //foreach (string text in Enum.GetNames(typeof(SkillTrainerState)))
-                //{
-                //    SkillTrainerStateComboBox.Items.Add(text);
-                //}
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateStateComboBoxes", Logging.White);
+                QuestorStateComboBox.Items.Clear();
+                foreach (string text in Enum.GetNames(typeof(QuestorState)))
+                    QuestorStateComboBox.Items.Add(text);
 
 
-                //
-                // populate combo boxes with the various states that are possible
-                //
-                // ComboxBoxes on main windows (at top)
-                //
-                DamageTypeComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(DamageType)))
+                if (Settings.Instance.CharacterMode != null)
                 {
-                    DamageTypeComboBox.Items.Add(text);
-                }
+                    //if (Logging.DebugUI) Logging.Log("SkillTrainerUI", "PopulateStateComboBoxes", Logging.White);
+                    //SkillTrainerStateComboBox.Items.Clear();
+                    //foreach (string text in Enum.GetNames(typeof(SkillTrainerState)))
+                    //{
+                    //    SkillTrainerStateComboBox.Items.Add(text);
+                    //}
 
-                //
-                // middle column
-                //
-                PanicStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(PanicState)))
-                {
-                    PanicStateComboBox.Items.Add(text);
-                }
 
-                CombatStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(CombatState)))
-                {
-                    CombatStateComboBox.Items.Add(text);
-                }
+                    //
+                    // populate combo boxes with the various states that are possible
+                    //
+                    // ComboxBoxes on main windows (at top)
+                    //
+                    DamageTypeComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(DamageType)))
+                    {
+                        DamageTypeComboBox.Items.Add(text);
+                    }
 
-                DronesStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(DroneState)))
-                {
-                    DronesStateComboBox.Items.Add(text);
-                }
+                    //
+                    // middle column
+                    //
+                    PanicStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(PanicState)))
+                    {
+                        PanicStateComboBox.Items.Add(text);
+                    }
 
-                CleanupStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(CleanupState)))
-                {
-                    CleanupStateComboBox.Items.Add(text);
-                }
+                    CombatStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(CombatState)))
+                    {
+                        CombatStateComboBox.Items.Add(text);
+                    }
 
-                LocalWatchStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(LocalWatchState)))
-                {
-                    LocalWatchStateComboBox.Items.Add(text);
-                }
+                    DronesStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(DroneState)))
+                    {
+                        DronesStateComboBox.Items.Add(text);
+                    }
 
-                SalvageStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(SalvageState)))
-                {
-                    SalvageStateComboBox.Items.Add(text);
-                }
+                    CleanupStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(CleanupState)))
+                    {
+                        CleanupStateComboBox.Items.Add(text);
+                    }
 
-                //
-                // right column
-                //
-                CombatMissionCtrlStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(CombatMissionCtrlState)))
-                {
-                    CombatMissionCtrlStateComboBox.Items.Add(text);
-                }
+                    LocalWatchStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(LocalWatchState)))
+                    {
+                        LocalWatchStateComboBox.Items.Add(text);
+                    }
 
-                StorylineStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(StorylineState)))
-                {
-                    StorylineStateComboBox.Items.Add(text);
-                }
+                    SalvageStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(SalvageState)))
+                    {
+                        SalvageStateComboBox.Items.Add(text);
+                    }
 
-                ArmStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(ArmState)))
-                {
-                    ArmStateComboBox.Items.Add(text);
-                }
+                    //
+                    // right column
+                    //
+                    CombatMissionCtrlStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(CombatMissionCtrlState)))
+                    {
+                        CombatMissionCtrlStateComboBox.Items.Add(text);
+                    }
 
-                UnloadStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(UnloadLootState)))
-                {
-                    UnloadStateComboBox.Items.Add(text);
-                }
+                    StorylineStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(StorylineState)))
+                    {
+                        StorylineStateComboBox.Items.Add(text);
+                    }
 
-                TravelerStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(TravelerState)))
-                {
-                    TravelerStateComboBox.Items.Add(text);
-                }
+                    ArmStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(ArmState)))
+                    {
+                        ArmStateComboBox.Items.Add(text);
+                    }
 
-                AgentInteractionStateComboBox.Items.Clear();
-                foreach (string text in Enum.GetNames(typeof(AgentInteractionState)))
-                {
-                    AgentInteractionStateComboBox.Items.Add(text);
+                    UnloadStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(UnloadLootState)))
+                    {
+                        UnloadStateComboBox.Items.Add(text);
+                    }
+
+                    TravelerStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(TravelerState)))
+                    {
+                        TravelerStateComboBox.Items.Add(text);
+                    }
+
+                    AgentInteractionStateComboBox.Items.Clear();
+                    foreach (string text in Enum.GetNames(typeof(AgentInteractionState)))
+                    {
+                        AgentInteractionStateComboBox.Items.Add(text);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
             }
         }
 
         private void PopulateMissionLists()
         {
-            //Logging.Log("QuestorUI","populating MissionBlacklisttextbox",Logging.White);
-            BlacklistedMissionstextbox.Text = "";
-            foreach (string blacklistedmission in MissionSettings.MissionBlacklist)
+            try
             {
-                BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
-            }
+                //Logging.Log("QuestorUI","populating MissionBlacklisttextbox",Logging.White);
+                BlacklistedMissionstextbox.Text = "";
+                foreach (string blacklistedmission in MissionSettings.MissionBlacklist)
+                {
+                    BlacklistedMissionstextbox.AppendText(blacklistedmission + "\r\n");
+                }
 
-            //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.White);
-            GreyListedMissionsTextBox.Text = "";
-            foreach (string GreyListedMission in MissionSettings.MissionGreylist)
+                //Logging.Log("QuestorUI", "populating MissionBlacklisttextbox", Logging.White);
+                GreyListedMissionsTextBox.Text = "";
+                foreach (string GreyListedMission in MissionSettings.MissionGreylist)
+                {
+                    GreyListedMissionsTextBox.AppendText(GreyListedMission + "\r\n");
+                }
+            }
+            catch (Exception ex)
             {
-                GreyListedMissionsTextBox.AppendText(GreyListedMission + "\r\n");
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
             }
         }
 
@@ -292,541 +320,565 @@ namespace Questor
                     if (Logging.DebugUI) Logging.Log("QuestorUI", "RefreshInfoDisplayedInUI: unable to update all UI labels: exception was [" + ex.Message + "]", Logging.Teal);
                 }
             }
-            if (DateTime.UtcNow > _nextScheduleUpdate)
+
+            try
             {
-                _nextScheduleUpdate = DateTime.UtcNow.AddSeconds(90);
-                if (Time.Instance.StopTimeSpecified)
+                if (DateTime.UtcNow > _nextScheduleUpdate)
                 {
-                    ScheduledStopTimeData.Text = Time.Instance.StopTime.ToLongTimeString();
-                }
-
-                //
-                // if control is enabled (checked) then update ManualStopTime so that on next idle questor will check to see if it needs to stop
-                //
-                if (dateTimePicker1.Checked)
-                {
-                    Time.Instance.ManualStopTime = dateTimePicker1.Value;
-                    if (Time.Instance.ManualStopTime > Time.Instance.StopTime)
+                    _nextScheduleUpdate = DateTime.UtcNow.AddSeconds(90);
+                    if (Time.Instance.StopTimeSpecified)
                     {
-                        Time.Instance.StopTimeSpecified = false;
+                        ScheduledStopTimeData.Text = Time.Instance.StopTime.ToLongTimeString();
                     }
 
-                    if (Time.Instance.ManualStopTime < Time.Instance.StopTime)
+                    //
+                    // if control is enabled (checked) then update ManualStopTime so that on next idle questor will check to see if it needs to stop
+                    //
+                    if (dateTimePicker1.Checked)
                     {
-                        Time.Instance.StopTimeSpecified = true;
-                    }
-                }
-                else
-                {
-                    dateTimePicker1.Value = DateTime.Now.AddHours(1);
-                    if (!dateTimePicker2.Checked)
-                    {
-                        Time.Instance.StopTimeSpecified = true;
-                    }
-                }
-                //
-                // if control is enabled (checked) then update ManualRestartTime so that on next idle questor will check to see if it needs to stop/restart
-                //
-                if (dateTimePicker2.Checked)
-                {
-                    Time.Instance.ManualRestartTime = dateTimePicker2.Value;
-                    if (Time.Instance.ManualRestartTime > Time.Instance.StopTime)
-                    {
-                        Time.Instance.StopTimeSpecified = false;
-                    }
+                        Time.Instance.ManualStopTime = dateTimePicker1.Value;
+                        if (Time.Instance.ManualStopTime > Time.Instance.StopTime)
+                        {
+                            Time.Instance.StopTimeSpecified = false;
+                        }
 
-                    if (Time.Instance.ManualRestartTime < Time.Instance.StopTime)
-                    {
-                        Time.Instance.StopTimeSpecified = true;
+                        if (Time.Instance.ManualStopTime < Time.Instance.StopTime)
+                        {
+                            Time.Instance.StopTimeSpecified = true;
+                        }
                     }
-                }
-                else
-                {
-                    dateTimePicker1.Value = DateTime.Now.AddHours(1);
-                    if (!dateTimePicker1.Checked)
+                    else
                     {
-                        Time.Instance.StopTimeSpecified = true;
+                        dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                        if (!dateTimePicker2.Checked)
+                        {
+                            Time.Instance.StopTimeSpecified = true;
+                        }
+                    }
+                    //
+                    // if control is enabled (checked) then update ManualRestartTime so that on next idle questor will check to see if it needs to stop/restart
+                    //
+                    if (dateTimePicker2.Checked)
+                    {
+                        Time.Instance.ManualRestartTime = dateTimePicker2.Value;
+                        if (Time.Instance.ManualRestartTime > Time.Instance.StopTime)
+                        {
+                            Time.Instance.StopTimeSpecified = false;
+                        }
+
+                        if (Time.Instance.ManualRestartTime < Time.Instance.StopTime)
+                        {
+                            Time.Instance.StopTimeSpecified = true;
+                        }
+                    }
+                    else
+                    {
+                        dateTimePicker1.Value = DateTime.Now.AddHours(1);
+                        if (!dateTimePicker1.Checked)
+                        {
+                            Time.Instance.StopTimeSpecified = true;
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
+            }
+            
         }
 
         private void PopulateBehaviorStateComboBox()
         {
-            if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
-            if (Settings.Instance.CharacterMode != null)
+            try
             {
-                //
-                // populate combo boxes with the various states that are possible
-                //
-                // left column
-                //
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "PopulateBehaviorStateComboBox", Logging.White);
+                if (Settings.Instance.CharacterMode != null)
                 {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(CombatMissionsBehaviorState)))
+                    //
+                    // populate combo boxes with the various states that are possible
+                    //
+                    // left column
+                    //
+                    if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(CombatMissionsBehaviorState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
-                }
-                if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(DedicatedBookmarkSalvagerBehaviorState)))
+                    if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(DedicatedBookmarkSalvagerBehaviorState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
-                }
-                if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
-                {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(CombatHelperBehaviorState)))
+                    if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(CombatHelperBehaviorState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
-                }
-                if (_States.CurrentQuestorState == QuestorState.Mining)
-                {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(MiningState)))
+                    if (_States.CurrentQuestorState == QuestorState.Mining)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(MiningState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
-                }
-                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
-                {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(DirectionalScannerBehaviorState)))
+                    if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(DirectionalScannerBehaviorState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
-                }
-                if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
-                {
-                    BehaviorComboBox.Items.Clear();
-                    foreach (string text in Enum.GetNames(typeof(DebugHangarsBehaviorState)))
+                    if (_States.CurrentQuestorState == QuestorState.DebugHangarsBehavior)
                     {
-                        BehaviorComboBox.Items.Add(text);
+                        BehaviorComboBox.Items.Clear();
+                        foreach (string text in Enum.GetNames(typeof(DebugHangarsBehaviorState)))
+                        {
+                            BehaviorComboBox.Items.Add(text);
+                        }
                     }
+                    //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+                    //{
+                    //    BehaviorComboBox.Items.Clear();
+                    //    foreach (string text in Enum.GetNames(typeof(BackgroundBehaviorState)))
+                    //    {
+                    //        BehaviorComboBox.Items.Add(text);
+                    //    }
+                    //}
                 }
-                //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-                //{
-                //    BehaviorComboBox.Items.Clear();
-                //    foreach (string text in Enum.GetNames(typeof(BackgroundBehaviorState)))
-                //    {
-                //        BehaviorComboBox.Items.Add(text);
-                //    }
-                //}
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
             }
         }
 
         private void UpdateUiTick(object sender, EventArgs e)
         {
-            //if (Logging.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
-            // The if's in here stop the UI from flickering
-            string text = "Questor";
-            if (Settings.Instance.CharacterName != string.Empty)
+            try
             {
-                text = "Questor [" + Settings.Instance.CharacterName + "]";
-            }
-            if (Settings.Instance.CharacterName != string.Empty && Cache.Instance.Wealth > 10000000)
-            {
-                text = "Questor [" + Settings.Instance.CharacterName + "][" + String.Format("{0:0,0}", Cache.Instance.Wealth / 1000000) + "mil isk]";
-            }
-
-            if (Text != text)
-                Text = text;
-
-            lastSessionisreadyData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] sec ago";
-            LastFrameData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
-            lastInSpaceData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
-            lastInStationData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
-            lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
-            dataStopTimeSpecified.Text = Time.Instance.StopTimeSpecified.ToString();
-
-            if (Cleanup.SessionState == "Quitting")
-            {
-                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                //if (Logging.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
+                // The if's in here stop the UI from flickering
+                string text = "Questor";
+                if (Settings.Instance.CharacterName != string.Empty)
                 {
-                    if (Cleanup.ReasonToStopQuestor == string.Empty)
+                    text = "Questor [" + Settings.Instance.CharacterName + "]";
+                }
+                if (Settings.Instance.CharacterName != string.Empty && Cache.Instance.Wealth > 10000000)
+                {
+                    text = "Questor [" + Settings.Instance.CharacterName + "][" + String.Format("{0:0,0}", Cache.Instance.Wealth / 1000000) + "mil isk]";
+                }
+
+                if (Text != text)
+                    Text = text;
+
+                lastSessionisreadyData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] sec ago";
+                LastFrameData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] sec ago";
+                lastInSpaceData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastInSpace).TotalSeconds, 0) + "] sec ago";
+                lastInStationData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastInStation).TotalSeconds, 0) + "] sec ago";
+                lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
+                dataStopTimeSpecified.Text = Time.Instance.StopTimeSpecified.ToString();
+
+                if (Cleanup.SessionState == "Quitting")
+                {
+                    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                     {
-                        Cleanup.ReasonToStopQuestor = "Cleanup.SessionState == Quitting";
-                    }
-
-                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
-                }
-            }
-
-            RefreshInfoDisplayedInUI();
-
-            //
-            // Left Group
-            //
-            if ((string)QuestorStateComboBox.SelectedItem != _States.CurrentQuestorState.ToString() && !QuestorStateComboBox.DroppedDown)
-            {
-                QuestorStateComboBox.SelectedItem = _States.CurrentQuestorState.ToString();
-                _States.LavishEvent_QuestorState();
-                if (_States.CurrentQuestorState == QuestorState.Idle)
-                {
-                    _States.LavishEvent_QuestorIdle();
-                }
-            }
-
-            if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-            {
-                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                {
-                    BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();
-                    _States.LavishEvent_QuestorCombatMissionsBehaviorState();
-                }
-            }
-
-            if (_States.CurrentQuestorState == QuestorState.Mining)
-            {
-                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentMiningState.ToString() && !BehaviorComboBox.DroppedDown)
-                {
-                    BehaviorComboBox.SelectedItem = _States.CurrentMiningState.ToString();
-                }
-            }
-
-            if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-            {
-                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                {
-                    BehaviorComboBox.SelectedItem = _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString();
-                    _States.LavishEvent_QuestorDedicatedBookmarkSalvagerBehaviorState();
-                }
-            }
-
-            if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
-            {
-                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                {
-                    BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
-                }
-            }
-
-            if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
-            {
-                if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-                {
-                    BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
-                }
-            }
-
-            //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-            //{
-            //    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentBackgroundBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
-            //    {
-            //        BehaviorComboBox.SelectedItem = _States.CurrentBackgroundBehaviorState.ToString();
-            //    }
-            //}
-
-            if ((string)DamageTypeComboBox.SelectedItem != MissionSettings.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
-            {
-                DamageTypeComboBox.SelectedItem = MissionSettings.MissionDamageType.ToString();
-            }
-
-            //
-            // Middle group
-            //
-            if ((string)PanicStateComboBox.SelectedItem != _States.CurrentPanicState.ToString() && !PanicStateComboBox.DroppedDown)
-            {
-                PanicStateComboBox.SelectedItem = _States.CurrentPanicState.ToString();
-                _States.LavishEvent_QuestorPanicState();
-            }
-
-            if ((string)CombatStateComboBox.SelectedItem != _States.CurrentCombatState.ToString() && !CombatStateComboBox.DroppedDown)
-            {
-                CombatStateComboBox.SelectedItem = _States.CurrentCombatState.ToString();
-                _States.LavishEvent_QuestorCombatState();
-            }
-
-            if ((string)DronesStateComboBox.SelectedItem != _States.CurrentDroneState.ToString() && !DronesStateComboBox.DroppedDown)
-            {
-                DronesStateComboBox.SelectedItem = _States.CurrentDroneState.ToString();
-                _States.LavishEvent_QuestorDronesState();
-            }
-
-            if ((string)CleanupStateComboBox.SelectedItem != _States.CurrentCleanupState.ToString() && !CleanupStateComboBox.DroppedDown)
-            {
-                CleanupStateComboBox.SelectedItem = _States.CurrentCleanupState.ToString();
-            }
-
-            if ((string)LocalWatchStateComboBox.SelectedItem != _States.CurrentLocalWatchState.ToString() && !LocalWatchStateComboBox.DroppedDown)
-            {
-                LocalWatchStateComboBox.SelectedItem = _States.CurrentLocalWatchState.ToString();
-            }
-
-            if ((string)SalvageStateComboBox.SelectedItem != _States.CurrentSalvageState.ToString() && !SalvageStateComboBox.DroppedDown)
-            {
-                SalvageStateComboBox.SelectedItem = _States.CurrentSalvageState.ToString();
-            }
-
-            //
-            // Right Group
-            //
-            if ((string)CombatMissionCtrlStateComboBox.SelectedItem != _States.CurrentCombatMissionCtrlState.ToString() && !CombatMissionCtrlStateComboBox.DroppedDown)
-            {
-                CombatMissionCtrlStateComboBox.SelectedItem = _States.CurrentCombatMissionCtrlState.ToString();
-            }
-
-            if ((string)StorylineStateComboBox.SelectedItem != _States.CurrentStorylineState.ToString() && !StorylineStateComboBox.DroppedDown)
-            {
-                StorylineStateComboBox.SelectedItem = _States.CurrentStorylineState.ToString();
-            }
-
-            if ((string)ArmStateComboBox.SelectedItem != _States.CurrentArmState.ToString() && !ArmStateComboBox.DroppedDown)
-            {
-                ArmStateComboBox.SelectedItem = _States.CurrentArmState.ToString();
-            }
-
-            if ((string)UnloadStateComboBox.SelectedItem != _States.CurrentUnloadLootState.ToString() && !UnloadStateComboBox.DroppedDown)
-            {
-                UnloadStateComboBox.SelectedItem = _States.CurrentUnloadLootState.ToString();
-            }
-
-            if ((string)TravelerStateComboBox.SelectedItem != _States.CurrentTravelerState.ToString() && !TravelerStateComboBox.DroppedDown)
-            {
-                TravelerStateComboBox.SelectedItem = _States.CurrentTravelerState.ToString();
-                _States.LavishEvent_QuestorTravelerState();
-            }
-
-            if ((string)AgentInteractionStateComboBox.SelectedItem != _States.CurrentAgentInteractionState.ToString() && !AgentInteractionStateComboBox.DroppedDown)
-            {
-                AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
-            }
-
-            //if (Settings.Instance.CharacterMode.ToLower() == "dps" || Settings.Instance.CharacterMode.ToLower() == "combat missions")
-            //{
-            //
-            //}
-
-            if (AutoStartCheckBox.Checked != Settings.Instance.AutoStart)
-            {
-                AutoStartCheckBox.Checked = Settings.Instance.AutoStart;
-                _States.LavishEvent_QuestorAutoStartState();
-            }
-
-            if (PauseCheckBox.Checked != Cache.Instance.Paused)
-            {
-                PauseCheckBox.Checked = Cache.Instance.Paused;
-                _States.LavishEvent_QuestorPausedState();
-            }
-
-            if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
-            {
-                Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
-                _States.LavishEvent_QuestorDisable3DState();
-            }
-
-            if (Settings.Instance.WindowXPosition.HasValue)
-            {
-                Left = Settings.Instance.WindowXPosition.Value;
-                Settings.Instance.WindowXPosition = null;
-            }
-
-            if (Settings.Instance.WindowYPosition.HasValue)
-            {
-                Top = Settings.Instance.WindowYPosition.Value;
-                Settings.Instance.WindowYPosition = null;
-            }
-
-            if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission && Cache.Instance.CurrentPocketAction != null)
-            {
-                string newlblCurrentPocketActiontext = "[ " + Cache.Instance.CurrentPocketAction + " ] Action";
-                if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
-                {
-                    lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
-                }
-            }
-            else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage ||
-                     _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoSalvageBookmark ||
-                     _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageNextPocket ||
-                     _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.BeginAfterMissionSalvaging ||
-                     _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageUseGate)
-            {
-                const string newlblCurrentPocketActiontext = "[ " + "After Mission Salvaging" + " ] ";
-                if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
-                {
-                    lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
-                }
-            }
-            else
-            {
-                const string newlblCurrentPocketActiontext = "[ ]";
-                if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
-                {
-                    lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
-                }
-            }
-
-            if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle && _States.CurrentQuestorState != QuestorState.Idle)
-            {
-                if (!String.IsNullOrEmpty(MissionSettings.MissionName))
-                {
-                    if (!String.IsNullOrEmpty(MissionSettings.MissionsPath))
-                    {
-                        if (File.Exists(MissionSettings.MissionXmlPath))
+                        if (Cleanup.ReasonToStopQuestor == string.Empty)
                         {
-                            string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
-                            if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
-                            {
-                                lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
-                                buttonOpenMissionXML.Enabled = true;
-                            }
+                            Cleanup.ReasonToStopQuestor = "Cleanup.SessionState == Quitting";
                         }
-                        else
-                        {
-                            string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
-                            if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
-                            {
-                                lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
-                                buttonOpenMissionXML.Enabled = false;
-                            }
-                        }
+
+                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                     }
                 }
-                else if (String.IsNullOrEmpty(MissionSettings.MissionName))
+
+                RefreshInfoDisplayedInUI();
+
+                //
+                // Left Group
+                //
+                if ((string)QuestorStateComboBox.SelectedItem != _States.CurrentQuestorState.ToString() && !QuestorStateComboBox.DroppedDown)
                 {
-                    lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
-                    buttonOpenMissionXML.Enabled = false;
+                    QuestorStateComboBox.SelectedItem = _States.CurrentQuestorState.ToString();
+                    _States.LavishEvent_QuestorState();
+                    if (_States.CurrentQuestorState == QuestorState.Idle)
+                    {
+                        _States.LavishEvent_QuestorIdle();
+                    }
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatMissionBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    {
+                        BehaviorComboBox.SelectedItem = _States.CurrentCombatMissionBehaviorState.ToString();
+                        _States.LavishEvent_QuestorCombatMissionsBehaviorState();
+                    }
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.Mining)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentMiningState.ToString() && !BehaviorComboBox.DroppedDown)
+                    {
+                        BehaviorComboBox.SelectedItem = _States.CurrentMiningState.ToString();
+                    }
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    {
+                        BehaviorComboBox.SelectedItem = _States.CurrentDedicatedBookmarkSalvagerBehaviorState.ToString();
+                        _States.LavishEvent_QuestorDedicatedBookmarkSalvagerBehaviorState();
+                    }
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.CombatHelperBehavior)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentCombatHelperBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    {
+                        BehaviorComboBox.SelectedItem = _States.CurrentCombatHelperBehaviorState.ToString();
+                    }
+                }
+
+                if (_States.CurrentQuestorState == QuestorState.DirectionalScannerBehavior)
+                {
+                    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentDirectionalScannerBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                    {
+                        BehaviorComboBox.SelectedItem = _States.CurrentDirectionalScannerBehaviorState.ToString();
+                    }
+                }
+
+                //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
+                //{
+                //    if ((string)BehaviorComboBox.SelectedItem != _States.CurrentBackgroundBehaviorState.ToString() && !BehaviorComboBox.DroppedDown)
+                //    {
+                //        BehaviorComboBox.SelectedItem = _States.CurrentBackgroundBehaviorState.ToString();
+                //    }
+                //}
+
+                if ((string)DamageTypeComboBox.SelectedItem != MissionSettings.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+                {
+                    DamageTypeComboBox.SelectedItem = MissionSettings.MissionDamageType.ToString();
+                }
+
+                //
+                // Middle group
+                //
+                if ((string)PanicStateComboBox.SelectedItem != _States.CurrentPanicState.ToString() && !PanicStateComboBox.DroppedDown)
+                {
+                    PanicStateComboBox.SelectedItem = _States.CurrentPanicState.ToString();
+                    _States.LavishEvent_QuestorPanicState();
+                }
+
+                if ((string)CombatStateComboBox.SelectedItem != _States.CurrentCombatState.ToString() && !CombatStateComboBox.DroppedDown)
+                {
+                    CombatStateComboBox.SelectedItem = _States.CurrentCombatState.ToString();
+                    _States.LavishEvent_QuestorCombatState();
+                }
+
+                if ((string)DronesStateComboBox.SelectedItem != _States.CurrentDroneState.ToString() && !DronesStateComboBox.DroppedDown)
+                {
+                    DronesStateComboBox.SelectedItem = _States.CurrentDroneState.ToString();
+                    _States.LavishEvent_QuestorDronesState();
+                }
+
+                if ((string)CleanupStateComboBox.SelectedItem != _States.CurrentCleanupState.ToString() && !CleanupStateComboBox.DroppedDown)
+                {
+                    CleanupStateComboBox.SelectedItem = _States.CurrentCleanupState.ToString();
+                }
+
+                if ((string)LocalWatchStateComboBox.SelectedItem != _States.CurrentLocalWatchState.ToString() && !LocalWatchStateComboBox.DroppedDown)
+                {
+                    LocalWatchStateComboBox.SelectedItem = _States.CurrentLocalWatchState.ToString();
+                }
+
+                if ((string)SalvageStateComboBox.SelectedItem != _States.CurrentSalvageState.ToString() && !SalvageStateComboBox.DroppedDown)
+                {
+                    SalvageStateComboBox.SelectedItem = _States.CurrentSalvageState.ToString();
+                }
+
+                //
+                // Right Group
+                //
+                if ((string)CombatMissionCtrlStateComboBox.SelectedItem != _States.CurrentCombatMissionCtrlState.ToString() && !CombatMissionCtrlStateComboBox.DroppedDown)
+                {
+                    CombatMissionCtrlStateComboBox.SelectedItem = _States.CurrentCombatMissionCtrlState.ToString();
+                }
+
+                if ((string)StorylineStateComboBox.SelectedItem != _States.CurrentStorylineState.ToString() && !StorylineStateComboBox.DroppedDown)
+                {
+                    StorylineStateComboBox.SelectedItem = _States.CurrentStorylineState.ToString();
+                }
+
+                if ((string)ArmStateComboBox.SelectedItem != _States.CurrentArmState.ToString() && !ArmStateComboBox.DroppedDown)
+                {
+                    ArmStateComboBox.SelectedItem = _States.CurrentArmState.ToString();
+                }
+
+                if ((string)UnloadStateComboBox.SelectedItem != _States.CurrentUnloadLootState.ToString() && !UnloadStateComboBox.DroppedDown)
+                {
+                    UnloadStateComboBox.SelectedItem = _States.CurrentUnloadLootState.ToString();
+                }
+
+                if ((string)TravelerStateComboBox.SelectedItem != _States.CurrentTravelerState.ToString() && !TravelerStateComboBox.DroppedDown)
+                {
+                    TravelerStateComboBox.SelectedItem = _States.CurrentTravelerState.ToString();
+                    _States.LavishEvent_QuestorTravelerState();
+                }
+
+                if ((string)AgentInteractionStateComboBox.SelectedItem != _States.CurrentAgentInteractionState.ToString() && !AgentInteractionStateComboBox.DroppedDown)
+                {
+                    AgentInteractionStateComboBox.SelectedItem = _States.CurrentAgentInteractionState.ToString();
+                }
+
+                //if (Settings.Instance.CharacterMode.ToLower() == "dps" || Settings.Instance.CharacterMode.ToLower() == "combat missions")
+                //{
+                //
+                //}
+
+                if (AutoStartCheckBox.Checked != Settings.Instance.AutoStart)
+                {
+                    AutoStartCheckBox.Checked = Settings.Instance.AutoStart;
+                    _States.LavishEvent_QuestorAutoStartState();
+                }
+
+                if (PauseCheckBox.Checked != Cache.Instance.Paused)
+                {
+                    PauseCheckBox.Checked = Cache.Instance.Paused;
+                    _States.LavishEvent_QuestorPausedState();
+                }
+
+                if (Disable3DCheckBox.Checked != Settings.Instance.Disable3D)
+                {
+                    Disable3DCheckBox.Checked = Settings.Instance.Disable3D;
+                    _States.LavishEvent_QuestorDisable3DState();
+                }
+
+                if (Settings.Instance.WindowXPosition.HasValue)
+                {
+                    Left = Settings.Instance.WindowXPosition.Value;
+                    Settings.Instance.WindowXPosition = null;
+                }
+
+                if (Settings.Instance.WindowYPosition.HasValue)
+                {
+                    Top = Settings.Instance.WindowYPosition.Value;
+                    Settings.Instance.WindowYPosition = null;
+                }
+
+                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission && Cache.Instance.CurrentPocketAction != null)
+                {
+                    string newlblCurrentPocketActiontext = "[ " + Cache.Instance.CurrentPocketAction + " ] Action";
+                    if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                    {
+                        lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                    }
+                }
+                else if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.Salvage ||
+                         _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.GotoSalvageBookmark ||
+                         _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageNextPocket ||
+                         _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.BeginAfterMissionSalvaging ||
+                         _States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.SalvageUseGate)
+                {
+                    const string newlblCurrentPocketActiontext = "[ " + "After Mission Salvaging" + " ] ";
+                    if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                    {
+                        lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                    }
                 }
                 else
                 {
-                    //lblCurrentMissionInfo.Text = "No Mission XML exists for this mission";
-                    buttonOpenMissionXML.Enabled = false;
+                    const string newlblCurrentPocketActiontext = "[ ]";
+                    if (lblCurrentPocketAction.Text != newlblCurrentPocketActiontext)
+                    {
+                        lblCurrentPocketAction.Text = newlblCurrentPocketActiontext;
+                    }
                 }
-            }
-            else
-            {
-                buttonOpenMissionXML.Enabled = false;
-            }
 
-
-            if (Settings.Instance.DefaultSettingsLoaded)
-            {
-                buttonOpenCharacterXML.Enabled = false;
-                buttonOpenSchedulesXML.Enabled = false;
-                buttonQuestormanager.Enabled = false;
-                buttonOpenCommonSettingsXML.Enabled = false;
-                buttonQuestorStatistics.Enabled = false;
-            }
-            else
-            {
-                if (Settings.Instance.CharacterXMLExists)
+                if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle && _States.CurrentQuestorState != QuestorState.Idle)
                 {
-                    buttonOpenCharacterXML.Enabled = true;
-                    Settings.Instance.CharacterXMLExists = true;
+                    if (!String.IsNullOrEmpty(MissionSettings.MissionName))
+                    {
+                        if (!String.IsNullOrEmpty(MissionSettings.MissionsPath))
+                        {
+                            if (File.Exists(MissionSettings.MissionXmlPath))
+                            {
+                                string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
+                                if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                                {
+                                    lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
+                                    buttonOpenMissionXML.Enabled = true;
+                                }
+                            }
+                            else
+                            {
+                                string newlblCurrentMissionInfotext = "[ " + MissionSettings.MissionName + " ][ " + Math.Round(DateTime.UtcNow.Subtract(Statistics.StartedMission).TotalMinutes, 0) + " min][ #" + Statistics.MissionsThisSession + " ]";
+                                if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
+                                {
+                                    lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
+                                    buttonOpenMissionXML.Enabled = false;
+                                }
+                            }
+                        }
+                    }
+                    else if (String.IsNullOrEmpty(MissionSettings.MissionName))
+                    {
+                        lblCurrentMissionInfo.Text = Resources.QuestorfrmMain_UpdateUiTick_No_Mission_Selected_Yet;
+                        buttonOpenMissionXML.Enabled = false;
+                    }
+                    else
+                    {
+                        //lblCurrentMissionInfo.Text = "No Mission XML exists for this mission";
+                        buttonOpenMissionXML.Enabled = false;
+                    }
                 }
                 else
+                {
+                    buttonOpenMissionXML.Enabled = false;
+                }
+
+
+                if (Settings.Instance.DefaultSettingsLoaded)
                 {
                     buttonOpenCharacterXML.Enabled = false;
-                    Settings.Instance.CharacterXMLExists = false;
-                }
-
-                //
-                // Does Schedules.xml exist in the directory where we started questor?
-                //
-                if (Settings.Instance.SchedulesXMLExists)
-                {
-                    buttonOpenCharacterXML.Enabled = true;
-                    Settings.Instance.SchedulesXMLExists = true;
-                }
-                else
-                {
                     buttonOpenSchedulesXML.Enabled = false;
-                    Settings.Instance.SchedulesXMLExists = false;
-                }
-
-                //
-                // Does QuestorStatistics.exe exist in the directory where we started questor?
-                //
-                if (Settings.Instance.QuestorStatisticsExists)
-                {
-                    buttonQuestorStatistics.Enabled = true;
-                    Settings.Instance.QuestorStatisticsExists = true;
-                }
-                else
-                {
-                    buttonQuestorStatistics.Enabled = false;
-                    Settings.Instance.QuestorStatisticsExists = false;
-                }
-
-                //
-                // Does QuestorSettings.exe exist in the directory where we started questor?
-                //
-                if (Settings.Instance.QuestorSettingsExists)
-                {
-                    buttonOpenCommonSettingsXML.Enabled = true;
-                    Settings.Instance.QuestorSettingsExists = true;
-                }
-                else
-                {
-                    buttonOpenCommonSettingsXML.Enabled = false;
-                    Settings.Instance.QuestorSettingsExists = false;
-                }
-
-                //
-                // Does Questormanager.exe exist in the directory where we started questor?
-                //
-                if (Settings.Instance.QuestorManagerExists)
-                {
-                    buttonQuestormanager.Enabled = true;
-                    Settings.Instance.QuestorManagerExists = true;
-                }
-                else
-                {
                     buttonQuestormanager.Enabled = false;
-                    Settings.Instance.QuestorManagerExists = false;
+                    buttonOpenCommonSettingsXML.Enabled = false;
+                    buttonQuestorStatistics.Enabled = false;
                 }
-            }
-
-            if (!String.IsNullOrEmpty(Logging.ExtConsole))
-            {
-                if (DateTime.UtcNow > _nextConsoleLogRefresh)
+                else
                 {
-                    if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                    if (Settings.Instance.CharacterXMLExists)
                     {
-                        txtExtConsole.Text = "";
+                        buttonOpenCharacterXML.Enabled = true;
+                        Settings.Instance.CharacterXMLExists = true;
                     }
-                    txtExtConsole.AppendText(Logging.ExtConsole);
-                    Logging.ExtConsole = null;
-                    _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
-                }
-            }
+                    else
+                    {
+                        buttonOpenCharacterXML.Enabled = false;
+                        Settings.Instance.CharacterXMLExists = false;
+                    }
 
-            int extraWaitSeconds = 0;
-            if (!System.Diagnostics.Debugger.IsAttached) //do not restart due to no frames or Session.Isready aging if a debugger is attached until it reaches absurdity...
-            {
-                extraWaitSeconds = 60;
-            }
-
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds > (Time.Instance.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.UtcNow.Subtract(BeforeLogin.EVEAccountLoginStarted).TotalSeconds > 300)
-            {
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 30)
-                {
-                    Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cleanup.ReasonToStopQuestor = "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
                     //
-                    // closing eve would be a very good idea here
+                    // Does Schedules.xml exist in the directory where we started questor?
                     //
-                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
-                    Application.Exit();
+                    if (Settings.Instance.SchedulesXMLExists)
+                    {
+                        buttonOpenCharacterXML.Enabled = true;
+                        Settings.Instance.SchedulesXMLExists = true;
+                    }
+                    else
+                    {
+                        buttonOpenSchedulesXML.Enabled = false;
+                        Settings.Instance.SchedulesXMLExists = false;
+                    }
+
+                    //
+                    // Does QuestorStatistics.exe exist in the directory where we started questor?
+                    //
+                    if (Settings.Instance.QuestorStatisticsExists)
+                    {
+                        buttonQuestorStatistics.Enabled = true;
+                        Settings.Instance.QuestorStatisticsExists = true;
+                    }
+                    else
+                    {
+                        buttonQuestorStatistics.Enabled = false;
+                        Settings.Instance.QuestorStatisticsExists = false;
+                    }
+
+                    //
+                    // Does QuestorSettings.exe exist in the directory where we started questor?
+                    //
+                    if (Settings.Instance.QuestorSettingsExists)
+                    {
+                        buttonOpenCommonSettingsXML.Enabled = true;
+                        Settings.Instance.QuestorSettingsExists = true;
+                    }
+                    else
+                    {
+                        buttonOpenCommonSettingsXML.Enabled = false;
+                        Settings.Instance.QuestorSettingsExists = false;
+                    }
+
+                    //
+                    // Does Questormanager.exe exist in the directory where we started questor?
+                    //
+                    if (Settings.Instance.QuestorManagerExists)
+                    {
+                        buttonQuestormanager.Enabled = true;
+                        Settings.Instance.QuestorManagerExists = true;
+                    }
+                    else
+                    {
+                        buttonQuestormanager.Enabled = false;
+                        Settings.Instance.QuestorManagerExists = false;
+                    }
                 }
+
+                if (!String.IsNullOrEmpty(Logging.ExtConsole))
+                {
+                    if (DateTime.UtcNow > _nextConsoleLogRefresh)
+                    {
+                        if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                        {
+                            txtExtConsole.Text = "";
+                        }
+                        txtExtConsole.AppendText(Logging.ExtConsole);
+                        Logging.ExtConsole = null;
+                        _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
+                    }
+                }
+
+                int extraWaitSeconds = 0;
+                if (!System.Diagnostics.Debugger.IsAttached) //do not restart due to no frames or Session.Isready aging if a debugger is attached until it reaches absurdity...
+                {
+                    extraWaitSeconds = 60;
+                }
+
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds > (Time.Instance.NoFramesRestart_seconds + extraWaitSeconds) && DateTime.UtcNow.Subtract(BeforeLogin.EVEAccountLoginStarted).TotalSeconds > 300)
+                {
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 30)
+                    {
+                        Logging.Log("QuestorUI", "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
+                        Cleanup.ReasonToStopQuestor = "The Last UI Frame Drawn by EVE was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastFrame).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
+                        //
+                        // closing eve would be a very good idea here
+                        //
+                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
+                        Application.Exit();
+                    }
+                }
+
+                if (DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds > (Time.Instance.NoSessionIsReadyRestart_seconds + extraWaitSeconds) &&
+                        DateTime.UtcNow.Subtract(BeforeLogin.EVEAccountLoginStarted).TotalSeconds > 210)
+                {
+                    if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 60)
+                    {
+                        Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
+                        Cleanup.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
+                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
+                        Application.Exit();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorUI.PopulateMissionLists", "Exception [" + ex + "]", Logging.Debug);
             }
 
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds > (Time.Instance.NoSessionIsReadyRestart_seconds + extraWaitSeconds) &&
-                    DateTime.UtcNow.Subtract(BeforeLogin.EVEAccountLoginStarted).TotalSeconds > 210)
-            {
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastLogMessage).TotalSeconds > 60)
-                {
-                    Logging.Log("QuestorUI", "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE", Logging.Red);
-                    Cleanup.ReasonToStopQuestor = "The Last Session.IsReady = true was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastSessionIsReady).TotalSeconds, 0) + "] seconds ago! This is bad. - Exiting EVE";
-                    Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
-                    Application.Exit();
-                }
-            }
         }
 
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)

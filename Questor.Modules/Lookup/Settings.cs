@@ -1215,14 +1215,12 @@ namespace Questor.Modules.Lookup
                 bool reloadSettings = true;
                 if (File.Exists(Logging.CharacterSettingsPath))
                 {
-                    //if (!forcereload)
-                    //{
                     reloadSettings = _lastModifiedDateOfMySettingsFile != File.GetLastWriteTime(Logging.CharacterSettingsPath);
                     if (!reloadSettings)
                     {
                         if (File.Exists(Settings.Instance.CommonSettingsPath)) reloadSettings = _lastModifiedDateOfMyCommonSettingsFile != File.GetLastWriteTime(CommonSettingsPath);
                     }
-                    //}
+                    if (!reloadSettings && forcereload) reloadSettings = true;
 
                     if (!reloadSettings)
                         return;

@@ -93,6 +93,7 @@ namespace Questor.Modules.Logging
 
         public static bool InnerspaceGeneratedConsoleLog { get; set; }
         public static bool UseInnerspace { get; set; }
+        public static bool EnableVisualStyles { get; set; }
         //public static bool ConsoleLog { get; set; }
         public static string ConsoleLogPath { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static string ConsoleLogFile { get; set; } //we should set this to a sane value (via get { blah } when we are pre-login.... 

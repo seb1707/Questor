@@ -985,6 +985,10 @@ namespace Questor
                         case "standaloneinstance":
                             _standaloneInstance = bool.Parse(sLine[1]);
                             break;
+
+                        case "enablevisualstyles":
+                            Logging.EnableVisualStyles = bool.Parse(sLine[1]);
+                            break;
                     }
                 }
 

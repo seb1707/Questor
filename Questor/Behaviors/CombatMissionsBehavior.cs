@@ -1573,6 +1573,12 @@ namespace Questor.Behaviors
                     SalvageNextPocketCMBState();
                     break;
 
+                case CombatMissionsBehaviorState.PrepareStorylineSwitchAgents:
+                    Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
+                    Logging.Log("AgentInteraction", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineGotoBase;
+                    break;
+
                 case CombatMissionsBehaviorState.PrepareStorylineGotoBase:
                     if (Logging.DebugGotobase) Logging.Log("CombatMissionsBehavior", "PrepareStorylineGotoBase: AvoidBumpingThings()", Logging.White);
 

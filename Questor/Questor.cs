@@ -462,15 +462,9 @@ namespace Questor
                 //if we somehow manage to get the questor GUI running on the login screen, do nothing.
                 return false;
             }
-
-
+            
             // New frame, invalidate old cache
             Cache.Instance.InvalidateCache();
-
-            //if (Cache.Instance.EntitiesthatHaveExploded.Any())
-            //{
-            //    if (Logging.DebugKillTargets && Cache.Instance.EntitiesthatHaveExploded.Count() > 5) Logging.Log("Questor", "EntitiesthatHaveExploded Count is currently [" + Cache.Instance.EntitiesthatHaveExploded.Count() + "]", Logging.Debug);
-            //}
 
             Time.Instance.LastFrame = DateTime.UtcNow;
 

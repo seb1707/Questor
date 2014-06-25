@@ -1160,6 +1160,13 @@ namespace Questor.Modules.Lookup
                 //
                 Logging.ConsoleLogDaysOfLogsToKeep = (int?)CharacterSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? (int?)CommonSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
                 Logging.tryToLogToFile = (bool?)CharacterSettingsXml.Element("tryToLogToFile") ?? (bool?)CommonSettingsXml.Element("tryToLogToFile") ?? true;
+
+                Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
+                Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
+                Settings.Instance.SchedulesXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "schedules.XML"));
+                Settings.Instance.QuestorManagerExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorManager.exe"));
+                Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
+                Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
             }
             catch(Exception exception)
             {
@@ -1238,21 +1245,6 @@ namespace Questor.Modules.Lookup
                 Logging.Log("Settings", "Exception [" + ex + "]", Logging.White);
             }
             
-
-            // if we are at login still we want to re-load settings on the next attempt so do not record the last write time for settings until after we are in game
-            //if (!Cache.Instance.DirectEve.Login.AtLogin || DateTime.UtcNow > Time.Instance.QuestorStarted_DateTime.AddMinutes(1))
-            //{
-                if (File.Exists(Logging.CharacterSettingsPath)) _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
-                if (File.Exists(Settings.Instance.CommonSettingsPath)) _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
-            //}
-
-            Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
-            Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
-            Settings.Instance.SchedulesXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "schedules.XML"));
-            Settings.Instance.QuestorManagerExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorManager.exe"));
-            Settings.Instance.QuestorSettingsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorSettings.exe"));
-            Settings.Instance.QuestorStatisticsExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "QuestorStatistics.exe"));
-
             if (!File.Exists(Logging.CharacterSettingsPath) && !Settings.Instance.DefaultSettingsLoaded) //if the settings file does not exist initialize these values. Should we not halt when missing the settings XML?
             {
                 Settings.Instance.CharacterXMLExists = false;
@@ -1728,6 +1720,8 @@ namespace Questor.Modules.Lookup
                 }
                 else
                 {
+                    if (File.Exists(Logging.CharacterSettingsPath)) _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(Logging.CharacterSettingsPath);
+                    if (File.Exists(Settings.Instance.CommonSettingsPath)) _lastModifiedDateOfMyCommonSettingsFile = File.GetLastWriteTime(CommonSettingsPath);
                     ReadSettingsFromXML(CharacterSettingsXml);
                 }
             }

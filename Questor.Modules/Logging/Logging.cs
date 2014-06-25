@@ -291,6 +291,7 @@ namespace Questor.Modules.Logging
                 {
                     line = line.Replace(Environment.UserDomainName, "_MyWindowsDomainNameRedacted_");
                 }
+
                 return line;
             }
             catch (Exception exception)

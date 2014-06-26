@@ -2763,7 +2763,7 @@ namespace Questor.Modules.Caching
 
         public bool StackItemsHangarAsLootHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes) < 10 || Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes) < 10)
             {
                 return true;
             }
@@ -2782,7 +2782,7 @@ namespace Questor.Modules.Caching
             {
                 if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "public bool StackItemsHangarAsLootHangar(String module)", Logging.Teal);
 
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
+                if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds) < 30)
                 {
                     if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 15)]", Logging.Teal);
 
@@ -2794,7 +2794,7 @@ namespace Questor.Modules.Caching
 
                     if (Logging.DebugItemHangar) Logging.Log("StackItemsHangarAsLootHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds > 20)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds) > 20)
                     {
                         Logging.Log(module, "Stacking Corp Loot Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -2853,7 +2853,7 @@ namespace Questor.Modules.Caching
         {
             //Logging.Log("StackItemsHangarAsAmmoHangar", "test", Logging.Teal);
 
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes < 10 || DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackItemHangar).TotalMinutes) < 10 || Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes) < 10)
             {
                 return true;
             }
@@ -2872,7 +2872,7 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 30)
+                if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds) < 30)
                 {
                     if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 15)]", Logging.Teal);
 
@@ -2884,7 +2884,7 @@ namespace Questor.Modules.Caching
 
                     if (Logging.DebugHangars) Logging.Log("StackItemsHangarAsAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 20)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds) > 20)
                     {
                         Logging.Log(module, "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -2949,7 +2949,7 @@ namespace Questor.Modules.Caching
 
             try
             {
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 25)
+                if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds) < 25)
                 {
                     if (Logging.DebugHangars) Logging.Log("StackCargoHold", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds < 15)", Logging.Debug);
 
@@ -2961,7 +2961,7 @@ namespace Questor.Modules.Caching
 
                     if (Logging.DebugHangars) Logging.Log("StackCargoHold", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds > 20)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackCargohold).TotalSeconds) > 20)
                     {
                         Logging.Log(module, "Stacking CargoHold timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -3006,7 +3006,7 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow < Time.Instance.NextOpenCargoAction)
                 {
-                    if (DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds > 0)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds) > 0)
                     {
                         Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Time.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }
@@ -3293,7 +3293,7 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpAmmoHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes) < 10)
             {
                 return true;
             }
@@ -3312,7 +3312,7 @@ namespace Questor.Modules.Caching
             {
                 if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "LastStackAmmoHangar: [" + Time.Instance.LastStackAmmoHangar.AddSeconds(60) + "] DateTime.UtcNow: [" + DateTime.UtcNow + "]", Logging.Teal);
 
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 25)
+                if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds) < 25)
                 {
                     if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 60)]", Logging.Teal);
 
@@ -3323,7 +3323,7 @@ namespace Questor.Modules.Caching
                     }
                     if (Logging.DebugHangars) Logging.Log("StackCorpAmmoHangar", "GetLockedItems(2) [" + Cache.Instance.DirectEve.GetLockedItems().Count() + "]", Logging.Teal);
 
-                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds > 30)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds) > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Ammo Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -3428,7 +3428,7 @@ namespace Questor.Modules.Caching
 
         public bool StackCorpLootHangar(string module)
         {
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds) < 30)
             {
                 if (Logging.DebugHangars) Logging.Log("StackCorpLootHangar", "if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Debug);
                 return true;
@@ -3455,7 +3455,7 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
-                    if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds > 30)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalSeconds) > 30)
                     {
                         Logging.Log("Arm", "Stacking Corp Loot Hangar timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
@@ -4288,7 +4288,7 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes < 10)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackLootHangar).TotalMinutes) < 10)
             {
                 return true;
             }
@@ -4476,7 +4476,7 @@ namespace Questor.Modules.Caching
                 return true;
             }
 
-            if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes < 10)
+            if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalMinutes) < 10)
             {
                 return true;
             }

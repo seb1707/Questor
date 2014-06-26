@@ -54,7 +54,7 @@ namespace Questor.Modules.Actions
                 {
                     if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                     {
-                        if (DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                        if (Math.Abs(DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds) > 15)
                         {
                             Logging.Log("UnloadLoot.MoveAmmo", "Moving Ammo timed out, clearing item locks", Logging.Orange);
                             Cache.Instance.DirectEve.UnlockItems();
@@ -73,10 +73,6 @@ namespace Questor.Modules.Actions
                 if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 10)
                 {
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
-                    //
-                    // why do we *ever* have to close the Ammohangar?
-                    //
-                    //if (!Cache.Instance.CloseAmmoHangar("UnloadLootState.MoveAmmo")) return false;
                     Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);
                     AmmoIsBeingMoved = false;
                     _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
@@ -281,7 +277,7 @@ namespace Questor.Modules.Actions
             {
                 if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
                 {
-                    if (DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds > 120)
+                    if (Math.Abs(DateTime.UtcNow.Subtract(_lastUnloadAction).TotalSeconds) > 15)
                     {
                         Logging.Log("UnloadLootState.MoveLoot", "Moving Loot timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();

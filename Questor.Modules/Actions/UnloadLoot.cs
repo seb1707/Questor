@@ -70,7 +70,7 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds < 10)
+                if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.LastStackAmmoHangar).TotalSeconds) < 10)
                 {
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveAmmo", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackAmmoHangar).TotalSeconds < 30)", Logging.Teal);
                     Logging.Log("UnloadLoot.MoveAmmo", "Done Moving Ammo", Logging.White);

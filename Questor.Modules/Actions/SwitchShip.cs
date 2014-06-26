@@ -164,7 +164,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case SwitchShipState.Cleanup:
-                    if (!Cleanup.CloseInventoryWindows()) break;
+                    //if (!Cleanup.CloseInventoryWindows()) break;
                     _States.CurrentSwitchShipState = SwitchShipState.Done;
                     break;
 

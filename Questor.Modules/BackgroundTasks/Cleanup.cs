@@ -363,7 +363,6 @@ namespace Questor.Modules.BackgroundTasks
                     //
                 }
 
-                Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
                 return true;
             }
             catch (System.Exception ex)

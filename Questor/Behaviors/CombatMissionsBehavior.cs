@@ -358,6 +358,15 @@ namespace Questor.Behaviors
 
             if (_firstStart)
             {
+                if (string.IsNullOrEmpty(MissionSettings.MissionsPath) || string.IsNullOrWhiteSpace(MissionSettings.MissionsPath))
+                {
+                    Logging.Log("Settings", "You *must* set a MissionsPath to use Questor. Without it we do not know what directory to pull mission XMLs from. Disabling Autostart.", Logging.White);
+                    Settings.Instance.AutoStart = false;
+                    Cache.Instance.Paused = true;
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                    return;
+                }
+
                 //if you are in wrong station and is not first agent
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Switch;
                 _firstStart = false;
@@ -517,12 +526,6 @@ namespace Questor.Behaviors
         
         private void LocalWatchCMBState()
         {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction)
-            {
-                //Logging.Log("Cleanup", "Closing Inventory Windows: waiting [" + Math.Round(Time.Instance.NextArmAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "]sec", Logging.White);
-                return;
-            }
-
             if (Settings.Instance.UseLocalWatch)
             {
                 Time.Instance.LastLocalWatchAction = DateTime.UtcNow;

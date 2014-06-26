@@ -3006,7 +3006,7 @@ namespace Questor.Modules.Caching
             {
                 if (DateTime.UtcNow < Time.Instance.NextOpenCargoAction)
                 {
-                    if (Math.Abs(DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds) > 0)
+                    if ((DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds) > 0)
                     {
                         Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Time.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }

@@ -393,7 +393,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         if (_name == null)
@@ -445,7 +445,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         if (String.IsNullOrEmpty(_givenName))
                         {
@@ -477,7 +477,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         if (String.IsNullOrEmpty(_givenName))
                         {
@@ -509,7 +509,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
                         if (_distance == null)
                         {
@@ -4961,7 +4961,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             if (Distance < 2500)
@@ -5037,7 +5037,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         //we cant move in bastion mode, do not try
@@ -5084,7 +5084,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         //we cant move in bastion mode, do not try
@@ -5125,7 +5125,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         //we cant move in bastion mode, do not try
@@ -5170,7 +5170,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         //we cant move in bastion mode, do not try
@@ -5218,7 +5218,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.WarpTo", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
                             
                             //
@@ -5285,7 +5285,7 @@ namespace Questor.Modules.Caching
                     {
                         if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                         {
-                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                            Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                         }
 
                         _directEntity.AlignTo();
@@ -5323,7 +5323,7 @@ namespace Questor.Modules.Caching
                         {
                             if (DateTime.UtcNow.AddSeconds(-5) > ThisEntityCacheCreated)
                             {
-                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + Name + "][" + Math.Round(Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
+                                Logging.Log("EntityCache.Name", "The EntityCache instance that represents [" + _directEntity.Name + "][" + Math.Round(_directEntity.Distance / 1000, 0) + "k][" + MaskedId + "] was created more than 5 seconds ago (ugh!)", Logging.Debug);
                             }
 
                             Time.Instance.WehaveMoved = DateTime.UtcNow;

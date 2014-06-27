@@ -229,6 +229,8 @@ namespace Questor.Modules.Caching
                 if (TypeId == 24576) return true;    // Imperial Navy Gate Permit
                 if (TypeId == 28260) return true;   // Zbikoki's Hacker Card
                 if (TypeId == 3814) return true;    // Reports
+                if (TypeId == 24766) return true;    // Ship's Crew
+
                 return false;
             }
         }
@@ -306,6 +308,11 @@ namespace Questor.Modules.Caching
                     }
 
                     if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains((Name ?? string.Empty).ToLower()))
+                    {
+                        return true;
+                    }
+
+                    if (IsTypicalMissionCompletionItem)
                     {
                         return true;
                     }

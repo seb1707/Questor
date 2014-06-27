@@ -857,7 +857,7 @@ namespace Questor.Modules.BackgroundTasks
                             {
                                 if (Settings.Instance.FleetSupportSlave && !Settings.Instance.FleetSupportMaster)
                                 {
-                                    if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name))
+                                    if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name) || item.IsMissionItem)
                                     {
                                         if (Logging.DebugFleetSupportSlave) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is an item specified in a lootitem action. Do not loot it here. Let the Master loot this.", Logging.Teal);
                                         Cache.Instance.LootedContainers.Add(containerEntity.Id);

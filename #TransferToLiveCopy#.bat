@@ -66,9 +66,9 @@ popd
 
 :CopyQuestor
 @Echo.
-@Echo Starting to copy EasyHook files from [.\DirectEVE\easyhook*.*] to [.\output\]
+@Echo Starting to copy EasyHook files from [.\DirectEVE\easyhook*.dll] to [.\output\]
 @Echo on
-copy /y ".\DirectEVE\easyhook*.*" ".\output\"
+copy /y ".\DirectEVE\easyhook*.dll" ".\output\"
 
 @Echo.
 @Echo Starting to copy debug files from [.\output\*.pdb] to [%innerspacedotnetdirectory%]
@@ -114,19 +114,19 @@ copy /y ".\output\settings.xml" "%innerspacedotnetdirectory%"
 copy /y ".\output\factions.xml" "%innerspacedotnetdirectory%"
 @Echo.
 @Echo *** only copy ShipTargetValues.xml if one does not already exist (it contains targeting data)
-if not exist "%innerspacedotnetdirectory%ShipTargetValues.xml" copy /y ".\output\ShipTargetValues.xml" "%innerspacedotnetdirectory%"
+if not exist "%innerspacedotnetdirectory%\ShipTargetValues.xml" copy /y ".\output\ShipTargetValues.xml" "%innerspacedotnetdirectory%"
 @Echo.
 @Echo *** only copy invtypes.xml if one does not already exist (it contains pricing data)
-if not exist "%innerspacedotnetdirectory%invtypes.xml" copy /y ".\output\invtypes.xml" "%innerspacedotnetdirectory%"
+if not exist "%innerspacedotnetdirectory%\invtypes.xml" copy /y ".\output\invtypes.xml" "%innerspacedotnetdirectory%"
 @Echo.
 @Echo *** only copy InvIgnore.xml if one does not already exist (it contains invtypes that will not be sold by valuedump)
-if not exist "%innerspacedotnetdirectory%InvIgnore.xml" copy /y ".\output\InvIgnore.xml" "%innerspacedotnetdirectory%"
+if not exist "%innerspacedotnetdirectory%\InvIgnore.xml" copy /y ".\output\InvIgnore.xml" "%innerspacedotnetdirectory%"
 @Echo.
 @Echo *** only copy Schedules.xml if one does not already exist (it contains the schedule your toons will use to logoff and login if you start eve early)
-if not exist "%innerspacedotnetdirectory%Schedules.xml" copy /y ".\output\Schedules.xml" "%innerspacedotnetdirectory%"
+if not exist "%innerspacedotnetdirectory%\Schedules.xml" copy /y ".\output\Schedules.xml" "%innerspacedotnetdirectory%"
 @Echo. 
 @Echo *** only copy Skill_Prerequisites.xml if one does not already exist (it contains skill prerequisites which allows questor to determine which skills can be injected)
-if not exist "%innerspacedotnetdirectory%Skill_Prerequisites.xml" copy /y ".\output\Skill_Prerequisites.xml" "%innerspacedotnetdirectory%"
+if not exist "%innerspacedotnetdirectory%\Skill_Prerequisites.xml" copy /y ".\output\Skill_Prerequisites.xml" "%innerspacedotnetdirectory%"
 @Echo off
 
 goto :done

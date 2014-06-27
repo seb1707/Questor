@@ -13,21 +13,13 @@ namespace Questor.Modules.States
     {
         Idle,
         Begin,
-        OpenHangars,
-        MoveCommonMissionCompletionitems,
-        MoveLoot,
-        WaitForMove,
-        StackItemsHangar,
+        MoveAmmo,
+        MoveMissionGateKeys,
+        MoveCommonMissionCompletionItems,
+        MoveScripts,
         StackAmmoHangar,
         StackLootHangar,
-        CloseAmmoHangar,
-        CloseLootHangar,
-        WaitForStacking,
-        WaitForAmmoHangarStacking,
-        WaitForLootHangarStacking,
+        MoveLoot,
         Done,
-        MoveAmmo,
-        MoveCommonMissionCompletionItemsToAmmoHangar,
-        MoveCommonMissionCompletionItemsToItemsHangar
     }
 }

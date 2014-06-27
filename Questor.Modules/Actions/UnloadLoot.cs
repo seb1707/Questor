@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Configuration;
+
 namespace Questor.Modules.Actions
 {
     using System;
@@ -399,35 +401,19 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (AmmoIsBeingMoved)
+                if ((Settings.Instance.AmmoHangarTabName == "" && Settings.Instance.LootHangarTabName == "") || Settings.Instance.AmmoHangarTabName == Settings.Instance.LootHangarTabName)
                 {
-                    if (!WaitForLockedItems(_States.CurrentUnloadLootState.ToString(), UnloadLootState.MoveLoot)) return false;
-                    Logging.Log(_States.CurrentUnloadLootState.ToString(), "Done", Logging.White);
-                    AmmoIsBeingMoved = false;
-                    return false;
+                    return true;
                 }
-
+                
                 try
                 {
-                    if (Cache.Instance.CurrentShipsCargo == null)
-                    {
-                        Logging.Log(_States.CurrentUnloadLootState.ToString(), "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                        return false;
-                    }
-
-                    if (Cache.Instance.CurrentShipsCargo.Window.Type == "form.ActiveShipCargo")
-                    {
-                        //
-                        // Stack AmmoHangar
-                        //
-                        if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
-                        if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackAmmoHangar")) return false;
-                        _lastUnloadAction = DateTime.UtcNow;
-                        return true;
-                    }
-
-                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.StackAmmoHangar", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
-                    return false;
+                    //
+                    // Stack AmmoHangar
+                    //
+                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
+                    if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackAmmoHangar")) return false;
+                    return true;
                 }
                 catch (NullReferenceException) { }
                 return false;
@@ -589,35 +575,14 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (AmmoIsBeingMoved)
-                {
-                    if (!WaitForLockedItems(_States.CurrentUnloadLootState.ToString(), UnloadLootState.Done)) return false;
-                    Logging.Log(_States.CurrentUnloadLootState.ToString(), "Done", Logging.White);
-                    AmmoIsBeingMoved = false;
-                    return false;
-                }
-
                 try
                 {
-                    if (Cache.Instance.CurrentShipsCargo == null)
-                    {
-                        Logging.Log(_States.CurrentUnloadLootState.ToString(), "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                        return false;
-                    }
-
-                    if (Cache.Instance.CurrentShipsCargo.Window.Type == "form.ActiveShipCargo")
-                    {
-                        //
-                        // Stack AmmoHangar
-                        //
-                        if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.StackLootHangar", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
-                        if (!Cache.Instance.StackLootHangar("UnloadLoot.StackLootHangar")) return false;
-                        _lastUnloadAction = DateTime.UtcNow;
-                        return true;
-                    }
-
-                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.StackLootHangar", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
-                    return false;
+                    //
+                    // Stack AmmoHangar
+                    //
+                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.StackLootHangar", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
+                    if (!Cache.Instance.StackLootHangar("UnloadLoot.StackLootHangar")) return false;
+                    return true;   
                 }
                 catch (NullReferenceException) { }
                 return false;
@@ -686,6 +651,8 @@ namespace Questor.Modules.Actions
             switch (_States.CurrentUnloadLootState)
             {
                 case UnloadLootState.Idle:
+                    break;
+
                 case UnloadLootState.Done:
                     break;
 
@@ -693,42 +660,40 @@ namespace Questor.Modules.Actions
                     AmmoIsBeingMoved = false;
                     LootIsBeingMoved = false;
                     _lastUnloadAction = DateTime.UtcNow.AddMinutes(-1);
-                    _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;
+                    if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                    {
+                        _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;    
+                    }
+
+                    _States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.MoveAmmo:
                     if (!MoveAmmo()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                     break;
 
                 case UnloadLootState.MoveMissionGateKeys:
                     if (!MoveMissionGateKeys()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                     break;
 
                 case UnloadLootState.MoveCommonMissionCompletionItems:
                     if (!MoveCommonMissionCompletionItems()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.MoveScripts:
                     if (!MoveScripts()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.StackAmmoHangar:
                     if (!StackAmmoHangar()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.MoveLoot:
                     if (!MoveLoot()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.StackLootHangar:
                     if (!StackLootHangar()) return;
-                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
             }
         }

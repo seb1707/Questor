@@ -413,6 +413,7 @@ namespace Questor.Modules.Actions
                     //
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
                     if (!Cache.Instance.StackAmmoHangar("UnloadLoot.StackAmmoHangar")) return false;
+                    _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                     return true;
                 }
                 catch (NullReferenceException) { }
@@ -557,7 +558,7 @@ namespace Questor.Modules.Actions
             if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "if (!Cache.Instance.StackLootHangar(UnloadLoot.MoveLoot)) return;", Logging.White);
             _lastUnloadAction = DateTime.UtcNow;
             if (!Cache.Instance.StackLootHangar("UnloadLoot.MoveLoot")) return false;
-            _States.CurrentUnloadLootState = UnloadLootState.Done;
+            _States.CurrentUnloadLootState = UnloadLootState.StackLootHangar;
             return true;
             
 
@@ -582,6 +583,7 @@ namespace Questor.Modules.Actions
                     //
                     if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.StackLootHangar", "if (!Cache.Instance.StackAmmoHangar(UnloadLoot.MoveAmmo)) return;", Logging.White);
                     if (!Cache.Instance.StackLootHangar("UnloadLoot.StackLootHangar")) return false;
+                    _States.CurrentUnloadLootState = UnloadLootState.Done;
                     return true;   
                 }
                 catch (NullReferenceException) { }

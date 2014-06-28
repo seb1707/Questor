@@ -407,80 +407,72 @@ namespace Questor.Modules.BackgroundTasks
             }
         }
 
-        public static void NavigateToObject(EntityCache target, string module)  //this needs to accept a distance parameter....
+        public static bool NavigateToTarget(EntityCache target, string module, bool orbit, int DistanceFromTarget)  //this needs to accept a distance parameter....
         {
-            if (NavigateOnGrid.SpeedTank)
-            {   //this should be only executed when no specific actions
-                if (DateTime.UtcNow > Time.Instance.NextOrbit)
+            // if we are inside warpto range you need to approach (you cant warp from here)
+            if (target.Distance < (int) Distances.WarptoDistance)
+            {
+                if (orbit)
                 {
-                    if (target.Distance + NavigateOnGrid.OrbitDistance < Combat.MaxRange)
+                    if (target.Distance < DistanceFromTarget)
+                    {
+                        return true;
+                    }
+
+                    if (DateTime.UtcNow > Time.Instance.NextOrbit)
                     {
                         //we cant move in bastion mode, do not try
                         List<ModuleCache> bastionModules = null;
                         bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
-                        if (bastionModules.Any(i => i.IsActive)) return;
+                        if (bastionModules.Any(i => i.IsActive)) return false;
 
                         Logging.Log(module, "StartOrbiting: Target in range", Logging.Teal);
                         if (!Cache.Instance.IsApproachingOrOrbiting(target.Id))
                         {
                             Logging.Log("CombatMissionCtrl.NavigateToObject", "We are not approaching nor orbiting", Logging.Teal);
-                            EntityCache structure = Cache.Instance.EntitiesOnGrid.Where(i => i.IsLargeCollidable || i.Name.Contains("Gate") || i.Name.Contains("Beacon")).OrderBy(t => t.Distance).ThenBy(t => t.Distance).FirstOrDefault();
-
-                            if (NavigateOnGrid.OrbitStructure && structure != null)
-                            {
-                                if (structure.Orbit(NavigateOnGrid.OrbitDistance))
-                                {
-                                    Logging.Log(module, "Initiating Orbit [" + structure.Name + "][ID: " + structure.MaskedId + "]", Logging.Teal);
-                                    return;
-                                }
-
-                                return;
-                            }
-
-                            if (target.Orbit(NavigateOnGrid.OrbitDistance))
+                            if (target.Orbit(DistanceFromTarget - 1500))
                             {
                                 Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.MaskedId + "]", Logging.Teal);
-                                return;
+                                return false;
                             }
-                            
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Logging.Log(module, "Possibly out of range. ignoring orbit around structure", Logging.Teal);
-                        if (target.Orbit(NavigateOnGrid.OrbitDistance))
-                        {
-                            Logging.Log(module, "Initiating Orbit [" + target.Name + "][ID: " + target.MaskedId + "]", Logging.Teal);
-                            return;
-                        }
 
-                        return;
+                            return false;
+                        }
                     }
                 }
-            }
-            else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
-            {
-                if (DateTime.UtcNow > Time.Instance.NextApproachAction)
+                else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range
                 {
-                    //if optimalrange is set - use it to determine engagement range
-                    //
-                    // this assumes that both optimal range and missile boats both want to be within 5k of the object they asked us to navigate to
-                    //
-                    if (target.Distance > Combat.MaxRange)
+                    if (DateTime.UtcNow > Time.Instance.NextApproachAction)
                     {
+                        if (target.Distance < DistanceFromTarget)
+                        {
+                            return true;
+                        }
+
                         if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != target.Id || Cache.Instance.MyShipEntity.Velocity < 50)
                         {
-                            if (target.KeepAtRange((int) (Distances.SafeDistancefromStructure)))
+                            if (target.KeepAtRange(DistanceFromTarget - 1500))
                             {
-                                Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + target.MaskedId + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);        
+                                Logging.Log(module, "Using SafeDistanceFromStructure: Approaching target [" + target.Name + "][ID: " + target.MaskedId + "][" + Math.Round(target.Distance / 1000, 0) + "k away]", Logging.Teal);
                             }
+
+                            return false;
                         }
+
+                        return false;
                     }
 
-                    return;
+                    return false;
                 }
+
             }
+            // Probably never happens
+            if (target.AlignTo())
+            {
+                return false;
+            }
+            
+            return false;
         }
     }
 }

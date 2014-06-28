@@ -156,6 +156,12 @@
       
       <action name="SalvageBookmark" />
       
+	  <action name="Salvage">
+        <parameter name="Target" value="Dim" />							<!-- orbit this target at 500m and salvage it until it produces an item (specified in the Item parameter) in your ships cargo -->
+		<parameter name="Item" value="0" />                             <!-- salvage the target until an item with this name appears in the ships cargo!  -->
+		<parameter name="Quantity" value="0" />                         <!-- if this is missing we assume we only need to have 1 of these items for this action to succeed -->
+      </action>
+	  
       <action name="Activate">
         <parameter name="optional" value="false" /> <!-- if true and we cant find the target to activate we assume the mission is done -->
         <parameter name="target" value="Acceleration Gate" />

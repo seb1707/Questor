@@ -657,7 +657,7 @@ namespace Questor.Modules.Activities
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
-                _currentAction++;
+                Nextaction();
                 return;
             }
 
@@ -727,7 +727,7 @@ namespace Questor.Modules.Activities
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
-                _currentAction++;
+                Nextaction();
                 return;
             }
 
@@ -1814,7 +1814,7 @@ namespace Questor.Modules.Activities
                 if (targetContainerNames == null && Salvage.LootItemRequiresTarget)
                 {
                     Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], " *** No Target Was Specified In the LootItem Action! ***", Logging.Debug);
-                    _currentAction++;
+                    Nextaction();
                 }
 
                 List<string> itemsToLoot = null;
@@ -1826,7 +1826,7 @@ namespace Questor.Modules.Activities
                 if (itemsToLoot == null)
                 {
                     Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], " *** No Item Was Specified In the LootItem Action! ***", Logging.Debug);
-                    _currentAction++;
+                    Nextaction();
                 }
 
                 // if we are not generally looting we need to re-enable the opening of wrecks to
@@ -1860,7 +1860,7 @@ namespace Questor.Modules.Activities
                     if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
                     Salvage.MissionLoot = false;
                     Salvage.CurrentlyShouldBeSalvaging = false;
-                    _currentAction++;
+                    Nextaction();
                     return;
                 }
 
@@ -1876,7 +1876,7 @@ namespace Questor.Modules.Activities
                     if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
                     Salvage.MissionLoot = false;
                     Salvage.CurrentlyShouldBeSalvaging = false;
-                    _currentAction++;
+                    Nextaction();
                     return;
                 }
 
@@ -1886,7 +1886,7 @@ namespace Questor.Modules.Activities
                     if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
                     Salvage.MissionLoot = false; 
                     Salvage.CurrentlyShouldBeSalvaging = false;
-                    _currentAction++;
+                    Nextaction();
                     return;
                 }
 
@@ -1941,61 +1941,106 @@ namespace Questor.Modules.Activities
             }
         }
 
-        //
-        // this action still needs some TLC - currently broken (unimplemented)
-        //
-        /*
-                private void SalvageAction(Actions.Action action)
+        private void SalvageAction(Actions.Action action)
+        {
+            List<string> itemsToLoot = null;
+            if (action.GetParameterValues("item") != null)
+            {
+                itemsToLoot = action.GetParameterValues("item");
+            }
+
+            int quantity;
+            if (!int.TryParse(action.GetParameterValue("quantity"), out quantity))
+            {
+                quantity = 1;
+            }
+
+            if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
+
+            List<string> targetNames = action.GetParameterValues("target");
+
+            // No parameter? Ignore salvage action
+            if (targetNames.Count == 0)
+            {
+                Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "No targets defined!", Logging.Teal);
+                Nextaction();
+                return;
+            }
+
+            if (itemsToLoot == null)
+            {
+                Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], " *** No Item Was Specified In the Salvage Action! ***", Logging.Debug);
+                Nextaction();
+            }
+            else if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Window.IsReady)
+            {
+                if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
                 {
-                    Cache.Instance.MissionLoot = true;
-                    List<string> items = action.GetParameterValues("item");
-                    List<string> targetNames = action.GetParameterValues("target");
+                    Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "We are done - we have the item(s)", Logging.Teal);
 
-                    // if we are not generally looting we need to re-enable the opening of wrecks to
-                    // find this LootItems we are looking for
-                    Cache.Instance.OpenWrecks = true;
-
-                    //
-                    // when the salvage action is 'done' we will be able to open the "target"
-                    //
-                    bool done = items.Count == 0;
-                    if (!done)
-                    {
-                        // We assume that the ship's cargo will be opened somewhere else
-                        if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
-                            done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => (items.Contains(i.TypeName)));
-                    }
-                    if (done)
-                    {
-                        Logging.Log("CombatMission." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
-
-                        // now that we have completed this action revert OpenWrecks to false
-                        Cache.Instance.OpenWrecks = false;
-                        Cache.Instance.MissionLoot = false;
-                        _currentAction++;
-                        return;
-                    }
-
-                    IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
-                    if (!containers.Any())
-                    {
-                        Logging.Log("CombatMission." + _pocketActions[_currentAction], "We are done looting", Logging.Teal);
-
-                        _currentAction++;
-                        return;
-                    }
-
-                    EntityCache closest = containers.LastOrDefault(c => targetNames.Contains(c.Name)) ?? containers.LastOrDefault();
-                    if (closest != null && (closest.Distance > (int)Distance.SafeScoopRange && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id)))
-                    {
-                        if (DateTime.UtcNow > Cache.Instance.NextApproachAction && (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != closest.Id))
-                        {
-                            Logging.Log("CombatMission." + _pocketActions[_currentAction], "Approaching target [" + closest.Name + "][ID: " + closest.Id + "] which is at [" + Math.Round(closest.Distance / 1000, 0) + "k away]", Logging.Teal);
-                            closest.Approach();
-                        }
-                    }
+                    // now that we have completed this action revert OpenWrecks to false
+                    if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
+                    Salvage.MissionLoot = false;
+                    Salvage.CurrentlyShouldBeSalvaging = false;
+                    Nextaction();
+                    return;
                 }
-        */
+            }
+            
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(targetNames.FirstOrDefault(), Cache.Instance.EntitiesOnGrid.ToList()).ToList();
+            if (!targets.Any())
+            {
+                Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "no entities found named [" + targets.FirstOrDefault() + "] proceeding to next action", Logging.Teal);
+                Nextaction();
+                return;
+            }
+
+            if (Combat.GetBestPrimaryWeaponTarget((double)Distances.OnGridWithMe, false, "combat", Combat.PotentialCombatTargets.OrderBy(t => t.Distance).Take(1).ToList()))
+                _clearPocketTimeout = null;
+
+            // Do we have a timeout?  No, set it to now + 5 seconds
+            if (!_clearPocketTimeout.HasValue) _clearPocketTimeout = DateTime.UtcNow.AddSeconds(5);
+
+            //
+            // how do we determine success here? we assume the 'reward' for salvaging will appear in your cargo, we also assume the mission action will know what that item is called!
+            //
+
+            EntityCache closest = targets.OrderBy(t => t.Distance).FirstOrDefault();
+            if (closest != null)
+            {
+                if (!NavigateOnGrid.NavigateToTarget(targets.FirstOrDefault(), "", true, 500)) return;
+                
+                if (Salvage.salvagers == null || !Salvage.salvagers.Any())
+                {
+                    Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "this action REQUIRES at least 1 salvager! - you may need to use Mission specific fittings to accomplish this", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "this action REQUIRES at least 1 salvager! - disabling autostart", Logging.Teal);
+                    Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "this action REQUIRES at least 1 salvager! - setting CombatMissionsBehaviorState to GotoBase", Logging.Teal);
+                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    Settings.Instance.AutoStart = false;
+                }
+                else if (closest.Distance < Salvage.salvagers.Min(s => s.OptimalRange))
+                {
+                    if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = true;
+                    Salvage.CurrentlyShouldBeSalvaging = true;
+                    Salvage.TargetWrecks(targets);
+                    Salvage.ActivateSalvagers(targets);
+                }
+
+                return;
+            }
+            
+            // Are we in timeout?
+            if (DateTime.UtcNow < _clearPocketTimeout.Value) return;
+
+            // We have cleared the Pocket, perform the next action \o/ - reset the timers that we had set for actions...
+            Nextaction();
+
+            // Reset timeout
+            _clearPocketTimeout = null;
+            return;
+            
+        }
+       
 
         private void LootAction(Actions.Action action)
         {
@@ -2027,8 +2072,7 @@ namespace Questor.Modules.Activities
                         if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
                         Salvage.MissionLoot = false;
                         Salvage.CurrentlyShouldBeSalvaging = false;
-
-                        _currentAction++;
+                        Nextaction();
                         return;
                     }
                 }
@@ -2060,8 +2104,7 @@ namespace Questor.Modules.Activities
                     if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
                     Salvage.MissionLoot = false;
                     Salvage.CurrentlyShouldBeSalvaging = false;
-
-                    _currentAction++;
+                    Nextaction();
                     return;
                 }
 
@@ -2150,7 +2193,7 @@ namespace Questor.Modules.Activities
                 Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "Your ignore list is empty", Logging.Teal);
             }
 
-            _currentAction++;
+            Nextaction();
             return;
         }
 
@@ -2177,7 +2220,7 @@ namespace Questor.Modules.Activities
                 case ActionState.SalvageBookmark:
                     BookmarkPocketForSalvaging();
 
-                    _currentAction++;
+                    Nextaction();
                     break;
 
                 case ActionState.Done:
@@ -2240,9 +2283,9 @@ namespace Questor.Modules.Activities
                     ClearWithinWeaponsRangeWithAggroOnlyAction(action);
                     break;
 
-                //case ActionState.Salvage:
-                //    SalvageAction(action);
-                //    break;
+                case ActionState.Salvage:
+                    SalvageAction(action);
+                    break;
 
                 //case ActionState.Analyze:
                 //    AnalyzeAction(action);

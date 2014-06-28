@@ -2259,6 +2259,7 @@ namespace Questor.Modules.Caching
             {
                 Drones.InvalidateCache();
                 Combat.InvalidateCache();
+                Salvage.InvalidateCache();
                 
                 //
                 // this list of variables is cleared every pulse.

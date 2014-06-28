@@ -35,6 +35,9 @@ namespace Questor.Modules.BackgroundTasks
         private static DateTime _lastSalvageProcessState;
         public static Dictionary<long, DateTime> OpenedContainers;
         //public static int SalvageInstances;
+        internal static List<ModuleCache> salvagers;
+        private static List<EntityCache> wrecks;
+        private static List<EntityCache> containersInRange;
         public static List<int> WreckBlackList { get; set; }
         public static bool WreckBlackListSmallWrecks { get; set; }
         public static bool WreckBlackListMediumWrecks { get; set; }
@@ -368,7 +371,7 @@ namespace Questor.Modules.BackgroundTasks
 
             return;
         }
-        private static void ActivateSalvagers()
+        public static void ActivateSalvagers(IEnumerable<EntityCache> SalvageThese = null)
         {
             if (Time.Instance.NextSalvageAction > DateTime.UtcNow)
             {
@@ -376,7 +379,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            List<ModuleCache> salvagers = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Salvager).ToList();
+            salvagers = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Salvager).ToList();
 
             if (salvagers.Count == 0)
             {
@@ -391,7 +394,15 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             double salvagerRange = salvagers.Min(s => s.OptimalRange);
-            List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange && WreckBlackList.All(a => a != t.TypeId)).ToList();
+            if (SalvageThese == null)
+            {
+                wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange && WreckBlackList.All(a => a != t.TypeId)).ToList();    
+            }
+            else
+            {
+                wrecks = SalvageThese.Where(i => i.Distance < salvagers.Min(s => s.OptimalRange)).ToList();
+            }
+
             if (Salvage.SalvageAll)
             {
                 wrecks = Cache.Instance.Targets.Where(t => t.GroupId == (int)Group.Wreck && t.Distance < salvagerRange).ToList();
@@ -490,7 +501,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Target wrecks within range
         /// </summary>
-        private static void TargetWrecks()
+        public static void TargetWrecks(IEnumerable<EntityCache> TargetTheseEntities = null)
         {
             // We are jammed, we do not need to log (Combat does this already)
             if (Cache.Instance.MaxLockedTargets == 0 || Cache.Instance.Targets.Any() && Cache.Instance.Targets.Count() >= Cache.Instance.MaxLockedTargets)
@@ -580,8 +591,17 @@ namespace Questor.Modules.BackgroundTasks
             // TargetWrecks/Container, etc If needed
             //
             int wrecksProcessedThisTick = 0;
-            IEnumerable<EntityCache> wrecks = Cache.Instance.UnlootedContainers;
-            foreach (EntityCache wreck in wrecks.OrderByDescending(i => i.IsLootTarget))
+            IEnumerable<EntityCache> AttemptToTargetThese = null;
+            if (TargetTheseEntities != null)
+            {
+                AttemptToTargetThese = TargetTheseEntities;    
+            }
+            else
+            {
+                AttemptToTargetThese = Cache.Instance.UnlootedContainers;
+            }
+            
+            foreach (EntityCache wreck in AttemptToTargetThese.OrderByDescending(i => i.IsLootTarget))
             {
                 // Its already a target, ignore it
                 if (wreck.IsTarget || wreck.IsTargeting)
@@ -596,7 +616,7 @@ namespace Questor.Modules.BackgroundTasks
                     continue;
                 }
 
-                if (!wreck.HaveLootRights)
+                if (!wreck.HaveLootRights || TargetTheseEntities != null)
                 {
                     if (Logging.DebugTargetWrecks) Logging.Log("Salvage.TargetWrecks", "Debug: if (!wreck.HaveLootRights)", Logging.Teal);
                     continue;
@@ -691,7 +711,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Loot any wrecks & cargo containers close by
         /// </summary>
-        private static void LootWrecks()
+        private static void LootWrecks(IEnumerable<EntityCache> EntitiesToLoot = null)
         {
             if (Time.Instance.NextLootAction > DateTime.UtcNow)
             {
@@ -725,7 +745,16 @@ namespace Questor.Modules.BackgroundTasks
 
             // Open a container in range
             int containersProcessedThisTick = 0;
-            List<EntityCache> containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
+
+            if (EntitiesToLoot != null)
+            {
+                containersInRange = EntitiesToLoot.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
+            }
+            else
+            {
+                containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();    
+            }
+            
             if (Logging.DebugLootWrecks)
             {
                 int containersInRangeCount = 0;
@@ -765,13 +794,6 @@ namespace Questor.Modules.BackgroundTasks
                     if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We have already looted [" + containerEntity.Id + "]", Logging.White);
                     continue;
                 }
-
-                // We should not loot this container
-                //if (Settings.Instance.FleetSupportSlave && Cache.Instance.ListofContainersToLoot.Contains(containerEntity.Id))
-                //{
-                //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We are not supposed to loot [" + containerEntity.Id + "]. Leaving it for the Master.", Logging.White);
-                //    continue;
-                //}
 
                 // Ignore open request within 10 seconds
                 if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.UtcNow.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
@@ -1181,7 +1203,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (Cache.Instance.InSpace &&
                         (Cache.Instance.ActiveShip.Entity != null &&
                         !Cache.Instance.ActiveShip.Entity.IsCloaked &&
-                        (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName.ToLower() ||
+                        (Cache.Instance.ActiveShip.GivenName.ToLower() != Combat.CombatShipName.ToLower() ||
                         Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.SalvageShipName.ToLower()) &&
                         !Cache.Instance.InWarp))
                     {
@@ -1196,6 +1218,23 @@ namespace Questor.Modules.BackgroundTasks
                     // Unknown state, goto first state
                     _States.CurrentSalvageState = SalvageState.TargetWrecks;
                     break;
+            }
+        }
+
+        public static void InvalidateCache()
+        {
+            try
+            {
+                //
+                // this list of variables is cleared every pulse.
+                //
+                salvagers = null;
+                wrecks = null;
+                containersInRange = null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Salvage.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
     }

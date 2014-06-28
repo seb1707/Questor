@@ -396,6 +396,10 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                //disable stacking for now
+                _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
+                return true;
+
                 if (DateTime.UtcNow < _lastUnloadAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 3000)))
                 {
                     return false;
@@ -571,6 +575,10 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                //disable stacking for now
+                _States.CurrentUnloadLootState = UnloadLootState.Done;
+                return true;
+
                 if (DateTime.UtcNow < _lastUnloadAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 3000)))
                 {
                     return false;

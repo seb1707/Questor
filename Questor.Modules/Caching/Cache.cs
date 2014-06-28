@@ -3092,11 +3092,21 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.ShipHangar != null && Cache.Instance.ShipHangar.IsValid)
                     {
-                        Logging.Log(module, "Stacking Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                        Time.Instance.LastStackShipsHangar = DateTime.UtcNow;
-                        Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
-                        Cache.Instance.ShipHangar.StackAll();
-                        return true;
+                        if (Cache.Instance.StackHangarAttempts > 0)
+                        {
+                            if (!WaitForLockedItems(Time.Instance.LastStackShipsHangar)) return false;
+                            return true;
+                        }
+
+                        if (Cache.Instance.StackHangarAttempts <= 0)
+                        {
+                            Logging.Log(module, "Stacking Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
+                            Time.Instance.LastStackShipsHangar = DateTime.UtcNow;
+                            Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(3, 5));
+                            Cache.Instance.ShipHangar.StackAll();
+                            return true;
+                        }
+                        
                     }
                     Logging.Log(module, "Stacking Ship Hangar: not yet ready: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     return false;
@@ -3964,12 +3974,21 @@ namespace Questor.Modules.Caching
 
                     if (LootContainer.Window == null || !LootContainer.Window.IsReady) return false;
 
-                    Logging.Log(module, "Loot Container window named: [ " + LootContainer.Window.Name + " ] was found and its contents are being stacked", Logging.White);
-                    LootContainer.StackAll();
-                    Time.Instance.LastStackLootContainer = DateTime.UtcNow;
-                    Time.Instance.LastStackLootHangar = DateTime.UtcNow;
-                    Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    return true;
+                    if (Cache.Instance.StackHangarAttempts > 0)
+                    {
+                        if (!WaitForLockedItems(Time.Instance.LastStackLootContainer)) return false;
+                        return true;
+                    }
+
+                    if (Cache.Instance.StackHangarAttempts <= 0)
+                    {
+                        Logging.Log(module, "Loot Container window named: [ " + LootContainer.Window.Name + " ] was found and its contents are being stacked", Logging.White);
+                        LootContainer.StackAll();
+                        Time.Instance.LastStackLootContainer = DateTime.UtcNow;
+                        Time.Instance.LastStackLootHangar = DateTime.UtcNow;
+                        Time.Instance.NextOpenLootContainerAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
+                        return true;
+                    }
                 }
 
                 return false;
@@ -4421,7 +4440,6 @@ namespace Questor.Modules.Caching
                         if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Starting [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
                         if (!Cache.Instance.StackCorpAmmoHangar(module)) return false;
                         if (Logging.DebugHangars) Logging.Log("StackAmmoHangar", "Finished [Cache.Instance.StackCorpAmmoHangar]", Logging.Teal);
-                        StackAmmohangarAttempts = 0;
                         return true;
                     }
 

@@ -1422,7 +1422,7 @@ namespace Questor.Modules.Combat
             if (Cache.Instance.InSpace &&
                 Cache.Instance.ActiveShip.Entity != null &&
                 !Cache.Instance.ActiveShip.Entity.IsCloaked &&
-                Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.CombatShipName &&
+                Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName &&
                 Drones.UseDrones &&
                 !Cache.Instance.InWarp)
             {

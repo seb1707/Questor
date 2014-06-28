@@ -660,12 +660,12 @@ namespace Questor.Modules.Actions
                     AmmoIsBeingMoved = false;
                     LootIsBeingMoved = false;
                     _lastUnloadAction = DateTime.UtcNow.AddMinutes(-1);
-                    if (Cache.Instance.CurrentShipsCargo.Items.Any())
-                    {
+                    //if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
+                    //{
                         _States.CurrentUnloadLootState = UnloadLootState.MoveAmmo;    
-                    }
-
-                    _States.CurrentUnloadLootState = UnloadLootState.Done;
+                    //}
+                    //
+                    //_States.CurrentUnloadLootState = UnloadLootState.Done;
                     break;
 
                 case UnloadLootState.MoveAmmo:

@@ -2793,7 +2793,7 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance.StackHangarAttempts <= 0)
                             {
-                                if (LootHangar.Items.Any())
+                                if (LootHangar.Items.Any() && LootHangar.Items.Count() > RandomNumber(600, 800))
                                 {
                                     Logging.Log(module, "Stacking Item Hangar (as LootHangar)", Logging.White);
                                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
@@ -2883,7 +2883,7 @@ namespace Questor.Modules.Caching
 
                             if (Cache.Instance.StackHangarAttempts <= 0)
                             {
-                                if (AmmoHangar.Items.Any())
+                                if (AmmoHangar.Items.Any() && AmmoHangar.Items.Count() > RandomNumber(600, 800))
                                 {
                                     Logging.Log(module, "Stacking Item Hangar (as AmmoHangar)", Logging.White);
                                     Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
@@ -3311,7 +3311,7 @@ namespace Questor.Modules.Caching
 
                                 if (Cache.Instance.StackHangarAttempts <= 0)
                                 {
-                                    if (AmmoHangar.Items.Any())
+                                    if (AmmoHangar.Items.Any() && AmmoHangar.Items.Count() > RandomNumber(600, 800))
                                     {
                                         Logging.Log(module, "Stacking Item Hangar (as AmmoHangar)", Logging.White);
                                         Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);
@@ -3430,7 +3430,7 @@ namespace Questor.Modules.Caching
 
                                 if (Cache.Instance.StackHangarAttempts <= 0)
                                 {
-                                    if (LootHangar.Items.Any())
+                                    if (LootHangar.Items.Any() && LootHangar.Items.Count() > RandomNumber(600, 800))
                                     {
                                         Logging.Log(module, "Stacking Item Hangar (as LootHangar)", Logging.White);
                                         Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(5);

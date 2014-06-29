@@ -1,8 +1,7 @@
 @Echo off
 cls
-
 Set InjectorEXE=Adapteve.exe
-Set iniFile=setting.ini
+Set iniFile=Rename_This_To_ToonName.ini
 ::
 :: we eventually need to also have things like AccountName, AccountPassword, CharacterName (the login info that is in Schedules.XML)
 ::

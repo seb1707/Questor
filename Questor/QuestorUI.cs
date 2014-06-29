@@ -1,4 +1,3 @@
-using Questor.Behaviors;
 using Questor.Modules.Combat;
 using Questor.Properties;
 
@@ -246,7 +245,6 @@ namespace Questor
                         LastSessionChangeData.Text = Time.Instance.LastSessionChange.ToLongTimeString();
                         AutostartData.Text = Settings.Instance.AutoStart.ToString(CultureInfo.InvariantCulture);
                         useDronesData.Text = Drones.UseDrones.ToString(CultureInfo.InvariantCulture);
-                        useInnerspaceData.Text = Logging.UseInnerspace.ToString(CultureInfo.InvariantCulture);
 
                         if (Settings.Instance.UserDefinedLavishScriptScript1Description != string.Empty)
                         {
@@ -709,16 +707,7 @@ namespace Questor
                     }
                 }
 
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior && !CombatMissionsBehavior.ValidSettings)
-                {
-                    string newlblCurrentMissionInfotext = "[ CombatMissionsBehavior.ValidSettings is false! - we cannot proceed ]";
-                    if (lblCurrentMissionInfo.Text != newlblCurrentMissionInfotext)
-                    {
-                        lblCurrentMissionInfo.Text = newlblCurrentMissionInfotext;
-                        buttonOpenMissionXML.Enabled = false;
-                    }
-                }
-                else if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle && _States.CurrentQuestorState != QuestorState.Idle)
+                if (_States.CurrentCombatMissionBehaviorState != CombatMissionsBehaviorState.Idle && _States.CurrentQuestorState != QuestorState.Idle)
                 {
                     if (!String.IsNullOrEmpty(MissionSettings.MissionName))
                     {

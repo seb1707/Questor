@@ -251,8 +251,7 @@ namespace Questor
                     return;
                 }
 
-                int TryLoadingDirectVE = 0;
-                while (Cache.Instance.DirectEve == null && TryLoadingDirectVE < 30)
+                if (Cache.Instance.DirectEve == null)
                 {
                     //
                     // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
@@ -265,47 +264,24 @@ namespace Questor
                     //}
                     if (!Logging.UseInnerspace)
                     {
-                        try
-                        {
-                            Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
-                            Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
-                            TryLoadingDirectVE++;
-                            Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
-                        }
-                        catch (Exception exception)
-                        {
-                            Logging.Log("Startup", "exception [" + exception + "]", Logging.Orange);
-                            return;
-                        }
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
+                        Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
                     }
                     else
                     {
-                        try
-                        {
-                            Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
-                            Cache.Instance.DirectEve = new DirectEve();
-                            TryLoadingDirectVE++;
-                            Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
-                        }
-                        catch (Exception exception)
-                        {
-                            Logging.Log("Startup", "exception [" + exception + "]", Logging.Orange);
-                            return;
-                        }
+                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
+                        Cache.Instance.DirectEve = new DirectEve();
+                        Logging.Log("Startup", "DirectEVE should now be active: see above for any messages from DirectEVE", Logging.Debug);
                     }
                 }
             }
-            catch (Exception exception)
-            {
-                Logging.Log("Startup", "exception [" + exception + "]", Logging.Orange);
-                return;
-            }
-
-            if (Cache.Instance.DirectEve == null)
+            catch (Exception ex)
             {
                 try
                 {
                     Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
+                    Logging.Log("Startup", "DirectEVE: Exception [" + ex + "]", Logging.White);
                     Cache.Instance.CloseQuestorCMDLogoff = false;
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.CloseQuestorEndProcess = true;
@@ -316,9 +292,10 @@ namespace Questor
                 }
                 catch (Exception exception)
                 {
-                    Logging.BasicLog("Startup", "Exception while logging exception, oh joy [" + exception + "]");
+                    Logging.Log("Startup", "Exception while logging exception, oh joy [" + exception + "]", Logging.Orange);
                     return;
                 }
+
             }
 
             #endregion Load DirectEVE

@@ -48,7 +48,7 @@ namespace Questor.Behaviors
         private bool _firstStart = true;
         public bool PanicStateReset; //false;
 
-        public static bool ValidSettings;
+        private bool ValidSettings { get; set; }
         
         private DateTime _nextBookmarkRefreshCheck = DateTime.MinValue;
         private DateTime _nextBookmarksrefresh = DateTime.MinValue;

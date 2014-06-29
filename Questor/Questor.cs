@@ -165,12 +165,13 @@ namespace Questor
                     //Cache.Instance.IterateInvTypes("RunOnceAfterStartup");          // populates the prices of items (cant we use prices from the game now?!)
                     Cache.Instance.IterateUnloadLootTheseItemsAreLootItems("RunOnceAfterStartup");       // populates the list of items we never want in our local cargo (used mainly in unloadloot)
 
+                    MissionSettings.UpdateMissionName();
+                    Logging.MaintainConsoleLogs();
+
                     if (Logging.UseInnerspace)
                     {
                         InnerspaceCommands.CreateLavishCommands();
-
-                        MissionSettings.UpdateMissionName();
-
+                        
                         //enable windowtaskbar = on, so that minimized windows do not make us die in a fire.
                         Logging.Log("RunOnceAfterStartup", "Running Innerspace command: timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName, Logging.White);
                         LavishScript.ExecuteCommand("timedcommand 100 windowtaskbar on " + Settings.Instance.CharacterName);
@@ -204,8 +205,6 @@ namespace Questor
                             LavishScript.ExecuteCommand("runscript " + Settings.Instance.LoginQuestorLavishScriptContents.ToString(CultureInfo.InvariantCulture));
                             Logging.Log("RunOnceAfterStartup", "Done: executing LoginQuestorLavishScriptCmd", Logging.White);
                         }
-
-                        Logging.MaintainConsoleLogs();
                     }
                 }
                 else
@@ -451,22 +450,21 @@ namespace Questor
 
         public bool OnframeProcessEveryPulse()
         {
+            // New frame, invalidate old cache
+            Cache.Instance.InvalidateCache();
+
+            Time.Instance.LastFrame = DateTime.UtcNow;
+
             if (Cache.Instance.DirectEve.Login.AtLogin)
             {
                 //if we somehow manage to get the questor GUI running on the login screen, do nothing.
                 return false;
             }
 
-            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(Cache.Instance.RandomNumber(1,4)))
+            if (DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(Cache.Instance.RandomNumber(1, 4)))
             {
-                //if we somehow manage to get the questor GUI running on the login screen, do nothing.
                 return false;
             }
-            
-            // New frame, invalidate old cache
-            Cache.Instance.InvalidateCache();
-
-            Time.Instance.LastFrame = DateTime.UtcNow;
 
             // Only pulse state changes every 1.5s
             if (Cache.Instance.InSpace && DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulseInSpace_milliseconds) //default: 1000ms

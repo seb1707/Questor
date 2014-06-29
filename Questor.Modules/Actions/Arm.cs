@@ -8,16 +8,12 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.IO;
-
 namespace Questor.Modules.Actions
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using DirectEve;
-    using System.Threading;
-    using System.Xml.Linq;
     using System.Globalization;
     using global::Questor.Modules.BackgroundTasks;
     using global::Questor.Modules.Caching;
@@ -28,49 +24,50 @@ namespace Questor.Modules.Actions
     
     public static class Arm
     {
-        //public static int ArmInstances = 0;
-
-        //
-        // this needs work, nextArmAction and _lastArmAction are not consistent... we dont want to enforce a constant delay however... needs thought
-        //
         static Arm()
         {
             AmmoToLoad = new List<Ammo>();
             CrystalsToLoad = new List<MiningCrystals>();
-            //Interlocked.Increment(ref ArmInstances);
         }
 
         private static List<MiningCrystals> CrystalsToLoad;
-        private static bool _bringItemMoved;
-        private static bool _bringoptionalItemMoved;
         private static bool ItemsAreBeingMoved;
-        private static bool CheckCargoForBringItem;
-        //private static bool CheckCargoForOptionalBringItem;
-        //private bool CheckCargoForAmmo;
-
-        //private static DateTime _lastPulse;
         private static DateTime _lastArmAction;
 
-        private static int bringItemQuantity;
-        //private static int bringOptionalItemQuantity;
-        // we don't want this here, can we move it to cache?
+        private static int _itemsLeftToMoveQuantity;
         public static long AgentId { get; set; }
 
         public static List<Ammo> AmmoToLoad { get; private set; }
 
         private static bool DefaultFittingChecked; //false; //flag to check for the correct default fitting before using the fitting manager
         private static bool DefaultFittingFound; //Did we find the default fitting?
-        private static bool TryMissionShip = true;  // Used in the event we can't find the ship specified in the missionfittings
         private static bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
         private static bool CustomFittingFound;
-        private static bool WaitForFittingToLoad = true;
-        private static bool capsMoved = false;
+        private static bool switchingShips;
         
-        //private bool ammoMoved = false;
-        private static int retryCount = 0;
         private static int ItemHangarRetries = 0;
+        private static int WeHaveThisManyOfThoseItemsInCargo;
+        private static int WeHaveThisManyOfThoseItemsInHangar;
+        private static DirectInvType _droneInvTypeItem;
+        private static DirectInvType DroneInvTypeItem
+        {
+            get
+            {
+                if (_droneInvTypeItem == null)
+                {
+                    Cache.Instance.DirectEve.InvTypes.TryGetValue(Drones.DroneTypeID, out _droneInvTypeItem);
+                }
+
+                return _droneInvTypeItem;
+            }
+        }
+
+        
         public static bool ArmLoadCapBoosters { get; set; }
         public static bool NeedRepair { get; set; }
+        private static IEnumerable<DirectItem> cargoItems;
+        private static IEnumerable<DirectItem> hangarItems;
+        private static DirectItem hangarItem;
 
         public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
         {
@@ -78,74 +75,315 @@ namespace Questor.Modules.Actions
             AmmoToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
         }
 
-        public static void LoadSpecificMiningCrystals(IEnumerable<OreType> miningCrystals)
+        private static void LoadSpecificMiningCrystals(IEnumerable<OreType> miningCrystals)
         {
             CrystalsToLoad.Clear();
             CrystalsToLoad.AddRange(Combat.MiningCrystals.Where(a => miningCrystals.Contains(a.OreType)).Select(a => a.Clone()));
         }
 
-        private static bool FindDefaultFitting(string module)
+        private static bool LookForItem(string itemToFind, DirectContainer HangarToCheckForItemsdWeAlreadyMoved)
         {
-            DefaultFittingFound = false;
-            if (!DefaultFittingChecked)
+            //
+            // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+            //
+            if (HangarToCheckForItemsdWeAlreadyMoved != null && HangarToCheckForItemsdWeAlreadyMoved.Items.Any())
             {
-                if (Cache.Instance.FittingManagerWindow == null)
+                cargoItems = HangarToCheckForItemsdWeAlreadyMoved.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                WeHaveThisManyOfThoseItemsInCargo = cargoItems.Sum(i => i.Stacksize);
+                //do not return here
+            }
+            
+            //
+            // check itemhangar for the item
+            //
+            if (Cache.Instance.ItemHangar == null) return false;
+            if (Cache.Instance.ItemHangar.Items.Any())
+            {
+                if (Cache.Instance.ItemHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
                 {
-                    Logging.Log("FindDefaultFitting", "FittingManagerWindow is null", Logging.Debug);
-                    return false;
-                }
-
-                if (MissionSettings.DefaultFitting == null)
-                {
-                    MissionSettings.DefaultFittingName = MissionSettings.DefaultFitting.FittingName;
-                    MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
-                }
-                if (Logging.DebugFittingMgr) Logging.Log(module, "Character Settings XML says Default Fitting is [" + MissionSettings.DefaultFitting + "]", Logging.White);
-
-                if (Cache.Instance.FittingManagerWindow.Fittings.Any())
-                {
-                    if (Logging.DebugFittingMgr) Logging.Log(module, "if (Cache.Instance.FittingManagerWindow.Fittings.Any())", Logging.Teal);
-                    int i = 1;
-                    foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
-                    {
-                        //ok found it
-                        if (Logging.DebugFittingMgr)
-                        {
-                            Logging.Log(module, "[" + i + "] Found a Fitting Named [" + fitting.Name + "]", Logging.Teal);
-                        }
-
-                        if (fitting.Name.ToLower().Equals(MissionSettings.DefaultFittingName.ToLower()))
-                        {
-                            DefaultFittingChecked = true;
-                            DefaultFittingFound = true;
-                            Logging.Log(module, "[" + i + "] Found Default Fitting [" + fitting.Name + "]", Logging.White);
-                            return true;
-                        }
-                        i++;
-                    }
-                }
-                else
-                {
-                    Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Manager at all!  Disabling fitting manager.", Logging.Orange);
-                    DefaultFittingChecked = true;
-                    DefaultFittingFound = false;
+                    hangarItems = Cache.Instance.ItemHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                    hangarItem = hangarItems.FirstOrDefault();
+                    WeHaveThisManyOfThoseItemsInHangar = hangarItems.Sum(i => i.Stacksize);
                     return true;
-                }
+                }    
+            }
+            
 
-                if (!DefaultFittingFound)
+            if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
+            {
+                //
+                // check ammohangar for the item
+                //
+                if (Cache.Instance.AmmoHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
                 {
-                    Logging.Log("Arm.LoadFitting", "Error! Could not find Default Fitting [" + MissionSettings.DefaultFittingName.ToLower() + "].  Disabling fitting manager.", Logging.Orange);
-                    DefaultFittingChecked = true;
-                    DefaultFittingFound = false;
-                    Settings.Instance.UseFittingManager = false;
-                    Logging.Log("Arm.LoadFitting", "Closing Fitting Manager", Logging.White);
-                    Cache.Instance.FittingManagerWindow.Close();
-
-                    _States.CurrentArmState = ArmState.MoveItems;
+                    hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
                     return true;
                 }
             }
-            return false;
+
+            if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+            {
+                //
+                // check loothangar for the item
+                //
+                if (Cache.Instance.LootHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
+                {
+                    hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                    return true;
+                }
+            }
+            
+            //
+            // no item found
+            //
+            return true;
+        }
+
+        private static bool MoveItemsToCargo(string MoveItemTypeName,int totalMoveItemQuantity, ArmState StateToChangeToWhenDoneMoving, ArmState StateWeWereCalledFrom, bool _optional = false)
+        {
+            if (string.IsNullOrEmpty(MoveItemTypeName))
+            {
+                ChangeArmState(StateToChangeToWhenDoneMoving);
+                return false;
+            }
+
+            if (ItemsAreBeingMoved)
+            {
+                if (!WaitForLockedItems(StateWeWereCalledFrom)) return false;
+                return true;
+            }
+
+            if (!LookForItem(MoveItemTypeName, Cache.Instance.CurrentShipsCargo)) return false;
+
+            if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInHangar < totalMoveItemQuantity)
+            {
+                if (_optional)
+                {
+                    ChangeArmState(StateToChangeToWhenDoneMoving);
+                    return true;
+                }
+
+                Logging.Log("Arm.MoveItemsToCargo", "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
+                ItemsAreBeingMoved = false;
+                ChangeArmState(ArmState.NotEnoughAmmo);
+                Cache.Instance.Paused = true;
+                return true;
+            }
+
+            //
+            // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+            //
+            if (cargoItems.Any())
+            {
+                _itemsLeftToMoveQuantity = totalMoveItemQuantity;
+                foreach (DirectItem moveItemInCargo in cargoItems)
+                {
+                    _itemsLeftToMoveQuantity -= moveItemInCargo.Stacksize;
+                    if (_itemsLeftToMoveQuantity <= 0)
+                    {
+                        ChangeArmState(StateToChangeToWhenDoneMoving);
+                        return true;
+                    }
+
+                    continue;
+                }
+            }
+
+            if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+            {
+                if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                {
+                    return false;
+                }
+
+                int moveItemQuantity = Math.Min(hangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                moveItemQuantity = Math.Max(moveItemQuantity, 1);
+                _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveItemQuantity;
+                Logging.Log(StateWeWereCalledFrom.ToString(), "Moving Item [" + hangarItem.TypeName + "] to CargoHold: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveItemQuantity);
+                ItemsAreBeingMoved = true;
+                _lastArmAction = DateTime.UtcNow;
+                return false;
+            }
+
+            ItemsAreBeingMoved = false;
+            return true;
+        }
+
+        private static bool MoveDronesToDroneBay(string MoveItemTypeName, ArmState StateToChangeToWhenDoneMoving, ArmState StateWeWereCalledFrom, bool _optional = false)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(MoveItemTypeName))
+                {
+                    ChangeArmState(StateToChangeToWhenDoneMoving);
+                    return false;
+                }
+
+                if (ItemsAreBeingMoved)
+                {
+                    if (!WaitForLockedItems(StateWeWereCalledFrom)) return false;
+                    return true;
+                }
+
+                if (Cache.Instance.ItemHangar == null) return false;
+                if (!Drones.OpenDroneBay("Arm.MoveDrones")) return false;
+
+                if (!LookForItem(MoveItemTypeName, Drones.DroneBay)) return false;
+
+                if (Cache.Instance.DirectEve.GetShipsDroneBay().Capacity == Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity)
+                {
+                    Logging.Log("Arm.MoveDrones", "MoveDrones", Logging.White);
+                    ChangeArmState(StateToChangeToWhenDoneMoving);
+                    return false;
+                }
+
+                if (DroneInvTypeItem != null)
+                {
+                    int neededDrones = (int)Math.Floor((Drones.DroneBay.Capacity - Drones.DroneBay.UsedCapacity) / DroneInvTypeItem.Volume);
+                    Logging.Log("Arm.MoveDrones", "neededDrones: " + neededDrones, Logging.White);
+
+                    if ((int)neededDrones == 0)
+                    {
+                        Logging.Log("Arm.MoveDrones", "MoveItems", Logging.White);
+                        ChangeArmState(ArmState.MoveBringItems);
+                        return false;
+                    }
+
+                    if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInHangar < neededDrones)
+                    {
+                        if (_optional)
+                        {
+                            ChangeArmState(StateToChangeToWhenDoneMoving);
+                            return true;
+                        }
+
+                        Logging.Log("Arm.MoveDronesToDroneBay", "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold / dronebay)", Logging.Red);
+                        ItemsAreBeingMoved = false;
+                        ChangeArmState(ArmState.NotEnoughDrones);
+                        Cache.Instance.Paused = true;
+                        return true;
+                    }
+
+                    //
+                    // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
+                    //
+                    if (cargoItems.Any())
+                    {
+                        _itemsLeftToMoveQuantity = neededDrones;
+                        foreach (DirectItem moveItemInCargo in cargoItems)
+                        {
+                            _itemsLeftToMoveQuantity -= moveItemInCargo.Stacksize;
+                            if (_itemsLeftToMoveQuantity <= 0)
+                            {
+                                ChangeArmState(StateToChangeToWhenDoneMoving);
+                                return true;
+                            }
+
+                            continue;
+                        }
+                    }
+
+                    if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                    {
+                        if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                        {
+                            return false;
+                        }
+
+                        int moveDroneQuantity = Math.Min(hangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                        moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
+                        _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
+                        Logging.Log(StateWeWereCalledFrom.ToString(), "Moving Item [" + hangarItem.TypeName + "] to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Drones.DroneBay.Add(hangarItem, moveDroneQuantity);
+                        ItemsAreBeingMoved = true;
+                        _lastArmAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                Logging.Log("Arm.MoveDrones", "droneTypeId is highly likely to be incorrect in your settings xml", Logging.Debug);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+                return false;
+            }
+        }
+
+        private static bool FindDefaultFitting(string module)
+        {
+            try
+            {
+                DefaultFittingFound = false;
+                if (!DefaultFittingChecked)
+                {
+                    if (Cache.Instance.FittingManagerWindow == null)
+                    {
+                        Logging.Log("FindDefaultFitting", "FittingManagerWindow is null", Logging.Debug);
+                        return false;
+                    }
+
+                    if (MissionSettings.DefaultFitting == null)
+                    {
+                        MissionSettings.DefaultFittingName = MissionSettings.DefaultFitting.FittingName;
+                        MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
+                    }
+                    if (Logging.DebugFittingMgr) Logging.Log(module, "Character Settings XML says Default Fitting is [" + MissionSettings.DefaultFitting + "]", Logging.White);
+
+                    if (Cache.Instance.FittingManagerWindow.Fittings.Any())
+                    {
+                        if (Logging.DebugFittingMgr) Logging.Log(module, "if (Cache.Instance.FittingManagerWindow.Fittings.Any())", Logging.Teal);
+                        int i = 1;
+                        foreach (DirectFitting fitting in Cache.Instance.FittingManagerWindow.Fittings)
+                        {
+                            //ok found it
+                            if (Logging.DebugFittingMgr)
+                            {
+                                Logging.Log(module, "[" + i + "] Found a Fitting Named [" + fitting.Name + "]", Logging.Teal);
+                            }
+
+                            if (fitting.Name.ToLower().Equals(MissionSettings.DefaultFittingName.ToLower()))
+                            {
+                                DefaultFittingChecked = true;
+                                DefaultFittingFound = true;
+                                Logging.Log(module, "[" + i + "] Found Default Fitting [" + fitting.Name + "]", Logging.White);
+                                return true;
+                            }
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        Logging.Log("Arm.LoadFitting", "No Fittings found in the Fitting Manager at all!  Disabling fitting manager.", Logging.Orange);
+                        DefaultFittingChecked = true;
+                        DefaultFittingFound = false;
+                        return true;
+                    }
+
+                    if (!DefaultFittingFound)
+                    {
+                        Logging.Log("Arm.LoadFitting", "Error! Could not find Default Fitting [" + MissionSettings.DefaultFittingName.ToLower() + "].  Disabling fitting manager.", Logging.Orange);
+                        DefaultFittingChecked = true;
+                        DefaultFittingFound = false;
+                        Settings.Instance.UseFittingManager = false;
+                        Logging.Log("Arm.LoadFitting", "Closing Fitting Manager", Logging.White);
+                        Cache.Instance.FittingManagerWindow.Close();
+
+                        ChangeArmState(ArmState.MoveBringItems);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+                return false;
+            }
         }
 
         public static bool ChangeArmState(ArmState _ArmStateToSet, bool WaitAMomentbeforeNextAction = false, string LogMessage = null)
@@ -159,226 +397,186 @@ namespace Questor.Modules.Actions
                 {
                     case ArmState.OpenShipHangar:
                         _States.CurrentCombatState = CombatState.Idle;
-                        break;
-
+                        return true;
+                        
                     case ArmState.NotEnoughAmmo:
                         if (LogMessage != null) Logging.Log(_States.CurrentArmState.ToString(), LogMessage, Logging.Red);
                         Cache.Instance.Paused = true;
                         _States.CurrentCombatState = CombatState.Idle;
-                        break;
-
+                        return true;
                 }
             }
             catch (Exception ex)
             {
-                Logging.Log(Logging.CurrentBehaviorsMainState(), "Exception [" + ex + "]", Logging.Red);
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+                return false;
             }
             finally
             {
                 if (WaitAMomentbeforeNextAction) _lastArmAction = DateTime.UtcNow;
+                Arm.ClearDataBetweenStates();
                 _States.CurrentArmState = _ArmStateToSet;
             }
             
             return true;
         }
 
-        public static bool BeginArmState()
+        private static bool BeginArmState()
         {
-            //if (!Cleanup.CloseInventoryWindows()) return false;
-            MissionSettings.ArmLoadedCache = false;
-            TryMissionShip = true;           // Used in the event we can't find the ship specified in the missionfittings
+            switchingShips = false;
             UseMissionShip = false;          // Were we successful in activating the mission specific ship?
             DefaultFittingChecked = false;   //flag to check for the correct default fitting before using the fitting manager
             DefaultFittingFound = false;      //Did we find the default fitting?
             CustomFittingFound = false;
-            WaitForFittingToLoad = false;
-            _bringItemMoved = false;
-            bringItemQuantity = (int)MissionSettings.BringMissionItemQuantity;
-            CheckCargoForBringItem = true;
-            //bringOptionalItemQuantity = (int)Cache.Instance.BringOptionalMissionItemQuantity;
+            ItemsAreBeingMoved = false;
             if (Logging.DebugArm) Logging.Log("Arm.Begin", "Cache.Instance.BringOptionalMissionItemQuantity is [" + MissionSettings.BringOptionalMissionItemQuantity + "]", Logging.Debug);
-            _bringoptionalItemMoved = false;
-            //CheckCargoForOptionalBringItem = true;
-            capsMoved = false;
-            //ammoMoved = false;
-            retryCount = 0;
             ItemHangarRetries = 0;
-
+            MissionSettings.RefreshMissionItems(AgentId);
             if (MissionSettings.MissionAmmo.Any())
             {
                 AmmoToLoad = new List<Ammo>(MissionSettings.MissionAmmo);
             }
 
-            if (!ChangeArmState(ArmState.OpenShipHangar)) return false;
-            return true;
-        }
-
-        public static bool CleanupArmState()
-        {
-            if (Drones.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
+            if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
             {
-                // Close the drone bay, its not required in space.
-                if (!Drones.CloseDroneBay("Arm.Cleanup")) return false;
-            }
-
-            if (Settings.Instance.UseFittingManager)
-            {
-                if (!Cache.Instance.CloseFittingManager("Arm")) return false;
-            }
-
-            //if (!Cleanup.CloseInventoryWindows()) return false;
-            if (!ChangeArmState(ArmState.StackAmmoHangar)) return false;
-            return false;
-        }
-
-        public static bool StackAmmoHangarArmState()
-        {
-            if (!Cache.Instance.StackAmmoHangar("Arm")) return false;
-            if (!ChangeArmState(ArmState.Done)) return false;
-            return true;
-        }
-
-        public static bool SwitchShipsArmState()
-        {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
-            if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
-
-            if (string.IsNullOrEmpty(Settings.Instance.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
-            {
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, false , "CombatShipName and SalvageShipName both have to be populated! Fix your characters config.")) return false;
-                return false;
-            }
-
-            if (Settings.Instance.CombatShipName == Settings.Instance.SalvageShipName)
-            {
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.")) return false;
-                return false;
-            }
-
-            if (_States.CurrentArmState == ArmState.OpenShipHangar && Settings.Instance.CharacterMode == "mining")
-            {
-                if (!ChangeArmState(ArmState.ActivateMiningShip, false, "Changing to ArmState.ActivateMiningShip")) return false;
+                ChangeArmState(ArmState.ActivateSalvageShip);
                 return true;
             }
 
-            switch (_States.CurrentArmState)
-            {
-                case ArmState.OpenShipHangar:
-                    if (!ChangeArmState(ArmState.ActivateCombatShip, false, "Changing to ArmState.ActivateCombatShip")) return false;
-                    return true;
-
-                case ArmState.SwitchToTransportShip:
-                    if (!ChangeArmState(ArmState.ActivateTransportShip, false, "Changing to ArmState.ActivateTransportShip")) return false;
-                    return true;
-
-                case ArmState.SwitchToSalvageShip:
-                    if (!ChangeArmState(ArmState.ActivateSalvageShip, false, "Changing to ArmState.ActivateTransportShip")) return false;
-                    return true;
-            }
-            
+            ChangeArmState(ArmState.ActivateCombatShip);
             return true;
         }
 
-        public static bool ActivateThisShip(string ShipNameToActivate, string RoleOfThisShipName)
+        private static bool StackAmmoHangarArmState()
         {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
+            if (!Cache.Instance.StackAmmoHangar("Arm")) return false;
+            ChangeArmState(ArmState.Done);
+            return true;
+        }
 
-            if (string.IsNullOrEmpty(ShipNameToActivate))
+        private static bool WaitForLockedItems(ArmState _armStateToSwitchTo)
+        {
+            if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
             {
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "Could not find " + RoleOfThisShipName + " in your characters XML settings!")) return false;
+                if (Math.Abs(DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds) > 15)
+                {
+                    Logging.Log(_States.CurrentArmState.ToString(), "Moving Ammo timed out, clearing item locks", Logging.Orange);
+                    Cache.Instance.DirectEve.UnlockItems();
+                    _lastArmAction = DateTime.UtcNow.AddSeconds(-1);
+                    return false;
+                }
+
+                if (Logging.DebugUnloadLoot) Logging.Log(_States.CurrentArmState.ToString(), "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
+                return false;
+            }
+
+            _lastArmAction = DateTime.UtcNow.AddSeconds(-1);
+            Logging.Log(_States.CurrentArmState.ToString(), "Done", Logging.White);
+            ItemsAreBeingMoved = false;
+            ChangeArmState(_armStateToSwitchTo);
+            return true;
+        }
+        private static bool ActivateThisShip(string ShipNameToActivate)
+        {
+            if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(Cache.Instance.RandomNumber(2000,3000))) return false;
+
+            //
+            // have we attempted to switch ships already (and are waiting for it to take effect)
+            //
+            if (switchingShips)
+            {
+                if (Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == ShipNameToActivate.ToLower())
+                {
+                    switchingShips = false;
+                    return true;
+                }
+
+                _lastArmAction = DateTime.UtcNow;
+                return false;
+            }
+
+            //
+            // is the ShipName is already the current ship? (we may have started in the right ship!)
+            //
+            if (Cache.Instance.DirectEve.ActiveShip != null && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == ShipNameToActivate.ToLower())
+            {
+                switchingShips = false;
+                return true;
+            }
+
+            //
+            // Check and warn the use if their config is hosed.
+            //
+            if (string.IsNullOrEmpty(Combat.CombatShipName) || string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "CombatShipName and SalvageShipName both have to be populated! Fix your characters config.")) return false;
+                return false;
+            }
+
+            if (Combat.CombatShipName == Settings.Instance.SalvageShipName)
+            {
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "CombatShipName and SalvageShipName cannot be the same ship/shipname ffs! Fix your characters config.")) return false;
                 return false;
             }
 
             //
             // we have the mining shipname configured but it is not the current ship
             // 
-            if ((!string.IsNullOrEmpty(ShipNameToActivate) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != ShipNameToActivate.ToLower()))
+            if (!string.IsNullOrEmpty(ShipNameToActivate))
             {
                 if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
 
-                if (Cache.Instance.ShipHangar.Items.Any(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                List<DirectItem> shipsInShipHangar = Cache.Instance.ShipHangar.Items;
+                if (shipsInShipHangar.Any(s => s.GivenName != null && s.GivenName.ToLower() == ShipNameToActivate.ToLower()))
                 {
-                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
+                    if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
+                    DirectItem ship = shipsInShipHangar.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == ShipNameToActivate.ToLower());
+                    if (ship != null)
                     {
-                        if (!Cache.Instance.CloseCargoHold(_States.CurrentArmState.ToString())) return false;
-                        Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
+                        Logging.Log(_States.CurrentArmState.ToString(), "Making [" + ship.GivenName + "] active", Logging.White);
                         ship.ActivateShip();
-                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                        return true;
+                        switchingShips = true;
+                        _lastArmAction = DateTime.UtcNow;
+                        return false;
                     }
 
-                    if (!ChangeArmState(ArmState.ActivateMiningShip, false, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
+                    return false;
+                }
+                
+                if (Cache.Instance.ShipHangar.Items.Any())
+                {
+                    Logging.Log(_States.CurrentArmState.ToString(), "Found the following ships:", Logging.White);
+                    foreach (DirectItem shipInShipHangar in Cache.Instance.ShipHangar.Items)
+                    {
+                        Logging.Log(_States.CurrentArmState.ToString(), "GivenName [" + shipInShipHangar.GivenName.ToLower() + "] TypeName[" + shipInShipHangar.TypeName + "]", Logging.White);
+                    }
+
+                    if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "Missing Ship with GivenName [" + ShipNameToActivate.ToLower() + "] in ShipHangar")) return false;
+                    return false;
                 }
 
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
-                return true;
+                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "No ships found in ShipHangar!")) return false;
+                return false;
             }
-
-            //
-            // the configured MiningShipName is already the current ship
-            //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
-            {
-                if (!ChangeArmState(ArmState.MoveDrones, false, "Done")) return false;
-                return true;
-            }
-
-            return true;
+            
+            return false;
         }
 
-        public static bool ActivateMiningShipArmState()
+        private static bool ActivateMiningShipArmState()
         {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
             if (string.IsNullOrEmpty(Settings.Instance.MiningShipName))
             {
                 if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "Could not find miningShipName in settings!")) return false;
                 return false;
             }
 
-            //
-            // we have the mining shipname configured but it is not the current ship
-            // 
-            if ((!string.IsNullOrEmpty(Settings.Instance.MiningShipName) && Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() != Settings.Instance.MiningShipName.ToLower()))
-            {
-                if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
-
-                if (Cache.Instance.ShipHangar.Items.Any(ship =>ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
-                {
-                    foreach (DirectItem ship in Cache.Instance.ShipHangar.Items.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower()))
-                    {
-
-                        if (!Cache.Instance.CloseCargoHold("Arm.ActivateMiningShip")) return false; 
-                        Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
-                        ship.ActivateShip();
-                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                        return true;
-                    }
-
-                    if (!ChangeArmState(ArmState.ActivateMiningShip, false, "Unable to switch to MiningShip named [" + Settings.Instance.MiningShipName + "] !?! - retrying")) return false;
-                }
-                
-                if (!ChangeArmState(ArmState.NotEnoughAmmo, false, "Missing MiningShip named [" + Settings.Instance.MiningShipName + "] in ShipHangar")) return false;
-                return true;
-            }
-
-            //
-            // the configured MiningShipName is already the current ship
-            //
-            if (Cache.Instance.DirectEve.ActiveShip.GivenName.ToLower() == Settings.Instance.MiningShipName.ToLower())
-            {
-                if (!ChangeArmState(ArmState.MoveDrones, false, "Done")) return false;
-                return true;
-            }
-
+            if (!ActivateThisShip(Settings.Instance.MiningShipName)) return false;
             return true;
         }
 
-        public static bool ActivateNoobShipArmState()
+        private static bool ActivateNoobShipArmState()
         {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
+            if (DateTime.UtcNow < _lastArmAction.AddSeconds(Time.Instance.SwitchShipsDelay_seconds)) return false;
             
             if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip &&
                 Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
@@ -391,7 +589,7 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.CloseCargoHold("Arm.ActivateNoobShip")) return false;
                     Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
                     ship.ActivateShip();
-                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
+                    _lastArmAction = DateTime.UtcNow;
                     return true;
                 }
 
@@ -409,37 +607,19 @@ namespace Questor.Modules.Actions
             return true;
         }
 
-        private static bool ActivteTransportShipArmState()
+        private static bool ActivateTransportShipArmState()
         {
-            if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
-            //if (!Cache.Instance.CloseCargoHold("Arm.ActivateTransportShip")) return;
-
             if (string.IsNullOrEmpty(Settings.Instance.TransportShipName))
             {
-                _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                ChangeArmState(ArmState.NotEnoughAmmo);
                 Logging.Log("Arm.ActivateTransportShip", "Could not find transportshipName in settings!", Logging.Orange);
                 return false;
             }
 
-            if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
-            {
-                if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
-
-                List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))
-                {
-                    Logging.Log("Arm", "Making [" + ship.GivenName + "] active", Logging.White);
-                    ship.ActivateShip();
-                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                    break;
-                }
-
-                return false;
-            }
-
+            if (!ActivateThisShip(Settings.Instance.TransportShipName)) return false;
+            
             Logging.Log("Arm.ActivateTransportShip", "Done", Logging.White);
-            _States.CurrentArmState = ArmState.Cleanup;
+            ChangeArmState(ArmState.Cleanup);
             return true;
         }
 
@@ -447,43 +627,17 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                string salvageshipName = Settings.Instance.SalvageShipName.ToLower();
-
-                if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
-                //if (!Cache.Instance.CloseCargoHold("Arm.ActivateSalvageShip")) return;
-
-                if (string.IsNullOrEmpty(salvageshipName))
+                if (string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
                 {
-                    _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                    Logging.Log("Arm.ActivateSalvageShip", "Could not find salvageshipName: " + salvageshipName + " in settings!", Logging.Orange);
+                    ChangeArmState(ArmState.NotEnoughAmmo);
+                    Logging.Log("Arm.ActivateSalvageShip", "Could not find salvageshipName: " + Settings.Instance.SalvageShipName + " in settings!", Logging.Orange);
                     return false;
                 }
 
-                if ((!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != salvageshipName.ToLower()))
-                {
-                    if (!Cache.Instance.OpenShipsHangar("Arm")) return false;
-
-                    List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
-                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == salvageshipName.ToLower()))
-                    {
-                        Logging.Log("Arm.ActivateSalvageShip", "Making [" + ship.GivenName + "] active", Logging.White);
-                        ship.ActivateShip();
-                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                        break;
-                    }
-
-                    return false;
-                }
-
-                if (!string.IsNullOrEmpty(salvageshipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != salvageshipName)
-                {
-                    _States.CurrentArmState = ArmState.OpenShipHangar;
-                    return false;
-                }
+                if (!ActivateThisShip(Settings.Instance.SalvageShipName)) return false;
 
                 Logging.Log("Arm.ActivateSalvageShip", "Done", Logging.White);
-                _States.CurrentArmState = ArmState.Cleanup;
+                ChangeArmState(ArmState.Cleanup);
                 return true;
             }
             catch (Exception ex)
@@ -497,98 +651,16 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
-                string shipNameToUseNow = Settings.Instance.CombatShipName;
-                if (string.IsNullOrEmpty(shipNameToUseNow))
+                if (string.IsNullOrEmpty(Combat.CombatShipName))
                 {
-                    _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                    Logging.Log("Arm.ActivateCombatShip", "Could not find CombatShipName: " + shipNameToUseNow + " in settings!", Logging.Orange);
+                    ChangeArmState(ArmState.NotEnoughAmmo);
+                    Logging.Log("Arm.ActivateSalvageShip", "Could not find CombatShipName: " + Combat.CombatShipName + " in settings!", Logging.Orange);
                     return false;
                 }
 
-                if (!MissionSettings.ArmLoadedCache)
-                {
-                    _bringItemMoved = false;
-                    if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                    {
-                        MissionSettings.RefreshMissionItems(AgentId);
-                    }
+                if (!ActivateThisShip(Combat.CombatShipName)) return false;
 
-                    MissionSettings.ArmLoadedCache = true;
-                }
-
-                //
-                // If we have a mission-specific ship defined, switch to it
-                //
-                if (!string.IsNullOrEmpty(MissionSettings.MissionShip) && TryMissionShip)
-                {
-                    shipNameToUseNow = MissionSettings.MissionShip;
-                    TryMissionShip = true;
-                }
-                else
-                {
-                    TryMissionShip = false;
-                }
-
-                //
-                // if we have a ship to use defined and we are not currently in that defined ship. change to that ship
-                //
-                if (Logging.DebugArm) Logging.Log("Arm.ActivateCombatShip", "shipNameToUseNow = [" + shipNameToUseNow + "]", Logging.Teal);
-                if (Logging.DebugArm) Logging.Log("Arm.ActivateCombatShip", "Cache.Instance.ActiveShip.GivenName   = [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.Teal);
-
-                if ((!string.IsNullOrEmpty(shipNameToUseNow) && Cache.Instance.ActiveShip.GivenName != shipNameToUseNow))
-                {
-                    if (!Cache.Instance.OpenShipsHangar("Arm.ActivateCombatShip")) return false;
-
-                    List<DirectItem> shipsInShipHangar = Cache.Instance.ShipHangar.Items;
-                    DirectItem shipToUseNow = shipsInShipHangar.FirstOrDefault(s => s.GivenName != null && s.GivenName.ToLower() == shipNameToUseNow.ToLower());
-                    if (shipToUseNow != null)
-                    {
-                        Logging.Log("Arm.ActivateCombatShip", "Making [" + shipToUseNow.GivenName + "] active", Logging.White);
-                        shipToUseNow.ActivateShip();
-                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.SwitchShipsDelay_seconds);
-                        if (TryMissionShip)
-                        {
-                            UseMissionShip = true;
-                        }
-
-                        if (TryMissionShip && !UseMissionShip)
-                        {
-                            Logging.Log("Arm.ActivateCombatShip", "Unable to find the ship specified in the missionfitting.  Using default combat ship and default fitting.", Logging.Orange);
-                            TryMissionShip = false;
-                            MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
-                        }
-                    }
-                    else
-                    {
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                        Logging.Log("Arm.ActivateCombatShip", "Found the following ships:", Logging.White);
-                        foreach (DirectItem shipInShipHangar in shipsInShipHangar)
-                        {
-                            Logging.Log("Arm.ActivateCombatShip", "[" + shipInShipHangar.GivenName + "]", Logging.White);
-                        }
-
-                        Logging.Log("Arm.ActivateCombatShip", "Could not find [" + shipNameToUseNow + "] ship!", Logging.Red);
-                        return false;
-                    }
-                }
-
-                if (TryMissionShip)
-                {
-                    UseMissionShip = true;
-                }
-
-                if (AmmoToLoad.Count == 0 && string.IsNullOrEmpty(MissionSettings.BringMissionItem))
-                {
-                    Logging.Log("Arm", "Done", Logging.White);
-                    _States.CurrentArmState = ArmState.Cleanup;
-                }
-                else
-                {
-                    _States.CurrentArmState = ArmState.RepairShop;
-                }
-
+                ChangeArmState(ArmState.RepairShop);
                 return true;
             }
             catch (Exception ex)
@@ -602,14 +674,12 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
                 if (Cache.Instance.DirectEve.HasSupportInstances() && Panic.UseStationRepair && Arm.NeedRepair)
                 {
                     if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return false; //attempt to use repair facilities if avail in station
                 }
-                
-                _States.CurrentArmState = ArmState.LoadSavedFitting;
+
+                ChangeArmState(ArmState.LoadSavedFitting);
                 return true;
             }
             catch (Exception ex)
@@ -623,39 +693,13 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                if (DateTime.UtcNow < Time.Instance.NextArmAction) return false;
-
                 if (Settings.Instance.UseFittingManager)
                 {
                     //If we are already loading a fitting...
-                    if (WaitForFittingToLoad)
+                    if (ItemsAreBeingMoved)
                     {
-                        if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadSavedFitting", "if (WaitForFittingToLoad) ", Logging.Teal);
-
-                        if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
-                        {
-                            //we should be done fitting, proceed to the next state
-                            if (!Cache.Instance.CloseFittingManager("Arm")) return false;
-
-                            WaitForFittingToLoad = false;
-                            _States.CurrentArmState = ArmState.MoveDrones;
-                            Logging.Log("Arm.LoadFitting", "Done Loading Saved Fitting", Logging.White);
-                            return true;
-                        }
-
-                        if (DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds > 45)
-                        {
-                            Logging.Log("Arm.LoadFitting", "Loading Fitting timed out, clearing item locks", Logging.Orange);
-                            Cache.Instance.DirectEve.UnlockItems();
-                            _lastArmAction = DateTime.UtcNow;
-                            _States.CurrentArmState = ArmState.Begin;
-                            return false;
-                        }
-
-                        //let's wait 10 seconds if we still have locked items
-                        Logging.Log("Arm.LoadFitting", "Waiting for fitting. locked items = " + Cache.Instance.DirectEve.GetLockedItems().Count, Logging.White);
-                        Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(Time.Instance.FittingWindowLoadFittingDelay_seconds);
-                        return false;
+                        if (!WaitForLockedItems(ArmState.MoveDrones)) return false;
+                        return true;
                     }
 
                     if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior) //|| _States.CurrentQuestorState == QuestorState.BackgroundBehavior)
@@ -674,7 +718,7 @@ namespace Questor.Modules.Actions
                         if ((!DefaultFittingFound) || (UseMissionShip && !MissionSettings.ChangeMissionShipFittings))
                         {
                             if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
-                            _States.CurrentArmState = ArmState.MoveDrones;
+                            ChangeArmState(ArmState.MoveDrones);
                             return false;
                         }
 
@@ -683,7 +727,7 @@ namespace Questor.Modules.Actions
                         if (MissionSettings.FittingToLoad.Equals(MissionSettings.CurrentFit))
                         {
                             Logging.Log("Arm.LoadFitting", "Current fit is now correct", Logging.White);
-                            _States.CurrentArmState = ArmState.MoveDrones;
+                            ChangeArmState(ArmState.MoveDrones);
                             return true;
                         }
 
@@ -703,7 +747,7 @@ namespace Questor.Modules.Actions
                                 //switch to the requested fitting for the current mission
                                 fitting.Fit();
                                 _lastArmAction = DateTime.UtcNow;
-                                WaitForFittingToLoad = true;
+                                ItemsAreBeingMoved = true;
                                 MissionSettings.CurrentFit = fitting.Name;
                                 CustomFittingFound = true;
                                 return false;
@@ -719,20 +763,19 @@ namespace Questor.Modules.Actions
                             if (UseMissionShip)
                             {
                                 Logging.Log("Arm.LoadFitting", "Could not find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
-                                _States.CurrentArmState = ArmState.MoveItems;
+                                ChangeArmState(ArmState.MoveDrones);
                                 return false;
                             }
 
                             Logging.Log("Arm.LoadFitting", "Could not find fitting - switching to default", Logging.Orange);
                             MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
-                            _States.CurrentArmState = ArmState.MoveItems;
+                            ChangeArmState(ArmState.MoveDrones);
                             return false;
                         }
                     }
                 }
 
-                if (!Cache.Instance.CloseFittingManager("Arm.LoadFitting")) return false;
-                _States.CurrentArmState = ArmState.MoveDrones;
+                ChangeArmState(ArmState.MoveDrones);
                 return true;
             }
             catch (Exception ex)
@@ -742,164 +785,31 @@ namespace Questor.Modules.Actions
             }
         }
 
-        private static bool MoveDronesArmState()
+        private static bool MoveDrones()
         {
             try
             {
-                if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(2000)) return false;
-
                 if (!Drones.UseDrones ||
                     (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
                      Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
                      Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                     Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName))
+                     Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName))
                 {
-                    _States.CurrentArmState = ArmState.MoveItems;
+                    ChangeArmState(ArmState.MoveBringItems);
                     return false;
                 }
 
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior
                     //_States.CurrentQuestorState == QuestorState.BackgroundBehavior 
-                    //_States.CurrentQuestorState == QuestorState.Mining 
                    )
                 {
-                    _States.CurrentArmState = ArmState.Cleanup;
+                    Logging.Log("Arm.MoveDrones", "Skipping loading drones for this Questor Behavior", Logging.Orange);
+                    ChangeArmState(ArmState.MoveBringItems);
                     return false;
                 }
 
-                if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
-                {
-                    if (DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds > 45)
-                    {
-                        Logging.Log("Arm.MoveDrones", "Moving Drones timed out, clearing item locks", Logging.Orange);
-                        Cache.Instance.DirectEve.UnlockItems();
-                        _lastArmAction = DateTime.UtcNow;
-                        _States.CurrentArmState = ArmState.Begin;
-                        return false;
-                    }
-
-                    return false;
-                }
-
-                if (Cache.Instance.ItemHangar == null) return false;
-                if (!Drones.OpenDroneBay("Arm.MoveDrones")) return false;
-
-                retryCount++;
-                List<DirectItem> ItemHangarDrones = null;
-                List<DirectItem> AmmoHangarDrones = null;
-                List<DirectItem> LootHangarDrones = null;
-                int ItemHangarDronesQuantity = 0;
-                int AmmoHangarDronesQuantity = 0;
-                int LootHangarDronesQuantity = 0;
-
-                if (Cache.Instance.DirectEve.GetShipsDroneBay().Capacity == Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity)
-                {
-                    retryCount = 0;
-                    Logging.Log("Arm.MoveDrones", "MoveItems", Logging.White);
-                    _States.CurrentArmState = ArmState.MoveItems;
-                    return false;
-                }
-
-                try
-                {
-                    ItemHangarDrones = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
-                    ItemHangarDronesQuantity = ItemHangarDrones.Sum(item => item.Stacksize);
-                    if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + ItemHangarDronesQuantity + "] Drones available in the ItemHangar", Logging.Debug);
-
-                    if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
-                    {
-                        AmmoHangarDrones = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
-                        AmmoHangarDronesQuantity = AmmoHangarDrones.Sum(item => item.Stacksize);
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + AmmoHangarDronesQuantity + "] Drones available in the AmmoHangar [" + Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
-                    }
-
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
-                    {
-                        LootHangarDrones = Cache.Instance.LootHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
-                        LootHangarDronesQuantity = LootHangarDrones.Sum(item => item.Stacksize);
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "[" + LootHangarDronesQuantity + "] Drones available in the LootHangar [" + Settings.Instance.LootHangarTabName.ToString(CultureInfo.InvariantCulture) + "]", Logging.Debug);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "NON FATAL Exception (this happens normally for loothangar and sometimes itemhangar) [" + exception + "]", Logging.Debug);
-                }
-
-                DirectItem drone = null;
-                if (ItemHangarDrones != null && ItemHangarDrones.Any())
-                {
-                    //
-                    // ItemHangar Drones, this prefers stacks, not singletons
-                    //
-                    drone = ItemHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
-                    if (drone != null)
-                    {
-                        Logging.Log("Arm.MoveDrones", "Found [" + ItemHangarDronesQuantity + "] drones in ItemHangar: using a stack of [" + drone.Quantity + "]", Logging.White);
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
-                {
-                    if (drone == null && AmmoHangarDrones != null && AmmoHangarDrones.Any())
-                    {
-                        //
-                        // AmmoHangar Drones, this prefers stacks, not singletons
-                        //
-                        drone = AmmoHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
-                        if (drone != null)
-                        {
-                            Logging.Log("Arm.MoveDrones", "Found [" + AmmoHangarDronesQuantity + "] drones in AmmoHangar [" + Settings.Instance.AmmoHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
-                        }
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
-                {
-                    if (drone == null && LootHangarDrones != null && LootHangarDrones.Any())
-                    {
-                        //
-                        // LootHangar Drones, this prefers stacks, not singletons
-                        //
-                        drone = LootHangarDrones.Where(i => i.Stacksize >= 1).OrderBy(i => i.Quantity).FirstOrDefault();
-                        if (drone != null)
-                        {
-                            Logging.Log("Arm.MoveDrones", "Found [" + LootHangarDronesQuantity + "] drones in LootHangar [" + Settings.Instance.LootHangarTabName + "] using a stack of [" + drone.Quantity + "]", Logging.White);
-                        }
-                    }
-                }
-
-                if (drone == null || drone.Quantity < -1 || retryCount > 30)
-                {
-                    string droneHangarName = string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) ? "ItemHangar" : Settings.Instance.AmmoHangarTabName.ToString(CultureInfo.InvariantCulture);
-                    Logging.Log("Arm.MoveDrones", "Out of drones with typeID [" + Drones.DroneTypeID + "] in [" + droneHangarName + "] retryCount [" + retryCount + "]", Logging.Orange);
-                    if (drone != null && Logging.DebugArm)
-                    {
-                        Logging.Log("Arm.MoveDrones", "drone.IsSingleton [" + drone.IsSingleton + "]", Logging.Orange);
-                        Logging.Log("Arm.MoveDrones", "drone.Quantity [" + drone.Quantity + "]", Logging.Orange);
-                        Logging.Log("Arm.MoveDrones", "drone.TypeId [" + drone.TypeId + "]", Logging.Orange);
-                        Logging.Log("Arm.MoveDrones", "drone.Volume [" + drone.Volume + "]", Logging.Orange);
-                        Logging.Log("Arm.MoveDrones", "drone.ItemId [" + drone.ItemId + "]", Logging.Orange);
-                    }
-                    retryCount = 0;
-                    _States.CurrentArmState = ArmState.NotEnoughDrones;
-                    return false;
-                }
-
-                double neededDrones = Math.Floor((Drones.DroneBay.Capacity - Drones.DroneBay.UsedCapacity) / drone.Volume);
-                Logging.Log("Arm.MoveDrones", "neededDrones: " + neededDrones, Logging.White);
-
-                if ((int)neededDrones == 0)
-                {
-                    retryCount = 0;
-                    Logging.Log("Arm.MoveDrones", "MoveItems", Logging.White);
-                    _States.CurrentArmState = ArmState.MoveItems;
-                    return false;
-                }
-
-                // Move needed drones
-                Logging.Log("Arm.MoveDrones", "Move [ " + (int)Math.Min(neededDrones, drone.Stacksize) + " ] Drones into drone bay", Logging.White);
-                _lastArmAction = DateTime.UtcNow;
-                Drones.DroneBay.Add(drone, (int)Math.Min(neededDrones, drone.Stacksize));
+                if (MoveDronesToDroneBay(DroneInvTypeItem.TypeName, ArmState.MoveBringItems, ArmState.MoveDrones, false)) return false;
+                
                 return false;
             }
             catch (Exception ex)
@@ -909,339 +819,85 @@ namespace Questor.Modules.Actions
             }
         }
 
-        private static bool MoveItemsArmState()
+        private static bool MoveBringItems()
         {
-            if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(2000))
+            if (!MoveItemsToCargo(MissionSettings.BringMissionItem, MissionSettings.BringMissionItemQuantity, ArmState.MoveOptionalBringItems, ArmState.MoveBringItems, false)) return false;
+            return false;
+        }
+
+        private static bool MoveOptionalBringItems()
+        {
+            if (!MoveItemsToCargo(MissionSettings.BringOptionalMissionItem, MissionSettings.BringOptionalMissionItemQuantity, ArmState.MoveCapBoosters, ArmState.MoveOptionalBringItems, true)) return false;
+            return false;
+        }
+
+        private static bool MoveCapBoosters()
+        {
+            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
+                 Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
+                 Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
+                 Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName)
             {
-                if (Logging.DebugArm) Logging.Log("ArmState.MoveItems", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
+                ChangeArmState(ArmState.MoveAmmo);
                 return false;
             }
 
-            if (Logging.DebugArm) Logging.Log("ArmState.MoveItems", " start if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
-            if (!Cache.Instance.CloseFittingManager("Arm")) return false;
-            if (Logging.DebugArm) Logging.Log("ArmState.MoveItems", " finish if (!Cache.Instance.CloseFittingManager(Arm)) return;", Logging.Teal);
+            if (Combat.WeaponGroupId == 53) //civilian guns of all types
+            {
+                Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
+                ChangeArmState(ArmState.MoveAmmo);
+                return false;
+            }
+
+            //
+            // load cap boosters
+            //
+            #region load cap boosters
+            DirectInvType _CapBoosterInvTypeItem = null;
+            Cache.Instance.DirectEve.InvTypes.TryGetValue(Settings.Instance.CapacitorInjectorScript, out _CapBoosterInvTypeItem);
+            if (ArmLoadCapBoosters && _CapBoosterInvTypeItem != null)
+            {
+                if (!MoveItemsToCargo(_CapBoosterInvTypeItem.TypeName, Settings.Instance.NumberOfCapBoostersToLoad, ArmState.MoveCapBoosters, ArmState.MoveAmmo)) return false;
+            }
+
+            ChangeArmState(ArmState.MoveAmmo);
+            return false;
+
+            #endregion move cap boosters
+        }
+        private static bool MoveAmmo()
+        {
+            if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 3000)))
+            {
+                if (Logging.DebugArm) Logging.Log("ArmState.MoveAmmo", "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
+                return false;
+            }
 
             if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
                  Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
                  Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                 Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
+                 Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName)
             {
-                _States.CurrentArmState = ArmState.Cleanup;
+                ChangeArmState(ArmState.StackAmmoHangar);
                 return false;
             }
 
-            //
-            // Check for locked items if we are already moving items
-            //
-            #region check for item locks
-
-            if (ItemsAreBeingMoved)
+            if (Combat.WeaponGroupId == 53) //civilian guns of all types
             {
-                if (DateTime.UtcNow.Subtract(_lastArmAction).Milliseconds < 1000)
-                {
-                    return false;
-                }
-
-                if (Logging.DebugArm) Logging.Log("ArmState.MoveItems", "if (ItemsAreBeingMoved)", Logging.Teal);
-
-                if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
-                {
-                    if (DateTime.UtcNow.Subtract(_lastArmAction).TotalSeconds > 45)
-                    {
-                        Logging.Log("Unloadloot.MoveItems", "Moving Items timed out, clearing item locks", Logging.Orange);
-                        Cache.Instance.DirectEve.UnlockItems();
-                        _lastArmAction = DateTime.UtcNow;
-                        _States.CurrentArmState = ArmState.Begin;
-                        return false;
-                    }
-
-                    if (Logging.DebugArm) Logging.Log("ArmState.MoveItems", "Waiting for Locks to clear. GetLockedItems().Count [" + Cache.Instance.DirectEve.GetLockedItems().Count + "]", Logging.Teal);
-                    return false;
-                }
-                ItemsAreBeingMoved = false;
+                Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
+                ChangeArmState(ArmState.StackAmmoHangar);
                 return false;
             }
-            #endregion check for item locks
-
-            //
-            // Bring item
-            //
-            #region Bring Item
-            retryCount++;
-            string bringItem = MissionSettings.BringMissionItem;
-            if (string.IsNullOrEmpty(bringItem))
-            {
-                _bringItemMoved = true;
-            }
-
-            if (!_bringItemMoved)
-            {
-                if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "if (!_missionItemMoved)", Logging.Teal);
-                if (Cache.Instance.CurrentShipsCargo == null)
-                {
-                    Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                    return false;
-                }
-
-                if (Cache.Instance.ItemHangar == null) return false;
-
-                IEnumerable<DirectItem> cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
-
-                DirectItem hangarItem = null;
-                if (Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
-                {
-                    hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
-                }
-
-                if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName) && Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
-                {
-                    hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
-                }
-
-                if (hangarItem == null && !string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem) != null)
-                {
-                    hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == bringItem);
-                }
-
-                if (CheckCargoForBringItem)
-                {
-                    //
-                    // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
-                    //
-                    foreach (DirectItem bringItemInCargo in cargoItems)
-                    {
-                        bringItemQuantity -= bringItemInCargo.Stacksize;
-                        if (bringItemQuantity <= 0)
-                        {
-                            //
-                            // if we already have enough bringItems in our cargoHold then we are done
-                            //
-                            if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "BringItem: if (bringItemQuantity <= 0)", Logging.Debug);
-                            _bringItemMoved = true;
-                            retryCount = 0;
-                            CheckCargoForBringItem = false;
-                            return false;
-                        }
-
-                        continue;
-                    }
-                    CheckCargoForBringItem = false;
-                }
-
-                if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
-                {
-                    if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
-                    {
-                        _bringoptionalItemMoved = true;
-                        retryCount = 0;
-                        return false;
-                    }
-
-                    int moveBringItemQuantity = Math.Min(hangarItem.Stacksize, bringItemQuantity);
-                    moveBringItemQuantity = Math.Max(moveBringItemQuantity, 1);
-                    Logging.Log("Arm.MoveItems", "Moving Bring Item [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
-                    Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveBringItemQuantity);
-
-                    bringItemQuantity = bringItemQuantity - moveBringItemQuantity;
-                    if (bringItemQuantity <= 0)
-                    {
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "BringItem: if (bringItemQuantity <= 0)", Logging.Debug);
-                        _bringItemMoved = true;
-                        retryCount = 0;
-                        return false;
-                    }
-
-                    if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "BringItem: We have [" + bringItemQuantity + "] more bringitem(s) to move", Logging.Debug);
-                    ItemsAreBeingMoved = true;
-                    _lastArmAction = DateTime.UtcNow;
-                    return false;
-                }
-
-                if (retryCount > 10)
-                {
-                    Logging.Log("Arm.MoveItems", "We do not have enough of bringitem [" + bringItem + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
-                    _bringItemMoved = false;
-                    _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                    Cache.Instance.Paused = true;
-                }
-
-                return false;
-
-            }
-
-            #endregion Bring Item
-
-            //
-            // Try To Optional Bring item
-            //
-            #region Optional Bring Item
-
-            retryCount++;
-            string bringOptionalItem = MissionSettings.BringOptionalMissionItem;
-            if (string.IsNullOrEmpty(bringOptionalItem))
-            {
-                _bringoptionalItemMoved = true;
-            }
-
-            if (!_bringoptionalItemMoved)
-            {
-                if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "if (!_optionalMissionItemMoved)", Logging.Teal);
-                if (Cache.Instance.CurrentShipsCargo == null)
-                {
-                    Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                    return false;
-                }
-
-                if (Cache.Instance.ItemHangar == null) return false;
-
-                IEnumerable<DirectItem> cargoItems = new List<DirectItem>();
-                cargoItems = Cache.Instance.CurrentShipsCargo.Items.Where(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase));
-
-                DirectItem hangarItem = Cache.Instance.ItemHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase)) ??
-                                        Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase)) ??
-                                        Cache.Instance.LootHangar.Items.FirstOrDefault(i => String.Equals((i.TypeName ?? string.Empty), bringOptionalItem, StringComparison.CurrentCultureIgnoreCase));
-
-                //if (CheckCargoForOptionalBringItem && cargoItems.Any())
-                //{
-                //    //
-                //    // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
-                //    //
-                //    foreach (DirectItem bringOptionalItemInCargo in cargoItems)
-                //    {
-                //        Cache.Instance.BringOptionalMissionItemQuantity -= bringOptionalItemInCargo.Quantity;
-                //        Logging.Log("Arm.MoveItems", "Bring Optional Item: we found [" + bringOptionalItemInCargo + "][" + bringOptionalItemInCargo.Quantity + "] already in the cargo, we need [" + Cache.Instance.BringOptionalMissionItemQuantity + "] more.", Logging.Teal);
-                //        if (Cache.Instance.BringOptionalMissionItemQuantity <= 0)
-                //        {
-                //            //
-                //            // if we already have enough bringOptionalItems in our cargoHold then we are done
-                //            //
-                //            Logging.Log("Arm.MoveItems", "Bring Optional Item: we have all the bring optional items we need.", Logging.Teal);
-                //            _bringoptionalItemMoved = true;
-                //            retryCount = 0;
-                //            CheckCargoForOptionalBringItem = false;
-                //            return false;
-                //        }
-                //
-                //        continue;
-                //    }
-                //
-                //    CheckCargoForOptionalBringItem = false;
-                //}
-
-                if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
-                {
-                    if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
-                    {
-                        Logging.Log("Arm.MoveItems", "Bring Optional Item: Error: retrying", Logging.Teal);
-                        _bringoptionalItemMoved = false;
-                        return false;
-                    }
-
-                    int moveOptionalMissionItemQuantity = Math.Min(hangarItem.Stacksize, MissionSettings.BringOptionalMissionItemQuantity);
-                    if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "hangarItem.StackSize [" + hangarItem.Stacksize + "] bringOptionalItemQuantity [" + MissionSettings.BringOptionalMissionItemQuantity + "] moveOptionalMissionItemQuantity [" + moveOptionalMissionItemQuantity + "]", Logging.Debug);
-                    moveOptionalMissionItemQuantity = Math.Max(moveOptionalMissionItemQuantity, 1);
-                    Logging.Log("Arm.MoveItems", "Moving [" + moveOptionalMissionItemQuantity + "] Bring Optional Item(s) of [" + hangarItem.TypeName + "] to CargoHold", Logging.White);
-                    Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveOptionalMissionItemQuantity);
-
-                    MissionSettings.BringOptionalMissionItemQuantity -= moveOptionalMissionItemQuantity;
-                    if (MissionSettings.BringOptionalMissionItemQuantity < 1)
-                    {
-                        Logging.Log("Arm.MoveItems", "Bring Optional Item: we have all the bring optional items we need. [bringOptionalItemQuantity is now 0]", Logging.Teal);
-                        _bringoptionalItemMoved = true;
-                        retryCount = 0;
-                        return false;
-                    }
-
-                    ItemsAreBeingMoved = true;
-                    _lastArmAction = DateTime.UtcNow;
-                    return false;
-                }
-
-                if (retryCount > 10)
-                {
-                    Logging.Log("Arm.MoveItems", "We do not have enough of bringOptionalItem [" + bringOptionalItem + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
-                    _bringoptionalItemMoved = true;
-                }
-
-                return false;
-            }
-            #endregion optional bring item
 
             //
             // load ammo
             //
             #region load ammo
-
-            if (Combat.WeaponGroupId == 53) //civilian guns of all types
+            
+            if (ItemsAreBeingMoved)
             {
-                Logging.Log("Arm.MoveItems", "No ammo needed for civilian guns: done", Logging.White);
-                _States.CurrentArmState = ArmState.Cleanup;
-                return false;
-            }
-
-            if (Cache.Instance.ModulesAsItemCache == null)
-            {
-                if (Logging.DebugArm) Logging.Log("Arm.MoveItems", "if (Cache.Instance.ModulesAsItemCache == null) Note: without ModulesAsItemCache we cant know if we need cap boosters or not ", Logging.White);
-            }
-
-            if (!capsMoved)
-            {
-                if ((Cache.Instance.ModulesAsItemCache != null && Cache.Instance.ModulesAsItemCache.Any(i => i.GroupId == (int)Group.CapacitorInjector)) || ArmLoadCapBoosters)
-                {
-                    if (Cache.Instance.CurrentShipsCargo == null)
-                    {
-                        Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                        return false;
-                    }
-
-                    int capsIncargo = 0;
-                    foreach (DirectItem cargoItem in Cache.Instance.CurrentShipsCargo.Items)
-                    {
-                        if (cargoItem.TypeId != Settings.Instance.CapacitorInjectorScript)
-                            continue;
-
-                        capsIncargo += cargoItem.Quantity;
-                        continue;
-                    }
-
-                    int capsToLoad = Settings.Instance.CapBoosterToLoad - capsIncargo;
-                    if (capsToLoad <= 0)
-                    {
-                        capsMoved = true;
-                        return false;
-                    }
-
-                    if (capsToLoad > 0)
-                    {
-                        foreach (DirectItem item in Cache.Instance.AmmoHangar.Items)
-                        {
-                            if (item.ItemId <= 0 || item.Volume == 0.00 || item.Quantity == 0)
-                                continue;
-
-                            if (item.TypeId != Settings.Instance.CapacitorInjectorScript)
-                                continue;
-
-                            int moveCapQuantity = Math.Min(item.Stacksize, capsToLoad);
-                            Cache.Instance.CurrentShipsCargo.Add(item, moveCapQuantity);
-                            Logging.Log("Arm.MoveItems", "Moving [" + moveCapQuantity + "] units of Cap  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
-                            return false; // you can only move one set of items per frame
-                        }
-
-                        Logging.Log("Arm", "Missing [" + capsToLoad + "] units of Cap Booster with TypeId [" + Settings.Instance.CapacitorInjectorScript + "]", Logging.Orange);
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo;
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (Logging.DebugArm) Logging.Log("Arm", "No Capacitor Injectors found on the ship, no cap boosters will be loaded!", Logging.Debug);
-                }
-            }
-
-            if (Cache.Instance.CurrentShipsCargo == null)
-            {
-                Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                return false;
+                if (!WaitForLockedItems(ArmState.MoveAmmo)) return false;
+                return true;
             }
 
             //
@@ -1254,7 +910,7 @@ namespace Questor.Modules.Actions
                 // if we have no more ammo types to be loaded we have to be finished with arm.
                 //
                 if (Logging.DebugArm) Logging.Log("Arm", "We have no more ammo types to be loaded. We have to be finished with arm.", Logging.Debug);
-                _States.CurrentArmState = ArmState.Cleanup;
+                ChangeArmState(ArmState.StackAmmoHangar);
                 return false;
             }
 
@@ -1296,7 +952,8 @@ namespace Questor.Modules.Actions
                             {
                                 Logging.Log("Arm", "Itemhangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
                             }
-                            _States.CurrentArmState = ArmState.NotEnoughAmmo;
+
+                            ChangeArmState(ArmState.NotEnoughAmmo);
                             return false;
                         }
                     }
@@ -1304,7 +961,6 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("Arm.MoveItems", "Itemhangar Exception [" + exception + "]", Logging.Debug);
                     }
-
                 }
 
                 try
@@ -1318,6 +974,8 @@ namespace Questor.Modules.Actions
                         // move items to cargo
                         //
                         Cache.Instance.CurrentShipsCargo.Add(item, moveAmmoQuantity);
+                        ItemsAreBeingMoved = true;
+                        _lastArmAction = DateTime.UtcNow;
                         //
                         // subtract the moved items from the items that need to be moved
                         //
@@ -1353,19 +1011,18 @@ namespace Questor.Modules.Actions
                     Logging.Log("Arm", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
                 }
 
-                _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                ChangeArmState(ArmState.NotEnoughAmmo);
                 return false;
             }
 
             _lastArmAction = DateTime.UtcNow;
-            Logging.Log("Arm.MoveItems", "Waiting for items", Logging.White);
-            _States.CurrentArmState = ArmState.WaitForItems;
+            ChangeArmState(ArmState.StackAmmoHangar);
             return false;
 
             #endregion move ammo
         }
-
-        private static bool MoveMiningCrystalsArmState()
+        
+        private static bool MoveMiningCrystals()
         {
             if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(2000))
             {
@@ -1393,7 +1050,7 @@ namespace Questor.Modules.Actions
                         Logging.Log("Unloadloot.MoveMiningCrystals", "Moving Items timed out, clearing item locks", Logging.Orange);
                         Cache.Instance.DirectEve.UnlockItems();
                         _lastArmAction = DateTime.UtcNow;
-                        _States.CurrentArmState = ArmState.Begin;
+                        ChangeArmState(ArmState.Begin);
                         return false;
                     }
 
@@ -1433,7 +1090,7 @@ namespace Questor.Modules.Actions
                 // if we have no more ammo types to be loaded we have to be finished with arm.
                 //
                 Logging.Log("Arm", "if (CurrentMiningCrystalsToLoad == null)", Logging.Debug);
-                _States.CurrentArmState = ArmState.Cleanup;
+                ChangeArmState(ArmState.Cleanup);
                 return false;
             }
 
@@ -1454,7 +1111,7 @@ namespace Questor.Modules.Actions
                             Logging.Log("Arm", "Missing [" + _miningCrystal.Quantity + "] units of ammo: [ " + _miningCrystal.Description + " ] with TypeId [" + _miningCrystal.TypeId + "]", Logging.Orange);
                         }
 
-                        _States.CurrentArmState = ArmState.NotEnoughAmmo; //should we just continue in this case instead of pausing?
+                        ChangeArmState(ArmState.NotEnoughAmmo);
                         return false;
                     }
                 }
@@ -1497,99 +1154,35 @@ namespace Questor.Modules.Actions
                     Logging.Log("Arm", "Missing [" + _miningCrystal.Quantity + "] units of ammo: [ " + _miningCrystal.Description + " ] with TypeId [" + _miningCrystal.TypeId + "]", Logging.Orange);
                 }
 
-                _States.CurrentArmState = ArmState.NotEnoughAmmo;
+                ChangeArmState(ArmState.NotEnoughAmmo);
                 return false;
             }
 
             _lastArmAction = DateTime.UtcNow;
             Logging.Log("Arm.MoveMiningCrystals", "Waiting for items", Logging.White);
-            _States.CurrentArmState = ArmState.WaitForItems;
+            //_States.CurrentArmState = ArmState.WaitForItems;
             return false;
 
             #endregion move ammo
         }
 
-        private static bool WaitForItemsArmState()
+        private static bool CleanupArmState()
         {
-            #region WaitForItems
-                    
-            // Wait 5 seconds after moving
-            if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(2000))
-                return false;
-
-            if (Cache.Instance.CurrentShipsCargo == null)
+            if (Drones.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
             {
-                Logging.Log("ArmState.WaitForItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                return false;
+                // Close the drone bay, its not required in space.
+                if (!Drones.CloseDroneBay("Arm.Cleanup")) return false;
             }
 
-            if (Cache.Instance.CurrentShipsCargo.Items.Count == 0) return false;
-
-            if (Cache.Instance.DirectEve.GetLockedItems().Count == 0)
+            if (Settings.Instance.UseFittingManager)
             {
-                Logging.Log("Arm", "Done", Logging.White);
-
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                {
-                    //reload the ammo setting for combat
-                    try
-                    {
-                        //DirectAgentMission mission = Cache.Instance.DirectEve.AgentMissions.FirstOrDefault(m => m.AgentId == AgentId);
-                        //if (mission == null) return;
-
-                        if (!string.IsNullOrEmpty(AgentInteraction.MissionName))
-                        {
-                            MissionSettings.SetmissionXmlPath(Logging.FilterPath(AgentInteraction.MissionName));
-                            if (File.Exists(MissionSettings.MissionXmlPath))
-                            {
-                                XDocument missionXml = XDocument.Load(MissionSettings.MissionXmlPath);
-                                MissionSettings.MissionAmmo = new List<Ammo>();
-                                if (missionXml.Root != null)
-                                {
-                                    XElement ammoTypes = missionXml.Root.Element("ammoTypes");
-                                    if (ammoTypes != null)
-                                    {
-                                        if (MissionSettings.MissionAmmo.Any()) Logging.Log("Arm.WaitForitems", "Clearing existing list of Ammo to bring", Logging.White);
-                                        MissionSettings.MissionAmmo.Clear();
-                                        foreach (XElement ammoDefinedInXML in ammoTypes.Elements("ammoType"))
-                                        {
-                                            Ammo AmmoToAdd = new Ammo(ammoDefinedInXML);
-                                            MissionSettings.MissionAmmo.Add(AmmoToAdd);
-                                            Logging.Log("Arm.WaitForitems", "Adding [" + AmmoToAdd.Name + "] TypeID [" + AmmoToAdd.TypeId + "] DamageType [" + AmmoToAdd.DamageType + "] to the list of Ammo to bring/use", Logging.White);
-                                        }
-                                    }
-
-                                    ammoTypes = missionXml.Root.Element("missionammo");
-                                    if (ammoTypes != null)
-                                    {
-                                        if (MissionSettings.MissionAmmo.Any()) Logging.Log("Arm.WaitForitems", "Clearing existing list of Ammo to bring", Logging.White);
-                                        MissionSettings.MissionAmmo.Clear();
-                                        foreach (XElement ammoDefinedInXML in ammoTypes.Elements("ammoType"))
-                                        {
-                                            Ammo AmmoToAdd = new Ammo(ammoDefinedInXML);
-                                            MissionSettings.MissionAmmo.Add(AmmoToAdd);
-                                            Logging.Log("Arm.WaitForitems", "Adding [" + AmmoToAdd.Name + "] TypeID [" + AmmoToAdd.TypeId + "] DamageType [" + AmmoToAdd.DamageType + "] to the list of Ammo to bring/use", Logging.White);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log("Arms.WaitForItems", "Unable to load missionammo from mission XML for: [" + MissionSettings.MissionName + "], " + ex.Message, Logging.Orange);
-                        MissionSettings.MissionAmmo = new List<Ammo>();
-                    }
-                }
-
-                _States.CurrentArmState = ArmState.Cleanup;
-                return false;
+                if (!Cache.Instance.CloseFittingManager("Arm")) return false;
             }
 
-            // Note, there's no unlock here as we *always* want our ammo!
+            //if (!Cleanup.CloseInventoryWindows()) return false;
             return false;
-            #endregion WaitForItems
         }
+
 
         public static void ProcessState()
         {
@@ -1609,48 +1202,8 @@ namespace Questor.Modules.Actions
                     case ArmState.Idle:
                         break;
 
-                    case ArmState.Cleanup:
-                        if (!CleanupArmState()) return;
-                        break;
-
-                    case ArmState.StackAmmoHangar:
-                        if (!StackAmmoHangarArmState()) return;
-                        break;
-
-                    case ArmState.Done:
-                        break;
-
-                    case ArmState.NotEnoughDrones: //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
-                        break;
-
-                    case ArmState.NotEnoughAmmo:   //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
-                        break;
-
                     case ArmState.Begin:
                         if (!BeginArmState()) break;
-                        break;
-
-                    case ArmState.OpenShipHangar:
-                    case ArmState.SwitchToTransportShip:
-                    case ArmState.SwitchToSalvageShip:
-                    case ArmState.SwitchToMiningShip:
-                        if (!SwitchShipsArmState()) return;
-                        break;
-
-                    case ArmState.ActivateMiningShip:
-                        if (!ActivateMiningShipArmState()) return;
-                        break;
-
-                    case ArmState.ActivateNoobShip:
-                        if (!ActivateNoobShipArmState()) return;
-                        break;
-
-                    case ArmState.ActivateTransportShip:
-                        if (!ActivteTransportShipArmState()) return;
-                        break;
-
-                    case ArmState.ActivateSalvageShip:
-                        if (!ActivateSalvageShipArmState()) return;
                         break;
 
                     case ArmState.ActivateCombatShip:
@@ -1666,26 +1219,111 @@ namespace Questor.Modules.Actions
                         break;
 
                     case ArmState.MoveDrones:
-                        if (!MoveDronesArmState()) return;
+                        if (!MoveDrones()) return;
                         break;
 
-                    case ArmState.MoveItems:
-                        if (!MoveItemsArmState()) return;
+                    case ArmState.MoveBringItems:
+                        if (!MoveBringItems()) return;
+                        break;
+
+                    case ArmState.MoveOptionalBringItems:
+                        if (!MoveOptionalBringItems()) return;
+                        break;
+
+                    case ArmState.MoveCapBoosters:
+                        if (!MoveCapBoosters()) return;
+                        break;
+
+                    case ArmState.MoveAmmo:
+                        if (!MoveAmmo()) return;
                         break;
 
                     case ArmState.MoveMiningCrystals:
-                        if (!MoveMiningCrystalsArmState()) return;
+                        if (!MoveMiningCrystals()) return;
                         break;
 
-                    case ArmState.WaitForItems:
-                        if (!WaitForItemsArmState()) return;
+                    case ArmState.StackAmmoHangar:
+                        if (!StackAmmoHangarArmState()) return;
                         break;
+
+                    case ArmState.Cleanup:
+                        if (!CleanupArmState()) return;
+                        break;
+
+                    case ArmState.Done:
+                        break;
+
+                    case ArmState.ActivateMiningShip:
+                        if (!ActivateMiningShipArmState()) return;
+                        break;
+
+                    case ArmState.ActivateNoobShip:
+                        if (!ActivateNoobShipArmState()) return;
+                        break;
+
+                    case ArmState.ActivateTransportShip:
+                        if (!ActivateTransportShipArmState()) return;
+                        break;
+
+                    case ArmState.ActivateSalvageShip:
+                        if (!ActivateSalvageShipArmState()) return;
+                        break;
+
+                    case ArmState.NotEnoughDrones: //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
+                        break;
+
+                    case ArmState.NotEnoughAmmo:   //This is logged in questor.cs - do not double log, stay in this state until dislodged elsewhere
+                        break;
+
                 }
             }
             catch (Exception ex)
             {
                 Logging.Log("Arm.ProcessState","Exception [" + ex + "]",Logging.Debug);
                 return;
+            }
+        }
+
+        ///
+        ///   Invalidate the cached items every pulse (called from cache.invalidatecache, which itself is called every frame in questor.cs)
+        /// 
+        public static void ClearDataBetweenStates()
+        {
+            try
+            {
+                //
+                // this list of variables is cleared every pulse.
+                //
+                cargoItems = null;
+                hangarItem = null;
+                hangarItems = null;
+                WeHaveThisManyOfThoseItemsInCargo = 0;
+                WeHaveThisManyOfThoseItemsInHangar = 0;
+                _itemsLeftToMoveQuantity = 0;                
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Arm.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
+            }
+        }
+
+        ///
+        ///   Invalidate the cached items every pulse (called from cache.invalidatecache, which itself is called every frame in questor.cs)
+        /// 
+        public static void InvalidateCache()
+        {
+            try
+            {
+                //
+                // this list of variables is cleared every pulse.
+                //
+                cargoItems = null;
+                hangarItem = null;
+                hangarItems = null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Arm.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 

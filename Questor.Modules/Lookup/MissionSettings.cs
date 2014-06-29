@@ -9,7 +9,6 @@
 // -------------------------------------------------------------------------------
 
 using LavishScriptAPI;
-using Questor.Modules.Combat;
 
 namespace Questor.Modules.Lookup
 {
@@ -33,7 +32,6 @@ namespace Questor.Modules.Lookup
     {
         static MissionSettings()
         {
-            ArmLoadedCache = false; 
             ChangeMissionShipFittings = false;
             DefaultFitting = new FactionFitting(); 
             FactionBlacklist = new List<string>();
@@ -224,12 +222,12 @@ namespace Questor.Modules.Lookup
         public static List<string> MissionItems { get; private set; }
 
         public static string FittingToLoad { get; set; } // stores name of the final fitting we want to use
-        public static string MissionShip { get; set; } //stores name of mission specific ship
+        public static string MissionSpecificShip { get; set; } //stores name of mission specific ship
+        public static string FactionSpecificShip { get; set; } //stores name of mission specific ship
         public static string DefaultFittingName { get; set; } //stores name of the default fitting
         public static string CurrentFit { get; set; }
         public static string FactionFittingForThisMissionsFaction { get; set; }
         public static string FactionName { get; set; }
-        public static bool ArmLoadedCache { get; set; } // flags whether arm has already loaded the mission
         public static bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public static bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
         public static List<Ammo> MissionAmmo;
@@ -281,6 +279,8 @@ namespace Questor.Modules.Lookup
 
         public static void ClearMissionSpecificSettings()
         {
+            MissionSettings.MissionSpecificShip = null;
+            MissionSettings.FactionSpecificShip = null;
             MissionSettings.MissionItems.Clear();
             MissionSettings.BringMissionItem = string.Empty;
             MissionSettings.BringOptionalMissionItem = string.Empty;
@@ -636,7 +636,8 @@ namespace Questor.Modules.Lookup
                 //Set fitting to default
                 DefaultFittingName = DefaultFitting.FittingName;
                 FittingToLoad = DefaultFittingName;
-                MissionShip = "";
+                MissionSpecificShip = null;
+                FactionSpecificShip = null;
                 ChangeMissionShipFittings = false;
 
                 //
@@ -671,7 +672,7 @@ namespace Questor.Modules.Lookup
                         //
                         //
                         //
-                        MissionShip = FittingNameTouseForThisMission.Ship;
+                        MissionSpecificShip = FittingNameTouseForThisMission.Ship;
                         //
                         // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
                         //
@@ -680,7 +681,7 @@ namespace Questor.Modules.Lookup
                             MissionSettings.MissionDroneTypeID = (int)FittingNameTouseForThisMission.DroneTypeID;
                         }
 
-                        if (!(FittingNameTouseForThisMission.Fitting == "" && MissionShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
+                        if (!(FittingNameTouseForThisMission.Fitting == "" && MissionSpecificShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
                         {
                             ChangeMissionShipFittings = true;
                             FittingToLoad = FittingNameTouseForThisMission.Fitting;
@@ -690,8 +691,8 @@ namespace Questor.Modules.Lookup
                             FittingToLoad = FactionFittingForThisMissionsFaction;
                         }
 
-                        Logging.Log("RefreshMissionItems", "Mission: " + MissionShip + " - Faction: " + FactionName + " - Fitting: " + FittingToLoad + "]", Logging.White);
-                        Logging.Log("RefreshMissionItems", "Ship: " + MissionShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings + "Using DroneTypeID [" + Drones.DroneTypeID + "]", Logging.White);
+                        Logging.Log("RefreshMissionItems", "Mission: " + MissionSpecificShip + " - Faction: " + FactionName + " - Fitting: " + FittingToLoad + "]", Logging.White);
+                        Logging.Log("RefreshMissionItems", "Ship: " + MissionSpecificShip + " - ChangeMissionShipFittings: " + ChangeMissionShipFittings + "Using DroneTypeID [" + Drones.DroneTypeID + "]", Logging.White);
                     }
                 }
                 else if (!string.IsNullOrEmpty(FactionFittingForThisMissionsFaction)) // if no mission fittings defined, try to match by faction

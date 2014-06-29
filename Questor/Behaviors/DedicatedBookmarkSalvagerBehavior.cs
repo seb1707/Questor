@@ -435,7 +435,7 @@ namespace Questor.Behaviors
                     if (Cache.Instance.InStation)
                     {
                         if (_States.CurrentArmState == ArmState.Idle)
-                            _States.CurrentArmState = ArmState.SwitchToSalvageShip;
+                            _States.CurrentArmState = ArmState.ActivateSalvageShip;
 
                         Arm.ProcessState();
                     }

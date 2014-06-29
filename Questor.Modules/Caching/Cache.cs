@@ -2257,6 +2257,7 @@ namespace Questor.Modules.Caching
         {
             try
             {
+                Arm.InvalidateCache();
                 Drones.InvalidateCache();
                 Combat.InvalidateCache();
                 Salvage.InvalidateCache();

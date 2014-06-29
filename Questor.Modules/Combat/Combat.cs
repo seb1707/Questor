@@ -29,6 +29,39 @@ namespace Questor.Modules.Combat
     /// </summary>
     public static class Combat
     {
+        static Combat()
+        {
+            //Interlocked.Increment(ref CombatInstances);
+        }
+
+        //~Combat()
+        //{
+        //    Interlocked.Decrement(ref CombatInstances);
+        //}
+
+        private static string _combatShipName;
+        public static string CombatShipName
+        {
+            get
+            {
+                if (MissionSettings.MissionSpecificShip != null)
+                {
+                    return MissionSettings.MissionSpecificShip;
+                }
+
+                if (MissionSettings.FactionSpecificShip != null)
+                {
+                    return MissionSettings.FactionSpecificShip;
+                }
+
+                return _combatShipName;
+            }
+            set
+            {
+                _combatShipName = value;
+            }
+        }
+
         private static bool _isJammed;
         private static int _weaponNumber;
 
@@ -82,16 +115,6 @@ namespace Questor.Modules.Combat
             }
         }
         
-        static Combat()
-        {
-            //Interlocked.Increment(ref CombatInstances);
-        }
-
-        //~Combat()
-        //{
-        //    Interlocked.Decrement(ref CombatInstances);
-        //}
-
         public static bool DontShootFrigatesWithSiegeorAutoCannons { get; set; }
         public static int WeaponGroupId { get; set; }
         public static int MaximumHighValueTargets { get; set; }
@@ -3362,9 +3385,9 @@ namespace Questor.Modules.Combat
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
                         }
 
-                        if (Cache.Instance.ActiveShip.GivenName != Settings.Instance.CombatShipName)
+                        if (Cache.Instance.ActiveShip.GivenName != CombatShipName)
                         {
-                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + Settings.Instance.CombatShipName + "]", Logging.Red);
+                            Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + CombatShipName + "]", Logging.Red);
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
                         }
                     }
@@ -3511,7 +3534,7 @@ namespace Questor.Modules.Combat
                         if (Cache.Instance.InSpace && //we are in space (as opposed to being in station or in limbo between systems when jumping)
                             (Cache.Instance.ActiveShip.Entity != null &&  // we are in a ship!
                             !Cache.Instance.ActiveShip.Entity.IsCloaked && //we are not cloaked anymore
-                            Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower() && //we are in our combat ship
+                            Cache.Instance.ActiveShip.GivenName.ToLower() == CombatShipName.ToLower() && //we are in our combat ship
                             !Cache.Instance.InWarp)) // no longer in warp
                         {
                             _States.CurrentCombatState = CombatState.CheckTargets;
@@ -3561,7 +3584,7 @@ namespace Questor.Modules.Combat
             }
             catch (Exception exception)
             {
-                Logging.Log("Cache.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("Combat.InvalidateCache", "Exception [" + exception + "]", Logging.Debug);
             }
         }
     }

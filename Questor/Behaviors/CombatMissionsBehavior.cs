@@ -465,7 +465,7 @@ namespace Questor.Behaviors
                 if (Cache.Instance.CourierMission)
                 {
                     Logging.Log("Arm", "Begin: CourierMission", Logging.White);
-                    _States.CurrentArmState = ArmState.SwitchToTransportShip;
+                    _States.CurrentArmState = ArmState.ActivateTransportShip;
                 }
                 else
                 {
@@ -1083,7 +1083,7 @@ namespace Questor.Behaviors
 
             if (_States.CurrentArmState == ArmState.Idle)
             {
-                _States.CurrentArmState = ArmState.SwitchToSalvageShip;
+                _States.CurrentArmState = ArmState.ActivateSalvageShip;
             }
 
             Arm.ProcessState();

@@ -530,9 +530,9 @@ namespace Questor.Modules.BackgroundTasks
         private static void BookmarkMyWreckPanicState()
         {
             BookmarkMyWreckAttempts++;
-            if (Cache.Instance.Wrecks.Any(i => i.Name.Contains(Settings.Instance.CombatShipName)))
+            if (Cache.Instance.Wrecks.Any(i => i.Name.Contains(Combat.CombatShipName)))
             {
-                Cache.Instance.CreateBookmark("Wreck: " + Settings.Instance.CombatShipName);
+                Cache.Instance.CreateBookmark("Wreck: " + Combat.CombatShipName);
                 _States.CurrentPanicState = PanicState.StartPanicking;
                 return;
             }

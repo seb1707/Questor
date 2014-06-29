@@ -7,6 +7,7 @@ namespace Questor.Modules.Actions
     using System.Linq;
     using DirectEve;
     using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
     using global::Questor.Modules.Logging;
@@ -52,7 +53,7 @@ namespace Questor.Modules.Actions
                     break;
 
                 case SwitchShipState.ActivateCombatShip:
-                    string shipName = Settings.Instance.CombatShipName.ToLower();
+                    string shipName = Combat.CombatShipName.ToLower();
 
                     if (Cache.Instance.ActiveShip == null || (!string.IsNullOrEmpty(shipName) && Cache.Instance.ActiveShip.GivenName.ToLower() != shipName))
                     {

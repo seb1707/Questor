@@ -136,7 +136,6 @@ namespace Questor.Modules.Lookup
         //
         // Ship Names
         //
-        public string CombatShipName { get; set; }
         public string SalvageShipName { get; set; }
         public string TransportShipName { get; set; }
         public string TravelShipName { get; set; }
@@ -203,7 +202,7 @@ namespace Questor.Modules.Lookup
         public int SensorDampenerScript { get; private set; }
         public int AncillaryShieldBoosterScript { get; private set; } //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
         public int CapacitorInjectorScript { get; private set; }      //they are not scripts, but they work the same, but are consumable for our purposes that does not matter
-        public int CapBoosterToLoad { get; private set; } 
+        public int NumberOfCapBoostersToLoad { get; private set; } 
         //
         // OverLoad Settings (this WILL burn out modules, likely very quickly!
         // If you enable the overloading of a slot it is HIGHLY recommended you actually have something overloadable in that slot =/ 
@@ -566,7 +565,7 @@ namespace Questor.Modules.Lookup
                     //
                     try
                     {
-                        CombatShipName = (string)CharacterSettingsXml.Element("combatShipName") ?? (string)CommonSettingsXml.Element("combatShipName") ?? "My frigate of doom";
+                        Combat.CombatShipName = (string)CharacterSettingsXml.Element("combatShipName") ?? (string)CommonSettingsXml.Element("combatShipName") ?? "My frigate of doom";
                         SalvageShipName = (string)CharacterSettingsXml.Element("salvageShipName") ?? (string)CommonSettingsXml.Element("salvageShipName") ?? "My Destroyer of salvage";
                         TransportShipName = (string)CharacterSettingsXml.Element("transportShipName") ?? (string)CommonSettingsXml.Element("transportShipName") ?? "My Hauler of transportation";
                         TravelShipName = (string)CharacterSettingsXml.Element("travelShipName") ?? (string)CommonSettingsXml.Element("travelShipName") ?? "My Shuttle of traveling";
@@ -754,7 +753,7 @@ namespace Questor.Modules.Lookup
                         SensorDampenerScript = (int?)CharacterSettingsXml.Element("sensorDampenerScript") ?? (int?)CommonSettingsXml.Element("sensorDampenerScript") ?? (int)TypeID.TargetingRangeDampeningScript;
                         AncillaryShieldBoosterScript = (int?)CharacterSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int?)CommonSettingsXml.Element("ancillaryShieldBoosterScript") ?? (int)TypeID.AncillaryShieldBoosterScript;
                         CapacitorInjectorScript = (int?)CharacterSettingsXml.Element("capacitorInjectorScript") ?? (int?)CommonSettingsXml.Element("capacitorInjectorScript") ?? (int)TypeID.CapacitorInjectorScript;
-                        CapBoosterToLoad = (int?)CharacterSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CommonSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CharacterSettingsXml.Element("capBoosterToLoad") ?? (int?)CommonSettingsXml.Element("capBoosterToLoad") ?? 15;
+                        NumberOfCapBoostersToLoad = (int?)CharacterSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CommonSettingsXml.Element("capacitorInjectorToLoad") ?? (int?)CharacterSettingsXml.Element("capBoosterToLoad") ?? (int?)CommonSettingsXml.Element("capBoosterToLoad") ?? 15;
 
                         //
                         // OverLoad Settings (this WILL burn out modules, likely very quickly!
@@ -1457,7 +1456,7 @@ namespace Questor.Modules.Lookup
                 //
                 // Ship Names
                 //
-                CombatShipName = "Raven";
+                Combat.CombatShipName = "Raven";
                 SalvageShipName = "Noctis";
                 TransportShipName = "Transport";
                 TravelShipName = "Travel";
@@ -1590,7 +1589,7 @@ namespace Questor.Modules.Lookup
                 SensorDampenerScript = 29015;
                 AncillaryShieldBoosterScript = 11289;
                 CapacitorInjectorScript = 11289;
-                CapBoosterToLoad = 15;
+                NumberOfCapBoostersToLoad = 15;
 
                 //
                 // OverLoad Settings (this WILL burn out modules, likely very quickly!

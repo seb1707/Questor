@@ -485,7 +485,7 @@ namespace Questor.Modules.BackgroundTasks
                     // this should only kick in when using frigates as the combatship
                     //
                     if (Cache.Instance.ActiveShip.Capacitor < 400 && !Combat.TargetedBy.Any() &&
-                        Cache.Instance.ActiveShip.GivenName.ToLower() == Settings.Instance.CombatShipName.ToLower())
+                        Cache.Instance.ActiveShip.GivenName.ToLower() == Combat.CombatShipName.ToLower())
                     {
                         if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] You have less then 400 units total cap and nothing is targeting you yet, no need for hardeners yet.", Logging.Debug);
                         continue;
@@ -808,7 +808,7 @@ namespace Questor.Modules.BackgroundTasks
                         deactivate = true;
                         if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Settings.Instance.CombatShipName)
+                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Combat.CombatShipName)
                     {
                         deactivate = true;
                         if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);

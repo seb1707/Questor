@@ -42,7 +42,6 @@
             this.Disable3DCheckBox = new System.Windows.Forms.CheckBox();
             this.chkShowDetails = new System.Windows.Forms.CheckBox();
             this.lblMissionName = new System.Windows.Forms.Label();
-            QuestorUI.lblCurrentMissionInfo = new System.Windows.Forms.Label();
             this.lblPocketAction = new System.Windows.Forms.Label();
             this.lblCurrentPocketAction = new System.Windows.Forms.Label();
             this.buttonQuestorStatistics = new System.Windows.Forms.Button();
@@ -59,6 +58,8 @@
             this.label25 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
             this.tabMiscInfo = new System.Windows.Forms.TabPage();
+            this.useInnerspaceData = new System.Windows.Forms.Label();
+            this.label276 = new System.Windows.Forms.Label();
             this.useDronesData = new System.Windows.Forms.Label();
             this.label275 = new System.Windows.Forms.Label();
             this.DataCurrentDroneTarget = new System.Windows.Forms.Label();
@@ -580,8 +581,6 @@
             this.bttnUserDefinedScript3 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript2 = new System.Windows.Forms.Button();
             this.bttnUserDefinedScript1 = new System.Windows.Forms.Button();
-            this.label276 = new System.Windows.Forms.Label();
-            this.useInnerspaceData = new System.Windows.Forms.Label();
             this.tabMiscInfo.SuspendLayout();
             this.tabTimeStamps.SuspendLayout();
             this.tabMissions.SuspendLayout();
@@ -694,16 +693,6 @@
             this.lblMissionName.Name = "lblMissionName";
             this.lblMissionName.Size = new System.Drawing.Size(0, 13);
             this.lblMissionName.TabIndex = 92;
-            // 
-            // lblCurrentMissionInfo
-            // 
-            QuestorUI.lblCurrentMissionInfo.Location = new System.Drawing.Point(3, 55);
-            QuestorUI.lblCurrentMissionInfo.MaximumSize = new System.Drawing.Size(250, 13);
-            QuestorUI.lblCurrentMissionInfo.MinimumSize = new System.Drawing.Size(275, 13);
-            QuestorUI.lblCurrentMissionInfo.Name = "lblCurrentMissionInfo";
-            QuestorUI.lblCurrentMissionInfo.Size = new System.Drawing.Size(275, 13);
-            QuestorUI.lblCurrentMissionInfo.TabIndex = 93;
-            QuestorUI.lblCurrentMissionInfo.Text = "[ No Mission Selected Yet ]";
             // 
             // lblPocketAction
             // 
@@ -899,6 +888,24 @@
             this.tabMiscInfo.TabIndex = 7;
             this.tabMiscInfo.Text = "MiscInfo";
             this.tabMiscInfo.UseVisualStyleBackColor = true;
+            // 
+            // useInnerspaceData
+            // 
+            this.useInnerspaceData.AutoSize = true;
+            this.useInnerspaceData.Location = new System.Drawing.Point(132, 235);
+            this.useInnerspaceData.Name = "useInnerspaceData";
+            this.useInnerspaceData.Size = new System.Drawing.Size(24, 13);
+            this.useInnerspaceData.TabIndex = 236;
+            this.useInnerspaceData.Text = "n/a";
+            // 
+            // label276
+            // 
+            this.label276.AutoSize = true;
+            this.label276.Location = new System.Drawing.Point(45, 235);
+            this.label276.Name = "label276";
+            this.label276.Size = new System.Drawing.Size(77, 13);
+            this.label276.TabIndex = 235;
+            this.label276.Text = "useInnerspace";
             // 
             // useDronesData
             // 
@@ -6165,24 +6172,6 @@
             this.bttnUserDefinedScript1.UseVisualStyleBackColor = true;
             this.bttnUserDefinedScript1.Click += new System.EventHandler(this.bttnUserDefinedScript1_Click);
             // 
-            // label276
-            // 
-            this.label276.AutoSize = true;
-            this.label276.Location = new System.Drawing.Point(45, 235);
-            this.label276.Name = "label276";
-            this.label276.Size = new System.Drawing.Size(77, 13);
-            this.label276.TabIndex = 235;
-            this.label276.Text = "useInnerspace";
-            // 
-            // useInnerspaceData
-            // 
-            this.useInnerspaceData.AutoSize = true;
-            this.useInnerspaceData.Location = new System.Drawing.Point(132, 235);
-            this.useInnerspaceData.Name = "useInnerspaceData";
-            this.useInnerspaceData.Size = new System.Drawing.Size(24, 13);
-            this.useInnerspaceData.TabIndex = 236;
-            this.useInnerspaceData.Text = "n/a";
-            // 
             // QuestorUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -6205,7 +6194,6 @@
             this.Controls.Add(this.QuestorStateComboBox);
             this.Controls.Add(this.QuestorStatelbl);
             this.Controls.Add(this.lblPocketAction);
-            this.Controls.Add(QuestorUI.lblCurrentMissionInfo);
             this.Controls.Add(this.lblMissionName);
             this.Controls.Add(this.chkShowDetails);
             this.Controls.Add(this.Disable3DCheckBox);

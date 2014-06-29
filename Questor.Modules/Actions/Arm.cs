@@ -165,8 +165,8 @@ namespace Questor.Modules.Actions
 
                 Logging.Log("Arm.MoveItemsToCargo", "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
                 ItemsAreBeingMoved = false;
-                ChangeArmState(ArmState.NotEnoughAmmo);
                 Cache.Instance.Paused = true;
+                ChangeArmState(ArmState.NotEnoughAmmo);
                 return true;
             }
 
@@ -260,8 +260,8 @@ namespace Questor.Modules.Actions
 
                         Logging.Log("Arm.MoveDronesToDroneBay", "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold / dronebay)", Logging.Red);
                         ItemsAreBeingMoved = false;
-                        ChangeArmState(ArmState.NotEnoughDrones);
                         Cache.Instance.Paused = true;
+                        ChangeArmState(ArmState.NotEnoughDrones);
                         return true;
                     }
 
@@ -411,11 +411,23 @@ namespace Questor.Modules.Actions
                 Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
                 return false;
             }
-            finally
+
+            try
             {
-                if (WaitAMomentbeforeNextAction) _lastArmAction = DateTime.UtcNow;
                 Arm.ClearDataBetweenStates();
-                _States.CurrentArmState = _ArmStateToSet;
+                if (_States.CurrentArmState != _ArmStateToSet)
+                {
+                    _States.CurrentArmState = _ArmStateToSet;
+                    if (WaitAMomentbeforeNextAction) _lastArmAction = DateTime.UtcNow;
+                    else Arm.ProcessState();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+                return false;
             }
             
             return true;
@@ -611,8 +623,8 @@ namespace Questor.Modules.Actions
         {
             if (string.IsNullOrEmpty(Settings.Instance.TransportShipName))
             {
-                ChangeArmState(ArmState.NotEnoughAmmo);
                 Logging.Log("Arm.ActivateTransportShip", "Could not find transportshipName in settings!", Logging.Orange);
+                ChangeArmState(ArmState.NotEnoughAmmo);
                 return false;
             }
 
@@ -629,8 +641,8 @@ namespace Questor.Modules.Actions
             {
                 if (string.IsNullOrEmpty(Settings.Instance.SalvageShipName))
                 {
-                    ChangeArmState(ArmState.NotEnoughAmmo);
                     Logging.Log("Arm.ActivateSalvageShip", "Could not find salvageshipName: " + Settings.Instance.SalvageShipName + " in settings!", Logging.Orange);
+                    ChangeArmState(ArmState.NotEnoughAmmo);
                     return false;
                 }
 
@@ -653,14 +665,14 @@ namespace Questor.Modules.Actions
             {
                 if (string.IsNullOrEmpty(Combat.CombatShipName))
                 {
-                    ChangeArmState(ArmState.NotEnoughAmmo);
                     Logging.Log("Arm.ActivateSalvageShip", "Could not find CombatShipName: " + Combat.CombatShipName + " in settings!", Logging.Orange);
+                    ChangeArmState(ArmState.NotEnoughAmmo);
                     return false;
                 }
 
                 if (!ActivateThisShip(Combat.CombatShipName)) return false;
 
-                ChangeArmState(ArmState.RepairShop);
+                ChangeArmState(ArmState.RepairShop, true);
                 return true;
             }
             catch (Exception ex)
@@ -679,7 +691,7 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.RepairItems("Arm.RepairShop [ALL]")) return false; //attempt to use repair facilities if avail in station
                 }
 
-                ChangeArmState(ArmState.LoadSavedFitting);
+                ChangeArmState(ArmState.LoadSavedFitting, true);
                 return true;
             }
             catch (Exception ex)
@@ -718,7 +730,7 @@ namespace Questor.Modules.Actions
                         if ((!DefaultFittingFound) || (UseMissionShip && !MissionSettings.ChangeMissionShipFittings))
                         {
                             if (Logging.DebugFittingMgr) Logging.Log("Arm.LoadFitting", "if ((!Settings.Instance.UseFittingManager || !DefaultFittingFound) || (UseMissionShip && !Cache.Instance.ChangeMissionShipFittings))", Logging.Teal);
-                            ChangeArmState(ArmState.MoveDrones);
+                            ChangeArmState(ArmState.MoveDrones, true);
                             return false;
                         }
 
@@ -727,7 +739,7 @@ namespace Questor.Modules.Actions
                         if (MissionSettings.FittingToLoad.Equals(MissionSettings.CurrentFit))
                         {
                             Logging.Log("Arm.LoadFitting", "Current fit is now correct", Logging.White);
-                            ChangeArmState(ArmState.MoveDrones);
+                            ChangeArmState(ArmState.MoveDrones, true);
                             return true;
                         }
 
@@ -763,19 +775,19 @@ namespace Questor.Modules.Actions
                             if (UseMissionShip)
                             {
                                 Logging.Log("Arm.LoadFitting", "Could not find fitting for this ship typeid.  Using current fitting.", Logging.Orange);
-                                ChangeArmState(ArmState.MoveDrones);
+                                ChangeArmState(ArmState.MoveDrones, true);
                                 return false;
                             }
 
                             Logging.Log("Arm.LoadFitting", "Could not find fitting - switching to default", Logging.Orange);
                             MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
-                            ChangeArmState(ArmState.MoveDrones);
+                            ChangeArmState(ArmState.MoveDrones, true);
                             return false;
                         }
                     }
                 }
 
-                ChangeArmState(ArmState.MoveDrones);
+                ChangeArmState(ArmState.MoveDrones, true);
                 return true;
             }
             catch (Exception ex)
@@ -860,7 +872,7 @@ namespace Questor.Modules.Actions
                 if (!MoveItemsToCargo(_CapBoosterInvTypeItem.TypeName, Settings.Instance.NumberOfCapBoostersToLoad, ArmState.MoveCapBoosters, ArmState.MoveAmmo)) return false;
             }
 
-            ChangeArmState(ArmState.MoveAmmo);
+            ChangeArmState(ArmState.MoveAmmo, true);
             return false;
 
             #endregion move cap boosters

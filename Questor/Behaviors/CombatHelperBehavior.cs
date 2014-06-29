@@ -27,15 +27,6 @@ namespace Questor.Behaviors
 {
     public class CombatHelperBehavior
     {
-        //private readonly Arm _arm;
-        //private readonly Combat _combat;
-        //private readonly Drones _drones;
-
-        //private readonly Panic _panic;
-        //private readonly Salvage _salvage;
-        //private readonly Slave _slave;
-        private readonly UnloadLoot _unloadLoot;
-
         public DateTime LastAction;
         public static long AgentID;
 
@@ -45,21 +36,10 @@ namespace Questor.Behaviors
 
         private bool ValidSettings { get; set; }
 
-        public bool CloseQuestorFlag = true;
-
-        public string CharacterName { get; set; }
-
         public static int CombatHelperBehaviorInstances = 0;
 
         public CombatHelperBehavior()
         {
-            //_arm = new Arm();
-            //_combat = new Combat();
-            //_drones = new Drones();
-            //_panic = new Panic();
-            //_salvage = new Salvage();
-            //_slave = new Slave();
-            _unloadLoot = new UnloadLoot();
             _watch = new Stopwatch();
 
             //
@@ -423,7 +403,7 @@ namespace Questor.Behaviors
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                     }
 
-                    _unloadLoot.ProcessState();
+                    UnloadLoot.ProcessState();
 
                     if (_States.CurrentUnloadLootState == UnloadLootState.Done)
                     {

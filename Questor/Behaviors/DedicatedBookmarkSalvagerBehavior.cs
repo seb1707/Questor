@@ -27,11 +27,6 @@ namespace Questor.Behaviors
 {
     public class DedicatedBookmarkSalvagerBehavior
     {
-        //private readonly Arm _arm;
-        //private readonly Panic _panic;
-        //private readonly Statistics _statistics;
-        //private readonly Salvage _salvage;
-        private readonly UnloadLoot _unloadLoot;
         public DateTime LastAction;
         private DateTime _nextBookmarksrefresh = DateTime.UtcNow;
 
@@ -54,11 +49,6 @@ namespace Questor.Behaviors
 
         public DedicatedBookmarkSalvagerBehavior()
         {
-            //_salvage = new Salvage();
-            _unloadLoot = new UnloadLoot();
-            //_arm = new Arm();
-            //_panic = new Panic();
-            //_statistics = new Statistics();
             _watch = new Stopwatch();
 
             //
@@ -366,7 +356,7 @@ namespace Questor.Behaviors
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                     }
 
-                    _unloadLoot.ProcessState();
+                    UnloadLoot.ProcessState();
 
                     if (_States.CurrentUnloadLootState == UnloadLootState.Done)
                     {

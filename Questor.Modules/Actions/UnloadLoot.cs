@@ -22,7 +22,7 @@ namespace Questor.Modules.Actions
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;
 
-    public class UnloadLoot
+    public static class UnloadLoot
     {
         //private static DateTime _nextUnloadAction = DateTime.UtcNow;
         private static DateTime _lastUnloadAction = DateTime.MinValue;
@@ -31,7 +31,6 @@ namespace Questor.Modules.Actions
 
         private static bool AmmoIsBeingMoved;
         private static bool LootIsBeingMoved;
-        private static bool AllLootWillFit;
         private static IEnumerable<DirectItem> ammoToMove;
         private static IEnumerable<DirectItem> scriptsToMove;
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
@@ -39,8 +38,7 @@ namespace Questor.Modules.Actions
         private static DirectContainer PutLootHere = null;
         private static string PutLootHere_Description;
 
-
-        private bool WaitForLockedItems(string CallingRoutineForLogs, UnloadLootState _UnloadLootStateToSwitchTo)
+        private static bool WaitForLockedItems(string CallingRoutineForLogs, UnloadLootState _UnloadLootStateToSwitchTo)
         {
             if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
             {
@@ -63,7 +61,7 @@ namespace Questor.Modules.Actions
             return true;
         }
 
-        private bool MoveAmmo()
+        private static bool MoveAmmo()
         {
             try
             {
@@ -137,7 +135,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        private bool MoveMissionGateKeys()
+        private static bool MoveMissionGateKeys()
         {
             try
             {
@@ -214,7 +212,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        private bool MoveCommonMissionCompletionItems()
+        private static bool MoveCommonMissionCompletionItems()
         {
             try
             {
@@ -301,7 +299,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        private bool MoveScripts()
+        private static bool MoveScripts()
         {
             try
             {
@@ -399,7 +397,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        private bool StackAmmoHangar()
+        private static bool StackAmmoHangar()
         {
             try
             {
@@ -438,7 +436,7 @@ namespace Questor.Modules.Actions
             return false;
         }
 
-        private bool MoveLoot()
+        private static bool MoveLoot()
         {
             if (DateTime.UtcNow < _lastUnloadAction.AddMilliseconds(1000))
             {
@@ -558,7 +556,7 @@ namespace Questor.Modules.Actions
             return false;
         }
         
-        private bool StackLootHangar()
+        private static bool StackLootHangar()
         {
             try
             {
@@ -591,8 +589,8 @@ namespace Questor.Modules.Actions
 
             return false;
         }
-        
-        private bool EveryUnloadLootPulse()
+
+        private static bool EveryUnloadLootPulse()
         {
             try
             {
@@ -641,7 +639,8 @@ namespace Questor.Modules.Actions
             }
         }
 
-        public void ProcessState()
+
+        public static void ProcessState()
         {
             if (!EveryUnloadLootPulse()) return;
             

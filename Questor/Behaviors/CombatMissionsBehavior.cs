@@ -30,28 +30,18 @@ namespace Questor.Behaviors
 {
     public class CombatMissionsBehavior
     {
-        //private readonly AgentInteraction _agentInteraction;
-        //private readonly Arm _arm;
         private readonly SwitchShip _switchShip;
-        //private readonly Combat _combat;
         private readonly CourierMissionCtrl _courierMissionCtrl;
-        //private readonly Drones _drones;
-
+        
         private DateTime _lastPulse;
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionCtrl _combatMissionCtrl;
-        //private readonly Traveler _traveler;
-        //private readonly Panic _panic;
         private readonly Storyline _storyline;
-        //private readonly Statistics _statistics;
-        //private readonly Salvage _salvage;
-        private readonly UnloadLoot _unloadLoot;
         public DateTime LastCMBAction;
         private readonly Random _random;
         private int _randomDelay;
         public static long AgentID;
-        private readonly Stopwatch _watch;
-
+        
         private double _lastX;
         private double _lastY;
         private double _lastZ;
@@ -59,27 +49,18 @@ namespace Questor.Behaviors
         public bool PanicStateReset; //false;
 
         private bool ValidSettings { get; set; }
-
-        public bool CloseQuestorFlag = true;
-
-        public string CharacterName { get; set; }
-
-        //DateTime _nextAction = DateTime.UtcNow;
-
+        
         private DateTime _nextBookmarkRefreshCheck = DateTime.MinValue;
         private DateTime _nextBookmarksrefresh = DateTime.MinValue;
         public CombatMissionsBehavior()
         {
             _lastPulse = DateTime.MinValue;
-
             _random = new Random();
-            _unloadLoot = new UnloadLoot();
             _courierMissionCtrl = new CourierMissionCtrl();
             _switchShip = new SwitchShip();
             _combatMissionCtrl = new CombatMissionCtrl();
             _storyline = new Storyline();
-            _watch = new Stopwatch();
-
+            
             //
             // this is combat mission specific and needs to be generalized
             //
@@ -136,6 +117,44 @@ namespace Questor.Behaviors
             return;
         }
 
+        public bool ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState _CMBStateToSet, string LogMessage = null)
+        {
+            try
+            {
+                //
+                // if _ArmStateToSet matches also do this stuff...
+                //
+                switch (_CMBStateToSet)
+                {
+                    case CombatMissionsBehaviorState.Idle:
+                        return true;
+
+                    case CombatMissionsBehaviorState.Panic:
+                        return true;
+
+                    case CombatMissionsBehaviorState.Error:
+                        return true;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
+                return false;
+            }
+            finally
+            {
+                //if (WaitAMomentbeforeNextAction) Time.Instance.next = DateTime.UtcNow;
+                //CombatMissionsBehavior.ClearDataBetweenStates();
+                if (_States.CurrentCombatMissionBehaviorState != _CMBStateToSet)
+                {
+                    _States.CurrentCombatMissionBehaviorState = _CMBStateToSet;
+                    ProcessState();    
+                }
+            }
+
+            return true;
+        }
         private void BeginClosingQuestor()
         {
             Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
@@ -352,7 +371,7 @@ namespace Questor.Behaviors
                 // Questor does not handle in space starts very well, head back to base to try again
                 Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in [" + _randomDelay + "] seconds", Logging.White);
                 LastCMBAction = DateTime.UtcNow;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.DelayedGotoBase);
                 return;
             }
 
@@ -363,13 +382,13 @@ namespace Questor.Behaviors
                     Logging.Log("Settings", "You *must* set a MissionsPath to use Questor. Without it we do not know what directory to pull mission XMLs from. Disabling Autostart.", Logging.White);
                     Settings.Instance.AutoStart = false;
                     Cache.Instance.Paused = true;
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Error);
                     return;
                 }
 
                 //if you are in wrong station and is not first agent
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Switch;
                 _firstStart = false;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Switch);
                 return;
             }
 
@@ -383,7 +402,7 @@ namespace Questor.Behaviors
                 {
                     Logging.Log("CombatMissionsBehavior", "Storyline detected, doing storyline.", Logging.White);
                     _storyline.Reset();
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.PrepareStorylineSwitchAgents;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.PrepareStorylineSwitchAgents);
                     return;
                 }
 
@@ -402,14 +421,12 @@ namespace Questor.Behaviors
                     if (Cache.Instance.CourierMission)
                     {
                         Cache.Instance.CourierMission = false;
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                         _States.CurrentQuestorState = QuestorState.Idle;
+                        ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Idle);
+                        return;
                     }
-                    else
-                    {
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
-                    }
-
+                    
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.UnloadLoot);
                     return;
                 }
 
@@ -420,7 +437,7 @@ namespace Questor.Behaviors
             {
                 MissionSettings.UpdateMissionName(AgentID);
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Arm;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Arm);
                 return;
             }
 
@@ -428,7 +445,7 @@ namespace Questor.Behaviors
             {
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 ValidateCombatMissionSettings();
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Switch;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Switch);
                 return;
             }
 
@@ -450,7 +467,8 @@ namespace Questor.Behaviors
             if (_States.CurrentSwitchShipState == SwitchShipState.Done)
             {
                 _States.CurrentSwitchShipState = SwitchShipState.Idle;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.GotoBase);
+                return;
             }
 
             return;
@@ -470,7 +488,7 @@ namespace Questor.Behaviors
                 else
                 {
                     Logging.Log("Arm", "Begin", Logging.White);
-                    _States.CurrentArmState = ArmState.Begin;
+                    Arm.ChangeArmState(ArmState.Begin);
 
                     // Load right ammo based on mission
                     Arm.AmmoToLoad.Clear();
@@ -493,8 +511,8 @@ namespace Questor.Behaviors
                 Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
-                _States.CurrentArmState = ArmState.Idle;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                Arm.ChangeArmState(ArmState.Idle);
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Error);
                 return;
             }
 
@@ -505,8 +523,8 @@ namespace Questor.Behaviors
                 Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
                 Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
-                _States.CurrentArmState = ArmState.Idle;
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                Arm.ChangeArmState(ArmState.Idle);
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Error);
                 return;
             }
 
@@ -515,7 +533,7 @@ namespace Questor.Behaviors
                 //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
                 Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                 Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                _States.CurrentArmState = ArmState.Idle;
+                Arm.ChangeArmState(ArmState.Idle);
                 _States.CurrentDroneState = DroneState.WaitingForTargets;
                 _States.CurrentCombatMissionBehaviorState = Cache.Instance.CourierMission ? CombatMissionsBehaviorState.CourierMission : CombatMissionsBehaviorState.LocalWatch;
                 return;
@@ -658,19 +676,22 @@ namespace Questor.Behaviors
 
                 if (_States.CurrentCombatMissionCtrlState == CombatMissionCtrlState.Error)
                 {
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
+                    Traveler.Destination = null;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Error);
+                    return;
                 }
-                else if (_States.CurrentCombatState != CombatState.OutOfAmmo && MissionSettings.Mission != null && MissionSettings.Mission.State == (int)MissionState.Accepted)
+                
+                if (_States.CurrentCombatState != CombatState.OutOfAmmo && MissionSettings.Mission != null && MissionSettings.Mission.State == (int)MissionState.Accepted)
                 {
                     ValidateCombatMissionSettings();
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CompleteMission;
+                    Traveler.Destination = null;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.CompleteMission);
+                    return;
                 }
-                else
-                {
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
-                }
-
+                
                 Traveler.Destination = null;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.UnloadLoot);
+                return;
             }
 
             return;
@@ -698,19 +719,19 @@ namespace Questor.Behaviors
                 if (Cache.Instance.CourierMission)
                 {
                     Cache.Instance.CourierMission = false;
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                     _States.CurrentQuestorState = QuestorState.Idle;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Idle);
+                    return;
                 }
-                else if (Statistics.LastMissionCompletionError.AddSeconds(10) < DateTime.UtcNow)
+                
+                if (Statistics.LastMissionCompletionError.AddSeconds(10) < DateTime.UtcNow)
                 {
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Statistics;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Statistics);
+                    return;
                 }
-                else
-                {
-                    Logging.Log("CurrentCombatMissionBehavior.CompleteMission", "Skipping statistics: We have not yet completed a mission", Logging.Teal);
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
-                }
-
+                
+                Logging.Log("CurrentCombatMissionBehavior.CompleteMission", "Skipping statistics: We have not yet completed a mission", Logging.Teal);
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.UnloadLoot);
                 return;
             }
 
@@ -761,7 +782,8 @@ namespace Questor.Behaviors
                 }
             }
 
-            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.UnloadLoot;
+            ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.UnloadLoot);
+            return;
         }
         
         private void ExecuteMissionCMBState()
@@ -918,10 +940,10 @@ namespace Questor.Behaviors
             
             if (_States.CurrentTravelerState == TravelerState.AtDestination)
             {
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.ExecuteMission;
                 // Seeing as we just warped to the mission, start the mission controller
                 _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
                 Traveler.Destination = null;
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.ExecuteMission);
                 return;
             }
 
@@ -938,7 +960,7 @@ namespace Questor.Behaviors
                 _States.CurrentUnloadLootState = UnloadLootState.Begin;
             }
 
-            _unloadLoot.ProcessState();
+            UnloadLoot.ProcessState();
 
             if (_States.CurrentUnloadLootState == UnloadLootState.Done)
             {
@@ -1101,9 +1123,9 @@ namespace Questor.Behaviors
                     }
                 }
 
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoSalvageBookmark;
                 _lastSalvageTrip = DateTime.UtcNow;
                 Traveler.Destination = new BookmarkDestination(bookmark);
+                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.GotoSalvageBookmark);
                 return;
             }
 

@@ -19,16 +19,9 @@ namespace Questor.Behaviors
     {
         private static readonly List<int> MiningToolGroupIDs = new List<int>();
         private readonly List<long> EmptyBelts = new List<long>();
-        //private readonly Arm _arm;
-        //private readonly Panic _panic;
-        //private readonly Combat _combat;
-        //private readonly Drones _drones;
-        private readonly UnloadLoot _unloadLoot;
-
         private bool PanicStateReset = false;
         private bool _isJammed = false;
         private int _minerNumber = 0;
-        //private double _lastAsteroidPosition = 0;
         private EntityCache _targetAsteroid;
         private long _targetAsteroidID;
         private EntityCache _currentBelt;
@@ -38,14 +31,7 @@ namespace Questor.Behaviors
         
         public MiningBehavior()
         {
-            //_arm = new Arm();
-            //_panic = new Panic();
-            //_combat = new Combat();
-            _unloadLoot = new UnloadLoot();
-            //_drones = new Drones();
-
             _lastPulse = DateTime.MinValue;
-
             MiningToolGroupIDs.Add((int)Group.Miners);              //miners
             MiningToolGroupIDs.Add((int)Group.StripMiners);         //strip miners
             MiningToolGroupIDs.Add((int)Group.ModulatedStripMiners);//modulated strip miners
@@ -156,7 +142,7 @@ namespace Questor.Behaviors
                         _States.CurrentUnloadLootState = UnloadLootState.Begin;
                     }
 
-                    _unloadLoot.ProcessState();
+                    UnloadLoot.ProcessState();
 
                     if (_States.CurrentUnloadLootState == UnloadLootState.Done)
                     {

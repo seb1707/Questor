@@ -1134,14 +1134,6 @@ namespace Questor.Behaviors
         
         private void SalvageCMBState()
         {
-            if (Logging.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: attempting to open cargo hold", Logging.White);
-            if (Cache.Instance.CurrentShipsCargo == null)
-            {
-                Logging.Log("CombatMissionsBehavior", "salvage:: if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                return;
-            }
-
-            if (Logging.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage:: done opening cargo hold", Logging.White);
             Salvage.SalvageAll = true;
             if (NavigateOnGrid.SpeedTank || !NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = true;
             Salvage.CurrentlyShouldBeSalvaging = true;

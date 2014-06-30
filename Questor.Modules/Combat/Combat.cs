@@ -1395,7 +1395,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Check if we still have that ammo in our cargo
-                    correctAmmoInCargo = correctAmmoToUse.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
+                    correctAmmoInCargo = correctAmmoToUse.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
 
                     //check if mission specific ammo is defined
                     if (MissionSettings.MissionAmmo.Count() != 0)
@@ -1404,7 +1404,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Check if we still have that ammo in our cargo
-                    correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
+                    correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
                     if (MissionSettings.MissionAmmo.Count() != 0)
                     {
                         correctAmmoInCargo = MissionSettings.MissionAmmo;
@@ -1439,7 +1439,7 @@ namespace Questor.Modules.Combat
                     correctAmmoToUse = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
 
                     // Check if we still have that ammo in our cargo
-                    correctAmmoInCargo = correctAmmoToUse.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
+                    correctAmmoInCargo = correctAmmoToUse.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
 
                     //check if mission specific ammo is defined
                     if (MissionSettings.MissionAmmo.Count() != 0)
@@ -1448,7 +1448,7 @@ namespace Questor.Modules.Combat
                     }
 
                     // Check if we still have that ammo in our cargo
-                    correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
+                    correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
                     if (MissionSettings.MissionAmmo.Count() != 0)
                     {
                         correctAmmoInCargo = MissionSettings.MissionAmmo;
@@ -1566,6 +1566,8 @@ namespace Questor.Modules.Combat
             //    return true;
             //}
 
+            if (Cache.Instance.CurrentShipsCargo != null) return false;
+
             DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(e => e.TypeId == ammo.TypeId && e.Quantity >= Combat.MinimumAmmoCharges);
 
             // This should have shown up as "out of ammo"
@@ -1632,7 +1634,7 @@ namespace Questor.Modules.Combat
             IEnumerable<Ammo> correctAmmo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
 
             // Check if we still have that ammo in our cargo
-            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId)).ToList();
+            IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId)).ToList();
 
             //check if mission specific ammo is defined
             if (MissionSettings.MissionAmmo.Count() != 0)
@@ -1641,7 +1643,7 @@ namespace Questor.Modules.Combat
             }
 
             // Check if we still have that ammo in our cargo
-            correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId && e.Quantity >= Combat.MinimumAmmoCharges)).ToList();
+            correctAmmoInCargo = correctAmmoInCargo.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId && e.Quantity >= Combat.MinimumAmmoCharges)).ToList();
             if (MissionSettings.MissionAmmo.Count() != 0)
             {
                 correctAmmoInCargo = MissionSettings.MissionAmmo;
@@ -1741,6 +1743,7 @@ namespace Questor.Modules.Combat
         {
             // We need the cargo bay open for both reload actions
             //if (!Cache.Instance.OpenCargoHold("Combat: ReloadAmmo")) return false;
+            if (weapon.GroupId == 53) return true;
 
             return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
         }
@@ -1764,6 +1767,12 @@ namespace Questor.Modules.Combat
                 if (Cache.Instance.MyShipEntity.GroupId == (int)Group.Shuttle)
                 {
                     Logging.Log("ReloadAll", "You are in a Shuttle, no need to reload ammo!", Logging.Debug);
+                    return true;
+                }
+
+                if (Combat.WeaponGroupId == 53)
+                {
+                    Logging.Log("ReloadAll", "Your guns do not use ammo. [ WeaponGroupId is 53 ]", Logging.Debug);
                     return true;
                 }
             }
@@ -3385,7 +3394,7 @@ namespace Questor.Modules.Combat
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
                         }
 
-                        if (Cache.Instance.ActiveShip.GivenName != CombatShipName)
+                        if (Cache.Instance.ActiveShip.GivenName.ToLower() != CombatShipName.ToLower())
                         {
                             Logging.Log("Combat", "Your Current ship [" + Cache.Instance.ActiveShip.GivenName + "] GroupID [" + Cache.Instance.MyShipEntity.GroupId + "] TypeID [" + Cache.Instance.MyShipEntity.TypeId + "] is not the CombatShipName [" + CombatShipName + "]", Logging.Red);
                             _States.CurrentCombatState = CombatState.OutOfAmmo;
@@ -3418,11 +3427,6 @@ namespace Questor.Modules.Combat
 
                     case CombatState.KillTargets:
 
-                        if (Cache.Instance.CurrentShipsCargo == null)
-                        {
-                            Logging.Log("Combat.KillTargets", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                            return;
-                        }
                         _States.CurrentCombatState = CombatState.CheckTargets;
 
                         if (Logging.DebugPreferredPrimaryWeaponTarget || Logging.DebugKillTargets)

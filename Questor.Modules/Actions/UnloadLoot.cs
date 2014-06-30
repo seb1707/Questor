@@ -443,10 +443,18 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (LootIsBeingMoved)
+            if (Cache.Instance.CurrentShipsCargo == null)
+            {
+                Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                return false;
+            }
+
+            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "Cache.Instance.CurrentShipsCargo.Items.Any() [" + Cache.Instance.CurrentShipsCargo.Items.Any() + "]", Logging.White);
+            
+
+            if (LootIsBeingMoved || !Cache.Instance.CurrentShipsCargo.Items.Any())
             {
                 if(!WaitForLockedItems(_States.CurrentUnloadLootState.ToString(), UnloadLootState.StackLootHangar)) return false;
-                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (DateTime.UtcNow.Subtract(Cache.Instance.LastStackLootHangar).TotalSeconds < 30)", Logging.Teal);
                 //
                 // why do we *ever* have to close the loothangar?
                 //
@@ -457,13 +465,6 @@ namespace Questor.Modules.Actions
                 return true;
             }
             
-            if (Cache.Instance.CurrentShipsCargo == null)
-            {
-                Logging.Log("UnloadLootState.MoveAmmo", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                return false;
-            }
-            
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.CargoHold.IsValid)", Logging.White);
             IEnumerable<DirectItem> lootToMove = Cache.Instance.CurrentShipsCargo.Items.ToList();
 
             //IEnumerable<DirectItem> somelootToMove = lootToMove;

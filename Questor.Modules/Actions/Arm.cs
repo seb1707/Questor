@@ -429,8 +429,6 @@ namespace Questor.Modules.Actions
                 Logging.Log(_States.CurrentArmState.ToString(), "Exception [" + ex + "]", Logging.Red);
                 return false;
             }
-            
-            return true;
         }
 
         private static bool BeginArmState()
@@ -1085,12 +1083,6 @@ namespace Questor.Modules.Actions
             //    _States.CurrentArmState = ArmState.Cleanup;
             //    return false;
             //}
-
-            if (Cache.Instance.CurrentShipsCargo == null)
-            {
-                Logging.Log("ArmState.MoveItems", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
-                return false;
-            }
 
             //
             // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.

@@ -1738,10 +1738,10 @@ namespace Questor.Modules.Activities
                                 return;
                             }
 
-                            if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                            if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                             {
-                                int CurrentShipsCargoItemCount = 0;
-                                CurrentShipsCargoItemCount = Cache.Instance.CurrentShipsCargo.Items.Count();
+                                //int CurrentShipsCargoItemCount = 0;
+                                //CurrentShipsCargoItemCount = Cache.Instance.CurrentShipsCargo.Items.Count();
 
                                 //DirectItem itemsToMove = null;
                                 //itemsToMove = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(i => i.TypeName.ToLower() == items.FirstOrDefault().ToLower());
@@ -1839,20 +1839,7 @@ namespace Questor.Modules.Activities
                     quantity = 1;
                 }
 
-                bool done = itemsToLoot.Count == 0;
-                if (!done)
-                {
-                    //if (!Cache.Instance.OpenCargoHold("CombatMissionCtrl.LootItemAction")) return;
-                    if (Cache.Instance.CurrentShipsCargo.Window.IsReady)
-                    {
-                        if (Cache.Instance.CurrentShipsCargo.Items.Any(i => (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
-                        {
-                            done = true;
-                        }
-                    }
-                }
-
-                if (done)
+                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
                 {
                     Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "We are done - we have the item(s)", Logging.Teal);
 
@@ -2056,15 +2043,7 @@ namespace Questor.Modules.Activities
 
                 if (!Salvage.LootEverything)
                 {
-                    bool done = items.Count == 0;
-                    if (!done)
-                    {
-                        // We assume that the ship's cargo will be opened somewhere else
-                        if (Cache.Instance.CurrentShipsCargo != null)
-                            done |= Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName));
-                    }
-
-                    if (done)
+                    if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => items.Contains(i.TypeName)))
                     {
                         Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "LootEverything:  We are done looting", Logging.Teal);
 

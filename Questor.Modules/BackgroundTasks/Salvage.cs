@@ -722,7 +722,7 @@ namespace Questor.Modules.BackgroundTasks
             //
             // when full return to base and unloadloot
             //
-            if (UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.IsValid && Cache.Instance.CurrentShipsCargo.Capacity > 150 && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 50)
+            if (UnloadLootAtStation && Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Capacity > 150 && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 50)
             {
                 if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
                 {
@@ -773,6 +773,7 @@ namespace Questor.Modules.BackgroundTasks
                 if (containersInRangeCount < 1) Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRangeCount + "]", Logging.Teal);
                 if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
             }
+            if (Cache.Instance.CurrentShipsCargo == null) return;
 
             List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
             double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;

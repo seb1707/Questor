@@ -1853,7 +1853,7 @@ namespace Questor.Modules.Activities
                 //
                 // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
                 //
-                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderBy(e => e.Distance);
+                IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.GroupId == (int)Group.CargoContainer).ThenBy(e => e.Distance);
 
 
                 if (!containers.Any())

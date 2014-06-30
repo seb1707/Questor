@@ -110,6 +110,7 @@ namespace Questor.Modules.Lookup
         public DateTime LastStackAmmoHangar = DateTime.UtcNow;
         public DateTime LastStackLootHangar = DateTime.UtcNow;
         public DateTime LastStackItemHangar = DateTime.UtcNow;
+        public DateTime LastOpenItemHangar = DateTime.UtcNow;
         public DateTime LastStackShipsHangar = DateTime.UtcNow;
         public DateTime LastStackCargohold = DateTime.UtcNow;
         public DateTime LastStackLootContainer = DateTime.UtcNow;

@@ -1811,10 +1811,9 @@ namespace Questor.Modules.Activities
                     targetContainerNames = action.GetParameterValues("target");
                 }
 
-                if (targetContainerNames == null && Salvage.LootItemRequiresTarget)
+                if ((targetContainerNames == null || !targetContainerNames.Any()) && Salvage.LootItemRequiresTarget)
                 {
                     Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], " *** No Target Was Specified In the LootItem Action! ***", Logging.Debug);
-                    Nextaction();
                 }
 
                 List<string> itemsToLoot = null;
@@ -1867,16 +1866,6 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                if (targetContainerNames != null && containers.Where(i => !i.IsWreckEmpty).All(i => i.Name != targetContainerNames.FirstOrDefault()))
-                {
-                    Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "no containers named [" + targetContainerNames + "] left to loot, next action", Logging.Teal);
-                    if (NavigateOnGrid.SpeedTank) Salvage.OpenWrecks = false;
-                    Salvage.MissionLoot = false; 
-                    Salvage.CurrentlyShouldBeSalvaging = false;
-                    Nextaction();
-                    return;
-                }
-
                 //
                 // add containers that we were told to loot into the ListofContainersToLoot so that they are prioritized by the background salvage routine
                 //
@@ -1884,13 +1873,38 @@ namespace Questor.Modules.Activities
                 {
                     foreach (EntityCache continerToLoot in containers)
                     {
-                        if (continerToLoot.Name == targetContainerNames.FirstOrDefault())
+                        if (targetContainerNames != null && targetContainerNames.Any())
                         {
-                            if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                            foreach (string targetContainerName in targetContainerNames)
                             {
-                                Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                                if (continerToLoot.Name == targetContainerName)
+                                {
+                                    if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                                    {
+                                        Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                                    }
+                                }
+
+                                continue;
                             }
                         }
+                        else
+                        {
+                            foreach (EntityCache _unlootedcontainer in Cache.Instance.UnlootedContainers)
+                            {
+                                if (continerToLoot.Name == _unlootedcontainer.Name)
+                                {
+                                    if (!Cache.Instance.ListofContainersToLoot.Contains(continerToLoot.Id))
+                                    {
+                                        Cache.Instance.ListofContainersToLoot.Add(continerToLoot.Id);
+                                    }
+                                }
+
+                                continue;
+                            }
+                        }
+
+                        continue;
                     }
                 }
 
@@ -1905,7 +1919,16 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                EntityCache container = containers.FirstOrDefault(c => targetContainerNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+                EntityCache container;
+                if (targetContainerNames != null && targetContainerNames.Any())
+                {
+                    container = containers.FirstOrDefault(c => targetContainerNames.Contains(c.Name));    
+                }
+                else
+                {
+                    container = containers.FirstOrDefault();
+                }
+                
                 if (container != null) 
                 {
                     if (container.Distance > (int)Distances.SafeScoopRange)

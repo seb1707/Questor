@@ -23,7 +23,7 @@ namespace Questor.Modules.Actions
 		public static void ProcessState()
 		{
 			// Only pulse state changes every .5s
-			if (DateTime.UtcNow <  Time.Instance.NextSkillTrainerProcessState)
+			if (DateTime.UtcNow < Time.Instance.NextSkillTrainerProcessState || DateTime.UtcNow < Time.Instance.QuestorStarted_DateTime.AddSeconds(15))
 			{
 				return;
 			}

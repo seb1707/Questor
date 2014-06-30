@@ -136,7 +136,7 @@ namespace QuestorManager
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
                 Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cleanup.SessionState = "Quitting";
+                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 return;
             }
@@ -248,13 +248,14 @@ namespace QuestorManager
                     return;
                 }
 
-                //if (Cleanup.SessionState == "Quitting")
-                //{
-                //    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
-                //    {
-                //        BeginClosingQuestor();
-                //    }
-                //}
+                if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
+                {
+                    if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                    {
+                        _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                        Cleanup.BeginClosingQuestor();
+                    }
+                }
 
                 // Start _cleanup.ProcessState
                 // Description: Closes Windows, and eventually other things considered 'cleanup' useful to more than just Questor(Missions) but also Anomalies, Mining, etc

@@ -180,9 +180,13 @@ namespace Questor.Behaviors
         public void ProcessState()
         {
             //Logging.Log("DebugHangarsBehavior","ProcessState - every tick",Logging.Teal);
-            if (Cleanup.SessionState == "Quitting")
+            if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
             {
-                BeginClosingQuestor();
+                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                {
+                    _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                    BeginClosingQuestor();
+                }
             }
 
             if (Cache.Instance.GotoBaseNow)

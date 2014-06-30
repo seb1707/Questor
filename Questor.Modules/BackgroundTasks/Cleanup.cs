@@ -1,4 +1,6 @@
 ﻿
+using System.Windows.Forms;
+
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -29,14 +31,15 @@ namespace Questor.Modules.BackgroundTasks
         private static DateTime FoundDuelInvitationTime = DateTime.UtcNow.AddDays(-1);
         public static string ReasonToStopQuestor { get; set; }
         public static string SessionState { get; set; }
-
-
+        public static bool SignalToQuitQuestorAndEVEAndRestartInAMoment { get; set; }
+        public static bool SignalToQuitQuestor { get; set; }
+        
         public static void BeginClosingQuestor()
         {
             Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-            Cleanup.SessionState = "Quitting";
+            Cleanup.SessionState = "BeginClosingQuestor";
+            SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
-            //Cleanup.CloseQuestor();
         }
 
         public static void DirecteveDispose()
@@ -44,8 +47,16 @@ namespace Questor.Modules.BackgroundTasks
             Logging.Log("Questor", "started calling DirectEve.Dispose()", Logging.White);
             Cache.Instance.DirectEve.Dispose(); //could this hang?
             Logging.Log("Questor", "finished calling DirectEve.Dispose()", Logging.White);
-            Process.GetCurrentProcess().Kill();
-            Environment.Exit(0);
+            //
+            // if Cleanup.SessionState is "Quitting!!" then we know for certain we are scheduling a restart, NOT just exiting questor (and possibly trying to restart it)
+            //
+            if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
+            {
+                Process.GetCurrentProcess().Kill();
+                Environment.Exit(0);    
+            }
+            
+            Cleanup.SignalToQuitQuestor = true;
         }
 
         public static bool CloseQuestor(string Reason, bool restart = false)
@@ -475,7 +486,7 @@ namespace Questor.Modules.BackgroundTasks
                         Cleanup.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cleanup.ReasonToStopQuestor, Logging.White);
                         Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
-                        Cleanup.SessionState = "Quitting";
+                        Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                         Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                         return;
                     }
@@ -643,7 +654,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorEndProcess = true;
                                 Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
-                                Cleanup.SessionState = "Quitting";
+                                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                                 return;
                             }
@@ -656,7 +667,7 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = false;
                                 Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
-                                Cleanup.SessionState = "Quitting";
+                                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                                 Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
                                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
@@ -705,7 +716,7 @@ namespace Questor.Modules.BackgroundTasks
                                 //Cache.Instance.CloseQuestorCMDLogoff = false;
                                 //Cache.Instance.CloseQuestorCMDExitGame = true;
                                 //Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
-                                //Cleanup.SessionState = "Quitting";
+                                //Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                                 window.Close();
                                 continue;
                             }
@@ -824,7 +835,7 @@ namespace Questor.Modules.BackgroundTasks
                         Logging.Log("Cleanup", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                         Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                         Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-                        Cleanup.SessionState = "Quitting";
+                        Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                         _States.CurrentQuestorState = QuestorState.CloseQuestor;
                         Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                         return;

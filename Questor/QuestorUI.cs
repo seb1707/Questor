@@ -60,8 +60,7 @@ namespace Questor
             try
             {
                 if (Logging.DebugUI) Logging.Log("QuestorUI", "QuestorfrmMainFormClosed", Logging.White);
-                //Cache.Instance.DirectEve.Dispose();
-                //Cache.Instance.DirectEve = null;
+                Cleanup.SignalToQuitQuestor = true;
             }
             catch (Exception ex)
             {
@@ -490,16 +489,12 @@ namespace Questor
                 lastKnownGoodConnectedTimeData.Text = "[" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastKnownGoodConnectedTime).TotalMinutes, 0) + "] min ago";
                 dataStopTimeSpecified.Text = Time.Instance.StopTimeSpecified.ToString();
 
-                if (Cleanup.SessionState == "Quitting")
+                if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
                 {
                     if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                     {
-                        if (Cleanup.ReasonToStopQuestor == string.Empty)
-                        {
-                            Cleanup.ReasonToStopQuestor = "Cleanup.SessionState == Quitting";
-                        }
-
-                        Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
+                        _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                        Cleanup.CloseQuestor("Quitting");
                     }
                 }
 
@@ -1488,7 +1483,7 @@ namespace Questor
         private void btnSetQuestorQuittingFlag_Click_1(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Setting: Cleanup.SessionState to [Quitting] - the next Questor.Idle state should see and process this.", Logging.Debug);
-            Cleanup.SessionState = "Quitting";
+            Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
         }
 
         private void bttnUserDefinedScript1_Click(object sender, EventArgs e)

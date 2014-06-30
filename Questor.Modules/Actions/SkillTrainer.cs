@@ -90,7 +90,7 @@ namespace Questor.Modules.Actions
 					Cache.Instance.CloseQuestorEndProcess = true;
 					Settings.Instance.AutoStart = false;
 					Cleanup.ReasonToStopQuestor = "Done Processing Skill Training Plan and adding skills as needed to the training queue";
-					Cleanup.SessionState = "Quitting";
+					Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
 					Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
 					break;
 

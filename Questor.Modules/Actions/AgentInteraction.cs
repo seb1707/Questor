@@ -396,7 +396,7 @@ namespace Questor.Modules.Actions
                             Cache.Instance.CloseQuestorCMDExitGame = true;
                             Cleanup.ReasonToStopQuestor = "AgentInteraction: WaitforMission: Journal would not open/refresh - mission was null: restarting EVE Session";
                             Logging.Log("ReasonToStopQuestor", Cleanup.ReasonToStopQuestor, Logging.Yellow);
-                            Cleanup.SessionState = "Quitting";
+                            Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                         }
                     }
                     return;

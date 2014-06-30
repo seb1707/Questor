@@ -18,6 +18,7 @@ namespace Questor
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
+    using global::Questor.Modules.States;
 
     public static class BeforeLogin
     {
@@ -310,7 +311,7 @@ namespace Questor
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cache.Instance.CloseQuestorEndProcess = true;
                     Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                    Cleanup.SessionState = "Quitting";
+                    Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                     Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor, true);
                     return;
                 }
@@ -406,12 +407,21 @@ namespace Questor
                     Logging.Log("Startup", "We are logged in.", Logging.Teal);
                     Logging.Log("Startup", "Launching Questor", Logging.Teal);
                     _questor = new Questor();
+
+                    int intdelayQuestorUI = 0;
+                    while (intdelayQuestorUI < 50) //2.5sec = 50ms x 50
+                    {
+                        intdelayQuestorUI++;
+                        System.Threading.Thread.Sleep(50);
+                    }
+                    
                     Logging.Log("Startup", "Launching QuestorUI", Logging.Teal);
                     Application.Run(new QuestorUI());
-                    //while (_questorUI.Visible)
-                    //{
-                    //    System.Threading.Thread.Sleep(50); //this runs while we wait to login
-                    //}
+
+                    while (!Cleanup.SignalToQuitQuestor)
+                    {
+                        System.Threading.Thread.Sleep(50); //this runs while questor is running.
+                    }
 
                     Logging.Log("Startup", "Exiting Questor", Logging.Teal);
 
@@ -597,14 +607,14 @@ namespace Questor
             Time.Instance.LastSessionIsReady = DateTime.UtcNow;
                 //update this regardless before we login there is no session
 
-            //if (Cleanup.SessionState != "Quitting")
-            //{
-            //    // Update settings (settings only load if character name changed)
-            //    if (!Settings.Instance.DefaultSettingsLoaded)
-            //    {
-            //        Settings.Instance.LoadSettings();
-            //    }
-            //}
+            if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
+            {
+                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                {
+                    _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                    Cleanup.BeginClosingQuestor();
+                }
+            }
 
             if (DateTime.UtcNow < _lastServerStatusCheckWasNotOK.AddSeconds(RandomNumber(10, 20)))
             {

@@ -38,7 +38,7 @@ namespace Questor.Modules.Actions
                 if (_undockAttempts + Cache.Instance.RandomNumber(0, 4) > 10) //If we are having to retry at all there is likely something very wrong. Make it non-obvious if we do have to restart by restarting at diff intervals.
                 {
                     Logging.Log("TravelerDestination.StationDestination", "This is not the destination station, we have tried to undock [" + _undockAttempts + "] times - and it is evidentially not working (lag?) - restarting Questor (and EVE)", Logging.Green);
-                    Cleanup.SessionState = "Quitting"; //this will perform a graceful restart
+                    Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true; //this will perform a graceful restart
                     return;
                 }
 
@@ -452,7 +452,7 @@ namespace Questor.Modules.Actions
                     Cache.Instance.CloseQuestorCMDExitGame = true;
                     Cleanup.ReasonToStopQuestor = "TravelerDestination.MissionBookmarkDestination: Invalid mission bookmark! - Lag?! Closing EVE";
                     Logging.Log("TravelerDestination", Cleanup.ReasonToStopQuestor, Logging.Red);
-                    Cleanup.SessionState = "Quitting";
+                    Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                 }
                 else
                 {

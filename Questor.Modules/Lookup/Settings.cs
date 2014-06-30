@@ -1212,7 +1212,7 @@ namespace Questor.Modules.Lookup
                     Logging.Log("Settings", "CharacterName not defined! - Are we still logged in? Did we lose connection to eve? Questor should be restarting here.", Logging.White);
                     Settings.Instance.CharacterName = "NoCharactersLoggedInAnymore";
                     Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
-                    Cleanup.SessionState = "Quitting";
+                    Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                     _States.CurrentQuestorState = QuestorState.CloseQuestor;
                     Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                     return;
@@ -1220,7 +1220,7 @@ namespace Questor.Modules.Lookup
 
                 Logging.Log("Settings", "CharacterName not defined! - Are we logged in yet? Did we lose connection to eve?", Logging.White);
                 Settings.Instance.CharacterName = "AtLoginScreenNoCharactersLoggedInYet";
-                //Cleanup.SessionState = "Quitting";
+                //Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
             }
 
             try

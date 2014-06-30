@@ -82,7 +82,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
                 Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cleanup.SessionState = "Quitting";
+                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                 return;
             }
@@ -147,7 +147,7 @@ namespace Questor
                 Cache.Instance.CloseQuestorEndProcess = true;
                 Settings.Instance.AutoStart = true;
                 Cleanup.ReasonToStopQuestor = "Error on DirectEve.OnFrame, maybe the DirectEVE license server is down";
-                Cleanup.SessionState = "Quitting";
+                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
             }
         }
@@ -479,7 +479,7 @@ namespace Questor
 
             _lastQuestorPulse = DateTime.UtcNow;
 
-            if (Cleanup.SessionState != "Quitting")
+            if (!Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
             {
                 // Update settings (settings only load if character name changed)
                 if (!Settings.Instance.DefaultSettingsLoaded)
@@ -576,10 +576,11 @@ namespace Questor
                 return;
             }
 
-            if (Cleanup.SessionState == "Quitting")
+            if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
             {
                 if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
                 {
+                    _States.CurrentQuestorState = QuestorState.CloseQuestor;
                     Cleanup.BeginClosingQuestor();
                 }
             }

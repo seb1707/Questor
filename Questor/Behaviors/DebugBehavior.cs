@@ -277,9 +277,13 @@ namespace Questor.Behaviors
                 }
             }
 
-            if (Cleanup.SessionState == "Quitting")
+            if (Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment)
             {
-                BeginClosingQuestor();
+                if (_States.CurrentQuestorState != QuestorState.CloseQuestor)
+                {
+                    _States.CurrentQuestorState = QuestorState.CloseQuestor;
+                    BeginClosingQuestor();
+                }
             }
 
             if (Cache.Instance.GotoBaseNow)

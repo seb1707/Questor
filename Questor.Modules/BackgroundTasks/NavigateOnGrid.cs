@@ -126,7 +126,7 @@ namespace Questor.Modules.BackgroundTasks
                                     Cache.Instance.CloseQuestorCMDExitGame = true;
                                     Cleanup.ReasonToStopQuestor = "navigateOnGrid: We have been stuck on an object for over 15 min";
                                     Logging.Log("ReasonToStopQuestor", Cleanup.ReasonToStopQuestor, Logging.Yellow);
-                                    Cleanup.SessionState = "Quitting";
+                                    Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                                 }
                             }
 

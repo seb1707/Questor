@@ -52,58 +52,76 @@ namespace Questor.Modules.Lookup
 		
 		public static bool RetrieveSkillQueueInfo()
 		{
-			if (DateTime.UtcNow > _nextRetrieveSkillQueueInfoAction)
-			{
-				MySkillQueue = Cache.Instance.DirectEve.Skills.MySkillQueue;
-				_nextRetrieveSkillQueueInfoAction = DateTime.UtcNow.AddSeconds(10);
-				if (MySkillQueue != null)
-				{
-					if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is not null, continue", Logging.Debug);
-					return true;
-				}
+		    try
+		    {
+                if (DateTime.UtcNow > _nextRetrieveSkillQueueInfoAction)
+                {
+                    MySkillQueue = Cache.Instance.DirectEve.Skills.MySkillQueue;
+                    _nextRetrieveSkillQueueInfoAction = DateTime.UtcNow.AddSeconds(10);
+                    if (MySkillQueue != null)
+                    {
+                        if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is not null, continue", Logging.Debug);
+                        return true;
+                    }
 
-				if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is null, how? retry in 10 sec", Logging.Debug);
-				return true;
-			}
+                    if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "MySkillQueue is null, how? retry in 10 sec", Logging.Debug);
+                    return true;
+                }
 
-			if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "Waiting...", Logging.Debug);
-			return false;
+                if (Logging.DebugSkillTraining) Logging.Log("RetrieveSkillQueueInfo", "Waiting...", Logging.Debug);
+                return false;
+		    }
+		    catch (Exception exception)
+		    {
+                Logging.Log("SkillPlan","Exception [" + exception + "]",Logging.Debug);
+		        return false;
+		    }
 		}
 
 		public static bool InjectSkillBook(int skillID)
 		{
-			IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == skillID).ToList();
-			if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillID.ToString() + "] found in ItemHangar", Logging.Debug);
-				DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeId == skillID);
-				if (SkillBookToInject != null)
-				{
-					if (MyCharacterSheetSkills != null && !MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName || i.GivenName == SkillBookToInject.TypeName))
-					{
-						if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
-						if (DoWeHaveTheRightPrerequisites(SkillBookToInject.TypeId)) {
-							SkillBookToInject.InjectSkill();
-							skillWasInjected = true;
-							return true;
-						} 
+		    try
+		    {
+                IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == skillID).ToList();
+                if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillID.ToString() + "] found in ItemHangar", Logging.Debug);
+                    DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeId == skillID);
+                    if (SkillBookToInject != null)
+                    {
+                        if (MyCharacterSheetSkills != null && !MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName || i.GivenName == SkillBookToInject.TypeName))
+                        {
+                            if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  GivenName [" + SkillBookToInject.GivenName + "] TypeName [" + SkillBookToInject.TypeName + "] is being injected", Logging.Debug);
+                            if (DoWeHaveTheRightPrerequisites(SkillBookToInject.TypeId))
+                            {
+                                SkillBookToInject.InjectSkill();
+                                skillWasInjected = true;
+                                return true;
+                            }
 
-                        if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "Skillbook: We don't have the right Prerequisites for " + SkillBookToInject.GivenName, Logging.Debug);
-					}
-					
-					if (MyCharacterSheetSkills != null && MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName))
-					{
-						if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  TypeName [" + SkillBookToInject.TypeName + "] is already injected, why are we trying to do so again? aborting injection attempt ", Logging.Debug);
-						return true;
-					}
-				}
-				
-				return false;
-			}
-			Logging.Log("InjectSkillBook", "We don't have this skill in our hangar", Logging.Debug);
-			return false;
+                            if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "Skillbook: We don't have the right Prerequisites for " + SkillBookToInject.GivenName, Logging.Debug);
+                        }
+
+                        if (MyCharacterSheetSkills != null && MyCharacterSheetSkills.Any(i => i.TypeName == SkillBookToInject.TypeName))
+                        {
+                            if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook:  TypeName [" + SkillBookToInject.TypeName + "] is already injected, why are we trying to do so again? aborting injection attempt ", Logging.Debug);
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                Logging.Log("InjectSkillBook", "We don't have this skill in our hangar", Logging.Debug);
+                return false;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
-		public static bool DoWeHaveTheRightPrerequisites(int skillID){
+		public static bool DoWeHaveTheRightPrerequisites(int skillID)
+        {
 			try 
             {
 				if (skillPreReqs == null) 
@@ -162,98 +180,117 @@ namespace Questor.Modules.Lookup
 			if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.DoWeHaveThisSkillAlreadyInOurItemHangar:", "We don't have this skill in our hangar " + skillID.ToString(), Logging.White);
 			return false;
 		}
-		public static bool BuySkill(int skillID){
-			
-			if (!Cache.Instance.InStation) return false;
-			if (DateTime.UtcNow < _nextSkillTrainingAction)
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.buySkill:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);
-				return false;
-			}
-			
-			if (buyingSkill == true && buyingSkillTypeID != 0){
-				buyingIterator++;
-				
-				if (buyingIterator>20)
-                {
-					Logging.Log("buySkill", "buying iterator < 20 with SkillID" + skillID, Logging.White);
-					buyingSkill = false;
-					buyingSkillTypeID = 0;
-					buyingIterator = 0;
-					return true;
-				}
-				// only buy if we do not have it already in our itemhangar
-				if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
-				{
-					Logging.Log("buySkill", "We already purchased this skill" + skillID, Logging.White);
-					buyingSkill = false;
-					buyingSkillTypeID = 0;
-					buyingIterator = 0;
-					return true;
-				}
-				
-				DirectMarketWindow marketWindow = Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
-				if (Cache.Instance.DirectEve.HasSupportInstances())
-				{
-					if (marketWindow == null)
-					{
-						_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(10);
+		public static bool BuySkill(int skillID)
+        {
+		    try
+		    {
+		        if (!Cache.Instance.InStation) return false;
+		        if (DateTime.UtcNow < _nextSkillTrainingAction)
+		        {
+		            if (Logging.DebugSkillTraining)
+		                Logging.Log("SkillPlan.buySkill:",
+		                    "Next Skill Training Action is set to continue in [" +
+		                    Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds",
+		                    Logging.White);
+		            return false;
+		        }
 
-						Logging.Log("buySkill", "Opening market window", Logging.White);
+		        if (buyingSkill == true && buyingSkillTypeID != 0)
+		        {
+		            buyingIterator++;
 
-						Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
-                        Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
-						return false;
-						
-					}
+		            if (buyingIterator > 20)
+		            {
+		                Logging.Log("buySkill", "buying iterator < 20 with SkillID" + skillID, Logging.White);
+		                buyingSkill = false;
+		                buyingSkillTypeID = 0;
+		                buyingIterator = 0;
+		                return true;
+		            }
+		            // only buy if we do not have it already in our itemhangar
+		            if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
+		            {
+		                Logging.Log("buySkill", "We already purchased this skill" + skillID, Logging.White);
+		                buyingSkill = false;
+		                buyingSkillTypeID = 0;
+		                buyingIterator = 0;
+		                return true;
+		            }
 
-					if (!marketWindow.IsReady)
-					{
-						_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(3);
-						return false;
-					}
+		            DirectMarketWindow marketWindow =
+		                Cache.Instance.DirectEve.Windows.OfType<DirectMarketWindow>().FirstOrDefault();
+		            if (Cache.Instance.DirectEve.HasSupportInstances())
+		            {
+		                if (marketWindow == null)
+		                {
+		                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(10);
 
-					if (marketWindow.DetailTypeId != skillID)
-					{
-						// No, load the right order
-						marketWindow.LoadTypeId(skillID);
-						Logging.Log("buySkill", "Loading market with right typeid ", Logging.White);
-						_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(6);
-						return false;
-					}
+		                    Logging.Log("buySkill", "Opening market window", Logging.White);
 
-					// Get the median sell price
-				    DirectInvType type;
-				    Cache.Instance.DirectEve.InvTypes.TryGetValue(skillID, out type);
-					double? maxPrice = type.AveragePrice * 10;
-					Logging.Log("buySkill", "maxPrice "  + maxPrice.ToString(), Logging.White);
+		                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+		                    Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
+		                    return false;
 
-					// Do we have orders?
-					IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
-					if (orders.Any())
-					{
-						DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
-						if (order != null)
-							order.Buy(1, DirectOrderRange.Station);
-						Logging.Log("buySkill", "Buying skill with typeid & waiting 20 seconds ( to ensure we don't buy the skills twice ) " + skillID, Logging.White);
-						buyingSkill = false;
-						buyingSkillTypeID = 0;
-						buyingIterator = 0;
-						// Wait for the order to go through
-						_nextRetrieveCharactersheetInfoAction = DateTime.MinValue; // ensure we get the character sheet update
-						_nextSkillTrainingAction  = DateTime.UtcNow.AddSeconds(20);
-						return true;
-					} 
+		                }
 
-					Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
-					buyingSkill = false;
-					buyingSkillTypeID = 0;
-					buyingIterator = 0;
-					return false;
-				}
-			}
-			return false;
-		}
+		                if (!marketWindow.IsReady)
+		                {
+		                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(3);
+		                    return false;
+		                }
+
+		                if (marketWindow.DetailTypeId != skillID)
+		                {
+		                    // No, load the right order
+		                    marketWindow.LoadTypeId(skillID);
+		                    Logging.Log("buySkill", "Loading market with right typeid ", Logging.White);
+		                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(6);
+		                    return false;
+		                }
+
+		                // Get the median sell price
+		                DirectInvType type;
+		                Cache.Instance.DirectEve.InvTypes.TryGetValue(skillID, out type);
+		                double? maxPrice = type.AveragePrice*10;
+		                Logging.Log("buySkill", "maxPrice " + maxPrice.ToString(), Logging.White);
+
+		                // Do we have orders?
+		                IEnumerable<DirectOrder> orders =
+		                    marketWindow.SellOrders.Where(
+		                        o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
+		                if (orders.Any())
+		                {
+		                    DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
+		                    if (order != null)
+		                        order.Buy(1, DirectOrderRange.Station);
+		                    Logging.Log("buySkill",
+		                        "Buying skill with typeid & waiting 20 seconds ( to ensure we don't buy the skills twice ) " +
+		                        skillID, Logging.White);
+		                    buyingSkill = false;
+		                    buyingSkillTypeID = 0;
+		                    buyingIterator = 0;
+		                    // Wait for the order to go through
+		                    _nextRetrieveCharactersheetInfoAction = DateTime.MinValue;
+		                        // ensure we get the character sheet update
+		                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(20);
+		                    return true;
+		                }
+
+		                Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
+		                buyingSkill = false;
+		                buyingSkillTypeID = 0;
+		                buyingIterator = 0;
+		                return false;
+		            }
+		        }
+		        return false;
+		    }
+		    catch (Exception exception)
+		    {
+		        Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+		        return false;
+		    }
+        }
 
 		public static bool ImportSkillPlan()
 		{
@@ -294,34 +331,43 @@ namespace Questor.Modules.Lookup
 				Logging.Log("importSkillPlan", "Exception was: [" + exception +"]", Logging.Teal);
 				return false;
 			}
+
 			return true;
 		}
 
 		public static void ReadySkillPlan()
 		{
-			mySkillPlan.Clear();
-			//int i = 1;
-			foreach (string imported_skill in myRawSkillPlan)
-			{
-				string RomanNumeral = ParseRomanNumeral(imported_skill);
-				string SkillName = imported_skill.Substring(0,imported_skill.Length - CountNonSpaceChars(RomanNumeral));
-				SkillName = SkillName.Trim();
-				int LevelPlanned = Decode(RomanNumeral);
-				if (mySkillPlan.ContainsKey(SkillName))
-				{
-					if (mySkillPlan.FirstOrDefault(x => x.Key == SkillName).Value < LevelPlanned)
-					{
-						mySkillPlan.Remove(SkillName);
-						mySkillPlan.Add(SkillName, LevelPlanned);
-					}
-					continue;
-				}
-				
+		    try
+		    {
+                mySkillPlan.Clear();
+                //int i = 1;
+                foreach (string imported_skill in myRawSkillPlan)
+                {
+                    string RomanNumeral = ParseRomanNumeral(imported_skill);
+                    string SkillName = imported_skill.Substring(0, imported_skill.Length - CountNonSpaceChars(RomanNumeral));
+                    SkillName = SkillName.Trim();
+                    int LevelPlanned = Decode(RomanNumeral);
+                    if (mySkillPlan.ContainsKey(SkillName))
+                    {
+                        if (mySkillPlan.FirstOrDefault(x => x.Key == SkillName).Value < LevelPlanned)
+                        {
+                            mySkillPlan.Remove(SkillName);
+                            mySkillPlan.Add(SkillName, LevelPlanned);
+                        }
+                        continue;
+                    }
 
-				mySkillPlan.Add(SkillName, LevelPlanned);
-				//if (Logging.DebugSkillTraining) Logging.Log("Skills.readySkillPlan", "[" + i + "]" + imported_skill + "] LevelPlanned[" + LevelPlanned + "][" + RomanNumeral + "]", Logging.Teal);
-				continue;
-			}
+
+                    mySkillPlan.Add(SkillName, LevelPlanned);
+                    //if (Logging.DebugSkillTraining) Logging.Log("Skills.readySkillPlan", "[" + i + "]" + imported_skill + "] LevelPlanned[" + LevelPlanned + "][" + RomanNumeral + "]", Logging.Teal);
+                    continue;
+                }
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return;
+            }
 		}
 
 		static int CountNonSpaceChars(string value)
@@ -331,34 +377,46 @@ namespace Questor.Modules.Lookup
 
 		public static bool CheckTrainingQueue(string module)
 		{
-			if (DateTime.UtcNow < _nextSkillTrainingAction)
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);
-				return false;
-			}
-			if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:","Current iCount is: " + iCount.ToString(), Logging.White);
-			iCount++;
+		    try
+		    {
+                if (DateTime.UtcNow < _nextSkillTrainingAction)
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);
+                    return false;
+                }
+                if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Current iCount is: " + iCount.ToString(), Logging.White);
+                iCount++;
 
-			if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.White);
-				_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(3);
+                if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.White);
+                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(3);
 
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
-				if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalMinutes < 1337 && Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalMinutes >= 0) // 1440 = 60*24
-				{
-					Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
-					if(doneWithAllPlannedSKills) return true;
-					if (!AddPlannedSkillToQueue("SkillPlan")) return false;
-					if (iCount > 30) return true; //this should only happen if the actual adding of items to the skill queue fails or if we can't add enough skills to the queue <24h
-				} else {
-					Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue is full. [" + Math.Abs(Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2)) + " is more than 24 hours]", Logging.White);
-					return true;
-				}
-			} else {
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", " false: if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.White);
-			}
-			return false;
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", "Current Training Queue Length is [" + Cache.Instance.DirectEve.Skills.SkillQueueLength.ToString() + "]", Logging.White);
+                    if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalMinutes < 1337 && Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalMinutes >= 0) // 1440 = 60*24
+                    {
+                        Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
+                        if (doneWithAllPlannedSKills) return true;
+                        if (!AddPlannedSkillToQueue("SkillPlan")) return false;
+                        if (iCount > 30) return true; //this should only happen if the actual adding of items to the skill queue fails or if we can't add enough skills to the queue <24h
+                    }
+                    else
+                    {
+                        Logging.Log("SkillPlan.CheckTrainingQueue:", "Training Queue is full. [" + Math.Abs(Math.Round(Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2)) + " is more than 24 hours]", Logging.White);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.CheckTrainingQueue:", " false: if (Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.White);
+                }
+                return false;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
 		
 		public static bool SkillAlreadyQueued(KeyValuePair<string, int> skill)
@@ -460,19 +518,26 @@ namespace Questor.Modules.Lookup
 		
 		public static bool TrainSkillNow(KeyValuePair<string, int> skill)
         {
-			
-			foreach (DirectSkill knownskill in MyCharacterSheetSkills)
-			{
-				if (knownskill.TypeName == skill.Key && knownskill.Level < skill.Value)
-				{
-					if (Logging.DebugSkillTraining) Logging.Log("TrainSkillNow", "Training Skill now:  [" + skill.Key + "]", Logging.White);
-					knownskill.AddToEndOfQueue();
-					return true;
-				}
-			}
+		    try
+		    {
+                foreach (DirectSkill knownskill in MyCharacterSheetSkills)
+                {
+                    if (knownskill.TypeName == skill.Key && knownskill.Level < skill.Value)
+                    {
+                        if (Logging.DebugSkillTraining) Logging.Log("TrainSkillNow", "Training Skill now:  [" + skill.Key + "]", Logging.White);
+                        knownskill.AddToEndOfQueue();
+                        return true;
+                    }
+                }
 
-			if (Logging.DebugSkillTraining) Logging.Log("TrainSkillNow", "This skill couldn't be trained:  [" + skill.Key + "]", Logging.White);
-			return false;
+                if (Logging.DebugSkillTraining) Logging.Log("TrainSkillNow", "This skill couldn't be trained:  [" + skill.Key + "]", Logging.White);
+                return false;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
 		
 		public static int getInvTypeID(string moduleName)
@@ -500,43 +565,51 @@ namespace Questor.Modules.Lookup
 
 		public static bool AddPlannedSkillToQueue(string module)
 		{
-			foreach (KeyValuePair<string, int> skill in mySkillPlan)
-			{
-				//if (Logging.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Currently working with [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
-				if (!SkillAlreadyQueued(skill) && SkillIsBelowPlannedLevel(skill) && SkillAlreadyInCharacterSheet(skill)) // not queued && below planned level && in our character sheet
-				{
-					TrainSkillNow(skill);
-					_nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
-					return false;
-				}
-				
-				if(!SkillAlreadyInCharacterSheet(skill) && attemptsToDoSomethingWithNonInjectedSkills <= 15)
-                {	
-                    // skill not already in our character sheet
-					attemptsToDoSomethingWithNonInjectedSkills++;
-					Logging.Log("AddPlannedSkillToQueue","Skill [" + skill.Key  + "] will be bought(if in station & price < average sell * 10) and/or injected if in itemhangar",Logging.Red);
-					buyingSkillTypeID = getInvTypeID(skill.Key);
-					if (buyingSkillTypeID != 0)
+		    try
+		    {
+                foreach (KeyValuePair<string, int> skill in mySkillPlan)
+                {
+                    //if (Logging.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Currently working with [" + skill.Key + "] level [" + skill.Value + "]", Logging.White);
+                    if (!SkillAlreadyQueued(skill) && SkillIsBelowPlannedLevel(skill) && SkillAlreadyInCharacterSheet(skill)) // not queued && below planned level && in our character sheet
                     {
-						if (DoWeHaveThisSkillAlreadyInOurItemHangar(buyingSkillTypeID))
-                        {
-							InjectSkillBook(buyingSkillTypeID);
-							return false;
-						} 
-                        
-						if (Cache.Instance.InStation) 
-                        {
-							buyingSkill = true;
-						}
+                        TrainSkillNow(skill);
+                        _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 5));
+                        return false;
+                    }
 
-						return false;
-					}
-					return false;
-				}
-			}
-			if (Logging.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Done with all planned skills", Logging.White);
-			doneWithAllPlannedSKills = true;
-			return true;
+                    if (!SkillAlreadyInCharacterSheet(skill) && attemptsToDoSomethingWithNonInjectedSkills <= 15)
+                    {
+                        // skill not already in our character sheet
+                        attemptsToDoSomethingWithNonInjectedSkills++;
+                        Logging.Log("AddPlannedSkillToQueue", "Skill [" + skill.Key + "] will be bought(if in station & price < average sell * 10) and/or injected if in itemhangar", Logging.Red);
+                        buyingSkillTypeID = getInvTypeID(skill.Key);
+                        if (buyingSkillTypeID != 0)
+                        {
+                            if (DoWeHaveThisSkillAlreadyInOurItemHangar(buyingSkillTypeID))
+                            {
+                                InjectSkillBook(buyingSkillTypeID);
+                                return false;
+                            }
+
+                            if (Cache.Instance.InStation)
+                            {
+                                buyingSkill = true;
+                            }
+
+                            return false;
+                        }
+                        return false;
+                    }
+                }
+                if (Logging.DebugSkillTraining) Logging.Log("AddPlannedSkillToQueue", "Done with all planned skills", Logging.White);
+                doneWithAllPlannedSKills = true;
+                return true;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
 
 		private static string ParseRomanNumeral(string importedSkill)
@@ -573,7 +646,6 @@ namespace Questor.Modules.Lookup
 
 		private static int Decode(string roman)
 		{
-
 			roman = roman.ToUpper();
 			int total = 0, minus = 0;
 
@@ -597,41 +669,50 @@ namespace Questor.Modules.Lookup
 
 		public static bool ReadMyCharacterSheetSkills()
 		{
-			if (DateTime.UtcNow < _nextSkillTrainingAction)
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.ReadMyCharacterSheetSkills:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);
-				return false;
-			}
-			if (MyCharacterSheetSkills == null || !MyCharacterSheetSkills.Any())
-			{
-				if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!MyCharacterSheetSkills.Any())", Logging.Teal);
-				
-				MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
-				return false;
-			}
+		    try
+		    {
+                if (DateTime.UtcNow < _nextSkillTrainingAction)
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillPlan.ReadMyCharacterSheetSkills:", "Next Skill Training Action is set to continue in [" + Math.Round(_nextSkillTrainingAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] seconds", Logging.White);
+                    return false;
+                }
+                if (MyCharacterSheetSkills == null || !MyCharacterSheetSkills.Any())
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!MyCharacterSheetSkills.Any())", Logging.Teal);
 
-			int iCount = 1;
+                    MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
+                    return false;
+                }
 
-			
-			if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
-			{
-				if(Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.Teal);
-				return false;
-			}
-			
-			if (DateTime.UtcNow > _nextRetrieveCharactersheetInfoAction) {
-				if(Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "Updating Character sheet again", Logging.Teal);
-				MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
-				_nextRetrieveCharactersheetInfoAction.AddSeconds(13);
-				return true;
-			}
+                int iCount = 1;
 
-			foreach (DirectSkill trainedskill in MyCharacterSheetSkills)
-			{
-				iCount++;
-				//if (Logging.DebugSkillTraining) Logging.Log("Skills.MyCharacterSheetSkills", "[" + iCount + "] SkillName [" + trainedskill.TypeName + "] lvl [" + trainedskill.Level + "] SkillPoints [" + trainedskill.SkillPoints + "] inTraining [" + trainedskill.InTraining + "]", Logging.Teal);
-			}
-			return true;
+
+                if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "if (!Cache.Instance.DirectEve.Skills.AreMySkillsReady)", Logging.Teal);
+                    return false;
+                }
+
+                if (DateTime.UtcNow > _nextRetrieveCharactersheetInfoAction)
+                {
+                    if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "Updating Character sheet again", Logging.Teal);
+                    MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
+                    _nextRetrieveCharactersheetInfoAction.AddSeconds(13);
+                    return true;
+                }
+
+                foreach (DirectSkill trainedskill in MyCharacterSheetSkills)
+                {
+                    iCount++;
+                    //if (Logging.DebugSkillTraining) Logging.Log("Skills.MyCharacterSheetSkills", "[" + iCount + "] SkillName [" + trainedskill.TypeName + "] lvl [" + trainedskill.Level + "] SkillPoints [" + trainedskill.SkillPoints + "] inTraining [" + trainedskill.InTraining + "]", Logging.Teal);
+                }
+                return true;
+		    }
+            catch (Exception exception)
+            {
+                Logging.Log("SkillPlan", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
 		}
 	}
 }

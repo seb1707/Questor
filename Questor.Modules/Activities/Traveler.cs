@@ -225,7 +225,7 @@ namespace Questor.Modules.Activities
             EntityCache MyNextStargate = Cache.Instance.StargateByName(_locationName);
             if (MyNextStargate != null)
             {
-                if (MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked)
+                if ((MyNextStargate.Distance < (int)Distances.DecloakRange && !Cache.Instance.ActiveShip.Entity.IsCloaked) || (MyNextStargate.Distance < (int)Distances.JumpRange && Cache.Instance.Modules.Any(i => i.GroupId != (int)Group.CloakingDevice)))
                 {
                     if (MyNextStargate.Jump())
                     {

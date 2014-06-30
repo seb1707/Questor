@@ -24,6 +24,7 @@ namespace Questor.Modules.Lookup
         OptimalRangeCushion = 5000, // This is used to determine when to stop approaching, if not speed tanking (optimal distance + optimalDistanceCushion)
         InsideThisRangeIsLikelyToBeMostlyFrigates = 9000, // 9k - overall this assumption works, use with caution
         DecloakRange = 1500,
+        JumpRange = 2450,
         SafeToCloakDistance = 2300,
         DockingRange = 1900,
         MissionWarpLimit = 150000000, // Mission bookmarks have a 1.000.000 distance warp-to limit (changed it to 150.000.000 as there are some bugged missions around)

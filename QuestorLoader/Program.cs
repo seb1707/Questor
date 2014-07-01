@@ -10,12 +10,15 @@ namespace QuestorLoader
     
     public class Main : IEntryPoint
     {
-        public static bool UnthawEVEProcess = false;
+        //public static bool UnthawEVEProcess = false;
         public static string _appDomainNameToUse;
         public static string _pathToQuestorEXE;
+        public static bool _RestartQuestorIfClosed;
+        public static bool DebugAppDomains;
         public static EXEBootStrapper _exeBootStrapper;
         public static string QuestorDLLSettingsINI;
-
+        public static DateTime QuestorLoader_Started;
+        
         public Main(RemoteHooking.IContext InContext, string questorLoaderParameters)
         {
             //RemoteHooking.WakeUpProcess();
@@ -65,15 +68,15 @@ namespace QuestorLoader
                 
                 if (!string.IsNullOrEmpty(QuestorDLLSettingsINI) && File.Exists(QuestorDLLSettingsINI))
                 {
-                    Logging.Log("Startup", "Found [" + QuestorDLLSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
+                    Logging.Log("QuestorLoader", "Found [" + QuestorDLLSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
                     if (!PreLoginSettings(QuestorDLLSettingsINI))
                     {
-                        Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + QuestorDLLSettingsINI + "]", Logging.Debug);
+                        Logging.Log("QuestorLoader", "Failed to load PreLogin settings from [" + QuestorDLLSettingsINI + "]", Logging.Debug);
                         return false;
                     }
 
-                    Logging.Log("Startup.PreLoginSettings", "_pathToQuestorEXE is [" + _pathToQuestorEXE + "]", Logging.Debug);
-                    Logging.Log("Startup.PreLoginSettings", "_appDomainNameToUse is [" + _appDomainNameToUse + "]", Logging.Debug);
+                    Logging.Log("QuestorLoader", "_pathToQuestorEXE is [" + _pathToQuestorEXE + "]", Logging.Debug);
+                    Logging.Log("QuestorLoader", "_appDomainNameToUse is [" + _appDomainNameToUse + "]", Logging.Debug);
                     return true;
                 }
 
@@ -142,6 +145,7 @@ namespace QuestorLoader
                 if (!File.Exists(iniFile))
                 {
                     Logging.Log("PreLoginSettings", "Could not find a file named [" + iniFile + "]", Logging.Debug);
+                    return false;
                 }
 
                 //foreach (string line in File.ReadAllLines(iniFile))
@@ -184,6 +188,14 @@ namespace QuestorLoader
                         case "appdomaintocreateforquestor":
                             _appDomainNameToUse = sLine[1];
                             break;
+
+                        case "restartquestorifclosed":
+                            _RestartQuestorIfClosed = Boolean.Parse(sLine[1]);
+                            break;
+
+                        case "debugappdomains":
+                            DebugAppDomains = Boolean.Parse(sLine[1]);
+                            break;
                     }
                 }
 
@@ -201,7 +213,7 @@ namespace QuestorLoader
             }
             catch (Exception exception)
             {
-                Logging.Log("Startup.PreLoginSettings", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("QuestorLoader", "Exception [" + exception + "]", Logging.Debug);
                 return false;
             }
         }

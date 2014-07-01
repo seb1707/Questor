@@ -107,7 +107,7 @@ namespace QuestorLoader
         //public static string ConsoleLogRedacted { get; set; }
         public static string Logpath { get; set; }
         public static bool InnerspaceGeneratedConsoleLog { get; set; }
-        public static bool UseInnerspace { get; set; }
+        public const bool UseInnerspace = false;
         //public static bool ConsoleLog { get; set; }
         public static string ConsoleLogPath { get; set; }
         public static string ConsoleLogFile { get; set; }

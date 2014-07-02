@@ -79,7 +79,7 @@ namespace Questor
             }
             set
             {
-                Logging.Log("Startup", "! Logging.UseInnerspace = false; !", Logging.White);
+                //Logging.Log("Startup", "! Logging.UseInnerspace = false; !", Logging.White);
                 Logging.UseInnerspace = false;
             }
 
@@ -198,7 +198,7 @@ namespace Questor
             }
             if (!string.IsNullOrEmpty(PreLoginSettingsINI) && File.Exists(PreLoginSettingsINI))
             {
-                Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
+                //Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
                 if (!PreLoginSettings(PreLoginSettingsINI)) Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + PreLoginSettingsINI + "]", Logging.Debug);
             }
         }
@@ -207,12 +207,12 @@ namespace Questor
         {
             //if (Logging.DebugPreLogin)
             //{
-                int i = 0;
-                foreach (string arg in args)
-                {
-                    Logging.Log("Startup", " *** Questor Parameters we have parsed [" + i + "] - [" + arg + "]", Logging.Debug);
-                    i++;
-                }
+            //    int i = 0;
+            //    foreach (string arg in args)
+            //    {
+            //        Logging.Log("Startup", " *** Questor Parameters we have parsed [" + i + "] - [" + arg + "]", Logging.Debug);
+            //        i++;
+            //    }
             //}
 
             ParseArgs(args);
@@ -344,96 +344,105 @@ namespace Questor
             }
             catch (Exception exception)
             {
-                Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
+                Logging.Log("Startup", "Exception while checking: _directEve.HasSupportInstances() - exception was: [" + exception + "]", Logging.Orange);
             }
 
             #endregion Verify DirectEVE Support Instances
 
-            try
-            {
-                Cache.Instance.DirectEve.OnFrame += LoginOnFrame;
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
-            }
-
-            // Sleep until we're loggedInAndreadyToStartQuestorUI
-            while (!loggedInAndreadyToStartQuestorUI)
-            {
-                System.Threading.Thread.Sleep(50); //this runs while we wait to login
-            }
-
-            if (loggedInAndreadyToStartQuestorUI)
+            if (!Logging.DebugDisableAutoLogin)
             {
                 try
                 {
-                    //
-                    // do not dispose here as we want to use the same DirectEve instance later in the main program
-                    //
-                    //_directEve.Dispose();
-                    Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
+                    Cache.Instance.DirectEve.OnFrame += LoginOnFrame;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("Startup", "DirectEVE.Dispose: Exception [" + ex + "]", Logging.White);
+                    Logging.Log("Startup", string.Format("DirectEVE.OnFrame: Exception {0}...", ex), Logging.White);
                 }
 
-
-                //if (!string.IsNullOrEmpty(_scriptAfterLoginFile))
-                //{
-                //    Logging.Log("Startup", "Running Script After Login: [ timedcommand 150 runscript " + _scriptAfterLoginFile + " ]", Logging.Teal);
-                //    LavishScript.ExecuteCommand("timedcommand 150 runscript " + _scriptAfterLoginFile);
-                //    return;
-                //}
-
-                // If the last parameter is false, then we only auto-login
-                if (_loginOnly)
+                // Sleep until we're loggedInAndreadyToStartQuestorUI
+                while (!loggedInAndreadyToStartQuestorUI)
                 {
-                    Logging.Log("Startup", "_loginOnly: done and exiting", Logging.Teal);
-                    return;
+                    System.Threading.Thread.Sleep(50); //this runs while we wait to login
                 }
 
-
-                StartTime = DateTime.Now;
-
-                //
-                // We should only get this far if run if we are already logged in...
-                // launch questor
-                //
-                try
+                if (loggedInAndreadyToStartQuestorUI)
                 {
-                	
-                    Logging.Log("Startup", "We are logged in.", Logging.Teal);
-                    Logging.Log("Startup", "Launching Questor", Logging.Teal);
-                    _questor = new Questor();
-
-                    int intdelayQuestorUI = 0;
-                    while (intdelayQuestorUI < 50) //2.5sec = 50ms x 50
+                    try
                     {
-                        intdelayQuestorUI++;
-                        System.Threading.Thread.Sleep(50);
+                        //
+                        // do not dispose here as we want to use the same DirectEve instance later in the main program
+                        //
+                        //_directEve.Dispose();
+                        Cache.Instance.DirectEve.OnFrame -= LoginOnFrame;
                     }
-                    
-                    Logging.Log("Startup", "Launching QuestorUI", Logging.Teal);
-                    Application.Run(new QuestorUI());
-
-                    while (!Cleanup.SignalToQuitQuestor)
+                    catch (Exception ex)
                     {
-                        System.Threading.Thread.Sleep(50); //this runs while questor is running.
+                        Logging.Log("Startup", "DirectEVE.Dispose: Exception [" + ex + "]", Logging.White);
                     }
 
-                    Logging.Log("Startup", "Exiting Questor", Logging.Teal);
 
-                }
-                catch (Exception ex)
-                {
-                    Logging.Log("Startup", "Exception [" + ex + "]", Logging.Teal);
-                }
-                finally
-                {
-                    Cleanup.DirecteveDispose();
-                }
+                    //if (!string.IsNullOrEmpty(_scriptAfterLoginFile))
+                    //{
+                    //    Logging.Log("Startup", "Running Script After Login: [ timedcommand 150 runscript " + _scriptAfterLoginFile + " ]", Logging.Teal);
+                    //    LavishScript.ExecuteCommand("timedcommand 150 runscript " + _scriptAfterLoginFile);
+                    //    return;
+                    //}
+
+                    // If the last parameter is false, then we only auto-login
+                    if (_loginOnly)
+                    {
+                        Logging.Log("Startup", "_loginOnly: done and exiting", Logging.Teal);
+                        return;
+                    }
+
+
+                    StartTime = DateTime.Now;
+
+                    //
+                    // We should only get this far if run if we are already logged in...
+                    // launch questor
+                    //
+                    try
+                    {
+
+                        Logging.Log("Startup", "We are logged in.", Logging.Teal);
+                        Logging.Log("Startup", "Launching Questor", Logging.Teal);
+                        _questor = new Questor();
+
+                        int intdelayQuestorUI = 0;
+                        while (intdelayQuestorUI < 50) //2.5sec = 50ms x 50
+                        {
+                            intdelayQuestorUI++;
+                            System.Threading.Thread.Sleep(50);
+                        }
+
+                        Logging.Log("Startup", "Launching QuestorUI", Logging.Teal);
+                        Application.Run(new QuestorUI());
+
+                        while (!Cleanup.SignalToQuitQuestor)
+                        {
+                            System.Threading.Thread.Sleep(50); //this runs while questor is running.
+                        }
+
+                        Logging.Log("Startup", "Exiting Questor", Logging.Teal);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log("Startup", "Exception [" + ex + "]", Logging.Teal);
+                    }
+                    finally
+                    {
+                        Cleanup.DirecteveDispose();
+                        AppDomain.Unload(AppDomain.CurrentDomain);
+                    }
+                }    
+            }
+            else
+            {
+                Logging.Log("Startup", "DebugDisableAutoLogin is true (check characters prelogin settings ini), closing before doing anything useful!", Logging.Debug);
+                Cache.Instance.DirectEve.Dispose();
             }
         }
 
@@ -1021,6 +1030,10 @@ namespace Questor
 
                         case "enablevisualstyles":
                             Logging.EnableVisualStyles = bool.Parse(sLine[1]);
+                            break;
+
+                        case "debugdisableautologin":
+                            Logging.DebugDisableAutoLogin = bool.Parse(sLine[1]);
                             break;
                     }
                 }

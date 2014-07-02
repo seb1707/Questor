@@ -8,6 +8,7 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using LavishSettingsAPI;
 
@@ -713,358 +714,372 @@ namespace Questor.Modules.BackgroundTasks
         /// </summary>
         private static void LootWrecks(IEnumerable<EntityCache> EntitiesToLoot = null)
         {
-            if (Time.Instance.NextLootAction > DateTime.UtcNow)
+            try
             {
-                if (Logging.DebugLootWrecks) Logging.Log("Salvage", "Debug: Cache.Instance.NextLootAction is still in the future, waiting", Logging.Teal);
-                return;
-            }
-
-            //
-            // when full return to base and unloadloot
-            //
-            if (UnloadLootAtStation && Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Capacity > 150 && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 50)
-            {
-                if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
+                if (Time.Instance.NextLootAction > DateTime.UtcNow)
                 {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "(mission) We are full, heading back to base to dump loot ", Logging.Teal);
-                    _States.CurrentCombatHelperBehaviorState = States.CombatHelperBehaviorState.GotoBase;
+                    if (Logging.DebugLootWrecks) Logging.Log("Salvage", "Debug: Cache.Instance.NextLootAction is still in the future, waiting", Logging.Teal);
                     return;
                 }
 
-                if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == States.DedicatedBookmarkSalvagerBehaviorState.Salvage)
+                //
+                // when full return to base and unloadloot
+                //
+                if (UnloadLootAtStation && Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Capacity > 150 && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 50)
                 {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "(salvage) We are full, heading back to base to dump loot ", Logging.Teal);
-                    _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
-                    Time.Instance.NextSalvageTrip = DateTime.UtcNow;
-                    return;
-                }
-
-                Logging.Log("Salvage.LootWrecks", "We are full: we are using a behavior that does not have a supported place to auto dump loot: error!", Logging.Orange);
-                return;
-            }
-
-            // Open a container in range
-            int containersProcessedThisTick = 0;
-
-            if (EntitiesToLoot != null)
-            {
-                containersInRange = EntitiesToLoot.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
-            }
-            else
-            {
-                containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();    
-            }
-            
-            if (Logging.DebugLootWrecks)
-            {
-                int containersInRangeCount = 0;
-                if (containersInRange.Any())
-                {
-                    containersInRangeCount = containersInRange.Count();
-                }
-            
-                List<EntityCache> containersOutOfRange = Cache.Instance.Containers.Where(e => e.Distance >= (int)Distances.SafeScoopRange).ToList();
-                int containersOutOfRangeCount = 0;
-                if (containersOutOfRange.Any())
-                {
-                    containersOutOfRangeCount = containersOutOfRange.Count();
-                }
-
-                if (containersInRangeCount < 1) Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRangeCount + "]", Logging.Teal);
-                if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
-            }
-            if (Cache.Instance.CurrentShipsCargo == null) return;
-
-            List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
-            double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
-            foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))
-            {
-                containersProcessedThisTick++;
-
-                // Empty wreck, ignore
-                if (containerEntity.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
-                {
-                    Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "Ignoring Empty Wreck", Logging.Teal);
-                    continue;
-                }
-
-                // We looted this container
-                if (Cache.Instance.LootedContainers.Contains(containerEntity.Id))
-                {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We have already looted [" + containerEntity.Id + "]", Logging.White);
-                    continue;
-                }
-
-                // Ignore open request within 10 seconds
-                if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.UtcNow.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
-                {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We attempted to open [" + containerEntity.Id + "] less than 10 sec ago, ignoring", Logging.White);
-                    continue;
-                }
-
-                // Don't even try to open a wreck if you are speed tanking and you are not processing a loot action
-                if (NavigateOnGrid.SpeedTank && !Cache.Instance.MyShipEntity.IsBattleship && OpenWrecks == false)
-                {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "SpeedTank is true and OpenWrecks is false [" + containerEntity.Id + "]", Logging.White);
-                    continue;
-                }
-
-                // Don't even try to open a wreck if you are specified LootEverything as false and you are not processing a loot action
-                //      this is currently commented out as it would keep Golems and other non-speed tanked ships from looting the field as they cleared
-                //      missions, but NOT stick around after killing things to clear it ALL. Looteverything==false does NOT mean loot nothing
-                //if (Settings.Instance.LootEverything == false && Cache.Instance.OpenWrecks == false)
-                //    continue;
-
-                // Open the container
-                Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerEntity.Id);
-                if (Cache.Instance.ContainerInSpace == null)
-                {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (Cache.Instance.ContainerInSpace == null)", Logging.White);
-                    continue;
-                }
-
-                if (Cache.Instance.ContainerInSpace.Window == null)
-                {
-                    if (containerEntity.OpenCargo())
+                    if (_States.CurrentCombatMissionBehaviorState == CombatMissionsBehaviorState.ExecuteMission)
                     {
-                        Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);    
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "(mission) We are full, heading back to base to dump loot ", Logging.Teal);
+                        _States.CurrentCombatHelperBehaviorState = States.CombatHelperBehaviorState.GotoBase;
+                        return;
                     }
-                    
-                    return;
-                }
 
-                if (!Cache.Instance.ContainerInSpace.Window.IsReady)
-                {
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.White);
-                    return;
-                }
-
-                
-                if (Cache.Instance.ContainerInSpace.Window.IsReady)
-                {
-                    Logging.Log("Salvage", "Opened container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "]", Logging.White);
-                    if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is ready", Logging.White);
-                    OpenedContainers[containerEntity.Id] = DateTime.UtcNow;
-                    Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
-
-                    
-
-                    // List its items
-                    IEnumerable<ItemCache> items = Cache.Instance.ContainerInSpace.Items.Select(i => new ItemCache(i)).ToList();
-                    if (Logging.DebugLootWrecks && items.Any()) Logging.Log("Salvage.LootWrecks", "Found [" + items.Count() + "] items in [" + containerEntity.Name + "][" +  Math.Round(containerEntity.Distance / 1000,0) + "k][" + containerEntity.MaskedId + "]", Logging.Teal);
-
-                    // Build a list of items to loot
-                    List<ItemCache> lootItems = new List<ItemCache>();
-
-                    // log wreck contents to file
-                    if (!Statistics.WreckStatistics(items, containerEntity)) break;
-                    
-                    if (items.Any())
+                    if (_States.CurrentDedicatedBookmarkSalvagerBehaviorState == States.DedicatedBookmarkSalvagerBehaviorState.Salvage)
                     {
-                        // Walk through the list of items ordered by highest value item first
-                        foreach (ItemCache item in items.OrderByDescending(i => i.IsContraband).ThenByDescending(i => i.IskPerM3))
-                        {
-                            if (freeCargoCapacity < 1000) //this should allow BSs to not pickup large low value items but haulers and noctis' to scoop everything
-                            {
-                                // We never want to pick up a cap booster
-                                if (item.GroupID == (int)Group.CapacitorGroupCharge)
-                                {
-                                    continue;
-                                }
-                            }
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "(salvage) We are full, heading back to base to dump loot ", Logging.Teal);
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
+                        Time.Instance.NextSalvageTrip = DateTime.UtcNow;
+                        return;
+                    }
 
-                            // We pick up loot depending on isk per m3
-                            bool _isMissionItem = MissionSettings.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
-                            if (MissionSettings.MissionItems.Any())
+                    Logging.Log("Salvage.LootWrecks", "We are full: we are using a behavior that does not have a supported place to auto dump loot: error!", Logging.Orange);
+                    return;
+                }
+
+                // Open a container in range
+                int containersProcessedThisTick = 0;
+
+                if (EntitiesToLoot != null)
+                {
+                    containersInRange = EntitiesToLoot.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
+                }
+                else
+                {
+                    containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
+                }
+
+                if (Logging.DebugLootWrecks)
+                {
+                    int containersInRangeCount = 0;
+                    if (containersInRange.Any())
+                    {
+                        containersInRangeCount = containersInRange.Count();
+                    }
+
+                    List<EntityCache> containersOutOfRange = Cache.Instance.Containers.Where(e => e.Distance >= (int)Distances.SafeScoopRange).ToList();
+                    int containersOutOfRangeCount = 0;
+                    if (containersOutOfRange.Any())
+                    {
+                        containersOutOfRangeCount = containersOutOfRange.Count();
+                    }
+
+                    if (containersInRangeCount < 1) Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRangeCount + "]", Logging.Teal);
+                    if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
+                }
+                if (Cache.Instance.CurrentShipsCargo == null) return;
+
+                List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
+                double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
+                foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))
+                {
+                    containersProcessedThisTick++;
+
+                    // Empty wreck, ignore
+                    if (containerEntity.IsWreckEmpty) //this only returns true if it is a wreck, not for cargo containers, spawn containers, etc.
+                    {
+                        Cache.Instance.LootedContainers.Add(containerEntity.Id);
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "Ignoring Empty Wreck", Logging.Teal);
+                        continue;
+                    }
+
+                    // We looted this container
+                    if (Cache.Instance.LootedContainers.Contains(containerEntity.Id))
+                    {
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We have already looted [" + containerEntity.Id + "]", Logging.White);
+                        continue;
+                    }
+
+                    // Ignore open request within 10 seconds
+                    if (OpenedContainers.ContainsKey(containerEntity.Id) && DateTime.UtcNow.Subtract(OpenedContainers[containerEntity.Id]).TotalSeconds < 10)
+                    {
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We attempted to open [" + containerEntity.Id + "] less than 10 sec ago, ignoring", Logging.White);
+                        continue;
+                    }
+
+                    // Don't even try to open a wreck if you are speed tanking and you are not processing a loot action
+                    if (NavigateOnGrid.SpeedTank && !Cache.Instance.MyShipEntity.IsBattleship && OpenWrecks == false)
+                    {
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "SpeedTank is true and OpenWrecks is false [" + containerEntity.Id + "]", Logging.White);
+                        continue;
+                    }
+
+                    // Don't even try to open a wreck if you are specified LootEverything as false and you are not processing a loot action
+                    //      this is currently commented out as it would keep Golems and other non-speed tanked ships from looting the field as they cleared
+                    //      missions, but NOT stick around after killing things to clear it ALL. Looteverything==false does NOT mean loot nothing
+                    //if (Settings.Instance.LootEverything == false && Cache.Instance.OpenWrecks == false)
+                    //    continue;
+
+                    // Open the container
+                    Cache.Instance.ContainerInSpace = Cache.Instance.DirectEve.GetContainer(containerEntity.Id);
+                    if (Cache.Instance.ContainerInSpace == null)
+                    {
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (Cache.Instance.ContainerInSpace == null)", Logging.White);
+                        continue;
+                    }
+
+                    if (Cache.Instance.ContainerInSpace.Window == null)
+                    {
+                        if (containerEntity.OpenCargo())
+                        {
+                            Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                        }
+
+                        return;
+                    }
+
+                    if (!Cache.Instance.ContainerInSpace.Window.IsReady)
+                    {
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.White);
+                        return;
+                    }
+
+
+                    if (Cache.Instance.ContainerInSpace.Window.IsReady)
+                    {
+                        Logging.Log("Salvage", "Opened container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "]", Logging.White);
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is ready", Logging.White);
+                        OpenedContainers[containerEntity.Id] = DateTime.UtcNow;
+                        Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+
+
+
+                        // List its items
+                        IEnumerable<ItemCache> items = Cache.Instance.ContainerInSpace.Items.Select(i => new ItemCache(i)).ToList();
+                        if (Logging.DebugLootWrecks && items.Any()) Logging.Log("Salvage.LootWrecks", "Found [" + items.Count() + "] items in [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][" + containerEntity.MaskedId + "]", Logging.Teal);
+
+                        // Build a list of items to loot
+                        List<ItemCache> lootItems = new List<ItemCache>();
+
+                        // log wreck contents to file
+                        if (!Statistics.WreckStatistics(items, containerEntity)) break;
+
+                        if (items.Any())
+                        {
+                            // Walk through the list of items ordered by highest value item first
+                            foreach (ItemCache item in items.OrderByDescending(i => i.IsContraband).ThenByDescending(i => i.IskPerM3))
                             {
-                                if (Settings.Instance.FleetSupportSlave && !Settings.Instance.FleetSupportMaster)
+                                if (freeCargoCapacity < 1000) //this should allow BSs to not pickup large low value items but haulers and noctis' to scoop everything
                                 {
-                                    if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name) || item.IsMissionItem)
+                                    // We never want to pick up a cap booster
+                                    if (item.GroupID == (int)Group.CapacitorGroupCharge)
                                     {
-                                        if (Logging.DebugFleetSupportSlave) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is an item specified in a lootitem action. Do not loot it here. Let the Master loot this.", Logging.Teal);
-                                        Cache.Instance.LootedContainers.Add(containerEntity.Id);
                                         continue;
                                     }
                                 }
-                            }
 
-
-                            // Never pick up contraband (unless its the mission item)
-                            if (item.IsContraband) //is the mission item EVER contraband?!
-                            {
-                                if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and is considered Contraband: ignore it", Logging.Teal);
-                                Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                                continue;
-                            }
-
-                            if (!Salvage.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion)
-                            {
-                                // Do we want to loot other items?
-                                if (!_isMissionItem && !LootEverything)
+                                // We pick up loot depending on isk per m3
+                                bool _isMissionItem = MissionSettings.MissionItems.Contains((item.Name ?? string.Empty).ToLower());
+                                if (MissionSettings.MissionItems.Any())
                                 {
-                                    continue;
-                                }
-                            }
-
-                            // We are at our max, either make room or skip the item
-                            if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
-                            {
-                                Logging.Log("Salvage.LootWrecks", "We Need More m3: FreeCargoCapacity [" + freeCargoCapacity + "] - [" + item.Name + "][" + item.TotalVolume + "total][" + item.Volume + "each]", Logging.Debug);
-                                //
-                                // I have no idea what problem this solved (a long long time ago, but its not doing anything useful that I can tell)
-                                //
-                                // We can't drop items in this container anyway, well get it after its salvaged
-                                //if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
-                                //{
-                                //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
-                                //    Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                                //    continue;
-                                //}
-
-                                // Make a list of items which are worth less
-                                List<ItemCache> worthLess = null;
-                                if (_isMissionItem)
-                                {
-                                    worthLess = shipsCargo;
-                                }
-                                else if (item.IskPerM3.HasValue)
-                                {
-                                    worthLess = shipsCargo.Where(sc => sc.IskPerM3.HasValue && sc.IskPerM3 < item.IskPerM3).ToList();
-                                }
-                                else
-                                {
-                                    worthLess = shipsCargo.Where(sc => !sc.IsMissionItem && sc.IskPerM3.HasValue).ToList();
-                                }
-
-                                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
-                                {
-                                    // Remove mission item from this list
-                                    worthLess.RemoveAll(wl => MissionSettings.MissionItems.Contains((wl.Name ?? string.Empty).ToLower()));
-                                    if (!string.IsNullOrEmpty(MissionSettings.BringMissionItem))
+                                    if (Settings.Instance.FleetSupportSlave && !Settings.Instance.FleetSupportMaster)
                                     {
-                                        worthLess.RemoveAll(wl => (wl.Name ?? string.Empty).ToLower() == MissionSettings.BringMissionItem.ToLower());
-                                    }
-
-                                    // Consider dropping ammo if it concerns the mission item!
-                                    if (!_isMissionItem)
-                                    {
-                                        worthLess.RemoveAll(wl => Ammo.Any(a => a.TypeId == wl.TypeId));
+                                        if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains(item.Name) || item.IsMissionItem)
+                                        {
+                                            if (Logging.DebugFleetSupportSlave) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is an item specified in a lootitem action. Do not loot it here. Let the Master loot this.", Logging.Teal);
+                                            Cache.Instance.LootedContainers.Add(containerEntity.Id);
+                                            continue;
+                                        }
                                     }
                                 }
 
-                                // Nothing is worth less then the current item
-                                if (!worthLess.Any())
+
+                                // Never pick up contraband (unless its the mission item)
+                                if (item.IsContraband) //is the mission item EVER contraband?!
                                 {
-                                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] ::: if (!worthLess.Any()) continue ", Logging.Teal);
+                                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and is considered Contraband: ignore it", Logging.Teal);
+                                    Cache.Instance.LootedContainers.Add(containerEntity.Id);
                                     continue;
                                 }
 
-                                // Not enough space even if we dumped the crap
-                                if ((freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) < item.TotalVolume)
+                                if (!Salvage.LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion)
                                 {
-                                    if (item.IsMissionItem)
+                                    // Do we want to loot other items?
+                                    if (!_isMissionItem && !LootEverything)
                                     {
-                                        Logging.Log("Salvage", "Not enough space for [" + item.Name + "] Need [" + item.TotalVolume + "] maximum available [" + (freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) + "]", Logging.White);
+                                        continue;
+                                    }
+                                }
+
+                                try
+                                {
+                                    // We are at our max, either make room or skip the item
+                                    if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
+                                    {
+                                        Logging.Log("Salvage.LootWrecks", "We Need More m3: FreeCargoCapacity [" + freeCargoCapacity + "] - [" + item.Name + "][" + item.TotalVolume + "total][" + item.Volume + "each]", Logging.Debug);
                                         //
-                                        // partially loot the mission item if possible.
+                                        // I have no idea what problem this solved (a long long time ago, but its not doing anything useful that I can tell)
                                         //
+                                        // We can't drop items in this container anyway, well get it after its salvaged
+                                        //if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
+                                        //{
+                                        //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
+                                        //    Cache.Instance.LootedContainers.Add(containerEntity.Id);
+                                        //    continue;
+                                        //}
 
-                                    }
-                                    continue;
-                                }
+                                        // Make a list of items which are worth less
+                                        List<ItemCache> worthLess = null;
+                                        if (_isMissionItem)
+                                        {
+                                            worthLess = shipsCargo;
+                                        }
+                                        else if (item.IskPerM3.HasValue)
+                                        {
+                                            worthLess = shipsCargo.Where(sc => sc.IskPerM3.HasValue && sc.IskPerM3 < item.IskPerM3).ToList();
+                                        }
+                                        else
+                                        {
+                                            worthLess = shipsCargo.Where(sc => !sc.IsMissionItem && sc.IskPerM3.HasValue).ToList();
+                                        }
 
-                                // Start clearing out items that are worth less
-                                List<DirectItem> moveTheseItems = new List<DirectItem>();
-                                foreach (ItemCache wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
-                                {
-                                    // Mark this item as moved
-                                    moveTheseItems.Add(wl.DirectItem);
+                                        if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                                        {
+                                            // Remove mission item from this list
+                                            worthLess.RemoveAll(wl => MissionSettings.MissionItems.Contains((wl.Name ?? string.Empty).ToLower()));
+                                            if (!string.IsNullOrEmpty(MissionSettings.BringMissionItem))
+                                            {
+                                                worthLess.RemoveAll(wl => (wl.Name ?? string.Empty).ToLower() == MissionSettings.BringMissionItem.ToLower());
+                                            }
 
-                                    // Subtract (now) free volume
-                                    freeCargoCapacity += wl.TotalVolume;
+                                            // Consider dropping ammo if it concerns the mission item!
+                                            if (!_isMissionItem)
+                                            {
+                                                worthLess.RemoveAll(wl => Ammo.Any(a => a.TypeId == wl.TypeId));
+                                            }
+                                        }
 
-                                    // We freed up enough space?
-                                    if ((freeCargoCapacity - item.TotalVolume) >= ReserveCargoCapacity)
-                                    {
-                                        break;
-                                    }
-                                }
+                                        // Nothing is worth less then the current item
+                                        if (!worthLess.Any())
+                                        {
+                                            if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] ::: if (!worthLess.Any()) continue ", Logging.Teal);
+                                            continue;
+                                        }
 
-                                if (moveTheseItems.Count > 0)
-                                {
-                                    // jettison loot
-                                    if (DateTime.UtcNow.Subtract(Time.Instance.LastJettison).TotalSeconds < Time.Instance.DelayBetweenJetcans_seconds)
-                                    {
+                                        // Not enough space even if we dumped the crap
+                                        if ((freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) < item.TotalVolume)
+                                        {
+                                            if (item.IsMissionItem)
+                                            {
+                                                Logging.Log("Salvage", "Not enough space for [" + item.Name + "] Need [" + item.TotalVolume + "] maximum available [" + (freeCargoCapacity + worthLess.Sum(wl => wl.TotalVolume)) + "]", Logging.White);
+                                                //
+                                                // partially loot the mission item if possible.
+                                                //
+
+                                            }
+                                            continue;
+                                        }
+
+                                        // Start clearing out items that are worth less
+                                        List<DirectItem> moveTheseItems = new List<DirectItem>();
+                                        foreach (ItemCache wl in worthLess.OrderBy(wl => wl.IskPerM3.HasValue ? wl.IskPerM3.Value : double.MaxValue).ThenByDescending(wl => wl.TotalVolume))
+                                        {
+                                            // Mark this item as moved
+                                            moveTheseItems.Add(wl.DirectItem);
+
+                                            // Subtract (now) free volume
+                                            freeCargoCapacity += wl.TotalVolume;
+
+                                            // We freed up enough space?
+                                            if ((freeCargoCapacity - item.TotalVolume) >= ReserveCargoCapacity)
+                                            {
+                                                break;
+                                            }
+                                        }
+
+                                        if (moveTheseItems.Count > 0)
+                                        {
+                                            // jettison loot
+                                            if (DateTime.UtcNow.Subtract(Time.Instance.LastJettison).TotalSeconds < Time.Instance.DelayBetweenJetcans_seconds)
+                                            {
+                                                return;
+                                            }
+
+                                            Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.White);
+
+                                            // Note: This could (in theory) fuck up with the bot jettison an item and
+                                            // then picking it up again :/ (granted it should never happen unless
+                                            // mission item volume > reserved volume
+                                            Cache.Instance.CurrentShipsCargo.Jettison(moveTheseItems.Select(i => i.ItemId));
+                                            Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                                            Time.Instance.LastJettison = DateTime.UtcNow;
+                                            return;
+                                        }
+
                                         return;
                                     }
 
-                                    Logging.Log("Salvage", "Jettisoning [" + moveTheseItems.Count + "] items to make room for the more valuable loot", Logging.White);
-
-                                    // Note: This could (in theory) fuck up with the bot jettison an item and
-                                    // then picking it up again :/ (granted it should never happen unless
-                                    // mission item volume > reserved volume
-                                    Cache.Instance.CurrentShipsCargo.Jettison(moveTheseItems.Select(i => i.ItemId));
-                                    Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
-                                    Time.Instance.LastJettison = DateTime.UtcNow;
-                                    return;
+                                    // Update free space
+                                    freeCargoCapacity -= item.TotalVolume;
+                                    lootItems.Add(item);
+                                    //if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We just added 1 more item to lootItems for a total of [" + lootItems.Count() + "] items we will loot from [" + containerID + "]", Logging.Teal);
                                 }
-
-                                return;
-                            }
-
-                            // Update free space
-                            freeCargoCapacity -= item.TotalVolume;
-                            lootItems.Add(item);
-                            //if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "We just added 1 more item to lootItems for a total of [" + lootItems.Count() + "] items we will loot from [" + containerID + "]", Logging.Teal);
-                        }
-                    }
-                    
-                    // Mark container as looted
-                    Cache.Instance.LootedContainers.Add(containerEntity.Id);
-
-                    // Loot actual items
-                    if (lootItems.Count != 0)
-                    {
-                        Logging.Log("Salvage.LootWrecks", "Looting container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "], [" + lootItems.Count + "] valuable items", Logging.White);
-                        if(Logging.DebugLootWrecks)
-                        {
-                            int icount = 0;
-                            if (lootItems != null && lootItems.Any())
-                            {
-                                foreach (var lootItem in lootItems)
+                                catch (Exception exception)
                                 {
-                                    icount++;
-                                    Logging.Log("Salvage.LootWrecks", "[" + icount + "]LootItems Contains: [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
-                                    if (lootItem.GroupID == (int)Group.Drugs ||
-                                        lootItem.GroupID == (int)Group.ToxicWaste ||
-                                        lootItem.TypeId == (int)TypeID.Small_Arms ||
-                                        lootItem.TypeId == (int)TypeID.Ectoplasm)
-                                    {
-                                        lootItems.Remove(lootItem);
-                                        Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
-                                    }
-                                }    
+                                    Logging.Log("Salvage.LootWrecks", "We Need More m3: Exception [" + exception + "]", Logging.Debug);
+                                }
                             }
                         }
 
-                        Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
-                    }
-                    else
-                    {
-                        Logging.Log("Salvage.LootWrecks", "Container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "] contained no valuable items", Logging.White);
+                        // Mark container as looted
+                        Cache.Instance.LootedContainers.Add(containerEntity.Id);
+
+                        // Loot actual items
+                        if (lootItems.Count != 0)
+                        {
+                            Logging.Log("Salvage.LootWrecks", "Looting container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "], [" + lootItems.Count + "] valuable items", Logging.White);
+                            if (Logging.DebugLootWrecks)
+                            {
+                                int icount = 0;
+                                if (lootItems != null && lootItems.Any())
+                                {
+                                    foreach (var lootItem in lootItems)
+                                    {
+                                        icount++;
+                                        Logging.Log("Salvage.LootWrecks", "[" + icount + "]LootItems Contains: [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                        if (lootItem.GroupID == (int)Group.Drugs ||
+                                            lootItem.GroupID == (int)Group.ToxicWaste ||
+                                            lootItem.TypeId == (int)TypeID.Small_Arms ||
+                                            lootItem.TypeId == (int)TypeID.Ectoplasm)
+                                        {
+                                            lootItems.Remove(lootItem);
+                                            Logging.Log("Salvage.LootWrecks", "[" + icount + "] Removed this from LootItems before looting [" + lootItem.Name + "] Quantity[" + lootItem.Quantity + "k] isContraband [" + lootItem.IsContraband + "] groupID [" + lootItem.GroupID + "] typeID [" + lootItem.TypeId + "] isCommonMissionItem [" + lootItem.IsCommonMissionItem + "]", Logging.White);
+                                        }
+                                    }
+                                }
+                            }
+
+                            Cache.Instance.CurrentShipsCargo.Add(lootItems.Select(i => i.DirectItem));
+                        }
+                        else
+                        {
+                            Logging.Log("Salvage.LootWrecks", "Container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "] contained no valuable items", Logging.White);
+                        }
+
+                        return;
                     }
 
+                    //add cont proceed this tick
+                    //if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                    //{
+                    //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.White);
+                    //    continue;
+                    //}
                     return;
                 }
-
-                //add cont proceed this tick
-                //if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
-                //{
-                //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containersProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)", Logging.White);
-                //    continue;
-                //}
-                return;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Salvage.LootWrecks", "Exception [" + exception + "]", Logging.Debug);
             }
         }
 

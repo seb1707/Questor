@@ -44,7 +44,6 @@ namespace Questor.Modules.Logging
 
         public static bool MissionLoggingCompleted; //false
         public static bool DroneLoggingCompleted; //false
-        public static long AgentID { get; set; }
         //private bool PocketLoggingCompleted = false;
         //private bool SessionLoggingCompleted = false;
 

@@ -300,27 +300,35 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
+                try
                 {
-                    if (MissionSettings.MissionItems.Contains((Name ?? string.Empty).ToLower()))
+                    if (_States.CurrentQuestorState == QuestorState.CombatMissionsBehavior)
                     {
-                        return true;
+                        if (MissionSettings.MissionItems.Contains((Name ?? string.Empty).ToLower()))
+                        {
+                            return true;
+                        }
+
+                        if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains((Name ?? string.Empty).ToLower()))
+                        {
+                            return true;
+                        }
+
+                        if (IsTypicalMissionCompletionItem)
+                        {
+                            return true;
+                        }
+
+                        return false;
                     }
 
-                    if (Cache.Instance.ListofMissionCompletionItemsToLoot.Contains((Name ?? string.Empty).ToLower()))
-                    {
-                        return true;
-                    }
-
-                    if (IsTypicalMissionCompletionItem)
-                    {
-                        return true;
-                    }
-
-                    return false;   
+                    return false;
                 }
-
-                return false;
+                catch (Exception ex)
+                {
+                    Logging.Log("ItemCache.IsMissionItem", "Exception [" + ex + "]", Logging.Debug);
+                    return false;
+                }
             }
         }
 
@@ -358,12 +366,25 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directItem != null)
+                try
                 {
-                    return _directItem.AveragePrice() / _directItem.Volume;
-                }
+                    if (_directItem != null)
+                    {
+                        if (_directItem.AveragePrice() > 0)
+                        {
+                            return _directItem.AveragePrice() / _directItem.Volume;
+                        }
 
-                return 1;
+                        return 0.001;
+                    }
+
+                    return 0.001;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("ItemCache.IskPerM3", "Exception [" + ex + "]", Logging.Debug);
+                    return null;
+                }
             }
         }
 
@@ -371,12 +392,25 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (_directItem != null)
+                try
                 {
-                    return _directItem.AveragePrice();
-                }
+                    if (_directItem != null)
+                    {
+                        if (_directItem.AveragePrice() > 0)
+                        {
+                            return _directItem.AveragePrice();
+                        }
 
-                return 1;
+                        return 0.001;
+                    }
+
+                    return 0.001;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("ItemCache.Value","Exception [" + ex + "]",Logging.Debug);
+                    return null;
+                }
             }
         }
     }

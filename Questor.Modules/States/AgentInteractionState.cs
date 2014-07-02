@@ -20,6 +20,7 @@ namespace Questor.Modules.States
         Done,
         UnexpectedDialogOptions,
         WaitForMission,
+        PrepareForOfferedMission,
         AcceptMission,
         DeclineMission
     }

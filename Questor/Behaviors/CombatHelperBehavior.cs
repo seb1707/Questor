@@ -110,7 +110,6 @@ namespace Questor.Behaviors
             }
             else
             {
-                Arm.AgentId = agent.AgentId;
                 AgentID = agent.AgentId;
             }
         }
@@ -282,8 +281,8 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load right ammo based on mission
-                        Arm.AmmoToLoad.Clear();
-                        Arm.LoadSpecificAmmo(new[] { MissionSettings.MissionDamageType });
+                        Arm.AmmoTypesToLoad.Clear();
+                        Arm.LoadSpecificAmmoTypeForNonMissionSituations(new[] { MissionSettings.MissionDamageType });
                     }
 
                     Arm.ProcessState();
@@ -543,7 +542,7 @@ namespace Questor.Behaviors
                         }
                         else
                         {
-                            if (station.Distance < 1900)
+                            if (station.Distance < (int) Distances.DockingRange)
                             {
                                 if (station.Dock())
                                 {

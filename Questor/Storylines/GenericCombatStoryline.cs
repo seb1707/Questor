@@ -65,24 +65,14 @@ namespace Questor.Storylines
                 _neededAmmo.Clear();
                 _agentId = Cache.Instance.CurrentStorylineAgentId;
 
-                AgentInteraction.AgentId = _agentId;
                 AgentInteraction.ForceAccept = true; // This makes agent interaction skip the offer-check
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 AgentInteraction.Purpose = AgentInteractionPurpose.AmmoCheck;
 
-                Modules.Actions.Arm.AgentId = _agentId;
                 _States.CurrentArmState = ArmState.Idle;
-                Modules.Actions.Arm.AmmoToLoad.Clear();
+                Modules.Actions.Arm.AmmoTypesToLoad.Clear();
 
-                //Questor.AgentID = _agentId;
-
-                Statistics.AgentID = _agentId;
-
-                CombatMissionCtrl.AgentId = _agentId;
                 _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
-
-                //_States.CurrentCombatState = CombatState.CheckTargets;
-
                 _States.CurrentDroneState = DroneState.WaitingForTargets;
             }
 
@@ -133,13 +123,6 @@ namespace Questor.Storylines
                     AgentInteraction.Agent.Window.Close();
                 Logging.Log("GenericCombatStoryline", "Mission offer is in a Low Security System", Logging.Orange); //do storyline missions in lowsec get blacklisted by: "public StorylineState Arm(Storyline storyline)"?
                 throw new Exception("Low security systems");
-            }
-
-            if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
-            {
-                Modules.Actions.Arm.AmmoToLoad.Clear();
-                Modules.Actions.Arm.AmmoToLoad.AddRange(MissionSettings.AmmoToLoad);
-                return true;
             }
 
             return false;

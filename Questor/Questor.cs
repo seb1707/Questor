@@ -514,14 +514,6 @@ namespace Questor
                 Time.Instance.LastSessionIsReady = DateTime.UtcNow;
             }
 
-            // We are not in space or station, don't do shit yet!
-            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
-            {
-                Time.Instance.NextInSpaceorInStation = DateTime.UtcNow.AddSeconds(12);
-                Time.Instance.LastSessionChange = DateTime.UtcNow;
-                return false;
-            }
-
             if (DateTime.UtcNow < Time.Instance.NextInSpaceorInStation)
             {
                 if (Cache.Instance.ActiveShip.GroupId == (int)Group.Capsule)

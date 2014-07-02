@@ -95,7 +95,6 @@ namespace Questor.Modules.Activities
             if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
             {
                 if (Logging.DebugTraveler) Logging.Log("Traveler", "NavigateToBookmarkSystem: We just session changed less than 10 sec go, wait.", Logging.Teal);
-                Time.Instance.NextTravelerAction = Time.Instance.LastSessionChange.AddSeconds(12);
                 return;
             }
 

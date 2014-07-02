@@ -1493,12 +1493,17 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
+                    if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
+                    {
+                        return false;
+                    }
+
                     if (DateTime.UtcNow < Time.Instance.LastInSpace.AddMilliseconds(800))
                     {
                         //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
                         return true;
                     }
-
+                    
                     if (DirectEve.Session.IsInSpace)
                     {
                         if (!Cache.Instance.InStation)
@@ -1543,6 +1548,11 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
+                    if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(10))
+                    {
+                        return false;
+                    }
+
                     if (DateTime.UtcNow < Time.Instance.LastInStation.AddMilliseconds(800))
                     {
                         //if We already set the LastInStation timestamp this iteration we do not need to check if we are in station
@@ -1619,69 +1629,93 @@ namespace Questor.Modules.Caching
 
         public bool IsOrbiting(long EntityWeWantToBeOrbiting = 0)
         {
-            if (Cache.Instance.Approaching != null)
+            try
             {
-                bool _followIDIsOnGrid = false;
+                if (Cache.Instance.Approaching != null)
+                {
+                    bool _followIDIsOnGrid = false;
 
-                if (EntityWeWantToBeOrbiting != 0)
-                {
-                    _followIDIsOnGrid = (EntityWeWantToBeOrbiting == Cache.Instance.ActiveShip.Entity.FollowId);
-                }
-                else
-                {
-                    _followIDIsOnGrid = Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
-                }
+                    if (EntityWeWantToBeOrbiting != 0)
+                    {
+                        _followIDIsOnGrid = (EntityWeWantToBeOrbiting == Cache.Instance.ActiveShip.Entity.FollowId);
+                    }
+                    else
+                    {
+                        _followIDIsOnGrid = Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
+                    }
 
-                if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
-                {
-                    return true;
+                    if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 4 && _followIDIsOnGrid)
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
 
                 return false;
             }
-
-            return false;
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.IsApproaching", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
         }
 
         public bool IsApproaching(long EntityWeWantToBeApproaching = 0)
         {
-            if (Cache.Instance.Approaching != null)
+            try
             {
-                bool _followIDIsOnGrid = false;
-                
-                if (EntityWeWantToBeApproaching != 0)
+                if (Cache.Instance.Approaching != null)
                 {
-                    _followIDIsOnGrid = (EntityWeWantToBeApproaching == Cache.Instance.ActiveShip.Entity.FollowId);
-                }
-                else
-                {
-                    _followIDIsOnGrid = Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
+                    bool _followIDIsOnGrid = false;
+
+                    if (EntityWeWantToBeApproaching != 0)
+                    {
+                        _followIDIsOnGrid = (EntityWeWantToBeApproaching == Cache.Instance.ActiveShip.Entity.FollowId);
+                    }
+                    else
+                    {
+                        _followIDIsOnGrid = Cache.Instance.EntitiesOnGrid.Any(i => i.Id == Cache.Instance.ActiveShip.Entity.FollowId);
+                    }
+
+                    if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
 
-                if (Cache.Instance.ActiveShip.Entity != null && Cache.Instance.ActiveShip.Entity.Mode == 1 && _followIDIsOnGrid)
+                return false;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Cache.IsApproaching", "Exception [" + exception + "]", Logging.Debug);
+                return false;
+            }
+        }
+
+        public bool IsApproachingOrOrbiting(long EntityWeWantToBeApproachingOrOrbiting = 0)
+        {
+            try
+            {
+                if (IsApproaching(EntityWeWantToBeApproachingOrOrbiting))
+                {
+                    return true;
+                }
+
+                if (IsOrbiting(EntityWeWantToBeApproachingOrOrbiting))
                 {
                     return true;
                 }
 
                 return false;
             }
-
-            return false;
-        }
-
-        public bool IsApproachingOrOrbiting(long EntityWeWantToBeApproachingOrOrbiting = 0)
-        {   
-            if (IsApproaching(EntityWeWantToBeApproachingOrOrbiting))
+            catch (Exception exception)
             {
-                return true;
+                Logging.Log("Cache.IsApproachingOrOrbiting", "Exception [" + exception + "]", Logging.Debug);
+                return false;
             }
-
-            if (IsOrbiting(EntityWeWantToBeApproachingOrOrbiting))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         public List<EntityCache> Stations
@@ -1720,12 +1754,20 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                if (Stations != null &&  Stations.Any())
+                try
                 {
-                    return Stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Cache.Instance.Entities.OrderByDescending(s => s.Distance).FirstOrDefault();    
-                }
+                    if (Stations != null && Stations.Any())
+                    {
+                        return Stations.OrderBy(s => s.Distance).FirstOrDefault() ?? Cache.Instance.Entities.OrderByDescending(s => s.Distance).FirstOrDefault();
+                    }
 
-                return null;
+                    return null;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.IsApproaching", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
             }
         }
 
@@ -1888,10 +1930,18 @@ namespace Questor.Modules.Caching
         {
             get
             {
-                return _bigObjects ?? (_bigObjects = Cache.Instance.EntitiesOnGrid.Where(e =>
+                try
+                {
+                    return _bigObjects ?? (_bigObjects = Cache.Instance.EntitiesOnGrid.Where(e =>
                        e.Distance < (double)Distances.OnGridWithMe &&
                        (e.IsLargeCollidable || e.CategoryId == (int)CategoryID.Asteroid || e.GroupId == (int)Group.SpawnContainer)
                        ).OrderBy(t => t.Distance).ToList());
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.BigObjects", "Exception [" + exception + "]", Logging.Debug);
+                    return new List<EntityCache>();
+                }
             }
         }
 
@@ -4663,77 +4713,6 @@ namespace Questor.Modules.Caching
             return true;
         }
         
-        public bool OpenAgentWindow(string module)
-        {
-            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-            {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
-            {
-                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (DateTime.UtcNow < Cache.Instance.NextAgentWindowAction)", Logging.Yellow);
-                return false;
-            }
-
-            if (AgentInteraction.Agent.Window == null)
-            {
-                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
-                Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(10);
-                AgentInteraction.Agent.InteractWith();
-                Statistics.LogWindowActionToWindowLog("AgentWindow", "Opening AgentWindow");
-                return false;
-            }
-
-            if (!AgentInteraction.Agent.Window.IsReady)
-            {
-                return false;
-            }
-
-            if (AgentInteraction.Agent.Window.IsReady && AgentInteraction.AgentId == AgentInteraction.Agent.AgentId)
-            {
-                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
-                return true;
-            }
-
-            return false;
-        }
-
-        public DirectWindow JournalWindow { get; set; }
-
-        public bool OpenJournalWindow(string module)
-        {
-            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
-            {
-                return false;
-            }
-
-            if (DateTime.UtcNow < Time.Instance.NextWindowAction)
-            {
-                return false;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                Cache.Instance.JournalWindow = Cache.Instance.GetWindowByName("journal");
-
-                // Is the journal window open?
-                if (Cache.Instance.JournalWindow == null)
-                {
-                    // No, command it to open
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenJournal);
-                    Statistics.LogWindowActionToWindowLog("JournalWindow", "Opening JournalWindow");
-                    Time.Instance.NextWindowAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 4));
-                    Logging.Log(module, "Opening Journal Window: waiting [" + Math.Round(Time.Instance.NextWindowAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    return false;
-                }
-
-                return true; //if JournalWindow is not null then the window must be open.
-            }
-
-            return false;
-        }
-
         public DirectMarketWindow MarketWindow { get; set; }
 
         public bool OpenMarket(string module)

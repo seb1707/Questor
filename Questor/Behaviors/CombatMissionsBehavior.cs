@@ -40,7 +40,6 @@ namespace Questor.Behaviors
         public DateTime LastCMBAction;
         private readonly Random _random;
         private int _randomDelay;
-        public static long AgentID;
         
         private double _lastX;
         private double _lastY;
@@ -110,10 +109,6 @@ namespace Questor.Behaviors
             }
 
             AgentInteraction.AgentId = Cache.Instance.AgentId;
-            CombatMissionCtrl.AgentId = Cache.Instance.AgentId;
-            Arm.AgentId = Cache.Instance.AgentId;
-            Statistics.AgentID = Cache.Instance.AgentId;
-            AgentID = Cache.Instance.AgentId;
             return;
         }
 
@@ -127,13 +122,13 @@ namespace Questor.Behaviors
                 switch (_CMBStateToSet)
                 {
                     case CombatMissionsBehaviorState.Idle:
-                        return true;
+                        break;
 
                     case CombatMissionsBehaviorState.Panic:
-                        return true;
+                        break;
 
                     case CombatMissionsBehaviorState.Error:
-                        return true;
+                        break;
                 }
                 
             }
@@ -159,68 +154,6 @@ namespace Questor.Behaviors
         {
             Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
-        }
-
-        private bool WeShouldBeInStationAndOutOfSessionChange()
-        {
-            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
-            {
-                if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug1", "if (!Cache.Instance.InSpace && !Cache.Instance.InStation)", Logging.Debug);
-                //wait... we must be in a session change
-                return false;
-            }
-
-            //
-            // this state should never be reached in space. if we are in space and in this state we should switch to gotomission
-            //
-            if (Cache.Instance.InSpace)
-            {
-                Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "We are in space, how did we get set to this state while in space? Changing state to: GotoBase", Logging.White);
-                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                return false;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug1", "if (Cache.Instance.InStation)", Logging.Debug);
-                if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))
-                {
-                    if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug1", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(16))", Logging.Debug);
-                    //wait... we must be in a session change
-                    return false;    
-                }
-
-                return true;
-            }
-
-            Logging.Log("WeShouldBeInStationAndOutOfSessionChange", "We aren't in space, We aren't in station, waiting", Logging.Debug);
-            return false;
-        }
-
-        private bool WeShouldBeInSpaceAndOutOfSessionChange()
-        {
-            if (!Cache.Instance.InSpace && !Cache.Instance.InStation)
-            {
-                //wait... we must be in a session change
-                if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug2", "if (!Cache.Instance.InSpace && !Cache.Instance.InStation)", Logging.Debug);
-                return false;
-            }
-
-            if (Cache.Instance.InSpace)
-            {
-                if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug2", "if (Cache.Instance.InSpace)", Logging.Debug);
-                if (DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(16))
-                {
-                    if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug2", "if (DateTime.UtcNow < Time.Instance.LastInStation.AddSeconds(16))", Logging.Debug);
-                    //wait... we must be in a session change
-                    return false;
-                }
-
-                return true;
-            }
-
-            if (Logging.DebugWeShouldBeInSpaceORInStationAndOutOfSessionChange) Logging.Log("Debug2", "Are we not in space?! InSpace[" + Cache.Instance.InSpace + "] InStation[" + Cache.Instance.InStation + "]", Logging.Debug);
-            return false;
         }
 
         private bool WeShouldBeInSpaceORInStationAndOutOfSessionChange()
@@ -435,7 +368,7 @@ namespace Questor.Behaviors
 
             if (_States.CurrentAgentInteractionState == AgentInteractionState.Done)
             {
-                MissionSettings.UpdateMissionName(AgentID);
+                MissionSettings.UpdateMissionName(AgentInteraction.AgentId);
                 _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
                 ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.Arm);
                 return;
@@ -454,7 +387,7 @@ namespace Questor.Behaviors
         
         private void SwitchCMBState()
         {
-            if (!WeShouldBeInStationAndOutOfSessionChange()) return;
+            if (!Cache.Instance.InStation) return;
 
             if (_States.CurrentSwitchShipState == SwitchShipState.Idle)
             {
@@ -476,7 +409,7 @@ namespace Questor.Behaviors
         
         private void ArmCMBState()
         {
-            if (!WeShouldBeInStationAndOutOfSessionChange()) return;
+            if (!Cache.Instance.InStation) return;
 
             if (_States.CurrentArmState == ArmState.Idle)
             {
@@ -489,16 +422,6 @@ namespace Questor.Behaviors
                 {
                     Logging.Log("Arm", "Begin", Logging.White);
                     Arm.ChangeArmState(ArmState.Begin);
-
-                    // Load right ammo based on mission
-                    Arm.AmmoToLoad.Clear();
-                    if (Combat.WeaponGroupId != 53) //civilian guns of all types
-                    {
-                        //
-                        // only add ammo to the AmmoToLoad if we are not using civilian guns
-                        //
-                        Arm.AmmoToLoad.AddRange(MissionSettings.AmmoToLoad);
-                    }
                 }
             }
 
@@ -656,11 +579,11 @@ namespace Questor.Behaviors
             {
                 if (Logging.DebugGotobase) Logging.Log("CombatMissionsBehavior", "GotoBase: We are at destination", Logging.White);
                 Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                if (AgentID != 0)
+                if (AgentInteraction.AgentId != 0)
                 {
                     try
                     {
-                        MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentID, true);
+                        MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentInteraction.AgentId, true);
                     }
                     catch (Exception exception)
                     {
@@ -699,7 +622,7 @@ namespace Questor.Behaviors
         
         private void CompleteMissionCMBState()
         {
-            if (!WeShouldBeInStationAndOutOfSessionChange()) return; // Do Not Continue if we are not in station and out of session change
+            if (!Cache.Instance.InStation) return; // Do Not Continue if we are not in station and out of session change
 
             //
             // 2 Iterations needed to finish Complete Mission (1 sec a piece == 2 seconds)
@@ -771,7 +694,7 @@ namespace Questor.Behaviors
                     if (!Statistics.MissionLoggingCompleted)
                     {
                         if (Logging.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
-                        Statistics.WriteMissionStatistics(AgentID);
+                        Statistics.WriteMissionStatistics(AgentInteraction.AgentId);
                         if (Logging.DebugStatistics) Logging.Log("CombatMissionsBehavior.Idle", "Done w Statistics.WriteMissionStatistics(AgentID);", Logging.Teal);
                         return;
                     }
@@ -788,7 +711,7 @@ namespace Questor.Behaviors
         
         private void ExecuteMissionCMBState()
         {
-            if (!WeShouldBeInSpaceAndOutOfSessionChange()) return; //if we are not in space and out of session change wait.
+            if (!Cache.Instance.InSpace) return; //if we are not in space and out of session change wait.
 
             //
             // Execution time will vary heavily on the mission!
@@ -913,163 +836,188 @@ namespace Questor.Behaviors
         
         private void GotoMissionCMBState()
         {
-            if (!WeShouldBeInSpaceORInStationAndOutOfSessionChange()) return; //either in space or in station is fine, but we should not continue until we are not in a session change
-            Statistics.MissionLoggingCompleted = false;
-            Drones.IsMissionPocketDone = false;
-
-            MissionBookmarkDestination missionDestination = Traveler.Destination as MissionBookmarkDestination;
-
-            if (missionDestination == null || missionDestination.AgentId != AgentID) // We assume that this will always work "correctly" (tm)
+            try
             {
-                string nameOfBookmark = "";
-                if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
-                if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
-                if (nameOfBookmark == "") nameOfBookmark = "Encounter";
-                Logging.Log("CombatMissionsBehavior", "Setting Destination to 1st bookmark from AgentID: " + AgentID + " with [" + nameOfBookmark + "] in the title", Logging.White);
-                Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(AgentID, nameOfBookmark));
-                Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);
-            }
+                if (!WeShouldBeInSpaceORInStationAndOutOfSessionChange()) return; //either in space or in station is fine, but we should not continue until we are not in a session change
+                Statistics.MissionLoggingCompleted = false;
+                Drones.IsMissionPocketDone = false;
 
-            if (Combat.PotentialCombatTargets.Any())
-            {
-                Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Combat.PotentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
-                Combat.ProcessState();
-            }
+                MissionBookmarkDestination missionDestination = Traveler.Destination as MissionBookmarkDestination;
 
-            Traveler.ProcessState();
-            
-            if (_States.CurrentTravelerState == TravelerState.AtDestination)
-            {
-                // Seeing as we just warped to the mission, start the mission controller
-                _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
-                Traveler.Destination = null;
-                ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.ExecuteMission);
+                if (missionDestination == null || missionDestination.AgentId != AgentInteraction.AgentId) // We assume that this will always work "correctly" (tm)
+                {
+                    string nameOfBookmark = "";
+                    if (Settings.Instance.EveServerName == "Tranquility") nameOfBookmark = "Encounter";
+                    if (Settings.Instance.EveServerName == "Serenity") nameOfBookmark = "遭遇战";
+                    if (nameOfBookmark == "") nameOfBookmark = "Encounter";
+                    if (MissionSettings.GetMissionBookmark(AgentInteraction.AgentId, nameOfBookmark) != null)
+                    {
+                        Logging.Log("CombatMissionsBehavior", "Setting Destination to 1st bookmark from AgentID: " + AgentInteraction.AgentId + " with [" + nameOfBookmark + "] in the title", Logging.White);
+                        Traveler.Destination = new MissionBookmarkDestination(MissionSettings.GetMissionBookmark(AgentInteraction.AgentId, nameOfBookmark));
+                        if (Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId) != null)
+                        {
+                            Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);
+                            Logging.Log("CombatMissionsBehavior", "MissionSolarSystem is [" + Cache.Instance.MissionSolarSystem + "]", Logging.White);
+                        }
+                    }
+                     
+                    
+                }
+
+                if (Combat.PotentialCombatTargets.Any())
+                {
+                    Logging.Log("CombatMissionsBehavior.GotoMission", "[" + Combat.PotentialCombatTargets.Count() + "] potentialCombatTargets found , Running combat.ProcessState", Logging.White);
+                    Combat.ProcessState();
+                }
+
+                Traveler.ProcessState();
+
+                if (_States.CurrentTravelerState == TravelerState.AtDestination)
+                {
+                    // Seeing as we just warped to the mission, start the mission controller
+                    _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
+                    Traveler.Destination = null;
+                    ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.ExecuteMission);
+                    return;
+                }
+
                 return;
             }
-
-            return;
+            catch (Exception exception)
+            {
+                Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(), "Exception [" + exception + "]", Logging.Debug);
+                return;
+            }
         }
         
         private void UnloadLootCMBState()
         {
-            if (!WeShouldBeInStationAndOutOfSessionChange()) return; //if we are in space GotoBase, if we are in station wait until we are out of any session changes before continuing
-
-            if (_States.CurrentUnloadLootState == UnloadLootState.Idle)
+            try
             {
-                Logging.Log("CombatMissionsBehavior", "UnloadLoot: Begin", Logging.White);
-                _States.CurrentUnloadLootState = UnloadLootState.Begin;
-            }
+                if (!Cache.Instance.InStation) return; //if we are in space GotoBase, if we are in station wait until we are out of any session changes before continuing
 
-            UnloadLoot.ProcessState();
-
-            if (_States.CurrentUnloadLootState == UnloadLootState.Done)
-            {
-                Cache.Instance.LootAlreadyUnloaded = true;
-                _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentID, true);
-
-                //if (Cache.Instance.Mission == null)
-                //{
-                //    Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
-                //    return;
-                //}
-
-                if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
+                if (_States.CurrentUnloadLootState == UnloadLootState.Idle)
                 {
-                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                    return;
+                    Logging.Log("CombatMissionsBehavior", "UnloadLoot: Begin", Logging.White);
+                    _States.CurrentUnloadLootState = UnloadLootState.Begin;
                 }
 
-                if ((MissionSettings.Mission != null) && (MissionSettings.Mission.State != (int)MissionState.Offered)) // on mission
-                {
-                    Logging.Log("CombatMissionsBehavior.Unloadloot", "We are on mission", Logging.White);
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                    return;
-                }
+                UnloadLoot.ProcessState();
 
-                //This salvaging decision tree does not belong here and should be separated out into a different QuestorState
-                if (Salvage.AfterMissionSalvaging)
+                if (_States.CurrentUnloadLootState == UnloadLootState.Done)
                 {
-                    if (Cache.Instance.GetSalvagingBookmark == null)
+                    Cache.Instance.LootAlreadyUnloaded = true;
+                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
+                    MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentInteraction.AgentId, true);
+
+                    //if (Cache.Instance.Mission == null)
+                    //{
+                    //    Logging.Log("CombatMissionsBehavior", "Cache.Instance.Mission == null - retry on next iteration", Logging.Teal);
+                    //    return;
+                    //}
+
+                    if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
                     {
-                        Logging.Log("CombatMissionsBehavior.Unloadloot", " No more salvaging bookmarks. Setting FinishedSalvaging Update.", Logging.White);
-
-                        //if (Settings.Instance.CharacterMode == "Salvager")
-                        //{
-                        //    Logging.Log("Salvager mode set and no bookmarks making delay");
-                        //    States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorStateState.Error; //or salvageonly. need to check difference
-                        //}
-
-                        if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
-                        {
-                            Logging.Log("CombatMissionsBehavior.UnloadLoot", "Character mode is BookmarkSalvager and no bookmarks salvage.", Logging.White);
-
-                            //We just need a NextSalvagerSession timestamp to key off of here to add the delay
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                        }
-                        else
-                        {
-                            //Logging.Log("CombatMissionsBehavior: Character mode is not salvage going to next mission.");
-                            _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle; //add pause here
-                            _States.CurrentQuestorState = QuestorState.Idle;
-                        }
-                        Statistics.FinishedSalvaging = DateTime.UtcNow;
+                        Logging.Log("CombatMissionsBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                         return;
                     }
-                    else //There is at least 1 salvage bookmark
+
+                    if ((MissionSettings.Mission != null) && (MissionSettings.Mission.State != (int)MissionState.Offered)) // on mission
                     {
-                        Logging.Log("CombatMissionsBehavior.Unloadloot", "There are [ " + Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count + " ] more salvage bookmarks left to process", Logging.White);
+                        Logging.Log("CombatMissionsBehavior.Unloadloot", "We are on mission", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                        return;
+                    }
 
-                        // Salvage only after multiple missions have been completed
-                        if (Salvage.SalvageMultipleMissionsinOnePass)
+                    //This salvaging decision tree does not belong here and should be separated out into a different QuestorState
+                    if (Salvage.AfterMissionSalvaging)
+                    {
+                        if (Cache.Instance.GetSalvagingBookmark == null)
                         {
-                            //if we can still complete another mission before the Wrecks disappear and still have time to salvage
-                            if (DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes > (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes))
-                            {
-                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
-                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are after mission salvaging again because it has been at least [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
-                                Statistics.StartedSalvaging = DateTime.UtcNow;
+                            Logging.Log("CombatMissionsBehavior.Unloadloot", " No more salvaging bookmarks. Setting FinishedSalvaging Update.", Logging.White);
 
-                                //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
-                            }
-                            else //we are salvaging mission 'in one pass' and it has not been enough time since our last run... do another mission
-                            {
-                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
-                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are going to the next mission because it has not been [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                            }
-                        }
-                        else //begin after mission salvaging now, rather than later
-                        {
+                            //if (Settings.Instance.CharacterMode == "Salvager")
+                            //{
+                            //    Logging.Log("Salvager mode set and no bookmarks making delay");
+                            //    States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorStateState.Error; //or salvageonly. need to check difference
+                            //}
+
                             if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                             {
-                                Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
-                                Statistics.StartedSalvaging = DateTime.UtcNow;
+                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "Character mode is BookmarkSalvager and no bookmarks salvage.", Logging.White);
+
+                                //We just need a NextSalvagerSession timestamp to key off of here to add the delay
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                             }
                             else
                             {
-                                Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last after mission salvaging session was [" + Math.Round(DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes, 0) + "min] ago ", Logging.White);
-                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
-                                Statistics.StartedSalvaging = DateTime.UtcNow;
+                                //Logging.Log("CombatMissionsBehavior: Character mode is not salvage going to next mission.");
+                                _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle; //add pause here
+                                _States.CurrentQuestorState = QuestorState.Idle;
+                            }
+                            Statistics.FinishedSalvaging = DateTime.UtcNow;
+                            return;
+                        }
+                        else //There is at least 1 salvage bookmark
+                        {
+                            Logging.Log("CombatMissionsBehavior.Unloadloot", "There are [ " + Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ").Count + " ] more salvage bookmarks left to process", Logging.White);
+
+                            // Salvage only after multiple missions have been completed
+                            if (Salvage.SalvageMultipleMissionsinOnePass)
+                            {
+                                //if we can still complete another mission before the Wrecks disappear and still have time to salvage
+                                if (DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes > (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes))
+                                {
+                                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
+                                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are after mission salvaging again because it has been at least [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
+                                    Statistics.StartedSalvaging = DateTime.UtcNow;
+
+                                    //FIXME: should we be overwriting this timestamp here? What if this is the 3rd run back and fourth to the station?
+                                }
+                                else //we are salvaging mission 'in one pass' and it has not been enough time since our last run... do another mission
+                                {
+                                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last finished after mission salvaging session was [" + DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes + "] ago ", Logging.White);
+                                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "we are going to the next mission because it has not been [" + (Time.Instance.WrecksDisappearAfter_minutes - Time.Instance.AverageTimeToCompleteAMission_minutes - Time.Instance.AverageTimetoSalvageMultipleMissions_minutes) + "] min since the last session. ", Logging.White);
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                                }
+                            }
+                            else //begin after mission salvaging now, rather than later
+                            {
+                                if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
+                                {
+                                    Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
+                                    Statistics.StartedSalvaging = DateTime.UtcNow;
+                                }
+                                else
+                                {
+                                    Logging.Log("CombatMissionsBehavior.UnloadLoot", "The last after mission salvaging session was [" + Math.Round(DateTime.UtcNow.Subtract(Statistics.FinishedSalvaging).TotalMinutes, 0) + "min] ago ", Logging.White);
+                                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.CheckBookmarkAge;
+                                    Statistics.StartedSalvaging = DateTime.UtcNow;
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
-                    _States.CurrentQuestorState = QuestorState.Idle;
-                    Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
+                    else
+                    {
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
+                        _States.CurrentQuestorState = QuestorState.Idle;
+                        Logging.Log("CombatMissionsBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], CombatMissionsBehaviorState: [" + _States.CurrentCombatMissionBehaviorState + "]", Logging.White);
+                        return;
+                    }
+
                     return;
                 }
 
                 return;
             }
-
-            return;
+            catch (Exception exception)
+            {
+                Logging.Log(_States.CurrentCombatMissionBehaviorState.ToString(),"Exception [" + exception + "]",Logging.Debug);
+                return;
+            }            
         }
         
         private void BeginAftermissionSalvagingCMBState()
@@ -1625,11 +1573,11 @@ namespace Questor.Behaviors
                     {
                         if (Logging.DebugGotobase) Logging.Log("CombatMissionsBehavior", "PrepareStorylineGotoBase: We are at destination", Logging.White);
                         Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' gotobase
-                        if (AgentID != 0)
+                        if (AgentInteraction.AgentId != 0)
                         {
                             try
                             {
-                                MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentID, true);
+                                MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentInteraction.AgentId, true);
                             }
                             catch (Exception exception)
                             {
@@ -1725,7 +1673,7 @@ namespace Questor.Behaviors
                             break;
                         }
 
-                        if (station.Distance < 1900)
+                        if (station.Distance < (int) Distances.DockingRange)
                         {
                             if (station.Dock())
                             {

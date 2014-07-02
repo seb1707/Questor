@@ -9,6 +9,8 @@
 // -------------------------------------------------------------------------------
 
 
+using Questor.Modules.Actions;
+
 namespace Questor.Modules.Activities
 {
     using System;
@@ -37,7 +39,7 @@ namespace Questor.Modules.Activities
         private static List<Actions.Action> _pocketActions;
         private bool _waiting;
         private DateTime _waitingSince;
-        private DateTime _moveToNextPocket = DateTime.MaxValue;
+        private DateTime _moveToNextPocket = DateTime.UtcNow.AddHours(10);
         private DateTime _nextCombatMissionCtrlAction = DateTime.UtcNow;
         private int AttemptsToActivateGateTimer;
         private int AttemptsToGetAwayFromGate;
@@ -48,8 +50,7 @@ namespace Questor.Modules.Activities
         ///   List of targets to ignore
         /// </summary>
         public static HashSet<string> IgnoreTargets { get; private set; }
-        public static long AgentId { get; set; }
-
+        
         public CombatMissionCtrl()
         {
             _pocketActions = new List<Actions.Action>();
@@ -1851,10 +1852,9 @@ namespace Questor.Modules.Activities
                 }
 
                 //
-                // sorting by distance is bad if we are moving (we'd change targets unpredictably)... sorting by ID should be better and be nearly the same(?!)
+                // we re-sot by distance on every pulse. The order will be potentially different on each pulse as we move around the field. this is ok and desirable.
                 //
                 IOrderedEnumerable<EntityCache> containers = Cache.Instance.Containers.Where(e => !Cache.Instance.LootedContainers.Contains(e.Id)).OrderByDescending(e => e.GroupId == (int)Group.CargoContainer).ThenBy(e => e.Distance);
-
 
                 if (!containers.Any())
                 {
@@ -2338,7 +2338,7 @@ namespace Questor.Modules.Activities
             // Clear the Pocket
             _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
             _pocketActions.Add(new Actions.Action { State = ActionState.ClearPocket });
-            _pocketActions.AddRange(LoadMissionActions(AgentId, PocketNumber, true));
+            _pocketActions.AddRange(LoadMissionActions(AgentInteraction.AgentId, PocketNumber, true));
 
             //we manually add 2 ClearPockets above, then we try to load other mission XMLs for this pocket, if we fail Count will be 2 and we know we need to add an activate and/or a done action.
             if (_pocketActions.Count() == 2) 
@@ -2404,7 +2404,7 @@ namespace Questor.Modules.Activities
                     MissionSettings.PocketUseDrones = null;
 
                     // Reload the items needed for this mission from the XML file
-                    MissionSettings.RefreshMissionItems(AgentId);
+                    MissionSettings.RefreshMissionItems(AgentInteraction.AgentId);
 
                     // Reset notNormalNav and onlyKillAggro to false
                     Cache.Instance.normalNav = true;
@@ -2420,7 +2420,7 @@ namespace Questor.Modules.Activities
 
                 case CombatMissionCtrlState.LoadPocket:
                     _pocketActions.Clear();
-                    _pocketActions.AddRange(LoadMissionActions(AgentId, PocketNumber, true));
+                    _pocketActions.AddRange(LoadMissionActions(AgentInteraction.AgentId, PocketNumber, true));
 
                     //
                     // LogStatistics();

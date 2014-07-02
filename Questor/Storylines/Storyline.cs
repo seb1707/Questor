@@ -295,77 +295,102 @@
 
         public void Reset()
         {
-            //Logging.Log("Storyline", "Storyline.Reset", Logging.White);
-            _States.CurrentStorylineState = StorylineState.Idle;
-            Cache.Instance.CurrentStorylineAgentId = 0;
-            _storyline = null;
-            _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
-            _States.CurrentTravelerState = TravelerState.Idle;
-            Traveler.Destination = null;
+            try
+            {
+                //Logging.Log("Storyline", "Storyline.Reset", Logging.White);
+                _States.CurrentStorylineState = StorylineState.Idle;
+                Cache.Instance.CurrentStorylineAgentId = 0;
+                _storyline = null;
+                _States.CurrentAgentInteractionState = AgentInteractionState.Idle;
+                _States.CurrentTravelerState = TravelerState.Idle;
+                Traveler.Destination = null;
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Storyline.Reset", "IterateShipTargetValues - Exception: [" + exception + "]", Logging.Debug);
+                return;
+            }
         }
 
         private DirectAgentMission StorylineMission
         {
             get
             {
-                IEnumerable<DirectAgentMission> missionsInJournal = Cache.Instance.DirectEve.AgentMissions.ToList();
-                if (Cache.Instance.CurrentStorylineAgentId != 0)
-                    return missionsInJournal.FirstOrDefault(m => m.AgentId == Cache.Instance.CurrentStorylineAgentId);
-
-                missionsInJournal = missionsInJournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId)).ToList();
-                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] missions available", Logging.Yellow);
-                if (Logging.DebugStorylineMissions)
+                try
                 {
-                    int i = 1;
-                    foreach (DirectAgentMission _mission in missionsInJournal)
-                    {
-                        Logging.Log("Storyline", "[" + i + "] Named      [" + Logging.FilterPath(_mission.Name) + ".xml]", Logging.Yellow);
-                        Logging.Log("Storyline", "[" + i + "] AgentID    [" + _mission.AgentId + "]", Logging.Yellow);
-                        Logging.Log("Storyline", "[" + i + "] Important? [" + _mission.Important + "]", Logging.Yellow);
-                        Logging.Log("Storyline", "[" + i + "] State      [" + _mission.State + "]", Logging.Yellow);
-                        Logging.Log("Storyline", "[" + i + "] Type       [" + _mission.Type + "]", Logging.Yellow);
-                        i++;
-                    }
-                }
-                missionsInJournal = missionsInJournal.Where(m => m.Type.Contains("Storyline")).ToList();
-                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions available", Logging.Yellow);
-                missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Logging.FilterPath(m.Name).ToLower()));
-                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do", Logging.Yellow);
-                missionsInJournal = missionsInJournal.Where(m => MissionSettings.MissionBlacklist.All(b => b.ToLower() != Logging.FilterPath(m.Name).ToLower())).ToList();
-                Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do and are not blacklisted", Logging.Yellow);
+                    IEnumerable<DirectAgentMission> missionsInJournal = Cache.Instance.DirectEve.AgentMissions.ToList();
+                    if (Cache.Instance.CurrentStorylineAgentId != 0)
+                        return missionsInJournal.FirstOrDefault(m => m.AgentId == Cache.Instance.CurrentStorylineAgentId);
 
-                //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Logging.FilterPath(m.Name).ToLower()));
-                return missionsInJournal.FirstOrDefault();
+                    missionsInJournal = missionsInJournal.Where(m => !Cache.Instance.AgentBlacklist.Contains(m.AgentId)).ToList();
+                    Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] missions available", Logging.Yellow);
+                    if (Logging.DebugStorylineMissions)
+                    {
+                        int i = 1;
+                        foreach (DirectAgentMission _mission in missionsInJournal)
+                        {
+                            Logging.Log("Storyline", "[" + i + "] Named      [" + Logging.FilterPath(_mission.Name) + ".xml]", Logging.Yellow);
+                            Logging.Log("Storyline", "[" + i + "] AgentID    [" + _mission.AgentId + "]", Logging.Yellow);
+                            Logging.Log("Storyline", "[" + i + "] Important? [" + _mission.Important + "]", Logging.Yellow);
+                            Logging.Log("Storyline", "[" + i + "] State      [" + _mission.State + "]", Logging.Yellow);
+                            Logging.Log("Storyline", "[" + i + "] Type       [" + _mission.Type + "]", Logging.Yellow);
+                            i++;
+                        }
+                    }
+                    missionsInJournal = missionsInJournal.Where(m => m.Type.Contains("Storyline")).ToList();
+                    Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions available", Logging.Yellow);
+                    missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Logging.FilterPath(m.Name).ToLower()));
+                    Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do", Logging.Yellow);
+                    missionsInJournal = missionsInJournal.Where(m => MissionSettings.MissionBlacklist.All(b => b.ToLower() != Logging.FilterPath(m.Name).ToLower())).ToList();
+                    Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do and are not blacklisted", Logging.Yellow);
+
+                    //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Logging.FilterPath(m.Name).ToLower()));
+                    return missionsInJournal.FirstOrDefault();
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Storyline.StorylineMission", "IterateShipTargetValues - Exception: [" + exception + "]", Logging.Debug);
+                    return null;
+                }
             }
         }
 
         private void IdleState()
         {
-            DirectAgentMission currentStorylineMission = StorylineMission;
-            if (currentStorylineMission == null)
+            try
             {
-                _nextStoryLineAttempt = DateTime.UtcNow.AddMinutes(15);
-                _States.CurrentStorylineState = StorylineState.Done;
-                MissionSettings.MissionName = String.Empty;
+                DirectAgentMission currentStorylineMission = StorylineMission;
+                if (currentStorylineMission == null)
+                {
+                    _nextStoryLineAttempt = DateTime.UtcNow.AddMinutes(15);
+                    _States.CurrentStorylineState = StorylineState.Done;
+                    MissionSettings.MissionName = String.Empty;
+                    AgentInteraction.UseStorylineAgentAsActiveAgent = false;
+                    return;
+                }
+
+                Cache.Instance.CurrentStorylineAgentId = currentStorylineMission.AgentId;
+                DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
+                if (storylineagent == null)
+                {
+                    Logging.Log("Storyline", "Unknown agent [" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.Yellow);
+                    AgentInteraction.UseStorylineAgentAsActiveAgent = false;
+                    _States.CurrentStorylineState = StorylineState.Done;
+                    return;
+                }
+
+                Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.Yellow);
+                MissionSettings.MissionName = currentStorylineMission.Name;
+                AgentInteraction.UseStorylineAgentAsActiveAgent = true;
+                _highSecChecked = false;
+                _States.CurrentStorylineState = StorylineState.Arm;
+                _storyline = _storylines[Logging.FilterPath(currentStorylineMission.Name.ToLower())];
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("Storyline.IdleState", "IterateShipTargetValues - Exception: [" + exception + "]", Logging.Debug);
                 return;
             }
-
-            Cache.Instance.CurrentStorylineAgentId = currentStorylineMission.AgentId;
-            DirectAgent storylineagent = Cache.Instance.DirectEve.GetAgentById(Cache.Instance.CurrentStorylineAgentId);
-            if (storylineagent == null)
-            {
-                Logging.Log("Storyline", "Unknown agent [" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.Yellow);
-
-                _States.CurrentStorylineState = StorylineState.Done;
-                return;
-            }
-
-            Logging.Log("Storyline", "Going to do [" + currentStorylineMission.Name + "] for agent [" + storylineagent.Name + "] AgentID[" + Cache.Instance.CurrentStorylineAgentId + "]", Logging.Yellow);
-            MissionSettings.MissionName = currentStorylineMission.Name;
-
-            _highSecChecked = false;
-            _States.CurrentStorylineState = StorylineState.Arm;
-            _storyline = _storylines[Logging.FilterPath(currentStorylineMission.Name.ToLower())];
         }
 
         private void GotoAgent(StorylineState nextState)
@@ -528,7 +553,6 @@
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.DeclineMission;
-                        AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
                     }
 
                     AgentInteraction.ProcessState();
@@ -550,7 +574,7 @@
 
                         _States.CurrentAgentInteractionState = AgentInteractionState.StartConversation;
                         AgentInteraction.Purpose = AgentInteractionPurpose.StartMission;
-                        AgentInteraction.AgentId = Cache.Instance.CurrentStorylineAgentId;
+                        AgentInteraction.UseStorylineAgentAsActiveAgent = true;
                         AgentInteraction.ForceAccept = true;
                     }
 
@@ -603,6 +627,7 @@
                     break;
 
                 case StorylineState.Done:
+                    AgentInteraction.UseStorylineAgentAsActiveAgent = false;
                     if (DateTime.UtcNow > _nextStoryLineAttempt)
                     {
                         _States.CurrentStorylineState = StorylineState.Idle;

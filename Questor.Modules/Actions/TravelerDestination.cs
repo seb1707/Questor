@@ -48,6 +48,7 @@ namespace Questor.Modules.Actions
                     {
                         Logging.Log("TravelerDestination.SolarSystemDestination", "Exiting station", Logging.White);
                         Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.CmdExitStation);
+                        Time.Instance.LastSessionChange = DateTime.UtcNow;
                         _undockAttempts++;
                         Time.Instance.NextUndockAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerExitStationAmIInSpaceYet_seconds + Cache.Instance.RandomNumber(0, 20));
                         return;

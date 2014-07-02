@@ -38,7 +38,7 @@ namespace Questor.Modules.Lookup
             ListOfAgents = new List<AgentsList>();
             ListofFactionFittings = new List<FactionFitting>();
             ListOfMissionFittings = new List<MissionFitting>();
-            MissionAmmo = new List<Ammo>();
+            MissionAmmoTypesToLoad = new List<Ammo>();
             MissionBlacklist = new List<string>();
             MissionGreylist = new List<string>();
             MissionItems = new List<string>();
@@ -230,7 +230,9 @@ namespace Questor.Modules.Lookup
         public static string FactionName { get; set; }
         public static bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public static bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
-        public static List<Ammo> MissionAmmo;
+        public static List<Ammo> MissionAmmoTypesToLoad { get; set; }
+        public static List<Ammo> FactionAmmoTypesToLoad { get; set; }
+        
         public static int MissionsThisSession = 0;
 
         
@@ -253,9 +255,9 @@ namespace Questor.Modules.Lookup
                 // Did we accept this mission?
                 if (missionForBookmarkInfo.State != (int)MissionState.Accepted || missionForBookmarkInfo.AgentId != agentId)
                 {
-                    //Logging.Log("missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString(CultureInfo.InvariantCulture) + "]");
-                    //Logging.Log("missionForBookmarkInfo.AgentId: [" + missionForBookmarkInfo.AgentId.ToString(CultureInfo.InvariantCulture) + "]");
-                    //Logging.Log("agentId: [" + agentId.ToString(CultureInfo.InvariantCulture) + "]");
+                    Logging.Log("","missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString() + "]", Logging.Debug);
+                    Logging.Log("", "missionForBookmarkInfo.AgentId: [" + missionForBookmarkInfo.AgentId.ToString() + "]", Logging.Debug);
+                    Logging.Log("", "agentId: [" + agentId + "]", Logging.Debug);
                     return null;
                 }
 
@@ -297,6 +299,7 @@ namespace Questor.Modules.Lookup
             MissionSettings.MissionUseDrones = null;
             MissionSettings.MissionOrbitDistance = null;
             MissionSettings.MissionOptimalRange = null;
+            MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
         }
 
         public static void ClearFactionSpecificSettings()
@@ -306,6 +309,7 @@ namespace Questor.Modules.Lookup
             MissionSettings.FactionDronesKillHighValueTargets = null;
             MissionSettings.FactionOptimalRange = null;
             MissionSettings.FactionOrbitDistance = null;
+            MissionSettings.FactionAmmoTypesToLoad = new List<Ammo>();
         }
 
         public static void LoadMissionXMLData()
@@ -330,10 +334,12 @@ namespace Questor.Modules.Lookup
                     XElement ammoTypes = missionXml.Root.Element("ammoTypes");
                     if (ammoTypes != null)
                     {
-                        MissionAmmo.Clear();
+                        Logging.Log("LoadMissionXMLData", "Clearing existing list of Ammo To load", Logging.White);
+                        MissionAmmoTypesToLoad = new List<Ammo>();
                         foreach (XElement ammo in ammoTypes.Elements("ammoType"))
                         {
-                            MissionAmmo.Add(new Ammo(ammo));
+                            Logging.Log("LoadSpecificAmmo", "Adding [" + new Ammo(ammo).Name + "] to the list of ammo to load: from: ammoTypes", Logging.White);
+                            MissionAmmoTypesToLoad.Add(new Ammo(ammo));
                         }
 
                         //Cache.Instance.DamageType
@@ -342,10 +348,12 @@ namespace Questor.Modules.Lookup
                     ammoTypes = missionXml.Root.Element("missionammo");
                     if (ammoTypes != null)
                     {
-                        MissionAmmo.Clear();
+                        Logging.Log("LoadMissionXMLData", "Clearing existing list of Ammo To load", Logging.White);
+                        MissionAmmoTypesToLoad = new List<Ammo>();
                         foreach (XElement ammo in ammoTypes.Elements("ammo"))
                         {
-                            MissionAmmo.Add(new Ammo(ammo));
+                            Logging.Log("LoadSpecificAmmo", "Adding [" + new Ammo(ammo).Name + "] to the list of ammo to load: from: missionammo", Logging.White);
+                            MissionAmmoTypesToLoad.Add(new Ammo(ammo));
                         }
 
                         //Cache.Instance.DamageType
@@ -362,7 +370,8 @@ namespace Questor.Modules.Lookup
                 if (damageTypesForThisMission.Any())
                 {
                     MissionDamageType = damageTypesForThisMission.FirstOrDefault();
-                    LoadSpecificAmmo(damageTypesForThisMission.Distinct());
+                    Logging.Log("AgentInteraction", "Mission XML specified the Mission Damagetype for [" + MissionName + "] is [" + MissionDamageType.ToString() + "]", Logging.White);
+                    LoadSpecificAmmo(damageTypesForThisMission.Distinct(), false, true, true);
                     loadedAmmo = true;
                 }
             }
@@ -380,12 +389,43 @@ namespace Questor.Modules.Lookup
 
         public static bool loadedAmmo = false;
 
-        public static List<Ammo> AmmoToLoad { get; set; }
-
-        public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes)
+        public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes, bool FactionAmmo, bool MissionAmmo, bool ClearExisting)
         {
-            AmmoToLoad.Clear();
-            AmmoToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+            try
+            {
+                Logging.Log("LoadSpecificAmmo", "Clearing existing list of Ammo To load", Logging.White);
+                Arm._ammoTypesToLoad = new List<Ammo>();
+                if (Combat.Ammo.Any(a => damageTypes.Contains(a.DamageType)))
+                {
+                    Ammo _ammo = Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()).FirstOrDefault();
+                    if (_ammo != null)
+                    {
+                        if (FactionAmmo)
+                        {
+                            Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of FactionAmmo to load", Logging.White);
+                            if (ClearExisting) MissionSettings.FactionAmmoTypesToLoad = new List<Ammo>();
+                            MissionSettings.FactionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+                            return;
+                        }
+
+                        if (MissionAmmo)
+                        {
+                            Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of MissionAmmo to load", Logging.White);
+                            if (ClearExisting) MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
+                            MissionSettings.MissionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+                            return;
+                        }
+
+                        //if (ClearExisting) Arm.AmmoToLoad.Clear();
+                        //Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of ammo to load", Logging.White);
+                        //Arm._ammoToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log("LoadSpecificAmmo", "Exception [" + exception + "]", Logging.Debug);
+            }
         }
 
         /*
@@ -516,8 +556,9 @@ namespace Questor.Modules.Lookup
         /// </summary>
         public static DamageType MissionDamageType { get; set; }
 
-        public static DamageType GetMissionDamageType(string html)
+        public static DamageType GetFactionDamageType(string html)
         {
+            DamageType DamageTypeToUse;
             // We are going to check damage types
             Regex logoRegex = new Regex("img src=\"factionlogo:(?<factionlogo>\\d+)");
 
@@ -525,7 +566,7 @@ namespace Questor.Modules.Lookup
             if (logoMatch.Success)
             {
                 string logo = logoMatch.Groups["factionlogo"].Value;
-
+                
                 // Load faction xml
                 XDocument xml = XDocument.Load(Path.Combine(Settings.Instance.Path, "Factions.xml"));
                 if (xml.Root != null)
@@ -533,15 +574,33 @@ namespace Questor.Modules.Lookup
                     XElement faction = xml.Root.Elements("faction").FirstOrDefault(f => (string)f.Attribute("logo") == logo);
                     if (faction != null)
                     {
-                        MissionSettings.FactionName = (string)faction.Attribute("name");
-                        MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
-                        return (DamageType)Enum.Parse(typeof(DamageType), (string)faction.Attribute("damagetype"));
+                        FactionName = (string)faction.Attribute("name");
+                        Logging.Log("GetMissionDamageType", "[" + MissionName + "] Faction [" + FactionName + "]", Logging.Yellow);
+                        if (faction.Attribute("damagetype") != null)
+                        {
+                            DamageTypeToUse = ((DamageType) Enum.Parse(typeof (DamageType), (string) faction.Attribute("damagetype")));
+                            Logging.Log("GetMissionDamageType", "Faction DamageType defined as [" + DamageTypeToUse + "]", Logging.Yellow);
+                            return DamageTypeToUse;
+                        }
+
+                        DamageTypeToUse = DamageType.EM;
+                        Logging.Log("GetMissionDamageType", "DamageType not found for Faction [" + FactionName + "], Defaulting to DamageType  [" + DamageTypeToUse + "]", Logging.Yellow);
+                        return DamageTypeToUse;
                     }
+
+                    DamageTypeToUse = DamageType.EM;
+                    Logging.Log("GetMissionDamageType", "Faction not found in factions.xml, Defaulting to DamageType  [" + DamageTypeToUse + "]", Logging.Yellow);
+                    return DamageTypeToUse;
                 }
+
+                DamageTypeToUse = DamageType.EM;
+                Logging.Log("GetMissionDamageType", "Factions.xml is missing, Defaulting to DamageType  [" + DamageTypeToUse + "]", Logging.Yellow);
+                return DamageTypeToUse;
             }
 
-            MissionDamageType = DamageType.EM;
-            return DamageType.EM;
+            DamageTypeToUse = DamageType.EM;
+            Logging.Log("GetMissionDamageType", "Faction logo not matched, Defaulting to DamageType  [" + DamageTypeToUse + "]", Logging.Yellow);
+            return DamageTypeToUse;
         }
 
         public static void UpdateMissionName(long AgentID = 0)

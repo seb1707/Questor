@@ -4968,6 +4968,7 @@ namespace Questor.Modules.Caching
                             {
                                 _directEntity.Jump();
                                 Cache.Instance.ClearPerPocketCache("Jump()");
+                                Time.Instance.LastSessionChange = DateTime.UtcNow;
                                 Time.Instance.NextInSpaceorInStation = DateTime.UtcNow;
                                 Time.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
                                 Time.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
@@ -5360,7 +5361,8 @@ namespace Questor.Modules.Caching
                             //{
                                 _directEntity.Dock();
                                 Time.Instance.WehaveMoved = DateTime.UtcNow;
-                                Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);    
+                                Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                                Time.Instance.LastSessionChange = DateTime.UtcNow;
                             //}
 
                             //Logging.Log("Dock", "[" + Name + "][" + Distance +"] is not in docking range, aborting docking request", Logging.Debug);

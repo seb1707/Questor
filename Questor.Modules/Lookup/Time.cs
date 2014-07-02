@@ -121,7 +121,7 @@ namespace Questor.Modules.Lookup
 
         public DateTime ManualStopTime = DateTime.Now.AddHours(10);
         public DateTime ManualRestartTime = DateTime.Now.AddHours(10);
-        public DateTime MissionBookmarkTimeout = DateTime.MaxValue;
+        public DateTime MissionBookmarkTimeout = DateTime.Now.AddHours(10);
 
         public DateTime NextCheckCorpisAtWar = DateTime.UtcNow; 
         public DateTime NextInSpaceorInStation;

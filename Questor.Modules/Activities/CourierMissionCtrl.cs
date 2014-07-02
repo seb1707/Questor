@@ -214,7 +214,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CourierMissionCtrlState.GotoPickupLocation:
-                    if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Pick Up)"))
+                    if (GotoMissionBookmark(AgentInteraction.AgentId, "Objective (Pick Up)"))
                     {
                         _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.PickupItem;
                         return;
@@ -241,7 +241,7 @@ namespace Questor.Modules.Activities
                     break;
 
                 case CourierMissionCtrlState.GotoDropOffLocation:
-                    if (GotoMissionBookmark(Cache.Instance.AgentId, "Objective (Drop Off)"))
+                    if (GotoMissionBookmark(AgentInteraction.AgentId, "Objective (Drop Off)"))
                     {
                         _States.CurrentCourierMissionCtrlState = CourierMissionCtrlState.DropOffItem;
                         return;

@@ -107,7 +107,7 @@ namespace Questor.Modules.Actions
                             if (ammoToMove.Any())
                             {
                                 if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (ammoToMove.Any())", Logging.White);
-                                Logging.Log(WeAreInThisStateForLogs(), "Moving [" + ammoToMove.Count() + "] Ammo Stacks to AmmoHangar", Logging.White);
+                                Logging.Log(WeAreInThisStateForLogs(), "Moving [" + ammoToMove.Count() + "] Ammo Stacks [" + ammoToMove.Where(i => !i.IsSingleton).Sum(i => i.Stacksize) + "] Total Units to AmmoHangar", Logging.White);
                                 AmmoIsBeingMoved = true;
                                 Cache.Instance.AmmoHangar.Add(ammoToMove);
                                 _lastUnloadAction = DateTime.UtcNow;

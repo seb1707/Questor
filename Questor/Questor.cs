@@ -274,7 +274,7 @@ namespace Questor
                     if (Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours < 24)
                     {
                         Logging.Log("Questor.SkillQueueCheck", "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]", Logging.White);
-                        QuestorUI.lblCurrentMissionInfo.Text = "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]";
+                        //QuestorUI.lblCurrentMissionInfo.Text = "Training Queue currently has room. [" + Math.Round(24 - Cache.Instance.DirectEve.Skills.SkillQueueLength.TotalHours, 2) + " hours free]";
                         _States.LavishEvent_SkillQueueHasRoom();
                         _States.CurrentQuestorState = QuestorState.SkillTrainer;
                         return false;

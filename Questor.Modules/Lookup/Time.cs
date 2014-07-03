@@ -45,7 +45,7 @@ namespace Questor.Modules.Lookup
         public int SetupLogPathDelay_seconds = 10;                          // Why is this delay here? this can likely be removed with some testing... Default is 10
         public int SessionRunningTimeUpdate_seconds = 15;                   // This is used to update the session running time counter every x seconds: default is 15 seconds
         public int WalletCheck_minutes = 1;                                 // Used to delay the next wallet balance check, units: minutes. Default is 1
-        public int DelayedGotoBase_seconds = 10;                            // Delay before going back to base, usually after a disconnect / reconnect. units: seconds. Default is 15
+        public int DelayedGotoBase_seconds = 15;                            // Delay before going back to base, usually after a disconnect / reconnect. units: seconds. Default is 15
         public int WaitforBadGuytoGoAway_minutes = 25;                      // Stay docked for this amount of time before checking local again, units: minutes. Default is 5
         public int CloseQuestorDelayBeforeExit_seconds = 20;                // Delay before closing eve, units: seconds. Default is 20
         public int QuestorBeforeLoginPulseDelay_milliseconds = 5000;        // Pulse Delay for Program.cs: Used to control the speed at which the program will retry logging in and retry checking the schedule

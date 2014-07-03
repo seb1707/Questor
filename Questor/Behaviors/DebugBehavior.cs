@@ -146,7 +146,7 @@ namespace Questor.Behaviors
             }
         }
 
-        #region Scanner Functions
+        #region Old Scanner Functions
 
         private void OpenDirectionalScanner()
         {
@@ -231,8 +231,7 @@ namespace Questor.Behaviors
             }
         }
 
-        #endregion Scanner Functions
-
+        #endregion Old Scanner Functions
 
         public void ProcessState()
         {

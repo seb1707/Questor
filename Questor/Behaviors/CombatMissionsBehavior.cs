@@ -37,7 +37,8 @@ namespace Questor.Behaviors
         private DateTime _lastSalvageTrip = DateTime.MinValue;
         private readonly CombatMissionCtrl _combatMissionCtrl;
         private readonly Storyline _storyline;
-        public DateTime LastCMBAction;
+        private DateTime _lastCMBIdle = DateTime.UtcNow.AddHours(-1);
+        private DateTime _lastValidSettingsCheck = DateTime.UtcNow.AddHours(-1);
         private readonly Random _random;
         private int _randomDelay;
         
@@ -77,7 +78,7 @@ namespace Questor.Behaviors
             ValidateCombatMissionSettings();
         }
         
-        public void ValidateCombatMissionSettings()
+        public bool ValidateCombatMissionSettings()
         {
             ValidSettings = true;
             if (Combat.Ammo.Any())
@@ -91,25 +92,25 @@ namespace Questor.Behaviors
 
                     Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
                     ValidSettings = false;
-                    return;
+                    return false;
                 }    
             }
             else
             {
                 Combat.Ammo = new List<Ammo>();
                 ValidSettings = false;
-                return;
+                return false;
             }
 
             if (Cache.Instance.Agent == null || !Cache.Instance.Agent.IsValid)
             {
                 Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
                 ValidSettings = false;
-                return;
+                return false;
             }
 
             AgentInteraction.AgentId = Cache.Instance.AgentId;
-            return;
+            return true;
         }
 
         public bool ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState _CMBStateToSet, string LogMessage = null)
@@ -182,7 +183,7 @@ namespace Questor.Behaviors
             //
             // Note: This does not interact with EVE, no need for ANY delays in this State
             //
-
+            _lastCMBIdle = DateTime.UtcNow;
             if (Cache.Instance.StopBot)
             {
                 //
@@ -198,7 +199,6 @@ namespace Questor.Behaviors
 
                 // Questor does not handle in space starts very well, head back to base to try again
                 Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in [" + _randomDelay + "] seconds", Logging.White);
-                LastCMBAction = DateTime.UtcNow;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedGotoBase;
                 return;
             }
@@ -219,7 +219,7 @@ namespace Questor.Behaviors
                 if (DateTime.UtcNow.Hour == 10)
                 {
                     if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Don't start a new action an hour before downtime, DateTime.UtcNow.Hour [" + DateTime.UtcNow.Hour + "]", Logging.White);
-                    QuestorUI.lblCurrentMissionInfo.Text = "less than 1 hour before downtime, waiting";
+                    //QuestorUI.lblCurrentMissionInfo.Text = "less than 1 hour before downtime, waiting";
                     return;
                 }
 
@@ -227,16 +227,15 @@ namespace Questor.Behaviors
                 if (DateTime.UtcNow.Hour == 11 && DateTime.UtcNow.Minute < 15)
                 {
                     if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("CombatMissionsBehavior", "DebugIdle: Don't start a new action near downtime, DateTime.UtcNow.Hour [" + DateTime.UtcNow.Hour + "] DateTime.UtcNow.Minute [" + DateTime.UtcNow.Minute + "]", Logging.White);
-                    QuestorUI.lblCurrentMissionInfo.Text = "less than 15min after downtime, waiting";
+                    //QuestorUI.lblCurrentMissionInfo.Text = "less than 15min after downtime, waiting";
                     return;
                 }
 
                 if (Settings.Instance.RandomDelay > 0 || Settings.Instance.MinimumDelay > 0)
                 {
                     _randomDelay = (Settings.Instance.RandomDelay > 0 ? _random.Next(Settings.Instance.RandomDelay) : 0) + Settings.Instance.MinimumDelay;
-                    LastCMBAction = DateTime.UtcNow;
                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.DelayedStart;
-                    QuestorUI.lblCurrentMissionInfo.Text = "Random start delay of [" + _randomDelay + "] seconds";
+                    //QuestorUI.lblCurrentMissionInfo.Text = "Random start delay of [" + _randomDelay + "] seconds";
                     Logging.Log("CombatMissionsBehavior", "Random start delay of [" + _randomDelay + "] seconds", Logging.White);
                     return;
                 }
@@ -254,7 +253,7 @@ namespace Questor.Behaviors
         
         private void DelayedStartCMBState()
         {
-            if (DateTime.UtcNow.Subtract(LastCMBAction).TotalSeconds < _randomDelay)
+            if (DateTime.UtcNow < _lastCMBIdle.AddSeconds(_randomDelay))
             {
                 return;
             }
@@ -266,7 +265,7 @@ namespace Questor.Behaviors
         
         private void DelayedGotoBaseCMBState()
         {
-            if (DateTime.UtcNow.Subtract(LastCMBAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
+            if (DateTime.UtcNow < _lastCMBIdle.AddSeconds(Time.Instance.DelayedGotoBase_seconds))
             {
                 return;
             }
@@ -289,7 +288,6 @@ namespace Questor.Behaviors
                 return;
             }
 
-            ValidateCombatMissionSettings();
             Cleanup.CheckEVEStatus();
             _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Start;
             return;
@@ -303,7 +301,6 @@ namespace Questor.Behaviors
             {
                 // Questor does not handle in space starts very well, head back to base to try again
                 Logging.Log("CombatMissionsBehavior", "Started questor while in space, heading back to base in [" + _randomDelay + "] seconds", Logging.White);
-                LastCMBAction = DateTime.UtcNow;
                 ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.DelayedGotoBase);
                 return;
             }
@@ -1318,10 +1315,12 @@ namespace Questor.Behaviors
             // Invalid settings, quit while we're ahead
             if (!ValidSettings)
             {
-                if (DateTime.UtcNow.Subtract(LastCMBAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
+                if (DateTime.UtcNow > _lastValidSettingsCheck.AddSeconds(Time.Instance.ValidateSettings_seconds)) //default is a 15 second interval
                 {
-                    ValidateCombatMissionSettings();
-                    LastCMBAction = DateTime.UtcNow;
+                    if (ValidateCombatMissionSettings())
+                    {
+                        _lastValidSettingsCheck = DateTime.UtcNow;    
+                    }
                 }
 
                 return false;

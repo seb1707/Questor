@@ -5369,7 +5369,7 @@ namespace Questor.Modules.Caching
                             //return false;
                         }
 
-                        Logging.Log("Dock", "[" + Name + "]: directEntity is null or is not valid", Logging.Debug);
+                        //Logging.Log("Dock", "[" + Name + "]: directEntity is null or is not valid", Logging.Debug);
                         return false;
                     }
 

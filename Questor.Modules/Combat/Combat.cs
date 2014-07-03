@@ -1608,6 +1608,7 @@ namespace Questor.Modules.Combat
                         return true;
                     }
 
+                    Logging.Log("Combat.ReloadNormalAmmo", "ReloadAmmo failed.", Logging.Debug);
                     return false;
                 }
                 
@@ -1616,6 +1617,7 @@ namespace Questor.Modules.Combat
                     return true;
                 }
 
+                Logging.Log("Combat.ReloadNormalAmmo", "ChangeAmmo failed.", Logging.Debug);
                 return false;
             }
             catch (Exception exception)

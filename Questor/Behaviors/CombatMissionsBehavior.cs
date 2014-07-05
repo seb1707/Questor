@@ -857,8 +857,11 @@ namespace Questor.Behaviors
                             Logging.Log("CombatMissionsBehavior", "MissionSolarSystem is [" + Cache.Instance.MissionSolarSystem + "]", Logging.White);
                         }
                     }
-                     
-                    
+                    else
+                    {
+                        Logging.Log("CombatMissionsBehavior", "We have no mission bookmark available for our current/normal agent", Logging.White);
+                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
+                    }
                 }
 
                 if (Combat.PotentialCombatTargets.Any())

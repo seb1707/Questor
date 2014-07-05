@@ -253,11 +253,16 @@ namespace Questor.Modules.Lookup
                 }
 
                 // Did we accept this mission?
-                if (missionForBookmarkInfo.State != (int)MissionState.Accepted || missionForBookmarkInfo.AgentId != agentId)
+                if (missionForBookmarkInfo.State != (int)MissionState.Accepted)
                 {
-                    Logging.Log("","missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString() + "]", Logging.Debug);
-                    Logging.Log("", "missionForBookmarkInfo.AgentId: [" + missionForBookmarkInfo.AgentId.ToString() + "]", Logging.Debug);
-                    Logging.Log("", "agentId: [" + agentId + "]", Logging.Debug);
+                    Logging.Log("GetMissionBookmark", "missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString() + "]", Logging.Debug);
+                    return null;
+                }
+
+                if (missionForBookmarkInfo.AgentId != agentId)
+                {
+                    Logging.Log("GetMissionBookmark", "missionForBookmarkInfo.AgentId: [" + missionForBookmarkInfo.AgentId.ToString() + "]", Logging.Debug);
+                    Logging.Log("GetMissionBookmark", "agentId: [" + agentId + "]", Logging.Debug);
                     return null;
                 }
 

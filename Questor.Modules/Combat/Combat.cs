@@ -61,19 +61,11 @@ namespace Questor.Modules.Combat
                 _combatShipName = value;
             }
         }
-
         private static bool _isJammed;
         private static int _weaponNumber;
-
         private static int MaxCharges { get; set; }
-
         private static DateTime _lastCombatProcessState;
-
-        //private static DateTime _lastReloadAll;
         private static int _reloadAllIteration;
-
-        //private static IEnumerable<EntityCache> __highValueTargets;
-        //private static IEnumerable<EntityCache> __lowValueTargets;
         public static IEnumerable<EntityCache> highValueTargetsTargeted;
         public static IEnumerable<EntityCache> lowValueTargetsTargeted;
         public static int? maxHighValueTargets;
@@ -114,11 +106,10 @@ namespace Questor.Modules.Combat
                 _killSentries = value;
             }
         }
-        
         public static bool DontShootFrigatesWithSiegeorAutoCannons { get; set; }
         public static int WeaponGroupId { get; set; }
-        public static int MaximumHighValueTargets { get; set; }
-        public static int MaximumLowValueTargets { get; set; }
+        //public static int MaximumHighValueTargets { get; set; }
+        //public static int MaximumLowValueTargets { get; set; }
         public static int MinimumAmmoCharges { get; set; }
         public static List<Ammo> Ammo { get; set; }
         public static List<MiningCrystals> MiningCrystals { get; private set; }

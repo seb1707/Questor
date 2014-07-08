@@ -679,8 +679,8 @@ namespace Questor.Modules.Lookup
 
                         Combat.WeaponGroupId = (int?)CharacterSettingsXml.Element("weaponGroupId") ?? (int?)CommonSettingsXml.Element("weaponGroupId") ?? 0;
                         Combat.DontShootFrigatesWithSiegeorAutoCannons = (bool?)CharacterSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? (bool?)CommonSettingsXml.Element("DontShootFrigatesWithSiegeorAutoCannons") ?? false;
-                        Combat.MaximumHighValueTargets = (int?)CharacterSettingsXml.Element("maximumHighValueTargets") ?? (int?)CommonSettingsXml.Element("maximumHighValueTargets") ?? 2;
-                        Combat.MaximumLowValueTargets = (int?)CharacterSettingsXml.Element("maximumLowValueTargets") ?? (int?)CommonSettingsXml.Element("maximumLowValueTargets") ?? 2;
+                        Combat.maxHighValueTargets = (int?)CharacterSettingsXml.Element("maximumHighValueTargets") ?? (int?)CommonSettingsXml.Element("maximumHighValueTargets") ?? 2;
+                        Combat.maxLowValueTargets = (int?)CharacterSettingsXml.Element("maximumLowValueTargets") ?? (int?)CommonSettingsXml.Element("maximumLowValueTargets") ?? 2;
                         Combat.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = (int?)CharacterSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? (int?)CommonSettingsXml.Element("doNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage") ?? 60;
                         Combat.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("distanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                         Combat.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = (int?)CharacterSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? (int?)CommonSettingsXml.Element("speedNPCFrigatesShouldBeIgnoredByPrimaryWeapons") ?? 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
@@ -1523,8 +1523,8 @@ namespace Questor.Modules.Lookup
                 //
                 Combat.WeaponGroupId = 506; //cruise
                 Combat.DontShootFrigatesWithSiegeorAutoCannons = false;
-                Combat.MaximumHighValueTargets = 2;
-                Combat.MaximumLowValueTargets = 2;
+                Combat.maxHighValueTargets = 2;
+                Combat.maxLowValueTargets = 2;
                 Combat.DoNotSwitchTargetsIfTargetHasMoreThanThisArmorDamagePercentage = 60;
                 Combat.DistanceNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 7000; //also requires SpeedFrigatesShouldBeIgnoredByMainWeapons
                 Combat.SpeedNPCFrigatesShouldBeIgnoredByPrimaryWeapons = 300; //also requires DistanceFrigatesShouldBeIgnoredByMainWeapons
@@ -1651,8 +1651,8 @@ namespace Questor.Modules.Lookup
                 //
                 Logging.ConsoleLogDaysOfLogsToKeep = 14;
 
-                Combat.MaximumHighValueTargets = 0;
-                Combat.MaximumLowValueTargets = 0;
+                Combat.maxHighValueTargets = 0;
+                Combat.maxLowValueTargets = 0;
 
                 //
                 // Email Settings

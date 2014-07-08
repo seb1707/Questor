@@ -125,7 +125,7 @@ namespace QuestorLoader
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
-        public static void Log(string module, string line, string color, bool verbose = false)
+        public static void Log(string DescriptionOfWhere, string line, string color, bool verbose = false)
         {
             try
             {
@@ -133,14 +133,14 @@ namespace QuestorLoader
                 
                 colorLogLine = line;
                 string plainLogLine = FilterColorsFromLogs(line);
-                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                redactedLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
                 
                 //
                 // Innerspace Console logging
                 //
                 if (Logging.UseInnerspace)
                 {
-                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + DescriptionOfWhere + Logging.Orange + "] " + color + colorLogLine));
                 }
                 else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
@@ -158,7 +158,7 @@ namespace QuestorLoader
                             //
                             if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
                             {
-                                module = "Logging";
+                                DescriptionOfWhere = "Logging";
                                 if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
                                 {
                                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
@@ -172,7 +172,7 @@ namespace QuestorLoader
                                     Directory.CreateDirectory(Path.GetDirectoryName(Logging.ConsoleLogFile));
                                     if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
                                     {
-                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                        Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "]" + plainLogLine + "\r\n");
                                         Logging.ConsoleLogOpened = true;
                                     }
                                     else
@@ -185,7 +185,7 @@ namespace QuestorLoader
                                 {
                                     line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
                                     if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                                    Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + DescriptionOfWhere + "] " + plainLogLine + "\r\n");
                                 }
                             }
                         }
@@ -201,7 +201,7 @@ namespace QuestorLoader
                                 //
                                 // normal text logging
                                 //
-                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "]" + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                             }
 
@@ -211,8 +211,8 @@ namespace QuestorLoader
                                 // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
                                 //
                                 System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
-                                module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
-                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "]" + plainLogLine + "\r\n");
+                                DescriptionOfWhere += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
+                                Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "]" + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
                             }
                             //Cache.Instance.ConsoleLog = null;
@@ -222,19 +222,19 @@ namespace QuestorLoader
                                 //
                                 // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
                                 //
-                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                                Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + DescriptionOfWhere + "] " + plainLogLine + "\r\n");
                                 File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedLogLine);               //Write In Memory Console log to File
                             }
                             //Cache.Instance.ConsoleLogRedacted = null;
                         }
 
-                        Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + plainLogLine + "\r\n");
+                        Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + DescriptionOfWhere + "] " + plainLogLine + "\r\n");
                     }
                 }
             }
             catch (Exception exception)
             {
-                BasicLog(module, exception.Message);
+                BasicLog(DescriptionOfWhere, exception.Message);
             }
         }
 

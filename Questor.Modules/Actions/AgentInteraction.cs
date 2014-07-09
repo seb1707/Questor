@@ -40,6 +40,7 @@ namespace Questor.Modules.Actions
         public const string Close = "Close";
         public const string Delay = "Delay";
         public const string Quit = "Quit";
+        public const string NoJobsAvailable = "Sorry, I have no jobs available for you.";
 
         //public static string MissionName;
 
@@ -269,10 +270,33 @@ namespace Questor.Modules.Actions
                 DirectAgentResponse delay = Agent.Window.AgentResponses.FirstOrDefault(r => r.Text.Contains(Delay));
                 DirectAgentResponse quit = Agent.Window.AgentResponses.FirstOrDefault(r => r.Text.Contains(Quit));
                 DirectAgentResponse close = Agent.Window.AgentResponses.FirstOrDefault(r => r.Text.Contains(Close));
+                DirectAgentResponse NoMoreMissionsAvailable = Agent.Window.AgentResponses.FirstOrDefault(r => r.Text.Contains(NoJobsAvailable));
 
                 //
                 // Read the possibly responses and make sure we are 'doing the right thing' - set AgentInteractionPurpose to fit the state of the agent window
                 //
+                if (NoMoreMissionsAvailable != null)
+                {
+                    if (MissionSettings.ListOfAgents.Count() > 1)
+                    {
+                        //
+                        //Change Agents
+                        //
+                        Logging.Log("AgentInteraction.ReplyToAgent", "Our current agent [" + Cache.Instance.CurrentAgentText + "] does not have any more missions for us. Attempting to change agents" + Cache.Instance.CurrentAgent, Logging.Yellow);
+                        AgentsList _currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+                        if (_currentAgent != null) _currentAgent.DeclineTimer = DateTime.UtcNow.AddDays(5);
+                        CloseConversation();
+                        
+                        Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
+                        Logging.Log("AgentInteraction.ReplyToAgent", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);
+                        ChangeAgentInteractionState(AgentInteractionState.ChangeAgent, true);
+                        return;    
+                    }
+
+                    Logging.Log("AgentInteraction.ReplyToAgent", "Our current agent [" + Cache.Instance.CurrentAgentText + "] does not have any more missions for us. Define more / different agents in the character XML. Pausing." + Cache.Instance.CurrentAgent, Logging.Yellow);
+                    Cache.Instance.Paused = true;
+                }
+
                 if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.
                 {
                     if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "if (Purpose != AgentInteractionPurpose.AmmoCheck) //do not change the AgentInteractionPurpose if we are checking which ammo type to use.", Logging.Yellow);
@@ -715,7 +739,7 @@ namespace Questor.Modules.Actions
                     }
 
                     int secondsToWait = ((hours * 3600) + (minutes * 60) + 60);
-                    AgentsList currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
+                    AgentsList _currentAgent = MissionSettings.ListOfAgents.FirstOrDefault(i => i.Name == Cache.Instance.CurrentAgent);
 
                     //
                     // standings are below the blacklist minimum 
@@ -760,7 +784,7 @@ namespace Questor.Modules.Actions
                         //
                         //Change Agents
                         //
-                        if (currentAgent != null) currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
+                        if (_currentAgent != null) _currentAgent.DeclineTimer = DateTime.UtcNow.AddSeconds(secondsToWait);
                         CloseConversation();
                         Cache.Instance.CurrentAgent = Cache.Instance.SwitchAgent();
                         Logging.Log("AgentInteraction.DeclineMission", "new agent is " + Cache.Instance.CurrentAgent, Logging.Yellow);

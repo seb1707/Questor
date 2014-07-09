@@ -33,7 +33,6 @@ namespace Questor.Modules.BackgroundTasks
             Interlocked.Increment(ref DefenseInstances);
         }
         
-        private static DateTime _lastSessionChange = Time.Instance.StartTime;
         private static DateTime _lastCloaked = DateTime.UtcNow;
 
         private static DateTime _lastPulse = DateTime.UtcNow;
@@ -925,7 +924,7 @@ namespace Questor.Modules.BackgroundTasks
             if (!Cache.Instance.InSpace)
             {
                 if (Logging.DebugDefense) Logging.Log("Defense", "we are not in space (yet?)", Logging.White);
-                _lastSessionChange = DateTime.UtcNow;
+                Time.Instance.LastSessionChange = DateTime.UtcNow;
                 return;
             }
 
@@ -933,11 +932,11 @@ namespace Questor.Modules.BackgroundTasks
             if (Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == (int) Group.Capsule)
             {
                 if (Logging.DebugDefense) Logging.Log("Defense", "no ship entity, or we are in a pod...", Logging.White);
-                _lastSessionChange = DateTime.UtcNow;
+                Time.Instance.LastSessionChange = DateTime.UtcNow;
                 return;
             }
 
-            if (DateTime.UtcNow.Subtract(_lastSessionChange).TotalSeconds < 15)
+            if (DateTime.UtcNow.Subtract(Time.Instance.LastSessionChange).TotalSeconds < 15)
             {
                 if (Logging.DebugDefense) Logging.Log("Defense", "we just completed a session change less than 7 seconds ago... waiting.", Logging.White);
                 _nextOverloadAttempt = DateTime.UtcNow;
